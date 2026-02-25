@@ -109,7 +109,7 @@ To ensure that a record of every operation is persisted even in case of an unexp
 | | `failure` | User is not authorized to unmute a rule. |
 | `rule_alert_mute` | `unknown` | User is muting an alert. |
 | | `failure` | User is not authorized to mute an alert. |
-| `rule_alert_unmute | `unknown` | User is unmuting an alert. |
+| `rule_alert_unmute` | `unknown` | User is unmuting an alert. |
 | | `failure` | User is not authorized to unmute an alert. |
 | `rule_alert_snooze` {applies_to}`stack: ga 9.4+` | `unknown` | User is snoozing an alert (per-alert conditional snooze with optional expiry or conditions). |
 | | `failure` | User is not authorized to snooze the alert. |
