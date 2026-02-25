@@ -261,10 +261,6 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
-export const ENABLE_GRAPH_VISUALIZATION_SETTING =
-  'securitySolution:enableGraphVisualization' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
 

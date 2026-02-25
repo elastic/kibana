@@ -37,7 +37,6 @@ import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
@@ -215,24 +214,6 @@ export const initUiSettings = (
       requiresPageReload: true,
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
-    },
-    [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
-        defaultMessage: 'Enable graph visualization',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
-        {
-          defaultMessage: `Enable the Graph Visualization feature within the Security Solution.`,
-        }
-      ),
-      type: 'boolean',
-      value: false,
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solutionViews: ['classic', 'security'],
-      technicalPreview: true,
     },
     ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
       [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {

@@ -32,8 +32,6 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
-import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 jest.mock('../../../shared/hooks/use_expand_section');
@@ -60,14 +58,6 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
 );
 
-const mockUseUiSetting = jest.fn().mockImplementation((key) => [false]);
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: (...args: unknown[]) => mockUseUiSetting(...args),
-  };
-});
 jest.mock('../../shared/hooks/use_graph_preview');
 
 const mockUseGraphPreview = useGraphPreview as jest.Mock;
@@ -104,7 +94,6 @@ const renderVisualizationsSection = (contextValue = panelContextValue) =>
 
 describe('<VisualizationsSection />', () => {
   beforeEach(() => {
-    mockUseUiSetting.mockImplementation(() => [false]);
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
@@ -149,15 +138,6 @@ describe('<VisualizationsSection />', () => {
     });
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useExpandSection as jest.Mock).mockReturnValue(true);
-    mockUseUiSetting.mockImplementation((key, defaultValue) => {
-      const useUiSetting$Mock = createUseUiSetting$Mock();
-
-      if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
-        return [false, jest.fn()];
-      }
-
-      return useUiSetting$Mock(key, defaultValue);
-    });
 
     const { getByTestId, queryByTestId } = renderVisualizationsSection();
     expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).toBeVisible();
@@ -167,19 +147,9 @@ describe('<VisualizationsSection />', () => {
     expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
   });
 
-  it('should render the graph preview component if the feature is enabled', () => {
+  it('should render the graph preview component when shouldShowGraph is true', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
-    mockUseUiSetting.mockImplementation((key, defaultValue) => {
-      const useUiSetting$Mock = createUseUiSetting$Mock();
 
-      if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
-        return [true, jest.fn()];
-      }
-
-      return useUiSetting$Mock(key, defaultValue);
-    });
-
-    // Mock useGraphPreview to reflect that graph is available when UI setting is enabled
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: true,
       eventIds: [],
@@ -194,17 +164,8 @@ describe('<VisualizationsSection />', () => {
     );
   });
 
-  it('should not render the graph preview component if the graph feature is disabled', () => {
+  it('should not render the graph preview component when shouldShowGraph is false', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
-    mockUseUiSetting.mockImplementation((key, defaultValue) => {
-      const useUiSetting$Mock = createUseUiSetting$Mock();
-
-      if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
-        return [false, jest.fn()];
-      }
-
-      return useUiSetting$Mock(key, defaultValue);
-    });
 
     const { queryByTestId } = renderVisualizationsSection();
 

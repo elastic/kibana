@@ -73,7 +73,6 @@ export interface UsageStats {
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
   'securitySolution:enableCcsWarning': boolean;
   'securitySolution:enableVisualizationsInFlyout': boolean;
-  'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'securitySolution:suppressionBehaviorOnAlertClosure': string;
