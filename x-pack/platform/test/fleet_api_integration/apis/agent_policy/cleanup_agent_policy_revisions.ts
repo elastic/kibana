@@ -321,5 +321,24 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       }
     });
+
+    it('should ignore unenrolled agents when querying minimum used revision', async () => {
+      const numRevisionsToAdd = MAX_REVISIONS + 10;
+      await createPolicyRevisions(providerContext, testPolicyId, numRevisionsToAdd);
+
+      // Create agents using older revisions that would normally be cleaned up
+      await createAgentDoc(providerContext, 'agent1', testPolicyId, {
+        policy_revision_idx: 10,
+      });
+      await createAgentDoc(providerContext, 'agent2', testPolicyId, {
+        policy_revision_idx: 6,
+        active: false,
+      });
+
+      // Should keep all revisions from 2 and up. Min agent revision is 6, so 6 - 5 (max revisions) = 1, so keep from revision 2 and up
+      await runAgentPolicyRevisionsCleanup();
+
+      await assertPolicyRevisions(providerContext, testPolicyId, 11, arrFromRange(6, 16));
+    });
   });
 }
