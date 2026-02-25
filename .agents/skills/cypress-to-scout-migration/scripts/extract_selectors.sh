@@ -3,7 +3,7 @@
 # then checks which selectors still exist in application source code.
 #
 # Usage:
-#   bash .agents/skills/security-solution-cypress-to-scout-migration/scripts/extract_selectors.sh \
+#   bash .agents/skills/cypress-to-scout-migration/scripts/extract_selectors.sh \
 #     path/to/cypress/test.cy.ts
 #
 # Output: list of selectors with existence status (FOUND / MISSING)

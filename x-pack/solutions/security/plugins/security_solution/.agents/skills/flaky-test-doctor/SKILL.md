@@ -1,5 +1,5 @@
 ---
-name: security-solution-flaky-test-doctor
+name: flaky-test-doctor
 description: >
   Security Solution specific. Analyzes flaky, failing, or skipped Security Solution Cypress tests to
   determine root cause and recommend fixes. Use when: (1) a user shares a flaky or skipped Cypress test,
@@ -30,7 +30,7 @@ Path relative to this skill's directory.
 
 ## Required sub-skills
 
-- **ON MIGRATION:** security-solution-cypress-to-scout-migration (when recommending Scout migration)
+- **ON MIGRATION:** cypress-to-scout-migration (Security Solution additive skill, when recommending Scout migration)
 - **ON SCOUT PATTERNS:** scout-ui-testing, scout-api-testing
 
 ## Boundaries
@@ -137,7 +137,7 @@ All fixes must follow team conventions:
 
 **For flakiness:** Provide root cause, before/after code, why the fix works.
 **For bugs:** Describe the bug, affected environments, next steps.
-**For migration candidates:** Read the `security-solution-cypress-to-scout-migration` skill.
+**For migration candidates:** Read the `cypress-to-scout-migration` skill (the one co-located in this plugin's `.agents/skills/`).
 
 ## Information gathering strategy
 

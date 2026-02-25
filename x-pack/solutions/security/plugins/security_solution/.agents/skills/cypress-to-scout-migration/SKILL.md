@@ -1,5 +1,5 @@
 ---
-name: security-solution-cypress-to-scout-migration
+name: cypress-to-scout-migration
 description: >
   Security Solution specific extensions for Cypress-to-Scout migration. Adds Security Solution
   conventions, paths, packages, roles, and API services on top of the general cypress-to-scout-migration
@@ -23,7 +23,7 @@ When guidance from different sources conflicts:
 
 ## Additional sub-skills
 
-- **ON FLAKY TESTS:** security-solution-flaky-test-doctor (when source test is flaky/skipped)
+- **ON FLAKY TESTS:** flaky-test-doctor (co-located in this plugin's `.agents/skills/`, when source test is flaky/skipped)
 
 ## Security Solution paths and packages
 
@@ -34,6 +34,43 @@ When guidance from different sources conflicts:
 | Scout package | `@kbn/scout-security` (imports: `spaceTest`, `test`, `tags`, `expect`) |
 | API integration | `x-pack/solutions/security/test/security_solution_api_integration/` |
 | Unit tests | Co-located with source (`*.test.ts`, `*.test.tsx`) |
+
+## Triage: where to search for duplicates (Gate 1)
+
+Search these locations by domain:
+
+| Domain | API integration test path |
+|--------|--------------------------|
+| Detection rules / alerts | `test/security_solution_api_integration/test_suites/detections_response/` |
+| Entity Analytics | `test/security_solution_api_integration/test_suites/entity_analytics/` |
+| Endpoint / EDR | `test/security_solution_api_integration/test_suites/edr_workflows/` |
+| Timeline / Saved Objects | `test/security_solution_api_integration/test_suites/investigation/` |
+| Lists / Exceptions | `test/security_solution_api_integration/test_suites/lists_and_exception_lists/` |
+| GenAI / AI Assistant | `test/security_solution_api_integration/test_suites/genai/` |
+| AI4DSOC | `test/security_solution_api_integration/test_suites/ai4dsoc/` |
+| SIEM Migrations | `test/security_solution_api_integration/test_suites/siem_migrations/` |
+| Explore (hosts, network, users) | `test/security_solution_api_integration/test_suites/explore/` |
+| Cases | Separate `x-pack/platform/test/cases_api_integration/` suite |
+
+All paths relative to `x-pack/solutions/security/`. Also check unit tests co-located with the source component.
+
+## Triage: layer guidance by domain (Gate 2)
+
+| Domain / Feature | Typical right layer | Rationale |
+|-----------------|-------------------|-----------|
+| Detection rules CRUD | API test | Comprehensive API integration coverage exists |
+| Rule execution + alert generation | API test | Validated by detections_response API tests |
+| Alert table interactions (filter, sort, bulk) | Scout UI | User workflow, requires browser |
+| RBAC on UI elements (disabled buttons, tooltips) | Scout UI | Permission-gated UI behavior |
+| Timeline creation / editing | Scout UI | UI-heavy, limited API test coverage |
+| Entity store / risk engine setup | API test | API tests exist; UI only for dashboard verification |
+| Exception list CRUD | API test | Full API coverage exists |
+| Exception list management page | Scout UI | User workflow on management UI |
+| Cases CRUD | API test | Cases API tests cover CRUD |
+| Cases UI workflows (attach alert, add comment) | Scout UI | User workflow |
+| Navigation / page loading | Consider deletion | Low value — usually covered implicitly |
+
+When in doubt: if the Cypress test primarily calls `cy.request()` for setup and only clicks one button to verify, it likely belongs at the API layer.
 
 ## Scaffold shortcut
 

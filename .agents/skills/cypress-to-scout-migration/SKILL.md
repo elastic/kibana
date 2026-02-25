@@ -15,7 +15,7 @@ description: >
 
 Migrate Cypress tests to Scout by first validating each test through triage gates, then rewriting using Scout patterns. **Never migrate Cypress tests directly** — validate first, then rewrite following Scout best practices.
 
-**Solution-specific skills may extend this skill** with additional conventions, paths, and API services. Check if one exists for your solution (e.g., `security-solution-cypress-to-scout-migration`).
+**Solution-specific skills may extend this skill** with additional conventions, paths, and API services. Check if one exists for your solution (e.g., Security Solution has one at `<plugin>/.agents/skills/cypress-to-scout-migration/`).
 
 ## Required sub-skills
 
