@@ -47,14 +47,15 @@ export const buildLabelFunction =
  * Returns the custom label if set, otherwise computes the default label.
  */
 export const getReferencedColumnLabel = (
-  refColumnId: string,
+  refColumnId: string | undefined,
   columns: Record<string, GenericIndexPatternColumn>,
   indexPattern?: IndexPattern
 ): string | undefined => {
+  if (!refColumnId) return undefined;
   const refColumn = columns[refColumnId];
   if (!refColumn) return undefined;
 
-  if (refColumn.label) {
+  if (refColumn.customLabel) {
     return refColumn.label;
   }
 
