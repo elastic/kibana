@@ -2562,8 +2562,9 @@ describe('AlertingAuthorization', () => {
       });
 
       const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
+      const kql = toKqlExpression(result.filter as KueryNode);
 
-      expect(result.filter).toBeDefined();
+      expect(kql).toMatchInlineSnapshot(`"alert.attributes.spaceIds: space1"`);
       expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
@@ -2581,8 +2582,10 @@ describe('AlertingAuthorization', () => {
       });
 
       const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
+      const kql = toKqlExpression(result.filter as KueryNode);
 
-      expect(result.filter).toBeDefined();
+      expect(kql).toMatchInlineSnapshot(`"alert.attributes.spaceIds: space1"`);
+
       expect(() => result.ensureRuleTypeIsAuthorized('any-type', 'rule')).not.toThrow();
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
@@ -2615,10 +2618,11 @@ describe('AlertingAuthorization', () => {
       });
 
       const result = await auth.getByRuleTypeAuthorizationFilter(findAuthParams);
-
       const kql = toKqlExpression(result.filter as KueryNode);
-      expect(kql).toContain('rule-type-id-1');
-      expect(kql).toContain('rule-type-id-2');
+
+      expect(kql).toMatchInlineSnapshot(
+        `"((alert.attributes.ruleTypeId: rule-type-id-1 AND alert.attributes.spaceIds: space1) OR (alert.attributes.ruleTypeId: rule-type-id-2 AND alert.attributes.spaceIds: space1))"`
+      );
     });
 
     it('throws when no rule types are authorized', async () => {
@@ -2807,9 +2811,7 @@ describe('AlertingAuthorization', () => {
       });
 
       const kql = toKqlExpression(result.filter as KueryNode);
-      expect(kql).toContain('rule-type-id-1');
-      expect(kql).not.toContain('alerts');
-      expect(kql).not.toContain('consumer-a');
+      expect(kql).toMatchInlineSnapshot(`"alert.attributes.ruleTypeId: rule-type-id-1"`);
     });
 
     it('ensureRuleTypeIsAuthorized is a no-op for any input when security is disabled', async () => {
