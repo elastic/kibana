@@ -9,7 +9,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 15226
+  automaticImportVTwo: 25753
   banners: 4087
   canvas: 14881
   cases: 225900
@@ -27,7 +27,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   controls: 10300
   core: 556473
-  cps: 5930
+  cps: 10000
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
@@ -41,7 +41,7 @@ pageLoadAssetSize:
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
   dataViewManagement: 6250
-  dataViews: 65000
+  dataViews: 66000
   dataVisualizer: 32778
   developerToolbar: 4467
   devTools: 8109
@@ -164,7 +164,7 @@ pageLoadAssetSize:
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7451
-  serverlessObservability: 18343
+  serverlessObservability: 21509
   serverlessSearch: 26287
   serverlessWorkplaceAI: 5078
   sessionView: 47912
@@ -183,7 +183,6 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 112000
   uiActions: 35278
-  uiActionsEnhanced: 17373
   unifiedDocViewer: 14513
   unifiedSearch: 19500
   upgradeAssistant: 6898

@@ -6,4 +6,3 @@
  */
 
 export { DemoPage } from './demo';
-export { MetricsExperiencePage } from './metrics_experience';
