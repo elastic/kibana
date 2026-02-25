@@ -120,7 +120,7 @@ It is extremely important to be clear and precise, and mention that string or pa
 
 ## Rules Dependencies Guidelines
 
-- Rule Names in Tests: If you a test with name such as 'RuleMatch_Test' or 'getCommonRules', it indicates a dependency on another rule. List of rule names can be found within the \`<text>\` tag of that test condition. See example
+- Rule Names in Tests: If you a test with name such as 'RuleMatch_Test' or 'getCommonRules', it indicates a dependency on another rule. List of rule names can be found within the \`<text>\` tag of that test condition.
 - If a test condition references another rule by name, that indicates a dependency on that rule. A dependency can also have other rules as its dependencies.
 - A Test can indicate both Rule ID in form of (OWNER-RULE_ID) and Rule Name. Use ONLY \`Rule Name\` to identify dependencies. DO NOT use RULE ID or UUID to getRules
 - Building Block Rules: If a rule as a dependency on another rules with name starting with "BB:", it indicates a building block rule dependency.
