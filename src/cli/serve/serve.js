@@ -478,7 +478,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     // The UIAM service needs a network-accessible ES URL to validate API keys during conversion.
     // In the local Docker setup, ES node "es01" is reachable on the "elastic" Docker network.
     if (!_.has(rawConfig, 'elasticsearch.publicBaseUrl')) {
-      lodashSet(rawConfig, 'elasticsearch.publicBaseUrl', 'https://es01:9200');
+      lodashSet(rawConfig, 'elasticsearch.publicBaseUrl', 'https://host.docker.internal:9200');
     }
   }
 

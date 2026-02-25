@@ -53,7 +53,7 @@ describe('UiamAPIKeys', () => {
       logger,
       license: mockLicense,
       uiam: mockUiam,
-      elasticsearchPublicBaseUrl: 'https://es.example.com',
+      elasticsearchUrl: 'https://es.example.com',
     });
   });
 
@@ -310,7 +310,7 @@ describe('UiamAPIKeys', () => {
       expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
     });
 
-    it('throws when elasticsearchPublicBaseUrl is not configured', async () => {
+    it('throws when elasticsearchUrl is not configured', async () => {
       const uiamApiKeysNoUrl = new UiamAPIKeys({
         logger,
         license: mockLicense,
@@ -318,7 +318,7 @@ describe('UiamAPIKeys', () => {
       });
 
       await expect(uiamApiKeysNoUrl.convert({ keys: [{ key: 'es-api-key' }] })).rejects.toThrow(
-        'Cannot convert API keys: elasticsearch.publicBaseUrl is not configured'
+        'Cannot convert API keys: cloud.elasticsearchUrl is not configured'
       );
 
       expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
@@ -354,7 +354,7 @@ describe('UiamAPIKeys', () => {
       expect(logger.debug).toHaveBeenCalledWith('API key(s) converted successfully');
     });
 
-    it('injects the same publicBaseUrl endpoint for all keys', async () => {
+    it('injects the same elasticsearch URL endpoint for all keys', async () => {
       const mockResponse = {
         results: [
           {

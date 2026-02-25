@@ -28,7 +28,7 @@ export interface UiamAPIKeysOptions {
   logger: Logger;
   license: SecurityLicense;
   uiam: UiamServicePublic;
-  elasticsearchPublicBaseUrl?: string;
+  elasticsearchUrl?: string;
 }
 
 /**
@@ -39,13 +39,13 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
-  private readonly elasticsearchPublicBaseUrl?: string;
+  private readonly elasticsearchUrl?: string;
 
-  constructor({ logger, license, uiam, elasticsearchPublicBaseUrl }: UiamAPIKeysOptions) {
+  constructor({ logger, license, uiam, elasticsearchUrl }: UiamAPIKeysOptions) {
     this.logger = logger;
     this.license = license;
     this.uiam = uiam;
-    this.elasticsearchPublicBaseUrl = elasticsearchPublicBaseUrl;
+    this.elasticsearchUrl = elasticsearchUrl;
   }
 
   /**
@@ -163,14 +163,14 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       return null;
     }
 
-    if (!this.elasticsearchPublicBaseUrl) {
-      throw new Error('Cannot convert API keys: elasticsearch.publicBaseUrl is not configured');
+    if (!this.elasticsearchUrl) {
+      throw new Error('Cannot convert API keys: cloud.elasticsearchUrl is not configured');
     }
 
     this.logger.debug(`Trying to convert ${params.keys.length} API key(s)`);
 
     try {
-      const endpoint = this.elasticsearchPublicBaseUrl;
+      const endpoint = this.elasticsearchUrl;
       const mappedKeys = params.keys.map(({ key }) => ({
         type: 'elasticsearch' as const,
         key,

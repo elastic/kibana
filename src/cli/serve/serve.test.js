@@ -117,7 +117,7 @@ describe('applyConfigOverrides', () => {
     expect(applyConfigOverrides({}, { dev: true, serverless: true, uiam: true }, {}, {})).toEqual({
       elasticsearch: {
         hosts: ['https://localhost:9200'],
-        publicBaseUrl: 'https://es01:9200',
+        publicBaseUrl: 'https://host.docker.internal:9200',
         serviceAccountToken: kibanaDevServiceAccount.token,
         ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
       },

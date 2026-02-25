@@ -184,7 +184,7 @@ export class SecurityPlugin
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
-  private elasticsearchPublicBaseUrl?: string;
+  private elasticsearchUrl?: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -215,7 +215,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
-    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, spaces, cloud }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getDefaultIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -246,7 +246,7 @@ export class SecurityPlugin
       features.registerElasticsearchFeature(securityFeature)
     );
 
-    this.elasticsearchPublicBaseUrl = core.elasticsearch.publicBaseUrl;
+    this.elasticsearchUrl = cloud?.elasticsearchUrl;
 
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
@@ -437,7 +437,7 @@ export class SecurityPlugin
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
-      elasticsearchPublicBaseUrl: this.elasticsearchPublicBaseUrl,
+      elasticsearchUrl: this.elasticsearchUrl,
     });
 
     this.authorizationService.start({
