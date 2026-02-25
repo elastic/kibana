@@ -117,21 +117,29 @@ export class ObservabilitySharedPlugin implements Plugin {
     const { agentBuilder } = plugins;
 
     if (agentBuilder?.setConversationFlyoutActiveConfig) {
-      this.appChangeSubscription = application.currentAppId$.subscribe((appId) => {
-        if (appId === undefined) {
-          return;
-        }
+            this.appChangeSubscription = combineLatest([currentAppId$, applications$]).subscribe(
+        ([appId, applications]) => {
+          if (appId === undefined) {
+            return;
+          }
 
-        if ((OBSERVABILITY_APP_IDS as readonly string[]).includes(appId)) {
-          agentBuilder.setConversationFlyoutActiveConfig({
-            agentId: OBSERVABILITY_AGENT_ID,
-            sessionTag: OBSERVABILITY_SESSION_TAG,
-            newConversation: true,
-          });
-        } else {
-          agentBuilder.clearConversationFlyoutActiveConfig?.();
+          const categoryId = appId && applications.get(appId)?.category?.id;
+
+          if (categoryId === undefined) {
+            return;
+          }
+
+          if (DEFAULT_APP_CATEGORIES.observability.id === categoryId) {
+            agentBuilder.setConversationFlyoutActiveConfig({
+              agentId: OBSERVABILITY_AGENT_ID,
+              sessionTag: OBSERVABILITY_SESSION_TAG,
+              newConversation: true,
+            });
+          } else {
+            agentBuilder.clearConversationFlyoutActiveConfig?.();
+          }
         }
-      });
+      );
     }
 
     const PageTemplate = createLazyObservabilityPageTemplate({
