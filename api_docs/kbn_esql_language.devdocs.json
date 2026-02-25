@@ -966,7 +966,26 @@
             "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.ComposerQuery.pipe.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialParams",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: unknown; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 261,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/esql-language",
@@ -990,7 +1009,26 @@
             "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.ComposerQuery.header.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialParams",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: unknown; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 261,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/esql-language",
@@ -2190,7 +2228,28 @@
             "lineNumber": 766,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [
+              "The updated ComposerQuery instance."
+            ],
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.ComposerQuery.where.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialParams",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: unknown; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 261,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/esql-language",
@@ -7920,6 +7979,45 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.cmd.$1",
+            "type": "string",
+            "tags": [],
+            "label": "src",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/synth/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 57,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.cmd.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-language",
+                "scope": "common",
+                "docId": "kibKbnEsqlLanguagePluginApi",
+                "section": "def-common.ParseOptions",
+                "text": "ParseOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/synth/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 70,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -7977,6 +8075,57 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.e.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "TemplateStringsArray"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.e.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "holes",
+            "description": [],
+            "signature": [
+              "{ [K in keyof T]: T[K] extends ",
+              {
+                "pluginId": "@kbn/esql-language",
+                "scope": "common",
+                "docId": "kibKbnEsqlLanguagePluginApi",
+                "section": "def-common.ParameterShorthandHole",
+                "text": "ParameterShorthandHole"
+              },
+              " ? ",
+              {
+                "pluginId": "@kbn/esql-language",
+                "scope": "common",
+                "docId": "kibKbnEsqlLanguagePluginApi",
+                "section": "def-common.SingleKey",
+                "text": "SingleKey"
+              },
+              "<T[K]> : T[K]; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -8034,6 +8183,61 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [
+          "A ComposerQuery instance representing the constructed ESQL query."
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.esql.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "TemplateStringsArray"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.esql.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "holes",
+            "description": [
+              "The dynamic values to be interpolated into the query."
+            ],
+            "signature": [
+              "{ [K in keyof T]: T[K] extends ",
+              {
+                "pluginId": "@kbn/esql-language",
+                "scope": "common",
+                "docId": "kibKbnEsqlLanguagePluginApi",
+                "section": "def-common.ParameterShorthandHole",
+                "text": "ParameterShorthandHole"
+              },
+              " ? ",
+              {
+                "pluginId": "@kbn/esql-language",
+                "scope": "common",
+                "docId": "kibKbnEsqlLanguagePluginApi",
+                "section": "def-common.SingleKey",
+                "text": "SingleKey"
+              },
+              "<T[K]> : T[K]; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -8082,6 +8286,45 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.exp.$1",
+            "type": "string",
+            "tags": [],
+            "label": "src",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/synth/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 57,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.exp.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-language",
+                "scope": "common",
+                "docId": "kibKbnEsqlLanguagePluginApi",
+                "section": "def-common.ParseOptions",
+                "text": "ParseOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/synth/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 70,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -10715,6 +10958,45 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.qry.$1",
+            "type": "string",
+            "tags": [],
+            "label": "src",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/synth/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 57,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.qry.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-language",
+                "scope": "common",
+                "docId": "kibKbnEsqlLanguagePluginApi",
+                "section": "def-common.ParseOptions",
+                "text": "ParseOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/composer/synth/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 70,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -11941,7 +12223,68 @@
             "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.ComposerQueryTagMethods.from.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "source",
+                "description": [
+                  "The source to use in the `FROM` command, at least one source\nis required."
+                ],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "@kbn/esql-language",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlLanguagePluginApi",
+                    "section": "def-common.ESQLSource",
+                    "text": "ESQLSource"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/esql-language",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlLanguagePluginApi",
+                    "section": "def-common.ComposerSourceWithAlias",
+                    "text": "ComposerSourceWithAlias"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 176,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.ComposerQueryTagMethods.from.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "moreSources",
+                "description": [
+                  "Additional sources to include in the `FROM` command."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-language",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlLanguagePluginApi",
+                    "section": "def-common.ComposerSourceShorthand",
+                    "text": "ComposerSourceShorthand"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 177,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/esql-language",
@@ -11973,7 +12316,68 @@
             "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.ComposerQueryTagMethods.ts.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "source",
+                "description": [
+                  "The source to use in the `TS` command, at least one source\nis required."
+                ],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "@kbn/esql-language",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlLanguagePluginApi",
+                    "section": "def-common.ESQLSource",
+                    "text": "ESQLSource"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/esql-language",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlLanguagePluginApi",
+                    "section": "def-common.ComposerSourceWithAlias",
+                    "text": "ComposerSourceWithAlias"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 176,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.ComposerQueryTagMethods.ts.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "moreSources",
+                "description": [
+                  "Additional sources to include in the `TS` command."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-language",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlLanguagePluginApi",
+                    "section": "def-common.ComposerSourceShorthand",
+                    "text": "ComposerSourceShorthand"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 177,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/esql-language",
@@ -12655,7 +13059,7 @@
             "label": "commandType",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"lookup\""
+              "\"right\" | \"left\" | \"lookup\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/types.ts",
             "lineNumber": 121,
@@ -15297,7 +15701,7 @@
           {
             "parentPluginId": "@kbn/esql-language",
             "id": "def-common.QueryCommandTag.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -15308,7 +15712,27 @@
             "lineNumber": 261,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.QueryCommandTag.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialParams",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 261,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15329,7 +15753,7 @@
           {
             "parentPluginId": "@kbn/esql-language",
             "id": "def-common.QueryCommandTagParametrized.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -15340,12 +15764,56 @@
             "lineNumber": 265,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.QueryCommandTagParametrized.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "template",
+                "description": [],
+                "signature": [
+                  "TemplateStringsArray"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 265,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.QueryCommandTagParametrized.Unnamed.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "holes",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-language",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlLanguagePluginApi",
+                    "section": "def-common.ComposerQueryTagHole",
+                    "text": "ComposerQueryTagHole"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 265,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/esql-language",
             "id": "def-common.QueryCommandTagParametrized.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -15356,7 +15824,44 @@
             "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.QueryCommandTagParametrized.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 266,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-language",
+                "id": "def-common.QueryCommandTagParametrized.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "paramsValues",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
+                "lineNumber": 266,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -18556,15 +19061,15 @@
             "text": "ParameterShorthandHole"
           },
           " | ",
+          "SynthTemplateHole",
+          " | ",
           {
             "pluginId": "@kbn/esql-language",
             "scope": "common",
             "docId": "kibKbnEsqlLanguagePluginApi",
             "section": "def-common.ParameterHole",
             "text": "ParameterHole"
-          },
-          " | ",
-          "SynthTemplateHole"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/composer/types.ts",
         "lineNumber": 15,
@@ -19636,7 +20141,7 @@
         "label": "InlineCastingType",
         "description": [],
         "signature": [
-          "\"string\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"date_range\" | \"aggregate_metric_double\" | \"dense_vector\" | \"bool\" | \"unsigned_long\" | \"datetime\" | \"int\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"geohash\" | \"geohex\" | \"geotile\""
+          "\"string\" | \"boolean\" | \"bool\" | \"geo_shape\" | \"geotile\" | \"geohash\" | \"geohex\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"date_range\" | \"aggregate_metric_double\" | \"dense_vector\" | \"unsigned_long\" | \"datetime\" | \"int\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/types.ts",
         "lineNumber": 520,
