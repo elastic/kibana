@@ -19,7 +19,7 @@
 | **Detection**   | `get_alerts`, `get_services`                                 |
 | **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`             |
 | **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`   |
-| **Correlation** | `get_correlated_logs`, `get_service_topology`                |
+| **Correlation** | `get_traces`, `get_service_topology`                         |
 | **Root Cause**  | `get_log_groups`, `get_trace_metrics` (grouped by dimension) |
 
 ---
