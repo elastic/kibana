@@ -13,6 +13,7 @@ import {
   buildRouteValidationWithZod,
   buildRunFilterQuery,
   buildStatsAggregation,
+  buildModelDisplayId,
   GetEvaluationRunRequestParams,
   GetEvaluationRunRequestQuery,
 } from '@kbn/evals-common';
@@ -96,7 +97,7 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
             });
           });
 
-          const buildModelDisplay = (model?: Record<string, unknown>) => {
+          const toModelDisplay = (model?: Record<string, unknown>) => {
             if (!model) return undefined;
             const { id, family, provider } = model as {
               id?: string;
@@ -104,9 +105,7 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
               provider?: string;
             };
             return {
-              id:
-                id ??
-                (family && provider ? `${provider}/${family}` : family ?? provider ?? 'unknown'),
+              id: buildModelDisplayId(id, family, provider),
               family,
               provider,
             };
@@ -115,8 +114,8 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
           return response.ok({
             body: {
               run_id: runId,
-              task_model: buildModelDisplay(firstDoc.task?.model),
-              evaluator_model: buildModelDisplay(firstDoc.evaluator?.model),
+              task_model: toModelDisplay(firstDoc.task?.model),
+              evaluator_model: toModelDisplay(firstDoc.evaluator?.model),
               total_repetitions: firstDoc.run_metadata?.total_repetitions ?? 1,
               stats,
             },

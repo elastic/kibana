@@ -12,4 +12,9 @@ export {
   buildRunFilterQuery,
   buildStatsAggregation,
   SCORES_SORT_ORDER,
+  buildRunsListingFilterQuery,
+  buildRunsListingAggregation,
+  parseRunsListingResponse,
+  buildModelDisplayId,
 } from './impl/query_builders';
+export type { RunsListingResult } from './impl/query_builders';
