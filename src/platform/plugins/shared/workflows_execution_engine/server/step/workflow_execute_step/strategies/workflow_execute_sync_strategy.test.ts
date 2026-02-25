@@ -244,6 +244,61 @@ describe('WorkflowExecuteSyncStrategy', () => {
       );
       expect(mockStepRuntime.tryEnterDelay).toHaveBeenCalledWith('16s');
     });
+  });
+
+  describe('resume()', () => {
+    it('should return same result as execute when wait state exists', async () => {
+      const waitState = {
+        workflowId: 'child-workflow-id',
+        executionId: 'child-exec-1',
+        startedAt: '2024-01-01T00:00:00Z',
+        pollCount: 0,
+      };
+      mockStepRuntime.getCurrentStepState.mockReturnValue(waitState);
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.COMPLETED,
+        context: { output: { result: 'done' } },
+      } as any);
+
+      const result = await strategy.resume('default');
+
+      expect(result).toEqual({ status: 'completed', output: { result: 'done' } });
+      expect(mockEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('should return failed when no wait state', async () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue(undefined);
+
+      const result = await strategy.resume('default');
+
+      expect(result.status).toBe('failed');
+      expect(result.error?.message).toContain('Cannot resume');
+      expect(mockExecRepo.getWorkflowExecutionById).not.toHaveBeenCalled();
+    });
+
+    it('should return failed when state has no executionId', async () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({ workflowId: 'w1' });
+
+      const result = await strategy.resume('default');
+
+      expect(result.status).toBe('failed');
+      expect(result.error?.message).toContain('Cannot resume');
+      expect(mockExecRepo.getWorkflowExecutionById).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('output extraction', () => {
+    const waitState = {
+      workflowId: 'child-workflow-id',
+      executionId: 'child-exec-1',
+      startedAt: '2024-01-01T00:00:00Z',
+      pollCount: 0,
+    };
+
+    beforeEach(() => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue(waitState);
+    });
 
     it('should fail when execution is not found', async () => {
       mockExecRepo.getWorkflowExecutionById.mockResolvedValue(null);
@@ -263,19 +318,6 @@ describe('WorkflowExecuteSyncStrategy', () => {
         status: 'failed',
         error: expect.objectContaining({ message: 'ES unavailable' }),
       });
-    });
-  });
-
-  describe('output extraction', () => {
-    const waitState = {
-      workflowId: 'child-workflow-id',
-      executionId: 'child-exec-1',
-      startedAt: '2024-01-01T00:00:00Z',
-      pollCount: 0,
-    };
-
-    beforeEach(() => {
-      mockStepRuntime.getCurrentStepState.mockReturnValue(waitState);
     });
 
     it('should use workflow.output from context when available', async () => {

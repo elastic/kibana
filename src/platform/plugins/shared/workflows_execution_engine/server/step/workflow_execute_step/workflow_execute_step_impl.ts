@@ -82,8 +82,33 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   async run(): Promise<void> {
     const { node, stepExecutionRuntime, workflowExecutionRuntime } = this.init;
 
-    // Start step execution to ensure stepType and stepId are set
-    // This is important for frontend rendering even if the step fails early
+    // Sync workflow.execute only: on poll resume, only check child state — no startStep, no validation
+    if (node.type === 'workflow.execute') {
+      const currentState = stepExecutionRuntime.getCurrentStepState() as
+        | { executionId?: string }
+        | undefined;
+      if (currentState?.executionId) {
+        try {
+          const result = await this.syncExecutor.resume(this.init.spaceId);
+          if (result.status === 'completed') {
+            stepExecutionRuntime.finishStep(result.output);
+            workflowExecutionRuntime.navigateToNextNode();
+          } else if (result.status === 'failed') {
+            stepExecutionRuntime.failStep(result.error as Error);
+            workflowExecutionRuntime.navigateToNextNode();
+          }
+          // result.status === 'waiting' | 'cancelled': delay entered or cancelled, no navigation
+        } catch (error) {
+          stepExecutionRuntime.failStep(error as Error);
+          workflowExecutionRuntime.navigateToNextNode();
+        } finally {
+          await stepExecutionRuntime.flushEventLogs();
+        }
+        return;
+      }
+    }
+
+    // First iteration only: start step and run validation
     stepExecutionRuntime.startStep();
 
     const { workflowId, inputs } = this.getInput();

@@ -61,6 +61,26 @@ export class WorkflowExecuteSyncStrategy {
     return this.checkSubWorkflowStatus(currentState, spaceId);
   }
 
+  /**
+   * Resume a sync workflow.execute step (poll iteration). Call only when the step
+   * already has wait state (e.g. after delay). Skips all initiation work; only
+   * checks sub-workflow status and updates wait state or completes.
+   */
+  async resume(spaceId: string): Promise<StrategyResult> {
+    const currentState = this.stepExecutionRuntime.getCurrentStepState() as
+      | SubWorkflowWaitState
+      | undefined;
+
+    if (!currentState?.executionId) {
+      return {
+        status: 'failed',
+        error: new Error('Cannot resume workflow.execute step without existing wait state'),
+      };
+    }
+
+    return this.checkSubWorkflowStatus(currentState, spaceId);
+  }
+
   private async initiateSubWorkflowExecution(
     workflow: EsWorkflow,
     inputs: Record<string, unknown>,
