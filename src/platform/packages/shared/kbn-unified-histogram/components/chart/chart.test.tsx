@@ -174,14 +174,14 @@ describe('Chart', () => {
     expect(screen.queryByText('Show chart')).not.toBeInTheDocument();
   });
 
-  test('should not render when custom toggle is provided and chart is hidden', async () => {
+  test('should not render chart content when custom toggle is provided and chart is hidden', async () => {
     await mountComponent({
       customToggle: <span data-test-subj="custom-toggle" />,
       chartHidden: true,
     });
 
-    expect(screen.getByTestId('unifiedHistogramChartPanelHidden')).toBeVisible();
-    expect(screen.queryByTestId('custom-toggle')).not.toBeInTheDocument();
+    expect(screen.getByTestId('custom-toggle')).toBeVisible();
+    expect(screen.queryByTestId('unifiedHistogramRendered')).not.toBeInTheDocument();
   });
 
   test('render when chart is defined and onEditVisualization is undefined', async () => {
