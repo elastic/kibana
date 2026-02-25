@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiIcon, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useInternalStateSelector, selectIsTabsBarHidden } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY } from '../../../../../common/constants';
@@ -23,7 +24,6 @@ export const useSwitchModesTour = (): React.ReactNode => {
   const [isDismissed, setIsDismissed] = useState(() =>
     Boolean(services.storage.get(DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY))
   );
-  const [isOpen, setIsOpen] = useState(false);
 
   const onClose = useCallback(() => {
     services.storage.set(DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY, true);
@@ -38,38 +38,19 @@ export const useSwitchModesTour = (): React.ReactNode => {
     !hideTabsBar &&
     !!currentTabId;
 
-  useEffect(() => {
-    if (!shouldShow) {
-      setIsOpen(false);
-      return;
-    }
-    let cancelled = false;
-    let raf2: number;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        if (!cancelled) setIsOpen(true);
-      });
-    });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf1);
-      if (raf2 !== undefined) cancelAnimationFrame(raf2);
-    };
-  }, [shouldShow]);
-
-  if (!shouldShow || !currentTabId) {
+  if (!shouldShow) {
     return null;
   }
 
   return (
     <EuiTourStep
+      key={`switch-modes-tour-${currentTabId}`}
       anchor={`[data-test-subj="unifiedTabs_tabMenuBtn_${currentTabId}"]`}
-      anchorPosition="leftUp"
+      anchorPosition="rightCenter"
       step={1}
       stepsTotal={1}
-      isStepOpen={isOpen}
+      isStepOpen={shouldShow}
       onFinish={onClose}
-      closePopover={() => {}}
       ownFocus
       initialFocus="[data-test-subj='discoverTabMenuSwitchModesTourClose']"
       title={i18n.translate('discover.tabsView.switchModesCalloutTitle', {
@@ -78,20 +59,13 @@ export const useSwitchModesTour = (): React.ReactNode => {
       content={
         <EuiText size="s">
           <p>
-            {i18n.translate('discover.tabsView.switchModesCalloutDescription', {
-              defaultMessage:
-                'Use the tab menu {icon} on each tab to switch between Classic and ES|QL.',
-              values: {
-                icon: (
-                  <EuiIcon
-                    type="boxesVertical"
-                    size="s"
-                    style={{ verticalAlign: 'middle', marginLeft: 2, marginRight: 2 }}
-                    aria-hidden
-                  />
-                ),
-              },
-            })}
+            <FormattedMessage
+              id="discover.tabsView.switchModesCalloutDescription"
+              defaultMessage="Use the tab menu {icon} on each tab to switch between Classic and ES|QL."
+              values={{
+                icon: <EuiIcon type="boxesVertical" size="s" aria-hidden={true} />,
+              }}
+            />
           </p>
         </EuiText>
       }
@@ -108,6 +82,8 @@ export const useSwitchModesTour = (): React.ReactNode => {
           })}
         </EuiButtonEmpty>
       }
+      // Ensure the tour renders above tab previews
+      zIndex={10001}
       data-test-subj="discoverTabMenuSwitchModesCallout"
     />
   );

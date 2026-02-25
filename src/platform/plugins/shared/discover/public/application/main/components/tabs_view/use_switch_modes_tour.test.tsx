@@ -8,29 +8,46 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import type { UserEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY } from '../../../../../common/constants';
+import { internalStateActions } from '../../state_management/redux';
+import { TabsBarVisibility } from '../../state_management/redux/types';
 import { useSwitchModesTour } from './use_switch_modes_tour';
-
-const flushRaf = () =>
-  new Promise<void>((resolve) => {
-    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-  });
 
 describe('useSwitchModesTour', () => {
   const setup = async ({
     enableEsql = true,
     dismissed = false,
-  }: { enableEsql?: boolean; dismissed?: boolean } = {}) => {
+    toursEnabled = true,
+    hideTabsBar = false,
+  }: {
+    enableEsql?: boolean;
+    dismissed?: boolean;
+    toursEnabled?: boolean;
+    hideTabsBar?: boolean;
+  } = {}) => {
     const toolkit = getDiscoverInternalStateMock();
     await toolkit.initializeTabs();
     await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
     if (dismissed) {
       toolkit.services.storage.set(DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY, true);
+    }
+
+    if (!toursEnabled) {
+      jest.spyOn(toolkit.services.notifications.tours, 'isEnabled').mockReturnValue(false);
+    }
+
+    if (hideTabsBar) {
+      toolkit.internalState.dispatch(
+        internalStateActions.setTabsBarVisibility(TabsBarVisibility.hidden)
+      );
     }
 
     const uiSettingsGetSpy = jest.spyOn(toolkit.services.uiSettings, 'get');
@@ -40,37 +57,77 @@ describe('useSwitchModesTour', () => {
       return originalGet?.(key);
     });
 
-    const hook = renderHook(() => useSwitchModesTour(), {
-      wrapper: ({ children }) => (
-        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
-      ),
-    });
+    const SwitchModesTourHarness = () => {
+      const tourStep = useSwitchModesTour();
+      return (
+        <>
+          <span data-test-subj={`unifiedTabs_tabMenuBtn_${toolkit.getCurrentTab().id}`} />
+          {tourStep ?? <span data-test-subj="tour-fallback" />}
+        </>
+      );
+    };
 
-    return { toolkit, hook };
+    const result = renderWithI18n(
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
+        <SwitchModesTourHarness />
+      </DiscoverToolkitTestProvider>
+    );
+
+    return { toolkit, result };
   };
 
+  let user: UserEvent;
+
+  beforeEach(() => {
+    user = userEvent.setup();
+  });
+
+  afterEach(async () => {
+    // EuiTourStep can leave leftovers if it's left open, so ensure it's closed after each test
+    if (screen.queryByTestId('discoverTabMenuSwitchModesTourClose')) {
+      await user.click(screen.getByTestId('discoverTabMenuSwitchModesTourClose'));
+    }
+  });
+
   it('returns null when callout was previously dismissed', async () => {
-    const { hook } = await setup({ dismissed: true });
-    await act(async () => {
-      await flushRaf();
-    });
-    expect(hook.result.current).toBeNull();
+    await setup({ dismissed: true });
+    expect(screen.queryByTestId('tour-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverTabMenuSwitchModesCallout')).not.toBeInTheDocument();
   });
 
   it('returns null when ES|QL is disabled', async () => {
-    const { hook } = await setup({ enableEsql: false });
-    await act(async () => {
-      await flushRaf();
-    });
-    expect(hook.result.current).toBeNull();
+    await setup({ enableEsql: false });
+    expect(screen.queryByTestId('tour-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverTabMenuSwitchModesCallout')).not.toBeInTheDocument();
+  });
+
+  it('returns null when tours are disabled', async () => {
+    await setup({ toursEnabled: false });
+    expect(screen.queryByTestId('tour-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverTabMenuSwitchModesCallout')).not.toBeInTheDocument();
+  });
+
+  it('returns null when tabs bar is hidden', async () => {
+    await setup({ hideTabsBar: true });
+    expect(screen.queryByTestId('tour-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverTabMenuSwitchModesCallout')).not.toBeInTheDocument();
   });
 
   it('returns tour step when conditions are met', async () => {
-    const { hook } = await setup();
-    await act(async () => {
-      await flushRaf();
-    });
-    expect(hook.result.current).not.toBeNull();
-    expect(React.isValidElement(hook.result.current)).toBe(true);
+    await setup();
+    expect(screen.queryByTestId('tour-fallback')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('discoverTabMenuSwitchModesCallout')).toBeInTheDocument();
+  });
+
+  it('persists dismissal when tour is closed', async () => {
+    const { toolkit } = await setup();
+
+    expect(toolkit.services.storage.get(DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY)).toBeNull();
+
+    await user.click(await screen.findByTestId('discoverTabMenuSwitchModesTourClose'));
+
+    expect(toolkit.services.storage.get(DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY)).toBe('true');
+    expect(screen.queryByTestId('tour-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('discoverTabMenuSwitchModesCallout')).not.toBeInTheDocument();
   });
 });
