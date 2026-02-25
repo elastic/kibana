@@ -122,6 +122,7 @@ export interface ConstructorOptions {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
+  authorizationCodeEnabled?: boolean;
 }
 
 export interface ActionsClientContext {
@@ -148,6 +149,7 @@ export interface ActionsClientContext {
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
   getCurrentUserProfileIdFromAPIKey?: (request: KibanaRequest) => Promise<string | undefined>;
+  authorizationCodeEnabled?: boolean;
 }
 
 const noop = async (_request: KibanaRequest): Promise<string | undefined> => undefined;
@@ -177,6 +179,7 @@ export class ActionsClient {
     spaces,
     isESOCanEncrypt,
     getCurrentUserProfileIdFromAPIKey,
+    authorizationCodeEnabled = false,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -200,6 +203,7 @@ export class ActionsClient {
       spaces,
       isESOCanEncrypt,
       getCurrentUserProfileIdFromAPIKey: getCurrentUserProfileIdFromAPIKey ?? noop,
+      authorizationCodeEnabled,
     };
   }
 
@@ -439,6 +443,9 @@ export class ActionsClient {
         throw Boom.badRequest(`Failed to retrieve access token`);
       }
     } else if (type === 'authorization_code') {
+      if (!this.context.authorizationCodeEnabled) {
+        throw Boom.badRequest('OAuth authorization code flow is not enabled');
+      }
       const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
         let authMode: AuthMode | undefined;

@@ -75,6 +75,7 @@ export interface ActionsConfigurationUtilities {
   getAwsSesConfig: () => AwsSesConfig;
   getEnabledEmailServices: () => string[];
   getMaxEmailBodyLength: () => number;
+  getActionsAuthTypeConfig: () => { authorizationCodeEnabled: boolean };
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -282,6 +283,12 @@ export function getActionsConfigurationUtilities(
       const configuredLength = config.email?.maximum_body_length ?? DEFAULT_EMAIL_BODY_LENGTH;
       const nonNegativeLength = Math.max(0, configuredLength);
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
+    },
+    getActionsAuthTypeConfig: () => {
+      const authorizationCodeEnabled = config.auth?.oauth_authorization_code.enabled ?? false;
+      return {
+        authorizationCodeEnabled,
+      };
     },
   };
 }

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import type { Criteria } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -37,6 +37,7 @@ import {
   OAuthRedirectMode,
   useConnectorOAuthDisconnect,
 } from '@kbn/response-ops-oauth-hooks';
+import { useConnectorContext } from '../../../..';
 import { loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -98,6 +99,7 @@ const ActionsConnectorsList = ({
     chrome,
     docLinks,
   } = useKibana().services;
+  const { services: authorizationCodeEnabled } = useConnectorContext();
 
   const { euiTheme } = useEuiTheme();
   const { connectorId } = useParams<{ connectorId?: string }>();
@@ -320,45 +322,47 @@ const ActionsConnectorsList = ({
         );
       },
     },
-    {
-      field: 'authMode',
-      'data-test-subj': 'connectorsTableCell-authMode',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModeTitle',
-        {
-          defaultMessage: 'Authentication',
+    authorizationCodeEnabled
+      ? {
+          field: 'authMode',
+          'data-test-subj': 'connectorsTableCell-authMode',
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModeTitle',
+            {
+              defaultMessage: 'Authentication',
+            }
+          ),
+          sortable: false,
+          truncateText: true,
+          render: (authMode: 'shared' | 'per-user') => {
+            return authMode === 'shared' ? (
+              <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="users" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModeShared',
+                    { defaultMessage: 'Service account' }
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="user" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModePerUser',
+                    { defaultMessage: 'Personal credentials' }
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          },
         }
-      ),
-      sortable: false,
-      truncateText: true,
-      render: (authMode: 'shared' | 'per-user') => {
-        return authMode === 'shared' ? (
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="users" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModeShared',
-                { defaultMessage: 'Service account' }
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="user" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModePerUser',
-                { defaultMessage: 'Personal credentials' }
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      },
-    },
+      : null,
     {
       name: '',
       render: (item: ActionConnectorTableItem) => {
@@ -411,7 +415,7 @@ const ActionsConnectorsList = ({
         );
       },
     },
-  ];
+  ].filter(Boolean) as EuiBasicTableColumn<ActionConnectorTableItem>[];
 
   const table = (
     <EuiInMemoryTable
