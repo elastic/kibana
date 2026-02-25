@@ -34,8 +34,7 @@ export interface OTLPExportConfig {
 export type TracingExporterConfig =
   | InferenceTracingExportConfig
   | { grpc: OTLPExportConfig }
-  | { http: OTLPExportConfig }
-  | { proto: OTLPExportConfig };
+  | { http: OTLPExportConfig };
 
 /**
  * Configuration for OpenTelemetry tracing
