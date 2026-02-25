@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { euid } from '../../../../../../plugins/entity_store/common';
+import { euid } from '@kbn/entity-store/common';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -21,9 +21,6 @@ import { ManagedUserDatasetKey } from '../../../../common/search_strategy/securi
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelFooter } from './footer';
 import { UserPanelContent } from './content';
@@ -34,7 +31,6 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/compon
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from './hooks/use_observed_user';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
@@ -91,7 +87,6 @@ export const UserPanel = ({
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
 
   const observedUser = useObservedUser(entityIdentifiers, scopeId);
-  const email = observedUser.details.user?.email;
   const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
@@ -162,12 +157,12 @@ export const UserPanel = ({
         isRulePreview={scopeId === TableId.rulePreview}
       />
       <UserPanelHeader
-        userName={userName}
-        managedUser={managedUser}
+        entityIdentifiers={entityIdentifiers}
         lastSeen={observedUser.lastSeen}
+        managedUser={managedUser}
+        userName={effectiveUserName}
       />
       <UserPanelContent
-        userName={userName}
         observedUser={observedUser}
         riskScoreState={riskScoreState}
         recalculatingScore={recalculatingScore}
@@ -176,10 +171,17 @@ export const UserPanel = ({
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
         isPreviewMode={isPreviewMode}
+        entityIdentifiers={entityIdentifiers}
       />
-      {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
+      {!isPreviewMode && assetInventoryEnabled && (
+        <UserPanelFooter entityIdentifiers={entityIdentifiers} />
+      )}
       {isPreviewMode && (
-        <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
+        <UserPreviewPanelFooter
+          entityIdentifiers={entityIdentifiers}
+          contextID={contextID}
+          scopeId={scopeId}
+        />
       )}
     </>
   );

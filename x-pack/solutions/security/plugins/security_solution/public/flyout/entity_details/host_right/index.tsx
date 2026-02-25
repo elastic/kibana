@@ -19,12 +19,10 @@ import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import type { HostItem } from '../../../../common/search_strategy';
 import {
   buildHostFilterFromEntityIdentifiers,
   buildHostNamesFilter,
 } from '../../../../common/search_strategy';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelFooter } from './footer';
 import { HostPanelContent } from './content';
@@ -34,7 +32,6 @@ import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedHost } from './hooks/use_observed_host';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
@@ -167,9 +164,9 @@ export const HostPanel = ({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <HostPanelHeader hostName={hostName} lastSeen={observedHost.lastSeen} />
+      <HostPanelHeader entityIdentifiers={entityIdentifiers} lastSeen={observedHost.lastSeen} />
       <HostPanelContent
-        hostName={hostName}
+        entityIdentifiers={entityIdentifiers}
         observedHost={observedHost}
         riskScoreState={riskScoreState}
         contextID={contextID}
@@ -180,9 +177,15 @@ export const HostPanel = ({
         isPreviewMode={isPreviewMode}
       />
       {isPreviewMode && (
-        <HostPreviewPanelFooter hostName={hostName} contextID={contextID} scopeId={scopeId} />
+        <HostPreviewPanelFooter
+          entityIdentifiers={entityIdentifiers}
+          contextID={contextID}
+          scopeId={scopeId}
+        />
       )}
-      {!isPreviewMode && assetInventoryEnabled && <HostPanelFooter hostName={hostName} />}
+      {!isPreviewMode && assetInventoryEnabled && (
+        <HostPanelFooter entityIdentifiers={entityIdentifiers} />
+      )}
     </>
   );
 };

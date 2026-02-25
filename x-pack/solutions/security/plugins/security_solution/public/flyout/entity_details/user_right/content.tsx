@@ -21,6 +21,7 @@ import type { EntityDetailsPath } from '../shared/components/left_panel/left_pan
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
 

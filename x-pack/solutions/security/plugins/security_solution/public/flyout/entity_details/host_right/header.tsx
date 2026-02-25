@@ -17,14 +17,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
-import type { HostItem } from '../../../../common/search_strategy';
 import { getHostDetailsUrl } from '../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 
 interface HostPanelHeaderProps {
@@ -44,11 +42,11 @@ export const HostPanelHeader = ({ entityIdentifiers, lastSeen }: HostPanelHeader
     [entityIdentifiers]
   );
 
-    const lastSeenDate = lastSeen?.date;
-    const isLoading = lastSeen?.isLoading ?? false;
-    const lastSeenDateFormatted = useMemo(
-                                          () => lastSeenDate && new Daate && new Date(observedHost.lastSeen.date),
-    [observedHost.lastSeen.date]
+  const lastSeenDate = lastSeen?.date;
+  const isLoading = lastSeen?.isLoading ?? false;
+  const lastSeenDateFormatted = useMemo(
+    () => lastSeenDate && new Date(lastSeenDate),
+    [lastSeenDate]
   );
 
   const hostDetailsPath = useMemo(

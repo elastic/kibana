@@ -169,8 +169,9 @@ export const AlertsByStatus = ({
           : []),
         ...(entityIdentifiers
           ? Object.entries(entityIdentifiers).map(([fieldName, value]) => ({
-              selectedOptions: [value],
-              fieldName,
+              selected_options: [value],
+              field_name: fieldName,
+              title: value,
             }))
           : []),
       ]),

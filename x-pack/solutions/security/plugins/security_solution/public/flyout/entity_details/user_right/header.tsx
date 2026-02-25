@@ -41,10 +41,9 @@ const urlParamOverride = { timeline: { isOpen: false } };
 
 export const UserPanelHeader = ({
   userName,
-  observedUser,
   managedUser,
   entityIdentifiers,
-                                lastSeen
+  lastSeen,
 }: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
@@ -52,8 +51,8 @@ export const UserPanelHeader = ({
   const entraTimestamp = managedUser.data?.[ManagedUserDatasetKey.ENTRA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
-    const observedUserLastSeenDate = lastSeen?.date;
-    const isLoading = lastSeen?.isLoading ?? false;
+  const observedUserLastSeenDate = lastSeen?.date;
+  const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
   const lastSeenDate = useMemo(

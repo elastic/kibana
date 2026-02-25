@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { EntityType } from '@kbn/scout-security/src/playwright/constants/entity_analytics';
-
 import { tags } from '@kbn/scout-security';
 
 export const COMMON_HEADERS = {

@@ -25,7 +25,6 @@ import type { HostItem } from '../../../../common/search_strategy';
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
 interface HostPanelContentProps {
-  hostName: string;
   observedHost: ObservedHostData;
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
