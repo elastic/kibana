@@ -39,7 +39,7 @@ export const registerSkills = async ({
   options,
 }: RegisterSkillsOpts): Promise<void> => {
   if (experimentalFeatures.automaticTroubleshootingSkill) {
-    await agentBuilder.skills.register(
+    agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService)
     );
   }
@@ -48,6 +48,4 @@ export const registerSkills = async ({
     getEntityAnalyticsSkill({ getStartServices, kibanaVersion, logger })
   );
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
-
-  // agentBuilder.skills.register(alertAnalysisSampleSkill);
 };

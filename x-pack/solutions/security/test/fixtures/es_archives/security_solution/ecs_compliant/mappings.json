@@ -81,6 +81,9 @@
             "name": {
               "type": "keyword"
             },
+            "id": {
+              "type": "keyword"
+            },
             "ip": {
               "type": "ip"
             },
@@ -121,6 +124,13 @@
                   "type": "keyword"
                 }
               }
+            }
+          }
+        },
+        "data_stream": {
+          "properties": {
+            "namespace": {
+              "type": "keyword"
             }
           }
         }
