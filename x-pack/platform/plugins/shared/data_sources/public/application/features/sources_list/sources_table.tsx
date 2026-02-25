@@ -44,7 +44,8 @@ interface SourcesTableProps {
 
 // CSS for hover-only quick actions
 const sourceQuickActionsHoverStyles = css`
-  .euiTableRow:hover .source-quick-actions {
+  .euiTableRow:hover .source-quick-actions,
+  .euiTableRow:focus-within .source-quick-actions {
     visibility: visible;
   }
 `;
