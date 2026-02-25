@@ -131,7 +131,7 @@ export class StepExecutionRuntime {
       scopeStack: this.workflowExecution.scopeStack,
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       status: ExecutionStatus.RUNNING,
-      startedAt: stepStartedAt.toISOString(),
+      startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
     } as Partial<EsWorkflowStepExecution>;
 
     this.workflowExecutionState.upsertStep(stepExecution);
