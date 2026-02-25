@@ -121,7 +121,7 @@ describe('runSaveLensVisualization', () => {
             expect.objectContaining({
               state: expect.objectContaining({
                 title: 'blah',
-                timeRange: { from: 'now-7d', to: 'now' },
+                time_range: { from: 'now-7d', to: 'now' },
               }),
             })
           );

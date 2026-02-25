@@ -50,7 +50,7 @@ describe('toExpression', () => {
         zoom: 3,
       },
       title: 'title',
-      timeRange: {
+      time_range: {
         from: 'now-1h',
         to: 'now',
       },
@@ -69,8 +69,8 @@ describe('toExpression', () => {
     const timerangeExpression = ast.chain[0].arguments.timerange[0] as Ast;
 
     expect(timerangeExpression.chain[0].function).toBe('timerange');
-    expect(timerangeExpression.chain[0].arguments.from[0]).toEqual(input.timeRange?.from);
-    expect(timerangeExpression.chain[0].arguments.to[0]).toEqual(input.timeRange?.to);
+    expect(timerangeExpression.chain[0].arguments.from[0]).toEqual(input.time_range?.from);
+    expect(timerangeExpression.chain[0].arguments.to[0]).toEqual(input.time_range?.to);
   });
 
   it('includes empty panel title', () => {
