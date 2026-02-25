@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/utility-types'
   - '@kbn/licensing-types'
+  - '@kbn/response-ops-scheduling-types'
 tags:
   - shared-common
   - package
