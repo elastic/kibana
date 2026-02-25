@@ -73,7 +73,10 @@ describe('ZendeskConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://test-company.zendesk.com/api/v2/tickets/123.json'
+        'https://test-company.zendesk.com/api/v2/tickets/123.json',
+        expect.objectContaining({
+          params: { include: 'comment_count' },
+        })
       );
     });
   });
