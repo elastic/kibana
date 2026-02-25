@@ -226,10 +226,12 @@ jobs:
 
           short_key="$(printf '%s' "$response" | jq -r '.key // .token // .data.key // empty')"
           if [ -z "$short_key" ] || [ "$short_key" = "null" ]; then
-            echo "::error::Failed to mint short-lived LiteLLM key. Raw response:"
-            printf '%s\n' "$response"
+            echo "::error::Failed to mint short-lived LiteLLM key."
             exit 1
           fi
+
+          # Ensure the ephemeral key is masked anywhere it might appear in logs.
+          echo "::add-mask::${short_key}"
 
           {
             echo "api_key=${short_key}"
@@ -265,6 +267,7 @@ jobs:
           cat > "$GITHUB_WORKSPACE/opencode.json" <<OCEOF
           {
             "\$schema": "https://opencode.ai/config.json",
+            "snapshot": false,
             "provider": {
               "litellm": {
                 "npm": "@ai-sdk/openai-compatible",
