@@ -81,6 +81,8 @@ dependsOn:
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/config'
   - '@kbn/expect'
+  - '@kbn/scout'
+  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod
@@ -93,6 +95,7 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
 tasks:
   jest:
