@@ -47,8 +47,7 @@ const renderTable = (overrides: Partial<McpToolsSelectionTableProps> = {}) => {
   return render(<McpToolsSelectionTable {...props} />, { wrapper: Wrapper });
 };
 
-const getCheckboxForRow = (toolName: string) =>
-  screen.getByTestId(`checkboxSelectRow-${toolName}`);
+const getCheckboxForRow = (toolName: string) => screen.getByTestId(`checkboxSelectRow-${toolName}`);
 
 const getNextPageButton = () => screen.getByTestId('pagination-button-next');
 
