@@ -225,7 +225,11 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
         name: i18n.translate('xpack.dataSources.sources.typeColumn', {
           defaultMessage: 'Type',
         }),
-        render: (type: string) => <EuiText size="s">{capitalize(type)}</EuiText>,
+        render: (type: string, source: ActiveSource) => (
+          <EuiText size="s" data-test-subj={`sourceType-${source.id}`}>
+            {capitalize(type)}
+          </EuiText>
+        ),
       },
       {
         field: 'workflows',
@@ -237,7 +241,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
           const path = `?query=${encodeURIComponent(source.name)}`;
           const workflowsUrl = application.getUrlForApp(WORKFLOWS_APP_ID, { path });
           return workflows.length > 0 ? (
-            <EuiLink href={workflowsUrl} data-test-subj="workflowsLink">
+            <EuiLink href={workflowsUrl} data-test-subj={`workflowsLink-${source.id}`}>
               <EuiText size="s">{workflows.length}</EuiText>
             </EuiLink>
           ) : (
@@ -255,7 +259,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
           const path = `/tools?search=${encodeURIComponent(source.type)}`;
           const toolsUrl = application.getUrlForApp(AGENT_BUILDER_APP_ID, { path });
           return agentTools.length > 0 ? (
-            <EuiLink href={toolsUrl} data-test-subj="toolsLink">
+            <EuiLink href={toolsUrl} data-test-subj={`toolsLink-${source.id}`}>
               <EuiText size="s">{agentTools.length}</EuiText>
             </EuiLink>
           ) : (
