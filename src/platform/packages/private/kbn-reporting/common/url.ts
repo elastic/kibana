@@ -22,7 +22,7 @@ export interface LocatorParams<P extends SerializableRecord = SerializableRecord
   /**
    * Kibana version used to create the params
    */
-  version: string;
+  version?: string;
 
   /**
    * Data to recreate the user's state in the application

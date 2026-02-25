@@ -15,6 +15,7 @@ import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/co
 import type { ILicense } from '@kbn/licensing-types';
 import type { Capabilities } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -158,6 +159,10 @@ export interface ExportShare
       requiresSavedState?: boolean;
       supportedLayoutOptions?: Array<'print'>;
       renderLayoutOptionSwitch?: boolean;
+      /**
+       * indicates if the export integration supports generating it exports with absolute time ranges
+       */
+      supportsAbsoluteTime?: boolean;
       renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
     } & (
       | {
@@ -253,12 +258,25 @@ export interface ShareUIConfig {
   };
 }
 
-export interface SharingData {
+/**
+ * One locator (typical link/export flows) or several (e.g. CSV reporting).
+ */
+export type SharingDataLocatorParams<P extends SerializableRecord = SerializableRecord> =
+  | {
+      id: string;
+      params: P;
+      version?: string;
+    }
+  | Array<{
+      id: string;
+      params: P;
+      version?: string;
+    }>;
+
+export interface SharingData<P extends SerializableRecord = SerializableRecord>
+  extends Record<string, unknown> {
   title: string;
-  locatorParams: {
-    id: string;
-    params: Record<string, unknown>;
-  };
+  locatorParams: SharingDataLocatorParams<P>;
 }
 
 export type ShareIntegrationMapKey = `integration-${string}`;
@@ -309,7 +327,7 @@ export type ShareableLocatorParams = {
  * It is possible to use the static function `toggleShareContextMenu`
  * to render the menu as a popover.
  * */
-export interface ShareContext {
+export interface ShareContext<S extends SharingData = SharingData> {
   /**
    * The type of the object to share. for example lens, dashboard, etc.
    */
@@ -349,7 +367,7 @@ export interface ShareContext {
     locator: LocatorPublic<any>;
     params: ShareableLocatorParams;
   };
-  sharingData: { [key: string]: unknown };
+  sharingData: S;
   isDirty: boolean;
   onClose: () => void;
 }
@@ -384,7 +402,7 @@ export interface ShareMenuItemLegacy extends ShareMenuItemBase {
 export interface ExportGenerationOpts {
   optimizedForPrinting?: boolean;
   intl: InjectedIntl;
-  useAbsoluteTime: boolean;
+  useAbsoluteTime?: boolean;
 }
 
 interface UrlParamExtensionProps {
@@ -397,7 +415,16 @@ export interface UrlParamExtension {
 }
 
 /** @public */
-export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
+export interface ShowShareMenuOptions<
+  /**
+   * Specifies the type of the locator params for the sharing data.
+   */
+  P extends SerializableRecord = SerializableRecord,
+  /**
+   * Specifies the type of the sharing data.
+   */
+  S extends Record<string, unknown> = Record<string, unknown>
+> extends Omit<ShareContext<SharingData<P> & S>, 'onClose'> {
   asExport?: boolean;
   anchorElement?: HTMLElement;
   allowShortUrl: boolean;

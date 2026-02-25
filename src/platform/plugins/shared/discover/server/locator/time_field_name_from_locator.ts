@@ -9,6 +9,7 @@
 
 import type { LocatorServicesDeps } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
+import { resolveTimeFieldName } from './resolve_time_field_name';
 
 /**
  * @internal
@@ -20,7 +21,7 @@ export const timeFieldNameFromLocatorFactory = (services: LocatorServicesDeps) =
   const timeFieldNameFromLocator = async (
     params: DiscoverAppLocatorParams
   ): Promise<string | undefined> => {
-    return params.dataViewSpec?.timeFieldName;
+    return resolveTimeFieldName(params, services);
   };
 
   return timeFieldNameFromLocator;

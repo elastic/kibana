@@ -10,6 +10,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { LocatorServicesDeps } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
+import { resolveTimeFieldName } from './resolve_time_field_name';
 
 /**
  * @internal
@@ -21,19 +22,18 @@ export const filtersFromLocatorFactory = (services: LocatorServicesDeps) => {
   const filtersFromLocator = async (params: DiscoverAppLocatorParams): Promise<Filter[]> => {
     const filters: Filter[] = [];
 
-    if (params.timeRange && params.dataViewSpec?.timeFieldName) {
-      const timeRange = params.timeRange;
-      const timeFieldName = params.dataViewSpec.timeFieldName;
+    if (params.timeRange) {
+      const timeFieldName = await resolveTimeFieldName(params, services);
 
-      if (timeRange) {
+      if (timeFieldName) {
         filters.push({
           meta: {},
           query: {
             range: {
               [timeFieldName]: {
                 format: 'strict_date_optional_time',
-                gte: timeRange.from,
-                lte: timeRange.to,
+                gte: params.timeRange.from,
+                lte: params.timeRange.to,
               },
             },
           },

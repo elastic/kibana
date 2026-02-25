@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { isTimeRangeAbsoluteTime } from '../../../lib/time_utils';
-import { TimeTypeSelection } from '../../common/time_type_selection';
+import { TimeTypeSection } from './time_type_section';
 import { useShareContext, type IShareContext } from '../../context';
 import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
 import { DraftModeCallout } from '../../common/draft_mode_callout';
@@ -140,7 +140,7 @@ export const LinkContent = ({
   return (
     <>
       <EuiForm>
-        <TimeTypeSelection
+        <TimeTypeSection
           timeRange={timeRange}
           onTimeTypeChange={handleTimeTypeChange}
           isAbsoluteTimeByDefault={isAbsoluteTimeByDefault}

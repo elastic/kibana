@@ -69,7 +69,7 @@ const RelativeTimeText = ({
     if (isToDate) {
       return (
         <FormattedMessage
-          id="share.common.timeRange.endOfRoundingUnit"
+          id="share.link.timeRange.endOfRoundingUnit"
           defaultMessage="<bold>the end of the {roundingUnit}</bold>"
           values={{
             roundingUnit,
@@ -80,7 +80,7 @@ const RelativeTimeText = ({
     }
     return (
       <FormattedMessage
-        id="share.common.timeRange.startOfRoundingUnit"
+        id="share.link.timeRange.startOfRoundingUnit"
         defaultMessage="<bold>the start of the {roundingUnit}</bold>"
         values={{
           roundingUnit,
@@ -94,7 +94,7 @@ const RelativeTimeText = ({
   if (value === 0 && unit === 'second' && !roundingUnit) {
     return (
       <FormattedMessage
-        id="share.common.timeRange.now"
+        id="share.link.timeRange.now"
         defaultMessage="<bold>now</bold>"
         values={{
           bold: (chunks) => <BoldText>{chunks}</BoldText>,
@@ -112,7 +112,7 @@ const RelativeTimeText = ({
       />
       {roundingUnit && (
         <FormattedMessage
-          id="share.common.timeRange.relativeTimeInfoText.roundingUnit"
+          id="share.link.timeRange.relativeTimeInfoText.roundingUnit"
           defaultMessage=" rounded to the {roundingUnit}"
           values={{
             roundingUnit,
@@ -154,7 +154,7 @@ const getTimeRangeText = (timeRange: TimeRange) => {
 
   return (
     <FormattedMessage
-      id="share.common.timeRange.relativeTimeInfoText"
+      id="share.link.timeRange.relativeTimeInfoText"
       defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
       values={{
         from: fromValue,
@@ -164,7 +164,7 @@ const getTimeRangeText = (timeRange: TimeRange) => {
   );
 };
 
-export const TimeTypeSelection = ({
+export const TimeTypeSection = ({
   timeRange,
   onTimeTypeChange,
   isAbsoluteTimeByDefault,
@@ -186,7 +186,7 @@ export const TimeTypeSelection = ({
       {!isAbsoluteTimeByDefault && (
         <>
           <EuiSwitch
-            label={i18n.translate('share.common.timeRange.switchLabel', {
+            label={i18n.translate('share.link.timeRange.switchLabel', {
               defaultMessage: 'Use absolute time range',
             })}
             checked={isAbsoluteTime}
@@ -200,7 +200,7 @@ export const TimeTypeSelection = ({
         {isAbsoluteTime ? (
           <div data-test-subj="absoluteTimeInfoText">
             <FormattedMessage
-              id="share.common.timeRange.absoluteTimeInfoText"
+              id="share.link.timeRange.absoluteTimeInfoText"
               defaultMessage="The users will see all data from {from} to {to}."
               values={{
                 from: <AbsoluteTimeText date={timeRange?.from} />,
@@ -217,7 +217,7 @@ export const TimeTypeSelection = ({
         <EuiCallOut
           announceOnMount
           size="s"
-          title={i18n.translate('share.common.timeRange.relativeTimeCallout', {
+          title={i18n.translate('share.link.timeRange.relativeTimeCallout', {
             defaultMessage: 'To use a relative time range, select it in the time picker first.',
           })}
           data-test-subj="relativeTimeCallout"

@@ -11,17 +11,17 @@ import type { ComponentProps } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
-import { TimeTypeSelection } from './time_type_selection';
+import { TimeTypeSection } from './time_type_section';
 
-const renderComponent = (props: ComponentProps<typeof TimeTypeSelection>) => {
+const renderComponent = (props: ComponentProps<typeof TimeTypeSection>) => {
   render(
     <IntlProvider locale="en">
-      <TimeTypeSelection {...props} />
+      <TimeTypeSection {...props} />
     </IntlProvider>
   );
 };
 
-describe('TimeTypeSelection', () => {
+describe('TimeTypeSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
