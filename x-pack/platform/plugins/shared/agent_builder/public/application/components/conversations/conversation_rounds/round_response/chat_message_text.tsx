@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/css';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiCodeBlock,
   EuiTable,
@@ -32,6 +32,7 @@ import {
   renderAttachmentElement,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
+import { useKibana } from '../../../../hooks/use_kibana';
 import {
   Cursor,
   esqlLanguagePlugin,
@@ -45,6 +46,19 @@ import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
 import { CanvasProvider } from './attachments/canvas_context';
 import { CanvasFlyout } from './attachments/canvas_flyout';
+import { ExternalLinkModal } from './external_link_modal';
+
+const isInternalLink = (href: string, serverBasePath: string): boolean => {
+  try {
+    const url = new URL(href, window.location.href);
+    const isHttp = url.protocol === 'http:' || url.protocol === 'https:';
+    const isSameOrigin = url.origin === window.location.origin;
+    const isSameBasePath = !serverBasePath || url.pathname.startsWith(serverBasePath);
+    return isHttp && isSameOrigin && isSameBasePath;
+  } catch {
+    return false;
+  }
+};
 
 interface Props {
   content: string;
@@ -83,6 +97,29 @@ export function ChatMessageText({
   const { attachmentsService, startDependencies } = useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
+  const {
+    services: { http, application },
+  } = useKibana();
+
+  const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
+  const serverBasePath = http.basePath.serverBasePath;
+
+  const handleLinkClick = useCallback(
+    (href: string, e: React.MouseEvent) => {
+      const internal = isInternalLink(href, serverBasePath);
+      if (!internal) {
+        // External links always show the confirmation modal
+        e.preventDefault();
+        setPendingExternalUrl(href);
+      } else if (isSidebar) {
+        // Internal link in flyout: navigate in current window
+        e.preventDefault();
+        application.navigateToUrl(new URL(href, window.location.href).toString());
+      }
+      // Internal link in full page: target="_blank" handles navigation
+    },
+    [isSidebar, serverBasePath, application]
+  );
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -98,7 +135,17 @@ export function ChatMessageText({
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
-      a: (props) => <EuiLink {...props} target="_blank" rel="noreferrer" external={false} />,
+      a: (props) => (
+        <EuiLink
+          {...props}
+          target="_blank"
+          rel="noreferrer"
+          external={false}
+          onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+            if (props.href) handleLinkClick(props.href, e);
+          }}
+        />
+      ),
       cursor: Cursor,
       codeBlock: (props) => {
         return (
@@ -177,6 +224,7 @@ export function ChatMessageText({
     conversationId,
     isSidebar,
     attachmentsService,
+    handleLinkClick,
   ]);
 
   return (
@@ -191,6 +239,7 @@ export function ChatMessageText({
         </EuiMarkdownFormat>
       </EuiText>
       <CanvasFlyout attachmentsService={attachmentsService} />
+      <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
     </CanvasProvider>
   );
 }
