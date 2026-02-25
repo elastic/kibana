@@ -132,6 +132,7 @@ components:
 
     RunScriptOsConfigValues:
       type: object
+      minProperties: 1
       properties:
         scriptId:
           type: string
