@@ -12,13 +12,13 @@ import { render, screen } from '@testing-library/react';
 import { FormattedValue } from './formatted_value';
 
 describe('FormattedValue', () => {
-  it('renders the value as HTML inside EuiText', () => {
-    render(<FormattedValue value="<mark>Inner HTML Value</mark>" />);
+  it('renders ReactNode value inside EuiText', () => {
+    render(<FormattedValue value={<mark>Inner HTML Value</mark>} />);
     const markElement = screen.getByText('Inner HTML Value');
     expect(markElement.tagName.toLowerCase()).toBe('mark');
   });
 
-  it('renders plain text if value is not HTML', () => {
+  it('renders plain text if value is a string', () => {
     render(<FormattedValue value="Just text" />);
     expect(screen.getByText('Just text')).toBeInTheDocument();
   });

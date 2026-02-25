@@ -24,23 +24,13 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { take } from 'rxjs';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import { formatHit } from '@kbn/discover-utils';
+import { formatHitReact } from '@kbn/discover-utils';
 import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { SearchHit } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
-
-/**
- * Strips HTML tags from a string to safely render text content.
- * This removes the need for dangerouslySetInnerHTML while preserving the text content.
- */
-function stripHtmlTags(html: string): string {
-  // Create a temporary div element to parse HTML
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || '';
-}
 
 interface Document {
   '@timestamp': string;
@@ -325,24 +315,16 @@ export const WorkflowExecuteIndexForm = ({
         render: (source: Document) => {
           const flattened = flattenObject(source as Record<string, unknown>);
 
-          // Create a mock DataTableRecord-like object for formatHit
           const mockRecord = {
             raw: { _source: source },
             flattened,
-            id: '', //  formatHit doesn't use ID
+            id: '',
             isAnchor: false,
           };
 
-          // Use formatHit to get properly formatted field pairs
           const formattedPairs =
             selectedDataView && typeof selectedDataView.getFieldByName === 'function'
-              ? formatHit(
-                  mockRecord,
-                  selectedDataView,
-                  () => true, // Show all fields
-                  10, // Max entries
-                  services.fieldFormats
-                )
+              ? formatHitReact(mockRecord, selectedDataView, () => true, 10, services.fieldFormats)
               : [];
 
           return (
@@ -356,7 +338,7 @@ export const WorkflowExecuteIndexForm = ({
                     <React.Fragment key={index}>
                       <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
                       <EuiDescriptionListDescription>
-                        {stripHtmlTags(description || '-')}
+                        {description || '-'}
                       </EuiDescriptionListDescription>
                     </React.Fragment>
                   ))}
@@ -385,16 +367,10 @@ export const WorkflowExecuteIndexForm = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" gutterSize="none">
+      <EuiFlexGroup direction="row" gutterSize="s">
         {/* Data View Selector */}
         <EuiFlexItem grow={false}>
-          <EuiPanel
-            paddingSize="s"
-            hasBorder={false}
-            hasShadow={false}
-            color="transparent"
-            css={{ paddingRight: 0 }}
-          >
+          <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
             <DataViewPicker
               trigger={{
                 'data-test-subj': 'workflow-data-view-selector',

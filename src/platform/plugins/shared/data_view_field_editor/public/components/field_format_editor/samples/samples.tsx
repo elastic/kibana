@@ -27,7 +27,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
   };
 
   render() {
-    const { samples, sampleType } = this.props;
+    const { samples } = this.props;
 
     const columns = [
       {
@@ -44,18 +44,8 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
         name: i18n.translate('indexPatternFieldEditor.samples.outputHeader', {
           defaultMessage: 'Output',
         }),
-        render: (output: string) => {
-          return sampleType === 'html' ? (
-            <div
-              /*
-               * Justification for dangerouslySetInnerHTML:
-               * Sample output may contain HTML tags, like URL image/audio format.
-               */
-              dangerouslySetInnerHTML={{ __html: output }} // eslint-disable-line react/no-danger
-            />
-          ) : (
-            <div>{output}</div>
-          );
+        render: (output: React.ReactNode) => {
+          return <div>{output}</div>;
         },
       },
     ];

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { isValidElement } from 'react';
+import { render } from '@testing-library/react';
 import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
-import { HTML_CONTEXT_TYPE } from '../content_types';
 import { StringFormat } from './string';
 
 /**
  * Removes a wrapping span, that is created by the field formatter infrastructure
  * and we're not caring about in these tests.
+ * Only used with 'html' output which always returns a string.
  */
 function stripSpan(input: string): string {
   return input.replace(/^\<span\>(.*)\<\/span\>$/, '$1');
@@ -110,7 +112,7 @@ describe('String Format', () => {
   test('outputs specific empty value', () => {
     const string = new StringFormat();
     expect(string.convert('')).toBe(EMPTY_LABEL);
-    expect(stripSpan(string.convert('', HTML_CONTEXT_TYPE))).toBe(
+    expect(stripSpan(string.convert('', 'html'))).toBe(
       `<span class="ffString__emptyValue">${EMPTY_LABEL}</span>`
     );
   });
@@ -119,10 +121,10 @@ describe('String Format', () => {
     const string = new StringFormat();
     expect(string.convert(null)).toBe(NULL_LABEL);
     expect(string.convert(undefined)).toBe(NULL_LABEL);
-    expect(stripSpan(string.convert(null, HTML_CONTEXT_TYPE))).toBe(
+    expect(stripSpan(string.convert(null, 'html'))).toBe(
       `<span class="ffString__emptyValue">${NULL_LABEL}</span>`
     );
-    expect(stripSpan(string.convert(undefined, HTML_CONTEXT_TYPE))).toBe(
+    expect(stripSpan(string.convert(undefined, 'html'))).toBe(
       `<span class="ffString__emptyValue">${NULL_LABEL}</span>`
     );
   });
@@ -139,5 +141,83 @@ describe('String Format', () => {
         })
       )
     ).toBe('<mark class="ffSearch__highlight">&lt;img /&gt;</mark>');
+  });
+
+  describe('react content type', () => {
+    test('returns plain text for simple values with transform', () => {
+      const lower = new StringFormat({ transform: 'lower' }, jest.fn());
+      expect(lower.convert('Kibana', 'react')).toBe('kibana');
+
+      const upper = new StringFormat({ transform: 'upper' }, jest.fn());
+      expect(upper.convert('Kibana', 'react')).toBe('KIBANA');
+    });
+
+    test('returns highlighted <mark> elements for matching highlights', () => {
+      const string = new StringFormat({}, jest.fn());
+      const result = string.convert('test value', 'react', {
+        field: { name: 'foo' },
+        hit: {
+          highlight: {
+            foo: ['@kibana-highlighted-field@test value@/kibana-highlighted-field@'],
+          },
+        },
+      });
+      expect(isValidElement(result)).toBe(true);
+      const { container } = render(React.createElement(React.Fragment, null, result));
+      const mark = container.querySelector('mark.ffSearch__highlight');
+      expect(mark).not.toBeNull();
+      expect(mark!.textContent).toBe('test value');
+    });
+
+    test('returns empty-value span with correct label for empty string', () => {
+      const string = new StringFormat();
+      const result = string.convert('', 'react');
+      expect(isValidElement(result)).toBe(true);
+      const { container } = render(React.createElement(React.Fragment, null, result));
+      const span = container.querySelector('.ffString__emptyValue');
+      expect(span).not.toBeNull();
+      expect(span!.textContent).toBe(EMPTY_LABEL);
+    });
+
+    test('returns null-value span with correct label for null/undefined', () => {
+      const string = new StringFormat();
+      for (const val of [null, undefined]) {
+        const result = string.convert(val, 'react');
+        expect(isValidElement(result)).toBe(true);
+        const { container } = render(React.createElement(React.Fragment, null, result));
+        const span = container.querySelector('.ffString__emptyValue');
+        expect(span).not.toBeNull();
+        expect(span!.textContent).toBe(NULL_LABEL);
+      }
+    });
+
+    test('escapes XSS in highlighted react output', () => {
+      const string = new StringFormat({}, jest.fn());
+      const result = string.convert('<script>alert("xss")</script>', 'react', {
+        field: { name: 'foo' },
+        hit: {
+          highlight: {
+            foo: [
+              '@kibana-highlighted-field@<script>alert("xss")</script>@/kibana-highlighted-field@',
+            ],
+          },
+        },
+      });
+      expect(isValidElement(result)).toBe(true);
+      const { container } = render(React.createElement(React.Fragment, null, result));
+      expect(container.querySelector('script')).toBeNull();
+      const mark = container.querySelector('mark.ffSearch__highlight');
+      expect(mark).not.toBeNull();
+      expect(mark!.textContent).toBe('<script>alert("xss")</script>');
+    });
+
+    test('returns plain string when no highlights match', () => {
+      const string = new StringFormat({}, jest.fn());
+      const result = string.convert('no match', 'react', {
+        field: { name: 'foo' },
+        hit: { highlight: {} },
+      });
+      expect(result).toBe('no match');
+    });
   });
 });

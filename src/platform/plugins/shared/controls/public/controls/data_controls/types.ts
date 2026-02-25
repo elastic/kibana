@@ -9,7 +9,10 @@
 
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+} from '@kbn/field-formats-plugin/common';
 import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
 import type {
   AppliesFilters,
@@ -24,7 +27,10 @@ import type { StateManager } from '@kbn/presentation-publishing/state_manager/ty
 import type { initializeLabelManager } from '../control_labels';
 import type { HasCustomPrepend } from '../types';
 
-export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
+export type DataControlFieldFormatter =
+  | HtmlContextTypeConvert
+  | TextContextTypeConvert
+  | ((toFormat: any) => string);
 
 export interface PublishesField {
   field$: PublishingSubject<DataViewField | undefined>;
