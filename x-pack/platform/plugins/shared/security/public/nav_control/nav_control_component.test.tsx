@@ -155,7 +155,8 @@ describe('SecurityNavControl', () => {
 
     const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
     const panels = lastCall[0].panels;
-    const items = panels[0].content.props.items;
+    const content = panels![0].content as React.ReactElement;
+    const items = content.props.items;
     const testSubjs = items.map((item: any) => item['data-test-subj']);
     expect(testSubjs).toEqual([
       'profileLink',
@@ -192,7 +193,8 @@ describe('SecurityNavControl', () => {
 
     const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
     const panels = lastCall[0].panels;
-    const items = panels[0].content.props.items;
+    const content = panels![0].content as React.ReactElement;
+    const items = content.props.items;
     const testSubjs = items.map((item: any) => item['data-test-subj']);
     expect(testSubjs).not.toContain('profileLink');
     expect(testSubjs).toEqual([
@@ -225,7 +227,8 @@ describe('SecurityNavControl', () => {
 
     const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
     const panels = lastCall[0].panels;
-    const items = panels[0].content.props.items;
+    const content = panels![0].content as React.ReactElement;
+    const items = content.props.items;
     const testSubjs = items.map((item: any) => item['data-test-subj']);
     expect(testSubjs).toContain('logoutLink');
     expect(testSubjs).not.toContain('profileLink');

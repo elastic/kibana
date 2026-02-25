@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { LocationDescriptorObject } from 'history';
 import React from 'react';
 
@@ -14,7 +14,6 @@ import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { UsersGridPage } from './users_grid_page';
-import type { User } from '../../../../common';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
 
