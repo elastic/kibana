@@ -167,6 +167,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   return (
     <>
+      hi
       {fetchingAutocompleteEntities ? (
         <div css={styles.requestProgressBarContainer}>
           <EuiProgress size="xs" color="accent" position="absolute" />
