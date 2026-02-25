@@ -61,6 +61,50 @@ export class WorkflowExecuteSyncStrategy {
     return this.checkSubWorkflowStatus(currentState, spaceId);
   }
 
+  /**
+   * Returns true when the step has persisted wait state (e.g. after entering delay
+   * to poll). Used by the step impl to decide resume vs full run without coupling
+   * to node type or state shape.
+   */
+  canResume(): boolean {
+    const state = this.stepExecutionRuntime.getCurrentStepState() as
+      | SubWorkflowWaitState
+      | undefined;
+    return !!state?.executionId;
+  }
+
+  /**
+   * Returns the child execution id if this step is in a state that can be cancelled
+   * (waiting on sub-workflow). Used by the step impl for onCancel without knowing
+   * the strategy's state shape.
+   */
+  getExecutionIdForCancel(): string | undefined {
+    const state = this.stepExecutionRuntime.getCurrentStepState() as
+      | SubWorkflowWaitState
+      | undefined;
+    return state?.executionId;
+  }
+
+  /**
+   * Resume a sync workflow.execute step (poll iteration). Call only when the step
+   * already has wait state (e.g. after delay). Skips all initiation work; only
+   * checks sub-workflow status and updates wait state or completes.
+   */
+  async resume(spaceId: string): Promise<StrategyResult> {
+    const currentState = this.stepExecutionRuntime.getCurrentStepState() as
+      | SubWorkflowWaitState
+      | undefined;
+
+    if (!currentState?.executionId) {
+      return {
+        status: 'failed',
+        error: new Error('Cannot resume workflow.execute step without existing wait state'),
+      };
+    }
+
+    return this.checkSubWorkflowStatus(currentState, spaceId);
+  }
+
   private async initiateSubWorkflowExecution(
     workflow: EsWorkflow,
     inputs: Record<string, unknown>,

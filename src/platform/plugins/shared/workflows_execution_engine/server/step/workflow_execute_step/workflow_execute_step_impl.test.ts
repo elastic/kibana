@@ -443,6 +443,37 @@ describe('WorkflowExecuteStepImpl', () => {
         inputs: {},
       });
     });
+
+    it('should skip getInput setInput getWorkflow and validation on poll resume', async () => {
+      const init = createMockInit();
+      (
+        init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>
+      ).getCurrentStepState.mockReturnValue({
+        workflowId: 'child-workflow-id',
+        executionId: 'child-exec-1',
+        startedAt: '2024-01-01T00:00:00Z',
+        pollCount: 0,
+      });
+      const execRepo = init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>;
+      execRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.COMPLETED,
+        context: { output: { result: 'success' } },
+      } as any);
+
+      const step = new WorkflowExecuteStepImpl(init);
+      await step.run();
+
+      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
+      const stepRuntime = init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>;
+      expect(stepRuntime.startStep).not.toHaveBeenCalled();
+      expect(repo.getWorkflow).not.toHaveBeenCalled();
+      expect(init.stepExecutionRuntime.setInput).not.toHaveBeenCalled();
+      expect(
+        init.stepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).not.toHaveBeenCalled();
+      expect(stepRuntime.finishStep).toHaveBeenCalledWith({ result: 'success' });
+    });
   });
 
   describe('onCancel()', () => {

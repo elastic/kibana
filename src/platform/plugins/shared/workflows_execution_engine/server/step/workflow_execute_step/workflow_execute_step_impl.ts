@@ -18,6 +18,7 @@ import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@k
 import { MAX_WORKFLOW_DEPTH } from './constants';
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
+import type { StrategyResult } from './types';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -79,11 +80,41 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     return { workflowId: String(workflowId), inputs: mappedInputs };
   }
 
+  /**
+   * Applies strategy result to step and workflow runtime (completed/failed → finish or fail step
+   * and navigate; waiting/cancelled → no navigation). Caller is responsible for flushEventLogs.
+   */
+  private handleResult(result: StrategyResult): void {
+    const { stepExecutionRuntime, workflowExecutionRuntime } = this.init;
+    if (result.status === 'completed') {
+      stepExecutionRuntime.finishStep(result.output);
+      workflowExecutionRuntime.navigateToNextNode();
+    } else if (result.status === 'failed') {
+      stepExecutionRuntime.failStep(result.error as Error);
+      workflowExecutionRuntime.navigateToNextNode();
+    }
+    // result.status === 'waiting' | 'cancelled': no navigation
+  }
+
   async run(): Promise<void> {
     const { node, stepExecutionRuntime, workflowExecutionRuntime } = this.init;
 
-    // Start step execution to ensure stepType and stepId are set
-    // This is important for frontend rendering even if the step fails early
+    // On poll resume: only check child state (no startStep, no validation). Strategy decides
+    // whether it has resumable state; no node-type or state-shape coupling here.
+    if (this.syncExecutor.canResume()) {
+      try {
+        const result = await this.syncExecutor.resume(this.init.spaceId);
+        this.handleResult(result);
+      } catch (error) {
+        stepExecutionRuntime.failStep(error as Error);
+        workflowExecutionRuntime.navigateToNextNode();
+      } finally {
+        await stepExecutionRuntime.flushEventLogs();
+      }
+      return;
+    }
+
+    // First iteration only: start step and run validation
     stepExecutionRuntime.startStep();
 
     const { workflowId, inputs } = this.getInput();
@@ -136,14 +167,7 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         currentDepth
       );
 
-      if (result.status === 'completed') {
-        stepExecutionRuntime.finishStep(result.output);
-        workflowExecutionRuntime.navigateToNextNode();
-      } else if (result.status === 'failed') {
-        stepExecutionRuntime.failStep(result.error as Error);
-        workflowExecutionRuntime.navigateToNextNode();
-      }
-      // result.status === 'waiting': delay entered, no navigation
+      this.handleResult(result);
     } catch (error) {
       stepExecutionRuntime.failStep(error as Error);
       workflowExecutionRuntime.navigateToNextNode();
@@ -153,16 +177,13 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   }
 
   async onCancel(): Promise<void> {
-    const state = this.init.stepExecutionRuntime.getCurrentStepState() as
-      | { executionId?: string }
-      | undefined;
-
-    if (!state?.executionId) {
+    const executionId = this.syncExecutor.getExecutionIdForCancel();
+    if (!executionId) {
       return;
     }
 
     await this.init.workflowsExecutionEngine.cancelWorkflowExecution(
-      state.executionId,
+      executionId,
       this.init.spaceId
     );
   }
