@@ -129,6 +129,9 @@ export function ServiceGroupTemplate({
         bottomBorder: 'extended',
         paddingSize: 'none',
         ...pageHeader,
+        css: css`
+          padding-inline: 8px;
+        `,
       }}
       environmentFilter={false}
       showServiceGroupSaveButton={!isAllServices}
