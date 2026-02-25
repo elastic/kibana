@@ -52,29 +52,40 @@ const GroupOverviewCustomSchema = schema.object({
 });
 
 function getSingleOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
-  return schema.allOf(
-    [
-      SingleOverviewCustomSchema,
-      getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS),
-      serializedTitlesSchema,
-    ],
-    { meta: { description: 'SLO Single Overview embeddable schema' } }
+  return schema.object(
+    {
+      ...SingleOverviewCustomSchema.getPropSchemas(),
+      ...getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS).getPropSchemas(),
+      ...serializedTitlesSchema.getPropSchemas(),
+    },
+    {
+      meta: {
+        id: 'slo-single-overview-embeddable',
+        description: 'SLO Single Overview embeddable schema',
+      },
+    }
   );
 }
 
 function getGroupOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
-  return schema.allOf(
-    [
-      GroupOverviewCustomSchema,
-      getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS),
-      serializedTitlesSchema,
-    ],
-    { meta: { description: 'SLO Group Overview embeddable schema' } }
+  return schema.object(
+    {
+      ...GroupOverviewCustomSchema.getPropSchemas(),
+      ...getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS).getPropSchemas(),
+      ...serializedTitlesSchema.getPropSchemas(),
+    },
+    {
+      meta: {
+        id: 'slo-group-overview-embeddable',
+        description: 'SLO Group Overview embeddable schema',
+      },
+    }
   );
 }
 
 export const getOverviewEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
-  return schema.oneOf(
+  return schema.discriminatedUnion(
+    'overview_mode',
     [
       getSingleOverviewEmbeddableSchema(getDrilldownsSchema),
       getGroupOverviewEmbeddableSchema(getDrilldownsSchema),

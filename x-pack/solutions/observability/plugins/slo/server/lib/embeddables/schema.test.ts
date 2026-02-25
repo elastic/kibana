@@ -43,13 +43,23 @@ describe('schema validation', () => {
       expect(() => overviewEmbeddableSchema.validate(minimalState)).not.toThrow();
     });
 
-    it('should reject invalid overview_mode value', () => {
+    it('should reject invalid overview_mode value with targeted error', () => {
       const invalidState = {
         slo_id: 'test-slo-id',
         overview_mode: 'invalid-mode',
       };
 
-      expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow();
+      expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow(
+        /expected "overview_mode" to be one of \["single", "groups"\]/
+      );
+    });
+
+    it('should report missing overview_mode without cross-variant noise', () => {
+      const missingMode = { slo_id: 'test-slo-id' };
+
+      expect(() => overviewEmbeddableSchema.validate(missingMode)).toThrow(
+        /"overview_mode" property is required/
+      );
     });
   });
 
@@ -114,7 +124,7 @@ describe('schema validation', () => {
       });
     });
 
-    it('should reject invalid group_by value', () => {
+    it('should reject invalid group_by value without cross-variant slo_id error', () => {
       const invalidState = {
         group_filters: {
           group_by: 'invalid-group-by',
@@ -122,7 +132,10 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow();
+      expect(() => overviewEmbeddableSchema.validate(invalidState)).toThrow(
+        /group_filters\.group_by/
+      );
+      expect(() => overviewEmbeddableSchema.validate(invalidState)).not.toThrow(/slo_id/);
     });
 
     it('should validate group overview state with minimal required fields', () => {
