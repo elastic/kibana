@@ -11,7 +11,7 @@ import { execFileSync, spawn } from 'child_process';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, isTTY } from '../prompts';
-import { isServiceRunning, readState, isAlive } from '../services';
+import { isServiceRunning, readState } from '../services';
 
 const SCOUT_LOCAL_SERVER_CONFIG_PATH = '.scout/servers/local.json';
 
