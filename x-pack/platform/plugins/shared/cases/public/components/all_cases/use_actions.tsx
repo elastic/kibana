@@ -85,7 +85,12 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     onActionSuccess: refreshCases,
   });
 
-  const { panels: closingReasonPanels } = useBulkClosingReasonItems();
+  const { panels: closingReasonPanels } = useBulkClosingReasonItems({
+    isEnabled: true,
+    onSubmitCloseReason: (params) => {
+      statusAction.handleUpdateCaseStatus([theCase], CaseStatuses.closed, params.reason);
+    },
+  });
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
   const canAssign = permissions.assign;

@@ -309,11 +309,13 @@ export const isFileAttachmentRequest = (
 export function createAlertUpdateStatusRequest({
   comment,
   status,
+  closingReason,
 }: {
   comment: AttachmentRequest;
   status: CaseStatuses;
+  closingReason?: string;
 }): UpdateAlertStatusRequest[] {
-  return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
+  return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status, closingReason }));
 }
 
 /**

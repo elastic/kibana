@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { ALERT_CLOSING_REASON_PANEL_ID } from '@kbn/response-ops-alerts-table';
+import type { CaseUpdateRequest } from '../../../../common/ui';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { CasesUI } from '../../../../common';
 import { CaseStatuses } from '../../../../common/types/domain';
@@ -46,13 +47,14 @@ export const useStatusAction = ({
   const { mutate: updateCases } = useUpdateCases();
   const { canUpdate, canReopenCase } = useUserPermissions();
   const handleUpdateCaseStatus = useCallback(
-    (selectedCases: CasesUI, status: CaseStatuses) => {
+    (selectedCases: CasesUI, status: CaseStatuses, closeReason?: string) => {
       onAction();
       const casesToUpdate = selectedCases.map((theCase) => ({
         status,
         id: theCase.id,
         version: theCase.version,
-      }));
+        closeReason,
+      })) as CaseUpdateRequest[];
 
       updateCases(
         {

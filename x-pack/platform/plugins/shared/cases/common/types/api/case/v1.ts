@@ -33,6 +33,7 @@ import {
   CaseCustomFieldToggleRt,
   CustomFieldTextTypeRt,
   CustomFieldNumberTypeRt,
+  CaseCloseReasonRt,
 } from '../../domain';
 import {
   CaseRt,
@@ -131,6 +132,10 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      * The alert sync settings
      */
     settings: CaseSettingsRt,
+    /**
+     * The case close reason
+     */
+    closeReason: CaseCloseReasonRt,
   })
 );
 

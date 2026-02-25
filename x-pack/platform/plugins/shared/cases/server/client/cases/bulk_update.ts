@@ -205,15 +205,15 @@ function getSyncStatusForComment({
   casesToSyncToStatus,
 }: {
   alertComment: SavedObjectsFindResult<AttachmentAttributes>;
-  casesToSyncToStatus: Map<string, CaseStatuses>;
-}): CaseStatuses {
+  casesToSyncToStatus: Map<string, [CaseStatuses, string?]>;
+}): [CaseStatuses, string?] {
   const id = getID(alertComment, CASE_SAVED_OBJECT);
 
   if (!id) {
-    return CaseStatuses.open;
+    return [CaseStatuses.open, undefined];
   }
 
-  return casesToSyncToStatus.get(id) ?? CaseStatuses.open;
+  return casesToSyncToStatus.get(id) ?? [CaseStatuses.open, undefined];
 }
 
 /**
@@ -236,11 +236,16 @@ async function updateAlerts({
    */
   const casesToSync = [...casesWithSyncSettingChangedToOn, ...casesWithStatusChangedAndSynced];
 
-  // build a map of case id to the status it has
+  // build a map of case id to the status it has, and optionally a closing reason
   const casesToSyncToStatus = casesToSync.reduce((acc, { updateReq, originalCase }) => {
-    acc.set(updateReq.id, updateReq.status ?? originalCase.attributes.status ?? CaseStatuses.open);
+    acc.set(updateReq.id, [
+      updateReq.status ?? originalCase.attributes.status ?? CaseStatuses.open,
+      updateReq.status && updateReq.status === CaseStatuses.closed
+        ? updateReq.closeReason
+        : undefined,
+    ]);
     return acc;
-  }, new Map<string, CaseStatuses>());
+  }, new Map<string, [CaseStatuses, string?]>());
 
   // get all the alerts for all the alert comments for all cases
   const totalAlerts = await getAlertComments({
@@ -252,12 +257,18 @@ async function updateAlerts({
   const alertsToUpdate = totalAlerts.saved_objects.reduce(
     (acc: UpdateAlertStatusRequest[], alertComment) => {
       if (isCommentRequestTypeAlert(alertComment.attributes)) {
-        const status = getSyncStatusForComment({
+        const statusAndReason = getSyncStatusForComment({
           alertComment,
           casesToSyncToStatus,
         });
 
-        acc.push(...createAlertUpdateStatusRequest({ comment: alertComment.attributes, status }));
+        acc.push(
+          ...createAlertUpdateStatusRequest({
+            comment: alertComment.attributes,
+            status: statusAndReason[0],
+            closingReason: statusAndReason[1],
+          })
+        );
       }
 
       return acc;
@@ -448,11 +459,16 @@ export const bulkUpdate = async (
         }
 
         const fieldsToUpdate = getCaseToUpdate(originalCase.attributes, updateCase);
+        // Explicitly add the closing reason if it exists in the request
+        const fieldsToUpdateIncludingCloseReason =
+          fieldsToUpdate.status === CaseStatuses.closed && updateCase.closeReason != null
+            ? { ...fieldsToUpdate, closeReason: updateCase.closeReason }
+            : fieldsToUpdate;
 
-        const { id, version, ...restFields } = fieldsToUpdate;
+        const { id, version, ...restFields } = fieldsToUpdateIncludingCloseReason;
 
         if (Object.keys(restFields).length > 0) {
-          acc.push({ originalCase, updateReq: fieldsToUpdate });
+          acc.push({ originalCase, updateReq: fieldsToUpdateIncludingCloseReason });
         }
 
         return acc;
@@ -583,7 +599,10 @@ export const bulkUpdate = async (
 };
 
 const normalizeCaseAttributes = (
-  updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>,
+  updateCaseAttributes: Omit<
+    CasePatchRequest,
+    'id' | 'version' | 'owner' | 'assignees' | 'closeReason'
+  >,
   customFieldsConfiguration?: CustomFieldsConfiguration
 ) => {
   let trimmedAttributes = { ...updateCaseAttributes };
@@ -636,8 +655,15 @@ const createPatchCasesPayload = ({
 
   return {
     cases: casesToUpdate.map(({ updateReq, originalCase }) => {
-      // intentionally removing owner from the case so that we don't accidentally allow it to be updated
-      const { id: caseId, version, owner, assignees, ...updateCaseAttributes } = updateReq;
+      // intentionally removing owner and closeReason from the case so that we don't accidentally allow it to be updated
+      const {
+        id: caseId,
+        version,
+        owner,
+        assignees,
+        closeReason: _closeReason,
+        ...updateCaseAttributes
+      } = updateReq;
 
       const dedupedAssignees = dedupAssignees(assignees);
 
