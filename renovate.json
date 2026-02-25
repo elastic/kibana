@@ -4336,7 +4336,7 @@
     {
       "groupName": "esql-js",
       "matchDepNames": [
-        "@elastic/esql-js"
+        "@elastic/esql"
       ],
       "reviewers": [
         "team:kibana-esql"
