@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getEmptyString } from '../../../common/components/empty_value';
+import { getEmptyValue } from '../../../common/components/empty_value';
 import type { EndpointScript } from '../../../../common/endpoint/types';
 import { useGetCustomScripts } from '../../hooks/custom_scripts/use_get_custom_scripts';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -126,7 +126,7 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
             <div className="eui-textTruncate" title={endpointScript.name}>
               <strong>{endpointScript.name}</strong>
             </div>
-            <div className="eui-textTruncate">{endpointScript.description || getEmptyString()}</div>
+            <div className="eui-textTruncate">{endpointScript.description || getEmptyValue()}</div>
           </div>
         );
 
@@ -162,14 +162,14 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
                   <strong>
                     <EuiIcon type="documentation" aria-hidden={true} /> {SCRIPT_DESCRIPTION_LABEL}
                   </strong>
-                  <div>{endpointScript.description}</div>
+                  <div>{endpointScript.description || getEmptyValue()}</div>
 
                   <EuiSpacer size="l" />
 
                   <strong>
                     <EuiIcon type="documentation" aria-hidden={true} /> {SCRIPT_INSTRUCTION_LABEL}
                   </strong>
-                  <div>{endpointScript.instructions}</div>
+                  <div>{endpointScript.instructions || getEmptyValue()}</div>
                 </div>
               }
             >
@@ -227,6 +227,8 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         options={scriptOptions}
         data-test-subj={getTestId()}
         valueOfSelected={selectedScript}
+        itemLayoutAlign="top"
+        hasDividers
         fullWidth
         isLoading={isFetching}
         placeholder={displayError ? displayError : SELECT_INPUT_PLACEHOLDER}
