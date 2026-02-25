@@ -31,7 +31,7 @@ AWS region
 
 ## Test connectors [amazon-s3-action-configuration]
 
-You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies connectivity by trying to access a list of available buckets for your authnticated account.
+You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies connectivity by trying to access a list of available buckets for your authenticated account.
 
 The Amazon s3 connector has the following actions:
 

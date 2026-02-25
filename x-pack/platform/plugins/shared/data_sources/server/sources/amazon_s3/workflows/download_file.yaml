@@ -17,6 +17,7 @@ inputs:
   - name: maximumDownloadSizeBytes
     type: number
     required: false
+    default: 131072
     description: "The maximum file size in bytes that can be downloaded through Kibana. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3. Default is 128 KB."
 steps:
   - name: downloadFile

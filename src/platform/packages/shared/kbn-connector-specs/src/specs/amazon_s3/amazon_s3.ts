@@ -30,10 +30,10 @@ const MAX_DOWNLOAD_FILE_SIZE_BYTES = 128 * 1024;
 function createS3Client(config: {
   accessKeyId: string;
   secretAccessKey: string;
-  region?: string;
+  region: string;
 }): S3Client {
   return new S3Client({
-    region: config.region || 'us-east-1',
+    region: config.region,
     credentials: {
       accessKeyId: config.accessKeyId,
       secretAccessKey: config.secretAccessKey,
@@ -102,7 +102,7 @@ export const AmazonS3: ConnectorSpec = {
       }),
     region: z
       .string()
-      .default('us-east-1')
+      .min(1)
       .describe('AWS region')
       .meta({
         widget: 'text',
@@ -123,7 +123,7 @@ export const AmazonS3: ConnectorSpec = {
         const config = ctx.config as {
           accessKeyId: string;
           secretAccessKey: string;
-          region?: string;
+          region: string;
         };
         const typedInput = input as {
           region?: string;
@@ -177,7 +177,7 @@ export const AmazonS3: ConnectorSpec = {
         const config = ctx.config as {
           accessKeyId: string;
           secretAccessKey: string;
-          region?: string;
+          region: string;
         };
         const typedInput = input as {
           bucket: string;
@@ -242,7 +242,7 @@ export const AmazonS3: ConnectorSpec = {
         const config = ctx.config as {
           accessKeyId: string;
           secretAccessKey: string;
-          region?: string;
+          region: string;
         };
         const typedInput = input as {
           bucket: string;
@@ -354,7 +354,7 @@ export const AmazonS3: ConnectorSpec = {
       const config = ctx.config as {
         accessKeyId: string;
         secretAccessKey: string;
-        region?: string;
+        region: string;
       };
 
       try {
