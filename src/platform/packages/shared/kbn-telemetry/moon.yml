@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/metrics'
   - '@kbn/repo-info'
+  - '@kbn/tracing-config'
 tags:
   - shared-server
   - package
