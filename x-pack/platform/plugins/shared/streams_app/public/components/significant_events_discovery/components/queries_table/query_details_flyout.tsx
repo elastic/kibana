@@ -306,7 +306,7 @@ export function QueryDetailsFlyout({
                 <StreamsESQLEditor
                   query={{ esql: query }}
                   onTextLangQueryChange={(newQuery) => setQuery(newQuery.esql)}
-                  onTextLangQuerySubmit={async () => {}}
+                  onTextLangQuerySubmit={async (newQuery) => setQuery(newQuery?.esql ?? '')}
                   dataTestSubj="queriesTableQueryDetailsFlyoutQueryInput"
                   isDisabled={isSaving}
                 />

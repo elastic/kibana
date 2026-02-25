@@ -7,11 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type {
-  GeneratedSignificantEventQuery,
-  Streams,
-  System,
-} from '@kbn/streams-schema';
+import type { GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
+import { ensureMetadata } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { FeatureClient } from '../streams/feature/feature_client';
@@ -67,18 +64,10 @@ export async function generateSignificantEventDefinitions(
     },
   });
 
-  const feature = system
-    ? { name: system.name, filter: system.filter, type: system.type }
-    : undefined;
-
   return {
     queries: queries.map((query) => ({
       title: query.title,
-      kql: '',
-      feature,
-      esql: {
-        query: query.esql,
-      },
+      esql: { query: ensureMetadata(query.esql) },
       severity_score: query.severity_score,
       evidence: query.evidence,
     })),

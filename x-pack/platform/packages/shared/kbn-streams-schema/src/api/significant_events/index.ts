@@ -59,7 +59,9 @@ type SignificantEventsPreviewResponse = Pick<
 
 interface GeneratedSignificantEventQuery {
   title: string;
-  kql: string;
+  /** @deprecated Legacy KQL query — only present on results from old generation tasks. */
+  kql?: string;
+  /** @deprecated Legacy feature filter — only present on results from old generation tasks. */
   feature?: {
     name: string;
     filter: Condition;
