@@ -93,6 +93,6 @@ export const ConnectorIconsMap: Map<
 
   [
     '.firecrawl',
-    lazy(() => import(/* webpackChunkName: "connectorIconfirecrawl" */ './specs/firecrawl/icon')),
+    lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
   ],
 ]);
