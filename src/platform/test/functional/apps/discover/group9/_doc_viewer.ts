@@ -265,34 +265,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('hide null values switch - data view mode', function () {
-      beforeEach(async () => {
+      it('should hide fields with null values when toggled', async function () {
+        if (!await testSubjects.exists('select-text-based-language-btn')) {
+          await discover.selectDataViewMode();
+          await discover.waitUntilTabIsLoaded();
+        }
+
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
         await retry.waitFor('rendered items', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
-      });
 
-      afterEach(async () => {
-        const clearSearchButton = await testSubjects.find('clearSearchButton');
-        await clearSearchButton.click();
-        const hideNullValuesSwitch = await testSubjects.find(
-          'unifiedDocViewerHideNullValuesSwitch'
-        );
-        if ((await hideNullValuesSwitch.getAttribute('aria-checked')) === 'true') {
-          await hideNullValuesSwitch.click();
-        }
-      });
-
-      it('should render the hide null values switch', async function () {
-        expect(await testSubjects.exists('unifiedDocViewerHideNullValuesSwitch')).to.be(true);
-      });
-
-      it('should hide fields with null values when toggled', async function () {
-        await discover.findFieldByNameOrValueInDocViewer('machine');
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
 
-        const hideNullValuesSwitch = await testSubjects.find(
+        let hideNullValuesSwitch = await testSubjects.find(
           'unifiedDocViewerHideNullValuesSwitch'
         );
         await hideNullValuesSwitch.click();
@@ -302,6 +289,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             (await find.allByCssSelector('.kbnDocViewer__fieldName')).length < initialFieldsCount
           );
         });
+
+        hideNullValuesSwitch = await testSubjects.find(
+          'unifiedDocViewerHideNullValuesSwitch'
+        );
+        await hideNullValuesSwitch.click();
       });
     });
 
