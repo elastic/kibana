@@ -19,5 +19,6 @@
     "@kbn/logging",
     "@kbn/metrics",
     "@kbn/repo-info",
+    "@kbn/tracing-config",
   ]
 }
