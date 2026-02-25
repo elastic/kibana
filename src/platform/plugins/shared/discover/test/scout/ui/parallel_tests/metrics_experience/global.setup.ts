@@ -10,8 +10,14 @@
 import { globalSetupHook } from '@kbn/scout';
 import { createMetricsTestIndexIfNeeded } from '../../fixtures/metrics_experience';
 
-globalSetupHook('Ingest metrics data to Elasticsearch', async ({ esClient, log }) => {
-  log.debug('[setup] creating metrics test index (only if it does not exist)...');
+const ES_ARCHIVE_TSDB_LOGS =
+  'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
+
+globalSetupHook('Ingest metrics data to Elasticsearch', async ({ esClient, esArchiver, log }) => {
+  log.debug('[setup] Loading TSDB_LOGS archive to warm up ES...');
+  await esArchiver.loadIfNeeded(ES_ARCHIVE_TSDB_LOGS);
+
+  log.debug('[setup] Creating metrics test index (only if it does not exist)...');
   const created = await createMetricsTestIndexIfNeeded(esClient);
   log.debug(
     created
