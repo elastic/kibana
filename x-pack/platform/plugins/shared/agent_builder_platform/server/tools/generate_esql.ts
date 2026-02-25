@@ -28,7 +28,7 @@ const nlToEsqlToolSchema = z.object({
     .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
   execute_query: z
     .boolean()
-    .optional()
+    .default(true)
     .describe(
       '(optional) If false, only validate the query using AST. If true (default), will execute the query to ensure it is valid before returning it.'
     ),
