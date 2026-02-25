@@ -21,7 +21,8 @@ import { getConnectorRoute } from './connector/get';
 import { updateConnectorRoute } from './connector/update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { oauthAuthorizeRoute } from './oauth_authorize';
-import { oauthCallbackRoute } from './oauth_callback';
+import { oauthCallbackRoute, oauthCallbackScriptRoute } from './oauth_callback';
+import { oauthDisconnectRoute } from './oauth_disconnect';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
@@ -37,10 +38,19 @@ export interface RouteOptions {
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;
   oauthRateLimiter: OAuthRateLimiter;
+  authorizationCodeEnabled: boolean;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter } = opts;
+  const {
+    router,
+    licenseState,
+    actionsConfigUtils,
+    logger,
+    core,
+    oauthRateLimiter,
+    authorizationCodeEnabled,
+  } = opts;
 
   createConnectorRoute(router, licenseState);
   deleteConnectorRoute(router, licenseState);
@@ -53,8 +63,12 @@ export function defineRoutes(opts: RouteOptions) {
   getGlobalExecutionKPIRoute(router, licenseState);
 
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
-  oauthAuthorizeRoute(router, licenseState, logger, core, oauthRateLimiter, actionsConfigUtils);
-  oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
+  if (authorizationCodeEnabled) {
+    oauthAuthorizeRoute(router, licenseState, logger, core, oauthRateLimiter, actionsConfigUtils);
+    oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
+    oauthCallbackScriptRoute(router);
+    oauthDisconnectRoute(router, licenseState, logger, core);
+  }
   getAllConnectorsIncludingSystemRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 }

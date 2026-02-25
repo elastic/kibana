@@ -323,6 +323,7 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll();
@@ -503,6 +504,7 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -648,6 +650,7 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -724,6 +727,7 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
@@ -812,6 +816,7 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll();
@@ -897,6 +902,7 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll();
@@ -981,6 +987,7 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAll();
@@ -1008,6 +1015,72 @@ describe('getAll()', () => {
       const connectorWithoutAuthMode = result.find((c) => c.id === 'testWithoutAuthMode');
       expect(connectorWithoutAuthMode).toBeDefined();
       expect(connectorWithoutAuthMode!.authMode).toBe('shared');
+    });
+
+    test('omits authMode when authorizationCodeEnabled is false', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: { foo: 'bar' },
+              authMode: 'per-user',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testPreconfigured',
+            actionTypeId: '.slack',
+            isPreconfigured: true,
+            name: 'test',
+            authMode: 'per-user',
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: false,
+      });
+
+      const result = await actionsClient.getAll();
+
+      result.forEach((connector) => {
+        expect(connector.authMode).toBeUndefined();
+      });
     });
   });
 
@@ -1134,6 +1207,7 @@ describe('getAll()', () => {
         encryptedSavedObjectsClient,
         isESOCanEncrypt,
         getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: true,
       });
 
       const result = await actionsClient.getAllSystemConnectors();
@@ -1148,6 +1222,51 @@ describe('getAll()', () => {
           authMode: 'shared',
         },
       ]);
+    });
+
+    test('omits authMode from system connectors when authorizationCodeEnabled is false', async () => {
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'system-connector-.test': { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'system-connector-.test',
+            actionTypeId: '.test',
+            name: 'Test system action',
+            isSystemAction: true,
+            authMode: 'per-user',
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        authorizationCodeEnabled: false,
+      });
+
+      const result = await actionsClient.getAllSystemConnectors();
+
+      result.forEach((connector) => {
+        expect(connector.authMode).toBeUndefined();
+      });
     });
   });
 });
@@ -1225,6 +1344,7 @@ describe('getAllUnsecured()', () => {
       logger,
       spaceId: 'default',
       connectorTypeRegistry: actionTypeRegistry,
+      authorizationCodeEnabled: true,
     });
 
     expect(result).toContainConnectorsFindResult([
@@ -1393,6 +1513,7 @@ describe('getAllUnsecured()', () => {
       logger,
       spaceId: 'custom',
       connectorTypeRegistry: actionTypeRegistry,
+      authorizationCodeEnabled: true,
     });
 
     expect(result).toContainConnectorsFindResult([
@@ -1547,6 +1668,7 @@ describe('getAllUnsecured()', () => {
       logger,
       spaceId: 'default',
       connectorTypeRegistry: actionTypeRegistry,
+      authorizationCodeEnabled: true,
     });
 
     expect(result).toContainConnectorsFindResult([
@@ -1574,5 +1696,60 @@ describe('getAllUnsecured()', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       'Error validating connector: 1, Error: [actionTypeId]: expected value of type [string] but got [undefined]'
     );
+  });
+
+  test('omits authMode when authorizationCodeEnabled is false', async () => {
+    internalSavedObjectsRepository.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            actionTypeId: '.test-connector-type',
+            isMissingSecrets: false,
+            config: { foo: 'bar' },
+            authMode: 'per-user',
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      }
+    );
+
+    const result = await getAllUnsecured({
+      esClient: scopedClusterClient.asInternalUser,
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          isPreconfigured: true,
+          name: 'test',
+          authMode: 'per-user',
+        }),
+      ],
+      internalSavedObjectsRepository,
+      kibanaIndices,
+      logger,
+      spaceId: 'default',
+      connectorTypeRegistry: actionTypeRegistry,
+      authorizationCodeEnabled: false,
+    });
+
+    result.forEach((connector) => {
+      expect(connector.authMode).toBeUndefined();
+    });
   });
 });

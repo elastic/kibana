@@ -42,6 +42,8 @@ import {
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
+import { CanvasProvider } from './attachments/canvas_context';
+import { CanvasFlyout } from './attachments/canvas_flyout';
 
 interface Props {
   content: string;
@@ -176,14 +178,17 @@ export function ChatMessageText({
   ]);
 
   return (
-    <EuiText size="m" className={containerClassName}>
-      <EuiMarkdownFormat
-        textSize="m"
-        parsingPluginList={parsingPluginList}
-        processingPluginList={processingPluginList}
-      >
-        {content}
-      </EuiMarkdownFormat>
-    </EuiText>
+    <CanvasProvider>
+      <EuiText size="m" className={containerClassName}>
+        <EuiMarkdownFormat
+          textSize="m"
+          parsingPluginList={parsingPluginList}
+          processingPluginList={processingPluginList}
+        >
+          {content}
+        </EuiMarkdownFormat>
+      </EuiText>
+      <CanvasFlyout attachmentsService={attachmentsService} />
+    </CanvasProvider>
   );
 }

@@ -10,9 +10,9 @@ import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { StreamQuery } from '@kbn/streams-schema';
-import { buildEsqlQuery } from '@kbn/streams-schema';
-import { isEqual, map, partition } from 'lodash';
+import type { StreamQuery, StreamQueryInput, Streams } from '@kbn/streams-schema';
+import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -28,6 +28,7 @@ import {
   ASSET_ID,
   ASSET_TYPE,
   ASSET_UUID,
+  QUERY_ESQL_QUERY,
   QUERY_EVIDENCE,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
@@ -36,10 +37,11 @@ import {
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
   RULE_BACKED,
+  RULE_ID,
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
-import { getRuleIdFromQueryLink } from './helpers/query';
+import { computeRuleId } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
@@ -67,9 +69,7 @@ function termsQuery<T extends string>(
     return [];
   }
 
-  const filteredValues = values.filter(
-    (value) => value !== undefined
-  ) as unknown as TermQueryFieldValue[];
+  const filteredValues = values.filter((value) => value !== undefined) as TermQueryFieldValue[];
 
   return [{ terms: { [field]: filteredValues } }];
 }
@@ -94,19 +94,25 @@ export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id'
 }
 
 function toQueryLink<TQueryLink extends QueryLinkRequest>(
-  name: string,
+  definition: Streams.all.Definition,
   asset: TQueryLink
 ): QueryLink {
+  const indices = getIndexPatternsForStream(definition);
   return {
     ...asset,
-    [ASSET_UUID]: getQueryLinkUuid(name, asset),
-    stream_name: name,
+    query: {
+      ...asset.query,
+      esql: { query: buildEsqlQuery(indices, asset.query) },
+    },
+    [ASSET_UUID]: getQueryLinkUuid(definition.name, asset),
+    stream_name: definition.name,
   };
 }
 
 type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
+  [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
   [RULE_BACKED]?: boolean;
 };
@@ -142,11 +148,15 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     ...storageFields,
     stream_name: link[STREAM_NAME],
     rule_backed: storageFields[RULE_BACKED] ?? LEGACY_RULE_BACKED_FALLBACK,
+    rule_id: storageFields[RULE_ID],
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
       kql: {
         query: storageFields[QUERY_KQL_BODY],
+      },
+      esql: {
+        query: storageFields[QUERY_ESQL_QUERY],
       },
       feature: storageFields[QUERY_FEATURE_NAME]
         ? {
@@ -163,22 +173,27 @@ function fromStorage(link: StoredQueryLink): QueryLink {
 
 type QueryLinkRequestWithRuleBacked = QueryLinkRequest & { rule_backed?: boolean };
 
-function toStorage(name: string, request: QueryLinkRequestWithRuleBacked): StoredQueryLink {
-  const link = toQueryLink(name, request);
+function toStorage(
+  definition: Streams.all.Definition,
+  request: QueryLinkRequestWithRuleBacked
+): StoredQueryLink {
+  const link = toQueryLink(definition, request);
   const { query, stream_name, ...rest } = link;
   const ruleBacked = request.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK;
   return {
     ...rest,
-    [STREAM_NAME]: name,
+    [STREAM_NAME]: definition.name,
     [QUERY_TITLE]: query.title,
     [QUERY_KQL_BODY]: query.kql.query,
+    [QUERY_ESQL_QUERY]: query.esql.query,
     [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
     [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
     [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: ruleBacked,
-  } as unknown as StoredQueryLink;
+    [RULE_ID]: link.rule_id,
+  } as StoredQueryLink;
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
@@ -189,12 +204,14 @@ function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): b
 }
 
 function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
+  const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
-    'asset.uuid': getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id }),
+    'asset.uuid': assetUuid,
     'asset.type': 'query',
     'asset.id': query.id,
     query,
     stream_name: stream,
+    rule_id: computeRuleId(assetUuid, query.esql.query),
   };
 }
 
@@ -211,21 +228,11 @@ export class QueryClient {
 
   // ==================== Storage Operations ====================
 
-  async linkQuery(name: string, link: QueryLinkRequest): Promise<QueryLink> {
-    const document = toStorage(name, link);
-
-    await this.dependencies.storageClient.index({
-      id: document[ASSET_UUID],
-      document,
-    });
-
-    return toQueryLink(name, link);
-  }
-
   async syncQueryList(
-    name: string,
+    definition: Streams.all.Definition,
     links: QueryLinkRequestWithRuleBacked[]
   ): Promise<{ deleted: QueryLink[]; indexed: QueryLink[] }> {
+    const name = definition.name;
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
       track_total_hits: false,
@@ -241,7 +248,7 @@ export class QueryClient {
     });
 
     const nextQueryLinks = links.map((link) => {
-      return { ...toQueryLink(name, link), rule_backed: link.rule_backed };
+      return { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
     });
 
     const nextIds = new Set(nextQueryLinks.map((link) => link[ASSET_UUID]));
@@ -253,7 +260,7 @@ export class QueryClient {
     ];
 
     if (operations.length) {
-      await this.bulkStorage(name, operations);
+      await this.bulkStorage(definition, operations);
     }
 
     return {
@@ -433,12 +440,12 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  private async bulkStorage(name: string, operations: QueryBulkOperation[]) {
+  private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
           const document = toStorage(
-            name,
+            definition,
             Object.values(operation)[0].asset as QueryLinkRequestWithRuleBacked
           );
           return {
@@ -449,7 +456,7 @@ export class QueryClient {
           };
         }
 
-        const id = getQueryLinkUuid(name, operation.delete.asset);
+        const id = getQueryLinkUuid(definition.name, operation.delete.asset);
         return {
           delete: {
             _id: id,
@@ -475,13 +482,16 @@ export class QueryClient {
         query: link.query,
         title: link.query.title,
         stream_name: link.stream_name,
+        rule_id: link.rule_id,
       };
     });
   }
 
   // ==================== Query Sync with Rules ====================
 
-  public async syncQueries(stream: string, queries: StreamQuery[]) {
+  public async syncQueries(definition: Streams.all.Definition, queries: StreamQuery[]) {
+    const stream = definition.name;
+
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping syncQueries for stream "${stream}" because significant events feature is disabled.`
@@ -499,49 +509,57 @@ export class QueryClient {
      * - If a query is deleted, it removes the associated rule.
      */
     const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
-    const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
+    const currentLinkByQueryId = new Map(currentQueryLinks.map((link) => [link.query.id, link]));
     const nextIds = new Set(queries.map((query) => query.id));
 
-    const nextQueriesToCreate = queries
-      .filter((query) => !currentIds.has(query.id))
-      .map((query) => toQueryLinkFromQuery(query, stream));
+    const nextQueriesToCreate: QueryLink[] = [];
+    const nextQueriesUpdatedWithBreakingChange: QueryLink[] = [];
+    const nextQueriesUpdatedWithoutBreakingChange: QueryLink[] = [];
+    const allNextQueryLinks: QueryLink[] = [];
+
+    for (const query of queries) {
+      const currentLink = currentLinkByQueryId.get(query.id);
+      if (!currentLink) {
+        const link = toQueryLinkFromQuery(query, stream);
+        nextQueriesToCreate.push(link);
+        allNextQueryLinks.push(link);
+      } else if (hasBreakingChange(currentLink.query, query)) {
+        const link = toQueryLinkFromQuery(query, stream);
+        nextQueriesUpdatedWithBreakingChange.push(link);
+        allNextQueryLinks.push(link);
+      } else {
+        const link = { ...currentLink, query };
+        nextQueriesUpdatedWithoutBreakingChange.push(link);
+        allNextQueryLinks.push(link);
+      }
+    }
 
     const currentQueriesToDelete = currentQueryLinks.filter((link) => !nextIds.has(link.query.id));
-
     const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
-      queries.some((query) => query.id === link.query.id && hasBreakingChange(link.query, query))
-    );
-
-    const [nextQueriesUpdatedWithBreakingChange, nextQueriesUpdatedWithoutBreakingChange] = map(
-      partition(
-        queries.filter((query) => currentIds.has(query.id)),
-        (query) => {
-          const currentLink = currentQueryLinks.find((link) => link.query.id === query.id);
-          return hasBreakingChange(currentLink!.query, query);
-        }
-      ),
-      (partitionedQueries) => partitionedQueries.map((query) => toQueryLinkFromQuery(query, stream))
+      nextQueriesUpdatedWithBreakingChange.some((updated) => updated.query.id === link.query.id)
     );
 
     await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
     await this.installQueries(
       [...nextQueriesToCreate, ...nextQueriesUpdatedWithBreakingChange],
       nextQueriesUpdatedWithoutBreakingChange,
-      stream
+      definition
     );
 
     await this.syncQueryList(
-      stream,
-      queries.map((query) => ({
-        [ASSET_ID]: query.id,
-        [ASSET_TYPE]: 'query',
-        query,
+      definition,
+      allNextQueryLinks.map((link) => ({
+        [ASSET_ID]: link[ASSET_ID],
+        [ASSET_TYPE]: link[ASSET_TYPE],
+        query: link.query,
         rule_backed: true,
+        rule_id: link.rule_id,
       }))
     );
   }
 
-  public async upsert(stream: string, query: StreamQuery) {
+  public async upsert(definition: Streams.all.Definition, query: StreamQueryInput) {
+    const stream = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping upsert for stream "${stream}" because significant events feature is disabled.`
@@ -549,10 +567,11 @@ export class QueryClient {
       return;
     }
 
-    await this.bulk(stream, [{ index: query }]);
+    await this.bulk(definition, [{ index: query }]);
   }
 
-  public async delete(stream: string, queryId: string) {
+  public async delete(definition: Streams.all.Definition, queryId: string) {
+    const stream = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping delete for stream "${stream}" because significant events feature is disabled.`
@@ -560,10 +579,11 @@ export class QueryClient {
       return;
     }
 
-    await this.bulk(stream, [{ delete: { id: queryId } }]);
+    await this.bulk(definition, [{ delete: { id: queryId } }]);
   }
 
-  public async deleteAll(stream: string) {
+  public async deleteAll(definition: Streams.all.Definition) {
+    const stream = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping deleteAll for stream "${stream}" because significant events feature is disabled.`
@@ -573,14 +593,17 @@ export class QueryClient {
 
     const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const queriesToDelete = currentQueryLinks.map((link) => ({ delete: { id: link.query.id } }));
-    await this.bulk(stream, queriesToDelete);
+    await this.bulk(definition, queriesToDelete);
   }
 
   public async bulk(
-    stream: string,
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
+    definition: Streams.all.Definition,
+    operations: Array<{ index?: StreamQueryInput; delete?: { id: string } }>,
     options?: { createRules?: boolean }
   ) {
+    const stream = definition.name;
+    const indices = getIndexPatternsForStream(definition);
+
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping bulk update for stream "${stream}" because significant events feature is disabled.`
@@ -593,7 +616,13 @@ export class QueryClient {
     const indexOperationsMap = new Map(
       operations
         .filter((operation) => operation.index)
-        .map((operation) => [operation.index!.id, operation.index!])
+        .map((operation) => [
+          operation.index!.id,
+          {
+            ...operation.index!,
+            esql: { query: buildEsqlQuery(indices, operation.index!) },
+          },
+        ])
     );
     const deleteOperationIds = new Set(
       operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)
@@ -608,7 +637,17 @@ export class QueryClient {
         }),
       ...operations
         .filter((operation) => operation.index && !currentIds.has(operation.index!.id))
-        .map((operation) => toQueryLinkFromQuery(operation.index!, stream)),
+        .map((operation) =>
+          toQueryLinkFromQuery(
+            {
+              ...operation.index!,
+              esql: {
+                query: buildEsqlQuery(indices, operation.index!),
+              },
+            },
+            stream
+          )
+        ),
     ];
 
     if (options?.createRules === false) {
@@ -619,19 +658,20 @@ export class QueryClient {
           : false,
       }));
       await this.syncQueryList(
-        stream,
+        definition,
         nextQueriesWithRuleBacked.map((link) => ({
           [ASSET_ID]: link[ASSET_ID],
           [ASSET_TYPE]: link[ASSET_TYPE],
           query: link.query,
           rule_backed: link.rule_backed,
+          rule_id: link.rule_id,
         }))
       );
       return;
     }
 
     await this.syncQueries(
-      stream,
+      definition,
       nextQueries.map((link) => link.query)
     );
   }
@@ -640,9 +680,11 @@ export class QueryClient {
    * Creates Kibana rules for stored queries that do not have a backing rule, then marks them as backed.
    */
   public async promoteQueries(
-    streamName: string,
+    definition: Streams.all.Definition,
     queryIds: string[]
   ): Promise<{ promoted: number }> {
+    const streamName = definition.name;
+
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
         `Skipping promoteQueries because significant events feature is disabled.`
@@ -652,20 +694,23 @@ export class QueryClient {
 
     const unbacked = await this.getUnbackedQueries(streamName);
     const idSet = new Set(queryIds);
-    const toPromote = unbacked.filter((link) => idSet.has(link.query.id));
+    const toPromote = unbacked
+      .filter((link) => idSet.has(link.query.id))
+      .map((link) => toQueryLinkFromQuery(link.query, streamName));
 
     if (toPromote.length === 0) {
       return { promoted: 0 };
     }
 
-    await this.installQueries(toPromote, [], streamName);
+    await this.installQueries(toPromote, [], definition);
 
     const bulkOperations = toPromote.map((link) => {
-      const document = toStorage(streamName, {
+      const document = toStorage(definition, {
         [ASSET_ID]: link[ASSET_ID],
         [ASSET_TYPE]: link[ASSET_TYPE],
         query: link.query,
         rule_backed: true,
+        rule_id: link.rule_id,
       });
       return {
         index: {
@@ -685,7 +730,7 @@ export class QueryClient {
   private async installQueries(
     queriesToCreate: QueryLink[],
     queriesToUpdate: QueryLink[],
-    stream: string
+    definition: Streams.all.Definition
   ) {
     const { rulesClient } = this.dependencies;
     const limiter = pLimit(10);
@@ -694,10 +739,12 @@ export class QueryClient {
       ...queriesToCreate.map((query) => {
         return limiter(() =>
           rulesClient
-            .create<EsqlRuleParams>(this.toCreateRuleParams(query, stream))
+            .create<EsqlRuleParams>(this.toCreateRuleParams(query, definition))
             .catch((error) => {
               if (isBoom(error) && error.output.statusCode === 409) {
-                return rulesClient.update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream));
+                return rulesClient.update<EsqlRuleParams>(
+                  this.toUpdateRuleParams(query, definition)
+                );
               }
               throw error;
             })
@@ -706,10 +753,12 @@ export class QueryClient {
       ...queriesToUpdate.map((query) => {
         return limiter(() =>
           rulesClient
-            .update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream))
+            .update<EsqlRuleParams>(this.toUpdateRuleParams(query, definition))
             .catch((error) => {
               if (isBoom(error) && error.output.statusCode === 404) {
-                return rulesClient.create<EsqlRuleParams>(this.toCreateRuleParams(query, stream));
+                return rulesClient.create<EsqlRuleParams>(
+                  this.toCreateRuleParams(query, definition)
+                );
               }
               throw error;
             })
@@ -724,8 +773,9 @@ export class QueryClient {
     }
 
     const { rulesClient } = this.dependencies;
+    const ruleIds = queries.map((q) => q.rule_id);
     await rulesClient
-      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink), ignoreInternalRuleTypes: false })
+      .bulkDeleteRules({ ids: ruleIds, ignoreInternalRuleTypes: false })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 400) {
           return;
@@ -734,10 +784,11 @@ export class QueryClient {
       });
   }
 
-  private toCreateRuleParams(query: QueryLink, stream: string) {
-    const ruleId = getRuleIdFromQueryLink(query);
+  private toCreateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
+    const { rule_id: ruleId } = query;
+    const indices = getIndexPatternsForStream(definition);
 
-    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
+    const esqlQuery = buildEsqlQuery(indices, query.query, true);
     return {
       data: {
         name: query.query.title,
@@ -749,7 +800,7 @@ export class QueryClient {
           query: esqlQuery,
         },
         enabled: true,
-        tags: ['streams', stream],
+        tags: ['streams', definition.name],
         schedule: {
           interval: '1m',
         },
@@ -760,9 +811,10 @@ export class QueryClient {
     };
   }
 
-  private toUpdateRuleParams(query: QueryLink, stream: string) {
-    const ruleId = getRuleIdFromQueryLink(query);
-    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
+  private toUpdateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
+    const { rule_id: ruleId } = query;
+    const indices = getIndexPatternsForStream(definition);
+    const esqlQuery = buildEsqlQuery(indices, query.query, true);
     return {
       id: ruleId,
       data: {
@@ -772,7 +824,7 @@ export class QueryClient {
           timestampField: '@timestamp',
           query: esqlQuery,
         },
-        tags: ['streams', stream],
+        tags: ['streams', definition.name],
         schedule: {
           interval: '1m',
         },

@@ -21,6 +21,16 @@ import { useHistory, useParams } from 'react-router-dom';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../..', () => ({
+  ...jest.requireActual('../../../..'),
+  useConnectorContext: jest.fn().mockReturnValue({
+    services: {
+      validateEmailAddresses: jest.fn(),
+      enabledEmailServices: ['*'],
+      authorizationCodeEnabled: false,
+    },
+  }),
+}));
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),

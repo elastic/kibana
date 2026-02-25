@@ -8,7 +8,7 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { GetTokenOpts, OAuthGetTokenOpts } from '@kbn/connector-specs';
+import type { AuthMode, GetTokenOpts, OAuthGetTokenOpts } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
@@ -52,6 +52,8 @@ async function handleOAuth401Error({
   logger,
   configurationUtilities,
   axiosInstance,
+  authMode,
+  profileUid,
 }: {
   error: AxiosErrorWithRetry;
   connectorId: string;
@@ -60,6 +62,8 @@ async function handleOAuth401Error({
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   axiosInstance: AxiosInstance;
+  authMode?: AuthMode;
+  profileUid?: string;
 }): Promise<never | AxiosInstance> {
   // Prevent retry loops - only attempt refresh once per request
   if (error.config._retry) {
@@ -93,6 +97,8 @@ async function handleOAuth401Error({
     },
     connectorTokenClient,
     scope,
+    authMode,
+    profileUid,
     forceRefresh: true,
   });
 
@@ -191,6 +197,8 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   connectorId: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
@@ -205,6 +213,8 @@ export const getAxiosInstanceWithAuth = ({
     connectorId,
     secrets,
     connectorTokenClient,
+    authMode,
+    profileUid,
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
@@ -247,55 +257,47 @@ export const getAxiosInstanceWithAuth = ({
         return config;
       });
 
-      // add a response interceptor to clean up saved tokens if necessary
-      // Skip for per-user OAuth auth types (oauth_authorization_code, ears): they use a
-      // dedicated 401 refresh interceptor, and deleting tokens on any 4xx would (a) wipe
-      // tokens on unrelated errors like 403/404 and (b) race with the 401 refresh path.
-      if (
-        connectorTokenClient &&
-        authTypeId !== 'oauth_authorization_code' &&
-        authTypeId !== 'ears'
-      ) {
-        const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
-          connectorTokenClient,
-          connectorId,
-        });
-        axiosInstance.interceptors.response.use(onFulfilled, onRejected);
-      }
-
-      // Add a response interceptor to handle 401 errors for OAuth authz code grant and EARS connectors
-      if (
-        (authTypeId === 'oauth_authorization_code' || authTypeId === 'ears') &&
-        connectorTokenClient
-      ) {
-        axiosInstance.interceptors.response.use(
-          (response) => response,
-          (error) => {
-            if (error.response?.status === 401) {
-              if (authTypeId === 'ears') {
-                return handleEars401Error({
+      if (connectorTokenClient) {
+        if (authTypeId === 'oauth_authorization_code') {
+          // Add a response interceptor to handle 401 errors for OAuth authz code grant connectors
+          axiosInstance.interceptors.response.use(
+            (response) => response,
+            (error) => {
+              if (error.response?.status === 401) {
+                if (authTypeId === 'ears') {
+                  return handleEars401Error({
+                    error,
+                    connectorId,
+                    secrets: secrets as EarsParams,
+                    connectorTokenClient,
+                    logger,
+                    configurationUtilities,
+                    axiosInstance,
+                  });
+                }
+                return handleOAuth401Error({
                   error,
                   connectorId,
-                  secrets: secrets as EarsParams,
+                  secrets: secrets as OAuth2AuthCodeParams,
                   connectorTokenClient,
                   logger,
                   configurationUtilities,
                   axiosInstance,
+                  authMode,
+                  profileUid,
                 });
               }
-              return handleOAuth401Error({
-                error,
-                connectorId,
-                secrets: secrets as OAuth2AuthCodeParams,
-                connectorTokenClient,
-                logger,
-                configurationUtilities,
-                axiosInstance,
-              });
+              return Promise.reject(error);
             }
-            return Promise.reject(error);
-          }
-        );
+          );
+        } else {
+          // add a response interceptor to clean up saved tokens if necessary
+          const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
+            connectorTokenClient,
+            connectorId,
+          });
+          axiosInstance.interceptors.response.use(onFulfilled, onRejected);
+        }
       }
 
       const configureCtx = {
@@ -340,6 +342,8 @@ export const getAxiosInstanceWithAuth = ({
               },
               connectorTokenClient,
               scope: oauthOpts.scope,
+              authMode,
+              profileUid,
             });
           }
 

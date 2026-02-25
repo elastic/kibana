@@ -866,6 +866,7 @@
   ],
   "integration-config": [
     "created_by",
+    "created_by_profile_uid",
     "data_stream_count",
     "integration_id",
     "metadata",
@@ -949,11 +950,6 @@
   ],
   "monitoring-telemetry": [
     "reportedClusterUuids"
-  ],
-  "oauth_state": [
-    "connectorId",
-    "expiresAt",
-    "state"
   ],
   "observability-onboarding-state": [
     "progress",
@@ -1369,16 +1365,17 @@
   "usage-counters": [
     "domainId"
   ],
-  "user_connector_token": [
-    "connectorId",
-    "credentialType",
-    "profileUid"
-  ],
   "visualization": [
     "description",
     "kibanaSavedObjectMeta",
     "title",
     "version"
+  ],
+  "watchlist-config": [
+    "description",
+    "managed",
+    "name",
+    "riskModifier"
   ],
   "workplace_search_telemetry": []
 }

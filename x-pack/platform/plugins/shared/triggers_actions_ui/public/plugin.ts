@@ -41,10 +41,7 @@ import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  ALERT_RULE_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
@@ -217,6 +214,7 @@ export class Plugin
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
+      authorizationCodeEnabled: plugins.actions.authorizationCodeEnabled,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -551,7 +549,7 @@ export class Plugin
     );
 
     plugins.uiActions.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
+      ON_OPEN_PANEL_MENU,
       ALERT_RULE_TRIGGER,
       createAlertRuleAction
     );

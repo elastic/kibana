@@ -9,16 +9,20 @@ import type { ActionTypeRegistry } from '../../../action_type_registry';
 import type { InMemoryConnector } from '../../../types';
 import type { Connector } from '../types';
 import { isConnectorDeprecated } from './is_connector_deprecated';
+import { getAuthMode } from './get_auth_mode';
 
 export function connectorFromInMemoryConnector({
   id,
   inMemoryConnector,
   actionTypeRegistry,
+  authorizationCodeEnabled,
 }: {
   id: string;
   inMemoryConnector: InMemoryConnector;
   actionTypeRegistry: ActionTypeRegistry;
+  authorizationCodeEnabled: boolean;
 }): Connector {
+  const authMode = getAuthMode(inMemoryConnector.authMode, authorizationCodeEnabled);
   const connector: Connector = {
     id,
     actionTypeId: inMemoryConnector.actionTypeId,
@@ -27,7 +31,7 @@ export function connectorFromInMemoryConnector({
     isSystemAction: inMemoryConnector.isSystemAction,
     isDeprecated: isConnectorDeprecated(inMemoryConnector),
     isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(inMemoryConnector.actionTypeId),
-    authMode: inMemoryConnector.authMode ?? 'shared',
+    ...(authMode !== undefined ? { authMode } : {}),
   };
 
   if (inMemoryConnector.exposeConfig) {

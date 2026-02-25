@@ -33,6 +33,8 @@ export const generateExecutorFunction = ({
       params,
       secrets,
       logger,
+      authMode,
+      profileUid,
     } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
@@ -41,6 +43,8 @@ export const generateExecutorFunction = ({
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
       secrets,
+      authMode,
+      profileUid,
     });
 
     if (!actions[subAction]) {
