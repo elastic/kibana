@@ -157,7 +157,10 @@ export const useConnectorTypeDecorations = ({
                 endColumn: actualEndColumn,
               },
               options: {
-                inlineClassName: `type-inline-highlight type-${baseConnectorType}`,
+                inlineClassName: `type-inline-highlight type-${baseConnectorType.replaceAll(
+                  '.',
+                  '-'
+                )}`,
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
               },
             },
