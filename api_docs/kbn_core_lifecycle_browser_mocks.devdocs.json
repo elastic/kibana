@@ -41,7 +41,7 @@
                 "text": "DeeplyMockedKeys"
               },
               "<",
-              "InternalChromeSetup",
+              "ChromeSetup",
               ">; customBranding: { customBranding$: ",
               "Observable",
               "<",
