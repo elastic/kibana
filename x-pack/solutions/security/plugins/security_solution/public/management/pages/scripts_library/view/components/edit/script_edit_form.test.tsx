@@ -73,16 +73,16 @@ describe('EndpointScriptEditForm', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
-  it('calls onChange when form values are changed', () => {
+  it('calls onChange when form values are changed', async () => {
     render();
 
     const { getByTestId } = renderResult;
 
     const nameInput = getByTestId('test-name-row').querySelector('input') as HTMLInputElement;
-    userEvent.type(nameInput, 'New Script Name');
-    userEvent.tab();
+    await userEvent.type(nameInput, 'New Script Name');
+    await userEvent.tab();
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(onChangeMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           script: expect.objectContaining({
@@ -106,58 +106,51 @@ describe('EndpointScriptEditForm', () => {
       expect(fileInput).toBeInTheDocument();
     });
 
-    it('shows file picker when file is uploaded', () => {
-      const { getByTestId } = renderResult;
+    it('shows file name when file is uploaded', async () => {
+      const { getByTestId, getByText } = renderResult;
 
-      const fileInputRow = getByTestId('test-file-picker-row');
       const fileInput = getByTestId('test-file-picker');
-      userEvent.upload(fileInput, [new File(['test'], 'test.sh', { type: 'application/txt' })]);
-      userEvent.tab();
-
-      waitFor(() => {
-        expect(fileInputRow.querySelector('.euiFilePicker__promptText')).toHaveValue('test.sh');
-      });
+      await userEvent.upload(fileInput, [
+        new File(['test'], 'test.sh', { type: 'application/txt' }),
+      ]);
+      expect(await getByText('test.sh')).toBeInTheDocument();
     });
 
-    it('shows required validation error when `file` is not selected', () => {
+    it('shows required validation error when `File` is not selected', async () => {
       const { getByTestId } = renderResult;
 
       const filePickerRow = getByTestId('test-file-picker-row');
       const fileInput = getByTestId('test-file-picker');
-      userEvent.click(fileInput);
-      userEvent.tab();
+      await userEvent.click(fileInput);
+      // Pressing Escape key to close the file picker dropdown that appears after clicking the file input
+      // so no file is selected and the validation error is triggered
+      await userEvent.keyboard('{Escape}');
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(fileInput).toHaveAttribute('aria-invalid', 'true');
         const euiFormErrorText = filePickerRow.querySelector('.euiFormErrorText');
         expect(euiFormErrorText?.textContent).toEqual('A script file is required.');
-        expect(onChangeMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            script: expect.objectContaining({
-              file: undefined,
-            }),
-            hasFormChanged: true,
-          })
-        );
+        // form has not changed yet, so onChange should not be called
+        expect(onChangeMock).not.toHaveBeenCalled();
       });
     });
 
-    it('shows required validation error when `name` input is blurred (with empty value)', () => {
+    it('shows required validation error when `Name` input is blurred (with empty value)', async () => {
       const { getByTestId } = renderResult;
 
       const nameRow = getByTestId('test-name-row');
       const nameInput = getByTestId('test-name-input');
-      userEvent.type(nameInput, ' ');
-      userEvent.tab();
+      await userEvent.type(nameInput, ' ');
+      await userEvent.tab();
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(nameInput).toHaveAttribute('aria-invalid', 'true');
         const euiFormErrorText = nameRow.querySelector('.euiFormErrorText');
         expect(euiFormErrorText?.textContent).toEqual('Name is required.');
         expect(onChangeMock).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
-              name: undefined,
+              name: '',
             }),
             hasFormChanged: true,
           })
@@ -165,54 +158,58 @@ describe('EndpointScriptEditForm', () => {
       });
     });
 
-    it('shows required validation error when `platforms` input is blurred (with empty value)', () => {
-      const { getByTestId } = renderResult;
-
-      const platformsRow = getByTestId('test-platforms-row');
-      const platformsInput = getByTestId('test-platforms-input');
-      userEvent.type(platformsInput, ' ');
-      userEvent.tab();
-
-      waitFor(() => {
-        expect(platformsInput).toHaveAttribute('aria-invalid', 'true');
-        const euiFormErrorText = platformsRow.querySelector('.euiFormErrorText');
-        expect(euiFormErrorText?.textContent).toEqual(
-          'At least one operating system must be selected.'
-        );
-        expect(onChangeMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            script: expect.objectContaining({
-              platform: undefined,
-            }),
-            hasFormChanged: true,
-          })
-        );
-      });
-    });
-
-    it('should trigger form `isValid: true` when required fields are filled', () => {
-      const { getByTestId } = renderResult;
-
-      const filePicker = getByTestId('test-file-picker');
-      const testFile = new File(['--test--file--'], 'file.sh', { type: 'application/txt' });
-      userEvent.upload(filePicker, [testFile]);
-      userEvent.tab();
+    it('shows required validation error when `Operating systems` input is blurred (with no selection)', async () => {
+      const { getByTestId, container } = renderResult;
 
       const nameInput = getByTestId('test-name-input');
-      userEvent.type(nameInput, 'Test Script');
-      userEvent.tab();
+      const comboboxInput = container.querySelector(
+        '[data-test-subj="comboBoxSearchInput"]'
+      ) as HTMLInputElement;
+      expect(comboboxInput.getAttribute('aria-autocomplete')).toEqual('list');
+      // Click on the combobox to open it
+      await userEvent.click(comboboxInput);
+      // click on name input to trigger blur event on platforms input without selecting any option
+      await userEvent.click(nameInput);
 
-      const platformsInput = getByTestId('test-platforms-input');
-      userEvent.type(platformsInput, 'windows');
-      userEvent.tab();
+      await waitFor(async () => {
+        expect(comboboxInput).toHaveAttribute('aria-invalid', 'true');
+        const platformsRow = getByTestId('test-platforms-row');
+        const errorInfoElement = platformsRow.querySelector('.euiFormErrorText');
+        expect(errorInfoElement?.textContent).toEqual(
+          'At least one operating system must be selected.'
+        );
+        expect(onChangeMock).not.toHaveBeenCalled();
+      });
+    });
 
-      waitFor(() => {
-        expect(onChangeMock).toHaveBeenCalledWith(
+    it('should trigger form `isValid: true` when required fields are filled', async () => {
+      const { getByTestId, container } = renderResult;
+
+      const filePicker = getByTestId('test-file-picker');
+      const nameInput = getByTestId('test-name-input');
+      // const platformsInput = getByTestId('test-platforms-input');
+
+      const testFile = new File(['--test--file--'], 'file.sh', { type: 'application/txt' });
+      await userEvent.upload(filePicker, [testFile]);
+      await userEvent.type(nameInput, 'Test Script');
+      // for platforms input, we need to select the first option from the dropdown to trigger the onChange event (typing doesn't work for this component)
+      const comboboxInput = container.querySelector(
+        '[data-test-subj="comboBoxSearchInput"]'
+      ) as HTMLInputElement;
+      expect(comboboxInput.getAttribute('aria-autocomplete')).toEqual('list');
+      await userEvent.click(comboboxInput);
+      // keydown event is needed to select the option from the dropdown
+      await userEvent.keyboard('{ArrowDown}');
+      await userEvent.keyboard('{Enter}');
+      await userEvent.tab();
+
+      await waitFor(() => {
+        expect(onChangeMock).toHaveBeenLastCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               fileName: 'file.sh',
               name: 'Test Script',
-              platform: ['windows'],
+              platform: ['linux'], // first option in sorted platforms dropdown
             }),
             isValid: true,
             hasFormChanged: true,
@@ -283,7 +280,7 @@ describe('EndpointScriptEditForm', () => {
       expect(filePicker.querySelector('.euiText')?.textContent).toEqual('test_script.sh');
     });
 
-    it('allows removing fake file picker when editing a script', () => {
+    it('allows removing fake file picker when editing a script', async () => {
       const { getByTestId, queryByTestId } = renderResult;
 
       const filePicker = getByTestId('test-fake-file-picker');
@@ -292,7 +289,7 @@ describe('EndpointScriptEditForm', () => {
       const removeFileButton = getByTestId('test-remove-file-button');
       userEvent.click(removeFileButton);
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(queryByTestId('test-fake-file-picker')).not.toBeInTheDocument();
         expect(onChangeMock).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -337,11 +334,11 @@ describe('EndpointScriptEditForm', () => {
       ['example', 'Provide examples of how to use the script.'],
     ])(
       'shows help text for `%s` field when the field is changed to empty',
-      (name, expectedText) => {
+      async (name, expectedText) => {
         const { getByTestId } = renderResult;
 
         const input = getByTestId(`test-${name}-input`);
-        userEvent.clear(input);
+        await userEvent.clear(input);
 
         expect(
           getByTestId(`test-${name}-row`).querySelector('.euiFormHelpText')?.textContent
