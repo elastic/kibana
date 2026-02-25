@@ -94,10 +94,12 @@
     "createdAt",
     "createdBy",
     "description",
+    "destinations",
+    "destinations.id",
+    "destinations.type",
     "name",
     "updatedAt",
-    "updatedBy",
-    "workflow_id"
+    "updatedBy"
   ],
   "alerting_rule": [
     "createdAt",
