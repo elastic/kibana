@@ -60,12 +60,6 @@ function formatRuntime(startTime: number): string {
   });
 }
 
-const queryTypeColors: Record<string, string> = {
-  'ES|QL': 'hollow',
-  DSL: 'hollow',
-  Other: 'hollow',
-};
-
 export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   query,
   onClose,
@@ -127,7 +121,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             <EuiText size="s">{query.taskId}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color={queryTypeColors[query.queryType] ?? 'hollow'}>
+            <EuiBadge color="hollow">
               {query.queryType === 'ES|QL' ? 'ESQL' : query.queryType}
             </EuiBadge>
           </EuiFlexItem>
@@ -264,7 +258,12 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="danger" fill onClick={() => onStopQuery(query.taskId)}>
+            <EuiButton
+              color="danger"
+              fill
+              onClick={() => onStopQuery(query.taskId)}
+              isDisabled={!query.cancellable || query.cancelled}
+            >
               {i18n.translate('xpack.runningQueries.flyout.stopQueryButton', {
                 defaultMessage: 'Stop query',
               })}

@@ -46,15 +46,41 @@ export const RunningQueriesApp: React.FC = () => {
   }, [resendRequest]);
 
   const handleCancelQuery = useCallback(
-    (taskId: string) => {
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.runningQueries.cancelQueryToast', {
-          defaultMessage: 'Cancel requested for query {taskId}',
-          values: { taskId },
-        })
-      );
+    async (taskId: string): Promise<boolean> => {
+      try {
+        const { error: cancelError } = await apiService.cancelTask(taskId);
+
+        if (cancelError) {
+          notifications.toasts.addDanger(
+            i18n.translate('xpack.runningQueries.stopQueryErrorToast', {
+              defaultMessage: 'Failed to stop query {taskId}',
+              values: { taskId },
+            })
+          );
+          return false;
+        }
+
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.runningQueries.stopQueryToast', {
+            defaultMessage: 'Stop requested for query {taskId}',
+            values: { taskId },
+          })
+        );
+
+        resendRequest();
+        setLastRefreshTime(Date.now());
+        return true;
+      } catch {
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.runningQueries.stopQueryErrorToast', {
+            defaultMessage: 'Failed to stop query {taskId}',
+            values: { taskId },
+          })
+        );
+        return false;
+      }
     },
-    [notifications]
+    [apiService, notifications, resendRequest]
   );
 
   const queries = data?.queries ?? [];

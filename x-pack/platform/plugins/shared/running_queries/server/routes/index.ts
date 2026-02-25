@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import { registerCancelRoute } from './cancel';
 import { registerSearchRoute } from './search';
 
 export interface RouteOptions {
@@ -14,5 +15,6 @@ export interface RouteOptions {
 }
 
 export function registerRoutes(options: RouteOptions) {
+  registerCancelRoute(options);
   registerSearchRoute(options);
 }

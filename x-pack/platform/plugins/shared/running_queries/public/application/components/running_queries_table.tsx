@@ -17,10 +17,11 @@ import { i18n } from '@kbn/i18n';
 import type { RunningQuery } from '../../../common/types';
 import { QueryDetailFlyout } from './query_detail_flyout';
 import { RunTimeFilter } from './run_time_filter';
+import { StopQueryConfirmationModal } from './stop_query_confirmation_modal';
 
 interface RunningQueriesTableProps {
   queries: RunningQuery[];
-  onCancelQuery: (taskId: string) => void;
+  onCancelQuery: (taskId: string) => Promise<boolean>;
 }
 
 export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
@@ -30,16 +31,39 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   const [selectedQuery, setSelectedQuery] = useState<RunningQuery | null>(null);
   const [runTimeValue, setRunTimeValue] = useState<number | null>(null);
   const [runTimeUnit, setRunTimeUnit] = useState('m');
+  const [taskIdToStop, setTaskIdToStop] = useState<string | null>(null);
+  const [isStopping, setIsStopping] = useState(false);
 
   const closeFlyout = useCallback(() => setSelectedQuery(null), []);
 
-  const handleStopQuery = useCallback(
-    (taskId: string) => {
-      onCancelQuery(taskId);
+  const requestStopQuery = useCallback((taskId: string) => setTaskIdToStop(taskId), []);
+
+  const cancelStopQuery = useCallback(() => {
+    if (isStopping) return;
+    setTaskIdToStop(null);
+  }, [isStopping]);
+
+  const confirmStopQuery = useCallback(async () => {
+    if (!taskIdToStop) return;
+
+    setIsStopping(true);
+    let didRequestStop = false;
+    try {
+      didRequestStop = await onCancelQuery(taskIdToStop);
+    } finally {
+      setIsStopping(false);
+    }
+
+    if (!didRequestStop) {
+      return;
+    }
+
+    if (selectedQuery?.taskId === taskIdToStop) {
       setSelectedQuery(null);
-    },
-    [onCancelQuery]
-  );
+    }
+
+    setTaskIdToStop(null);
+  }, [onCancelQuery, selectedQuery, taskIdToStop]);
 
   const filteredQueries = useMemo(() => {
     if (runTimeValue === null) return queries;
@@ -56,7 +80,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         name: i18n.translate('xpack.runningQueries.table.taskIdColumn', {
           defaultMessage: 'Task ID',
         }),
-        width: '250px',
+        width: '300px',
         sortable: true,
         render: (taskId: string, query: RunningQuery) => (
           <EuiLink onClick={() => setSelectedQuery(query)}>{taskId}</EuiLink>
@@ -102,23 +126,25 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         actions: [
           {
             name: i18n.translate('xpack.runningQueries.table.cancelAction', {
-              defaultMessage: 'Cancel',
+              defaultMessage: 'Stop query',
             }),
             description: i18n.translate('xpack.runningQueries.table.cancelActionDescription', {
-              defaultMessage: 'Cancel this query',
+              defaultMessage: 'Stop this query',
             }),
             icon: 'crossCircle',
             type: 'icon',
             color: 'danger',
-            onClick: (query: RunningQuery) => onCancelQuery(query.taskId),
+            enabled: (query: RunningQuery) => query.cancellable && !query.cancelled,
+            onClick: (query: RunningQuery) => requestStopQuery(query.taskId),
           },
         ],
       },
     ],
-    [onCancelQuery]
+    [requestStopQuery]
   );
 
   const uniqueSources = useMemo(() => [...new Set(queries.map((q) => q.source))], [queries]);
+  const uniqueQueryTypes = useMemo(() => [...new Set(queries.map((q) => q.queryType))], [queries]);
 
   const runTimeValueRef = React.useRef(runTimeValue);
   runTimeValueRef.current = runTimeValue;
@@ -156,11 +182,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
           defaultMessage: 'Query type',
         }),
         multiSelect: 'or' as const,
-        options: [
-          { value: 'ES|QL', name: 'ES|QL' },
-          { value: 'DSL', name: 'DSL' },
-          { value: 'Other', name: 'Other' },
-        ],
+        options: uniqueQueryTypes.map((queryType) => ({ value: queryType, name: queryType })),
       },
       {
         type: 'field_value_selection',
@@ -172,7 +194,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         options: uniqueSources.map((source) => ({ value: source, name: source })),
       },
     ],
-    [uniqueSources, RunTimeFilterCustom]
+    [uniqueQueryTypes, uniqueSources, RunTimeFilterCustom]
   );
 
   return (
@@ -201,7 +223,14 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         <QueryDetailFlyout
           query={selectedQuery}
           onClose={closeFlyout}
-          onStopQuery={handleStopQuery}
+          onStopQuery={requestStopQuery}
+        />
+      )}
+      {taskIdToStop && (
+        <StopQueryConfirmationModal
+          isLoading={isStopping}
+          onCancel={cancelStopQuery}
+          onConfirm={confirmStopQuery}
         />
       )}
     </>

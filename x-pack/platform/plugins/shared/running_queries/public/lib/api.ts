@@ -8,7 +8,8 @@
 import type { HttpSetup } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../common/constants';
 import type { RunningQuery } from '../../common/types';
-import { type UseRequestConfig, useRequest as _useRequest } from '../shared_imports';
+import type { SendRequestConfig, SendRequestResponse, UseRequestConfig } from '../shared_imports';
+import { sendRequest as _sendRequest, useRequest as _useRequest } from '../shared_imports';
 
 export class RunningQueriesApiService {
   constructor(private readonly client: HttpSetup) {}
@@ -17,10 +18,24 @@ export class RunningQueriesApiService {
     return _useRequest<R, E>(this.client, config);
   }
 
+  private sendRequest<D = any, E = any>(
+    config: SendRequestConfig
+  ): Promise<SendRequestResponse<D, E>> {
+    return _sendRequest<D, E>(this.client, config);
+  }
+
   public useLoadRunningQueries() {
     return this.useRequest<{ queries: RunningQuery[] }>({
       path: `${API_BASE_PATH}/search`,
       method: 'get',
+    });
+  }
+
+  public cancelTask(taskId: string) {
+    return this.sendRequest({
+      path: `${API_BASE_PATH}/cancel`,
+      method: 'post',
+      body: { taskId },
     });
   }
 }
