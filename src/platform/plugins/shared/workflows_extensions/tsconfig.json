@@ -22,10 +22,7 @@
     "@kbn/inference-plugin",
     "@kbn/inference-common",
     "@kbn/actions-plugin",
-    "@kbn/utility-types",
-    "@kbn/core-data-streams-server",
-    "@kbn/data-streams",
-    "@kbn/es-mappings"
+    "@kbn/utility-types"
   ],
   "exclude": ["target/**/*"]
 }

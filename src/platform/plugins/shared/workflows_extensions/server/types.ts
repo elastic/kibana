@@ -22,6 +22,7 @@ export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
  * Parameters passed to the trigger event handler when an event is emitted.
  */
 export interface TriggerEventHandlerParams {
+  timestamp: string;
   triggerId: string;
   spaceId: string;
   payload: Record<string, unknown>;
@@ -32,6 +33,21 @@ export interface TriggerEventHandlerParams {
  * Registered during setup to resolve subscriptions and run workflows.
  */
 export type TriggerEventHandler = (params: TriggerEventHandlerParams) => Promise<void>;
+
+/**
+ * Parameters for emitEvent.
+ */
+export interface EmitEventParams {
+  triggerId: string;
+  spaceId: string;
+  payload: Record<string, unknown>;
+}
+
+/**
+ * Emits a trigger event. Validates trigger id, then invokes the registered handler (which logs and runs subscribed workflows).
+ * @throws Error if triggerId is not registered
+ */
+export type EmitEventFn = (params: EmitEventParams) => Promise<void>;
 
 /**
  * Server-side plugin setup contract.
@@ -66,23 +82,22 @@ export interface WorkflowsExtensionsServerPluginSetup {
 }
 
 /**
- * Server-side trigger list API exposed on start.
+ * Server-side plugin start contract.
+ * Exposes step definitions (from common contract), trigger definitions, and emitEvent.
  */
-export interface WorkflowsExtensionsTriggerListStartContract {
+export type WorkflowsExtensionsServerPluginStart = WorkflowsExtensionsStartContract<ServerStepDefinition> & {
   /**
    * Get all registered trigger definitions.
    * @returns Array of all registered trigger definitions
    */
   getAllTriggerDefinitions(): ServerTriggerDefinition[];
-}
 
-/**
- * Server-side plugin start contract.
- * Exposes methods for retrieving registered server-side step implementations and triggers.
- */
-export type WorkflowsExtensionsServerPluginStart =
-  WorkflowsExtensionsStartContract<ServerStepDefinition> &
-    WorkflowsExtensionsTriggerListStartContract;
+  /**
+   * Emit a trigger event.
+   * @throws Error if triggerId is not registered
+   */
+  emitEvent: EmitEventFn;
+};
 
 /**
  * Dependencies for the server plugin setup phase.

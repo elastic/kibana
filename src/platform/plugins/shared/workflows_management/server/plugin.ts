@@ -24,6 +24,7 @@ import {
 } from './connectors/workflows';
 import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
 import { WorkflowsManagementFeatureConfig } from './features';
+import { initializeTriggerEventsDataStream } from './trigger_events_log';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
   WorkflowsRequestHandlerContext,
@@ -65,6 +66,8 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Setup');
 
     registerUISettings(core, plugins);
+
+    initializeTriggerEventsDataStream(core.dataStreams);
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {
