@@ -8,11 +8,13 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
+import { initializeTriggerEventsDataStream } from './trigger_events_log';
 import type {
   TriggerEventHandler,
   WorkflowsExtensionsServerPluginSetup,
@@ -33,6 +35,7 @@ export class WorkflowsExtensionsServerPlugin
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
   private triggerEventHandler: TriggerEventHandler | null = null;
+  private dataStreams: DataStreamsStart | null = null;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.stepRegistry = new ServerStepRegistry();
@@ -50,6 +53,7 @@ export class WorkflowsExtensionsServerPlugin
     // Register HTTP route to expose trigger definitions for testing
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
     registerInternalStepDefinitions(core, this.stepRegistry);
+    initializeTriggerEventsDataStream(core.dataStreams);
 
     return {
       registerStepDefinition: (definition) => {
@@ -65,10 +69,11 @@ export class WorkflowsExtensionsServerPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     _plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
     this.triggerRegistry.freeze();
+    this.dataStreams = core.dataStreams;
 
     return {
       getStepDefinition: (stepTypeId: string) => {
