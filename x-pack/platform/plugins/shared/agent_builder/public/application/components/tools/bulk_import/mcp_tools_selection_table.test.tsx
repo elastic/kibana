@@ -6,36 +6,28 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EuiThemeProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { type Tool as McpTool } from '@kbn/mcp-client';
+import type { Tool as McpTool } from '@kbn/mcp-client';
 import {
   McpToolsSelectionTable,
   type McpToolsSelectionTableProps,
 } from './mcp_tools_selection_table';
-import { type McpToolsSearch } from './use_mcp_tools_search';
-
-const mockUseMcpToolsSearch = jest.fn<McpToolsSearch, [{ tools: readonly McpTool[] }]>();
-
-jest.mock('./use_mcp_tools_search', () => ({
-  useMcpToolsSearch: (opts: { tools: readonly McpTool[] }) => mockUseMcpToolsSearch(opts),
-}));
-
-jest.mock('./mcp_tools_selection_table_header', () => ({
-  McpToolsSelectionTableHeader: () => null,
-}));
-
-const createMockTool = (name: string): McpTool => ({
-  name,
-  description: `Description for ${name}`,
-  inputSchema: {},
-});
+import type { McpToolField } from './types';
 
 const generateTools = (count: number): McpTool[] =>
-  Array.from({ length: count }, (_, i) => createMockTool(`tool-${String(i + 1).padStart(2, '0')}`));
+  Array.from({ length: count }, (_, i) => ({
+    name: `tool_${String(i + 1).padStart(3, '0')}`,
+    description: `Description for tool ${i + 1}`,
+    inputSchema: {},
+  }));
 
-const defaultProps: McpToolsSelectionTableProps = {
+const toSelectedFields = (tools: McpTool[]): McpToolField[] =>
+  tools.map((t) => ({ name: t.name, description: t.description ?? '' }));
+
+const DEFAULT_PROPS: McpToolsSelectionTableProps = {
   tools: [],
   selectedTools: [],
   onChange: jest.fn(),
@@ -44,26 +36,23 @@ const defaultProps: McpToolsSelectionTableProps = {
   isDisabled: false,
 };
 
-const renderTable = (props: Partial<McpToolsSelectionTableProps> = {}) => {
-  const merged = { ...defaultProps, ...props };
-  return render(
-    <IntlProvider locale="en">
-      <McpToolsSelectionTable {...merged} />
-    </IntlProvider>
-  );
+const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <EuiThemeProvider>
+    <IntlProvider locale="en">{children}</IntlProvider>
+  </EuiThemeProvider>
+);
+
+const renderTable = (overrides: Partial<McpToolsSelectionTableProps> = {}) => {
+  const props = { ...DEFAULT_PROPS, ...overrides };
+  return render(<McpToolsSelectionTable {...props} />, { wrapper: Wrapper });
 };
 
-const setupSearchMock = (tools: readonly McpTool[]) => {
-  const stableResults = [...tools];
-  mockUseMcpToolsSearch.mockReturnValue({
-    searchConfig: {
-      onChange: () => {},
-      box: { incremental: true, placeholder: 'Search tools', disabled: false },
-    },
-    searchQuery: '',
-    results: stableResults,
-  });
-};
+const getCheckboxForRow = (toolName: string) =>
+  screen.getByTestId(`checkboxSelectRow-${toolName}`);
+
+const getNextPageButton = () => screen.getByTestId('pagination-button-next');
+
+const flushMicrotasks = () => act(() => new Promise((resolve) => queueMicrotask(resolve)));
 
 describe('McpToolsSelectionTable', () => {
   beforeEach(() => {
@@ -72,167 +61,138 @@ describe('McpToolsSelectionTable', () => {
 
   it('renders tools in the table', () => {
     const tools = generateTools(3);
-    setupSearchMock(tools);
-
     renderTable({ tools });
 
-    for (const tool of tools) {
-      expect(screen.getByText(tool.name)).toBeInTheDocument();
-    }
+    expect(screen.getByText('tool_001')).toBeInTheDocument();
+    expect(screen.getByText('tool_002')).toBeInTheDocument();
+    expect(screen.getByText('tool_003')).toBeInTheDocument();
   });
 
-  it('calls onChange when a tool checkbox is clicked', async () => {
+  it('shows checkboxes as checked for selectedTools', () => {
     const tools = generateTools(3);
-    setupSearchMock(tools);
-    const onChange = jest.fn();
+    const selectedTools = toSelectedFields([tools[0], tools[2]]);
+    renderTable({ tools, selectedTools });
 
+    expect(getCheckboxForRow('tool_001')).toBeChecked();
+    expect(getCheckboxForRow('tool_002')).not.toBeChecked();
+    expect(getCheckboxForRow('tool_003')).toBeChecked();
+  });
+
+  it('calls onChange when a checkbox is clicked', async () => {
+    const tools = generateTools(3);
+    const onChange = jest.fn();
     renderTable({ tools, onChange });
 
-    const checkbox = screen.getByTestId('checkboxSelectRow-tool-01');
-    await userEvent.click(checkbox);
+    await userEvent.click(getCheckboxForRow('tool_001'));
 
-    expect(onChange).toHaveBeenCalled();
-    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0] as McpTool[];
-    expect(lastCall.some((t: McpTool) => t.name === 'tool-01')).toBe(true);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ name: 'tool_001' })])
+    );
   });
 
   describe('cross-page selection persistence', () => {
-    const tools = generateTools(15);
-
-    it('preserves page-1 selections when navigating to page 2', async () => {
-      setupSearchMock(tools);
+    it('does not fire onChange during page navigation', async () => {
+      const tools = generateTools(15);
       const onChange = jest.fn();
+      const selectedTools = toSelectedFields([tools[0], tools[2]]);
 
-      const { rerender } = render(
-        <IntlProvider locale="en">
-          <McpToolsSelectionTable {...defaultProps} tools={tools} onChange={onChange} />
-        </IntlProvider>
-      );
+      renderTable({ tools, selectedTools, onChange });
 
-      // Select a tool on page 1
-      await userEvent.click(screen.getByTestId('checkboxSelectRow-tool-01'));
-
-      expect(onChange).toHaveBeenCalled();
-      const selectionAfterClick = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-      expect(selectionAfterClick.some((t: McpTool) => t.name === 'tool-01')).toBe(true);
-
-      // Re-render with the selection applied (simulates parent state update)
-      onChange.mockClear();
-      rerender(
-        <IntlProvider locale="en">
-          <McpToolsSelectionTable
-            {...defaultProps}
-            tools={tools}
-            selectedTools={[{ name: 'tool-01', description: 'Description for tool-01' }]}
-            onChange={onChange}
-          />
-        </IntlProvider>
-      );
+      // Verify page-1 checkboxes are checked
+      expect(getCheckboxForRow('tool_001')).toBeChecked();
+      expect(getCheckboxForRow('tool_003')).toBeChecked();
 
       // Navigate to page 2
-      fireEvent.click(screen.getByTestId('pagination-button-next'));
+      await userEvent.click(getNextPageButton());
+      await flushMicrotasks();
 
-      await waitFor(() => {
-        expect(screen.getByTestId('checkboxSelectRow-tool-11')).toBeInTheDocument();
-      });
-
-      // After page change, onChange may fire due to EUI's getDerivedStateFromProps
-      // but the merged result must still include tool-01
-      if (onChange.mock.calls.length > 0) {
-        const lastSelection = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-        expect(lastSelection.some((t: McpTool) => t.name === 'tool-01')).toBe(true);
-      }
+      // The key assertion: onChange should NOT have been called during page
+      // navigation. Without the fix, EuiBasicTable.onPageChange calls
+      // clearSelection() which fires onSelectionChange([]), wiping form state.
+      expect(onChange).not.toHaveBeenCalled();
     });
 
-    it('includes selections from multiple pages', async () => {
-      setupSearchMock(tools);
+    it('shows correct checkboxes after navigating back to page 1', async () => {
+      const tools = generateTools(15);
       const onChange = jest.fn();
+      const selectedTools = toSelectedFields([tools[0], tools[2]]);
 
-      const { rerender } = render(
-        <IntlProvider locale="en">
-          <McpToolsSelectionTable
-            {...defaultProps}
-            tools={tools}
-            selectedTools={[{ name: 'tool-01', description: 'Description for tool-01' }]}
-            onChange={onChange}
-          />
-        </IntlProvider>
-      );
+      renderTable({ tools, selectedTools, onChange });
+
+      expect(getCheckboxForRow('tool_001')).toBeChecked();
+      expect(getCheckboxForRow('tool_003')).toBeChecked();
+
+      // Navigate to page 2 then back to page 1
+      await userEvent.click(getNextPageButton());
+      await flushMicrotasks();
+      await userEvent.click(screen.getByTestId('pagination-button-previous'));
+      await flushMicrotasks();
+
+      // Page-1 selections should still be visible
+      expect(getCheckboxForRow('tool_001')).toBeChecked();
+      expect(getCheckboxForRow('tool_003')).toBeChecked();
+    });
+
+    it('merges selections from different pages', async () => {
+      const tools = generateTools(15);
+      const onChange = jest.fn();
+      const initialSelected = toSelectedFields([tools[0]]);
+
+      renderTable({ tools, selectedTools: initialSelected, onChange });
+      expect(getCheckboxForRow('tool_001')).toBeChecked();
 
       // Navigate to page 2
-      fireEvent.click(screen.getByTestId('pagination-button-next'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('checkboxSelectRow-tool-11')).toBeInTheDocument();
-      });
-
-      // Re-render preserving the selection after page change — collect whatever
-      // onChange was last called with (the merge logic should keep tool-01).
-      const currentSelection =
-        onChange.mock.calls.length > 0
-          ? onChange.mock.calls[onChange.mock.calls.length - 1][0].map((t: McpTool) => ({
-              name: t.name,
-              description: t.description ?? '',
-            }))
-          : [{ name: 'tool-01', description: 'Description for tool-01' }];
-
+      await userEvent.click(getNextPageButton());
+      await flushMicrotasks();
       onChange.mockClear();
-      rerender(
-        <IntlProvider locale="en">
-          <McpToolsSelectionTable
-            {...defaultProps}
-            tools={tools}
-            selectedTools={currentSelection}
-            onChange={onChange}
-          />
-        </IntlProvider>
-      );
 
-      // Page 2 should show tool-11 through tool-15 (sorted ascending)
-      const page2Checkbox = screen.getByTestId('checkboxSelectRow-tool-11');
-      await userEvent.click(page2Checkbox);
+      // Click tool_011 on page 2
+      await userEvent.click(getCheckboxForRow('tool_011'));
 
-      expect(onChange).toHaveBeenCalled();
-      const lastSelection = onChange.mock.calls[onChange.mock.calls.length - 1][0] as McpTool[];
-      const selectedNames = lastSelection.map((t: McpTool) => t.name);
+      // onChange should include both the off-page tool_001 AND the new tool_011
+      expect(onChange).toHaveBeenCalledTimes(1);
+      const calledWith = onChange.mock.calls[0][0] as McpTool[];
+      const selectedNames = calledWith.map((t: McpTool) => t.name);
+      expect(selectedNames).toContain('tool_001');
+      expect(selectedNames).toContain('tool_011');
+    });
 
-      // Must include both page-1 selection and the new page-2 selection
-      expect(selectedNames).toContain('tool-01');
-      expect(selectedNames).toContain('tool-11');
+    it('does not lose selections when page size changes', async () => {
+      const tools = generateTools(30);
+      const onChange = jest.fn();
+      const selectedTools = toSelectedFields([tools[0], tools[1]]);
+
+      renderTable({ tools, selectedTools, onChange });
+
+      expect(getCheckboxForRow('tool_001')).toBeChecked();
+      expect(getCheckboxForRow('tool_002')).toBeChecked();
+
+      // Change page size via the rows-per-page selector
+      const perPageButton = screen.getByTestId('tablePaginationPopoverButton');
+      await userEvent.click(perPageButton);
+
+      const option25 = screen.getByTestId('tablePagination-25-rows');
+      await userEvent.click(option25);
+      await flushMicrotasks();
+
+      // Selections should not have been cleared
+      expect(onChange).not.toHaveBeenCalled();
     });
   });
 
-  it('select all selects all tools across pages', async () => {
-    const tools = generateTools(15);
-    setupSearchMock(tools);
-    const onChange = jest.fn();
+  describe('clear and select all', () => {
+    it('handleClearSelection clears all selections via onChange([])', async () => {
+      const tools = generateTools(15);
+      const onChange = jest.fn();
+      const selectedTools = toSelectedFields([tools[0], tools[1]]);
+      renderTable({ tools, selectedTools, onChange });
 
-    renderTable({ tools, onChange });
+      // The "Clear selection" button appears in the header when items are selected
+      const clearButton = screen.getByTestId('bulkImportMcpToolsClearSelectionButton');
+      await userEvent.click(clearButton);
 
-    // Use the header checkbox to select all on the current page
-    const headerCheckbox = screen.getByTestId('checkboxSelectAll');
-    await userEvent.click(headerCheckbox);
-
-    expect(onChange).toHaveBeenCalled();
-  });
-
-  it('clear selection clears all tools', async () => {
-    const tools = generateTools(3);
-    setupSearchMock(tools);
-    const onChange = jest.fn();
-
-    renderTable({
-      tools,
-      selectedTools: tools.map((t) => ({ name: t.name, description: t.description ?? '' })),
-      onChange,
+      expect(onChange).toHaveBeenCalledWith([]);
     });
-
-    // Click the header checkbox to deselect all
-    const headerCheckbox = screen.getByTestId('checkboxSelectAll');
-    await userEvent.click(headerCheckbox);
-
-    expect(onChange).toHaveBeenCalled();
-    const lastSelection = onChange.mock.calls[onChange.mock.calls.length - 1][0] as McpTool[];
-    expect(lastSelection).toHaveLength(0);
   });
 });
