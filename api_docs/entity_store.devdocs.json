@@ -455,8 +455,7 @@
             "description": [],
             "signature": [
               "(entityType: \"user\" | \"host\" | \"service\" | \"generic\", doc: any) => ",
-              "QueryDslQueryContainer",
-              " | undefined"
+              "QueryDslQueryContainer"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/common/index.ts",
             "lineNumber": 29,
