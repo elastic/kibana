@@ -27,16 +27,32 @@ dependsOn:
   - '@kbn/evals-common'
   - '@kbn/i18n'
   - '@kbn/react-kibana-context-render'
+  - '@kbn/react-query'
   - '@kbn/shared-ux-router'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-http-router-server-mocks'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
