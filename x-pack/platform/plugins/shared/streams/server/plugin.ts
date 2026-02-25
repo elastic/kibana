@@ -266,6 +266,9 @@ export class StreamsPlugin
       void core.getStartServices().then(async ([coreStart]) => {
         const esClient = coreStart.elasticsearch.client.asInternalUser;
         const soClient = coreStart.savedObjects.getUnsafeInternalClient();
+        // Since the RulesClient cannot be unscoped, we provide an empty object that will
+        // throw an error if dashboards, rules, or queries exist in the stream definition.
+        // This is a limitation of the config-based streams for now.
         const rulesClient = {} as RulesClient;
 
         const [attachmentClient, featureClient, systemClient, queryClient] = await Promise.all([
