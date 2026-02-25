@@ -43,6 +43,7 @@ import {
 } from '../../../shared/utils/workflow_utils';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
+import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
@@ -118,7 +119,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   );
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
+    (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
       runWorkflow.mutate(
         { id, inputs: event, triggerTab },
         {
@@ -531,7 +532,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           definition={executeWorkflow.definition}
           workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
-          onSubmit={(event) => handleRunWorkflow(executeWorkflow.id, event)}
+          onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
         />
       )}
       {workflowToDelete && (

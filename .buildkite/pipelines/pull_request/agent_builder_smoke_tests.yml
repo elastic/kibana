@@ -3,14 +3,10 @@ steps:
     key: agent-builder-smoke-tests
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     steps:
       - label: '🔍 Discover EIS Models'
         command: .buildkite/scripts/steps/test/discover_eis_models.sh
+        cancel_on_build_failing: true
         key: discover-eis-models
         timeout_in_minutes: 10
         env:
@@ -30,6 +26,7 @@ steps:
           mkdir -p target
           buildkite-agent artifact download 'target/eis_models.json' . --step discover-eis-models || echo '{"models":[]}' > target/eis_models.json
           .buildkite/scripts/steps/test/ftr_configs.sh
+        cancel_on_build_failing: true
         env:
           FTR_GEN_AI: '1'
           FTR_EIS_CCM: '1'

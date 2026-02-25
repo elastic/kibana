@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
+    cancel_on_build_failing: true
     label: 'Build Project Image'
     key: build_project_image
     agents:
@@ -12,6 +13,7 @@ steps:
         - exit_status: '-1'
           limit: 3
   - command: .buildkite/scripts/steps/serverless/deploy.sh
+    cancel_on_build_failing: true
     label: 'Deploy Project'
     agents:
       machineType: n2-standard-4
@@ -19,7 +21,7 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build_project_image
-      - linting
-      - linting_with_types
-      - checks
-      - check_types
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
