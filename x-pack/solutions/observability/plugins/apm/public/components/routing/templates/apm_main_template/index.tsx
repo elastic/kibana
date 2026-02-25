@@ -131,7 +131,7 @@ export function ApmMainTemplate({
         pageHeader={{
           rightSideItems,
           ...pageHeader,
-          pageTitle: pageHeader?.pageTitle ?? pageTitle,
+          pageTitle: undefined,
           children: (
             <>
               {showServiceGroupsNav && selectedNavButton && (
