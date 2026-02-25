@@ -439,7 +439,7 @@ export const ManageIntegrationActions: React.FC<{
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="delete"
-                icon={<EuiIcon type="trash" color="danger" />}
+                icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
                 onClick={openDeleteConfirm}
               >
                 <EuiTextColor color="danger">
