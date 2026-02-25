@@ -19,7 +19,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
   OBSERVABILITY_AGENT_ID,
   OBSERVABILITY_SESSION_TAG,
-} from '@kbn/observability-agent-builder-plugin/common';
+} from '@kbn/observability-agent-builder-plugin/public';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';

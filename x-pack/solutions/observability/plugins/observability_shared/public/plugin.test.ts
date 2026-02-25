@@ -14,7 +14,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import {
   OBSERVABILITY_AGENT_ID,
   OBSERVABILITY_SESSION_TAG,
-} from '@kbn/observability-agent-builder-plugin/common';
+} from '@kbn/observability-agent-builder-plugin/public';
 import { ObservabilitySharedPlugin } from './plugin';
 
 describe('ObservabilitySharedPlugin', () => {
