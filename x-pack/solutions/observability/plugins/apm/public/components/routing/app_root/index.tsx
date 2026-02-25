@@ -10,19 +10,14 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  HeaderMenuPortal,
-  InspectorContextProvider,
-} from '@kbn/observability-shared-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { Route } from '@kbn/shared-ux-router';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { KibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../../../context/apm_plugin/apm_plugin_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { BreadcrumbsContextProvider } from '../../../context/breadcrumbs/context';
 import { LicenseProvider } from '../../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../../context/time_range_id/time_range_id_context';
@@ -31,7 +26,6 @@ import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { ApmErrorBoundary } from '../apm_error_boundary';
 import { apmRouter } from '../apm_route_config';
 import { TrackPageview } from '../track_pageview';
-import { ApmHeaderActionMenu } from './apm_header_action_menu';
 import { RedirectDependenciesToDependenciesInventory } from './redirect_dependencies_to_dependencies_inventory';
 import { RedirectWithDefaultDateRange } from './redirect_with_default_date_range';
 import { RedirectWithDefaultEnvironment } from './redirect_with_default_environment';
@@ -80,7 +74,6 @@ export function ApmAppRoot({
                                         <LicenseProvider>
                                           <AnomalyDetectionJobsContextProvider>
                                             <InspectorContextProvider>
-                                              <MountApmHeaderActionMenu />
                                               <Route component={ScrollToTopOnPathChange} />
                                               <RouteRenderer />
                                             </InspectorContextProvider>
@@ -104,21 +97,5 @@ export function ApmAppRoot({
         </ApmPluginContext.Provider>
       </RedirectAppLinks>
     </div>
-  );
-}
-
-function MountApmHeaderActionMenu() {
-  const {
-    appMountParameters: { setHeaderActionMenu, theme$ },
-  } = useApmPluginContext();
-
-  return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>
-          <ApmHeaderActionMenu />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </HeaderMenuPortal>
   );
 }
