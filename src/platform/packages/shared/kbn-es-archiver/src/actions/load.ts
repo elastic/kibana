@@ -155,6 +155,7 @@ export async function loadAction({
     }
   );
 
+  // If we affected saved objects indices, we need to ensure they are migrated...
   if (!dataOnly && Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
     await migrateSavedObjectIndices(kbnClient!);
     log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
