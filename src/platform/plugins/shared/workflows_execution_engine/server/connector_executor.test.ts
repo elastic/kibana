@@ -19,7 +19,15 @@ describe('ConnectorExecutor', () => {
   beforeEach(() => {
     mockActionsClient = {
       execute: jest.fn(),
-      getAll: jest.fn(),
+      getAll: jest.fn(() =>
+        Promise.resolve([
+          {
+            id: '123e4567-e89b-12d3-a456-426614174000',
+            name: 'test-connector',
+            actionTypeId: 'http',
+          },
+        ] as ConnectorWithExtraFindData[])
+      ),
     } as unknown as jest.Mocked<ActionsClient>;
 
     connectorExecutor = new ConnectorExecutor(mockActionsClient);
@@ -32,13 +40,17 @@ describe('ConnectorExecutor', () => {
   describe('execute', () => {
     const connectorType = 'http';
     const connectorName = 'test-connector';
-    const inputs = { url: 'https://example.com', method: 'GET' };
-    const spaceId = 'default';
+    const input = { url: 'https://example.com', method: 'GET' };
     const abortController = new AbortController();
 
     it('should throw error if connector type is missing', async () => {
       await expect(
-        connectorExecutor.execute('', connectorName, inputs, spaceId, abortController)
+        connectorExecutor.execute({
+          connectorType: '',
+          connectorNameOrId: connectorName,
+          input,
+          abortController,
+        })
       ).rejects.toThrow('Connector type is required');
     });
 
@@ -52,17 +64,16 @@ describe('ConnectorExecutor', () => {
 
       mockActionsClient.execute.mockResolvedValue(expectedResult);
 
-      const result = await connectorExecutor.execute(
+      const result = await connectorExecutor.execute({
         connectorType,
-        connectorId,
-        inputs,
-        spaceId,
-        abortController
-      );
+        connectorNameOrId: connectorId,
+        input,
+        abortController,
+      });
 
       expect(mockActionsClient.execute).toHaveBeenCalledWith({
         actionId: connectorId,
-        params: inputs,
+        params: input,
         signal: abortController.signal,
       });
       expect(result).toEqual(expectedResult);
@@ -88,18 +99,17 @@ describe('ConnectorExecutor', () => {
       mockActionsClient.getAll.mockResolvedValue(mockConnectors);
       mockActionsClient.execute.mockResolvedValue(expectedResult);
 
-      const result = await connectorExecutor.execute(
+      const result = await connectorExecutor.execute({
         connectorType,
-        name,
-        inputs,
-        spaceId,
-        abortController
-      );
+        connectorNameOrId: name,
+        input,
+        abortController,
+      });
 
       expect(mockActionsClient.getAll).toHaveBeenCalled();
       expect(mockActionsClient.execute).toHaveBeenCalledWith({
         actionId: connectorId,
-        params: inputs,
+        params: input,
         signal: abortController.signal,
       });
       expect(result).toEqual(expectedResult);
@@ -109,8 +119,13 @@ describe('ConnectorExecutor', () => {
       mockActionsClient.getAll.mockResolvedValue([]);
 
       await expect(
-        connectorExecutor.execute(connectorType, 'non-existent', inputs, spaceId, abortController)
-      ).rejects.toThrow('Connector with name non-existent not found');
+        connectorExecutor.execute({
+          connectorType,
+          connectorNameOrId: 'non-existent',
+          input,
+          abortController,
+        })
+      ).rejects.toThrow('Connector non-existent not found');
     });
 
     it('should pass abort signal to actions client', async () => {
@@ -124,17 +139,16 @@ describe('ConnectorExecutor', () => {
       mockActionsClient.execute.mockResolvedValue(expectedResult);
 
       const testAbortController = new AbortController();
-      await connectorExecutor.execute(
+      await connectorExecutor.execute({
         connectorType,
-        connectorId,
-        inputs,
-        spaceId,
-        testAbortController
-      );
+        connectorNameOrId: connectorId,
+        input,
+        abortController: testAbortController,
+      });
 
       expect(mockActionsClient.execute).toHaveBeenCalledWith({
         actionId: connectorId,
-        params: inputs,
+        params: input,
         signal: testAbortController.signal,
       });
     });
@@ -157,19 +171,18 @@ describe('ConnectorExecutor', () => {
           })
       );
 
-      const executePromise = connectorExecutor.execute(
+      const executePromise = connectorExecutor.execute({
         connectorType,
-        connectorId,
-        inputs,
-        spaceId,
-        testAbortController
-      );
+        connectorNameOrId: connectorId,
+        input,
+        abortController: testAbortController,
+      });
 
       // Abort before execution completes
       testAbortController.abort();
 
       await expect(executePromise).rejects.toThrow(
-        `"${connectorId}" with type "${connectorType}" was aborted`
+        `Action type "${connectorType}" with ID "${connectorId}" execution was aborted`
       );
     });
   });
