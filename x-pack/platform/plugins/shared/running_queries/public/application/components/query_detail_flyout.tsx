@@ -32,6 +32,7 @@ import type { RunningQuery } from '../../../common/types';
 
 interface QueryDetailFlyoutProps {
   query: RunningQuery;
+  isStopRequested: boolean;
   onClose: () => void;
   onStopQuery: (taskId: string) => void;
 }
@@ -62,6 +63,7 @@ function formatRuntime(startTime: number): string {
 
 export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   query,
+  isStopRequested,
   onClose,
   onStopQuery,
 }) => {
@@ -258,16 +260,24 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              color="danger"
-              fill
-              onClick={() => onStopQuery(query.taskId)}
-              isDisabled={!query.cancellable || query.cancelled}
-            >
-              {i18n.translate('xpack.runningQueries.flyout.stopQueryButton', {
-                defaultMessage: 'Stop query',
-              })}
-            </EuiButton>
+            {isStopRequested ? (
+              <EuiText size="s" color="subdued">
+                {i18n.translate('xpack.runningQueries.flyout.stoppingQueryText', {
+                  defaultMessage: 'Stopping the query…',
+                })}
+              </EuiText>
+            ) : (
+              <EuiButton
+                color="danger"
+                fill
+                onClick={() => onStopQuery(query.taskId)}
+                isDisabled={!query.cancellable || query.cancelled}
+              >
+                {i18n.translate('xpack.runningQueries.flyout.stopQueryButton', {
+                  defaultMessage: 'Stop query',
+                })}
+              </EuiButton>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

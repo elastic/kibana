@@ -35,13 +35,26 @@ export const registerCancelRoute = ({ router, logger }: RouteOptions) => {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-        const result = await esClient.tasks.cancel({ task_id: taskId });
+        const result = await esClient.tasks.cancel({
+          task_id: taskId,
+          wait_for_completion: false,
+        });
 
         return response.ok({ body: result });
       } catch (error) {
+        const statusCode =
+          (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode ??
+          (error as { statusCode?: number; meta?: { statusCode?: number } })?.meta?.statusCode;
+
+        // If the task is already completed/removed, treat as success so the action is idempotent.
+        if (statusCode === 404) {
+          return response.ok({ body: { acknowledged: true } });
+        }
+
         logger.error(`Failed to cancel running query task "${taskId}": ${error}`);
         return response.customError({
           statusCode:
+            statusCode ??
             (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode ??
             (error as { statusCode?: number; meta?: { statusCode?: number } })?.meta?.statusCode ??
             500,

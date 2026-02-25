@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
   type EuiBasicTableColumn,
   type SearchFilterConfig,
 } from '@elastic/eui';
@@ -18,6 +23,11 @@ import type { RunningQuery } from '../../../common/types';
 import { QueryDetailFlyout } from './query_detail_flyout';
 import { RunTimeFilter } from './run_time_filter';
 import { StopQueryConfirmationModal } from './stop_query_confirmation_modal';
+import {
+  getStopRequestedTaskIds,
+  markStopRequestedTask,
+  pruneStopRequestedTasks,
+} from '../../lib/stop_requested_tasks_storage';
 
 interface RunningQueriesTableProps {
   queries: RunningQuery[];
@@ -33,10 +43,22 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   const [runTimeUnit, setRunTimeUnit] = useState('m');
   const [taskIdToStop, setTaskIdToStop] = useState<string | null>(null);
   const [isStopping, setIsStopping] = useState(false);
+  const [stopRequestedRevision, setStopRequestedRevision] = useState(0);
 
   const closeFlyout = useCallback(() => setSelectedQuery(null), []);
 
   const requestStopQuery = useCallback((taskId: string) => setTaskIdToStop(taskId), []);
+
+  const validTaskIds = useMemo(() => new Set(queries.map((q) => q.taskId)), [queries]);
+
+  const stopRequestedTaskIds = useMemo(() => {
+    void stopRequestedRevision;
+    return getStopRequestedTaskIds({ validTaskIds });
+  }, [validTaskIds, stopRequestedRevision]);
+
+  useEffect(() => {
+    pruneStopRequestedTasks({ validTaskIds });
+  }, [validTaskIds, stopRequestedRevision]);
 
   const cancelStopQuery = useCallback(() => {
     if (isStopping) return;
@@ -57,6 +79,9 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
     if (!didRequestStop) {
       return;
     }
+
+    markStopRequestedTask(taskIdToStop);
+    setStopRequestedRevision((r) => r + 1);
 
     if (selectedQuery?.taskId === taskIdToStop) {
       setSelectedQuery(null);
@@ -123,24 +148,49 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         name: i18n.translate('xpack.runningQueries.table.actionsColumn', {
           defaultMessage: 'Actions',
         }),
-        actions: [
-          {
-            name: i18n.translate('xpack.runningQueries.table.cancelAction', {
-              defaultMessage: 'Stop query',
-            }),
-            description: i18n.translate('xpack.runningQueries.table.cancelActionDescription', {
-              defaultMessage: 'Stop this query',
-            }),
-            icon: 'crossCircle',
-            type: 'icon',
-            color: 'danger',
-            enabled: (query: RunningQuery) => query.cancellable && !query.cancelled,
-            onClick: (query: RunningQuery) => requestStopQuery(query.taskId),
-          },
-        ],
+        width: '240px',
+        align: 'right',
+        render: (_: unknown, query: RunningQuery) => {
+          if (stopRequestedTaskIds.has(query.taskId)) {
+            return (
+              <EuiFlexGroup
+                gutterSize="s"
+                alignItems="center"
+                justifyContent="flexEnd"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {i18n.translate('xpack.runningQueries.table.stoppingQueryText', {
+                      defaultMessage: 'Stopping the query…',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          }
+
+          if (!query.cancellable || query.cancelled) {
+            return null;
+          }
+
+          return (
+            <EuiButtonIcon
+              aria-label={i18n.translate('xpack.runningQueries.table.stopQueryAriaLabel', {
+                defaultMessage: 'Stop query',
+              })}
+              iconType="crossCircle"
+              color="danger"
+              onClick={() => requestStopQuery(query.taskId)}
+            />
+          );
+        },
       },
     ],
-    [requestStopQuery]
+    [requestStopQuery, stopRequestedTaskIds]
   );
 
   const uniqueSources = useMemo(() => [...new Set(queries.map((q) => q.source))], [queries]);
@@ -222,6 +272,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
       {selectedQuery && (
         <QueryDetailFlyout
           query={selectedQuery}
+          isStopRequested={stopRequestedTaskIds.has(selectedQuery.taskId)}
           onClose={closeFlyout}
           onStopQuery={requestStopQuery}
         />
