@@ -66,6 +66,6 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'security.buildAlertEntityGraph',
-    handlerHash: '4b26df19ccd25d04a19c40327956cd316266242e41769ee3764e8d76739c6773',
+    handlerHash: '90e95df7b6deaa5b6ab908c1ff8f4a3606b6e8f7fce5d59e0411d3d577d0be44',
   },
 ];
