@@ -109,7 +109,6 @@ export const selectSavedObjectFormat = createSelector(
       visualizationMap: VisualizationMap;
       extractFilterReferences: FilterManager['extract'];
     }>,
-    selectActiveData,
   ],
   mergeToNewDoc
 );

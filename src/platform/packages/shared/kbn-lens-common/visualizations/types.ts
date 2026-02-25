@@ -267,8 +267,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   getPersistableState?: (
     state: T,
     datasource?: Datasource,
-    datasourceState?: { state: unknown },
-    activeData?: Record<string, Datatable>
+    datasourceState?: { state: unknown }
   ) => { state: P; references: Reference[] };
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];

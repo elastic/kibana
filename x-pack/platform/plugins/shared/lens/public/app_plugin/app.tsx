@@ -328,22 +328,7 @@ export function App({
           options
         );
         if (newState) {
-          const persistedVisState = newState.persistedDoc?.state?.visualization;
-          if (
-            persistedVisState &&
-            visualization.activeId &&
-            persistedVisState !== visualization.state
-          ) {
-            dispatchSetState({
-              ...newState,
-              visualization: {
-                ...visualization,
-                state: persistedVisState,
-              },
-            });
-          } else {
-            dispatchSetState(newState);
-          }
+          dispatchSetState(newState);
           setIsSaveModalVisible(false);
           setShouldCloseAndSaveTextBasedQuery(false);
         }
@@ -353,7 +338,8 @@ export function App({
       }
     },
     [
-      visualization,
+      visualization.activeId,
+      visualization.state,
       activeVisualization,
       dispatch,
       currentDoc,

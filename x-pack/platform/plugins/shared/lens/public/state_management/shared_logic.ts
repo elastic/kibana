@@ -39,8 +39,7 @@ export function mergeToNewDoc(
     datasourceMap: DatasourceMap;
     visualizationMap: VisualizationMap;
     extractFilterReferences: FilterManager['extract'];
-  },
-  activeData?: Record<string, Datatable>
+  }
 ): LensDocument | undefined {
   const activeVisualization =
     visualization.state && visualization.activeId ? visualizationMap[visualization.activeId] : null;
@@ -83,8 +82,7 @@ export function mergeToNewDoc(
       activeVisualization.getPersistableState(
         visualization.state,
         activeDatasource,
-        datasourceStates[activeDatasource.id],
-        activeData
+        datasourceStates[activeDatasource.id]
       );
     persistibleVisualizationState = persistableState;
     persistableReferences.forEach((r) => {
