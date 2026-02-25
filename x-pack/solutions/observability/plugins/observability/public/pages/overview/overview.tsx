@@ -180,6 +180,8 @@ export function OverviewPage() {
             display: 'flex',
             flexDirection: 'column',
             flexGrow: 1,
+            // POC: make the section body fill the viewport so content (e.g. obltOverviewNoDataPrompt) has room to grow
+            minHeight: 'calc(100vh - 120px)',
           },
         },
       }}
