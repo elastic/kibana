@@ -40,6 +40,28 @@ function MyComponent({ services, initialQuery, onClose }) {
 }
 ```
 
+### For Page Integration with Internal Submission
+
+Use `StandaloneRuleForm` with `includeSubmission` to let the form handle the API call internally:
+
+```tsx
+import { StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
+
+function CreateRulePage({ services, onSuccess, onCancel }) {
+  return (
+    <StandaloneRuleForm
+      query="FROM logs-*"
+      services={services}
+      includeSubmission
+      includeYaml
+      onSuccess={onSuccess}
+      onCancel={onCancel}
+      submitLabel="Create rule"
+    />
+  );
+}
+```
+
 ## Architecture
 
 The package uses a composable architecture with multiple layers:
@@ -50,6 +72,7 @@ The package uses a composable architecture with multiple layers:
 | `StandaloneRuleFormFlyout` | Visible | Complete flyout with static initialization and editable query (plugins) |
 | `RuleFormFlyout` + `DynamicRuleForm` | Hidden | Composable pattern for custom flyout behavior |
 | `RuleFormFlyout` + `StandaloneRuleForm` | Visible | Composable pattern for custom flyout behavior |
+| `StandaloneRuleForm` with `includeSubmission` | Visible | Standalone form that handles API call internally |
 
 ## Composable Pattern
 
@@ -58,7 +81,7 @@ For advanced customization, use the composable pattern with the base `RuleFormFl
 ### Dynamic Form (Syncs with Props)
 
 ```tsx
-import { RuleFormFlyout, DynamicRuleForm, RULE_FORM_ID } from '@kbn/alerting-v2-rule-form';
+import { RuleFormFlyout, DynamicRuleForm } from '@kbn/alerting-v2-rule-form';
 
 function DiscoverRuleFlyout({ services, query, onClose, onSubmit }) {
   return (
@@ -67,7 +90,6 @@ function DiscoverRuleFlyout({ services, query, onClose, onSubmit }) {
       push={true}
     >
       <DynamicRuleForm
-        formId={RULE_FORM_ID}
         query={query}
         onSubmit={onSubmit}
         services={{
@@ -88,7 +110,7 @@ The `DynamicRuleForm` uses react-hook-form's `values` prop with `resetOptions: {
 ### Standalone Form (Static Initialization)
 
 ```tsx
-import { RuleFormFlyout, StandaloneRuleForm, RULE_FORM_ID } from '@kbn/alerting-v2-rule-form';
+import { RuleFormFlyout, StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
 
 function PluginRuleFlyout({ services, initialQuery, onClose, onSubmit }) {
   return (
@@ -97,7 +119,6 @@ function PluginRuleFlyout({ services, initialQuery, onClose, onSubmit }) {
       push={true}
     >
       <StandaloneRuleForm
-        formId={RULE_FORM_ID}
         query={initialQuery}
         onSubmit={onSubmit}
         services={{
@@ -150,7 +171,7 @@ All flyout components require:
 | `http` | Core HTTP service for rule creation API |
 | `data` | Data plugin for query column fetching |
 | `dataViews` | Data views plugin for time field options |
-| `notifications` | For success/error toasts |
+| `notifications` | For success/error toasts (required for flyouts, optional for forms when using `includeSubmission`) |
 
 ## Development
 

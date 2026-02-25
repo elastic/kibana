@@ -10,7 +10,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { RuleFormFlyout, RULE_FORM_ID } from './rule_form_flyout';
+import { RuleFormFlyout } from './rule_form_flyout';
 import { DynamicRuleForm } from '../form/dynamic_rule_form';
 import { useCreateRule } from '../form/hooks/use_create_rule';
 import type { FormValues } from '../form/types';
@@ -59,17 +59,15 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
 
   return (
     <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
-      <DynamicRuleForm
-        formId={RULE_FORM_ID}
-        onSubmit={handleSubmit}
-        query={query}
-        services={{ http, data, dataViews }}
-      />
+      <DynamicRuleForm onSubmit={handleSubmit} query={query} services={{ http, data, dataViews }} />
     </RuleFormFlyout>
   );
 };
 
 export const DynamicRuleFormFlyout: React.FC<DynamicRuleFormFlyoutProps> = (props) => {
+  /* QueryClientProvider is needed for useCreateRule hook
+   * used by the submit button which exists outside of the
+   * DynamicRuleForm component. */
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>

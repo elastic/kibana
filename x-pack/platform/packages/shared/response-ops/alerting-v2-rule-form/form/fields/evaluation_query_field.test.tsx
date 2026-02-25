@@ -21,17 +21,20 @@ jest.mock('@kbn/code-editor', () => ({
     onChange,
     placeholder,
     dataTestSubj,
+    'aria-label': ariaLabel,
   }: {
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
     dataTestSubj?: string;
+    'aria-label'?: string;
   }) => (
     <textarea
       data-test-subj={dataTestSubj}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
+      aria-label={ariaLabel}
     />
   ),
 }));
@@ -50,16 +53,10 @@ jest.mock('@kbn/alerting-v2-schemas', () => ({
 }));
 
 describe('EvaluationQueryField', () => {
-  it('renders the query label', () => {
+  it('renders the editor with accessible aria-label', () => {
     render(<EvaluationQueryField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByText('Query')).toBeInTheDocument();
-  });
-
-  it('renders the tooltip icon', () => {
-    render(<EvaluationQueryField />, { wrapper: createFormWrapper() });
-
-    expect(screen.getByText('Info')).toBeInTheDocument();
+    expect(screen.getByLabelText('ES|QL query editor')).toBeInTheDocument();
   });
 
   it('renders the data-test-subj attribute', () => {

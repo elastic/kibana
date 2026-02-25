@@ -10,7 +10,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { RuleFormFlyout, RULE_FORM_ID } from './rule_form_flyout';
+import { RuleFormFlyout } from './rule_form_flyout';
 import { StandaloneRuleForm } from '../form/standalone_rule_form';
 import { useCreateRule } from '../form/hooks/use_create_rule';
 import type { FormValues } from '../form/types';
@@ -60,7 +60,6 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
   return (
     <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
       <StandaloneRuleForm
-        formId={RULE_FORM_ID}
         onSubmit={handleSubmit}
         query={query}
         services={{ http, data, dataViews }}
@@ -70,6 +69,9 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
 };
 
 export const StandaloneRuleFormFlyout: React.FC<StandaloneRuleFormFlyoutProps> = (props) => {
+  /* QueryClientProvider is needed for useCreateRule hook
+   * used by the submit button which exists outside of the
+   * StandaloneRuleForm component. */
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>

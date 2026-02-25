@@ -44,6 +44,8 @@ export interface EsqlEditorFieldProps {
   label?: React.ReactNode;
   /** Optional tooltip content displayed next to the label */
   labelTooltip?: string;
+  /** Accessible label for screen readers (required if no visible label) */
+  ariaLabel?: string;
   /** Optional help text displayed below the field */
   helpText?: React.ReactNode;
   /** Placeholder text for the input */
@@ -86,6 +88,7 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = ({
   name,
   label,
   labelTooltip,
+  ariaLabel,
   helpText,
   placeholder,
   height = EDITOR_HEIGHT_INLINE,
@@ -97,15 +100,17 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = ({
 }) => {
   const { control } = useFormContext<FormValues>();
 
-  const labelElement = labelTooltip ? (
-    <>
-      {label}
-      &nbsp;
-      <EuiIconTip position="right" type="question" content={labelTooltip} />
-    </>
-  ) : (
-    label
-  );
+  const labelElement = label ? (
+    labelTooltip ? (
+      <>
+        {label}
+        &nbsp;
+        <EuiIconTip position="right" type="question" content={labelTooltip} />
+      </>
+    ) : (
+      label
+    )
+  ) : undefined;
 
   const editorOptions = {
     ...ESQL_EDITOR_OPTIONS,
@@ -134,6 +139,7 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = ({
             placeholder={placeholder}
             options={editorOptions}
             dataTestSubj={dataTestSubj}
+            aria-label={ariaLabel}
           />
         </EuiFormRow>
       )}

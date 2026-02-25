@@ -23,11 +23,8 @@ export const EvaluationQueryField: React.FC<EvaluationQueryFieldProps> = ({
   return (
     <EsqlEditorField
       name="evaluation.query.base"
-      label={i18n.translate('xpack.alertingV2.ruleForm.evaluationQueryLabel', {
-        defaultMessage: 'Query',
-      })}
-      labelTooltip={i18n.translate('xpack.alertingV2.ruleForm.evaluationQueryTooltip', {
-        defaultMessage: 'The ES|QL query that defines what data this rule evaluates.',
+      ariaLabel={i18n.translate('xpack.alertingV2.ruleForm.evaluationQueryAriaLabel', {
+        defaultMessage: 'ES|QL query editor',
       })}
       placeholder={i18n.translate('xpack.alertingV2.ruleForm.evaluationQueryPlaceholder', {
         defaultMessage: 'FROM logs-* | WHERE ...',

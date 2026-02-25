@@ -18,8 +18,8 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { RULE_FORM_ID } from '../form/rule_form';
 
-export const RULE_FORM_ID = 'ruleV2Form';
 const FLYOUT_TITLE_ID = 'ruleV2FormFlyoutTitle';
 
 export interface RuleFormFlyoutProps {

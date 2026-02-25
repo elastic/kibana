@@ -10,7 +10,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DynamicRuleFormFlyout } from '../dynamic_rule_form_flyout';
 import { StandaloneRuleFormFlyout } from '../standalone_rule_form_flyout';
-import { RuleFormFlyout, RULE_FORM_ID } from '../rule_form_flyout';
+import { RuleFormFlyout } from '../rule_form_flyout';
 import { DynamicRuleForm } from '../../form/dynamic_rule_form';
 import { StandaloneRuleForm } from '../../form/standalone_rule_form';
 import type { RuleFormServices } from '../../form/rule_form';
@@ -129,13 +129,12 @@ type ComposableStory = StoryObj<typeof RuleFormFlyout>;
 
 /**
  * Composable: RuleFormFlyout is a pure presentation wrapper.
- * You control formId, onSubmit, and isLoading directly.
+ * You provide the form component and control onSubmit directly.
  */
 export const ComposableDynamic: ComposableStory = {
   render: () => (
     <RuleFormFlyout push={true} onClose={action('onClose')} isLoading={false}>
       <DynamicRuleForm
-        formId={RULE_FORM_ID}
         onSubmit={action('onSubmit')}
         query="FROM logs-* | STATS count = COUNT(*) BY host.name"
         services={mockFormServices}
@@ -151,7 +150,6 @@ export const ComposableStandalone: ComposableStory = {
   render: () => (
     <RuleFormFlyout push={true} onClose={action('onClose')} isLoading={false}>
       <StandaloneRuleForm
-        formId={RULE_FORM_ID}
         onSubmit={action('onSubmit')}
         query="FROM metrics-*"
         services={mockFormServices}
@@ -167,7 +165,6 @@ export const OverlayMode: ComposableStory = {
   render: () => (
     <RuleFormFlyout push={false} onClose={action('onClose')} isLoading={false}>
       <StandaloneRuleForm
-        formId={RULE_FORM_ID}
         onSubmit={action('onSubmit')}
         query="FROM logs-*"
         services={mockFormServices}

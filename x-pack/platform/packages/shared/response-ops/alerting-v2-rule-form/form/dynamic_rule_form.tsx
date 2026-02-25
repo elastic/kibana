@@ -9,19 +9,35 @@ import React from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { FormValues } from './types';
 import { RuleForm, type RuleFormServices } from './rule_form';
 import { useFormDefaults } from './hooks/use_form_defaults';
 
 export interface DynamicRuleFormProps {
-  /** Form ID for submission */
-  formId: string;
-  /** The query that drives form values - changes will sync to form state */
+  /* The query that drives form values - changes will sync to form state */
   query: string;
-  /** Services required for form fields */
   services: RuleFormServices;
-  /** Submit handler */
-  onSubmit: (values: FormValues) => void;
+  /* Called with form values when form is submitted.
+   * Only used when includeSubmission is false. */
+  onSubmit?: (values: FormValues) => void;
+  /* Called after successful rule creation (only used when includeSubmission is true) */
+  onSuccess?: () => void;
+  /* Callback when cancel button is clicked */
+  onCancel?: () => void;
+  /* Whether to include YAML editor toggle (default: false) */
+  includeYaml?: boolean;
+  /* ES|QL callbacks for YAML editor autocomplete (required if includeYaml is true) */
+  esqlCallbacks?: ESQLCallbacks;
+  /* Whether the form is in a loading/disabled state */
+  isDisabled?: boolean;
+  /* Whether to include submit/cancel buttons (default: false).
+   * When true, the form handles the API call internally. */
+  includeSubmission?: boolean;
+  /* Custom label for the submit button */
+  submitLabel?: React.ReactNode;
+  /* Custom label for the cancel button */
+  cancelLabel?: React.ReactNode;
 }
 
 /**
@@ -37,10 +53,17 @@ export interface DynamicRuleFormProps {
  * with `resetOptions: { keepDirtyValues: true }` to preserve user input.
  */
 export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
-  formId,
   query,
   services,
   onSubmit,
+  includeYaml = false,
+  esqlCallbacks,
+  isDisabled = false,
+  includeSubmission = false,
+  onSuccess,
+  onCancel,
+  submitLabel,
+  cancelLabel,
 }) => {
   // Get default form values derived from the query
   const formValues = useFormDefaults({ query });
@@ -68,10 +91,17 @@ export const DynamicRuleForm: React.FC<DynamicRuleFormProps> = ({
         render={() => <></>}
       />
       <RuleForm
-        formId={formId}
         services={services}
         onSubmit={onSubmit}
         includeQueryEditor={false}
+        includeYaml={includeYaml}
+        esqlCallbacks={esqlCallbacks}
+        isDisabled={isDisabled}
+        includeSubmission={includeSubmission}
+        onSuccess={onSuccess}
+        onCancel={onCancel}
+        submitLabel={submitLabel}
+        cancelLabel={cancelLabel}
       />
     </FormProvider>
   );

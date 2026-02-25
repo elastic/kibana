@@ -13,12 +13,19 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createQueryClientWrapper } from '../test_utils';
 import { DynamicRuleForm } from './dynamic_rule_form';
+import { RULE_FORM_ID } from './rule_form';
+
+// Mock the yaml-rule-editor to avoid monaco editor setup
+jest.mock('@kbn/yaml-rule-editor', () => ({
+  YamlRuleEditor: () => <div data-test-subj="yamlRuleEditorMock">YAML Editor Mock</div>,
+}));
 
 // Mock the ES|QL utils to avoid complex setup
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: jest.fn().mockResolvedValue({
     fields: {
       getByType: () => [{ name: '@timestamp', type: 'date' }],
+      toSpec: () => ({}),
     },
   }),
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([]),
@@ -32,7 +39,6 @@ const createMockServices = () => ({
 
 describe('DynamicRuleForm', () => {
   const defaultProps = {
-    formId: 'test-form',
     onSubmit: jest.fn(),
     query: 'FROM logs-* | STATS count = COUNT(*)',
     defaultTimeField: '@timestamp',
@@ -189,7 +195,6 @@ describe('DynamicRuleForm', () => {
       <Wrapper>
         <DynamicRuleForm
           {...defaultProps}
-          formId="submit-test-form"
           onSubmit={onSubmit}
           query="FROM logs-* | STATS count = COUNT(*)"
         />
@@ -200,8 +205,8 @@ describe('DynamicRuleForm', () => {
     const nameInput = screen.getByRole('textbox', { name: 'Name' });
     await user.type(nameInput, 'Test Rule');
 
-    // Submit the form
-    const form = document.getElementById('submit-test-form');
+    // Submit the form using the constant RULE_FORM_ID
+    const form = document.getElementById(RULE_FORM_ID);
     expect(form).toBeInTheDocument();
 
     // Trigger form submission
