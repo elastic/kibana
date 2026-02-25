@@ -15,6 +15,5 @@
     "@kbn/i18n-react",
     "@kbn/core",
     "@kbn/core-http-browser",
-    "@kbn/workflows-management-plugin"
   ]
 }
