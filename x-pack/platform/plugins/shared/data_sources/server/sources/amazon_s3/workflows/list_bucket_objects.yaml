@@ -1,0 +1,21 @@
+version: '1'
+name: 'sources.amazon_s3.list_objects'
+description: 'List objects in an Amazon S3 bucket.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: bucket
+    type: string
+    required: true
+  - name: prefix
+    type: string
+    required: false
+steps:
+  - name: listBucketObjects
+    type: amazon_s3.listBucketObjects
+    connector-id: <%= amazon-s3-stack-connector-id %>
+    with:
+      bucket: "${{ inputs.bucket }}"
+      prefix: "${{ inputs.prefix }}"

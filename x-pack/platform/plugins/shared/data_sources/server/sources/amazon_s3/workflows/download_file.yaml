@@ -1,0 +1,21 @@
+version: '1'
+name: 'sources.amazon_s3.download'
+description: 'Download a file from an Amazon S3 bucket. Actions and inputs: downloadFile'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: bucket
+    type: string
+    required: true
+  - name: key
+    type: string
+    required: true
+steps:
+  - name: downloadFile
+    type: amazon_s3.downloadFile
+    connector-id: <%= amazon-s3-stack-connector-id %>
+    with:
+      bucket: "${{ inputs.bucket }}"
+      key: "${{ inputs.key }}"
