@@ -68,6 +68,7 @@ test.describe(
       }
     });
 
+    // Flaky on 9.2
     test('should allow adding a new custom data source', async ({ page, pageObjects }) => {
       // First disable default random samples data source
       await pageObjects.streams.getDataSourcesList().getByText('Random samples').click();

@@ -98,6 +98,7 @@ test.describe(
       }
     });
 
+    // Flaky on 9.2
     test('should allow updating the condition manually by syntax editor', async ({
       pageObjects,
     }) => {
