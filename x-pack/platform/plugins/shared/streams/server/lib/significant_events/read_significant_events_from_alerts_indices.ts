@@ -194,13 +194,4 @@ export async function readSignificantEventsFromAlertsIndices(
   };
 }
 
-const toStreamQuery = (queryLink: QueryLink): StreamQuery => {
-  return {
-    id: queryLink.query.id,
-    title: queryLink.query.title,
-    feature: queryLink.query.feature,
-    severity_score: queryLink.query.severity_score,
-    evidence: queryLink.query.evidence,
-    esql: queryLink.query.esql,
-  };
-};
+const toStreamQuery = (queryLink: QueryLink): StreamQuery => queryLink.query;
