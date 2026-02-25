@@ -299,33 +299,31 @@ const esqlTabSchema = schema.allOf([
 
 const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
 
-const discoverSessionByValueEmbeddableSchema = schema.allOf([
-  serializedTitlesSchema,
-  schema.object({
-    tabs: schema.arrayOf(tabSchema, {
-      minSize: 1,
-      maxSize: 1,
+const discoverSessionBaseEmbeddableSchema = serializedTitlesSchema.extends({
+  timeRange: schema.maybe(timeRangeSchema), // Waiting on https://github.com/elastic/kibana/pull/253789
+});
+
+const discoverSessionByValueEmbeddableSchema = discoverSessionBaseEmbeddableSchema.extends({
+  tabs: schema.arrayOf(tabSchema, {
+    minSize: 1,
+    maxSize: 1,
+    meta: {
+      description: 'Array of tabs for the Discover session embeddable. Currently supports one tab.',
+    },
+  }),
+});
+
+const discoverSessionByReferenceEmbeddableSchema = discoverSessionBaseEmbeddableSchema.extends({
+  discover_session_id: schema.string(),
+  selected_tab_id: schema.maybe(
+    schema.string({
       meta: {
         description:
-          'Array of tabs for the Discover session embeddable. Currently supports one tab.',
+          'The selected tab in the Discover session. If omitted, defaults to the first tab.',
       },
-    }),
-    time_range: schema.maybe(timeRangeSchema),
-  }),
-]);
-
-const discoverSessionByReferenceEmbeddableSchema = schema.allOf([
-  serializedTitlesSchema,
-  schema.object({
-    discover_session_id: schema.string(),
-    selected_tab_id: schema.string({
-      meta: {
-        description: 'The unique identifier of the selected tab in the Discover session',
-      },
-    }),
-    time_range: schema.maybe(timeRangeSchema),
-  }),
-]);
+    })
+  ),
+});
 
 export const discoverSessionEmbeddableSchema = schema.oneOf([
   discoverSessionByValueEmbeddableSchema,
