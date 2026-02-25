@@ -90,4 +90,10 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+  [
+    '.one_password',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconOnePassword" */ './specs/one_password/icon')
+    ),
+  ],
 ]);
