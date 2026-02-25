@@ -24,12 +24,9 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/data-plugin'
   - '@kbn/kibana-react-plugin'
-  - '@kbn/kibana-utils-plugin'
   - '@kbn/evals-common'
   - '@kbn/i18n'
-  - '@kbn/i18n-react'
-  - '@kbn/react-kibana-mount'
-  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/react-kibana-context-render'
   - '@kbn/shared-ux-router'
 tags:
   - plugin
