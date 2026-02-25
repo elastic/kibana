@@ -55,8 +55,8 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     },
     subFeatures: [
       {
-        name: i18n.translate('xpack.agentBuilder.featureRegistry.subFeatures.manageAgents', {
-          defaultMessage: 'Agents',
+        name: i18n.translate('xpack.agentBuilder.featureRegistry.subFeatures.management', {
+          defaultMessage: 'Management',
         }),
         privilegeGroups: [
           {
@@ -73,18 +73,6 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 savedObject: { all: [], read: [] },
                 ui: [uiPrivileges.manageAgents],
               },
-            ],
-          },
-        ],
-      },
-      {
-        name: i18n.translate('xpack.agentBuilder.featureRegistry.subFeatures.manageTools', {
-          defaultMessage: 'Custom tools',
-        }),
-        privilegeGroups: [
-          {
-            groupType: 'independent',
-            privileges: [
               {
                 id: subFeaturePrivilegeIds.manageTools,
                 name: i18n.translate(
