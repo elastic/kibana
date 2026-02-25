@@ -74,7 +74,6 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      test.skip();
       test.setTimeout(300_000);
       const suffix = `${Date.now()}`;
       const savedQueryIdLocal = `Saved-Query-Id-${suffix}`;
@@ -120,7 +119,7 @@ test.describe(
         await page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden' })
-          .catch(() => {});
+          .catch(() => { });
       }
 
       // Exit fullscreen
@@ -221,7 +220,7 @@ test.describe(
 
       // Save edited — close the playground flyout first
       await playgroundFlyout.locator('[data-test-subj="euiFlyoutCloseButton"]').click();
-      await playgroundFlyout.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+      await playgroundFlyout.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => { });
       await page.testSubj.locator('update-query-button').click();
       await expect(page.getByText(`${savedQueryDescription} Edited`)).toBeVisible();
       await dismissAllToasts(page);
@@ -264,7 +263,6 @@ test.describe(
     });
 
     test('user can run prebuilt saved query and add to case', async ({ page, pageObjects }) => {
-      test.skip();
       await page.gotoApp('osquery/saved_queries');
       await pageObjects.packs.ensureAllPacksVisible();
       await page.locator(`[aria-label="Run users_elastic"]`).click();
@@ -319,7 +317,7 @@ test.describe(
       await page.testSubj
         .locator('globalLoadingIndicator')
         .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+        .catch(() => { });
       await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible({ timeout: 15_000 });
 
       await pageObjects.packs.selectSavedQuery('users_elastic');
@@ -374,7 +372,7 @@ test.describe(
       });
 
       await addQueryFlyout.getByRole('button', { name: 'Save' }).click();
-      await addQueryFlyout.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => {});
+      await addQueryFlyout.waitFor({ state: 'hidden', timeout: 15_000 }).catch(() => { });
 
       const editButton = page.locator(`[aria-label="Edit users_elastic"]`);
       await editButton.waitFor({ state: 'visible', timeout: 15_000 });

@@ -64,7 +64,6 @@ test.describe(
     });
 
     test('should run live pack', async ({ page, pageObjects }) => {
-      test.skip();
       test.setTimeout(300_000);
 
       await page.gotoApp('osquery');

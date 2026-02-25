@@ -111,7 +111,6 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
     'should add result to a case without showing add to timeline button (security)',
     { tag: [...tags.serverless.security.complete] },
     async ({ page, pageObjects, kbnUrl, kbnClient }) => {
-      test.skip();
       test.setTimeout(180_000);
 
       const caseData = await loadCase(kbnClient, 'securitySolution');

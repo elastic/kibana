@@ -150,8 +150,7 @@ async function waitForAgents(
   }
 
   throw new Error(
-    `Timed out waiting for ${expectedCount} agents to come online (got ${lastCount}) after ${
-      timeoutMs / 1000
+    `Timed out waiting for ${expectedCount} agents to come online (got ${lastCount}) after ${timeoutMs / 1000
     }s`
   );
 }
@@ -335,6 +334,19 @@ globalSetupHook(
   async ({ kbnClient, log, config }) => {
     const isServerless = config.serverless;
 
+    // ── 0. Check if Docker is available ────────────────────────────────
+    // Essentials tier tests only check PLI permissions and don't need agents.
+    // Their CI script skips Docker entirely, so we detect this and skip provisioning.
+    try {
+      await verifyDockerInstalled(log);
+    } catch {
+      log.info(
+        '[osquery-setup] Docker is not available — skipping Fleet Server and agent provisioning. ' +
+        'Tests that require live agents will be filtered out by tag.'
+      );
+      return;
+    }
+
     // Register container cleanup handler early
     registerCleanup(log);
 
@@ -346,8 +358,8 @@ globalSetupHook(
 
     log.info(
       `[osquery-setup] Existing state: fleet-server=${fleetServerRunning}, ` +
-        `agent-0=${agent0Running}, agent-1=${agent1Running}, ` +
-        `online agents=${onlineAgents}/${EXPECTED_AGENT_COUNT}`
+      `agent-0=${agent0Running}, agent-1=${agent1Running}, ` +
+      `online agents=${onlineAgents}/${EXPECTED_AGENT_COUNT}`
     );
 
     if (
@@ -381,14 +393,13 @@ globalSetupHook(
     log.info(`[osquery-setup] Agent version: ${agentVersion}`);
     log.info(`[osquery-setup] ES URL: ${config.hosts.elasticsearch}`);
 
-    await verifyDockerInstalled(log);
     await maybeCreateDockerNetwork(log);
 
     // ── 2. Clean up any stale containers ────────────────────────────────
     log.info('[osquery-setup] Cleaning up stale containers...');
-    await execa('docker', ['rm', '-f', FLEET_SERVER_CONTAINER]).catch(() => {});
+    await execa('docker', ['rm', '-f', FLEET_SERVER_CONTAINER]).catch(() => { });
     for (let i = 0; i < EXPECTED_AGENT_COUNT; i++) {
-      await execa('docker', ['rm', '-f', `${AGENT_CONTAINER_PREFIX}-${i}`]).catch(() => {});
+      await execa('docker', ['rm', '-f', `${AGENT_CONTAINER_PREFIX}-${i}`]).catch(() => { });
     }
 
     // ── 3. Fleet setup ─────────────────────────────────────────────────
@@ -424,7 +435,7 @@ globalSetupHook(
         } else if (defaultOutput.is_preconfigured) {
           log.info(
             `[osquery-setup] Default output "${defaultOutput.id}" is preconfigured with hosts=[${currentHosts}]. ` +
-              `Ensure --serverConfigSet osquery is used so the preconfigured output points to the Docker-accessible ES host.`
+            `Ensure --serverConfigSet osquery is used so the preconfigured output points to the Docker-accessible ES host.`
           );
         } else {
           await kbnClient.request<any>({
@@ -507,9 +518,51 @@ globalSetupHook(
       );
     }
 
-    // Give Fleet Server time to initialize
-    log.info('[osquery-setup] Waiting 20s for Fleet Server to initialize...');
-    await new Promise((r) => setTimeout(r, 20_000));
+    // Wait for Fleet Server to become healthy (poll instead of fixed sleep)
+    log.info('[osquery-setup] Waiting for Fleet Server to become healthy...');
+    const fleetServerHealthStart = Date.now();
+    const fleetServerHealthTimeout = 60_000;
+    let fleetServerReady = false;
+
+    while (Date.now() - fleetServerHealthStart < fleetServerHealthTimeout) {
+      try {
+        const { stdout } = await execa('docker', [
+          'inspect',
+          '--format',
+          '{{.State.Running}}',
+          FLEET_SERVER_CONTAINER,
+        ]);
+        if (stdout.trim() !== 'true') {
+          log.info('[osquery-setup] Fleet Server container not yet running, waiting 2s...');
+          await new Promise((r) => setTimeout(r, 2_000));
+          continue;
+        }
+
+        const result = await execa(
+          'docker',
+          ['exec', FLEET_SERVER_CONTAINER, 'curl', '-sf', '--max-time', '2', 'http://localhost:8220/api/status'],
+          { reject: false }
+        );
+        if (result.exitCode === 0) {
+          fleetServerReady = true;
+          log.info(
+            `[osquery-setup] Fleet Server is healthy (${Math.round(
+              (Date.now() - fleetServerHealthStart) / 1000
+            )}s)`
+          );
+          break;
+        }
+      } catch {
+        // Container might not be ready yet
+      }
+      await new Promise((r) => setTimeout(r, 2_000));
+    }
+
+    if (!fleetServerReady) {
+      log.info(
+        '[osquery-setup] Fleet Server health check timed out — proceeding anyway (agents may still connect)'
+      );
+    }
 
     // ── 7. Update Fleet Server host URL in Fleet settings ──────────────
     // Both stateful and serverless agents run inside Docker containers where

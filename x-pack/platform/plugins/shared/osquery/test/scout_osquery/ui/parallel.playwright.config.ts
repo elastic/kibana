@@ -17,18 +17,18 @@ const parallelJobIndex = process.env.BUILDKITE_PARALLEL_JOB
 const config: ReturnType<typeof createPlaywrightConfig> = {
   ...createPlaywrightConfig({
     testDir: './tests',
-    workers: 1,
+    workers: 2,
     runGlobalSetup: true,
   }),
   timeout: 300_000,
   retries: process.env.CI ? 1 : 0,
   ...(parallelJobCount && parallelJobIndex !== undefined
     ? {
-        shard: {
-          total: parallelJobCount,
-          current: parallelJobIndex + 1, // Buildkite is 0-based, Playwright is 1-based
-        },
-      }
+      shard: {
+        total: parallelJobCount,
+        current: parallelJobIndex + 1, // Buildkite is 0-based, Playwright is 1-based
+      },
+    }
     : {}),
 };
 
