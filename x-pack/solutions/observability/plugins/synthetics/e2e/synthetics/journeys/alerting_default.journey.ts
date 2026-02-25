@@ -106,9 +106,8 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.click('text=wow is not a valid email.');
     await page.click('[aria-label="Remove wow from selection in this group"]');
     await page.getByTestId('ccEmailAddressInput').getByTestId('comboBoxSearchInput').fill('list');
-    await page.click('.euiForm');
+    await page.keyboard.press('Enter');
     await page.click('[aria-label="Remove list from selection in this group"]');
-    await page.click('.euiForm');
     await page.click('[aria-label="Remove test@gmail.com from selection in this group"]');
     await page.click('.euiForm');
     await page.click('text=To: Email is required for selected email connector');
