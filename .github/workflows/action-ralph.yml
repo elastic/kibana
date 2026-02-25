@@ -293,10 +293,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          SPEC_FILE="/tmp/ralph-spec.md"
+          RALPH_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime"
+          AGENT_OUTPUT_DIR="$RALPH_DIR/agent-output"
+          SPEC_FILE="$RALPH_DIR/ralph-spec.md"
           PROTOCOL_FILE="action-ralph/AGENT_LOOP_PROTOCOL.md"
-          SESSION_DIR="/tmp/ralph-session"
-          mkdir -p "$SESSION_DIR"
+          SESSION_DIR="$RALPH_DIR/session"
+          export HOME="$RALPH_DIR/home"
+          mkdir -p "$SESSION_DIR" "$AGENT_OUTPUT_DIR" "$HOME"
 
           # Build the initial spec from the prompt
           if [ "$IS_PR" = "true" ]; then
@@ -390,16 +393,15 @@ jobs:
           done
 
           # Copy the final spec and last agent output for the publish phase
-          mkdir -p /tmp/agent-output
-          cp "$SPEC_FILE" /tmp/agent-output/ralph-spec.md
-          cat "${SESSION_DIR}"/run-*.md > /tmp/agent-output/agent-reasoning.md 2>/dev/null || true
+          cp "$SPEC_FILE" "$AGENT_OUTPUT_DIR/ralph-spec.md"
+          cat "${SESSION_DIR}"/run-*.md > "$AGENT_OUTPUT_DIR/agent-reasoning.md" 2>/dev/null || true
 
       - name: Redact agent reasoning output
         env:
           LITELLM_API_KEY: ${{ steps.short_lived_key.outputs.api_key }}
         run: |
           set -euo pipefail
-          if [ ! -f /tmp/agent-output/agent-reasoning.md ]; then
+          if [ ! -f "$GITHUB_WORKSPACE/.action-ralph-runtime/agent-output/agent-reasoning.md" ]; then
             exit 0
           fi
 
@@ -408,7 +410,7 @@ jobs:
           import re
           from pathlib import Path
 
-          path = Path('/tmp/agent-output/agent-reasoning.md')
+          path = Path(os.environ['GITHUB_WORKSPACE']) / '.action-ralph-runtime' / 'agent-output' / 'agent-reasoning.md'
           text = path.read_text(encoding='utf-8', errors='ignore')
 
           key = os.getenv('LITELLM_API_KEY')
@@ -433,12 +435,12 @@ jobs:
           set -euo pipefail
 
           # Find files changed by the agent (same heuristic as packaging step)
-          CHANGED=$(find . -newer /tmp/ralph-session/prompt-0001.md \
+          CHANGED=$(find . -newer "$GITHUB_WORKSPACE/.action-ralph-runtime/session/prompt-0001.md" \
             -not -path '*/node_modules/*' \
             -not -path '*/.git/*' \
             -not -name '*.log' \
             -not -path '*/target/*' \
-            -not -path '/tmp/*' \
+            -not -path '*/.action-ralph-runtime/*' \
             -type f 2>/dev/null || true)
 
           if [ -z "$CHANGED" ]; then
@@ -450,7 +452,7 @@ jobs:
           LINT_FILES=$(echo "$CHANGED" | grep -E '\.(ts|tsx|js|jsx)$' || true)
           if [ -n "$LINT_FILES" ]; then
             echo "=== Running eslint on changed files ==="
-            echo "$LINT_FILES" | head -50 | xargs node scripts/eslint.js --fix 2>&1 | tee /tmp/ralph-session/lint-output.txt || true
+            echo "$LINT_FILES" | head -50 | xargs node scripts/eslint.js --fix 2>&1 | tee "$GITHUB_WORKSPACE/.action-ralph-runtime/session/lint-output.txt" || true
           fi
 
           # Identify unique tsconfig.json projects for changed files and run type-check
@@ -471,7 +473,7 @@ jobs:
             echo "=== Running type-check on touched projects ==="
             for tc in $UNIQUE_TSCONFIGS; do
               echo "Type-checking: $tc"
-              yarn test:type_check --project "$tc" 2>&1 | tee -a /tmp/ralph-session/typecheck-output.txt || true
+              yarn test:type_check --project "$tc" 2>&1 | tee -a "$GITHUB_WORKSPACE/.action-ralph-runtime/session/typecheck-output.txt" || true
             done
           fi
 
@@ -483,24 +485,19 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Use git to detect changes since we have the .git-less warm state
-          # Any file that differs from what was in the artifact is a change
-          # We use the spec and agent output already saved to /tmp/agent-output
-
-          # Find all non-artifact files modified by the agent
-          # Compare against the pristine state by checking file modification times
-          # (the warm state was extracted, then the agent ran and modified files)
+          AGENT_OUTPUT_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime/agent-output"
+          mkdir -p "$AGENT_OUTPUT_DIR"
 
           # Collect all files that aren't part of the infrastructure
-          find . -newer /tmp/ralph-session/prompt-0001.md \
+          find . -newer "$GITHUB_WORKSPACE/.action-ralph-runtime/session/prompt-0001.md" \
             -not -path '*/node_modules/*' \
             -not -path '*/.git/*' \
             -not -name '*.log' \
             -not -path '*/target/*' \
-            -not -path '/tmp/*' \
-            -type f > /tmp/agent-output/changed-files.txt 2>/dev/null || true
+            -not -path '*/.action-ralph-runtime/*' \
+            -type f > "$AGENT_OUTPUT_DIR/changed-files.txt" 2>/dev/null || true
 
-          FILE_COUNT=$(wc -l < /tmp/agent-output/changed-files.txt | tr -d ' ')
+          FILE_COUNT=$(wc -l < "$AGENT_OUTPUT_DIR/changed-files.txt" | tr -d ' ')
           echo "Changed files: ${FILE_COUNT}"
 
           if [ "$FILE_COUNT" -eq 0 ]; then
@@ -508,18 +505,18 @@ jobs:
             exit 1
           fi
 
-          cat /tmp/agent-output/changed-files.txt
+          cat "$AGENT_OUTPUT_DIR/changed-files.txt"
 
-          tar czf /tmp/agent-output/agent-changes.tar.gz \
-            -T /tmp/agent-output/changed-files.txt
+          tar czf "$AGENT_OUTPUT_DIR/agent-changes.tar.gz" \
+            -T "$AGENT_OUTPUT_DIR/changed-files.txt"
 
-          printf '%s' "$TASK_PROMPT" | head -c 200 > /tmp/agent-output/prompt-summary.txt
+          printf '%s' "$TASK_PROMPT" | head -c 200 > "$AGENT_OUTPUT_DIR/prompt-summary.txt"
 
       - name: Upload agent output
         uses: actions/upload-artifact@v4
         with:
           name: agent-changes
-          path: /tmp/agent-output/
+          path: ${{ github.workspace }}/.action-ralph-runtime/agent-output/
           retention-days: 1
 
   # ---------------------------------------------------------------------------
