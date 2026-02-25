@@ -513,7 +513,7 @@
               "section": "def-common.CaseSeverity",
               "text": "CaseSeverity"
             },
-            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; sortField?: \"title\" | \"status\" | \"createdAt\" | \"updatedAt\" | \"severity\" | \"category\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
+            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; sortField?: \"status\" | \"title\" | \"createdAt\" | \"updatedAt\" | \"severity\" | \"category\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
             "Pagination",
             "> & { searchFields?: \"description\" | \"title\" | \"incremental_id.text\" | (\"description\" | \"title\" | \"incremental_id.text\")[] | undefined; }, signal?: AbortSignal | undefined) => Promise<",
             {
