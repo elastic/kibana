@@ -50,15 +50,23 @@ export const SalesforceConnector: ConnectorSpec = {
     search: {
       input: z.object({
         soql: z.string(),
+        nextRecordsUrl: z.string().optional(),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as { soql: string };
+        const typedInput = input as { soql: string; nextRecordsUrl?: string };
         const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        if (typedInput.nextRecordsUrl) {
+          const url = typedInput.nextRecordsUrl.startsWith('http')
+            ? typedInput.nextRecordsUrl
+            : `${baseUrl}${typedInput.nextRecordsUrl.startsWith('/') ? '' : '/'}${
+                typedInput.nextRecordsUrl
+              }`;
+          const response = await ctx.client.get(url, {});
+          return response.data;
+        }
         const response = await ctx.client.get(
           `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
-          {
-            params: { q: typedInput.soql },
-          }
+          { params: { q: typedInput.soql } }
         );
         return response.data;
       },
@@ -84,13 +92,24 @@ export const SalesforceConnector: ConnectorSpec = {
       input: z.object({
         sobjectName: z.string(),
         limit: z.number().default(50),
+        nextRecordsUrl: z.string().optional(),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           sobjectName: string;
           limit: number;
+          nextRecordsUrl?: string;
         };
         const baseUrl = getBaseUrl(ctx.secrets?.tokenUrl as string | undefined);
+        if (typedInput.nextRecordsUrl) {
+          const url = typedInput.nextRecordsUrl.startsWith('http')
+            ? typedInput.nextRecordsUrl
+            : `${baseUrl}${typedInput.nextRecordsUrl.startsWith('/') ? '' : '/'}${
+                typedInput.nextRecordsUrl
+              }`;
+          const response = await ctx.client.get(url, {});
+          return response.data;
+        }
         const limit = Math.min(typedInput.limit, 2000);
         const soql = `SELECT Id FROM ${typedInput.sobjectName} LIMIT ${limit}`;
         const response = await ctx.client.get(

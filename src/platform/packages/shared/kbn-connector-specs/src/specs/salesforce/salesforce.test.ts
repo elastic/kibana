@@ -19,8 +19,8 @@ describe('SalesforceConnector', () => {
   const baseUrl = 'https://myorg.my.salesforce.com';
   const mockContext = {
     client: mockClient,
-    config: { instanceUrl: baseUrl },
-    secrets: {},
+    config: {},
+    secrets: { tokenUrl: `${baseUrl}/services/oauth2/token` },
     log: { debug: jest.fn() },
   } as unknown as ActionContext;
 
@@ -66,7 +66,7 @@ describe('SalesforceConnector', () => {
         nextRecordsUrl: nextUrl,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(nextUrl, {});
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
     });
   });
 
@@ -110,7 +110,7 @@ describe('SalesforceConnector', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}/services/data/v59.0/query`, {
-        params: { q: 'SELECT Id FROM Account LIMIT 200' },
+        params: { q: 'SELECT Id FROM Account LIMIT 50' },
       });
       expect(result).toEqual(mockResponse.data);
     });
@@ -138,7 +138,7 @@ describe('SalesforceConnector', () => {
         nextRecordsUrl: nextUrl,
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(nextUrl, {});
+      expect(mockClient.get).toHaveBeenCalledWith(`${baseUrl}${nextUrl}`, {});
     });
   });
 

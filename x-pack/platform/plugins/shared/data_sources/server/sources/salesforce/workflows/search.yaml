@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.salesforce.search'
-description: 'Run a SOQL query against Salesforce. For large result sets, use nextRecordsUrl from the response to fetch the next page.'
+description: 'Run a SOQL query against Salesforce. Make sure you know the correct salesforce object name. For large result sets, use nextRecordsUrl from the response to fetch the next page.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
