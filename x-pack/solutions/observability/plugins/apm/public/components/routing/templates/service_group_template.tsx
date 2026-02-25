@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
@@ -125,28 +126,14 @@ export function ServiceGroupTemplate({
       pageTitle={serviceGroupsPageTitle}
       pageHeader={{
         tabs,
-        breadcrumbs: !isAllServices
-          ? [
-              {
-                text: (
-                  <>
-                    <EuiIcon size="s" type="arrowLeft" />{' '}
-                    {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
-                      defaultMessage: 'Return to service groups',
-                    })}
-                  </>
-                ),
-                color: 'primary',
-                'aria-current': false,
-                href: serviceGroupsLink,
-              },
-            ]
-          : undefined,
+        bottomBorder: 'extended',
+        paddingSize: 'none',
         ...pageHeader,
       }}
       environmentFilter={false}
       showServiceGroupSaveButton={!isAllServices}
       showServiceGroupsNav={false}
+      showPageHeader={true}
       selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
       {...pageTemplateProps}
     >

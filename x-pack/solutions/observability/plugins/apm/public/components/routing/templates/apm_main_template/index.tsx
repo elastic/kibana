@@ -45,6 +45,7 @@ export function ApmMainTemplate({
   showActionsMenu = false,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
+  showPageHeader = true,
   selectedNavButton,
   ...pageTemplateProps
 }: {
@@ -55,6 +56,8 @@ export function ApmMainTemplate({
   showActionsMenu?: boolean;
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
+  /** When false, the page header (title, tabs, breadcrumbs, rightSideItems) is not rendered. */
+  showPageHeader?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
@@ -123,27 +126,32 @@ export function ApmMainTemplate({
     ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
   ];
 
+  const observabilityPageTemplateProps = {
+    noDataConfig: shouldBypassNoDataScreen ? undefined : noDataConfig,
+    isPageDataLoaded: isLoading === false,
+    ...(showPageHeader
+      ? {
+          pageHeader: {
+            rightSideItems,
+            ...pageHeader,
+            pageTitle: undefined,
+            ...(showServiceGroupsNav &&
+              selectedNavButton && {
+                children: (
+                  <EuiFlexGroup direction="column">
+                    <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+                  </EuiFlexGroup>
+                ),
+              }),
+          },
+        }
+      : {}),
+    ...pageTemplateProps,
+  };
+
   return (
     <EnvironmentsContextProvider>
-      <ObservabilityPageTemplate
-        noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
-        isPageDataLoaded={isLoading === false}
-        pageHeader={{
-          rightSideItems,
-          ...pageHeader,
-          pageTitle: undefined,
-          children: (
-            <>
-              {showServiceGroupsNav && selectedNavButton && (
-                <EuiFlexGroup direction="column">
-                  <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
-                </EuiFlexGroup>
-              )}
-            </>
-          ),
-        }}
-        {...pageTemplateProps}
-      >
+      <ObservabilityPageTemplate {...observabilityPageTemplateProps}>
         {children}
       </ObservabilityPageTemplate>
     </EnvironmentsContextProvider>

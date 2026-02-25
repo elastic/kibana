@@ -39,6 +39,7 @@ export const dependencies = {
     title: DependenciesInventoryTitle,
     element: <DependenciesInventory />,
     environmentFilter: false,
+    showPageHeader: false,
     params: t.partial({
       query: t.intersection([
         t.type({

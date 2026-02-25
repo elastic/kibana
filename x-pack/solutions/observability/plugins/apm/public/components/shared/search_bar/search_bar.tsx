@@ -77,6 +77,7 @@ export function SearchBar({
             {showTimeComparison && (
               <EuiFlexItem grow={isXXXL} style={{ minWidth: 300 }}>
                 <TimeComparison />
+                <EuiSpacer size="s" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

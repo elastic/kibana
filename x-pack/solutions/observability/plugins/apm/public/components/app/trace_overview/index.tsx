@@ -21,6 +21,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
       <ApmMainTemplate
         pageTitle={title}
         environmentFilter={false}
+        showPageHeader={false}
         pageSectionProps={{
           contentProps: {
             style: {
