@@ -126,7 +126,6 @@ export const createThreatSignals = async ({
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
-  results.totalEventsFound = eventCount;
 
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
@@ -389,9 +388,6 @@ export const createThreatSignals = async ({
     signalsCount: results.createdSignalsCount,
     responseActions: completeRule.ruleParams.responseActions,
   });
-  // Restore totalEventsFound since combineConcurrentResults doesn't carry it through
-  results.totalEventsFound = eventCount;
-
   ruleExecutionLogger.trace('Indicator matching rule has completed');
   return results;
 };
