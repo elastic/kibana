@@ -27,7 +27,6 @@ export const EvaluationRunSummary = z.object({
   evaluator_model: Model.optional(),
   git_branch: z.string().nullable().optional(),
   git_commit_sha: z.string().nullable().optional(),
-  total_scores: z.number().int(),
   total_repetitions: z.number().int().optional(),
   ci: BuildkiteMetadata.optional(),
 });

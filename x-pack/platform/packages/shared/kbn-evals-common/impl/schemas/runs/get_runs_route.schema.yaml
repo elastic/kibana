@@ -85,8 +85,6 @@ components:
         git_commit_sha:
           type: string
           nullable: true
-        total_scores:
-          type: integer
         total_repetitions:
           type: integer
         ci:
@@ -94,4 +92,3 @@ components:
       required:
         - run_id
         - timestamp
-        - total_scores

@@ -60,7 +60,6 @@ export interface RunsListingResult {
     evaluator_model: { id: string; family: string | undefined; provider: string | undefined };
     git_branch: string | null;
     git_commit_sha: string | null;
-    total_scores: number;
     total_repetitions: number;
     ci: { build_url: string | undefined };
   }>;
@@ -227,7 +226,6 @@ export const parseRunsListingResponse = (
       },
       git_branch: firstBucket(bucket.git_branch) ?? null,
       git_commit_sha: firstBucket(bucket.git_commit_sha) ?? null,
-      total_scores: bucket.doc_count,
       total_repetitions: bucket.total_repetitions?.value ?? 1,
       ci: {
         build_url: firstBucket(bucket.build_url),

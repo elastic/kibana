@@ -79,12 +79,6 @@ export const RunsListPage: React.FC = () => {
         render: (branch: string | null) => branch ?? '-',
       },
       {
-        field: 'total_scores',
-        name: 'Scores',
-        sortable: true,
-        width: '80px',
-      },
-      {
         field: 'total_repetitions',
         name: 'Reps',
         width: '60px',
