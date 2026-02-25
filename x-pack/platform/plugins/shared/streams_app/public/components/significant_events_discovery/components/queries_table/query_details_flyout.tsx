@@ -134,8 +134,12 @@ export function QueryDetailsFlyout({
   };
 
   const isBacked = !unbackedQueryIds.includes(item.id);
+  const description = item.description?.trim();
+  const model = item.model?.trim();
+  const evidence = (item.evidence ?? []).map((value) => value.trim()).filter(Boolean);
+  const source = item.source;
 
-  const infoListItems = [
+  const infoListItems: Array<{ title: string; description: React.ReactNode }> = [
     {
       title: QUERY_LABEL,
       description: (
@@ -144,6 +148,49 @@ export function QueryDetailsFlyout({
         </EuiCodeBlock>
       ),
     },
+    ...(description
+      ? [
+          {
+            title: DESCRIPTION_LABEL,
+            description: <EuiText size="s">{description}</EuiText>,
+          },
+        ]
+      : []),
+    ...(model
+      ? [
+          {
+            title: MODEL_LABEL,
+            description: <EuiText size="s">{model}</EuiText>,
+          },
+        ]
+      : []),
+    ...(evidence.length > 0
+      ? [
+          {
+            title: EVIDENCE_LABEL,
+            description: (
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                {evidence.map((evidenceItem, index) => (
+                  <React.Fragment key={`${evidenceItem}-${index}`}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">{evidenceItem}</EuiText>
+                    </EuiFlexItem>
+                    {index < evidence.length - 1 ? <EuiHorizontalRule margin="xs" /> : null}
+                  </React.Fragment>
+                ))}
+              </EuiFlexGroup>
+            ),
+          },
+        ]
+      : []),
+    ...(source
+      ? [
+          {
+            title: SOURCE_LABEL,
+            description: <EuiBadge color="hollow">{getSourceDisplayName(source)}</EuiBadge>,
+          },
+        ]
+      : []),
     {
       title: IMPACT_COLUMN,
       description: <SeverityBadge score={item.severity_score} />,
@@ -391,6 +438,17 @@ function getDisplayQueryValue(query: StreamQuery) {
   return queryText || DEFAULT_QUERY_PLACEHOLDER;
 }
 
+function getSourceDisplayName(source: NonNullable<StreamQuery['source']>) {
+  switch (source) {
+    case 'ai_generated':
+      return SOURCE_AI_GENERATED_BADGE_LABEL;
+    case 'user_created':
+      return SOURCE_USER_CREATED_BADGE_LABEL;
+    case 'predefined':
+      return SOURCE_PREDEFINED_BADGE_LABEL;
+  }
+}
+
 const QUERY_INFORMATION_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryInformationTitle',
   { defaultMessage: 'Query information' }
@@ -409,6 +467,41 @@ const QUERY_NAME_LABEL = i18n.translate(
 const QUERY_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
   { defaultMessage: 'Query' }
+);
+
+const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.descriptionLabel',
+  { defaultMessage: 'Description' }
+);
+
+const MODEL_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.modelLabel',
+  { defaultMessage: 'Model' }
+);
+
+const EVIDENCE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.evidenceLabel',
+  { defaultMessage: 'Evidence' }
+);
+
+const SOURCE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourceLabel',
+  { defaultMessage: 'Source' }
+);
+
+const SOURCE_AI_GENERATED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourceAiGeneratedBadgeLabel',
+  { defaultMessage: 'AI generated' }
+);
+
+const SOURCE_USER_CREATED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourceUserCreatedBadgeLabel',
+  { defaultMessage: 'User created' }
+);
+
+const SOURCE_PREDEFINED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourcePredefinedBadgeLabel',
+  { defaultMessage: 'Predefined' }
 );
 
 const SEVERITY_LABEL = i18n.translate(
