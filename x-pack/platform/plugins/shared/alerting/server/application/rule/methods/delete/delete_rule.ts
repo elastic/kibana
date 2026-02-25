@@ -40,6 +40,7 @@ export async function deleteRule(context: RulesClientContext, params: DeleteRule
 async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: string }) {
   let taskIdToRemove: string | undefined | null;
   let apiKeyToInvalidate: string | null = null;
+  let uiamApiKeyToInvalidate: string | null = null;
   let apiKeyCreatedByUser: boolean | undefined | null = false;
   let attributes: RawRule;
   let rule: SavedObject<RawRule>;
@@ -52,7 +53,13 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
         namespace: context.namespace,
       },
     });
-    apiKeyToInvalidate = decryptedRule.attributes.apiKey;
+
+    const { uiamApiKey, apiKey } = decryptedRule.attributes;
+
+    apiKeyToInvalidate = apiKey;
+    if (uiamApiKey) {
+      uiamApiKeyToInvalidate = uiamApiKey;
+    }
     apiKeyCreatedByUser = decryptedRule.attributes.apiKeyCreatedByUser;
     taskIdToRemove = decryptedRule.attributes.scheduledTaskId;
     attributes = decryptedRule.attributes;
@@ -133,9 +140,14 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       namespace: context.namespace,
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
     }),
-    apiKeyToInvalidate && !apiKeyCreatedByUser
+    (apiKeyToInvalidate || uiamApiKeyToInvalidate) && !apiKeyCreatedByUser
       ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKeyToInvalidate] },
+          {
+            apiKeys: [
+              ...(apiKeyToInvalidate ? [apiKeyToInvalidate] : []),
+              ...(uiamApiKeyToInvalidate ? [uiamApiKeyToInvalidate] : []),
+            ],
+          },
           context.logger,
           context.unsecuredSavedObjectsClient
         )
