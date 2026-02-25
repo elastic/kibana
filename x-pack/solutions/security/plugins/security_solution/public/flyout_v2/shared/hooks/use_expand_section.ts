@@ -10,10 +10,6 @@ import { useKibana } from '../../../common/lib/kibana';
 
 export interface UseExpandSectionParams {
   /**
-   * Title of the section
-   */
-  title: string;
-  /**
    * Default value for the section
    */
   defaultValue: boolean;
@@ -21,19 +17,25 @@ export interface UseExpandSectionParams {
    * StorageKey to save value in specific flyout
    */
   storageKey: string;
+  /**
+   * Title of the section
+   */
+  title: string;
 }
 
 /**
  * Hook to get the expanded state of a section from local storage.
  */
-export const useExpandSection = ({ storageKey, title, defaultValue }: UseExpandSectionParams) => {
+export const useExpandSection = ({
+  storageKey,
+  title,
+  defaultValue,
+}: UseExpandSectionParams): boolean => {
   const { storage } = useKibana().services;
 
   return useMemo(() => {
     const localStorage = storage.get(storageKey);
     const key = title.toLowerCase();
-    const expanded =
-      localStorage && localStorage[key] !== undefined ? localStorage[key] : defaultValue;
-    return expanded;
-  }, [storage, storageKey, title, defaultValue]);
+    return localStorage && localStorage[key] !== undefined ? localStorage[key] : defaultValue;
+  }, [defaultValue, storage, storageKey, title]);
 };

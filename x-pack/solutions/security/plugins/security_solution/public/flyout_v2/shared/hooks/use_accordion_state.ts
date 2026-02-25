@@ -16,13 +16,13 @@ type ToggleReducerState = typeof CLOSED | typeof OPEN;
 
 export interface ToggleReducerAction {
   /**
-   * From useKibana().services.storage
-   */
-  storage: Storage | undefined;
-  /**
    * storageKey to save value in specific flyout
    */
   localStorageKey: string | undefined;
+  /**
+   * From useKibana().services.storage
+   */
+  storage: Storage | undefined;
   /**
    * title to save expanded value in local storage section
    */
@@ -35,7 +35,7 @@ export interface ToggleReducerAction {
  * The object stored is a map of section names to expanded boolean values.
  */
 export const toggleReducer = (state: ToggleReducerState, action: ToggleReducerAction) => {
-  const { storage, localStorageKey, title } = action;
+  const { localStorageKey, storage, title } = action;
 
   if (storage && localStorageKey && title) {
     const localStorage = storage.get(localStorageKey);
@@ -75,7 +75,7 @@ export const useAccordionState = (expandedInitially: boolean): UseAccordionState
   const renderContent = state === OPEN;
 
   const toggle = ({ localStorageKey, title }: { localStorageKey?: string; title?: string }) => {
-    toggleState({ storage, localStorageKey, title });
+    toggleState({ localStorageKey, storage, title });
   };
 
   return { renderContent, state, toggle };

@@ -22,6 +22,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'securitySolution:includedDataStreamNamespacesForRuleExecution': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Data stream namespace(s) to be included in rule execution.' },
+    },
+  },
   'securitySolution:maxUnassociatedNotes': {
     type: 'integer',
     _meta: { description: 'The maximum number of allowed unassociated notes' },
