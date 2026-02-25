@@ -54,9 +54,11 @@ jobs:
       pull-requests: read
     outputs:
       is_pr: ${{ steps.context.outputs.is_pr }}
+      is_fork_pr: ${{ steps.context.outputs.is_fork_pr }}
       pr_number: ${{ steps.context.outputs.pr_number }}
       pr_branch: ${{ steps.context.outputs.pr_branch }}
       pr_head_repo: ${{ steps.context.outputs.pr_head_repo }}
+      default_branch: ${{ steps.context.outputs.default_branch }}
 
     steps:
       - name: Resolve trigger context
@@ -65,8 +67,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          echo "default_branch=${{ github.event.repository.default_branch }}" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
             echo "is_pr=true" >> "$GITHUB_OUTPUT"
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+              echo "is_fork_pr=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "is_fork_pr=true" >> "$GITHUB_OUTPUT"
+            fi
             echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
             echo "pr_branch=${{ github.event.pull_request.head.ref }}" >> "$GITHUB_OUTPUT"
             echo "pr_head_repo=${{ github.event.pull_request.head.repo.full_name }}" >> "$GITHUB_OUTPUT"
@@ -77,17 +85,24 @@ jobs:
               PR_BRANCH=$(echo "$PR_JSON" | jq -r '.head.ref')
               PR_HEAD_REPO=$(echo "$PR_JSON" | jq -r '.head.repo.full_name')
               echo "is_pr=true" >> "$GITHUB_OUTPUT"
+              if [ "$PR_HEAD_REPO" = "${{ github.repository }}" ]; then
+                echo "is_fork_pr=false" >> "$GITHUB_OUTPUT"
+              else
+                echo "is_fork_pr=true" >> "$GITHUB_OUTPUT"
+              fi
               echo "pr_number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
               echo "pr_branch=${PR_BRANCH}" >> "$GITHUB_OUTPUT"
               echo "pr_head_repo=${PR_HEAD_REPO}" >> "$GITHUB_OUTPUT"
             else
               echo "is_pr=false" >> "$GITHUB_OUTPUT"
+              echo "is_fork_pr=false" >> "$GITHUB_OUTPUT"
               echo "pr_number=" >> "$GITHUB_OUTPUT"
               echo "pr_branch=" >> "$GITHUB_OUTPUT"
               echo "pr_head_repo=" >> "$GITHUB_OUTPUT"
             fi
           else
             echo "is_pr=false" >> "$GITHUB_OUTPUT"
+            echo "is_fork_pr=false" >> "$GITHUB_OUTPUT"
             echo "pr_number=" >> "$GITHUB_OUTPUT"
             echo "pr_branch=" >> "$GITHUB_OUTPUT"
             echo "pr_head_repo=" >> "$GITHUB_OUTPUT"
@@ -96,7 +111,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_branch || 'flash1293/action-ralph' }}
+          ref: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_branch || steps.context.outputs.default_branch }}
           fetch-depth: 1
           repository: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_head_repo || github.repository }}
 
@@ -165,33 +180,6 @@ jobs:
       - name: Install OpenCode CLI
         run: curl -fsSL https://opencode.ai/install | bash
 
-      - name: Configure OpenCode for LiteLLM
-        env:
-          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
-          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
-        run: |
-          set -euo pipefail
-          cat > "$GITHUB_WORKSPACE/opencode.json" <<OCEOF
-          {
-            "\$schema": "https://opencode.ai/config.json",
-            "provider": {
-              "litellm": {
-                "npm": "@ai-sdk/openai-compatible",
-                "name": "LiteLLM",
-                "options": {
-                  "baseURL": "${LITELLM_BASE_URL}",
-                  "apiKey": "{env:LITELLM_API_KEY}"
-                },
-                "models": {
-                  "${LITELLM_MODEL}": {
-                    "name": "${LITELLM_MODEL}"
-                  }
-                }
-              }
-            }
-          }
-          OCEOF
-
       - name: Resolve prompt and model
         id: prompt
         env:
@@ -247,14 +235,93 @@ jobs:
             echo "model=${DEFAULT_MODEL}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build spec and run inner ralph loop
+          EFFECTIVE_MODEL=$(awk -F= '$1=="model"{print $2}' "$GITHUB_OUTPUT" | tail -1)
+          if [[ "$EFFECTIVE_MODEL" != litellm/* ]]; then
+            echo "::error::Only litellm/<model> is supported in this workflow. Got: ${EFFECTIVE_MODEL}"
+            exit 1
+          fi
+          echo "litellm_model=${EFFECTIVE_MODEL#litellm/}" >> "$GITHUB_OUTPUT"
+
+      - name: Create short-lived LiteLLM key
+        id: short_lived_key
         env:
           LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          LITELLM_MODEL: ${{ steps.prompt.outputs.litellm_model }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          BASE="${LITELLM_BASE_URL%/}"
+          NO_V1="${BASE%/v1}"
+          API_KEY_ENDPOINT="${NO_V1}/key/generate"
+          FALLBACK_ENDPOINT="${BASE}/key/generate"
+
+          payload="$(jq -n \
+            --arg model "$LITELLM_MODEL" \
+            --arg alias "action-ralph-run-${RUN_ID}" \
+            '{models: [$model], duration: "90m", key_alias: $alias}')"
+
+          response="$(curl -fsS -X POST "$API_KEY_ENDPOINT" \
+            -H "Authorization: Bearer ${LITELLM_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload" 2>/dev/null || true)"
+
+          if [ -z "$response" ]; then
+            response="$(curl -fsS -X POST "$FALLBACK_ENDPOINT" \
+              -H "Authorization: Bearer ${LITELLM_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "$payload")"
+          fi
+
+          short_key="$(printf '%s' "$response" | jq -r '.key // .token // .data.key // empty')"
+          if [ -z "$short_key" ] || [ "$short_key" = "null" ]; then
+            echo "::error::Failed to mint short-lived LiteLLM key. Raw response:"
+            printf '%s\n' "$response"
+            exit 1
+          fi
+
+          {
+            echo "api_key=${short_key}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Configure OpenCode for LiteLLM
+        env:
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          LITELLM_MODEL: ${{ steps.prompt.outputs.litellm_model }}
+        run: |
+          set -euo pipefail
+          cat > "$GITHUB_WORKSPACE/opencode.json" <<OCEOF
+          {
+            "\$schema": "https://opencode.ai/config.json",
+            "provider": {
+              "litellm": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "LiteLLM",
+                "options": {
+                  "baseURL": "${LITELLM_BASE_URL}",
+                  "apiKey": "{env:LITELLM_API_KEY}"
+                },
+                "models": {
+                  "${LITELLM_MODEL}": {
+                    "name": "${LITELLM_MODEL}"
+                  }
+                }
+              }
+            }
+          }
+          OCEOF
+
+      - name: Build spec and run inner ralph loop
+        env:
+          # Security guardrail: pass only a short-lived, model-scoped key in the sandbox.
+          # Do not inject long-lived secrets in this phase without security review.
+          LITELLM_API_KEY: ${{ steps.short_lived_key.outputs.api_key }}
           PROMPT: ${{ steps.prompt.outputs.task }}
           MODEL: ${{ steps.prompt.outputs.model }}
           MAX_ITERATIONS: ${{ inputs.max_iterations || '5' }}
           IS_PR: ${{ needs.prepare.outputs.is_pr }}
           PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+          DEFAULT_BRANCH: ${{ needs.prepare.outputs.default_branch }}
         run: |
           set -euo pipefail
 
@@ -267,7 +334,7 @@ jobs:
           if [ "$IS_PR" = "true" ]; then
             SPEC_CONTEXT="Modifying existing PR #${PR_NUMBER}. Make file changes locally — a separate publish step handles git push."
           else
-            SPEC_CONTEXT="Creating new changes against flash1293/action-ralph. Make file changes locally — a separate publish step handles PR creation."
+            SPEC_CONTEXT="Creating new changes against ${DEFAULT_BRANCH}. Make file changes locally — a separate publish step handles PR creation."
           fi
 
           cat > "$SPEC_FILE" <<SPEC
@@ -358,6 +425,40 @@ jobs:
           mkdir -p /tmp/agent-output
           cp "$SPEC_FILE" /tmp/agent-output/ralph-spec.md
           cat "${SESSION_DIR}"/run-*.md > /tmp/agent-output/agent-reasoning.md 2>/dev/null || true
+
+      - name: Redact agent reasoning output
+        env:
+          LITELLM_API_KEY: ${{ steps.short_lived_key.outputs.api_key }}
+        run: |
+          set -euo pipefail
+          if [ ! -f /tmp/agent-output/agent-reasoning.md ]; then
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path('/tmp/agent-output/agent-reasoning.md')
+          text = path.read_text(encoding='utf-8', errors='ignore')
+
+          key = os.getenv('LITELLM_API_KEY')
+          if key:
+              text = text.replace(key, '[REDACTED_LITELLM_API_KEY]')
+
+          patterns = [
+              (r'(?i)(authorization\s*:\s*bearer)\s+[^\s]{12,}', r'\1 [REDACTED]'),
+              (r'(?i)(api[_-]?key|token|secret)\s*[:=]\s*[\'"]?[a-z0-9._\-/+=]{12,}[\'"]?', r'\1=[REDACTED]'),
+              (r'\bghp_[A-Za-z0-9]{20,}\b', '[REDACTED_GITHUB_TOKEN]'),
+              (r'\bgithub_pat_[A-Za-z0-9_]{20,}\b', '[REDACTED_GITHUB_PAT]'),
+              (r'\bsk-[A-Za-z0-9]{16,}\b', '[REDACTED_SK_TOKEN]'),
+          ]
+          for pattern, replacement in patterns:
+              text = re.sub(pattern, replacement, text)
+
+          path.write_text(text, encoding='utf-8')
+          PY
 
       - name: Validate changed files
         run: |
@@ -471,10 +572,10 @@ jobs:
       - name: Checkout target
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || 'flash1293/action-ralph' }}
+          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch }}
           fetch-depth: 1
           token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
+          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
 
       - name: Download agent changes
         uses: actions/download-artifact@v4
@@ -499,7 +600,7 @@ jobs:
           fi
 
       - name: Push to existing PR
-        if: env.has_changes == 'true' && needs.prepare.outputs.is_pr == 'true'
+        if: env.has_changes == 'true' && needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true'
         run: |
           set -euo pipefail
           PROMPT_SUMMARY=$(cat /tmp/agent-output/prompt-summary.txt 2>/dev/null || echo "AI-generated changes")
@@ -547,13 +648,17 @@ jobs:
           GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
 
       - name: Create new PR
-        if: env.has_changes == 'true' && needs.prepare.outputs.is_pr != 'true'
+        if: env.has_changes == 'true' && (needs.prepare.outputs.is_pr != 'true' || needs.prepare.outputs.is_fork_pr == 'true')
         run: |
           set -euo pipefail
           PROMPT_SUMMARY=$(cat /tmp/agent-output/prompt-summary.txt 2>/dev/null || echo "AI-generated changes")
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          BRANCH_SUFFIX=$(date +%Y%m%d-%H%M%S)-$(echo "$PROMPT_SUMMARY" | md5sum | head -c 8)
-          BRANCH_NAME="action-ralph/${BRANCH_SUFFIX}"
+          BRANCH_HASH=$(echo "$PROMPT_SUMMARY" | md5sum | head -c 8)
+          if [ "${{ needs.prepare.outputs.is_pr }}" = "true" ] && [ "${{ needs.prepare.outputs.is_fork_pr }}" = "true" ]; then
+            BRANCH_NAME="action-ralph/pr-${{ needs.prepare.outputs.pr_number }}-$(date +%Y%m%d-%H%M%S)-${BRANCH_HASH}"
+          else
+            BRANCH_NAME="action-ralph/issue-${{ github.event.issue.number || 'manual' }}-$(date +%Y%m%d-%H%M%S)-${BRANCH_HASH}"
+          fi
 
           git checkout -b "$BRANCH_NAME"
           CHANGED_COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
@@ -612,10 +717,15 @@ jobs:
           PR_URL=$(gh pr view --json url -q '.url')
           echo "::notice::PR created: ${PR_URL}"
 
-          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+          if [ "${{ github.event_name }}" = "issue_comment" ] && [ "${{ needs.prepare.outputs.is_pr }}" != "true" ]; then
             ISSUE_NUMBER="${{ github.event.issue.number }}"
             gh issue comment "$ISSUE_NUMBER" \
               --body "Action Ralph has completed the task and opened a PR: ${PR_URL}"
+          fi
+
+          if [ "${{ needs.prepare.outputs.is_pr }}" = "true" ] && [ "${{ needs.prepare.outputs.is_fork_pr }}" = "true" ]; then
+            SOURCE_PR="${{ needs.prepare.outputs.pr_number }}"
+            gh pr comment "$SOURCE_PR" --body "Action Ralph created a companion PR in \`${{ github.repository }}\` because the source PR comes from a fork and cannot be pushed directly: ${PR_URL}"
           fi
         env:
           GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}

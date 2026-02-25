@@ -35,7 +35,7 @@ This means the agent can plan its own work across sessions. Session 1 might inve
 
 ### 1. New work: workflow_dispatch
 
-Go to **Actions > Action Ralph > Run workflow**, enter a prompt. Creates a new PR from `flash1293/action-ralph`.
+Go to **Actions > Action Ralph > Run workflow**, enter a prompt. Creates a new PR from the repository default branch.
 
 ### 2. New work: issue comment
 
@@ -45,7 +45,7 @@ Comment on any issue:
 /action-ralph <description of what to build>
 ```
 
-Creates a new PR from `flash1293/action-ralph` with the issue body as context.
+Creates a new PR from the repository default branch with the issue body as context.
 
 ### 3. Modify existing PR: PR comment
 
@@ -59,8 +59,10 @@ Action Ralph will:
 - Checkout the PR's branch (not the base branch)
 - Bootstrap from that branch's state
 - Run the agent loop
-- Push commits directly to the PR branch
+- Push commits directly to the PR branch (same-repo PRs)
 - Post a comment on the PR with a summary of changes
+
+If the source PR comes from a fork, Action Ralph creates a companion PR in `elastic/kibana` and comments on the source PR with the link.
 
 ### 4. Modify existing PR: code review comment
 
@@ -79,11 +81,13 @@ Configure in **Settings > Secrets and variables > Actions**:
 | Secret | Description | Already in elastic/kibana? |
 |---|---|---|
 | `KIBANAMACHINE_TOKEN` | PAT for the `kibanamachine` service account (git push, PR creation, comments) | Yes |
-| `LITELLM_API_KEY` | API key for your LiteLLM proxy | No -- must add |
+| `LITELLM_API_KEY` | Admin/master API key used only to mint short-lived run keys | No -- must add |
 | `LITELLM_BASE_URL` | Base URL of your LiteLLM proxy (include `/v1`) | No -- must add |
 | `LITELLM_MODEL` | Model name in your LiteLLM config (e.g. `claude-opus-4-5`) | No -- must add |
 
 `KIBANAMACHINE_TOKEN` is already configured in the `elastic/kibana` repo. You only need to add the three `LITELLM_*` secrets.
+
+During Phase B, Action Ralph generates a short-lived LiteLLM key scoped to the selected model and passes only that ephemeral key to the agent runtime.
 
 ## Runner configuration
 
