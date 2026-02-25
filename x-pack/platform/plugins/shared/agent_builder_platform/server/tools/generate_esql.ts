@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -28,11 +30,13 @@ const nlToEsqlToolSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      '(optional) If false, only validate the query (AST) and do not execute it. Use when the query is for display or later use. Default true.'
+      '(optional) If false, only validate the query using AST. If true (default), will execute the query to ensure it is valid before returning it.'
     ),
 });
 
-export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+export const generateEsqlTool = (
+  buildServerESQLCallbacks?: (opts: { client: ElasticsearchClient }) => ESQLCallbacks
+): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
@@ -43,12 +47,14 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
       { esClient, modelProvider, logger, events }
     ) => {
       const model = await modelProvider.getDefaultModel();
+      const esqlCallbacks = buildServerESQLCallbacks?.({ client: esClient.asCurrentUser });
 
       const esqlResponse = await generateEsql({
         nlQuery,
         index,
         additionalContext: context,
         executeQuery,
+        esqlCallbacks,
         model,
         esClient: esClient.asCurrentUser,
         logger,

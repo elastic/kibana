@@ -7,6 +7,8 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import { productDocumentationTool } from './product_documentation';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type {
@@ -32,13 +34,17 @@ export const registerTools = ({
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
 }) => {
-  const { agentBuilder } = setupDeps;
+  const { agentBuilder, esql } = setupDeps;
+
+  const buildServerESQLCallbacks:
+    | ((opts: { client: ElasticsearchClient }) => ESQLCallbacks)
+    | undefined = esql?.buildServerESQLCallbacks;
 
   const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool(),
     getDocumentByIdTool(),
     executeEsqlTool(),
-    generateEsqlTool(),
+    generateEsqlTool(buildServerESQLCallbacks),
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),
