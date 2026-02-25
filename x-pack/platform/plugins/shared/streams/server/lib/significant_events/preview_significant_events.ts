@@ -10,8 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { BasicPrettyPrinter } from '@kbn/esql-language';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SignificantEventsPreviewResponse, StreamQuery, Streams } from '@kbn/streams-schema';
-import { getIndexPatternsForStream } from '@kbn/streams-schema';
-import { extractWhereExpression } from '../helpers/esql_helpers';
+import { extractWhereExpression, getIndexPatternsForStream } from '@kbn/streams-schema';
 
 /**
  * Converts a fixed-interval string (e.g. "300s") to an ES|QL time literal

@@ -11,12 +11,16 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { StreamQuery, StreamQueryInput, Streams } from '@kbn/streams-schema';
-import { getIndexPatternsForStream } from '@kbn/streams-schema';
+import {
+  buildMetadataOption,
+  ensureMetadata,
+  extractWhereExpression,
+  getIndexPatternsForStream,
+} from '@kbn/streams-schema';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import type { ESQLCommand } from '@kbn/esql-language';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
-import { extractWhereExpression } from '../../../helpers/esql_helpers';
 import {
   LEGACY_RULE_BACKED_FALLBACK,
   type Query,
@@ -225,16 +229,7 @@ function buildRuleEsqlQuery(indices: string[], query: StreamQuery): string {
 
   const fromCommand = Builder.command({
     name: 'from',
-    args: [
-      Builder.expression.source.index(indices.join(',')),
-      Builder.option({
-        name: 'METADATA',
-        args: [
-          Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
-          Builder.expression.column({ args: [Builder.identifier('_source')] }),
-        ],
-      }),
-    ],
+    args: [Builder.expression.source.index(indices.join(',')), buildMetadataOption()],
   });
 
   const commands: ESQLCommand[] = [fromCommand];
@@ -647,7 +642,14 @@ export class QueryClient {
     const indexOperationsMap = new Map(
       operations
         .filter((operation) => operation.index)
-        .map((operation) => [operation.index!.id, operation.index!])
+        .map((operation) => {
+          const input = operation.index!;
+          const normalized: StreamQueryInput = {
+            ...input,
+            esql: { query: ensureMetadata(input.esql.query) },
+          };
+          return [normalized.id, normalized];
+        })
     );
     const deleteOperationIds = new Set(
       operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)

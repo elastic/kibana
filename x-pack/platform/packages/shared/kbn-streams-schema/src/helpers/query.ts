@@ -9,40 +9,24 @@ import type { Condition } from '@kbn/streamlang';
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import type { KqlQuery } from '../queries';
+import { buildMetadataOption } from './esql_helpers';
 
 /**
  * @deprecated Legacy helper that converts a KQL query + optional feature filter
  * into an ES|QL query string. Only used for storage migration of pre-existing
- * KQL-based queries.
+ * KQL-based queries. Always includes `METADATA _id, _source` so the resulting
+ * query is self-contained for alerting rules.
  */
 export const buildEsqlQuery = (
   indices: string[],
   input: {
     kql: KqlQuery;
     feature?: { name: string; filter: Condition; type: 'system' };
-  },
-  includeMetadata: boolean = false
+  }
 ): string => {
   const fromCommand = Builder.command({
     name: 'from',
-    args: [
-      Builder.expression.source.index(indices.join(',')),
-      ...(includeMetadata
-        ? [
-            Builder.option({
-              name: 'METADATA',
-              args: [
-                Builder.expression.column({
-                  args: [Builder.identifier({ name: '_id' })],
-                }),
-                Builder.expression.column({
-                  args: [Builder.identifier('_source')],
-                }),
-              ],
-            }),
-          ]
-        : []),
-    ],
+    args: [Builder.expression.source.index(indices.join(',')), buildMetadataOption()],
   });
 
   const kqlQuery = Builder.expression.func.call('KQL', [

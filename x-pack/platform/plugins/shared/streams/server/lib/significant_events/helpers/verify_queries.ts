@@ -8,9 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import { kqlQuery } from '@kbn/es-query';
 import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
-import { extractWhereExpression } from '../../helpers/esql_helpers';
 import type { Streams } from '@kbn/streams-schema';
-import { getIndexPatternsForStream } from '@kbn/streams-schema';
+import { extractWhereExpression, getIndexPatternsForStream } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import pLimit from 'p-limit';
 import { isKqlQueryValid, rangeQuery } from '../../../../common/query_helpers';
