@@ -20,12 +20,12 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
     });
 
     test.afterEach(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('should create a new routing rule successfully', async ({ page, pageObjects }) => {
@@ -34,7 +34,9 @@ test.describe(
       // Verify we're in the creating new rule state
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
       await expect(page.getByTestId('streamsAppRoutingStreamNameLabel')).toBeVisible();
-      await expect(page.getByTestId('streamsAppRoutingStreamNamePrefix')).toContainText('logs.');
+      await expect(page.getByTestId('streamsAppRoutingStreamNamePrefix')).toContainText(
+        'logs.otel.'
+      );
 
       // Fill in the stream name
       await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('nginx');
@@ -50,8 +52,8 @@ test.describe(
       await page.getByTestId('streamsAppStreamDetailRoutingSaveButton').click();
 
       // Verify success
-      await pageObjects.streams.expectRoutingRuleVisible('logs.nginx');
-      const routingRule = page.getByTestId('routingRule-logs.nginx');
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.nginx');
+      const routingRule = page.getByTestId('routingRule-logs.otel.nginx');
       await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
         'service.name'
       );
@@ -133,7 +135,7 @@ test.describe(
     }) => {
       // Login as user with limited privileges
       await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
 
       // Create button should be disabled or show tooltip
       const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
@@ -169,13 +171,13 @@ test.describe(
       await pageObjects.toasts.closeAll();
 
       const streamLink = page
-        .getByTestId('routingRule-logs.navigation-test')
+        .getByTestId('routingRule-logs.otel.navigation-test')
         .getByTestId('streamsAppRoutingStreamEntryButton');
       await expect(streamLink).toBeVisible();
       await streamLink.click();
 
       // Verify we navigated to the child stream's partitioning tab
-      await expect(page).toHaveURL(/logs\.navigation-test\/management\/partitioning/);
+      await expect(page).toHaveURL(/logs\.otel\.navigation-test\/management\/partitioning/);
     });
 
     test('should show "Open stream in new tab" button in success toast', async ({
@@ -199,7 +201,7 @@ test.describe(
 
       await expect(openInNewTabButton).toHaveAttribute(
         'href',
-        expect.stringContaining('logs.toast-test')
+        expect.stringContaining('logs.otel.toast-test')
       );
     });
 
@@ -219,7 +221,7 @@ test.describe(
       await pageObjects.toasts.closeAll();
 
       // Verify first rule was created
-      await pageObjects.streams.expectRoutingRuleVisible('logs.duplicate-test');
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.duplicate-test');
 
       // Try to create another with same name
       await pageObjects.streams.clickCreateRoutingRule();
