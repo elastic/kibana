@@ -22,6 +22,7 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
@@ -148,6 +149,14 @@ export const createAppContextStartContractMock = (
     return internalSoClient;
   });
 
+  mockedSavedObject.getUnsafeInternalClient.mockImplementation((options) => {
+    if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
+      return internalSoClientWithoutSpaceExtension;
+    }
+
+    return internalSoClient;
+  });
+
   return {
     taskManagerStart: taskManagerMock.createStart(),
     elasticsearch: elasticsearchServiceMock.createStart(),
@@ -194,6 +203,7 @@ export const createAppContextStartContractMock = (
     alertingStart: {
       getRulesClientWithRequest: jest.fn(),
     } as any,
+    reportingStart: reportingMock.createStart(),
   };
 };
 
@@ -275,6 +285,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     restoreRollback: jest.fn(),
     cleanupRollbackSavedObjects: jest.fn(),
     bumpAgentPolicyRevisionAfterRollback: jest.fn(),
+    compilePackagePolicyForVersions: jest.fn(),
   };
 };
 

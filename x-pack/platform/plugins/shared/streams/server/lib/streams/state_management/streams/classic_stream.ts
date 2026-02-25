@@ -15,7 +15,13 @@ import type {
   IngestStreamLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
-import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import {
+  isIlmLifecycle,
+  isInheritLifecycle,
+  Streams,
+  validateStreamName,
+} from '@kbn/streams-schema';
+import { validateStreamlang } from '@kbn/streamlang';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,
@@ -38,7 +44,12 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import type { StateDependencies, StreamChange } from '../types';
-import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import {
+  computeChange,
+  formatSettings,
+  settingsUpdateRequiresRollover,
+  validateQueryStreams,
+} from './helpers';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface ClassicStreamChanges extends StreamChanges {
@@ -47,6 +58,7 @@ interface ClassicStreamChanges extends StreamChanges {
   failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
+  query_streams: boolean;
 }
 
 export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Definition> {
@@ -56,6 +68,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     lifecycle: false,
     failure_store: false,
     settings: false,
+    query_streams: false,
   };
 
   private _effectiveSettings?: IngestStreamSettings;
@@ -92,33 +105,64 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    this._changes.processing =
+    const isExistingStream = !!startingStateStreamDefinition;
+
+    this._changes.processing = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasChanged: () =>
+        !_.isEqual(
+          _.omit(this._definition.ingest.processing, ['updated_at']),
+          _.omit(startingStateStreamDefinition!.ingest.processing, ['updated_at'])
+        ),
+    });
+
+    this._changes.lifecycle = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !isInheritLifecycle(this._definition.ingest.lifecycle),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.lifecycle,
+          startingStateStreamDefinition!.ingest.lifecycle
+        ),
+    });
+
+    // Prefetch effective settings for existing streams to allow sync comparison
+    const effectiveSettings = isExistingStream ? await this.getEffectiveSettings() : undefined;
+    this._changes.settings = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: Object.keys(this._definition.ingest.settings || {}).length > 0,
+      hasChanged: () => !_.isEqual(effectiveSettings, this._definition.ingest.settings),
+    });
+
+    this._changes.field_overrides = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !!(
+        this._definition.ingest.classic.field_overrides &&
+        Object.keys(this._definition.ingest.classic.field_overrides).length > 0
+      ),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.classic.field_overrides,
+          startingStateStreamDefinition!.ingest.classic.field_overrides
+        ),
+    });
+
+    this._changes.failure_store = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !isInheritFailureStore(this._definition.ingest.failure_store),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.failure_store,
+          startingStateStreamDefinition!.ingest.failure_store
+        ),
+    });
+
+    this._changes.query_streams =
       !startingStateStreamDefinition ||
       !_.isEqual(
-        _.omit(this._definition.ingest.processing, ['updated_at']),
-        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
-      );
-
-    this._changes.lifecycle =
-      !startingStateStreamDefinition ||
-      !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
-
-    this._changes.settings =
-      !startingStateStreamDefinition ||
-      !_.isEqual(await this.getEffectiveSettings(), this._definition.ingest.settings);
-
-    this._changes.field_overrides =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.classic.field_overrides,
-        startingStateStreamDefinition.ingest.classic.field_overrides
-      );
-
-    this._changes.failure_store =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.failure_store,
-        startingStateStreamDefinition.ingest.failure_store
+        this._definition.query_streams ?? [],
+        startingStateStreamDefinition.query_streams ?? []
       );
 
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
@@ -140,13 +184,33 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
-    return { cascadingChanges: [], changeStatus: 'deleted' };
+    const cascadingChanges: StreamChange[] = [];
+
+    // Cascade delete to all child query streams
+    const childQueryStreams = this._definition.query_streams ?? [];
+    for (const childRef of childQueryStreams) {
+      cascadingChanges.push({
+        type: 'delete',
+        name: childRef.name,
+      });
+    }
+
+    return { cascadingChanges, changeStatus: 'deleted' };
   }
 
   protected async doValidateUpsertion(
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
+    // Validate the stream's name
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
+      };
+    }
+
     if (this.dependencies.isServerless) {
       if (isIlmLifecycle(this.getLifecycle())) {
         return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
@@ -232,6 +296,23 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);
 
+    // Validate Streamlang processing
+    if (this._definition.ingest.processing.steps.length > 0) {
+      const validationResult = validateStreamlang(this._definition.ingest.processing, {
+        reservedFields: [],
+        streamType: 'classic',
+      });
+
+      if (!validationResult.isValid) {
+        return {
+          isValid: false,
+          errors: validationResult.errors.map(
+            (error) => new Error(`${error.message} (field: ${error.field})`)
+          ),
+        };
+      }
+    }
+
     const allowlistValidation = validateSettings({
       settings: this._definition.ingest.settings,
       isServerless: this.dependencies.isServerless,
@@ -250,6 +331,16 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       }),
       validateSimulation(this._definition, this.dependencies.scopedClusterClient),
     ]);
+
+    const queryStreamsValidation = validateQueryStreams({
+      desiredState,
+      name: this._definition.name,
+      queryStreams: this._definition.query_streams ?? [],
+    });
+
+    if (queryStreamsValidation) {
+      return queryStreamsValidation;
+    }
 
     return { isValid: true, errors: [] };
   }
@@ -501,7 +592,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       {
         type: 'delete_queries',
         request: {
-          name: this._definition.name,
+          definition: this._definition,
         },
       },
       {

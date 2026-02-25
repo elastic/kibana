@@ -19,6 +19,7 @@ interface UseWorkflowExecutionsParams {
   workflowId: string | null;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
+  executedBy?: string[];
   size?: number;
 }
 
@@ -30,7 +31,7 @@ export function useWorkflowExecutions(
       unknown,
       WorkflowExecutionListDto,
       WorkflowExecutionListDto,
-      (string | number | ExecutionStatus[] | ExecutionType[] | null | undefined)[]
+      (string | number | ExecutionStatus[] | ExecutionType[] | string[] | null | undefined)[]
     >,
     'queryKey' | 'queryFn' | 'getNextPageParam'
   > = {}
@@ -45,12 +46,22 @@ export function useWorkflowExecutions(
           workflowId: params.workflowId,
           statuses: params.statuses,
           executionTypes: params.executionTypes,
+          ...(params.executedBy && params.executedBy.length > 0
+            ? { executedBy: params.executedBy }
+            : {}),
           page: pageParam,
           size: currentSize,
         },
       });
     },
-    [http, params.workflowId, params.statuses, params.executionTypes, currentSize]
+    [
+      http,
+      params.workflowId,
+      params.statuses,
+      params.executionTypes,
+      params.executedBy,
+      currentSize,
+    ]
   );
 
   const getNextPageParam = useCallback((lastPage: WorkflowExecutionListDto) => {
@@ -81,6 +92,7 @@ export function useWorkflowExecutions(
       'executions',
       params.statuses,
       params.executionTypes,
+      params.executedBy,
       currentSize,
     ],
     queryFn,

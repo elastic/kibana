@@ -31,7 +31,7 @@ export function createProjectFetcher(http: HttpSetup, logger: Logger): ProjectFe
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const response = await http.get<ProjectTagsResponse>('/internal/cps/projects_tags');
+        const response = await http.post<ProjectTagsResponse>('/internal/cps/projects_tags');
         const originValues = response.origin ? Object.values(response.origin) : [];
 
         return {

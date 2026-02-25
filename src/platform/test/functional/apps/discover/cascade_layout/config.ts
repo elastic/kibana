@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+  const kbnTestServer = functionalConfig.get('kbnTestServer');
+  const esTestCluster = functionalConfig.get('esTestCluster');
+
+  return {
+    ...functionalConfig.getAll(),
+    esTestCluster: {
+      ...esTestCluster,
+      license: 'trial', // required to test categorize grouping
+    },
+    kbnTestServer: {
+      ...kbnTestServer,
+      serverArgs: [
+        ...kbnTestServer.serverArgs,
+        '--feature_flags.overrides.discover.cascadeLayoutEnabled=true',
+      ],
+    },
+    testFiles: [require.resolve('.')],
+  };
+}

@@ -13,12 +13,16 @@ import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import type { InternalConnectorContract } from '@kbn/workflows';
-import { isInternalConnector } from '@kbn/workflows';
+import { buildElasticsearchRequest, isInternalConnector } from '@kbn/workflows';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { getAllConnectors } from '../../../../../common/schema';
-import type { ElasticsearchRequestInfo } from '../elasticsearch_step_utils';
-import { getElasticsearchRequestInfo } from '../elasticsearch_step_utils';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
+
+interface ElasticsearchRequestInfo {
+  method: string;
+  url: string;
+  data?: string[];
+}
 
 /**
  * Monaco connector handler for Elasticsearch APIs
@@ -47,7 +51,7 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
 
       // Get Elasticsearch request information
       const withParams = this.extractWithParams(stepContext.stepNode);
-      const requestInfo = getElasticsearchRequestInfo(connectorType, withParams);
+      const requestInfo = this.getElasticsearchRequestInfo(connectorType, withParams);
 
       // Get connector contract
       const connector = this.getConnectorContract(connectorType);
@@ -196,6 +200,22 @@ export class ElasticsearchMonacoConnectorHandler extends BaseMonacoConnectorHand
     }
 
     return withParams;
+  }
+
+  /**
+   * Get Elasticsearch request info using the shared buildRequestFromConnector utility
+   */
+  private getElasticsearchRequestInfo(
+    stepType: string,
+    withParams?: Record<string, unknown>
+  ): ElasticsearchRequestInfo {
+    const { method, path, body } = buildElasticsearchRequest(stepType, withParams || {});
+
+    return {
+      method,
+      url: decodeURIComponent(path),
+      data: body ? [JSON.stringify(body, null, 2)] : undefined,
+    };
   }
 
   private getConnectorContract(connectorType: string): InternalConnectorContract | null {

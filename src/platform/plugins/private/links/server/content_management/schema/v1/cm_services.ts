@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
@@ -42,31 +43,31 @@ export const dashboardLinkSchema = schema.object({
   options: schema.maybe(dashboardNavigationOptionsSchema),
 });
 
+export const externalLinkOptionsSchema = schema.object(
+  {
+    openInNewTab: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Whether to open this link in a new tab when clicked',
+        },
+      })
+    ),
+    encodeUrl: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'Whether to escape the URL with percent encoding',
+        },
+      })
+    ),
+  },
+  { unknowns: 'forbid' }
+);
+
 export const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to open this link in a new tab when clicked',
-            },
-          })
-        ),
-        encodeUrl: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to escape the URL with percent encoding',
-            },
-          })
-        ),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
+  options: schema.maybe(externalLinkOptionsSchema),
 });
 
 // Shared schema for links array - used by both saved objects and embeddables
@@ -86,10 +87,8 @@ export const layoutSchema = schema.maybe(
   })
 );
 
-export const linksSchema = schema.object(
+export const linksSchema = serializedTitlesSchema.extends(
   {
-    title: schema.string({ meta: { description: 'A human-readable title' } }),
-    description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     links: linksArraySchema,
     layout: layoutSchema,
   },

@@ -27,7 +27,7 @@ const testProps = {
     { title: 'Rules:', badge: { value: 2 } },
     { title: 'Alerts:', badge: { value: 2, width: 50, color: '#a83632' } },
   ],
-  takeActionItems: () => (
+  getActionItems: () => (
     <EuiContextMenu
       initialPanelId={0}
       panels={[
@@ -82,7 +82,7 @@ describe('Group stats', () => {
     const { queryByTestId } = render(
       <GroupStats
         {...testProps}
-        takeActionItems={() => (
+        getActionItems={() => (
           <EuiContextMenu
             initialPanelId={0}
             panels={[
@@ -99,7 +99,7 @@ describe('Group stats', () => {
   });
 
   it('hides the Take Actions menu when no action item is provided', () => {
-    const { queryByTestId } = render(<GroupStats {...testProps} takeActionItems={undefined} />);
+    const { queryByTestId } = render(<GroupStats {...testProps} getActionItems={undefined} />);
     expect(queryByTestId('take-action-button')).not.toBeInTheDocument();
   });
 });

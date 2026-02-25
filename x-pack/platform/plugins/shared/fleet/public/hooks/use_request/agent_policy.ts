@@ -125,11 +125,16 @@ export const useGetOneAgentPolicy = (agentPolicyId: string | undefined) => {
   } as SendConditionalRequestConfig);
 };
 
-export const useGetOneAgentPolicyFull = (agentPolicyId: string) => {
-  return useRequest<GetFullAgentPolicyResponse>({
-    path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
-    method: 'get',
-    version: API_VERSIONS.public.v1,
+export const useGetOneAgentPolicyFull = (agentPolicyId: string, query?: { revision?: number }) => {
+  return useQuery<GetFullAgentPolicyResponse, RequestError>({
+    queryKey: ['agentPolicyFull', agentPolicyId, query],
+    queryFn: () =>
+      sendRequestForRq<GetFullAgentPolicyResponse>({
+        path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
   });
 };
 
@@ -287,10 +292,14 @@ export const useGetListOutputsForPolicies = (body?: GetListAgentPolicyOutputsReq
 };
 
 export const useGetInfoOutputsForPolicy = (agentPolicyId: string | undefined) => {
-  return useConditionalRequest<GetAgentPolicyOutputsResponse>({
-    path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : undefined,
-    method: 'get',
-    shouldSendRequest: !!agentPolicyId,
-    version: API_VERSIONS.public.v1,
-  } as SendConditionalRequestConfig);
+  return useQuery({
+    queryKey: ['get_info_outputs_for_policy', agentPolicyId],
+    enabled: !!agentPolicyId,
+    queryFn: () =>
+      sendRequestForRq<GetAgentPolicyOutputsResponse>({
+        path: agentPolicyId ? agentPolicyRouteService.getInfoOutputsPath(agentPolicyId) : '',
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+  });
 };

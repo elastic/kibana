@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
 import { z } from '@kbn/zod/v4';
 import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
-import { isValidJsonSchema } from './lib/validate_json_schema';
+import { JsonModelSchema } from './schema/common/json_model_schema';
+import { timezoneNames } from './schema/triggers/timezone_names';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -58,12 +58,12 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']); // 'queue' TBD
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']);
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
 export const ConcurrencySettingsSchema = z.object({
   key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
-  strategy: CollisionStrategySchema.optional(), // 'queue', 'drop', or 'cancel-in-progress'
+  strategy: CollisionStrategySchema.optional(), // 'drop' or 'cancel-in-progress'
   max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
 });
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
@@ -111,7 +111,7 @@ export const ScheduledTriggerSchema = z.object({
         freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
         interval: z.number().int().positive(),
         tzid: z
-          .enum(moment.tz.names() as [string, ...string[]])
+          .enum(timezoneNames as [string, ...string[]])
           .optional()
           .default('UTC'),
         dtstart: z.string().optional(),
@@ -134,6 +134,36 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
+/** Schema for the `with` block of custom triggers (KQL condition to filter when the workflow runs). */
+const CustomTriggerWithSchema = z
+  .object({
+    condition: z.string().optional(),
+  })
+  .optional();
+
+/**
+ * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
+ * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
+ * Custom triggers allow a `with.condition` clause for KQL filtering.
+ */
+export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
+  if (customTriggerIds.length === 0) {
+    return TriggerSchema;
+  }
+  const customSchemas = customTriggerIds.map((id) =>
+    z.object({
+      type: z.literal(id),
+      with: CustomTriggerWithSchema,
+    })
+  );
+  return z.discriminatedUnion('type', [
+    AlertRuleTriggerSchema,
+    ScheduledTriggerSchema,
+    ManualTriggerSchema,
+    ...customSchemas,
+  ]);
+}
+
 export const TriggerTypes = [
   AlertRuleTriggerSchema.shape.type.value,
   ScheduledTriggerSchema.shape.type.value,
@@ -148,7 +178,7 @@ export const TimeoutPropSchema = z.object({
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
-  foreach: z.string().optional(),
+  foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
 });
 export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
@@ -165,7 +195,6 @@ export const StepWithOnFailureSchema = z.object({
 
 export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
-  'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
   with: z.record(z.string(), z.any()).optional(),
 })
   .merge(StepWithIfConditionSchema)
@@ -202,33 +231,19 @@ export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 // Fetcher configuration for HTTP request customization (shared across formats)
 export const FetcherConfigSchema = z
   .object({
-    skip_ssl_verification: z.boolean().optional(),
-    follow_redirects: z.boolean().optional(),
-    max_redirects: z.number().optional(),
-    keep_alive: z.boolean().optional(),
+    skip_ssl_verification: z
+      .boolean()
+      .optional()
+      .describe('Skip SSL/TLS certificate verification for the request'),
+    follow_redirects: z
+      .boolean()
+      .optional()
+      .describe('Whether to follow HTTP redirects. Defaults to true'),
+    max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
+    keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
   })
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
-
-export const HttpStepSchema = BaseStepSchema.extend({
-  type: z.literal('http'),
-  with: z.object({
-    url: z.string().min(1),
-    method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH']).optional().default('GET'),
-    headers: z
-      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-      .optional()
-      .default({}),
-    body: z.any().optional(),
-    timeout: z.string().optional().default('30s'),
-    fetcher: FetcherConfigSchema,
-  }),
-})
-  .merge(StepWithIfConditionSchema)
-  .merge(StepWithForEachSchema)
-  .merge(TimeoutPropSchema)
-  .merge(StepWithOnFailureSchema);
-export type HttpStep = z.infer<typeof HttpStepSchema>;
 
 // Generic Elasticsearch step schema for backend validation
 export const ElasticsearchStepSchema = BaseStepSchema.extend({
@@ -263,6 +278,22 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
+// Kibana step meta options that control routing and debugging (not forwarded as HTTP params)
+export const KibanaStepMetaSchema = {
+  use_server_info: z
+    .boolean()
+    .optional()
+    .describe('Use the server info URL (internal host:port) instead of the public URL'),
+  use_localhost: z
+    .boolean()
+    .optional()
+    .describe('Use localhost:5601 instead of the configured URL'),
+  debug: z
+    .boolean()
+    .optional()
+    .describe('Include the resolved full URL in the step output for debugging'),
+};
+
 // Generic Kibana step schema for backend validation
 export const KibanaStepSchema = BaseStepSchema.extend({
   type: z.string().refine((val) => val.startsWith('kibana.'), {
@@ -278,6 +309,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         headers: z.record(z.string(), z.string()).optional(),
       }),
       fetcher: FetcherConfigSchema,
+      ...KibanaStepMetaSchema,
     }),
     // Sugar syntax for common Kibana operations
     z
@@ -299,28 +331,16 @@ export const KibanaStepSchema = BaseStepSchema.extend({
         perPage: z.number().optional(),
         status: z.string().optional(),
         fetcher: FetcherConfigSchema,
+        ...KibanaStepMetaSchema,
       })
       .and(z.record(z.string(), z.any())), // Allow additional properties for flexibility
   ]),
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
-export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
-  const schema = HttpStepSchema.extend({
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
-  });
-
-  if (loose) {
-    // make all fields optional, but require type to be present for discriminated union
-    return schema.partial().required({ type: true });
-  }
-
-  return schema;
-}
-
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
-  foreach: z.string(),
+  foreach: z.union([z.string(), z.array(z.unknown())]),
   steps: z.array(BaseStepSchema).min(1),
 }).merge(StepWithIfConditionSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
@@ -452,57 +472,6 @@ export const WorkflowInputSchema = z.union([
 ]);
 export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
-// JSON Schema model structure
-// This represents a JSON Schema object with properties, required, additionalProperties, and definitions.
-// While currently used for workflow inputs, this schema is general-purpose and can be reused for other
-// structured data models.
-export const JsonModelSchema = z
-  .object({
-    type: z.literal('object').optional(),
-    properties: z.record(z.string(), z.any()).optional(),
-    required: z.array(z.string()).optional(),
-    additionalProperties: z.union([z.boolean(), z.any()]).optional(),
-    definitions: z.record(z.string(), z.any()).optional(),
-    $defs: z.record(z.string(), z.any()).optional(),
-  })
-  .refine(
-    (data) => {
-      // Validate that properties is a valid JSON Schema object
-      if (data.properties) {
-        // Validate each property is a valid JSON Schema
-        for (const value of Object.values(data.properties)) {
-          // $ref objects are valid JSON Schema but can't be validated in isolation
-          // since they reference definitions that exist in the parent schema
-          if (typeof value === 'object' && value !== null && '$ref' in value) {
-            // $ref is a valid JSON Schema construct, skip validation
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-          if (!isValidJsonSchema(value)) {
-            return false;
-          }
-        }
-      }
-      return true;
-    },
-    { message: 'properties must contain valid JSON Schema definitions' }
-  )
-  .refine(
-    (data) => {
-      // Validate that required fields exist in properties
-      if (data.required && data.properties) {
-        for (const field of data.required) {
-          if (!(field in data.properties)) {
-            return false;
-          }
-        }
-      }
-      return true;
-    },
-    { message: 'required fields must exist in properties' }
-  );
-export type JsonModelSchemaType = z.infer<typeof JsonModelSchema>;
-
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
   z.string(),
@@ -522,7 +491,6 @@ const StepSchema = z.lazy(() =>
     IfStepSchema,
     WaitStepSchema,
     DataSetStepSchema,
-    HttpStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
     ParallelStepSchema,
@@ -539,7 +507,6 @@ export const BuiltInStepTypes = [
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
-  HttpStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -552,7 +519,6 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  triggers: z.array(TriggerSchema).min(1),
   inputs: z
     .union([
       // New JSON Schema format
@@ -565,7 +531,9 @@ const WorkflowSchemaBase = z.object({
   steps: z.array(StepSchema).min(1),
 });
 
-export const WorkflowSchema = WorkflowSchemaBase.transform((data) => {
+export const WorkflowSchema = WorkflowSchemaBase.extend({
+  triggers: z.array(TriggerSchema).min(1),
+}).transform((data) => {
   // Transform inputs from legacy array format to JSON Schema format
   let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
   if (data.inputs) {
@@ -658,6 +626,8 @@ export const WorkflowExecutionContextSchema = z.object({
   isTestRun: z.boolean(),
   startedAt: z.date(),
   url: z.string(),
+  executedBy: z.string().optional(),
+  triggeredBy: z.string().optional(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 
@@ -671,7 +641,7 @@ export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
 // Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
 // Once a Zod-compatible version is available, we should import and use it instead.
-const AlertSchema = z.object({
+export const AlertSchema = z.object({
   _id: z.string(),
   _index: z.string(),
   kibana: z.object({
@@ -680,7 +650,7 @@ const AlertSchema = z.object({
   '@timestamp': z.string(),
 });
 
-const RuleSchema = z.object({
+export const RuleSchema = z.object({
   id: z.string(),
   name: z.string(),
   tags: z.array(z.string()),
@@ -689,12 +659,27 @@ const RuleSchema = z.object({
   ruleTypeId: z.string(),
 });
 
-export const EventSchema = z.object({
+/**
+ * Alert-specific event properties. Only present when the workflow has an alert trigger.
+ */
+export const AlertEventPropsSchema = z.object({
   alerts: z.array(z.union([AlertSchema, z.any()])),
   rule: RuleSchema,
-  spaceId: z.string(),
   params: z.any(),
 });
+
+/**
+ * Base event properties that are always present regardless of trigger type.
+ */
+export const BaseEventSchema = z.object({
+  spaceId: z.string(),
+});
+
+/**
+ * Full event schema (used for runtime validation of alert-triggered workflows).
+ * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
+ */
+export const EventSchema = BaseEventSchema.merge(AlertEventPropsSchema);
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -725,6 +710,9 @@ export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // extending with actual inputs and consts of different types
   inputs: z.object({}),
   consts: z.object({}),
+  // overriding event with base event schema (spaceId only) so it can be
+  // dynamically extended with trigger-specific properties (e.g., alerts, rule)
+  event: BaseEventSchema.optional(),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 

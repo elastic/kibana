@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
+import { apiHasEditorConfig } from '@kbn/control-group-renderer';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAddNewPanel,
   apiCanPinPanels,
   apiIsPresentationContainer,
-} from '@kbn/presentation-containers';
-import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+  apiPublishesDataViews,
+  type EmbeddableApiContext,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { ACTION_CREATE_CONTROL } from '@kbn/controls-constants';
@@ -50,7 +51,7 @@ export const createDataControlPanelAction = (): ActionDefinition<
 
     openDataControlEditor({
       initialState: {
-        dataViewId: parentDataViewId,
+        data_view_id: parentDataViewId,
       },
       parentApi: embeddable,
       isPinned,
@@ -76,7 +77,7 @@ export const createDataControlOfType = <State extends DataControlState = DataCon
 ) => {
   if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
-  const { dataViewId, fieldName } = state;
+  const { data_view_id: dataViewId, field_name: fieldName } = state;
   if (!dataViewId || !fieldName) {
     // this shouldn't happen due to constraints in the editor UI - however, if it does, throw an error
     throw new Error(

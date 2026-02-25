@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
@@ -101,18 +100,8 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, plugins: DiscoverCustomizationExamplesStartPlugins) {
+  start(_: CoreStart, plugins: DiscoverCustomizationExamplesStartPlugins) {
     this.customizationCallback = ({ customizations, stateContainer }) => {
-      customizations.set({
-        id: 'top_nav',
-        defaultMenu: {
-          newItem: { disabled: true },
-          openItem: { disabled: true },
-          alertsItem: { disabled: true },
-          inspectItem: { disabled: true },
-        },
-      });
-
       customizations.set({
         id: 'search_bar',
         CustomDataViewPicker: () => {
@@ -257,9 +246,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
 
                   if (!panels) {
                     builder.addOptionsListControl(initialState, {
-                      dataViewId: dataView?.id!,
+                      data_view_id: dataView?.id!,
                       title: fieldToFilterOn.name.split('.')[0],
-                      fieldName: fieldToFilterOn.name,
+                      field_name: fieldToFilterOn.name,
                       grow: false,
                       width: 'small',
                     });
@@ -276,28 +265,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
               />
             </EuiFlexItem>
           );
-        },
-      });
-
-      customizations.set({
-        id: 'flyout',
-        size: 650,
-        title: 'Example custom flyout',
-        actions: {
-          getActionItems: () =>
-            Array.from({ length: 5 }, (_, i) => {
-              const index = i + 1;
-              return {
-                id: `action-item-${index}`,
-                enabled: true,
-                label: `Action ${index}`,
-                iconType: ['faceHappy', 'faceNeutral', 'faceSad', 'infinity', 'bell'].at(
-                  i
-                ) as IconType,
-                dataTestSubj: `customActionItem${index}`,
-                onClick: () => alert(index),
-              };
-            }),
         },
       });
 

@@ -19,6 +19,7 @@
     "@kbn/core-application-browser",
     "@kbn/utility-types",
     "@kbn/share-plugin",
-    "@kbn/management-plugin"
+    "@kbn/management-plugin",
+    "@kbn/core"
   ]
 }

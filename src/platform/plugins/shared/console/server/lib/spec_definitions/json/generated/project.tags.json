@@ -4,8 +4,7 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__",
-      "project_routing": ""
+      "pretty": "__flag__"
     },
     "methods": [
       "GET",

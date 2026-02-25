@@ -9,7 +9,6 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../../../typings/emotion.d.ts"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -42,6 +41,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-agent-builder",
-    "@kbn/connector-schemas"
+    "@kbn/connector-schemas",
+    "@kbn/task-manager-plugin",
+    "@kbn/workflows"
   ]
 }

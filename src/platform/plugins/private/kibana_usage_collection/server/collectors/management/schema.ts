@@ -507,15 +507,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'agentBuilder:dashboardTools': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'agentBuilder:navEnabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'agentBuilder:externalMcp': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:experimentalFeatures': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -627,6 +627,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInfrastructureAssetCustomDashboards': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableGroupedNav': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -712,6 +716,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Content packs in Streams',
+    },
+  },
+  'observability:streamsEnableQueryStreams': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Query streams in Streams',
     },
   },
   'observability:enableDiagnosticMode': {

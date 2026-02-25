@@ -13,6 +13,12 @@ import { createStartServicesAccessorMock, createMetricsClientMock } from '../tes
 import { createLazyHostMetricsTable } from './create_lazy_host_metrics_table';
 import { HostMetricsTable } from './host_metrics_table';
 import IntegratedHostMetricsTable from './integrated_host_metrics_table';
+import {
+  SYSTEM_CPU_CORES,
+  SYSTEM_CPU_TOTAL_NORM_PCT,
+  SYSTEM_MEMORY_TOTAL,
+  SYSTEM_MEMORY_USED_PCT,
+} from '../shared/constants';
 import { metricByField } from './use_host_metrics_table';
 
 jest.mock('../../../pages/link_to/use_asset_details_redirect', () => ({
@@ -31,18 +37,7 @@ describe('HostMetricsTable', () => {
     to: 'now',
   };
 
-  const filterClauseDsl = {
-    bool: {
-      should: [
-        {
-          match: {
-            'host.name': 'gke-edge-oblt-pool-1-9a60016d-lgg9',
-          },
-        },
-      ],
-      minimum_should_match: 1,
-    },
-  };
+  const kuery = `host.name: "gke-edge-oblt-pool-1-9a60016d-lgg9"`;
 
   const mockData = {
     series: [
@@ -60,7 +55,7 @@ describe('HostMetricsTable', () => {
       const metricsClient = getMetricsClient();
       const LazyHostMetricsTable = createLazyHostMetricsTable(getStartServices()[0], metricsClient);
 
-      render(<LazyHostMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
+      render(<LazyHostMetricsTable timerange={timerange} kuery={kuery} />);
 
       expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('hostMetricsTable')).not.toBeInTheDocument();
@@ -90,7 +85,7 @@ describe('HostMetricsTable', () => {
       const { findByText } = render(
         <IntegratedHostMetricsTable
           timerange={timerange}
-          filterClauseDsl={filterClauseDsl}
+          kuery={kuery}
           sourceId="default"
           metricsClient={metricsClient}
           {...coreProvidersPropsMock}
@@ -156,10 +151,10 @@ function createHost(
     id: name,
     rows: [
       {
-        [metricByField['system.cpu.cores']]: coreCount,
-        [metricByField['system.cpu.total.norm.pct']]: cpuUsagePct,
-        [metricByField['system.memory.total']]: memoryBytes,
-        [metricByField['system.memory.used.pct']]: memoryUsagePct,
+        [metricByField[SYSTEM_CPU_CORES]]: coreCount,
+        [metricByField[SYSTEM_CPU_TOTAL_NORM_PCT]]: cpuUsagePct,
+        [metricByField[SYSTEM_MEMORY_TOTAL]]: memoryBytes,
+        [metricByField[SYSTEM_MEMORY_USED_PCT]]: memoryUsagePct,
       } as MetricsExplorerSeries['rows'][number],
     ],
   };
