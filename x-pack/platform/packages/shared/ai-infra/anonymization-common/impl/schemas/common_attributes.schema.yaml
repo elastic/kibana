@@ -6,6 +6,32 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
+    AnonymizationEntityClass:
+      type: string
+      enum:
+        - PER
+        - ORG
+        - LOC
+        - MISC
+        - HOST_NAME
+        - USER_NAME
+        - IP
+        - EMAIL
+        - CLOUD_ACCOUNT
+        - ENTITY_NAME
+        - RESOURCE_NAME
+        - RESOURCE_ID
+      example: HOST_NAME
+
+    NerEntityClass:
+      type: string
+      enum:
+        - PER
+        - ORG
+        - LOC
+        - MISC
+      example: PER
+
     ErrorResponse:
       type: object
       required:
@@ -56,8 +82,7 @@ components:
           type: boolean
           example: true
         entityClass:
-          type: string
-          example: HOST_NAME
+          $ref: '#/components/schemas/AnonymizationEntityClass'
 
     RegexRule:
       type: object
@@ -75,8 +100,7 @@ components:
           type: string
           enum: [regex]
         entityClass:
-          type: string
-          example: EMAIL
+          $ref: '#/components/schemas/AnonymizationEntityClass'
         pattern:
           type: string
           example: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}'
@@ -104,7 +128,7 @@ components:
         allowedEntityClasses:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/NerEntityClass'
           example: [PER, ORG]
         enabled:
           type: boolean

@@ -15,6 +15,30 @@
  */
 
 import { z } from '@kbn/zod';
+
+export type AnonymizationEntityClass = z.infer<typeof AnonymizationEntityClass>;
+export const AnonymizationEntityClass = z.enum([
+  'PER',
+  'ORG',
+  'LOC',
+  'MISC',
+  'HOST_NAME',
+  'USER_NAME',
+  'IP',
+  'EMAIL',
+  'CLOUD_ACCOUNT',
+  'ENTITY_NAME',
+  'RESOURCE_NAME',
+  'RESOURCE_ID',
+]);
+export type AnonymizationEntityClassEnum = typeof AnonymizationEntityClass.enum;
+export const AnonymizationEntityClassEnum = AnonymizationEntityClass.enum;
+
+export type NerEntityClass = z.infer<typeof NerEntityClass>;
+export const NerEntityClass = z.enum(['PER', 'ORG', 'LOC', 'MISC']);
+export type NerEntityClassEnum = typeof NerEntityClass.enum;
+export const NerEntityClassEnum = NerEntityClass.enum;
+
 export type ErrorResponse = z.infer<typeof ErrorResponse>;
 export const ErrorResponse = z.object({
   /**
@@ -43,14 +67,14 @@ export const FieldRule = z.object({
   field: z.string(),
   allowed: z.boolean(),
   anonymized: z.boolean(),
-  entityClass: z.string().optional(),
+  entityClass: AnonymizationEntityClass.optional(),
 });
 
 export type RegexRule = z.infer<typeof RegexRule>;
 export const RegexRule = z.object({
   id: z.string(),
   type: z.literal('regex'),
-  entityClass: z.string(),
+  entityClass: AnonymizationEntityClass,
   pattern: z.string(),
   enabled: z.boolean(),
 });
@@ -60,7 +84,7 @@ export const NerRule = z.object({
   id: z.string(),
   type: z.literal('ner'),
   modelId: z.string().optional(),
-  allowedEntityClasses: z.array(z.string()),
+  allowedEntityClasses: z.array(NerEntityClass),
   enabled: z.boolean(),
 });
 
