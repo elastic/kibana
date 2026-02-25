@@ -124,6 +124,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|3",
         "alert|2",
         "alert|1",
+        "alerting_notification_policy|1",
         "api_key_pending_invalidation|2",
         "api_key_pending_invalidation|1",
         "cloud-connect-api-key|1",
