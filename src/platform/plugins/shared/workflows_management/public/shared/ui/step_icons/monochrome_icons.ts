@@ -18,6 +18,8 @@ export const MonochromeIcons = new Set([
   'parallel',
   'merge',
   'wait',
+  'workflow.execute',
+  'workflow.executeAsync',
   // connector icons, which are monochrome and should be colored with currentColor
   '.inference',
   '.email',
