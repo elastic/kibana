@@ -6,45 +6,49 @@
  */
 
 import expect from '@kbn/expect';
+import { publicApiPath } from '@kbn/agent-builder-plugin/common/constants';
+import { v4 as uuidv4 } from 'uuid';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { spaceUrl } from '../utils/spaces';
 
-const API_BASE = '/api/agent_builder';
-/** Version for Agent Builder public API (versioned routes require this header). */
 const API_VERSION = '2023-10-31';
 
-const MOCK_AGENT = {
-  id: 'rbac-fixture-agent',
-  name: 'RBAC Fixture Agent',
-  description: 'Fixture for RBAC tests',
-  configuration: {
-    instructions: 'Test agent',
-    tools: [{ tool_ids: ['*'] }],
-  },
-};
+function mockAgent(id: string, toolIds: string[] = ['*']) {
+  return {
+    id,
+    name: 'RBAC Fixture Agent',
+    description: 'Fixture for RBAC tests',
+    configuration: {
+      instructions: 'Test agent',
+      tools: [{ tool_ids: toolIds }],
+    },
+  };
+}
 
-const MOCK_TOOL_ESQL = {
-  id: 'rbac-fixture-tool',
-  type: 'esql' as const,
-  description: 'Fixture for RBAC tests',
-  tags: [] as string[],
-  configuration: {
-    query: 'FROM my_index | LIMIT 1',
-    params: {} as Record<string, { type: string; description: string }>,
-  },
-};
+function mockToolEsql(id: string) {
+  return {
+    id,
+    type: 'esql' as const,
+    description: 'Fixture for RBAC tests',
+    tags: [] as string[],
+    configuration: {
+      query: 'FROM my_index | LIMIT 1',
+      params: {} as Record<string, { type: string; description: string }>,
+    },
+  };
+}
 
-/** Index that must exist so index_search tool validation (pattern must match at least one source) passes. */
-const RBAC_TEST_INDEX = 'rbac-test-index';
+/** Prefix used to generate per-run unique resources and avoid cross-test collisions. */
+const RBAC_TEST_PREFIX = 'rbac-test';
 
-/** index_search avoids ESQL query/param validation; use for RBAC-created tools. */
-function mockToolIndexSearch(id: string) {
+function mockToolIndexSearch(id: string, indexName: string) {
   return {
     id,
     type: 'index_search' as const,
     description: 'RBAC test tool',
     tags: [] as string[],
     configuration: {
-      pattern: RBAC_TEST_INDEX,
+      pattern: indexName,
     },
   };
 }
@@ -58,81 +62,107 @@ interface KibanaRole {
   }>;
 }
 
-function agentBuilderRole(privileges: string[]): KibanaRole {
-  return {
-    elasticsearch: { cluster: [], indices: [], run_as: [] },
-    kibana: [
-      {
-        base: [],
-        feature: {
-          agentBuilder: privileges,
-          actions: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  };
-}
-
-export default function rbacTests({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
-  const log = getService('log');
+  const spaces = getService('spaces');
   const es = getService('es');
   const randomness = getService('randomness');
+  const testRunId = uuidv4();
+  const rbacSpaceId = `${RBAC_TEST_PREFIX}-space-${testRunId}`;
+  const rbacApiBase = spaceUrl(publicApiPath, rbacSpaceId);
+
+  function makeRoleAndUserNames(scope: string) {
+    return {
+      roleName: `${RBAC_TEST_PREFIX}-${scope}-role-${testRunId}`,
+      username: `${RBAC_TEST_PREFIX}-${scope}-user-${testRunId}`,
+    };
+  }
+
+  function agentBuilderRole(privileges: string[]): KibanaRole {
+    return {
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            agentBuilder: privileges,
+            actions: ['read'],
+          },
+          spaces: [rbacSpaceId],
+        },
+      ],
+    };
+  }
+
+  async function deleteSecurityUserAndRole(username: string, roleName: string) {
+    await security.user.delete(username);
+    await security.role.delete(roleName);
+  }
 
   describe('Agent Builder RBAC: manage_agents and manage_tools sub-features', () => {
-    let fixtureAgentId: string;
-    let fixtureToolId: string;
+    const rbacTestIndex = `${RBAC_TEST_PREFIX}-index-${testRunId}`;
+
+    const fixtureAgentId = `${RBAC_TEST_PREFIX}-fixture-agent-${testRunId}`;
+    const fixtureToolId = `${RBAC_TEST_PREFIX}-fixture-tool-${testRunId}`;
+
+    const readOnlyPrincipal = makeRoleAndUserNames('read-only');
+    const manageAgentsPrincipal = makeRoleAndUserNames('manage-agents');
+    const manageToolsPrincipal = makeRoleAndUserNames('manage-tools');
+    const allPrincipal = makeRoleAndUserNames('all');
 
     before(async () => {
-      await es.indices.create({ index: RBAC_TEST_INDEX });
+      await spaces.create({
+        id: rbacSpaceId,
+        name: rbacSpaceId,
+        disabledFeatures: [],
+      });
 
-      const agentRes = await supertest
-        .post(`${API_BASE}/agents`)
+      await es.indices.create({ index: rbacTestIndex });
+
+      await supertest
+        .post(`${rbacApiBase}/tools`)
         .set('kbn-xsrf', 'kibana')
         .set('elastic-api-version', API_VERSION)
-        .send(MOCK_AGENT)
+        .send(mockToolIndexSearch(fixtureToolId, rbacTestIndex))
         .expect(200);
-      fixtureAgentId = agentRes.body.id;
 
-      const toolRes = await supertest
-        .post(`${API_BASE}/tools`)
+      await supertest
+        .post(`${rbacApiBase}/agents`)
         .set('kbn-xsrf', 'kibana')
         .set('elastic-api-version', API_VERSION)
-        .send(MOCK_TOOL_ESQL)
+        .send(mockAgent(fixtureAgentId, [fixtureToolId]))
         .expect(200);
-      fixtureToolId = toolRes.body.id;
     });
 
     after(async () => {
-      try {
-        await supertest
-          .delete(`${API_BASE}/agents/${fixtureAgentId}`)
-          .set('kbn-xsrf', 'kibana')
-          .set('elastic-api-version', API_VERSION);
-      } catch (e) {
-        log.warning(`RBAC cleanup: failed to delete agent ${fixtureAgentId}: ${e}`);
-      }
-      try {
-        await supertest
-          .delete(`${API_BASE}/tools/${fixtureToolId}`)
-          .set('kbn-xsrf', 'kibana')
-          .set('elastic-api-version', API_VERSION);
-      } catch (e) {
-        log.warning(`RBAC cleanup: failed to delete tool ${fixtureToolId}: ${e}`);
-      }
-      try {
-        await es.indices.delete({ index: RBAC_TEST_INDEX });
-      } catch (e) {
-        log.warning(`RBAC cleanup: failed to delete index ${RBAC_TEST_INDEX}: ${e}`);
-      }
+      await supertest
+        .delete(`${rbacApiBase}/agents/${fixtureAgentId}`)
+        .set('kbn-xsrf', 'kibana')
+        .set('elastic-api-version', API_VERSION)
+        .expect([200, 404]);
+      await supertest
+        .delete(`${rbacApiBase}/tools/${fixtureToolId}`)
+        .set('kbn-xsrf', 'kibana')
+        .set('elastic-api-version', API_VERSION)
+        .expect([200, 404]);
+
+      await deleteSecurityUserAndRole(readOnlyPrincipal.username, readOnlyPrincipal.roleName);
+      await deleteSecurityUserAndRole(
+        manageAgentsPrincipal.username,
+        manageAgentsPrincipal.roleName
+      );
+      await deleteSecurityUserAndRole(manageToolsPrincipal.username, manageToolsPrincipal.roleName);
+      await deleteSecurityUserAndRole(allPrincipal.username, allPrincipal.roleName);
+
+      await es.indices.delete({ index: rbacTestIndex });
+      await spaces.delete(rbacSpaceId);
     });
 
     describe('user with minimal_read only (no manage_agents, no manage_tools)', () => {
-      const roleName = 'ab_rbac_read_only';
-      const username = 'ab_rbac_read_only_user';
+      const roleName = readOnlyPrincipal.roleName;
+      const username = readOnlyPrincipal.username;
       const password = 'read-only-password';
 
       before(async () => {
@@ -144,14 +174,9 @@ export default function rbacTests({ getService }: FtrProviderContext) {
         });
       });
 
-      after(async () => {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-      });
-
       it('can GET /api/agent_builder/agents', async () => {
         const res = await supertestWithoutAuth
-          .get(API_BASE + '/agents')
+          .get(rbacApiBase + '/agents')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -160,7 +185,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('can GET /api/agent_builder/agents/:id', async () => {
         const res = await supertestWithoutAuth
-          .get(`${API_BASE}/agents/${fixtureAgentId}`)
+          .get(`${rbacApiBase}/agents/${fixtureAgentId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -169,7 +194,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('can GET /api/agent_builder/tools', async () => {
         const res = await supertestWithoutAuth
-          .get(API_BASE + '/tools')
+          .get(rbacApiBase + '/tools')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -178,7 +203,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('can GET /api/agent_builder/tools/:id', async () => {
         const res = await supertestWithoutAuth
-          .get(`${API_BASE}/tools/${fixtureToolId}`)
+          .get(`${rbacApiBase}/tools/${fixtureToolId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -187,17 +212,17 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('cannot POST /api/agent_builder/agents', async () => {
         const res = await supertestWithoutAuth
-          .post(API_BASE + '/agents')
+          .post(rbacApiBase + '/agents')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
-          .send({ ...MOCK_AGENT, id: 'rbac-readonly-create-agent' });
+          .send(mockAgent(`${RBAC_TEST_PREFIX}-readonly-create-agent-${testRunId}`));
         expect(res.status).to.be(403);
       });
 
       it('cannot PUT /api/agent_builder/agents/:id', async () => {
         const res = await supertestWithoutAuth
-          .put(`${API_BASE}/agents/${fixtureAgentId}`)
+          .put(`${rbacApiBase}/agents/${fixtureAgentId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
@@ -207,7 +232,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('cannot DELETE /api/agent_builder/agents/:id', async () => {
         const res = await supertestWithoutAuth
-          .delete(`${API_BASE}/agents/${fixtureAgentId}`)
+          .delete(`${rbacApiBase}/agents/${fixtureAgentId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -216,17 +241,17 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('cannot POST /api/agent_builder/tools', async () => {
         const res = await supertestWithoutAuth
-          .post(API_BASE + '/tools')
+          .post(rbacApiBase + '/tools')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
-          .send({ ...MOCK_TOOL_ESQL, id: 'rbac-readonly-create-tool' });
+          .send(mockToolEsql(`${RBAC_TEST_PREFIX}-readonly-create-tool-${testRunId}`));
         expect(res.status).to.be(403);
       });
 
       it('cannot PUT /api/agent_builder/tools/:id', async () => {
         const res = await supertestWithoutAuth
-          .put(`${API_BASE}/tools/${fixtureToolId}`)
+          .put(`${rbacApiBase}/tools/${fixtureToolId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
@@ -236,7 +261,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('cannot DELETE /api/agent_builder/tools/:id', async () => {
         const res = await supertestWithoutAuth
-          .delete(`${API_BASE}/tools/${fixtureToolId}`)
+          .delete(`${rbacApiBase}/tools/${fixtureToolId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -245,8 +270,8 @@ export default function rbacTests({ getService }: FtrProviderContext) {
     });
 
     describe('user with minimal_read + manage_agents (no manage_tools)', () => {
-      const roleName = 'ab_rbac_manage_agents_only';
-      const username = 'ab_rbac_manage_agents_only_user';
+      const roleName = manageAgentsPrincipal.roleName;
+      const username = manageAgentsPrincipal.username;
       const password = 'manage-agents-password';
 
       before(async () => {
@@ -258,24 +283,19 @@ export default function rbacTests({ getService }: FtrProviderContext) {
         });
       });
 
-      after(async () => {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-      });
-
       it('can create, update, and delete an agent', async () => {
         const agentId = `rbac-manage-agents-created-agent-${randomness.naturalNumber()}`;
         const createRes = await supertestWithoutAuth
-          .post(API_BASE + '/agents')
+          .post(rbacApiBase + '/agents')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
-          .send({ ...MOCK_AGENT, id: agentId });
+          .send(mockAgent(agentId));
         expect(createRes.status).to.be(200);
         expect(createRes.body.id).to.be(agentId);
 
         const updateRes = await supertestWithoutAuth
-          .put(`${API_BASE}/agents/${agentId}`)
+          .put(`${rbacApiBase}/agents/${agentId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
@@ -283,7 +303,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
         expect(updateRes.status).to.be(200);
 
         const deleteRes = await supertestWithoutAuth
-          .delete(`${API_BASE}/agents/${agentId}`)
+          .delete(`${rbacApiBase}/agents/${agentId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -292,17 +312,17 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('cannot POST /api/agent_builder/tools', async () => {
         const res = await supertestWithoutAuth
-          .post(API_BASE + '/tools')
+          .post(rbacApiBase + '/tools')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
-          .send({ ...MOCK_TOOL_ESQL, id: 'rbac-manage-agents-create-tool' });
+          .send(mockToolEsql(`${RBAC_TEST_PREFIX}-manage-agents-create-tool-${testRunId}`));
         expect(res.status).to.be(403);
       });
 
       it('cannot PUT /api/agent_builder/tools/:id', async () => {
         const res = await supertestWithoutAuth
-          .put(`${API_BASE}/tools/${fixtureToolId}`)
+          .put(`${rbacApiBase}/tools/${fixtureToolId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
@@ -312,7 +332,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('cannot DELETE /api/agent_builder/tools/:id', async () => {
         const res = await supertestWithoutAuth
-          .delete(`${API_BASE}/tools/${fixtureToolId}`)
+          .delete(`${rbacApiBase}/tools/${fixtureToolId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -321,8 +341,8 @@ export default function rbacTests({ getService }: FtrProviderContext) {
     });
 
     describe('user with minimal_read + manage_tools (no manage_agents)', () => {
-      const roleName = 'ab_rbac_manage_tools_only';
-      const username = 'ab_rbac_manage_tools_only_user';
+      const roleName = manageToolsPrincipal.roleName;
+      const username = manageToolsPrincipal.username;
       const password = 'manage-tools-password';
 
       before(async () => {
@@ -334,24 +354,19 @@ export default function rbacTests({ getService }: FtrProviderContext) {
         });
       });
 
-      after(async () => {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-      });
-
       it('can create, update, and delete a tool', async () => {
         const toolId = `rbac-manage-tools-created-tool-${randomness.naturalNumber()}`;
         const createRes = await supertestWithoutAuth
-          .post(API_BASE + '/tools')
+          .post(rbacApiBase + '/tools')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
-          .send(mockToolIndexSearch(toolId));
+          .send(mockToolIndexSearch(toolId, rbacTestIndex));
         expect(createRes.status).to.be(200);
         expect(createRes.body.id).to.be(toolId);
 
         const updateRes = await supertestWithoutAuth
-          .put(`${API_BASE}/tools/${toolId}`)
+          .put(`${rbacApiBase}/tools/${toolId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
@@ -359,7 +374,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
         expect(updateRes.status).to.be(200);
 
         const deleteRes = await supertestWithoutAuth
-          .delete(`${API_BASE}/tools/${toolId}`)
+          .delete(`${rbacApiBase}/tools/${toolId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -368,17 +383,17 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('cannot POST /api/agent_builder/agents', async () => {
         const res = await supertestWithoutAuth
-          .post(API_BASE + '/agents')
+          .post(rbacApiBase + '/agents')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
-          .send({ ...MOCK_AGENT, id: 'rbac-manage-tools-create-agent' });
+          .send(mockAgent(`${RBAC_TEST_PREFIX}-manage-tools-create-agent-${testRunId}`));
         expect(res.status).to.be(403);
       });
 
       it('cannot PUT /api/agent_builder/agents/:id', async () => {
         const res = await supertestWithoutAuth
-          .put(`${API_BASE}/agents/${fixtureAgentId}`)
+          .put(`${rbacApiBase}/agents/${fixtureAgentId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
@@ -388,7 +403,7 @@ export default function rbacTests({ getService }: FtrProviderContext) {
 
       it('cannot DELETE /api/agent_builder/agents/:id', async () => {
         const res = await supertestWithoutAuth
-          .delete(`${API_BASE}/agents/${fixtureAgentId}`)
+          .delete(`${rbacApiBase}/agents/${fixtureAgentId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -397,8 +412,8 @@ export default function rbacTests({ getService }: FtrProviderContext) {
     });
 
     describe('user with agentBuilder all', () => {
-      const roleName = 'ab_rbac_all';
-      const username = 'ab_rbac_all_user';
+      const roleName = allPrincipal.roleName;
+      const username = allPrincipal.username;
       const password = 'all-password';
 
       before(async () => {
@@ -410,24 +425,19 @@ export default function rbacTests({ getService }: FtrProviderContext) {
         });
       });
 
-      after(async () => {
-        await security.user.delete(username);
-        await security.role.delete(roleName);
-      });
-
       it('can create and delete an agent', async () => {
         const agentId = `rbac-all-created-agent-${randomness.naturalNumber()}`;
         const createRes = await supertestWithoutAuth
-          .post(API_BASE + '/agents')
+          .post(rbacApiBase + '/agents')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
-          .send({ ...MOCK_AGENT, id: agentId });
+          .send(mockAgent(agentId));
         expect(createRes.status).to.be(200);
         expect(createRes.body.id).to.be(agentId);
 
         const deleteRes = await supertestWithoutAuth
-          .delete(`${API_BASE}/agents/${agentId}`)
+          .delete(`${rbacApiBase}/agents/${agentId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
@@ -437,16 +447,16 @@ export default function rbacTests({ getService }: FtrProviderContext) {
       it('can create and delete a tool', async () => {
         const toolId = `rbac-all-created-tool-${randomness.naturalNumber()}`;
         const createRes = await supertestWithoutAuth
-          .post(API_BASE + '/tools')
+          .post(rbacApiBase + '/tools')
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION)
-          .send(mockToolIndexSearch(toolId));
+          .send(mockToolIndexSearch(toolId, rbacTestIndex));
         expect(createRes.status).to.be(200);
         expect(createRes.body.id).to.be(toolId);
 
         const deleteRes = await supertestWithoutAuth
-          .delete(`${API_BASE}/tools/${toolId}`)
+          .delete(`${rbacApiBase}/tools/${toolId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'kibana')
           .set('elastic-api-version', API_VERSION);
