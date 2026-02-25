@@ -72,6 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Verify that the control exists in discover
         const control = await dashboardControls.getControlElementById('esql-control-1');
         expect(control).to.be.ok();
+        await discover.expectDocTableToBeLoaded();
       });
     });
 
