@@ -19,12 +19,12 @@ import { registerAttachmentTypes } from './attachment_types';
 
 export class AgentBuilderPlatformPlugin
   implements
-  Plugin<
-    AgentBuilderPlatformPluginSetup,
-    AgentBuilderPlatformPluginStart,
-    PluginSetupDependencies,
-    PluginStartDependencies
-  >
+    Plugin<
+      AgentBuilderPlatformPluginSetup,
+      AgentBuilderPlatformPluginStart,
+      PluginSetupDependencies,
+      PluginStartDependencies
+    >
 {
   // @ts-expect-error unused for now
   private logger: Logger;
@@ -56,5 +56,5 @@ export class AgentBuilderPlatformPlugin
     return {};
   }
 
-  stop() { }
+  stop() {}
 }
