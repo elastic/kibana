@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type {
   ISloTelemetryClient,
   SloDetailsFlyoutViewedParams,
@@ -16,7 +16,7 @@ import type {
 import { SloTelemetryEventTypes } from './types';
 
 export class SloTelemetryClient implements ISloTelemetryClient {
-  constructor(private analytics: AnalyticsServiceSetup) {}
+  constructor(private readonly analytics: AnalyticsServiceStart) {}
 
   public reportSloDetailsFlyoutViewed = (params: SloDetailsFlyoutViewedParams) => {
     this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_VIEWED, params);

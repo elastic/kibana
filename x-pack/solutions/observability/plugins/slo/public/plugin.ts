@@ -64,7 +64,7 @@ export class SLOPlugin
   ) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
-    this.telemetryService.setup({ analytics: core.analytics });
+    this.telemetryService.setup(core.analytics);
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
@@ -207,7 +207,7 @@ export class SLOPlugin
 
   public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
-    const telemetryClient = this.telemetryService.start();
+    const telemetryClient = this.telemetryService.start(core.analytics);
     this.telemetryClient = telemetryClient;
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);

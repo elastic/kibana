@@ -5,33 +5,31 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type {
-  SloTelemetryServiceSetupParams,
-  ISloTelemetryClient,
-  SloTelemetryEventParams,
-} from './types';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { ISloTelemetryClient, SloTelemetryEventParams } from './types';
 import { sloTelemetryEventBasedTypes } from './telemetry_events';
 import { SloTelemetryClient } from './telemetry_client';
 
 export class SloTelemetryService {
-  constructor(private analytics: AnalyticsServiceSetup | null = null) {}
+  private initialized = false;
 
-  public setup({ analytics }: SloTelemetryServiceSetupParams) {
-    this.analytics = analytics;
-
+  public setup(analytics: AnalyticsServiceSetup) {
     sloTelemetryEventBasedTypes.forEach((eventConfig) =>
       analytics.registerEventType<SloTelemetryEventParams>(eventConfig)
     );
+    this.initialized = true;
   }
 
-  public start(): ISloTelemetryClient {
-    if (!this.analytics) {
+  public start(analytics: AnalyticsServiceStart): ISloTelemetryClient {
+    if (!analytics) {
       throw new Error(
-        'The SloTelemetryService.setup() method has not been invoked, be sure to call it during the plugin setup.'
+        'Analytics service is not available. Ensure it is started before using SloTelemetryService.'
       );
     }
+    if (!this.initialized) {
+      throw new Error('SloTelemetryService has not been initialized. Call setup() first.');
+    }
 
-    return new SloTelemetryClient(this.analytics);
+    return new SloTelemetryClient(analytics);
   }
 }

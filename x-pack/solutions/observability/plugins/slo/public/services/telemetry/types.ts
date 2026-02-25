@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-
-export interface SloTelemetryServiceSetupParams {
-  analytics: AnalyticsServiceSetup;
-}
+import type { RootSchema } from '@kbn/core/public';
 
 export interface SloDetailsFlyoutViewedParams {
   location: string;
