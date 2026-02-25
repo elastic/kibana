@@ -34,12 +34,12 @@ concurrency:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Phase A: Bootstrap the Kibana monorepo and produce a warm-state artifact.
-  # For PR comments, checks out the PR branch instead of the base branch.
-  # Privilege: contents:read (implicit GITHUB_TOKEN for checkout only).
+  # Phase A: Resolve trigger context only.
+  # Determines whether this is issue/PR/new work and computes target refs.
+  # Privilege: contents:read + pull-requests:read for context resolution.
   # ---------------------------------------------------------------------------
   prepare:
-    name: "Phase A: Bootstrap"
+    name: "Phase A: Resolve Context"
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
     timeout-minutes: 45
     if: >-
@@ -113,44 +113,6 @@ jobs:
             echo "pr_head_repo=" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Checkout source
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_branch || steps.context.outputs.default_branch }}
-          fetch-depth: 1
-          repository: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_head_repo || github.repository }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".node-version"
-
-      - name: Bootstrap Kibana
-        run: yarn kbn bootstrap --no-vscode
-        env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
-
-      - name: Package warm state
-        run: |
-          set -euo pipefail
-          tar czf /tmp/kibana-warm-state.tar.gz \
-            --exclude='./.git' \
-            --exclude='*/node_modules/.cache' \
-            --exclude='*/target' \
-            --exclude='./data' \
-            --exclude='*.log' \
-            -C "$GITHUB_WORKSPACE" .
-          echo "Warm state artifact size:"
-          ls -lh /tmp/kibana-warm-state.tar.gz
-
-      - name: Upload warm state artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kibana-warm-state
-          path: /tmp/kibana-warm-state.tar.gz
-          retention-days: 1
-          compression-level: 0
-
   # ---------------------------------------------------------------------------
   # Phase B: Run the OpenCode agent in a spec-driven loop (inner ralph loop).
   # The agent iterates on a spec file until status is "done" or "aborted",
@@ -166,23 +128,22 @@ jobs:
     permissions: {}
 
     steps:
-      - name: Download warm state artifact
-        uses: actions/download-artifact@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
         with:
-          name: kibana-warm-state
-          path: /tmp
-
-      - name: Extract warm state
-        run: |
-          set -euo pipefail
-          mkdir -p "$GITHUB_WORKSPACE"
-          tar xzf /tmp/kibana-warm-state.tar.gz -C "$GITHUB_WORKSPACE"
-          rm /tmp/kibana-warm-state.tar.gz
+          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch }}
+          fetch-depth: 1
+          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: ".node-version"
+
+      - name: Bootstrap Kibana
+        run: yarn kbn bootstrap --no-vscode
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Install OpenCode CLI
         run: curl -fsSL https://opencode.ai/install | bash

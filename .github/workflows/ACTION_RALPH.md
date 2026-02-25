@@ -5,14 +5,14 @@ Action Ralph is a three-phase GitHub Actions workflow that lets an AI agent (Ope
 ## How it works
 
 ```
-Phase A: Bootstrap      Phase B: Sandbox (Inner Ralph Loop)    Phase C: Publish
-(high privilege)        (no git/PR access)                     (write access)
+Phase A: Context        Phase B: Sandbox (Inner Ralph Loop)    Phase C: Publish
+(metadata only)         (no git/PR access)                     (write access)
 ┌──────────────┐       ┌─────────────────────────────┐        ┌──────────────────┐
 │ Detect if PR │       │ Build spec from prompt       │        │ If existing PR:  │
 │ or issue     │──────>│ ┌─────────────────────────┐  │───────>│   Push + comment │
-│ Checkout     │       │ │ Iteration 1: run agent  │  │        │                  │
-│ Bootstrap    │       │ │ Check spec status       │  │        │ If new work:     │
-│ Upload       │       │ │ Iteration 2: run agent  │  │        │   Create PR      │
+│ Output refs  │       │ │ Iteration 1: run agent  │  │        │                  │
+│ + branch info│       │ │ Check spec status       │  │        │ If new work:     │
+│              │       │ │ Iteration 2: run agent  │  │        │   Create PR      │
 └──────────────┘       │ │ ...until done/aborted   │  │        └──────────────────┘
                        │ └─────────────────────────┘  │
                        │ Package changes + reasoning  │
@@ -91,7 +91,7 @@ During Phase B, Action Ralph generates a short-lived LiteLLM key scoped to the s
 
 ## Runner configuration
 
-Defaults to `ubuntu-24.04-arm64-8core` for Phases A and B. To test without custom runners, change `runs-on` to `ubuntu-latest` in the `prepare` and `sandbox` jobs.
+Use the `runner` input on `workflow_dispatch` to choose the runner label for Phases A and B. Default is `ubuntu-latest`.
 
 ## Agent loop configuration
 
@@ -99,6 +99,7 @@ Defaults to `ubuntu-24.04-arm64-8core` for Phases A and B. To test without custo
 |---|---|---|
 | `max_iterations` | `5` | Maximum agent loop iterations before stopping |
 | `model` | (from `LITELLM_MODEL`) | Override the AI model (`provider/model` format) |
+| `runner` | `ubuntu-latest` | Runner label used by prepare and sandbox jobs |
 
 ## Files
 
@@ -113,7 +114,7 @@ Defaults to `ubuntu-24.04-arm64-8core` for Phases A and B. To test without custo
 
 | Phase | Timeout | Purpose |
 |---|---|---|
-| A: Bootstrap | 30 min | Prevents hung `yarn install` |
+| A: Resolve Context | 45 min | Resolves trigger context/refs with timeout guard |
 | B: Agent Loop | 45 min | Caps total agent reasoning time |
 | C: Publish | 10 min | Quick git push + PR creation |
 
@@ -128,7 +129,7 @@ New PRs are created as drafts and ping `@flash1293` in the PR body. PR update co
 1. Ensure `KIBANAMACHINE_TOKEN` exists and add the three `LITELLM_*` secrets.
 2. Go to **Actions > Action Ralph > Run workflow**.
 3. Enter: `Add a comment to the top of package.json saying "Hello from Action Ralph"`.
-4. Watch the run. Phase A bootstraps (~10-20 min), Phase B runs the agent loop, Phase C opens a draft PR and pings @flash1293.
+4. Watch the run. Phase A resolves context, Phase B checks out/bootstraps and runs the agent loop, Phase C opens a draft PR and pings @flash1293.
 
 ## Overriding the model
 
