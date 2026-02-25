@@ -8,9 +8,9 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { Firecrawl } from './firecrawl';
+import { FirecrawlConnector } from './firecrawl';
 
-describe('Firecrawl', () => {
+describe('FirecrawlConnector', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
@@ -26,29 +26,29 @@ describe('Firecrawl', () => {
   });
 
   it('should be defined', () => {
-    expect(Firecrawl).toBeDefined();
+    expect(FirecrawlConnector).toBeDefined();
   });
 
   it('should have correct metadata', () => {
-    expect(Firecrawl.metadata.id).toBe('.firecrawl');
-    expect(Firecrawl.metadata.displayName).toBe('Firecrawl');
-    expect(Firecrawl.metadata.description).toBeDefined();
+    expect(FirecrawlConnector.metadata.id).toBe('.firecrawl');
+    expect(FirecrawlConnector.metadata.displayName).toBe('Firecrawl');
+    expect(FirecrawlConnector.metadata.description).toBeDefined();
   });
 
   it('should have a valid schema', () => {
-    expect(Firecrawl.schema).toBeDefined();
-    expect(Firecrawl.schema.parse({})).toEqual({});
+    expect(FirecrawlConnector.schema).toBeDefined();
+    expect(FirecrawlConnector.schema.parse({})).toEqual({});
   });
 
   it('should have a test handler', () => {
-    expect(Firecrawl.test).toBeDefined();
-    expect(typeof Firecrawl.test?.handler).toBe('function');
-    expect(Firecrawl.test?.description).toBeDefined();
+    expect(FirecrawlConnector.test).toBeDefined();
+    expect(typeof FirecrawlConnector.test?.handler).toBe('function');
+    expect(FirecrawlConnector.test?.description).toBeDefined();
   });
 
   it('should use bearer auth type', () => {
-    expect(Firecrawl.auth).toBeDefined();
-    expect(Firecrawl.auth?.types).toContain('bearer');
+    expect(FirecrawlConnector.auth).toBeDefined();
+    expect(FirecrawlConnector.auth?.types).toContain('bearer');
   });
 
   describe('scrape action', () => {
@@ -56,7 +56,7 @@ describe('Firecrawl', () => {
       const mockData = { success: true, data: { markdown: '# Hello' } };
       mockClient.post.mockResolvedValue({ data: mockData });
 
-      const result = await Firecrawl.actions.scrape.handler(mockContext, {
+      const result = await FirecrawlConnector.actions.scrape.handler(mockContext, {
         url: 'https://example.com',
       });
 
@@ -73,7 +73,7 @@ describe('Firecrawl', () => {
       const mockData = { success: true, data: [] };
       mockClient.post.mockResolvedValue({ data: mockData });
 
-      const result = await Firecrawl.actions.search.handler(mockContext, {
+      const result = await FirecrawlConnector.actions.search.handler(mockContext, {
         query: 'test query',
       });
 
@@ -90,7 +90,7 @@ describe('Firecrawl', () => {
       const mockData = { success: true, links: [] };
       mockClient.post.mockResolvedValue({ data: mockData });
 
-      const result = await Firecrawl.actions.map.handler(mockContext, {
+      const result = await FirecrawlConnector.actions.map.handler(mockContext, {
         url: 'https://example.com',
       });
 
@@ -111,7 +111,7 @@ describe('Firecrawl', () => {
       const mockData = { success: true, id: '550e8400-e29b-41d4-a716-446655440000' };
       mockClient.post.mockResolvedValue({ data: mockData });
 
-      const result = await Firecrawl.actions.crawl.handler(mockContext, {
+      const result = await FirecrawlConnector.actions.crawl.handler(mockContext, {
         url: 'https://example.com',
       });
 
@@ -133,7 +133,7 @@ describe('Firecrawl', () => {
       const mockData = { status: 'completed', total: 10, completed: 10 };
       mockClient.get.mockResolvedValue({ data: mockData });
 
-      const result = await Firecrawl.actions.getCrawlStatus.handler(mockContext, { id: crawlId });
+      const result = await FirecrawlConnector.actions.getCrawlStatus.handler(mockContext, { id: crawlId });
 
       expect(mockClient.get).toHaveBeenCalledWith(
         `https://api.firecrawl.dev/v2/crawl/${crawlId}`
@@ -146,10 +146,10 @@ describe('Firecrawl', () => {
     it('should return success when API is accessible', async () => {
       mockClient.post.mockResolvedValue({ data: { success: true } });
 
-      if (!Firecrawl.test) {
+      if (!FirecrawlConnector.test) {
         throw new Error('Test handler not defined');
       }
-      const result = await Firecrawl.test.handler(mockContext);
+      const result = await FirecrawlConnector.test.handler(mockContext);
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://api.firecrawl.dev/v2/scrape',
@@ -165,10 +165,10 @@ describe('Firecrawl', () => {
     it('should return failure when API is not accessible', async () => {
       mockClient.post.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!Firecrawl.test) {
+      if (!FirecrawlConnector.test) {
         throw new Error('Test handler not defined');
       }
-      const result = await Firecrawl.test.handler(mockContext);
+      const result = await FirecrawlConnector.test.handler(mockContext);
 
       expect(result.ok).toBe(false);
       expect(result.message).toContain('Failed to connect');
@@ -180,10 +180,10 @@ describe('Firecrawl', () => {
       err.response = { status: 401 };
       mockClient.post.mockRejectedValue(err);
 
-      if (!Firecrawl.test) {
+      if (!FirecrawlConnector.test) {
         throw new Error('Test handler not defined');
       }
-      const result = await Firecrawl.test.handler(mockContext);
+      const result = await FirecrawlConnector.test.handler(mockContext);
 
       expect(result.ok).toBe(false);
       expect(result.message).toContain('Invalid or missing API key');

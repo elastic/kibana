@@ -13,7 +13,7 @@ import type { ConnectorSpec } from '../../connector_spec';
 
 const FIRECRAWL_API_BASE = 'https://api.firecrawl.dev';
 
-export const Firecrawl: ConnectorSpec = {
+export const FirecrawlConnector: ConnectorSpec = {
   metadata: {
     id: '.firecrawl',
     displayName: 'Firecrawl',
