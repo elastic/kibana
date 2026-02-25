@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { adminTestUser } from '@kbn/test';
 import { getSupertest, type createRoot, type HttpMethod } from '@kbn/core-test-helpers-kbn-server';
+import pRetry from 'p-retry';
 
 type Root = ReturnType<typeof createRoot>;
 
@@ -36,19 +37,18 @@ export const waitForDataStreamsReady = async (
   dataStreamNames: string[]
 ) => {
   const namePattern = dataStreamNames.join(',');
-  const maxAttempts = 30;
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
+  await pRetry(
+    async () => {
       const response = await esClient.indices.getDataStream({ name: namePattern });
-      if (response.data_streams.length >= dataStreamNames.length) {
-        break;
+      if (response.data_streams.length < dataStreamNames.length) {
+        throw new Error(
+          `Expected ${dataStreamNames.length} data streams, got ${response.data_streams.length}`
+        );
       }
-    } catch (e) {
-      // Data streams not created yet
-    }
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
+    },
+    { retries: 30, minTimeout: 2000, factor: 1 }
+  );
 
   await esClient.cluster.health({
     index: namePattern,
