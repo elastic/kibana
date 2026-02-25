@@ -128,23 +128,6 @@ jobs:
     permissions: {}
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch }}
-          fetch-depth: 1
-          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".node-version"
-
-      - name: Bootstrap Kibana
-        run: yarn kbn bootstrap --no-vscode
-        env:
-          NODE_OPTIONS: "--max-old-space-size=8192"
-
       - name: Install OpenCode CLI
         run: curl -fsSL https://opencode.ai/install | bash
 
@@ -278,6 +261,23 @@ jobs:
             }
           }
           OCEOF
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch }}
+          fetch-depth: 1
+          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+
+      - name: Bootstrap Kibana
+        run: yarn kbn bootstrap --no-vscode
+        env:
+          NODE_OPTIONS: "--max-old-space-size=8192"
 
       - name: Build spec and run inner ralph loop
         env:
