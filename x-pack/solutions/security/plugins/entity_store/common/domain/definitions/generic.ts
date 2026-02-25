@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { collectValues as collect, newestValue } from './field_retention_operations';
+import { newestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 
@@ -53,66 +53,5 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'orchestrator.type' }),
 
     ...getCommonFieldDescriptions('entity'),
-
-    collect({
-      source: 'entity.relationships.accesses_frequently',
-      destination: 'entity.relationships.accesses_frequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'entity.relationships.communicates_with',
-      destination: 'entity.relationships.communicates_with',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'entity.relationships.depends_on',
-      destination: 'entity.relationships.depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'entity.relationships.owns',
-      destination: 'entity.relationships.owns',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'entity.relationships.owns_inferred',
-      destination: 'entity.relationships.owns_inferred',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'entity.relationships.accesses_infrequently',
-      destination: 'entity.relationships.accesses_infrequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: 'entity.relationships.resolution.resolved_to',
-      destination: 'entity.relationships.resolution.resolved_to',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: 'entity.relationships.resolution.risk.calculated_level',
-      destination: 'entity.relationships.resolution.risk.calculated_level',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: 'entity.relationships.resolution.risk.calculated_score',
-      destination: 'entity.relationships.resolution.risk.calculated_score',
-      mapping: { type: 'float' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: 'entity.relationships.resolution.risk.calculated_score_norm',
-      destination: 'entity.relationships.resolution.risk.calculated_score_norm',
-      mapping: { type: 'float' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

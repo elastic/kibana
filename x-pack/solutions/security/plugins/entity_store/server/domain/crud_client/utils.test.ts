@@ -108,13 +108,13 @@ describe('crud_client utils', () => {
       entity: {
         id: 'entity-allow-update',
         attributes: {
-          watchlists: ['privileged'],
+          watchlists: ['privileged_watchlist_id'],
         },
       },
     } as Entity;
     const result = validateAndTransformDocForUpsert('generic', 'default', doc, false);
 
-    expect(result).toHaveProperty('entity.attributes.watchlists', ['privileged']);
+    expect(result).toHaveProperty('entity.attributes.watchlists', ['privileged_watchlist_id']);
   });
 
   it('getFieldDescriptions: throws for fields missing from definition', () => {

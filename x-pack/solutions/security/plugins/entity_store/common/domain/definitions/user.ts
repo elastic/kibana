@@ -58,57 +58,5 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'host.entity.id' }),
     collect({ source: 'host.id' }),
     collect({ source: 'host.name' }),
-
-    /* Relationships: keep one direction only, snake_case, keyword array */
-    collect({
-      source: 'user.entity.relationships.Accesses_frequently',
-      destination: 'entity.relationships.accesses_frequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'user.entity.relationships.Owns',
-      destination: 'entity.relationships.owns',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'user.entity.relationships.Supervises',
-      destination: 'entity.relationships.supervises',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-
-    /* Mapping only: populated by maintainers */
-    newestValue({
-      source: 'entity.relationships.owns_inferred',
-      destination: 'entity.relationships.owns_inferred',
-      mapping: { type: 'keyword' },
-    }),
-    newestValue({
-      source: 'entity.relationships.accesses_infrequently',
-      destination: 'entity.relationships.accesses_infrequently',
-      mapping: { type: 'keyword' },
-    }),
-    newestValue({
-      source: 'entity.relationships.resolution.resolved_to',
-      destination: 'entity.relationships.resolution.resolved_to',
-      mapping: { type: 'keyword' },
-    }),
-    newestValue({
-      source: 'entity.relationships.resolution.risk.calculated_level',
-      destination: 'entity.relationships.resolution.risk.calculated_level',
-      mapping: { type: 'keyword' },
-    }),
-    newestValue({
-      source: 'entity.relationships.resolution.risk.calculated_score',
-      destination: 'entity.relationships.resolution.risk.calculated_score',
-      mapping: { type: 'float' },
-    }),
-    newestValue({
-      source: 'entity.relationships.resolution.risk.calculated_score_norm',
-      destination: 'entity.relationships.resolution.risk.calculated_score_norm',
-      mapping: { type: 'float' },
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

@@ -87,53 +87,5 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'host.geo.timezone' }),
     ...getCommonFieldDescriptions('host'),
     ...getEntityFieldsDescriptions('host'),
-
-    collect({
-      source: 'host.entity.relationships.communicates_with',
-      destination: 'entity.relationships.communicates_with',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'host.entity.relationships.depends_on',
-      destination: 'entity.relationships.depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: 'host.entity.relationships.owns_inferred',
-      destination: 'entity.relationships.owns_inferred',
-      mapping: { type: 'keyword' },
-    }),
-    collect({
-      source: 'host.entity.relationships.accesses_infrequently',
-      destination: 'entity.relationships.accesses_infrequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: 'host.entity.relationships.resolution.resolved_to',
-      destination: 'entity.relationships.resolution.resolved_to',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: 'host.entity.relationships.resolution.risk.calculated_level',
-      destination: 'entity.relationships.resolution.risk.calculated_level',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: 'host.entity.relationships.resolution.risk.calculated_score',
-      destination: 'entity.relationships.resolution.risk.calculated_score',
-      mapping: { type: 'float' },
-      allowAPIUpdate: true,
-    }),
-    newestValue({
-      source: 'host.entity.relationships.resolution.risk.calculated_score_norm',
-      destination: 'entity.relationships.resolution.risk.calculated_score_norm',
-      mapping: { type: 'float' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

@@ -63,10 +63,14 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
-
     newestValue({
       source: `${prefix}.lifecycle.first_seen`,
       destination: 'entity.lifecycle.first_seen',
+      mapping: { type: 'date' },
+    }),
+    newestValue({
+      source: `${prefix}.lifecycle.last_seen`,
+      destination: 'entity.lifecycle.last_seen',
       mapping: { type: 'date' },
     }),
     newestValue({
@@ -74,7 +78,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.lifecycle.last_activity',
       mapping: { type: 'date' },
     }),
-
     collectValues({
       source: `${prefix}.behaviors.rule_names`,
       destination: 'entity.behaviors.rule_names',
@@ -87,6 +90,71 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.behaviors.anomaly_job_ids',
       mapping: { type: 'keyword' },
       fieldHistoryLength: 100,
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.communicates_with`,
+      destination: 'entity.relationships.communicates_with',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.depends_on`,
+      destination: 'entity.relationships.depends_on',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.owns_inferred`,
+      destination: 'entity.relationships.owns_inferred',
+      mapping: { type: 'keyword' },
+    }),
+    collectValues({
+      source: `${prefix}.relationships.accesses_infrequently`,
+      destination: 'entity.relationships.accesses_infrequently',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.accesses_frequently`,
+      destination: 'entity.relationships.accesses_frequently',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.owns`,
+      destination: 'entity.relationships.owns',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.supervises`,
+      destination: 'entity.relationships.supervises',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.resolved_to`,
+      destination: 'entity.relationships.resolution.resolved_to',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.risk.calculated_level`,
+      destination: 'entity.relationships.resolution.risk.calculated_level',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.risk.calculated_score`,
+      destination: 'entity.relationships.resolution.risk.calculated_score',
+      mapping: { type: 'float' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.risk.calculated_score_norm`,
+      destination: 'entity.relationships.resolution.risk.calculated_score_norm',
+      mapping: { type: 'float' },
       allowAPIUpdate: true,
     }),
   ];
