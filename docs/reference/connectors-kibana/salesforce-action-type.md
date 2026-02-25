@@ -48,7 +48,7 @@ Get record
 List records
 :   List records for a Salesforce sobject. Returns a page of record IDs; use `nextRecordsUrl` from the response to fetch the next page.
     - **sobjectName** (required): The API name of the sobject (for example, `Account`, `Contact`).
-    - **limit** (optional): Maximum number of records to return. Default is 200; maximum is 2000.
+    - **limit** (optional): Maximum number of records to return. Default is 50; maximum is 2000.
 
 ## Connector networking configuration [salesforce-connector-networking-configuration]
 
