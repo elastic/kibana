@@ -34,42 +34,13 @@ export const checkForMissingValueReact = (val: unknown): ReactNode | void => {
   }
 };
 
-const HTML_TAG_RE = /<[^>]+>/;
-
-const HTML_ENTITY_RE = /&(?:#\d+|#x[\da-fA-F]+|[a-zA-Z]+);/;
-
 /**
- * Decodes HTML entities in a string that contains no HTML tags.
- * Only invoked on tag-free strings, so a minimal set of common entities suffices.
+ * Creates a plain-text fallback for formatters that don't define reactConvert.
+ * Delegates to the text content type — no HTML, no dangerouslySetInnerHTML.
  */
-const decodeHTMLEntities = (html: string): string => {
-  if (!HTML_ENTITY_RE.test(html)) {
-    return html;
-  }
-  return html
-    .replaceAll('&amp;', '&')
-    .replaceAll('&lt;', '<')
-    .replaceAll('&gt;', '>')
-    .replaceAll('&quot;', '"')
-    .replaceAll('&#39;', "'")
-    .replaceAll('&#x27;', "'");
-};
-
-/**
- * Creates a fallback wrapper that converts HTML output to a ReactNode.
- * If the HTML contains no tags, decodes entities and returns plain text.
- * Otherwise wraps via dangerouslySetInnerHTML — identical to what consumers do today.
- */
-const createHtmlFallback = (format: IFieldFormat): ReactContextTypeConvert => {
+const createTextFallback = (format: IFieldFormat): ReactContextTypeConvert => {
   return (value, options = {}) => {
-    const html: string = format.convert(value, 'html', options);
-
-    if (!HTML_TAG_RE.test(html)) {
-      return decodeHTMLEntities(html);
-    }
-
-    // eslint-disable-next-line react/no-danger
-    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+    return format.convert(value, 'text', options);
   };
 };
 
@@ -77,7 +48,7 @@ const getConvertFn = (
   format: IFieldFormat,
   convert?: ReactContextTypeConvert
 ): ReactContextTypeConvert => {
-  return convert ?? createHtmlFallback(format);
+  return convert ?? createTextFallback(format);
 };
 
 export const setup = (
