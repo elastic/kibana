@@ -344,6 +344,18 @@
             "type": "keyword"
           }
         }
+      },
+      "apiKey": {
+        "type": "binary"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      },
+      "apiKeyOwner": {
+        "type": "keyword"
+      },
+      "apiKeyCreatedByUser": {
+        "type": "boolean"
       }
     }
   },

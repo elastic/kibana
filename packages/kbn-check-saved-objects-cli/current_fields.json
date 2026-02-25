@@ -98,6 +98,10 @@
     "destinations.id",
     "destinations.type",
     "name",
+    "apiKey",
+    "uiamApiKey",
+    "apiKeyOwner",
+    "apiKeyCreatedByUser",
     "updatedAt",
     "updatedBy"
   ],
