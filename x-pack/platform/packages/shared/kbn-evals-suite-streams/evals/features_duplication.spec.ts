@@ -438,7 +438,7 @@ Method:
           inferenceClient,
           evaluationConnector,
           logger,
-          phoenixClient,
+          executorClient,
         }) => {
           const evaluatorInferenceClient = inferenceClient.bindTo({
             connectorId: evaluationConnector.id,
@@ -454,7 +454,7 @@ Method:
 
           await esClient.indices.refresh({ index: dataset.input.stream_name });
 
-          await phoenixClient.runExperiment(
+          await executorClient.runExperiment(
             {
               dataset: {
                 name: dataset.name,
