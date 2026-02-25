@@ -28,11 +28,12 @@ export function ServiceInventoryCallouts() {
     !userHasDismissedCallout && shouldDisplayMlCallout(anomalyDetectionSetupState);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="none">
       <TracesInDiscoverCallout />
       {displayMlCallout && (
         <EuiFlexItem>
           <MLCallout
+            compact
             isOnSettingsPage={false}
             anomalyDetectionSetupState={anomalyDetectionSetupState}
             onDismiss={() => setUserHasDismissedCallout(true)}

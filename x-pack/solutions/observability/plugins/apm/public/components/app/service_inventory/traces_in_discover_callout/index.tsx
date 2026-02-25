@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { from, where } from '@kbn/esql-composer';
@@ -24,15 +24,8 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 
-const buttonLabel = i18n.translate('xpack.apm.apmMainTemplate.euiCallout.buttonLabel', {
-  defaultMessage: 'View traces in Discover',
-});
 const calloutTitle = i18n.translate('xpack.apm.apmMainTemplate.euiCallout.title', {
   defaultMessage: 'Try the new traces experience in Discover',
-});
-const calloutContent = i18n.translate('xpack.apm.apmMainTemplate.euiCallout.content', {
-  defaultMessage:
-    'Now you can view and analyse the full-screen waterfall and explore your trace data in context.',
 });
 
 const tracesInDiscoverCalloutStorageKey = 'apm.tracesInDiscoverCalloutDismissed';
@@ -106,22 +99,15 @@ export function TracesInDiscoverCallout() {
   return (
     <EuiCallOut
       data-test-subj="apmServiceInventoryTracesInDiscoverCallout"
-      size="m"
+      size="s"
       announceOnMount
-      title={calloutTitle}
-      iconType="cheer"
+      title={
+        <EuiLink href={discoverHref} data-test-subj="apmServiceInventoryTracesInDiscoverCalloutButton">
+          {calloutTitle}
+        </EuiLink>
+      }
+      iconType="pin"
       onDismiss={dismissCallout}
-    >
-      <EuiText size="s">{calloutContent}</EuiText>
-      <EuiSpacer size="m" />
-      <EuiButton
-        data-test-subj="apmServiceInventoryTracesInDiscoverCalloutButton"
-        fill
-        href={discoverHref}
-        aria-label={buttonLabel}
-      >
-        {buttonLabel}
-      </EuiButton>
-    </EuiCallOut>
+    />
   );
 }
