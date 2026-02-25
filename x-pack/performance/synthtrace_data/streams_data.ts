@@ -514,6 +514,28 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
     });
   }
 
+  // Fetch current ingest settings so we preserve lifecycle/failure_store/processing/fields.
+  // Root streams cannot use `inherit` for lifecycle or failure_store — they must keep
+  // their current concrete values or the server rejects with 400.
+  const response = await kibanaServer.request<{ ingest: Record<string, unknown> }>({
+    path: `/api/streams/${WIRED_ROOT_STREAM}/_ingest`,
+    method: 'GET',
+    headers: PUBLIC_API_HEADERS,
+  });
+  log.info('Fetched current root stream ingest settings');
+
+  const currentIngest = response.data;
+  const { processing, settings, lifecycle, failure_store, wired } = currentIngest.ingest as {
+    processing: { steps: unknown[]; updated_at?: string };
+    settings: Record<string, unknown>;
+    lifecycle: Record<string, unknown>;
+    failure_store: Record<string, unknown>;
+    wired: { fields: Record<string, unknown>; routing: unknown[] };
+  };
+
+  // Strip updated_at from processing — the server sets it on write
+  const { updated_at: _updatedAt, ...processingWithoutTimestamp } = processing;
+
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       await kibanaServer.request({
@@ -522,11 +544,11 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
         headers: PUBLIC_API_HEADERS,
         body: {
           ingest: {
-            processing: { steps: [] },
-            settings: {},
-            wired: { fields: {}, routing: allRouting },
-            lifecycle: { inherit: {} },
-            failure_store: { inherit: {} },
+            processing: processingWithoutTimestamp,
+            settings,
+            wired: { fields: wired.fields, routing: allRouting },
+            lifecycle,
+            failure_store,
           },
         },
       });
