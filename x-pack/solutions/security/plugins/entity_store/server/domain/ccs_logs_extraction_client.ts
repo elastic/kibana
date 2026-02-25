@@ -140,13 +140,15 @@ export class CcsLogsExtractionClient {
           ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
         ]);
 
+        const momentToDate = moment.utc(toDateISO);
+        let inc = 0;
         await this.crudClient.upsertEntitiesBulk(bulkObjects, {
           force: true,
-          // It's good to generate a random timestamp to avoid too many ts collisions
+          // It's good to generate a sparse timestamp to avoid too many ts collisions
           // in the main extraction
           timestampGenerator: () => {
-            const randomMs = Math.floor(Math.random() * 10000) + 1;
-            return moment.utc(toDateISO).add(randomMs, 'ms').toISOString();
+            inc++;
+            return momentToDate.add(inc, 'ms').toISOString();
           },
         });
       }
