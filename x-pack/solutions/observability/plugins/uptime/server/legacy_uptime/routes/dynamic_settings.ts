@@ -12,7 +12,13 @@ import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import type { UMRestApiRouteFactory } from '.';
 import { savedObjectsAdapter } from '../lib/saved_objects/saved_objects';
 import { VALUE_MUST_BE_AN_INTEGER } from '../../../common/translations';
-import { API_URLS, MAX_DEFAULT_CONNECTORS_PER_REQUEST, MAX_DEFAULT_EMAIL_BCC_PER_REQUEST, MAX_DEFAULT_EMAIL_CC_PER_REQUEST, MAX_DEFAULT_EMAIL_TO_PER_REQUEST } from '../../../common/constants';
+import {
+  API_URLS,
+  MAX_DEFAULT_CONNECTORS_PER_REQUEST,
+  MAX_DEFAULT_EMAIL_BCC_PER_REQUEST,
+  MAX_DEFAULT_EMAIL_CC_PER_REQUEST,
+  MAX_DEFAULT_EMAIL_TO_PER_REQUEST,
+} from '../../../common/constants';
 
 export const createGetDynamicSettingsRoute: UMRestApiRouteFactory<DynamicSettings> = (
   _libs: UMServerLibs
@@ -37,12 +43,18 @@ export const DynamicSettingsSchema = schema.object({
   heartbeatIndices: schema.maybe(schema.string({ minLength: 1 })),
   certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  defaultConnectors: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_CONNECTORS_PER_REQUEST })),
+  defaultConnectors: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_CONNECTORS_PER_REQUEST })
+  ),
   defaultEmail: schema.maybe(
     schema.object({
       to: schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_EMAIL_TO_PER_REQUEST }),
-      cc: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_EMAIL_CC_PER_REQUEST })),
-      bcc: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_EMAIL_BCC_PER_REQUEST })),
+      cc: schema.maybe(
+        schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_EMAIL_CC_PER_REQUEST })
+      ),
+      bcc: schema.maybe(
+        schema.arrayOf(schema.string(), { maxSize: MAX_DEFAULT_EMAIL_BCC_PER_REQUEST })
+      ),
     })
   ),
 });
