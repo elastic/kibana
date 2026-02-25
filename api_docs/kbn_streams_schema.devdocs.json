@@ -738,7 +738,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 28,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -754,7 +754,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 28,
+            "lineNumber": 143,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
@@ -775,7 +775,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 37,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -791,7 +791,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 37,
+            "lineNumber": 163,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -1086,12 +1086,14 @@
         "type": "Function",
         "tags": [],
         "label": "getParentId",
-        "description": [],
+        "description": [
+          "\nGet parent stream ID. Returns undefined for root streams.\n\nExamples:\n  - getParentId(\"logs.otel\") → undefined (root)\n  - getParentId(\"logs.otel.nginx\") → \"logs.otel\"\n  - getParentId(\"logs.otel.nginx.access\") → \"logs.otel.nginx\""
+        ],
         "signature": [
           "(id: string) => string | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 16,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1107,7 +1109,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 16,
+            "lineNumber": 88,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -1156,6 +1158,43 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getRoot",
+        "type": "Function",
+        "tags": [],
+        "label": "getRoot",
+        "description": [],
+        "signature": [
+          "(id: string) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getRoot.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+            "lineNumber": 134,
+            "columnNumber": 25,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getSegments",
         "type": "Function",
         "tags": [],
@@ -1165,7 +1204,7 @@
           "(id: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 41,
+        "lineNumber": 167,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1181,7 +1220,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 41,
+            "lineNumber": 167,
             "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
@@ -1304,7 +1343,7 @@
           "(parent: string, child: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 12,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1320,7 +1359,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 12,
+            "lineNumber": 51,
             "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
@@ -1337,7 +1376,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 12,
+            "lineNumber": 51,
             "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
@@ -1395,7 +1434,7 @@
           "(parent: string, child: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 8,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1411,7 +1450,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 8,
+            "lineNumber": 36,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -1428,7 +1467,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 8,
+            "lineNumber": 36,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -2041,6 +2080,62 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isParentName",
+        "type": "Function",
+        "tags": [],
+        "label": "isParentName",
+        "description": [
+          "\nCheck if parent is the direct parent of descendant.\nThis is the inverse of isChildOf - checks from parent's perspective.\n\nExamples:\n  - isParentName(\"logs.otel\", \"logs.otel.nginx\") → true\n  - isParentName(\"logs.otel\", \"logs.otel.nginx.access\") → false (grandparent)\n  - isParentName(\"logs\", \"logs.otel\") → false (logs.otel is a root)"
+        ],
+        "signature": [
+          "(parent: string, descendant: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isParentName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+            "lineNumber": 69,
+            "columnNumber": 30,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isParentName.$2",
+            "type": "string",
+            "tags": [],
+            "label": "descendant",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+            "lineNumber": 69,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isRoot",
         "type": "Function",
         "tags": [],
@@ -2050,7 +2145,7 @@
           "(id: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 24,
+        "lineNumber": 117,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2066,7 +2161,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-            "lineNumber": 24,
+            "lineNumber": 117,
             "columnNumber": 24,
             "deprecated": false,
             "trackAdoption": false,
@@ -2094,8 +2189,8 @@
           "WiredStream",
           ".Definition>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_root.ts",
-        "lineNumber": 11,
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/is_root_stream_definition.ts",
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3192,7 +3287,7 @@
         "label": "IngestBase",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
-        "lineNumber": 53,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3230,7 +3325,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
-            "lineNumber": 54,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3252,7 +3347,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
-            "lineNumber": 55,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3274,7 +3369,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
-            "lineNumber": 56,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3294,7 +3389,7 @@
               "FailureStoreEnabled"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
-            "lineNumber": 57,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5509,8 +5604,7 @@
         "label": "ElasticsearchProcessorType",
         "description": [],
         "signature": [
-          "keyof ",
-          "IngestProcessorContainer"
+          "\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"pipeline\" | \"json\" | \"csv\" | \"cef\" | \"remove\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"fail\" | \"grok\" | \"reroute\" | \"fingerprint\" | \"dissect\" | \"convert\" | \"redact\" | \"network_direction\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/ingest_pipeline_processors.ts",
         "lineNumber": 10,
@@ -5807,7 +5901,7 @@
           "\"standard\" | \"time_series\" | \"logsdb\" | \"lookup\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
-        "lineNumber": 117,
+        "lineNumber": 120,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6012,6 +6106,57 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.LOGS_ECS_STREAM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_ECS_STREAM_NAME",
+        "description": [],
+        "signature": [
+          "\"logs.ecs\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.LOGS_OTEL_STREAM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_OTEL_STREAM_NAME",
+        "description": [],
+        "signature": [
+          "\"logs.otel\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.LOGS_ROOT_STREAM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_ROOT_STREAM_NAME",
+        "description": [],
+        "signature": [
+          "\"logs\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+        "lineNumber": 7,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.MAX_NESTING_LEVEL",
         "type": "number",
         "tags": [],
@@ -6021,7 +6166,7 @@
           "5"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
-        "lineNumber": 45,
+        "lineNumber": 185,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6109,6 +6254,23 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
         "lineNumber": 119,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.RootStreamName",
+        "type": "Type",
+        "tags": [],
+        "label": "RootStreamName",
+        "description": [],
+        "signature": [
+          "\"logs\" | \"logs.otel\" | \"logs.ecs\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6668,7 +6830,7 @@
         "label": "elasticsearchProcessorTypes",
         "description": [],
         "signature": [
-          "readonly [\"append\", \"attachment\", \"bytes\", \"circle\", \"community_id\", \"convert\", \"csv\", \"date\", \"date_index_name\", \"dissect\", \"dot_expander\", \"drop\", \"enrich\", \"fail\", \"fingerprint\", \"foreach\", \"ip_location\", \"geo_grid\", \"geoip\", \"grok\", \"gsub\", \"html_strip\", \"inference\", \"join\", \"json\", \"kv\", \"lowercase\", \"network_direction\", \"pipeline\", \"redact\", \"registered_domain\", \"remove\", \"rename\", \"reroute\", \"script\", \"set\", \"set_security_user\", \"sort\", \"split\", \"terminate\", \"trim\", \"uppercase\", \"urldecode\", \"uri_parts\", \"user_agent\"]"
+          "readonly [\"append\", \"attachment\", \"bytes\", \"cef\", \"circle\", \"community_id\", \"convert\", \"csv\", \"date\", \"date_index_name\", \"dissect\", \"dot_expander\", \"drop\", \"enrich\", \"fail\", \"fingerprint\", \"foreach\", \"ip_location\", \"geo_grid\", \"geoip\", \"grok\", \"gsub\", \"html_strip\", \"inference\", \"join\", \"json\", \"kv\", \"lowercase\", \"network_direction\", \"pipeline\", \"redact\", \"registered_domain\", \"remove\", \"rename\", \"reroute\", \"script\", \"set\", \"set_security_user\", \"sort\", \"split\", \"terminate\", \"trim\", \"uppercase\", \"urldecode\", \"uri_parts\", \"user_agent\"]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/ingest_pipeline_processors.ts",
         "lineNumber": 18,
@@ -6982,7 +7144,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
-        "lineNumber": 60,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7178,6 +7340,23 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/record_types.ts",
         "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.ROOT_STREAM_NAMES",
+        "type": "Object",
+        "tags": [],
+        "label": "ROOT_STREAM_NAMES",
+        "description": [],
+        "signature": [
+          "readonly [\"logs\", \"logs.otel\", \"logs.ecs\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

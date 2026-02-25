@@ -75,10 +75,6 @@ xpack.serverless.search.enabled: true
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
 
-## Enable tech-preview pages
-uiSettings.overrides:
-  dataSources:enabled: false
-
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
@@ -165,6 +161,26 @@ xpack.actions.preconfigured:
       inferenceId: ".anthropic-claude-4.6-opus-chat_completion"
       providerConfig:
         model_id: "anthropic-claude-4.6-opus"
+  Anthropic-Claude-Sonnet-4-6:
+    name: Anthropic Claude Sonnet 4.6
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".anthropic-claude-4.6-sonnet-chat_completion"
+      providerConfig:
+        model_id: "anthropic-claude-4.6-sonnet"
+  Anthropic-Claude-Haiku-4-5:
+    name: Anthropic Claude Haiku 4.5
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".anthropic-claude-4.5-haiku-chat_completion"
+      providerConfig:
+        model_id: "anthropic-claude-4.5-haiku"
   OpenAI-GPT-OSS-120B:
     name: OpenAI GPT-OSS 120B
     actionTypeId: .inference
@@ -255,6 +271,16 @@ xpack.actions.preconfigured:
       inferenceId: ".google-gemini-2.5-flash-chat_completion"
       providerConfig:
         model_id: "google-gemini-2.5-flash"
+  Google-Gemini-2-5-Flash-Lite:
+    name: Google Gemini 2.5 Flash Lite
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".google-gemini-2.5-flash-lite-chat_completion"
+      providerConfig:
+        model_id: "google-gemini-2.5-flash-lite"
   Google-Gemini-3-0-Pro:
     name: Google Gemini 3.0 Pro
     actionTypeId: .inference

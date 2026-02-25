@@ -27,7 +27,7 @@ import type { FlyoutParamProps } from '../../synthetics/components/monitors_page
 import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_page/overview/overview/monitor_detail_flyout';
 import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewLoader } from '../../synthetics/components/monitors_page/overview/overview/overview_loader';
-import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const StatusGridComponent = ({
   reload$,
@@ -42,7 +42,7 @@ export const StatusGridComponent = ({
 
   const hasFilters = !areFiltersEmpty(filters);
   const singleMonitor =
-    filters && filters.locations.length === 1 && filters.monitorIds.length === 1;
+    filters && filters.locations?.length === 1 && filters.monitor_ids?.length === 1;
 
   const monitorOverviewListComponent = (
     <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
@@ -125,11 +125,11 @@ const MonitorsOverviewList = ({
     if (!filters) return;
     dispatch(
       setOverviewPageStateAction({
-        tags: filters.tags.map((tag) => tag.value),
-        locations: filters.locations.map((location) => location.value),
-        monitorTypes: filters.monitorTypes.map((monitorType) => monitorType.value),
-        monitorQueryIds: filters.monitorIds.map((monitorId) => monitorId.value),
-        projects: filters.projects.map((project) => project.value),
+        tags: filters.tags?.map((tag) => tag.value) ?? [],
+        locations: filters.locations?.map((location) => location.value) ?? [],
+        monitorTypes: filters.monitor_types?.map((monitorType) => monitorType.value) ?? [],
+        monitorQueryIds: filters.monitor_ids?.map((monitorId) => monitorId.value) ?? [],
+        projects: filters.projects?.map((project) => project.value) ?? [],
       })
     );
   }, [dispatch, filters]);
