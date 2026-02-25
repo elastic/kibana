@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -44,10 +45,7 @@ export interface SkillProvider {
   get(skillId: string): MaybePromise<PublicSkillDefinition | undefined>;
   list(): MaybePromise<PublicSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): MaybePromise<PublicSkillDefinition>;
-  update(
-    skillId: string,
-    update: PersistedSkillUpdateRequest
-  ): MaybePromise<PublicSkillDefinition>;
+  update(skillId: string, update: PersistedSkillUpdateRequest): MaybePromise<PublicSkillDefinition>;
   delete(skillId: string): MaybePromise<boolean>;
 }
 
@@ -182,15 +180,13 @@ class SkillServiceImpl implements SkillService {
 }
 
 class SkillRegistryImpl implements SkillRegistry {
+  private static readonly MAX_TOOL_IDS_PER_SKILL = 5;
+
   private readonly builtinSkillsMap: Map<string, SkillDefinition>;
   private readonly persistedProvider: SkillProvider;
   private readonly toolRegistry: ToolRegistry;
 
-  constructor({
-    builtinSkills,
-    persistedProvider,
-    toolRegistry,
-  }: CreateSkillRegistryParams) {
+  constructor({ builtinSkills, persistedProvider, toolRegistry }: CreateSkillRegistryParams) {
     this.builtinSkillsMap = new Map(builtinSkills.map((skill) => [skill.id, skill]));
     this.persistedProvider = persistedProvider;
     this.toolRegistry = toolRegistry;
@@ -340,8 +336,6 @@ class SkillRegistryImpl implements SkillRegistry {
 
     return result;
   }
-
-  private static readonly MAX_TOOL_IDS_PER_SKILL = 5;
 
   /**
    * Validates that all tool IDs exist in the tool registry
