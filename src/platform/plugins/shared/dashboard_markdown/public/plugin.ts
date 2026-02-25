@@ -46,8 +46,8 @@ export class DashboardMarkdownPlugin
 
     // Registering the markdown saved object type with content management
     // to support "Add from library" flyout in dashboard
-    // Only 'mSearch' route implemented
-    // All other content management routes throw
+    // Only 'mSearch' implemented to support markdown saved objects in 'api/content_management/rpc/mSearch' route
+    // CRUD content management routes not implemented and throw
     contentManagement.registry.register({
       id: MARKDOWN_SAVED_OBJECT_TYPE,
       name: 'Markdown',
