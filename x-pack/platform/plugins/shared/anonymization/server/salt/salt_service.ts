@@ -6,6 +6,7 @@
  */
 
 import { randomBytes } from 'crypto';
+import { v5 as uuidv5 } from 'uuid';
 import type { SavedObjectsServiceStart, Logger } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
@@ -13,6 +14,10 @@ export const ANONYMIZATION_SALT_SAVED_OBJECT_TYPE = 'anonymization-salt';
 
 /** Length of generated salt in bytes (32 bytes = 256 bits). */
 const SALT_LENGTH_BYTES = 32;
+const SALT_ID_NAMESPACE = uuidv5.DNS;
+
+const getSaltSavedObjectId = (namespace: string): string =>
+  uuidv5(`${ANONYMIZATION_SALT_SAVED_OBJECT_TYPE}:${namespace}`, SALT_ID_NAMESPACE);
 
 interface SaltAttributes {
   salt: string;
@@ -32,10 +37,10 @@ export class SaltService {
 
   /**
    * Gets the per-space salt, creating it if it doesn't exist.
-   * The salt is stored as an encrypted saved object keyed by `salt-{namespace}`.
+   * The salt is stored as an encrypted saved object keyed by a deterministic UUID per namespace.
    */
   async getSalt(namespace: string): Promise<string> {
-    const id = `salt-${namespace}`;
+    const id = getSaltSavedObjectId(namespace);
     const soNamespace = namespace === 'default' ? undefined : namespace;
 
     try {
@@ -65,16 +70,16 @@ export class SaltService {
    * produced a conflict, reads and returns the existing salt.
    */
   private async createSalt(namespace: string): Promise<string> {
-    const id = `salt-${namespace}`;
+    const id = getSaltSavedObjectId(namespace);
     const soNamespace = namespace === 'default' ? undefined : namespace;
     const salt = randomBytes(SALT_LENGTH_BYTES).toString('hex');
 
-    const internalRepo = this.savedObjects.createInternalRepository([
-      ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
-    ]);
+    const internalSoClient = this.savedObjects.getUnsafeInternalClient({
+      includedHiddenTypes: [ANONYMIZATION_SALT_SAVED_OBJECT_TYPE],
+    });
 
     try {
-      await internalRepo.create<SaltAttributes>(
+      await internalSoClient.create<SaltAttributes>(
         ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
         { salt },
         { id, namespace: soNamespace }
