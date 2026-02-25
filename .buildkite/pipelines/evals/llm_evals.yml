@@ -11,6 +11,18 @@ steps:
 
   - wait
 
+  - label: 'Store Cache for build'
+    command: .buildkite/scripts/steps/store_cache.sh
+    timeout_in_minutes: 10
+    id: store_cache
+    soft_fail: true
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-highcpu-8
+      diskSizeGb: 95
+
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
@@ -31,9 +43,17 @@ steps:
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'agent-builder'
           EVAL_FANOUT: '1'
-          EVAL_MODEL_GROUPS: 'all'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          # Weekly pipeline model allowlist:
+          # - Default behavior (EVAL_MODEL_GROUPS=all) runs against every discovered LiteLLM + EIS model.
+          # - That is too expensive/noisy for a weekly cadence, so we currently pin to a small EIS allowlist.
+          #
+          # NOTE: Use `eis/<modelId>` values (not connector ids) so we can filter purely on the discovered
+          # EIS model ids in `target/eis_models.json`.
+          EVAL_MODEL_GROUPS: &weekly_eis_model_groups 'eis/anthropic-claude-4.5-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.0-pro,eis/openai-gpt-5.2,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -51,9 +71,11 @@ steps:
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'esql-generation'
           EVAL_FANOUT: '1'
-          EVAL_MODEL_GROUPS: 'all'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -68,13 +90,14 @@ steps:
 
       - label: 'Evals: Streams'
         key: kbn-evals-weekly-streams
-        skip: 'Temporarily disabled (requires prerequisite data; will be re-enabled in follow-up PR)'
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'streams'
           EVAL_FANOUT: '1'
-          EVAL_MODEL_GROUPS: 'all'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -92,9 +115,11 @@ steps:
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'llm-tasks'
           EVAL_FANOUT: '1'
-          EVAL_MODEL_GROUPS: 'all'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -106,37 +131,16 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
-
-      - label: 'Evals: Observability AI Assistant'
-        key: kbn-evals-weekly-obs-ai-assistant
-        skip: 'Temporarily disabled (for the sake of cost reduction and low maturity of this eval suite; will be re-enabled in follow-up PR)'
-        command: bash .buildkite/scripts/steps/evals/run_suite.sh
-        env:
-          KBN_EVALS: '1'
-          EVAL_SUITE_ID: 'obs-ai-assistant'
-          EVAL_FANOUT: '1'
-          EVAL_MODEL_GROUPS: 'all'
-        timeout_in_minutes: 60
-        agents:
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-8
-          preemptible: true
-        retry:
-          automatic:
-            - exit_status: '-1'
-              limit: 3
-
-      - label: 'Evals: Observability AI Assistant (AI Insights)'
+      - label: 'Evals: Observability AI Insights'
         key: kbn-evals-weekly-obs-ai-assistant-ai-insights
-        skip: 'Temporarily disabled (requires prerequisite data; will be re-enabled in follow-up PR)'
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'obs-ai-assistant/ai_insights'
           EVAL_FANOUT: '1'
-          EVAL_MODEL_GROUPS: 'all'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404

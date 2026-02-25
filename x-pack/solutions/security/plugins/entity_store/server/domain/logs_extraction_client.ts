@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -17,6 +18,7 @@ import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import type { PaginationParams } from './logs_extraction/logs_extraction_query_builder';
 import {
   buildLogsExtractionEsqlQuery,
+  buildRemainingLogsCountQuery,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   extractPaginationParams,
   HASHED_ID_FIELD,
@@ -43,7 +45,6 @@ interface LogsExtractionOptions {
     toDateISO: string;
   };
   abortController?: AbortController;
-  countOnly?: boolean;
 }
 
 interface ExtractedLogsSummarySuccess {
@@ -103,7 +104,7 @@ export class LogsExtractionClient {
         scannedIndices: indexPatterns,
       };
 
-      if (opts?.specificWindow || opts?.countOnly) {
+      if (opts?.specificWindow) {
         return operationResult;
       }
 
@@ -132,6 +133,44 @@ export class LogsExtractionClient {
       return operationResult;
     } catch (error) {
       return await this.handleError(error, type);
+    }
+  }
+
+  public async getRemainingLogsCount(type: EntityType): Promise<number> {
+    try {
+      const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
+      const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
+      const indexPatterns = await this.getIndexPatterns(
+        engineDescriptor.logExtractionState.additionalIndexPatterns
+      );
+      const { fromDateISO } = this.getExtractionWindow(
+        engineDescriptor.logExtractionState,
+        delayMs
+      );
+      const toDateISO = moment().utc().toISOString();
+      const recoveryId = engineDescriptor.logExtractionState.paginationId;
+      const query = buildRemainingLogsCountQuery({
+        indexPatterns,
+        type,
+        fromDateISO,
+        toDateISO,
+        recoveryId,
+      });
+      const esqlResponse = await executeEsqlQuery({
+        esClient: this.esClient,
+        query,
+      });
+      const countColumnIdx = esqlResponse.columns.findIndex((col) => col.name === 'document_count');
+      if (countColumnIdx === -1 || esqlResponse.values.length === 0) {
+        return 0;
+      }
+      const count = esqlResponse.values[0][countColumnIdx];
+
+      return Number(count);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to get remaining logs count for entity type "${type}": ${message}`);
+      throw error;
     }
   }
 
@@ -210,18 +249,16 @@ export class LogsExtractionClient {
         pages++;
       }
 
-      if (!opts?.countOnly) {
-        this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
-        await ingestEntities({
-          esClient: this.esClient,
-          esqlResponse,
-          esIdField: HASHED_ID_FIELD,
-          fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
-          targetIndex: latestIndex,
-          logger: this.logger,
-          abortController: opts?.abortController,
-        });
-      }
+      this.logger.debug(`Found ${esqlResponse.values.length}, ingesting them`);
+      await ingestEntities({
+        esClient: this.esClient,
+        esqlResponse,
+        esIdField: HASHED_ID_FIELD,
+        fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
+        targetIndex: latestIndex,
+        logger: this.logger,
+        abortController: opts?.abortController,
+      });
 
       // On pagination we save the pagination to the last seen timestamp cursor
       // so we can recover from corrupt state
@@ -319,7 +356,7 @@ export class LogsExtractionClient {
       const cleanIndices = secSolDataView
         .getIndexPattern()
         .split(',')
-        .filter((index) => index !== alertsIndex);
+        .filter((index) => index !== alertsIndex && !isCCSRemoteIndexName(index));
       indexPatterns.push(...cleanIndices);
     } catch (error) {
       this.logger.warn(
