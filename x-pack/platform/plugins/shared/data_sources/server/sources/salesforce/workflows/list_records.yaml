@@ -11,7 +11,7 @@ inputs:
   - name: limit
     type: number
     required: false
-    default: 200
+    default: 50
   - name: next_records_url
     type: string
     required: false

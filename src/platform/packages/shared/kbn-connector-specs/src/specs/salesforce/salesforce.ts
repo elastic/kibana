@@ -110,7 +110,7 @@ export const SalesforceConnector: ConnectorSpec = {
           const response = await ctx.client.get(url, {});
           return response.data;
         }
-        const limit = Math.min(typedInput.limit, 2000);
+        const limit = Math.min(typedInput.limit ?? 50, 2000);
         const soql = `SELECT Id FROM ${typedInput.sobjectName} LIMIT ${limit}`;
         const response = await ctx.client.get(
           `${baseUrl}/services/data/${SALESFORCE_API_VERSION}/query`,
