@@ -28,6 +28,7 @@ import {
   getFeaturesIdentificationTaskId,
 } from './features_identification';
 import { waitForSubtask, scheduleFeaturesIdentificationTask } from './subtask_helpers';
+import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
 
 export interface SignificantEventsQueriesGenerationTaskParams {
   connectorId: string;
@@ -195,6 +196,13 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   combinedResults
                 );
               } catch (error) {
+                if (isDefinitionNotFoundError(error)) {
+                  taskContext.logger.debug(
+                    `Stream ${streamName} was deleted before significant events queries generation task started, skipping`
+                  );
+                  return getDeleteTaskRunResult();
+                }
+
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 
