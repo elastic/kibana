@@ -36,6 +36,18 @@ describe('path filters', () => {
     );
   });
 
+  test('throws on invalid JSON pointer escape sequence', () => {
+    expect(() => toYamlSearchPath('/paths/~1api~2fleet')).toThrow(
+      'Invalid JSON pointer escape sequence in token "~1api~2fleet"'
+    );
+  });
+
+  test('throws on trailing tilde in JSON pointer token', () => {
+    expect(() => toYamlSearchPath('/paths/~1api~1fleet~')).toThrow(
+      'Invalid JSON pointer escape sequence in token "~1api~1fleet~"'
+    );
+  });
+
   test('preserves human route filter for YAML matching', () => {
     expect(toYamlSearchPath('/api/fleet/agent_policies')).toBe('/api/fleet/agent_policies');
   });
