@@ -672,7 +672,7 @@ export class StreamsApp {
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
-    await this.page.getByLabel('Source Field').fill(value);
+    await this.processorFieldComboBox.setCustomSingleOption(value);
   }
 
   async fillDateProcessorFormatInput(value: string) {

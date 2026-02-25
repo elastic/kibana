@@ -154,6 +154,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -186,6 +187,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: false,
           manage_failure_store: false,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -253,7 +255,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('does not display callout for non-root streams', () => {
       const definition = createMockWiredStreamDefinition({
         stream: {
-          name: 'logs.child', // child stream
+          name: 'logs.otel.child', // child stream
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
@@ -560,7 +562,7 @@ describe('StreamDetailSchemaEditor', () => {
     it('shows add field button for non-root streams with manage privilege', () => {
       const definition = createMockClassicStreamDefinition({
         stream: {
-          name: 'logs.child',
+          name: 'logs.otel.child',
           description: '',
           updated_at: '2024-01-01T00:00:00.000Z',
           ingest: {
@@ -582,6 +584,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 
@@ -629,6 +632,7 @@ describe('StreamDetailSchemaEditor', () => {
           read_failure_store: true,
           manage_failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
       });
 

@@ -98,7 +98,9 @@ describe('validateAncestorFields', () => {
           [fieldName]: { type: 'keyword' },
         };
 
-        expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+        expect(() =>
+          validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+        ).not.toThrow();
       }
     });
 
@@ -109,7 +111,9 @@ describe('validateAncestorFields', () => {
         'resource.attributes.host.name': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should accept attributes prefixed fields', () => {
@@ -118,7 +122,9 @@ describe('validateAncestorFields', () => {
         'attributes.custom': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should accept scope.attributes prefixed fields', () => {
@@ -127,7 +133,9 @@ describe('validateAncestorFields', () => {
         'scope.attributes.library': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should accept body.structured prefixed fields', () => {
@@ -136,7 +144,9 @@ describe('validateAncestorFields', () => {
         'body.structured.message': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should reject fields without valid namespace prefix or not in keepFields', () => {
@@ -145,8 +155,10 @@ describe('validateAncestorFields', () => {
         invalid_field: { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(MalformedFieldsError);
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(
+      expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
+        MalformedFieldsError
+      );
+      expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
         "Field invalid_field is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema."
       );
     });
@@ -180,7 +192,9 @@ describe('validateAncestorFields', () => {
           [fieldName]: { type: 'keyword' },
         };
 
-        expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+        expect(() =>
+          validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+        ).not.toThrow();
       }
     });
 
@@ -196,8 +210,12 @@ describe('validateAncestorFields', () => {
           [fieldName]: { type: 'keyword' },
         };
 
-        expect(() => validateAncestorFields({ ancestors, fields })).toThrow(MalformedFieldsError);
-        expect(() => validateAncestorFields({ ancestors, fields })).toThrow(
+        expect(() =>
+          validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+        ).toThrow(MalformedFieldsError);
+        expect(() =>
+          validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+        ).toThrow(
           `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
         );
       }
@@ -214,8 +232,12 @@ describe('validateAncestorFields', () => {
           [fieldName]: { type: 'keyword' },
         };
 
-        expect(() => validateAncestorFields({ ancestors, fields })).toThrow(MalformedFieldsError);
-        expect(() => validateAncestorFields({ ancestors, fields })).toThrow(
+        expect(() =>
+          validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+        ).toThrow(MalformedFieldsError);
+        expect(() =>
+          validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+        ).toThrow(
           `Field ${fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.`
         );
       }
@@ -227,7 +249,9 @@ describe('validateAncestorFields', () => {
         'scope.name': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should accept @timestamp field', () => {
@@ -236,7 +260,9 @@ describe('validateAncestorFields', () => {
         '@timestamp': { type: 'date' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should accept trace_id and span_id fields', () => {
@@ -246,7 +272,9 @@ describe('validateAncestorFields', () => {
         span_id: { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should accept body.text and body.structured fields', () => {
@@ -258,7 +286,9 @@ describe('validateAncestorFields', () => {
         'body.structured': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should accept severity fields', () => {
@@ -268,7 +298,9 @@ describe('validateAncestorFields', () => {
         severity_number: { type: 'byte' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should accept resource metadata fields', () => {
@@ -278,7 +310,9 @@ describe('validateAncestorFields', () => {
         'resource.dropped_attributes_count': { type: 'integer' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
   });
 
@@ -293,8 +327,10 @@ describe('validateAncestorFields', () => {
         'attributes.level': { type: 'long' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(MalformedFieldsError);
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(
+      expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
+        MalformedFieldsError
+      );
+      expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
         'Field attributes.level is already defined with incompatible type in the parent stream logs'
       );
     });
@@ -309,7 +345,9 @@ describe('validateAncestorFields', () => {
         'attributes.level': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should check all ancestors for type conflicts', () => {
@@ -323,8 +361,12 @@ describe('validateAncestorFields', () => {
         'attributes.service': { type: 'text' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(MalformedFieldsError);
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel.app' })
+      ).toThrow(MalformedFieldsError);
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel.app' })
+      ).toThrow(
         'Field attributes.service is already defined with incompatible type in the parent stream logs.otel'
       );
     });
@@ -338,8 +380,10 @@ describe('validateAncestorFields', () => {
         'body.structured.scope.name': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(MalformedFieldsError);
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(
+      expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
+        MalformedFieldsError
+      );
+      expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
         'Field scope.name is an automatic alias of body.structured.scope.name because of otel compat mode'
       );
     });
@@ -354,8 +398,10 @@ describe('validateAncestorFields', () => {
         trace_id: { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(MalformedFieldsError);
-      expect(() => validateAncestorFields({ ancestors, fields })).toThrow(
+      expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
+        MalformedFieldsError
+      );
+      expect(() => validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })).toThrow(
         'Field trace_id is an automatic alias of attributes.trace_id because of otel compat mode'
       );
     });
@@ -368,14 +414,18 @@ describe('validateAncestorFields', () => {
         'attributes.custom': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should handle empty fields object', () => {
       const ancestors = [createWiredStreamDefinition('logs', { 'attributes.x': { type: 'long' } })];
       const fields: FieldDefinition = {};
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
     });
 
     it('should handle multiple valid fields simultaneously', () => {
@@ -388,7 +438,164 @@ describe('validateAncestorFields', () => {
         'attributes.custom': { type: 'keyword' },
       };
 
-      expect(() => validateAncestorFields({ ancestors, fields })).not.toThrow();
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.otel' })
+      ).not.toThrow();
+    });
+  });
+
+  describe('ECS stream field validation', () => {
+    it('should allow non-namespaced fields for logs.ecs streams', () => {
+      const ancestors = [createWiredStreamDefinition('logs.ecs', {})];
+      const fields: FieldDefinition = {
+        custom_field: { type: 'keyword' },
+        another_field: { type: 'keyword' },
+        host: { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).not.toThrow();
+    });
+
+    it('should allow standard ECS fields for logs.ecs streams', () => {
+      const ancestors = [createWiredStreamDefinition('logs.ecs', {})];
+      const fields: FieldDefinition = {
+        'host.name': { type: 'keyword' },
+        'service.name': { type: 'keyword' },
+        message: { type: 'match_only_text' },
+        'log.level': { type: 'keyword' },
+        'trace.id': { type: 'keyword' },
+        'span.id': { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).not.toThrow();
+    });
+
+    it('should allow namespaced fields for logs.ecs streams', () => {
+      const ancestors = [createWiredStreamDefinition('logs.ecs', {})];
+      const fields: FieldDefinition = {
+        'resource.attributes.custom': { type: 'keyword' },
+        'attributes.test': { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).not.toThrow();
+    });
+
+    it('should not check OTEL alias conflicts for logs.ecs streams', () => {
+      const ancestors = [createWiredStreamDefinition('logs.ecs', {})];
+      // 'body' and 'scope' are OTEL aliases that would be rejected for OTEL streams
+      const fields: FieldDefinition = {
+        body: { type: 'keyword' },
+        scope: { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).not.toThrow();
+    });
+  });
+
+  describe('ECS stream ancestor type conflict detection', () => {
+    it('should throw when field type conflicts with ancestor in logs.ecs hierarchy', () => {
+      const ancestors = [
+        createWiredStreamDefinition('logs.ecs', {
+          'host.name': { type: 'keyword' },
+        }),
+      ];
+      const fields: FieldDefinition = {
+        'host.name': { type: 'long' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).toThrow(MalformedFieldsError);
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).toThrow(
+        'Field host.name is already defined with incompatible type in the parent stream logs.ecs'
+      );
+    });
+
+    it('should allow same field with same type as ancestor in logs.ecs hierarchy', () => {
+      const ancestors = [
+        createWiredStreamDefinition('logs.ecs', {
+          message: { type: 'match_only_text' },
+          'log.level': { type: 'keyword' },
+        }),
+      ];
+      const fields: FieldDefinition = {
+        message: { type: 'match_only_text' },
+        'log.level': { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).not.toThrow();
+    });
+
+    it('should check multiple ancestors in logs.ecs hierarchy', () => {
+      const ancestors = [
+        createWiredStreamDefinition('logs.ecs', {}),
+        createWiredStreamDefinition('logs.ecs.parent', {
+          'custom.field': { type: 'keyword' },
+        }),
+      ];
+      const fields: FieldDefinition = {
+        'custom.field': { type: 'boolean' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.parent.child' })
+      ).toThrow(MalformedFieldsError);
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.parent.child' })
+      ).toThrow(
+        'Field custom.field is already defined with incompatible type in the parent stream logs.ecs.parent'
+      );
+    });
+  });
+
+  describe('ECS stream edge cases', () => {
+    it('should handle empty ancestors array for logs.ecs', () => {
+      const ancestors: Streams.WiredStream.Definition[] = [];
+      const fields: FieldDefinition = {
+        custom_field: { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).not.toThrow();
+    });
+
+    it('should handle empty fields object for logs.ecs', () => {
+      const ancestors = [
+        createWiredStreamDefinition('logs.ecs', { 'host.name': { type: 'keyword' } }),
+      ];
+      const fields: FieldDefinition = {};
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).not.toThrow();
+    });
+
+    it('should handle mixed namespaced and non-namespaced fields for logs.ecs', () => {
+      const ancestors = [createWiredStreamDefinition('logs.ecs', {})];
+      const fields: FieldDefinition = {
+        custom_field: { type: 'keyword' },
+        'host.name': { type: 'keyword' },
+        'service.name': { type: 'keyword' },
+        'attributes.custom': { type: 'keyword' }, // Namespaced also OK
+        'trace.id': { type: 'keyword' },
+      };
+
+      expect(() =>
+        validateAncestorFields({ ancestors, fields, streamName: 'logs.ecs.android' })
+      ).not.toThrow();
     });
   });
 });
