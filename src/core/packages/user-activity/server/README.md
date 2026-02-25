@@ -93,4 +93,6 @@ Some of the fields in the schema come from:
 - Injected context (for example `user.*`, `session.*`, `client.*`, `kibana.space.id`, and `http.request.referrer`)
 - Fields automatically added by the logging system / JSON layout (for example `@timestamp`)
 
-If you need to extend what gets emitted, reach out to the Core team (`@elastic/kibana-core`).
+> **Important**
+>
+> If you need to extend this schema, reach out to the Core team (`@elastic/kibana-core`).
