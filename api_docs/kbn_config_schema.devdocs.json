@@ -9718,7 +9718,131 @@
             "lineNumber": 647,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.allOf.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "types",
+                "description": [],
+                "signature": [
+                  "[",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<A>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<B>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<C>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<D>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<E>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<F>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<G>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<H>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<I>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<J>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<K>]"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 476,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.allOf.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "UnionTypeOptions",
+                  "<A & B & C & D & E & F & G & H & I & J & K> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 489,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
@@ -11589,7 +11713,131 @@
             "lineNumber": 656,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.intersection.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "types",
+                "description": [],
+                "signature": [
+                  "[",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<A>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<B>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<C>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<D>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<E>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<F>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<G>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<H>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<I>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<J>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<K>]"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 476,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.intersection.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "UnionTypeOptions",
+                  "<A & B & C & D & E & F & G & H & I & J & K> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 489,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
@@ -12838,7 +13086,139 @@
             "lineNumber": 666,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.oneOf.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "types",
+                "description": [],
+                "signature": [
+                  "[",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<A>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<B>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<C>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<D>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<E>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<F>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<G>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<H>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<I>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<J>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<K>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<L>]"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 157,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.oneOf.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "UnionTypeOptions",
+                  "<A | B | C | D | E | F | G | H | I | J | K | L> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 171,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
@@ -13598,7 +13978,139 @@
             "lineNumber": 667,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.union.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "types",
+                "description": [],
+                "signature": [
+                  "[",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<A>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<B>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<C>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<D>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<E>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<F>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<G>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<H>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<I>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<J>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<K>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<L>]"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 157,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.union.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "UnionTypeOptions",
+                  "<A | B | C | D | E | F | G | H | I | J | K | L> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 171,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/config-schema",
@@ -15478,7 +15990,179 @@
             "lineNumber": 668,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.discriminatedUnion.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "discriminator",
+                "description": [],
+                "signature": [
+                  "Discriminator"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 245,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.discriminatedUnion.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "types",
+                "description": [],
+                "signature": [
+                  "[",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<A>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<B>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<C>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<D>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<E>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<F>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<G>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<H>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<I>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<J>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<K>, ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.ObjectType",
+                    "text": "ObjectType"
+                  },
+                  "<L>]"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 246,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.discriminatedUnion.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "UnionTypeOptions",
+                  "<",
+                  "ObjectResultUnionType",
+                  "<A> | ",
+                  "ObjectResultUnionType",
+                  "<B> | ",
+                  "ObjectResultUnionType",
+                  "<C> | ",
+                  "ObjectResultUnionType",
+                  "<D> | ",
+                  "ObjectResultUnionType",
+                  "<E> | ",
+                  "ObjectResultUnionType",
+                  "<F> | ",
+                  "ObjectResultUnionType",
+                  "<G> | ",
+                  "ObjectResultUnionType",
+                  "<H> | ",
+                  "ObjectResultUnionType",
+                  "<I> | ",
+                  "ObjectResultUnionType",
+                  "<J> | ",
+                  "ObjectResultUnionType",
+                  "<K> | ",
+                  "ObjectResultUnionType",
+                  "<L>> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-config-schema/index.ts",
+                "lineNumber": 260,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/config-schema",

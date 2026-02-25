@@ -6,7 +6,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
-  apm: 38573
+  apm: 42431
   apmSourcesAccess: 2278
   automaticImport: 12162
   automaticImportVTwo: 25753
@@ -183,7 +183,6 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 112000
   uiActions: 35278
-  uiActionsEnhanced: 17373
   unifiedDocViewer: 14513
   unifiedSearch: 19500
   upgradeAssistant: 6898
