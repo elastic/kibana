@@ -65,7 +65,7 @@ describe('LoginPage', () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           customBranding={customBrandingMock}
@@ -78,6 +78,7 @@ describe('LoginPage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders with custom branding', async () => {
