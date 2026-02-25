@@ -57,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "f57d48f1be0e7895817648ecc89db8a5b594edc5185ad7c60b5ab743c960311b",
+        "action": "3ab1aa6b6d32d7704fa2dc5fe34c65d632d869af3736f5d08a761d09b93430e2",
         "action_task_params": "6751dc8a4707a432bc9b90f5a025f183aefc84bca5ec26c29ce6939b24ea81e4",
         "ad_hoc_run_params": "9c372f2a8f8b468e9b699a6df633c7f14fab7f13216c9ec160813e75bae56098",
         "alert": "ab52f596c3499231d37ab4c0ee346010789a9a0b9d64d61a6631986e1e62b2aa",
@@ -89,7 +89,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cloud-security-posture-settings": "86ac8eba7ea80c15ab48bf424f7c15f1d935774f84ff32c5c1e04c95c67e72b6",
         "config": "d368f46c1a9920560f23b0d2793379995ee24bbff8e0438661bc3d9f528f4947",
         "config-global": "e306e70563eb2f3204aff45506f3ca1c3c67461971a45fba471c72bd8eb4435b",
-        "connector_token": "6e14114a9a7ca64becf611b7db23d59438cd332fd5228fbf7c6cc2144e0459d0",
+        "connector_token": "04838c9e72fae94ee65cd2e0b7ac9acf883506c390304c5b02626961905d1656",
         "core-usage-stats": "0e76782718b2eef6104d2ddec46ed356339220997ad8da8d4f86433c3b46f77a",
         "csp-rule-template": "6fec028650a7aa0ef5a07d3d2906c32c2505da013adb2e51fa0e66bbf0ff70c5",
         "dashboard": "3cfab5e285c531092dd9abed38565e6e048b843d75ba9a6c1f5c3017a42db0c6",
@@ -237,6 +237,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action|global: 04984aae6011426601f8a2a06278e30080f6da3a",
         "action|mappings: c4a658c865d4c30b51ae9b49e1dec06d012bc213",
         "action|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "action|10.2.0: 4367848750ed49705e88d5ffbe6229bf25312bd17e0f66f1848ec0031b6667b8",
         "action|10.1.0: e588c3ab049a6d529d68099cac0cb5b8256603d421f28dd475bbcd2146451d6f",
         "action|8.3.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
         "action|8.0.0: 89bd5d9dfbcd73496bf7ff424f5ed670b074078e",
@@ -535,6 +536,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "connector_token|global: 9c6972571df6c56a0d542bdca734a55a7a3859e5",
         "connector_token|mappings: 8c3f381518f3a37955cc7a434e72a81c11e28f1c",
         "connector_token|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "connector_token|10.2.0: 796867ae86b9d9eb58eb4647bc61fdb58fbeca3024cf4ff556f18e34b7b70060",
         "connector_token|10.1.0: ab76db77c61eebd5d731958f792a26402d8c216ed20de984c25f17bd0b59b784",
         "========================================================================================",
         "core-usage-stats|global: 0f6c6a66d1ec3ccababd15890476caf7f6f57700",
@@ -1330,7 +1332,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
     // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
     expect(map).toMatchInlineSnapshot(`
       Object {
-        "action": "10.1.0",
+        "action": "10.2.0",
         "action_task_params": "10.2.0",
         "ad_hoc_run_params": "10.3.0",
         "alert": "10.9.0",
@@ -1362,7 +1364,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cloud-security-posture-settings": "10.1.0",
         "config": "10.2.0",
         "config-global": "10.0.0",
-        "connector_token": "10.1.0",
+        "connector_token": "10.2.0",
         "core-usage-stats": "10.0.0",
         "csp-rule-template": "10.0.0",
         "dashboard": "10.3.0",
@@ -1486,7 +1488,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
     // WARNING Existing entries' semvers should NEVER be downgraded. Never validate changes if they cause a downgrade.
     expect(map).toMatchInlineSnapshot(`
       Object {
-        "action": "10.1.0",
+        "action": "10.2.0",
         "action_task_params": "10.2.0",
         "ad_hoc_run_params": "10.3.0",
         "alert": "10.9.0",
@@ -1518,7 +1520,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "cloud-security-posture-settings": "10.1.0",
         "config": "10.2.0",
         "config-global": "0.0.0",
-        "connector_token": "10.1.0",
+        "connector_token": "10.2.0",
         "core-usage-stats": "7.14.1",
         "csp-rule-template": "8.7.0",
         "dashboard": "10.3.0",
