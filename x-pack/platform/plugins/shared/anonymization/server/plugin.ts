@@ -36,11 +36,10 @@ import {
   getAlertsDataViewTargetId,
   ALERTS_DATA_VIEW_TARGET_TYPE,
   ensureAlertsDataViewProfile,
-  ensureGlobalAnonymizationProfile,
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
-  ensureAndMigrateGlobalProfile,
+  ensureGlobalProfileForNamespace,
 } from './initialization';
 
 interface AnonymizationSetupDeps {
@@ -55,7 +54,6 @@ interface AnonymizationStartDeps {
 const anonymizationSaltSchemaV1 = schema.object({
   salt: schema.string(),
 });
-const ENSURE_GLOBAL_PROFILE_CACHE_MS = 60_000;
 
 export class AnonymizationPlugin
   implements
@@ -177,43 +175,6 @@ export class AnonymizationPlugin
       return uiSettingsClient.get<string | undefined>(LEGACY_ANONYMIZATION_UI_SETTING_KEY);
     };
 
-    const ensuredGlobalProfiles = new Map<string, number>();
-    const migratedLegacySettingsByNamespace = new Set<string>();
-
-    const ensureGlobalProfileForNamespace = async ({
-      namespace,
-    }: {
-      namespace: string;
-    }): Promise<void> => {
-      const now = Date.now();
-
-      // Ensure legacy settings migration is not missed when runtime anonymization
-      // happens before profiles `_find` in a space.
-      if (!migratedLegacySettingsByNamespace.has(namespace)) {
-        const legacySettings = await getLegacySettingsForNamespace(namespace);
-        await ensureAndMigrateGlobalProfile({
-          namespace,
-          profilesRepo,
-          logger: this.logger,
-          settingsString: legacySettings,
-        });
-        migratedLegacySettingsByNamespace.add(namespace);
-        ensuredGlobalProfiles.set(namespace, now);
-        return;
-      }
-
-      const lastEnsuredAt = ensuredGlobalProfiles.get(namespace);
-      if (lastEnsuredAt !== undefined && now - lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS) {
-        return;
-      }
-      await ensureGlobalAnonymizationProfile({
-        namespace,
-        profilesRepo,
-        logger: this.logger,
-      });
-      ensuredGlobalProfiles.set(namespace, now);
-    };
-
     // Ensure default alerts profile at startup. Global profile is lazily ensured
     // on profiles `_find` and anonymization runtime usage.
     void (async () => {
@@ -236,7 +197,12 @@ export class AnonymizationPlugin
     this.policyService = {
       resolveEffectivePolicy: async (namespace, target) => {
         await ensureProfilesIndexReady();
-        await ensureGlobalProfileForNamespace({ namespace });
+        await ensureGlobalProfileForNamespace({
+          namespace,
+          profilesRepo,
+          logger: this.logger,
+          getLegacySettingsString: () => getLegacySettingsForNamespace(namespace),
+        });
 
         if (
           target.type === ALERTS_DATA_VIEW_TARGET_TYPE &&
@@ -305,7 +271,12 @@ export class AnonymizationPlugin
 
       ensureGlobalProfile: async (namespace) => {
         await ensureProfilesIndexReady();
-        await ensureGlobalProfileForNamespace({ namespace });
+        await ensureGlobalProfileForNamespace({
+          namespace,
+          profilesRepo,
+          logger: this.logger,
+          getLegacySettingsString: () => getLegacySettingsForNamespace(namespace),
+        });
       },
 
       getSalt: async (namespace) => {

@@ -77,7 +77,6 @@ describe('ensureAlertsDataViewProfile', () => {
       expect.objectContaining({
         namespace: 'security',
         targetId: 'security-solution-alert-security',
-        saltId: 'salt-security',
       })
     );
   });

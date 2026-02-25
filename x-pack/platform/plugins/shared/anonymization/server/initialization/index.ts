@@ -23,4 +23,4 @@ export {
   extractEnabledLegacyRules,
   migrateLegacyUiSettingsIntoGlobalProfile,
 } from './legacy_ui_settings_migration';
-export { ensureAndMigrateGlobalProfile } from './ensure_global_profile';
+export { ensureAndMigrateGlobalProfile, ensureGlobalProfileForNamespace } from './ensure_global_profile';

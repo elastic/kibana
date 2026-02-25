@@ -88,7 +88,6 @@ export const ensureGlobalAnonymizationProfile = async ({
           regexRules,
           nerRules,
         },
-        saltId: `salt-${namespace}`,
         namespace,
         createdBy,
       });

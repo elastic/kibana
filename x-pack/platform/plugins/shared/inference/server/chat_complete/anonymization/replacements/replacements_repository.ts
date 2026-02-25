@@ -45,6 +45,7 @@ interface UpdateReplacementsParams {
 
 /** Maximum number of replacement entries per replacements set. */
 const MAX_REPLACEMENTS = 10000;
+const MAX_UPDATE_RETRIES = 3;
 const ENCRYPTION_VERSION = 'v1';
 
 /**
@@ -127,6 +128,12 @@ export class ReplacementsRepository {
     const withStatus = error as Error & { statusCode: number };
     withStatus.statusCode = statusCode;
     return withStatus;
+  }
+
+  private isVersionConflict(err: unknown): boolean {
+    const statusCode = (err as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
+    const metaStatusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    return statusCode === 409 || metaStatusCode === 409;
   }
 
   private dedupeAndValidate(
@@ -222,55 +229,62 @@ export class ReplacementsRepository {
     replacementsId: string,
     params: UpdateReplacementsParams
   ): Promise<ReplacementsSet | null> {
-    const existing = await this.get(namespace, replacementsId);
-    if (!existing) {
-      return null;
+    for (let attempt = 0; attempt < MAX_UPDATE_RETRIES; attempt++) {
+      let docResult: {
+        _source?: EsReplacementsDocument;
+        _seq_no?: number;
+        _primary_term?: number;
+      };
+      try {
+        docResult = await this.esClient.get<EsReplacementsDocument>({
+          index: ANONYMIZATION_REPLACEMENTS_INDEX,
+          id: replacementsId,
+        });
+      } catch (err) {
+        if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode === 404) {
+          return null;
+        }
+        throw err;
+      }
+
+      const doc = docResult._source;
+      if (!doc || doc.namespace !== namespace) {
+        return null;
+      }
+
+      const existing = this.toReplacementsSet(doc);
+      const now = new Date().toISOString();
+      const mergedReplacements = this.dedupeAndValidate([
+        ...existing.replacements,
+        ...params.replacements,
+      ]).slice(0, MAX_REPLACEMENTS);
+
+      try {
+        await this.esClient.update({
+          index: ANONYMIZATION_REPLACEMENTS_INDEX,
+          id: replacementsId,
+          if_seq_no: docResult._seq_no,
+          if_primary_term: docResult._primary_term,
+          doc: {
+            replacements: mergedReplacements.map((replacement) => ({
+              anonymized: replacement.anonymized,
+              ...this.serializeOriginal(replacement.original),
+            })),
+            updated_at: now,
+          },
+          refresh: 'wait_for',
+        });
+
+        return this.get(namespace, replacementsId);
+      } catch (err) {
+        if (this.isVersionConflict(err) && attempt < MAX_UPDATE_RETRIES - 1) {
+          continue;
+        }
+        throw err;
+      }
     }
 
-    const now = new Date().toISOString();
-
-    const mergedReplacements = this.dedupeAndValidate([
-      ...existing.replacements,
-      ...params.replacements,
-    ]).slice(0, MAX_REPLACEMENTS);
-
-    await this.esClient.update({
-      index: ANONYMIZATION_REPLACEMENTS_INDEX,
-      id: replacementsId,
-      doc: {
-        replacements: mergedReplacements.map((replacement) => ({
-          anonymized: replacement.anonymized,
-          ...this.serializeOriginal(replacement.original),
-        })),
-        updated_at: now,
-      },
-      refresh: 'wait_for',
-    });
-
-    return this.get(namespace, replacementsId);
-  }
-
-  /**
-   * Imports/merges replacements from a source set into a destination set.
-   * Rejects conflicting anonymized->original mappings.
-   */
-  async importReplacements(
-    namespace: string,
-    sourceId: string,
-    destinationId: string
-  ): Promise<ReplacementsSet> {
-    const source = await this.get(namespace, sourceId);
-    const destination = await this.get(namespace, destinationId);
-
-    if (!source || !destination) {
-      throw this.setStatusCode(new Error('Source or destination replacements set not found'), 404);
-    }
-
-    const result = await this.update(namespace, destinationId, {
-      replacements: source.replacements,
-    });
-
-    return result!;
+    throw this.setStatusCode(new Error('Failed to update replacements due to repeated conflicts'), 409);
   }
 
   /**

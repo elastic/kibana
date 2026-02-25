@@ -59,7 +59,6 @@ export const ANONYMIZATION_PROFILES_MAPPINGS = {
         },
       },
     },
-    salt_id: { type: 'keyword' as const },
     created_at: { type: 'date' as const },
     updated_at: { type: 'date' as const },
     created_by: { type: 'keyword' as const },

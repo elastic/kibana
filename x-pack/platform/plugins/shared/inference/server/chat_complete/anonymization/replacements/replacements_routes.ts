@@ -10,11 +10,9 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import {
   replaceTokensWithOriginals,
   type DeanonymizeWithReplacementsRequestBody,
-  type ImportAnonymizationReplacementsRequestBody,
 } from '@kbn/anonymization-common';
 import { apiPrivileges } from '@kbn/anonymization-plugin/common';
 import { ReplacementsRepository } from './replacements_repository';
-import { ensureReplacementsIndex } from './replacements_index';
 
 const API_VERSION = '1';
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
@@ -129,59 +127,4 @@ export const registerReplacementsRoutes = (
       }
     );
 
-  // POST /internal/inference/anonymization/replacements/_import — Import/merge
-  router.versioned
-    .post({
-      access: 'internal',
-      path: `${REPLACEMENTS_API_BASE}/_import`,
-      security: {
-        authz: {
-          requiredPrivileges: [apiPrivileges.manageAnonymization],
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSION,
-        validate: {
-          request: {
-            body: schema.object({
-              sourceId: schema.string(),
-              destinationId: schema.string(),
-            }),
-          },
-        },
-      },
-      async (context, request, response) => {
-        try {
-          const body = request.body as ImportAnonymizationReplacementsRequestBody;
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-          await ensureReplacementsIndex({ esClient, logger });
-
-          const repo = new ReplacementsRepository(esClient, options);
-          const result = await repo.importReplacements(
-            namespace,
-            body.sourceId,
-            body.destinationId
-          );
-
-          return response.ok({ body: { id: result.id, merged: true } });
-        } catch (err) {
-          if ((err as any).statusCode === 409) {
-            return response.conflict({ body: { message: err.message } });
-          }
-          if ((err as any).statusCode === 404) {
-            return response.notFound({ body: { message: err.message } });
-          }
-          logger.error(`Failed to import replacements: ${err.message}`);
-          return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
-          });
-        }
-      }
-    );
 };

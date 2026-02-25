@@ -32,7 +32,6 @@ const profileCreateParams = {
     regexRules: [],
     nerRules: [],
   },
-  saltId: 'salt-default',
   namespace: 'default',
   createdBy: 'tester',
 };

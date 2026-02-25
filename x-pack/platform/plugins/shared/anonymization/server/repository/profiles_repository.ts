@@ -45,7 +45,6 @@ interface EsProfileDocument {
       enabled: boolean;
     }>;
   };
-  salt_id: string;
   namespace: string;
   created_at: string;
   updated_at: string;
@@ -59,7 +58,6 @@ interface CreateProfileParams {
   targetType: 'data_view' | 'index_pattern' | 'index';
   targetId: string;
   rules: AnonymizationProfileRules;
-  saltId: string;
   namespace: string;
   createdBy: string;
 }
@@ -99,6 +97,10 @@ interface FindProfilesResult {
  */
 export class ProfilesRepository {
   constructor(private readonly esClient: ElasticsearchClient) {}
+
+  private getSaltId(namespace: string): string {
+    return `salt-${namespace}`;
+  }
 
   private buildProfileId(namespace: string, targetType: string, targetId: string): string {
     const tuple = `${namespace}:${targetType}:${targetId}`;
@@ -158,7 +160,6 @@ export class ProfilesRepository {
           enabled: r.enabled,
         })),
       },
-      salt_id: params.saltId,
       namespace: params.namespace,
       created_at: now,
       updated_at: now,
@@ -390,7 +391,7 @@ export class ProfilesRepository {
           enabled: r.enabled,
         })),
       },
-      saltId: doc.salt_id,
+      saltId: this.getSaltId(doc.namespace),
       namespace: doc.namespace,
       createdAt: doc.created_at,
       updatedAt: doc.updated_at,

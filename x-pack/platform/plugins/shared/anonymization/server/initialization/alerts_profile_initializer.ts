@@ -62,7 +62,6 @@ export const ensureAlertsDataViewProfile = async ({
     } else {
       // Ensure salt exists for this space
       await saltService.getSalt(namespace);
-      const saltId = `salt-${namespace}`;
 
       // Create the default profile
       await profilesRepo.create({
@@ -75,7 +74,6 @@ export const ensureAlertsDataViewProfile = async ({
           regexRules: [],
           nerRules: [],
         },
-        saltId,
         namespace,
         createdBy: 'system',
       });

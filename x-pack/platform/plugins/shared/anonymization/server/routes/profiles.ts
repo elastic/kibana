@@ -20,13 +20,10 @@ import {
 import { ProfilesRepository } from '../repository';
 import { ensureProfilesIndex } from '../system_index';
 import {
-  ensureAndMigrateGlobalProfile,
+  ensureGlobalProfileForNamespace,
   isGlobalProfileTarget,
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
 } from '../initialization';
-
-const ENSURE_GLOBAL_PROFILE_CACHE_MS = 60_000;
-const ensuredGlobalProfileByNamespace = new Map<string, number>();
 
 const fieldRuleSchema = schema.object({
   field: schema.string(),
@@ -131,11 +128,8 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           const repo = new ProfilesRepository(esClient);
 
-          const saltId = `salt-${namespace}`;
-
           const profile = await repo.create({
             ...body,
-            saltId,
             namespace,
             createdBy: coreContext.security.authc.getCurrentUser()?.username ?? 'unknown',
           });
@@ -200,23 +194,15 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           await ensureProfilesIndex({ esClient, logger });
 
           const repo = new ProfilesRepository(esClient);
-          const now = Date.now();
-          const lastEnsuredAt = ensuredGlobalProfileByNamespace.get(namespace);
-          if (
-            lastEnsuredAt === undefined ||
-            now - lastEnsuredAt >= ENSURE_GLOBAL_PROFILE_CACHE_MS
-          ) {
-            const settingsString = await coreContext.uiSettings.client.get<string | undefined>(
-              LEGACY_ANONYMIZATION_UI_SETTING_KEY
-            );
-            await ensureAndMigrateGlobalProfile({
-              namespace,
-              profilesRepo: repo,
-              logger,
-              settingsString,
-            });
-            ensuredGlobalProfileByNamespace.set(namespace, now);
-          }
+          await ensureGlobalProfileForNamespace({
+            namespace,
+            profilesRepo: repo,
+            logger,
+            getLegacySettingsString: () =>
+              coreContext.uiSettings.client.get<string | undefined>(
+                LEGACY_ANONYMIZATION_UI_SETTING_KEY
+              ),
+          });
           const result = await repo.find({
             namespace,
             filter: query.filter,
