@@ -67,24 +67,13 @@ export type GenericIndexPatternColumn =
  * This is intentionally a partial type - buildColumn implementations should
  * use optional chaining when accessing these properties.
  */
-export interface ColumnBuildHints {
-  filter?: Query;
-  timeShift?: string;
-  timeScale?: TimeScaleUnit;
-  reducedTimeRange?: string;
-  dataType?: string;
-  isBucketed?: boolean;
-  params?: {
-    format?: ValueFormatConfig;
-    [key: string]: unknown;
-  };
-  operationType?: string;
-  sourceField?: string;
-  label?: string;
-  customLabel?: boolean;
-  references?: string[];
-}
-
+export type ColumnBuildHints = Partial<
+  BaseIndexPatternColumn &
+    FieldBasedIndexPatternColumn &
+    ReferenceBasedIndexPatternColumn & {
+      params?: { format?: ValueFormatConfig; [key: string]: unknown };
+    }
+>;
 /**
  * Base options passed to `buildColumn` in operation definitions.
  *
