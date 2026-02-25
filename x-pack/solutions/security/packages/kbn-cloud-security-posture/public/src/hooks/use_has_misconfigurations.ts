@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import { buildGenericEntityFlyoutPreviewQuery } from '../../../../../../security/plugins/entity_store/common';
 import { useMisconfigurationPreview } from './use_misconfiguration_preview';
 
 export const useHasMisconfigurations = (entityIdentifiers: Record<string, string>) => {

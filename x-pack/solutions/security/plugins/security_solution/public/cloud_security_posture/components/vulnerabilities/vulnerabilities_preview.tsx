@@ -13,9 +13,9 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import {
-  buildGenericEntityFlyoutPreviewQuery,
   getAbbreviatedNumber,
 } from '@kbn/cloud-security-posture-common';
+import { buildGenericEntityFlyoutPreviewQuery } from '../../../../../entity_store/common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW,

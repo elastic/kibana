@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { buildEntityFiltersFromEntityIdentifiers, euid } from '@kbn/entity-store/common';
+import { buildEntityFiltersFromEntityIdentifiers, euid } from '../../../../../../entity_store/common';
 import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { getEntitiesIndexNameV2 } from '../../../../lib/entity_analytics/entity_store/utils/entity_utils';

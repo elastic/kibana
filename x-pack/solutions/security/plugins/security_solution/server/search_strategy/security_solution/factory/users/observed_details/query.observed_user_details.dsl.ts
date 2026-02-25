@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '../../../../../../../../plugins/entity_store/common';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { ObservedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';

@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { buildEntityFiltersFromEntityIdentifiers } from '@kbn/entity-store/common';
+import { buildEntityFiltersFromEntityIdentifiers } from '../../../../../entity_store/common';
 
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import type { ESBoolQuery } from '../../../../common/typed_json';
