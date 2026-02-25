@@ -288,16 +288,16 @@ export const CustomizePanelEditor = ({
     return (
       <EuiFormRow>
         <EuiSwitch
-          checked={Boolean(isPanelBorderless)}
+          checked={!isPanelBorderless}
           data-test-subj="customizePanelBorderlessToggle"
           id="borderlessToggle"
           label={
             <FormattedMessage
-              defaultMessage="Make panel borderless"
+              defaultMessage="Show panel border"
               id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.borderlessToggleSwitch"
             />
           }
-          onChange={(e) => setIsPanelBorderless(e.target.checked)}
+          onChange={(e) => setIsPanelBorderless(!e.target.checked)}
         />
       </EuiFormRow>
     );
