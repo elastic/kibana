@@ -17,7 +17,6 @@ import { castArray } from 'lodash';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { LateBindingSpanProcessor } from '..';
 import { OTLPSpanProcessor } from './otlp_span_processor';
-import { ElasticsearchOTLPSpanProcessor } from './elasticsearch_otlp_span_processor';
 
 /**
  * Initialize the OpenTelemetry tracing provider
@@ -79,10 +78,6 @@ export function initTracing({
 
       case 'proto':
         LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'proto'));
-        break;
-
-      case 'elasticsearch':
-        LateBindingSpanProcessor.get().register(new ElasticsearchOTLPSpanProcessor(variant.value));
         break;
     }
   });

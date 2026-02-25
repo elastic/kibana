@@ -24,14 +24,6 @@ const otlpExportConfigSchema: Type<OTLPExportConfig> = schema.object({
   scheduled_delay: scheduledDelay,
 });
 
-const elasticsearchOtlpExportConfigSchema = schema.object({
-  endpoint: schema.string(),
-  username: schema.maybe(schema.string()),
-  password: schema.maybe(schema.string()),
-  api_key: schema.maybe(schema.string()),
-  scheduled_delay: schema.maybe(scheduledDelay),
-});
-
 const tracingExportConfigSchema: Type<TracingExporterConfig> = schema.oneOf([
   inferenceTracingExportConfigSchema,
   schema.object({
@@ -42,9 +34,6 @@ const tracingExportConfigSchema: Type<TracingExporterConfig> = schema.oneOf([
   }),
   schema.object({
     proto: otlpExportConfigSchema,
-  }),
-  schema.object({
-    elasticsearch: elasticsearchOtlpExportConfigSchema,
   }),
 ]);
 

@@ -120,24 +120,20 @@ By default, these evaluators query traces from the same Elasticsearch cluster as
 
 #### Prerequisites
 
-To enable trace-based evaluators, configure a tracing exporter. For Elasticsearch 9.x+, the native OTLP endpoint is recommended:
+To enable trace-based evaluators, configure a tracing exporter. For Elasticsearch 9.x+, the `proto` exporter pointed at the native OTLP endpoint is recommended:
 
 ```yaml
 telemetry.tracing.exporters:
-  - elasticsearch:
-      endpoint: 'http://localhost:9220'
-      username: 'elastic'
-      password: 'changeme'
+  - proto:
+      url: 'http://elastic:changeme@localhost:9220/_otlp/v1/traces'
 ```
 
 You can also include the Phoenix exporter if you want traces visible in Phoenix (optional):
 
 ```yaml
 telemetry.tracing.exporters:
-  - elasticsearch:
-      endpoint: 'http://localhost:9220'
-      username: 'elastic'
-      password: 'changeme'
+  - proto:
+      url: 'http://elastic:changeme@localhost:9220/_otlp/v1/traces'
   - phoenix:
       base_url: 'https://<my-phoenix-host>'
       public_url: 'https://<my-phoenix-host>'
@@ -157,7 +153,7 @@ Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to rece
 ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
 ```
 
-The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. For ES 9.x+, use the native `elasticsearch` exporter instead — no collector required.
+The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. For ES 9.x+, use the `proto` exporter pointed at `/_otlp/v1/traces` instead — no collector required.
 
 #### Using a Separate Monitoring Cluster
 

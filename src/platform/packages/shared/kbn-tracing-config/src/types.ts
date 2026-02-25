@@ -29,26 +29,13 @@ export interface OTLPExportConfig {
 }
 
 /**
- * Native Elasticsearch OTLP endpoint configuration (ES 9.x+).
- * Sends traces directly to /_otlp/v1/traces using protobuf.
- */
-export interface ElasticsearchOTLPExportConfig {
-  endpoint: string;
-  username?: string;
-  password?: string;
-  api_key?: string;
-  scheduled_delay?: number;
-}
-
-/**
  * Allowed configurations for OTLP tracing exporters
  */
 export type TracingExporterConfig =
   | InferenceTracingExportConfig
   | { grpc: OTLPExportConfig }
   | { http: OTLPExportConfig }
-  | { proto: OTLPExportConfig }
-  | { elasticsearch: ElasticsearchOTLPExportConfig };
+  | { proto: OTLPExportConfig };
 
 /**
  * Configuration for OpenTelemetry tracing

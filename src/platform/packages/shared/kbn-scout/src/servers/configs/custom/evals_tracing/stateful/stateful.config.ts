@@ -78,10 +78,11 @@ if (gcsCredentials) {
 // Native Elasticsearch OTLP (ES 9.x+) as primary, EDOT collector as fallback
 const defaultExporters = JSON.stringify([
   {
-    elasticsearch: {
-      endpoint: 'http://localhost:9220',
-      username: 'elastic',
-      password: 'changeme',
+    proto: {
+      url: 'http://localhost:9220/_otlp/v1/traces',
+      headers: {
+        Authorization: `Basic ${Buffer.from('elastic:changeme').toString('base64')}`,
+      },
     },
   },
   {
