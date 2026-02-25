@@ -521,20 +521,37 @@ export interface SplitProcessor extends ProcessorBaseWithWhere {
   preserve_trailing?: boolean;
 }
 
-export const splitProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('split'),
-  from: StreamlangSourceField.describe('Source field to split into an array'),
-  separator: StreamlangSeparator.describe(
-    'Regex separator used to split the field value into an array'
-  ),
-  to: z
-    .optional(StreamlangTargetField)
-    .describe('Target field for the split array (defaults to source)'),
-  ignore_missing: z.optional(z.boolean()).describe('Skip processing when source field is missing'),
-  preserve_trailing: z
-    .optional(z.boolean())
-    .describe('Preserve empty trailing fields in the split result'),
-}) satisfies z.Schema<SplitProcessor>;
+export const splitProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('split'),
+    from: StreamlangSourceField.describe('Source field to split into an array'),
+    separator: StreamlangSeparator.describe(
+      'Regex separator used to split the field value into an array'
+    ),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe('Target field for the split array (defaults to source)'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+    preserve_trailing: z
+      .optional(z.boolean())
+      .describe('Preserve empty trailing fields in the split result'),
+  })
+  .refine(
+    (obj) =>
+      !obj.where ||
+      (obj.where && isAlwaysCondition(obj.where)) ||
+      (obj.where && obj.to && obj.from !== obj.to),
+    {
+      message:
+        'Split processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
+      path: ['to', 'where'],
+    }
+  )
+  .describe(
+    'Split processor - Split a field value into an array using a separator'
+  ) satisfies z.Schema<SplitProcessor>;
 
 /**
  * Sort processor
