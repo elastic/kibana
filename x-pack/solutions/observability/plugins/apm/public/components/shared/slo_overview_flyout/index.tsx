@@ -108,6 +108,8 @@ const STATUS_PRIORITY: Record<string, number> = {
 const SEARCH_DEBOUNCE_MS = 300;
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 
+const DEFAULT_INDICATOR_TYPE: ApmIndicatorType = 'sli.apm.transactionDuration';
+
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
@@ -286,22 +288,24 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const [createSloFlyoutOpen, setCreateSloFlyoutOpen] = useState(false);
 
   const openCreateSloFlyout = useCallback(() => {
+    telemetry.reportSloCreateFlowStarted({
+      location: 'empty_slo_overview_flyout',
+      sloType: DEFAULT_INDICATOR_TYPE,
+    });
     setCreateSloFlyoutOpen(true);
-  }, []);
+  }, [telemetry]);
 
   const closeCreateSloFlyout = useCallback(() => {
     setCreateSloFlyoutOpen(false);
     refetch();
   }, [refetch]);
 
-  const defaultIndicatorType: ApmIndicatorType = 'sli.apm.transactionDuration';
-
   const CreateSloFlyout = createSloFlyoutOpen
     ? sloPlugin?.getCreateSLOFormFlyout({
         initialValues: {
           name: `APM SLO for ${serviceName}`,
           indicator: {
-            type: defaultIndicatorType,
+            type: DEFAULT_INDICATOR_TYPE,
             params: {
               service: serviceName,
               environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
