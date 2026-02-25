@@ -34,7 +34,6 @@
     "@kbn/management-plugin",
     "@kbn/i18n-react",
     "@kbn/esql-types",
-    "@kbn/yaml-rule-editor",
     "@kbn/core-http-server-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/logging-mocks",
