@@ -14,6 +14,7 @@ import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { $Values } from '@kbn/utility-types';
 import type {
   DateRange,
+  IndexPattern,
   IndexPatternRef,
   Operation,
   TimeScaleUnit,
@@ -57,6 +58,46 @@ export type GenericIndexPatternColumn =
   | BaseIndexPatternColumn
   | FieldBasedIndexPatternColumn
   | ReferenceBasedIndexPatternColumn;
+
+/**
+ * Partial column metadata passed to buildColumn when creating a new column.
+ * Contains hints from a previous column or incomplete state that should be
+ * carried over to the new column (e.g., timeShift, filter, format).
+ *
+ * This is intentionally a partial type - buildColumn implementations should
+ * use optional chaining when accessing these properties.
+ */
+export interface ColumnBuildHints {
+  filter?: Query;
+  timeShift?: string;
+  timeScale?: TimeScaleUnit;
+  reducedTimeRange?: string;
+  dataType?: string;
+  isBucketed?: boolean;
+  params?: {
+    format?: ValueFormatConfig;
+    [key: string]: unknown;
+  };
+  operationType?: string;
+  sourceField?: string;
+  label?: string;
+  customLabel?: boolean;
+  references?: string[];
+}
+
+/**
+ * Base options passed to `buildColumn` in operation definitions.
+ *
+ * @property indexPattern - The data view (index pattern) for the layer
+ * @property previousColumn - Optional hints from a previous column when transitioning
+ *   between operations. This is partial metadata (not a full column) used to carry over
+ *   settings like timeShift, filter, format, or operation-specific params.
+ *   Use `hasOperationType()` to check the operation type and cast params as needed.
+ */
+export interface BuildColumnBaseOptions {
+  indexPattern: IndexPattern;
+  previousColumn?: ColumnBuildHints;
+}
 
 // Used to store the temporary invalid state
 export interface IncompleteColumn {

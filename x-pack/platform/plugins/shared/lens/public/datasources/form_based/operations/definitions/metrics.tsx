@@ -27,6 +27,7 @@ import {
 import type {
   AvgIndexPatternColumn,
   BaseIndexPatternColumn,
+  ColumnBuildHints,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MetricColumn,
@@ -40,7 +41,8 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getBooleanParam,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
@@ -97,7 +99,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   quickFunctionDocumentation?: string;
   unsupportedSettings?: LayerSettingsFeatures;
 }) {
-  const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
+  const labelLookup = (name: string, column?: ColumnBuildHints | BaseIndexPatternColumn) => {
     const label = ofName(name);
     return adjustTimeScaleLabelSuffix(
       label,
@@ -163,8 +165,8 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         params: {
           ...getFormatFromPreviousColumn(previousColumn),
           emptyAsNull:
-            hideZeroOption && previousColumn && isColumnOfType<T>(type, previousColumn)
-              ? previousColumn.params?.emptyAsNull
+            hideZeroOption && hasOperationType(previousColumn, type)
+              ? getBooleanParam(previousColumn, 'emptyAsNull')
               : !columnParams?.usedInMath,
         },
       } as T;

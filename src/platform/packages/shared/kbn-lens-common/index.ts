@@ -114,6 +114,8 @@ export type {
   DatasourceStates,
   DatasourceState,
   TextBasedField,
+  ColumnBuildHints,
+  BuildColumnBaseOptions,
 } from './datasources/types';
 
 export type {

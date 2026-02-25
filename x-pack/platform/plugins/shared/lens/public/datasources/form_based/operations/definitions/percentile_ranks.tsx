@@ -21,7 +21,8 @@ import {
   getSafeName,
   isValidNumber,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getNumberParam,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
@@ -109,12 +110,11 @@ export const percentileRanksOperation: OperationDefinition<
       column.reducedTimeRange
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
-    const existingPercentileRanksParam =
-      previousColumn &&
-      isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_rank', previousColumn) &&
-      previousColumn.params.value;
+    const existingPercentileRanksParam = hasOperationType(previousColumn, 'percentile_rank')
+      ? getNumberParam(previousColumn, 'value')
+      : undefined;
     const newPercentileRanksParam =
-      columnParams?.value ?? (existingPercentileRanksParam || DEFAULT_PERCENTILE_RANKS_VALUE);
+      columnParams?.value ?? existingPercentileRanksParam ?? DEFAULT_PERCENTILE_RANKS_VALUE;
     return {
       label: ofName(
         getSafeName(field.name, indexPattern),
