@@ -9,9 +9,19 @@ import { render, screen } from '@testing-library/react';
 import { Formik } from 'formik';
 import React from 'react';
 
-import { EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumber, EuiFieldText } from '@elastic/eui';
 
 import { createFieldValidator, FormField } from './form_field';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiFieldText: jest.fn((props: any) => <actual.EuiFieldText {...props} />),
+  };
+});
+
+const MockedEuiFieldText = EuiFieldText as unknown as jest.MockedFunction<typeof EuiFieldText>;
 
 const onSubmit = jest.fn();
 
@@ -37,15 +47,22 @@ describe('FormField', () => {
   });
 
   it('should render component with correct field props and event handlers', () => {
+    MockedEuiFieldText.mockClear();
     render(
       <Formik onSubmit={onSubmit} initialValues={{ email: 'mail@example.com' }}>
         <FormField name="email" />
       </Formik>
     );
 
-    const input = screen.getByRole('textbox');
-    expect(input).toHaveAttribute('name', 'email');
-    expect(input).toHaveValue('mail@example.com');
+    expect(MockedEuiFieldText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'email',
+        value: 'mail@example.com',
+        onChange: expect.any(Function),
+        onBlur: expect.any(Function),
+      }),
+      expect.anything()
+    );
   });
 
   it('should mark as invalid if field has errors and has been touched', () => {
@@ -55,6 +72,7 @@ describe('FormField', () => {
       { error: undefined, touched: true, isInvalid: false },
     ];
     assertions.forEach(({ error, touched, isInvalid }) => {
+      MockedEuiFieldText.mockClear();
       const { unmount } = render(
         <Formik
           onSubmit={onSubmit}
@@ -65,8 +83,10 @@ describe('FormField', () => {
           <FormField name="email" />
         </Formik>
       );
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveAttribute('aria-invalid', String(isInvalid));
+      expect(MockedEuiFieldText).toHaveBeenCalledWith(
+        expect.objectContaining({ isInvalid }),
+        expect.anything()
+      );
       unmount();
     });
   });
