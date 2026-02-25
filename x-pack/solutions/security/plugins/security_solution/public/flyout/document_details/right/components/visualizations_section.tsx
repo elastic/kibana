@@ -16,6 +16,7 @@ import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const KEY = 'visualizations';
@@ -33,11 +34,14 @@ export const VisualizationsSection = memo(() => {
     useDocumentDetailsContext();
 
   // Decide whether to show the graph preview or not
-  const { shouldShowGraph } = useGraphPreview({
+  const { shouldShowGraph, shouldShowUpsell } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
   });
+
+  // Show upsell when event has graph data but license is insufficient (ESS only)
+  const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 
   return (
     <ExpandableSection
@@ -59,6 +63,12 @@ export const VisualizationsSection = memo(() => {
         <>
           <EuiSpacer />
           <GraphPreviewContainer />
+        </>
+      )}
+      {shouldShowUpsell && GraphVisualizationUpsell && (
+        <>
+          <EuiSpacer />
+          <GraphVisualizationUpsell />
         </>
       )}
     </ExpandableSection>

@@ -31,6 +31,7 @@ import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -59,8 +60,10 @@ jest.mock(
 );
 
 jest.mock('../../shared/hooks/use_graph_preview');
+jest.mock('../../../../common/hooks/use_upselling');
 
 const mockUseGraphPreview = useGraphPreview as jest.Mock;
+const mockUseUpsellingComponent = useUpsellingComponent as jest.Mock;
 
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
@@ -102,11 +105,13 @@ describe('<VisualizationsSection />', () => {
       alertIds: undefined,
       statsNodes: undefined,
     });
-    // Default mock: graph visualization not available (UI setting is false by default)
+    // Default mock: graph visualization not available
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: false,
+      shouldShowUpsell: false,
       eventIds: [],
     });
+    mockUseUpsellingComponent.mockReturnValue(null);
     mockUseFetchGraphData.mockReturnValue({
       isLoading: false,
       isError: false,
@@ -152,6 +157,7 @@ describe('<VisualizationsSection />', () => {
 
     mockUseGraphPreview.mockReturnValue({
       shouldShowGraph: true,
+      shouldShowUpsell: true,
       eventIds: [],
     });
 
@@ -170,5 +176,41 @@ describe('<VisualizationsSection />', () => {
     const { queryByTestId } = renderVisualizationsSection();
 
     expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
+  });
+
+  it('should render the graph upsell when shouldShowUpsell is true and upsell component is available', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    mockUseGraphPreview.mockReturnValue({
+      shouldShowGraph: false,
+      shouldShowUpsell: true,
+      eventIds: [],
+    });
+
+    const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;
+    mockUseUpsellingComponent.mockReturnValue(MockUpsell);
+
+    const { getByTestId, queryByTestId } = renderVisualizationsSection();
+
+    expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
+    expect(getByTestId('graphVisualizationUpsell')).toBeInTheDocument();
+  });
+
+  it('should not render the graph upsell when shouldShowUpsell is false', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(true);
+
+    mockUseGraphPreview.mockReturnValue({
+      shouldShowGraph: false,
+      shouldShowUpsell: false,
+      eventIds: [],
+    });
+
+    const MockUpsell = () => <div data-test-subj="graphVisualizationUpsell">{'Upgrade'}</div>;
+    mockUseUpsellingComponent.mockReturnValue(MockUpsell);
+
+    const { queryByTestId } = renderVisualizationsSection();
+
+    expect(queryByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).not.toBeInTheDocument();
+    expect(queryByTestId('graphVisualizationUpsell')).not.toBeInTheDocument();
   });
 });
