@@ -39,11 +39,11 @@ export const servers: ScoutServerConfig = {
       `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
       '--xpack.security.uiam.ssl.verificationMode=none',
       // cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
-      // CI:    decodes to https://es01:9300 (ES is on the Docker network)
+      // CI:    decodes to https://es01:9200 (ES is on the Docker network)
       // Local: decodes to https://host.docker.internal:9220 (ES is on the host, reached via Docker bridge)
       `--xpack.cloud.id=${
         isRunOnCI
-          ? 'ci:ZXMwMTo5MzAwJDo5MzAwJGtpYmFuYTo5MzAw'
+          ? 'ci:ZXMwMTo5MjAwJDo5MjAwJGtpYmFuYTo5MjAw'
           : 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMjAkaG9zdDo5MjIwJGtpYmFuYTo5MjIw'
       }`,
     ],
