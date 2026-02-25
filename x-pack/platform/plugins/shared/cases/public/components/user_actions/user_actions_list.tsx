@@ -199,20 +199,36 @@ export const UserActionsList = React.memo(
     }, [commentId, initLoading, handleOutlineComment]);
 
     // Provide rendering context for comment attachments
-    const commentRenderingContext = {
-      appId: owner[0] ?? '',
-      caseData,
-      userProfiles,
-      commentRefs,
-      manageMarkdownEditIds,
-      selectedOutlineCommentId,
-      loadingCommentIds,
-      euiTheme,
-      handleManageMarkdownEditId,
-      handleSaveComment,
-      handleManageQuote,
-      handleDeleteComment,
-    };
+    const commentRenderingContext = useMemo(
+      () => ({
+        appId: owner[0] ?? '',
+        caseData,
+        userProfiles,
+        commentRefs,
+        manageMarkdownEditIds,
+        selectedOutlineCommentId,
+        loadingCommentIds,
+        euiTheme,
+        handleManageMarkdownEditId,
+        handleSaveComment,
+        handleManageQuote,
+        handleDeleteComment,
+      }),
+      [
+        owner,
+        caseData,
+        userProfiles,
+        commentRefs,
+        manageMarkdownEditIds,
+        selectedOutlineCommentId,
+        loadingCommentIds,
+        euiTheme,
+        handleManageMarkdownEditId,
+        handleSaveComment,
+        handleManageQuote,
+        handleDeleteComment,
+      ]
+    );
 
     return (
       <CommentRenderingProvider value={commentRenderingContext}>

@@ -24,7 +24,7 @@ export const CommentTimelineAvatar: React.FC<CommentTimelineAvatarProps> = ({ cr
     return <HoverableAvatarResolver user={createdBy} userProfiles={userProfiles} />;
   }
 
-  return <>{null}</>;
+  return null;
 };
 
 CommentTimelineAvatar.displayName = 'CommentTimelineAvatar';

@@ -15,10 +15,10 @@ import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { UserActionBuilderArgs, UserActionBuilder } from '../types';
 import { HoverableUsernameResolver } from '../../user_profiles/hoverable_username_resolver';
-import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
 import { CommentChildren } from '../../attachments/comment/comment_children';
 import { CommentActions } from '../../attachments/comment/comment_actions';
 import { CommentTimelineAvatar } from '../../attachments/comment/comment_timeline_avatar';
+import { hasDraftComment } from '../../attachments/comment/utils';
 
 type BuilderArgs = Pick<UserActionBuilderArgs, 'userProfiles' | 'appId' | 'euiTheme'> & {
   attachment: SnakeToCamelCase<UserCommentAttachment>;
@@ -38,19 +38,6 @@ const createCommentActionCss = (euiTheme?: EuiThemeComputed<{}>) => {
       max-width: calc(100% - (${euiTheme.size.xl} + ${euiTheme.size.base}));
     }
   `;
-};
-
-const hasDraftComment = (
-  applicationId = '',
-  caseId: string,
-  commentId: string,
-  comment: string
-): boolean => {
-  const draftStorageKey = getMarkdownEditorStorageKey({ appId: applicationId, caseId, commentId });
-
-  const sessionValue = sessionStorage.getItem(draftStorageKey);
-
-  return Boolean(sessionValue && sessionValue !== comment);
 };
 
 export const createUserAttachmentUserActionBuilder = ({

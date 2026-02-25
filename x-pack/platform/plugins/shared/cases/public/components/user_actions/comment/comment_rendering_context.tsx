@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, memo } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { CaseUI } from '../../../containers/types';
@@ -44,9 +44,9 @@ export const useCommentRenderingContext = (): Partial<CommentRenderingContextVal
 export const CommentRenderingProvider: React.FC<{
   value: CommentRenderingContextValue;
   children: React.ReactNode;
-}> = ({ value, children }) => {
+}> = memo(({ value, children }) => {
   return (
     <CommentRenderingContext.Provider value={value}>{children}</CommentRenderingContext.Provider>
   );
-};
+});
 CommentRenderingProvider.displayName = 'CommentRenderingProvider';

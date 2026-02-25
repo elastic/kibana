@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { UserActionContentToolbar } from '../../user_actions/content_toolbar';
 import { UserCommentPropertyActions } from '../../user_actions/property_actions/user_comment_property_actions';
 import * as i18n from '../../user_actions/comment/translations';
@@ -27,28 +27,37 @@ export const CommentActions: React.FC<CommentActionsProps> = ({ commentId, conte
     handleManageQuote,
   } = useCommentRenderingContext();
 
-  const isLoading = loadingCommentIds.includes(commentId);
+  const isLoading = useMemo(
+    () => loadingCommentIds.includes(commentId),
+    [loadingCommentIds, commentId]
+  );
+
+  const onEdit = useCallback(() => {
+    if (handleManageMarkdownEditId) {
+      handleManageMarkdownEditId(commentId);
+    }
+  }, [handleManageMarkdownEditId, commentId]);
+
+  const onDelete = useCallback(() => {
+    if (handleDeleteComment) {
+      handleDeleteComment(commentId, i18n.DELETE_COMMENT_SUCCESS_TITLE);
+    }
+  }, [handleDeleteComment, commentId]);
+
+  const onQuote = useCallback(() => {
+    if (handleManageQuote) {
+      handleManageQuote(content);
+    }
+  }, [handleManageQuote, content]);
 
   return (
     <UserActionContentToolbar id={commentId}>
       <UserCommentPropertyActions
         isLoading={isLoading}
         commentContent={content}
-        onEdit={() => {
-          if (handleManageMarkdownEditId) {
-            handleManageMarkdownEditId(commentId);
-          }
-        }}
-        onDelete={() => {
-          if (handleDeleteComment) {
-            handleDeleteComment(commentId, i18n.DELETE_COMMENT_SUCCESS_TITLE);
-          }
-        }}
-        onQuote={() => {
-          if (handleManageQuote) {
-            handleManageQuote(content);
-          }
-        }}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onQuote={onQuote}
       />
     </UserActionContentToolbar>
   );
