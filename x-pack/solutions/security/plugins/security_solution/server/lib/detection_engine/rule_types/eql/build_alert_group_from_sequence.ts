@@ -283,14 +283,14 @@ const flattenToPathValuesWithNotation = (
 ): { pathValues: [string[], unknown][]; dotPaths: Set<string> } => {
   const pathValues: [string[], unknown][] = [];
   const dotPaths = new Set<string>();
-  const stack: [object, string[], boolean][] = [[obj, [], false]];
+  const stack: [object, string[]][] = [[obj, []]];
   while (stack.length > 0 && stack.at(-1) != null) {
-    const [o, prefix, parentFromDot] = stack.pop() as [object, string[], boolean];
+    const [o, prefix] = stack.pop() as [object, string[]];
     for (const [k, v] of Object.entries(o)) {
       const path = prefix.concat(k.includes('.') ? k.split('.') : [k]);
       const keyWasDot = k.includes('.');
       if (isPlainObject(v)) {
-        stack.push([v, path, keyWasDot]);
+        stack.push([v, path]);
       } else {
         pathValues.push([path, v]);
         if (keyWasDot) {
