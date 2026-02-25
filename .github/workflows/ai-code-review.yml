@@ -61,7 +61,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Run Claude PR Review (Read-Only)
-        uses: elastic/ai-github-actions/claude-workflows/pr-review/ro@v0
+        uses: elastic/ai-github-actions/claude-workflows/pr-review/ro@caf5c041b5d92721cd165f61cf9ce3a16f8a4925 # v0.2.6
         with:
           claude-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github-token: ${{ github.token }}
