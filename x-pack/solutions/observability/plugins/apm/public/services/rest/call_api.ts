@@ -40,7 +40,7 @@ export async function callApi<T = void>(
   { http, uiSettings }: CoreStart | CoreSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
-  const inspectableEsQueriesEnabled: boolean = uiSettings?.get(enableInspectEsQueries) ?? false;
+  const inspectableEsQueriesEnabled: boolean = uiSettings.get(enableInspectEsQueries);
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
   if (cacheResponse) {

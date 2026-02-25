@@ -17,7 +17,7 @@ export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApm
     services: { share },
   } = useKibana<ApmPluginStartDeps>();
 
-  const url = share?.url?.locators?.get(DASHBOARD_APP_LOCATOR)?.getRedirectUrl({
+  const url = share?.url.locators.get(DASHBOARD_APP_LOCATOR)?.getRedirectUrl({
     dashboardId: currentDashboard?.dashboardSavedObjectId,
   });
   return (
@@ -26,7 +26,6 @@ export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApm
       color="text"
       size="s"
       iconType="visGauge"
-      isDisabled={!url}
       href={url}
     >
       {i18n.translate('xpack.apm.serviceDashboards.contextMenu.goToDashboard', {

@@ -31,8 +31,9 @@ export function DatePicker({
   const location = useLocation();
   const { core, plugins } = useApmPluginContext();
 
-  const timePickerQuickRanges =
-    core?.uiSettings?.get<TimePickerQuickRange[]>(UI_SETTINGS.TIMEPICKER_QUICK_RANGES) ?? [];
+  const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
+    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+  );
 
   const commonlyUsedRanges = timePickerQuickRanges.map(({ from, to, display }) => ({
     start: from,

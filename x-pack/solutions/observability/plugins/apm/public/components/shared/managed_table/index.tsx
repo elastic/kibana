@@ -65,7 +65,6 @@ export interface TableActionSubItem<T> {
   onClick?: (item: T) => void;
   href?: (item: T) => string | undefined;
   icon?: string;
-  isDisabled?: boolean;
 }
 
 export interface TableAction<T> {
@@ -74,7 +73,6 @@ export interface TableAction<T> {
   onClick?: (item: T) => void;
   href?: (item: T) => string | undefined;
   icon?: string;
-  isDisabled?: boolean;
   items?: Array<TableActionSubItem<T>>;
 }
 
@@ -94,7 +92,6 @@ function resolveTableActions<T>(actions: TableActions<T>, item: T): ActionGroups
       id: action.id,
       name: action.name,
       icon: action.icon,
-      isDisabled: action.isDisabled,
       onClick: action.onClick ? () => action.onClick!(item) : undefined,
       href: action.href ? action.href(item) : undefined,
       items: action.items?.map((subItem) => ({
@@ -102,7 +99,6 @@ function resolveTableActions<T>(actions: TableActions<T>, item: T): ActionGroups
         name: subItem.name,
         icon: subItem.icon,
         onClick: subItem.onClick ? () => subItem.onClick!(item) : undefined,
-        isDisabled: subItem.isDisabled,
         href: subItem.href ? subItem.href(item) : undefined,
       })),
     })),
