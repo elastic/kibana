@@ -5,30 +5,45 @@
  * 2.0.
  */
 
-import { buildUsersSearchBody } from './queries';
+import { buildEntitiesSearchBody } from './queries';
 
 describe('Watchlist sync queries', () => {
-  describe('buildUsersSearchBody', () => {
+  describe('buildEntitiesSearchBody', () => {
     it('constructs the correct search body with default page size', () => {
-      const searchBody = buildUsersSearchBody();
-      expect(searchBody).toMatchSnapshot();
+      const searchBody = buildEntitiesSearchBody('user');
+      expect(searchBody.size).toBe(0);
+      expect(searchBody.aggs?.entities?.composite?.size).toBe(100);
+      expect(searchBody.aggs?.entities?.composite?.sources).toEqual([
+        { euid: { terms: { field: 'euid' } } },
+      ]);
+      expect(searchBody.runtime_mappings?.euid).toBeDefined();
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
     });
 
     it('constructs the correct search body with an afterKey for pagination', () => {
-      const afterKey = { username: 'jdoe' };
-      const searchBody = buildUsersSearchBody(afterKey);
-      expect(searchBody).toMatchSnapshot();
+      const afterKey = { euid: 'user:jdoe' };
+      const searchBody = buildEntitiesSearchBody('user', afterKey);
+      expect(searchBody.aggs?.entities?.composite?.after).toEqual(afterKey);
     });
 
     it('constructs the correct search body with a custom page size', () => {
-      const searchBody = buildUsersSearchBody(undefined, 50);
-      expect(searchBody).toMatchSnapshot();
+      const searchBody = buildEntitiesSearchBody('user', undefined, 50);
+      expect(searchBody.aggs?.entities?.composite?.size).toBe(50);
     });
 
     it('constructs the correct search body with afterKey and custom page size', () => {
-      const afterKey = { username: 'user42' };
-      const searchBody = buildUsersSearchBody(afterKey, 25);
-      expect(searchBody).toMatchSnapshot();
+      const afterKey = { euid: 'user:user42' };
+      const searchBody = buildEntitiesSearchBody('user', afterKey, 25);
+      expect(searchBody.aggs?.entities?.composite?.after).toEqual(afterKey);
+      expect(searchBody.aggs?.entities?.composite?.size).toBe(25);
+    });
+
+    it('constructs the correct search body for host entity type', () => {
+      const searchBody = buildEntitiesSearchBody('host');
+      expect(searchBody.aggs?.entities?.composite?.sources).toEqual([
+        { euid: { terms: { field: 'euid' } } },
+      ]);
+      expect(searchBody.runtime_mappings?.euid).toBeDefined();
     });
   });
 });

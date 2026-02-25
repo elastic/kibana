@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import type { EntityType } from '@kbn/entity-store';
-
-export interface WatchlistBulkEntity {
-  euid: string;
-  type: EntityType;
-  name?: string;
-  sourceId: string;
-  existingEntityId?: string;
-}
+export * from './common';

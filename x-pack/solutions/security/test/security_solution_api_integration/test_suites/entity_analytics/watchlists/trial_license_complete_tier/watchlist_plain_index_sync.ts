@@ -38,13 +38,13 @@ export default ({ getService }: FtrProviderContext) => {
 
       await utils.syncWatchlist(watchlistId);
 
-      const users = await utils.queryWatchlistIndex(watchlistName);
-      expect(users).toHaveLength(3);
+      const entities = await utils.queryWatchlistIndex(watchlistName);
+      expect(entities).toHaveLength(3);
 
-      const names = users.map((u) => (u.user as { name: string }).name);
-      expect(names).toContain('alice');
-      expect(names).toContain('bob');
-      expect(names).toContain('charlie');
+      const euids = entities.map((e) => (e.entity as { id: string }).id);
+      expect(euids).toContain('user:alice');
+      expect(euids).toContain('user:bob');
+      expect(euids).toContain('user:charlie');
     });
 
     it('should not create duplicate users', async () => {
@@ -65,27 +65,27 @@ export default ({ getService }: FtrProviderContext) => {
       await utils.addUsersToSourceIndex([...uniqueUsernames, ...repeatedUsers]);
       await utils.syncWatchlist(watchlistId);
 
-      const users = await utils.queryWatchlistIndex(watchlistName);
-      expect(users).toHaveLength(uniqueUsernames.length);
+      const entities = await utils.queryWatchlistIndex(watchlistName);
+      expect(entities).toHaveLength(uniqueUsernames.length);
 
-      const names = users.map((u) => (u.user as { name: string }).name);
-      expect(names).toContain('Luke Skywalker');
-      expect(names).toContain('C-3PO');
-      expect(names.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
+      const euids = entities.map((e) => (e.entity as { id: string }).id);
+      expect(euids).toContain('user:Luke Skywalker');
+      expect(euids).toContain('user:C-3PO');
+      expect(euids.filter((euid: string) => euid === 'user:C-3PO')).toHaveLength(1);
     });
 
     it('should not update timestamps when re-syncing the same user', async () => {
       await utils.addUsersToSourceIndex(['user1']);
       await utils.syncWatchlist(watchlistId);
 
-      const usersAfterFirstSync = await utils.queryWatchlistIndex(watchlistName);
-      const user1AfterFirstSync = utils.findUser(usersAfterFirstSync, 'user1');
+      const entitiesAfterFirstSync = await utils.queryWatchlistIndex(watchlistName);
+      const user1AfterFirstSync = utils.findEntity(entitiesAfterFirstSync, 'user:user1');
       log.info(`User 1 after first sync: ${JSON.stringify(user1AfterFirstSync)}`);
 
       await utils.syncWatchlist(watchlistId);
 
-      const usersAfterSecondSync = await utils.queryWatchlistIndex(watchlistName);
-      const user1AfterSecondSync = utils.findUser(usersAfterSecondSync, 'user1');
+      const entitiesAfterSecondSync = await utils.queryWatchlistIndex(watchlistName);
+      const user1AfterSecondSync = utils.findEntity(entitiesAfterSecondSync, 'user:user1');
       log.info(`User 1 after second sync: ${JSON.stringify(user1AfterSecondSync)}`);
 
       expect(user1AfterSecondSync?.['@timestamp']).toEqual(user1AfterFirstSync?.['@timestamp']);

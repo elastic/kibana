@@ -94,10 +94,13 @@ export const WatchlistSyncUtils = (
     return response.hits.hits.map((hit) => hit._source as Record<string, unknown>);
   };
 
-  const findUser = (users: Array<Record<string, unknown>>, username: string) =>
-    users.find((u) => {
-      const user = u.user as { name: string } | undefined;
-      return user?.name === username;
+  const findEntity = (
+    entities: Array<Record<string, unknown>>,
+    euid: string
+  ): Record<string, unknown> | undefined =>
+    entities.find((e) => {
+      const entity = e.entity as { id?: string } | undefined;
+      return entity?.id === euid;
     });
 
   const deleteWatchlistIndex = async (watchlistName: string, namespace: string = 'default') => {
@@ -114,7 +117,7 @@ export const WatchlistSyncUtils = (
     createWatchlistAndEntitySource,
     syncWatchlist,
     queryWatchlistIndex,
-    findUser,
+    findEntity,
     deleteWatchlistIndex,
   };
 };
