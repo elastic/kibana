@@ -6,6 +6,7 @@
  */
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
@@ -93,9 +94,9 @@ describe('ManageSpacePage', () => {
       target: { value: 'some description' },
     });
 
-    updateSolutionView('oblt');
+    await updateSolutionView('oblt');
 
-    fireEvent.click(screen.getByTestId('save-space-button'));
+    await userEvent.click(screen.getByTestId('save-space-button'));
     await waitFor(() => {
       expect(spacesManager.createSpace).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -134,7 +135,7 @@ describe('ManageSpacePage', () => {
       expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('save-space-button'));
+    await userEvent.click(screen.getByTestId('save-space-button'));
 
     await waitFor(() => {
       expect(screen.getByText('Enter a name.')).toBeInTheDocument();
@@ -146,14 +147,14 @@ describe('ManageSpacePage', () => {
       target: { value: 'New Space Name' },
     });
 
-    fireEvent.click(screen.getByTestId('save-space-button'));
+    await userEvent.click(screen.getByTestId('save-space-button'));
     await waitFor(() => {
       expect(screen.getByText('Select a solution.')).toBeInTheDocument();
     });
 
-    updateSolutionView('oblt');
+    await updateSolutionView('oblt');
 
-    fireEvent.click(screen.getByTestId('save-space-button'));
+    await userEvent.click(screen.getByTestId('save-space-button'));
     await waitFor(() => {
       expect(spacesManager.createSpace).toHaveBeenCalled();
     });
@@ -246,7 +247,7 @@ describe('ManageSpacePage', () => {
       expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
     });
 
-    updateSolutionView('classic');
+    await updateSolutionView('classic');
 
     await waitFor(() => {
       expect(screen.getByTestId('enabled-features-panel')).toBeInTheDocument();
@@ -317,9 +318,9 @@ describe('ManageSpacePage', () => {
   });
 });
 
-function updateSolutionView(solution: SolutionView) {
-  fireEvent.click(screen.getByTestId('solutionViewSelect'));
-  fireEvent.click(
+async function updateSolutionView(solution: SolutionView) {
+  await userEvent.click(screen.getByTestId('solutionViewSelect'));
+  await userEvent.click(
     screen.getByTestId(`solutionView${solution.charAt(0).toUpperCase() + solution.slice(1)}Option`)
   );
 }

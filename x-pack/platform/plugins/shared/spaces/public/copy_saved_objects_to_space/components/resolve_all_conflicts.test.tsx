@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { I18nProvider } from '@kbn/i18n-react';
@@ -69,8 +70,7 @@ describe('ResolveAllConflicts', () => {
   };
 
   const openPopover = async () => {
-    const link = screen.getByText('(resolve all)');
-    fireEvent.click(link);
+    await userEvent.click(screen.getByText('(resolve all)'));
     await waitFor(() => {
       expect(screen.getByTestId('cts-resolve-all-conflicts-overwrite')).toBeInTheDocument();
     });
@@ -86,7 +86,7 @@ describe('ResolveAllConflicts', () => {
     await openPopover();
     expect(onRetriesChange).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByTestId('cts-resolve-all-conflicts-overwrite'));
+    await userEvent.click(screen.getByTestId('cts-resolve-all-conflicts-overwrite'));
     expect(onRetriesChange).toHaveBeenCalledWith([
       { type: 'type-1', id: 'id-1', overwrite: false },
       { type: 'type-5', id: 'id-5', overwrite: true, destinationId: 'dest-5b' },
@@ -103,7 +103,7 @@ describe('ResolveAllConflicts', () => {
     expect(onRetriesChange).not.toHaveBeenCalled();
     expect(onDestinationMapChange).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByTestId('cts-resolve-all-conflicts-skip'));
+    await userEvent.click(screen.getByTestId('cts-resolve-all-conflicts-skip'));
     expect(onRetriesChange).toHaveBeenCalledWith([
       { type: 'type-1', id: 'id-1', overwrite: false },
     ]);

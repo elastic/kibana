@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -146,9 +147,7 @@ describe('SpaceListInternal', () => {
         expect(button).not.toBeNull();
         expect(button!.textContent).toEqual('+1 more');
 
-        await act(async () => {
-          fireEvent.click(button!);
-        });
+        await userEvent.click(button!);
 
         expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F']);
         expect(button!.textContent).toEqual('show less');
@@ -169,9 +168,7 @@ describe('SpaceListInternal', () => {
         expect(button).not.toBeNull();
         expect(button!.textContent).toEqual('+2 more');
 
-        await act(async () => {
-          fireEvent.click(button!);
-        });
+        await userEvent.click(button!);
 
         expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', '+1']);
         expect(button!.textContent).toEqual('show less');
@@ -192,9 +189,7 @@ describe('SpaceListInternal', () => {
         expect(button).not.toBeNull();
         expect(button!.textContent).toEqual('+3 more');
 
-        await act(async () => {
-          fireEvent.click(button!);
-        });
+        await userEvent.click(button!);
 
         expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', '+2']);
         expect(button!.textContent).toEqual('show less');
@@ -239,8 +234,7 @@ describe('SpaceListInternal', () => {
         expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(getButton(container)).toBeNull();
 
-        const alphaAvatar = screen.getByTestId('space-avatar-alpha');
-        fireEvent.click(alphaAvatar);
+        await userEvent.click(screen.getByTestId('space-avatar-alpha'));
         expect(listOnClick).toHaveBeenCalledTimes(1);
       });
 
@@ -256,15 +250,12 @@ describe('SpaceListInternal', () => {
         expect(button).not.toBeNull();
         expect(button!.textContent).toEqual('+8 more');
 
-        await act(async () => {
-          fireEvent.click(button!);
-        });
+        await userEvent.click(button!);
 
         expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(button!.textContent).toEqual('show less');
 
-        const alphaAvatar = screen.getByTestId('space-avatar-alpha');
-        fireEvent.click(alphaAvatar);
+        await userEvent.click(screen.getByTestId('space-avatar-alpha'));
         expect(listOnClick).toHaveBeenCalledTimes(1);
       });
 
@@ -279,9 +270,7 @@ describe('SpaceListInternal', () => {
         expect(button).not.toBeNull();
         expect(button!.textContent).toEqual('+2 more');
 
-        await act(async () => {
-          fireEvent.click(button!);
-        });
+        await userEvent.click(button!);
 
         expect(getListText(container)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(button!.textContent).toEqual('show less');
@@ -310,9 +299,7 @@ describe('SpaceListInternal', () => {
         expect(button).not.toBeNull();
         expect(button!.textContent).toEqual('+5 more');
 
-        await act(async () => {
-          fireEvent.click(button!);
-        });
+        await userEvent.click(button!);
 
         expect(getListText(container)).toEqual(['D!', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(button!.textContent).toEqual('show less');
@@ -336,9 +323,7 @@ describe('SpaceListInternal', () => {
         expect(button).not.toBeNull();
         expect(button!.textContent).toEqual('+4 more');
 
-        await act(async () => {
-          fireEvent.click(button!);
-        });
+        await userEvent.click(button!);
 
         expect(getListText(container)).toEqual(['A', 'C', 'D', 'E', 'F', 'G', 'H', 'B', '+1']);
         expect(button!.textContent).toEqual('show less');
