@@ -86,8 +86,10 @@ export async function createRequestHandlerContext({
       analytics,
     }),
     crudClient,
+    ccsLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
     security: startPlugins.security,
+    namespace,
   };
 }

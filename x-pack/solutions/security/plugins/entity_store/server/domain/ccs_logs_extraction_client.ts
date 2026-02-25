@@ -72,7 +72,9 @@ export class CcsLogsExtractionClient {
     private readonly crudClient: CRUDClient
   ) {}
 
-  public async extractToUpdates(params: CcsExtractToUpdatesParams) {
+  public async extractToUpdates(
+    params: CcsExtractToUpdatesParams
+  ): Promise<CcsExtractToUpdatesResult> {
     try {
       return await this.doExtractToUpdates(params);
     } catch (error) {
@@ -80,7 +82,7 @@ export class CcsLogsExtractionClient {
         `Failed to extract to updates from CCS indices: ${error.message}`
       );
       this.logger.error(wrappedError);
-      return { error: wrappedError };
+      return { count: 0, pages: 0, error: wrappedError };
     }
   }
 
