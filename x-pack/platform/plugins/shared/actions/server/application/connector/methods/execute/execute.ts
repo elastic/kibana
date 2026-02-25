@@ -62,6 +62,6 @@ export async function execute(
     relatedSavedObjects,
     actionExecutionId: uuidv4(),
     connectorTokenClient: context.connectorTokenClient,
-    ...(signal && { signal }),
+    signal,
   });
 }
