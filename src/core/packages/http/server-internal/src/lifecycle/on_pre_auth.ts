@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { trace, context } from '@opentelemetry/api';
 import type { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -46,6 +47,9 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
     request: Request,
     responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    if (fn.name) {
+      trace.getSpan(context.active())?.updateName(`ext - onPreAuth - ${fn.name}`);
+    }
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {

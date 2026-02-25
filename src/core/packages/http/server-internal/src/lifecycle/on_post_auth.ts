@@ -24,6 +24,7 @@ import {
   lifecycleResponseFactory,
 } from '@kbn/core-http-router-server-internal';
 import { deepFreeze } from '@kbn/std';
+import { context, trace } from '@opentelemetry/api';
 
 const postAuthResult = {
   next(): OnPostAuthResult {
@@ -54,6 +55,9 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
     request: Request,
     responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    if (fn.name) {
+      trace.getSpan(context.active())?.updateName(`ext - onPostAuth - ${fn.name}`);
+    }
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
