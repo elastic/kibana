@@ -118,9 +118,9 @@ const mockNavLinks = [
     url: '/app/elasticsearch/analytics',
   },
   {
-    id: 'searchInferenceEndpoints:inferenceEndpoints',
+    id: 'management:inference_endpoints',
     title: 'Inference endpoints',
-    url: '/app/elasticsearch/relevance/inference_endpoints',
+    url: '/app/management/ml/inference_endpoints',
   },
   {
     id: 'searchSynonyms:synonyms',

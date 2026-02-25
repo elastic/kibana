@@ -261,8 +261,7 @@ export function createNavigationTree({
             children: [
               { link: 'management:trained_models', breadcrumbStatus: 'hidden' },
               {
-                id: 'searchInferenceEndpoints',
-                link: 'searchInferenceEndpoints',
+                link: 'management:inference_endpoints',
                 breadcrumbStatus: 'hidden',
               },
               { link: 'management:anomaly_detection' },
