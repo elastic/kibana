@@ -112,12 +112,11 @@ export const RunningQueriesApp: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued">
                 {secondsAgo < 60
-                  ? i18n.translate('xpack.runningQueries.lastUpdatedSeconds', {
-                      defaultMessage: 'Updated {seconds}s ago',
-                      values: { seconds: secondsAgo },
+                  ? i18n.translate('xpack.runningQueries.lastUpdatedLessThanOneMinute', {
+                      defaultMessage: 'Updated <1m ago',
                     })
                   : i18n.translate('xpack.runningQueries.lastUpdatedMinutes', {
-                      defaultMessage: 'Updated {minutes}m ago',
+                      defaultMessage: 'Updated {minutes}min ago',
                       values: { minutes: Math.floor(secondsAgo / 60) },
                     })}
               </EuiText>

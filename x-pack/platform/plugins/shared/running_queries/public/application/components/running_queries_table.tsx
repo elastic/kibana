@@ -150,7 +150,10 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         }),
         width: '240px',
         align: 'right',
-        render: (_: unknown, query: RunningQuery) => {
+        render: (value: unknown, record?: RunningQuery) => {
+          const query = (record ?? value) as RunningQuery | undefined;
+          if (!query) return null;
+
           if (stopRequestedTaskIds.has(query.taskId)) {
             return (
               <EuiFlexGroup

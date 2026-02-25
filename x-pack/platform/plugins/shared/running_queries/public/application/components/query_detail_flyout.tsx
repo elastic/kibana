@@ -260,24 +260,20 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isStopRequested ? (
-              <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.runningQueries.flyout.stoppingQueryText', {
-                  defaultMessage: 'Stopping the query…',
-                })}
-              </EuiText>
-            ) : (
-              <EuiButton
-                color="danger"
-                fill
-                onClick={() => onStopQuery(query.taskId)}
-                isDisabled={!query.cancellable || query.cancelled}
-              >
-                {i18n.translate('xpack.runningQueries.flyout.stopQueryButton', {
-                  defaultMessage: 'Stop query',
-                })}
-              </EuiButton>
-            )}
+            <EuiButton
+              color="danger"
+              fill
+              onClick={() => onStopQuery(query.taskId)}
+              isDisabled={!query.cancellable || query.cancelled || isStopRequested}
+            >
+              {isStopRequested
+                ? i18n.translate('xpack.runningQueries.flyout.stoppingQueryText', {
+                    defaultMessage: 'Stopping the query…',
+                  })
+                : i18n.translate('xpack.runningQueries.flyout.stopQueryButton', {
+                    defaultMessage: 'Stop query',
+                  })}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
