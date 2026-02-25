@@ -413,7 +413,15 @@
             "label": "getProjectRouting",
             "description": [],
             "signature": [
-              "() => ",
+              "(overrideValue?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              ") => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -427,7 +435,31 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.getProjectRouting.$1",
+                "type": "string",
+                "tags": [],
+                "label": "overrideValue",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.ProjectRouting",
+                    "text": "ProjectRouting"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 50,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
