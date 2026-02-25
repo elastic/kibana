@@ -13,6 +13,12 @@ import type { GraphNode } from '../../types';
 export const getInlineQueryNode = (params: GetInlineSplQueryParams): GraphNode => {
   const inlineSplQuery = getInlineSplQuery(params);
   return async (state) => {
+    if (state.original_rule.vendor !== 'splunk') {
+      // We only support inlining SPL queries, if the original rule is not a Splunk rule, we return the original query without inlining and add a comment about it.
+      return {
+        inline_query: undefined,
+      };
+    }
     const { inlineQuery, isUnsupported, comments } = await inlineSplQuery({
       query: state.original_rule.query,
       resources: state.resources,

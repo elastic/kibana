@@ -27,8 +27,10 @@ export const getCreateSemanticQueryNode = ({
     const query = state.original_rule.query;
     let promptTemplate: Awaited<ReturnType<ChatPromptTemplate['formatMessages']>>;
     if (state.original_rule.vendor === 'qradar') {
+      const qRadarQuery =
+        state.nl_query || `${state.original_rule.title} \n ${state.original_rule.description}`;
       promptTemplate = await QRADAR_SEMANTIC_QUERY_PROMPT.formatMessages({
-        nlQuery: state.nl_query,
+        nlQuery: qRadarQuery,
       });
     } else {
       promptTemplate = await CREATE_SPLUNK_SEMANTIC_QUERY_PROMPT.formatMessages({
