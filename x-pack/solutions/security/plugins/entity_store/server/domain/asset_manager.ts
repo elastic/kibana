@@ -11,11 +11,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { getEntityDefinition } from '../../common/domain/definitions/registry';
-import type {
-  EntityType,
-  ManagedEntityDefinition,
-} from '../../common/domain/definitions/entity_schema';
+import type { EntityType } from '../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
@@ -49,6 +45,9 @@ import {
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import type { LogsExtractionClient } from './logs_extraction_client';
+import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
+import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -88,16 +87,21 @@ export class AssetManager {
     logExtractionParams?: LogExtractionBodyParams
   ) {
     try {
-      await Promise.all(
-        entityTypes.map((type) => this.initEntity(request, type, logExtractionParams))
-      );
+      await Promise.all([
+        ...entityTypes.map((type) => this.initEntity(request, type, logExtractionParams)),
 
-      await scheduleEntityMaintainerTasks({
-        logger: this.logger,
-        taskManager: this.taskManager,
-        namespace: this.namespace,
-        request,
-      });
+        scheduleEntityMaintainerTasks({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
+
+        installEuidStoredScripts({
+          esClient: this.esClient,
+          logger: this.logger,
+        }),
+      ]);
     } catch (error) {
       this.logger.error('Error during entity store init:', error);
       throw error;
@@ -160,6 +164,10 @@ export class AssetManager {
           logger: this.logger.get(type),
           definition,
           namespace: this.namespace,
+        }),
+        deleteEuidStoredScripts({
+          esClient: this.esClient,
+          logger: this.logger,
         }),
       ]);
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
@@ -378,13 +386,12 @@ export class AssetManager {
     const taskId = getExtractEntityTaskId(type, this.namespace);
     try {
       const task = await this.taskManager.get(taskId);
-      const countResult = await this.logsExtractionClient.extractLogs(type, { countOnly: true });
       return {
         id: taskId,
         installed: true,
         resource: 'task',
         status: task.state.status ?? null,
-        remainingLogsToExtract: countResult.success ? countResult.count : null,
+        remainingLogsToExtract: await this.logsExtractionClient.getRemainingLogsCount(type),
         runs: task.state.runs ?? 0,
         lastError: task.state.lastError ?? null,
       };

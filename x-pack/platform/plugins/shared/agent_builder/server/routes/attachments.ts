@@ -8,8 +8,8 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
-import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
+import { isToolCallStep, attachmentTools } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RouteDependencies } from './types';
@@ -33,11 +33,7 @@ function isAttachmentReferencedInRounds(
   attachmentId: string,
   rounds: ConversationRound[]
 ): boolean {
-  const attachmentToolIds = [
-    'platform.core.attachment_read',
-    'platform.core.attachment_update',
-    'platform.core.attachment_diff',
-  ];
+  const attachmentToolIds = [attachmentTools.read, attachmentTools.update, attachmentTools.diff];
 
   for (const round of rounds) {
     for (const step of round.steps) {
