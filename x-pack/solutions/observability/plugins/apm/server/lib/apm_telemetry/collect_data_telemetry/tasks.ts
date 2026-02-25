@@ -118,9 +118,7 @@ function buildOtelAgentKey(parts: {
   if (!sdk_name || sdk_name === 'unknown' || sdk_name === '') {
     return null;
   }
-  const keyParts = [sdk_name, sdk_language, distro_name].filter(
-    (v) => v != null && v !== ''
-  );
+  const keyParts = [sdk_name, sdk_language, distro_name].filter((v) => v != null && v !== '');
   return keyParts.join('/');
 }
 
@@ -139,8 +137,7 @@ function accumulateVersionStats(
     record[key] = { total_docs: 0, docs_per_version: {}, services_per_version: {} };
   }
   record[key].total_docs += docCount;
-  record[key].docs_per_version[version] =
-    (record[key].docs_per_version[version] || 0) + docCount;
+  record[key].docs_per_version[version] = (record[key].docs_per_version[version] || 0) + docCount;
   record[key].services_per_version[version] =
     (record[key].services_per_version[version] || 0) + serviceCount;
 }
@@ -1935,10 +1932,7 @@ export const tasks: TelemetryTask[] = [
           timeout,
           query: {
             bool: {
-              filter: [
-                { exists: { field: SDK_NAME_FIELD } },
-                range1d,
-              ],
+              filter: [{ exists: { field: SDK_NAME_FIELD } }, range1d],
             },
           },
           aggs: {
@@ -2044,12 +2038,7 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'otel_sdk_distro',
     executor: async ({ indices, telemetryClient }) => {
-      const indicesList = [
-        indices.transaction,
-        indices.span,
-        indices.error,
-        indices.metric,
-      ];
+      const indicesList = [indices.transaction, indices.span, indices.error, indices.metric];
 
       // Collect SDK and Distro information together
       const sdkResponse = await telemetryClient.search({
@@ -2059,9 +2048,7 @@ export const tasks: TelemetryTask[] = [
         track_total_hits: true,
         query: {
           bool: {
-            filter: [{ exists: { field: SDK_NAME_FIELD } }, 
-              range1d,
-            ],
+            filter: [{ exists: { field: SDK_NAME_FIELD } }, range1d],
           },
         },
         aggs: {

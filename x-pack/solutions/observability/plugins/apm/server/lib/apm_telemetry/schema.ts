@@ -803,15 +803,13 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       docs: {
         type: 'long',
         _meta: {
-          description:
-            'Number of documents for this OTel agent within the last day',
+          description: 'Number of documents for this OTel agent within the last day',
         },
       },
       size_bytes: {
         type: 'long',
         _meta: {
-          description:
-            'Estimated size in bytes for this OTel agent within the last day',
+          description: 'Estimated size in bytes for this OTel agent within the last day',
         },
       },
     },
@@ -826,7 +824,8 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       total_docs: {
         type: 'long',
         _meta: {
-          description: 'Number of documents for this SDK name/language combination within the last day',
+          description:
+            'Number of documents for this SDK name/language combination within the last day',
         },
       },
       docs_per_version: {
