@@ -44,10 +44,24 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         resetBrowserApiTools: () =>
           setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
         addAttachment: (attachment) =>
-          setCurrentProps((prevProps) => ({
-            ...prevProps,
-            attachments: [...(prevProps.attachments ?? []), attachment],
-          })),
+          setCurrentProps((prevProps) => {
+            const existingAttachments = prevProps.attachments ?? [];
+
+            // If the new attachment has an ID, check for duplicates
+            if (attachment.id) {
+              const existingIndex = existingAttachments.findIndex((a) => a.id === attachment.id);
+              if (existingIndex !== -1) {
+                const updatedAttachments = [...existingAttachments];
+                updatedAttachments[existingIndex] = attachment;
+                return { ...prevProps, attachments: updatedAttachments };
+              }
+            }
+
+            return {
+              ...prevProps,
+              attachments: [...existingAttachments, attachment],
+            };
+          }),
       });
     }
   }, [onRegisterCallbacks]);
