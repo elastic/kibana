@@ -11,7 +11,6 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { entityMaintainersRegistry } from '../../../tasks/entity_maintainers/entity_maintainers_registry';
 
 const StopMaintainerParamsSchema = z
@@ -23,7 +22,7 @@ const StopMaintainerParamsSchema = z
 export function registerStopMaintainer(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP,
+      path: '/internal/security/entity-store/entity-maintainers/stop/{id}',
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

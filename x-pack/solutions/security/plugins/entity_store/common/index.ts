@@ -51,6 +51,4 @@ export const ENTITY_STORE_ROUTES = {
   INSTALL: '/internal/security/entity-store/install',
   UNINSTALL: '/internal/security/entity-store/uninstall',
   STATUS: '/internal/security/entity-store/status',
-  ENTITY_MAINTAINERS_START: '/internal/security/entity-store/entity-maintainers/:id/start',
-  ENTITY_MAINTAINERS_STOP: '/internal/security/entity-store/entity-maintainers/:id/stop',
 } as const satisfies Record<string, string>;

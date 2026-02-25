@@ -69,6 +69,51 @@ export class EntityStorePlugin
     this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
 
+    registerEntityMaintainerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: {
+        id: 'entity_maintainer_test1',
+        interval: '30s',
+        initialState: {
+          chen: 'ashuri - 0',
+        },
+        run: async ({status}) => {
+          this.logger.debug(` ==========> Running entity maintainer 1 state === ${JSON.stringify(status)}`);
+          return {
+            chen: `ashuri - ${status.state.chen === 'ashuri - 0' ? 1 : 0}`,
+          };
+        },
+        setup: async ({status}) => {
+          this.logger.debug(` ==========> Setting up entity maintainer 1 state === ${JSON.stringify(status)}`);
+          return status.state;
+        },
+      },
+      core,
+    });
+
+    registerEntityMaintainerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: {
+        id: 'entity_maintainer_test2',
+        interval: '40s',
+        initialState: {
+          tal: 'ronen - 0',
+        },
+        run: async ({status}) => {
+          this.logger.debug(` ==========> Running entity maintainer 2 state === ${JSON.stringify(status)}`);
+          return {
+            tal: `ronen - ${status.state.tal === 'ronen - 0' ? 1 : 0}`,
+          };
+        },
+        setup: async ({status}) => {
+          this.logger.debug(` ==========> Setting up entity maintainer 2 state === ${JSON.stringify(status)}`);
+          return status.state;
+        },
+      },
+      core,
+    })
     return {
       registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) =>
         registerEntityMaintainerTask({

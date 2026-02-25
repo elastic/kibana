@@ -25,25 +25,58 @@ describe('EntityMaintainersRegistry', () => {
     it('should add an entry and getAll returns it with not_started status', () => {
       registry.register({ id: 'maintainer-a', interval: '5m' });
       expect(registry.getAll()).toEqual([
-        { id: 'maintainer-a', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
+        {
+          id: 'maintainer-a',
+          interval: '5m',
+          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        },
       ]);
+      expect(registry.getAll()[0].description).toBeUndefined();
     });
 
     it('should add multiple entries and getAll returns all in map order', () => {
       registry.register({ id: 'maintainer-a', interval: '1m' });
       registry.register({ id: 'maintainer-b', interval: '5m' });
       expect(registry.getAll()).toEqual([
-        { id: 'maintainer-a', interval: '1m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
-        { id: 'maintainer-b', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
+        {
+          id: 'maintainer-a',
+          interval: '1m',
+          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        },
+        {
+          id: 'maintainer-b',
+          interval: '5m',
+          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        },
       ]);
+      expect(registry.getAll()[0].description).toBeUndefined();
+      expect(registry.getAll()[1].description).toBeUndefined();
     });
 
     it('should overwrite entry when register is called with same id', () => {
       registry.register({ id: 'maintainer-a', interval: '1m' });
       registry.register({ id: 'maintainer-a', interval: '10m' });
       expect(registry.getAll()).toEqual([
-        { id: 'maintainer-a', interval: '10m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
+        {
+          id: 'maintainer-a',
+          interval: '10m',
+          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        },
       ]);
+    });
+
+    it('should store description when provided', () => {
+      registry.register({
+        id: 'maintainer-a',
+        interval: '5m',
+        description: 'Maintains entity index',
+      });
+      expect(registry.get('maintainer-a')).toEqual({
+        id: 'maintainer-a',
+        interval: '5m',
+        taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        description: 'Maintains entity index',
+      });
     });
   });
 
@@ -59,6 +92,7 @@ describe('EntityMaintainersRegistry', () => {
         interval: '5m',
         taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
       });
+      expect(registry.get('maintainer-a')!.description).toBeUndefined();
     });
   });
 
@@ -85,7 +119,11 @@ describe('EntityMaintainersRegistry', () => {
         registry.update('maintainer-a', { taskStatus: EntityMaintainerTaskStatus.STARTED })
       ).toBe(true);
       expect(registry.getAll()).toEqual([
-        { id: 'maintainer-a', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
+        {
+          id: 'maintainer-a',
+          interval: '5m',
+          taskStatus: EntityMaintainerTaskStatus.STARTED,
+        },
       ]);
     });
 
@@ -95,7 +133,11 @@ describe('EntityMaintainersRegistry', () => {
         registry.update('maintainer-a', { taskStatus: EntityMaintainerTaskStatus.STOPPED })
       ).toBe(true);
       expect(registry.getAll()).toEqual([
-        { id: 'maintainer-a', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STOPPED },
+        {
+          id: 'maintainer-a',
+          interval: '5m',
+          taskStatus: EntityMaintainerTaskStatus.STOPPED,
+        },
       ]);
     });
 
@@ -103,7 +145,11 @@ describe('EntityMaintainersRegistry', () => {
       registry.register({ id: 'maintainer-a', interval: '5m' });
       expect(registry.update('maintainer-a', { interval: '10m' })).toBe(true);
       expect(registry.getAll()).toEqual([
-        { id: 'maintainer-a', interval: '10m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
+        {
+          id: 'maintainer-a',
+          interval: '10m',
+          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        },
       ]);
     });
 
@@ -113,7 +159,11 @@ describe('EntityMaintainersRegistry', () => {
         registry.update('maintainer-b', { taskStatus: EntityMaintainerTaskStatus.STOPPED })
       ).toBe(false);
       expect(registry.getAll()).toEqual([
-        { id: 'maintainer-a', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
+        {
+          id: 'maintainer-a',
+          interval: '5m',
+          taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+        },
       ]);
     });
   });

@@ -23,7 +23,7 @@ function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
 }
 
-function getTaskId(id: string, namespace: string): string {
+export function getTaskId(id: string, namespace: string): string {
   return `${id}:${namespace}`;
 }
 
@@ -71,11 +71,15 @@ export function registerEntityMaintainerTask({
   const { run, interval, initialState, description, id, setup } = config;
   const type = getTaskType(id);
 
-  entityMaintainersRegistry.register({ id, interval });
-
   void core
     .getStartServices()
     .then(([start]) => {
+      entityMaintainersRegistry.register({
+        id,
+        interval,
+        description,
+      });
+      
       taskManager.registerTaskDefinitions({
         [type]: {
           title,

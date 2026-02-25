@@ -17,15 +17,14 @@ export const EntityMaintainerTaskStatus = {
 export type EntityMaintainerTaskStatus =
   (typeof EntityMaintainerTaskStatus)[keyof typeof EntityMaintainerTaskStatus];
 
-export interface EntityMaintainerConfig {
+export interface EntityMaintainerRegistryData {
   interval: string;
   taskStatus: EntityMaintainerTaskStatus;
+  description?: string;
 }
 
-export interface EntityMaintainerTaskEntry {
+export interface EntityMaintainerTaskEntry extends EntityMaintainerRegistryData {
   id: string;
-  interval: string;
-  taskStatus: EntityMaintainerTaskStatus;
 }
 
 export interface EntityMaintainerStatusMetadata {

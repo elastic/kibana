@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { EntityMaintainerConfig, EntityMaintainerTaskEntry } from './types';
+import type { EntityMaintainerRegistryData, EntityMaintainerTaskEntry } from './types';
 import { EntityMaintainerTaskStatus } from './types';
 
 export class EntityMaintainersRegistry {
-  private readonly tasks = new Map<string, EntityMaintainerConfig>();
+  private readonly tasks = new Map<string, EntityMaintainerRegistryData>();
 
   hasId(id: string): boolean {
     return this.tasks.has(id);
@@ -23,16 +23,21 @@ export class EntityMaintainersRegistry {
     return { id, ...config };
   }
 
-  register({ id, interval }: Pick<EntityMaintainerTaskEntry, 'id' | 'interval'>): void {
+  register({
+    id,
+    interval,
+    description,
+  }: Omit<EntityMaintainerTaskEntry, 'taskStatus'>): void {
     this.tasks.set(id, {
       interval,
       taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
+      description,
     });
   }
 
   update(
     id: string,
-    overrides: Partial<Omit<EntityMaintainerConfig, 'id'>>
+    overrides: Partial<Omit<EntityMaintainerRegistryData, 'id'>>
   ): boolean {
     const existing = this.tasks.get(id);
     if (!existing) {

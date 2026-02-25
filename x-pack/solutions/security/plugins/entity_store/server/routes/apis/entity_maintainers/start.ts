@@ -11,7 +11,6 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { entityMaintainersRegistry } from '../../../tasks/entity_maintainers/entity_maintainers_registry';
 
 const StartMaintainerParamsSchema = z
@@ -21,9 +20,14 @@ const StartMaintainerParamsSchema = z
   .superRefine(validateMaintainerIdExists);
 
 export function registerStartMaintainer(router: EntityStorePluginRouter) {
+  /**
+   * Start (or re-start) an entity maintainer task.
+   * The task is re-scheduled using the registration configurations (e.g. interval).
+   * The task state is set to the maintainer's supplied initial state.
+   */
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START,
+      path: '/internal/security/entity-store/entity-maintainers/start/{id}',
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

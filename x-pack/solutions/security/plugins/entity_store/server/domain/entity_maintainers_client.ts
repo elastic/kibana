@@ -6,14 +6,30 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
+  getTaskId,
   scheduleEntityMaintainerTask,
   stopEntityMaintainer,
 } from '../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../tasks/entity_maintainers/entity_maintainers_registry';
-import { EntityMaintainerTaskStatus } from '../tasks/entity_maintainers/types';
+import { EntityMaintainerState, EntityMaintainerTaskStatus } from '../tasks/entity_maintainers/types';
+
+interface TaskSnapshot {
+  runs: number;
+  lastSuccessTimestamp: string | null;
+  lastErrorTimestamp: string | null;
+  state: EntityMaintainerState;
+}
+
+export interface EntityMaintainerListEntry {
+  id: string;
+  taskStatus: EntityMaintainerTaskStatus;
+  interval: string;
+  description?: string;
+  taskSnapshot?: TaskSnapshot;
+}
 
 interface EntityMaintainersClientDeps {
   logger: Logger;
@@ -94,5 +110,46 @@ export class EntityMaintainersClient {
       this.logger.error(`Failed to stop entity maintainer task: ${id}`, { error });
       throw error;
     }
+  }
+
+  public async getMaintainers(): Promise<EntityMaintainerListEntry[]> {
+    const entries = entityMaintainersRegistry.getAll();
+
+    const results = await Promise.all(
+      entries.map(async (entry): Promise<EntityMaintainerListEntry> => {
+        const { id, interval, taskStatus, description } = entry;
+        const taskId = getTaskId(id, this.namespace);
+        let taskSnapshot: TaskSnapshot | undefined;
+
+        try {
+          const task = await this.taskManager.get(taskId);
+          const { metadata, state } = task.state ?? {};
+          const runs = metadata?.runs ?? 0;
+          const lastSuccessTimestamp = metadata?.lastSuccessTimestamp ?? null;
+          const lastErrorTimestamp = metadata?.lastErrorTimestamp ?? null;
+          taskSnapshot = {
+            runs,
+            lastSuccessTimestamp,
+            lastErrorTimestamp,
+            state,
+          };
+        } catch (error) {
+          if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            this.logger.error(`Failed to get task snapshot for entity maintainer: ${id}`, { error });
+            throw error;
+          }
+        }
+
+        return {
+          id,
+          taskStatus,
+          interval,
+          description,
+          taskSnapshot,
+        };
+      })
+    );
+
+    return results;
   }
 }
