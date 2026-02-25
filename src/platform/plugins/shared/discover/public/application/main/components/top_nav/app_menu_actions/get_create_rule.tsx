@@ -33,7 +33,7 @@ export function CreateESQLRuleFlyout({
     (stateContainer.getCurrentTab().appState.query as AggregateQuery)?.esql || ''
   );
 
-  const { http, data, dataViews, notifications, history } = services;
+  const { http, data, dataViews, notifications, history, core } = services;
 
   // Use a ref to avoid stale closure issues with onClose
   const onCloseRef = useRef(onClose);
@@ -53,7 +53,7 @@ export function CreateESQLRuleFlyout({
       }
     });
 
-    // Listen for route changes to close the flyout
+    // Listen for route changes within Discover to close the flyout
     // Only close on actual navigation (pathname change), not query param changes
     const unlisten = history.listen((location) => {
       if (location.pathname !== initialPathnameRef.current) {
@@ -61,11 +61,20 @@ export function CreateESQLRuleFlyout({
       }
     });
 
+    // Listen for app changes (navigating away from Discover entirely)
+    const appChangeSubscription = core.application.currentAppId$.subscribe((appId) => {
+      // If the app changes to something other than Discover, close the flyout
+      if (appId && appId !== 'discover') {
+        onCloseRef.current();
+      }
+    });
+
     return () => {
       querySubscription.unsubscribe();
       unlisten();
+      appChangeSubscription.unsubscribe();
     };
-  }, [appState$, history]);
+  }, [appState$, history, core.application.currentAppId$]);
 
   return (
     <DynamicRuleFormFlyout
