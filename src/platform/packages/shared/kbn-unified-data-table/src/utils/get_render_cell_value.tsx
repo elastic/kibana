@@ -130,10 +130,15 @@ export const getRenderCellValueFn = ({
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
+        isPlainRecord,
       });
     }
 
-    if (field?.type === '_source' || useTopLevelObjectColumns) {
+    if (
+      field?.type === '_source' ||
+      useTopLevelObjectColumns ||
+      (isPlainRecord && columnId === '_source')
+    ) {
       return (
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
@@ -182,6 +187,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns,
   fieldFormats,
   closePopover,
+  isPlainRecord,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -190,6 +196,7 @@ function renderPopoverContent({
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
+  isPlainRecord?: boolean;
 }) {
   const closeButton = (
     <EuiButtonIcon
@@ -203,7 +210,11 @@ function renderPopoverContent({
       onClick={closePopover}
     />
   );
-  if (useTopLevelObjectColumns || field?.type === '_source') {
+  if (
+    useTopLevelObjectColumns ||
+    field?.type === '_source' ||
+    (isPlainRecord && columnId === '_source')
+  ) {
     return (
       <SourcePopoverContent
         row={row}
