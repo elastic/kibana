@@ -74,7 +74,6 @@ describe('getInitialAppState', () => {
           },
         },
       }),
-      timeRestore: false,
       services,
     });
     const appState = getInitialAppState({
@@ -120,7 +119,6 @@ describe('getInitialAppState', () => {
           },
         },
       }),
-      timeRestore: false,
       services,
     });
     const appState = getInitialAppState({
@@ -233,7 +231,6 @@ describe('getInitialAppState', () => {
   const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),
-      timeRestore: false,
       services,
     });
 
@@ -514,6 +511,38 @@ describe('getInitialAppState', () => {
               expect(appState).toEqual(
                 expect.objectContaining({
                   query: { esql: 'FROM the-data-view-title' },
+                })
+              );
+            });
+
+            it('should prefer the root profile default esql query when provided', () => {
+              // Given
+              const services = createDiscoverServicesMock();
+              services.storage.get = jest.fn().mockReturnValue(undefined);
+              services.uiSettings.get = jest.fn().mockReturnValue(true);
+              services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+              const defaultProfileEsqlQuery = {
+                query: 'FROM test | WHERE 1 == 1',
+              };
+
+              // When
+              const appState = getInitialAppState({
+                hasGlobalState: false,
+                initialUrlState: undefined,
+                persistedTab: undefined,
+                dataView: new DataView({
+                  spec: dataViewMock.toSpec(),
+                  fieldFormats: {} as DataView['fieldFormats'],
+                }),
+                services,
+                defaultProfileEsqlQuery,
+              });
+
+              // Then
+              expect(appState).toEqual(
+                expect.objectContaining({
+                  query: { esql: defaultProfileEsqlQuery.query },
                 })
               );
             });

@@ -7,6 +7,8 @@
 
 import type { EntityType } from '@kbn/scout-security/src/playwright/constants/entity_analytics';
 
+import { tags } from '@kbn/scout-security';
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
@@ -24,17 +26,12 @@ export const ENTITY_STORE_ROUTES = {
   UNINSTALL: 'internal/security/entity-store/uninstall',
   FORCE_LOG_EXTRACTION: (entityType: string) =>
     `internal/security/entity-store/${entityType}/force-log-extraction`,
+  CRUD_UPSERT: (entityType: string) => `internal/security/entity-store/entities/${entityType}`,
+  CRUD_UPSERT_BULK: 'internal/security/entity-store/entities/bulk',
+  CRUD_DELETE: 'internal/security/entity-store/entities/',
 } as const;
 
-// ESS Only until we have LAST/FIRST enabled for serverless
-export const ENTITY_STORE_TAGS = ['@ess' /* '@svlSecurity'*/];
-
-export const UPDATES_INDEX: Record<EntityType, string> = {
-  generic: '.entities.v2.updates.security_generic_default',
-  host: '.entities.v2.updates.security_host_default',
-  user: '.entities.v2.updates.security_user_default',
-  service: '.entities.v2.updates.security_service_default',
-} as const;
-export const ENTITY_STORE_TAGS = ['@ess', '@svlSecurity'];
+export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 export const UPDATES_INDEX = '.entities.v2.updates.security_default';
+export const LATEST_INDEX = '.entities.v2.latest.security_default';

@@ -414,8 +414,9 @@ const xyDataLayerSchemaESQL = schema.object(
       esqlColumnSchema.extends(
         {
           color: schema.maybe(colorMappingSchema),
+          collapse_by: schema.maybe(collapseBySchema),
         },
-        { meta: { description: 'ES|QL column for breakdown with optional color mapping' } }
+        { meta: { description: 'ES|QL column for breakdown' } }
       )
     ),
     y: schema.arrayOf(
@@ -439,7 +440,6 @@ const getListOfAvailableIcons = (description: string) =>
   schema.oneOf(
     [
       schema.oneOf([
-        schema.literal('empty'),
         schema.literal('asterisk'),
         schema.literal('alert'),
         schema.literal('bell'),
@@ -493,6 +493,11 @@ const referenceLineLayerShared = {
     })
   ),
   color: schema.maybe(staticColorSchema),
+  decoration_position: schema.maybe(
+    schema.oneOf([schema.literal('auto'), schema.literal('left'), schema.literal('right')], {
+      meta: { description: 'Position of the icon and label relative to the reference line' },
+    })
+  ),
   axis: schema.maybe(
     schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
       defaultValue: 'left',

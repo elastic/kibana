@@ -6,7 +6,7 @@
  */
 
 import { EntityType } from '../definitions/entity_schema';
-import { getEuidPainlessEvaluation } from './painless';
+import { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './painless';
 
 describe('getEuidPainlessEvaluation', () => {
   describe('snapshots per entity type', () => {
@@ -15,6 +15,20 @@ describe('getEuidPainlessEvaluation', () => {
         const script = getEuidPainlessEvaluation(entityType);
         expect(script).toMatchSnapshot();
       });
+    });
+  });
+});
+
+describe('getEuidPainlessRuntimeMapping', () => {
+  Object.values(EntityType.Values).forEach((entityType) => {
+    it(`returns a keyword runtime mapping that wraps getEuidPainlessEvaluation for ${entityType}`, () => {
+      const returnScript = getEuidPainlessEvaluation(entityType);
+      const mapping = getEuidPainlessRuntimeMapping(entityType);
+
+      expect(mapping.type).toBe('keyword');
+      expect(mapping.script).toBeDefined();
+      expect(mapping.script.source).toContain('emit(result)');
+      expect(mapping.script.source).toContain(returnScript);
     });
   });
 });

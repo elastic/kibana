@@ -8,7 +8,7 @@
  */
 
 /**
- * Project routing constants for cross-project search
+ * Project routing constants for Cross-project search
  * These are stored as strings in saved objects to explicitly override parent values
  */
 export const PROJECT_ROUTING = {

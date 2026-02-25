@@ -155,15 +155,15 @@ export const AlertsByStatus = ({
       navigateToAlerts([
         {
           title: OPEN_IN_ALERTS_TITLE_STATUS,
-          selectedOptions: [status],
-          fieldName: ALERT_WORKFLOW_STATUS,
+          selected_options: [status],
+          field_name: ALERT_WORKFLOW_STATUS,
         },
         ...(level
           ? [
               {
                 title: OPEN_IN_ALERTS_TITLE_SEVERITY,
-                selectedOptions: [level],
-                fieldName: ALERT_SEVERITY,
+                selected_options: [level],
+                field_name: ALERT_SEVERITY,
               },
             ]
           : []),
