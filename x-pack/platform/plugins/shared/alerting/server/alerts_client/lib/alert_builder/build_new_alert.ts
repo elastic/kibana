@@ -42,25 +42,13 @@ import {
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Alert as LegacyAlert } from '../../../alert/alert';
 import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../../types';
-import type { AlertRule, AlertRuleData } from '../../types';
+import type { AlertRule, AlertRuleData, SnoozedInstanceEntry } from '../../types';
 import { stripFrameworkFields } from '../strip_framework_fields';
 import { nanosToMicros } from '../nanos_to_micros';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
 
-/**
- * Returns AAD snooze fields for a given instance from the rule's snoozedInstances.
- * Used when building a new alert (e.g. re-fire after recovery) so the new document
- * gets snooze detail fields from the rule SO even when there is no existingAlert.
- */
-function getSnoozeFieldsFromRule(
-  alertInstanceId: string,
-  ruleData?: AlertRuleData
-): Partial<Record<string, unknown>> {
-  const entry = (ruleData?.snoozedInstances ?? []).find((e) => e.instanceId === alertInstanceId);
-  if (!entry) {
-    return {};
-  }
+function snoozeEntryToAadFields(entry: SnoozedInstanceEntry): Partial<Record<string, unknown>> {
   const fields: Partial<Record<string, unknown>> = {};
   if (entry.expiresAt != null) {
     fields[ALERT_SNOOZE_EXPIRES_AT] = entry.expiresAt;
@@ -83,6 +71,29 @@ function getSnoozeFieldsFromRule(
   return fields;
 }
 
+/**
+ * Builds a map of instanceId ---> AAD snooze fields from the rule's snoozedInstances.
+ * Call once per rule run and pass the result to buildNewAlert for O(1) lookup instead
+ * of scanning the array per new alert.
+ */
+export function buildSnoozeFromRuleMap(
+  ruleData?: AlertRuleData
+): Map<string, Partial<Record<string, unknown>>> {
+  const map = new Map<string, Partial<Record<string, unknown>>>();
+  for (const entry of ruleData?.snoozedInstances ?? []) {
+    map.set(entry.instanceId, snoozeEntryToAadFields(entry));
+  }
+  return map;
+}
+
+function getSnoozeFieldsFromRule(
+  alertInstanceId: string,
+  ruleData?: AlertRuleData
+): Partial<Record<string, unknown>> {
+  const entry = (ruleData?.snoozedInstances ?? []).find((e) => e.instanceId === alertInstanceId);
+  return entry ? snoozeEntryToAadFields(entry) : {};
+}
+
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
@@ -93,6 +104,8 @@ interface BuildNewAlertOpts<
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   /** When re-indexing an existing active alert, pass the current document to preserve snooze fields */
   existingAlert?: Alert & AlertData;
+  /** Precomputed snooze fields from rule (e.g. from buildSnoozeFromRuleMap) for O(1) lookup; falls back to getSnoozeFieldsFromRule when not provided */
+  snoozeFromRule?: Partial<Record<string, unknown>>;
   rule: AlertRule;
   ruleData?: AlertRuleData;
   payload?: DeepPartial<AlertData>;
@@ -116,6 +129,7 @@ export const buildNewAlert = <
 >({
   legacyAlert,
   existingAlert,
+  snoozeFromRule,
   rule,
   ruleData,
   runTimestamp,
@@ -153,7 +167,7 @@ export const buildNewAlert = <
           [ALERT_SNOOZE_CONDITION_OPERATOR]: existingAlert[ALERT_SNOOZE_CONDITION_OPERATOR],
           [ALERT_SNOOZE_SNAPSHOT]: existingAlert[ALERT_SNOOZE_SNAPSHOT],
         }
-      : getSnoozeFieldsFromRule(alertInstanceId, ruleData);
+      : snoozeFromRule ?? getSnoozeFieldsFromRule(alertInstanceId, ruleData);
 
   return deepmerge.all(
     [
