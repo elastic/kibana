@@ -35,7 +35,7 @@ This means the agent can plan its own work across sessions. Session 1 might inve
 
 ### 1. New work: workflow_dispatch
 
-Go to **Actions > Action Ralph > Run workflow**, enter a prompt. Creates a new PR from `main`.
+Go to **Actions > Action Ralph > Run workflow**, enter a prompt. Creates a new PR from `flash1293/action-ralph`.
 
 ### 2. New work: issue comment
 
@@ -45,7 +45,7 @@ Comment on any issue:
 /action-ralph <description of what to build>
 ```
 
-Creates a new PR from `main` with the issue body as context.
+Creates a new PR from `flash1293/action-ralph` with the issue body as context.
 
 ### 3. Modify existing PR: PR comment
 
@@ -56,7 +56,7 @@ Comment on any open PR:
 ```
 
 Action Ralph will:
-- Checkout the PR's branch (not `main`)
+- Checkout the PR's branch (not the base branch)
 - Bootstrap from that branch's state
 - Run the agent loop
 - Push commits directly to the PR branch
@@ -101,7 +101,9 @@ Defaults to `ubuntu-24.04-arm64-8core` for Phases A and B. To test without custo
 | File | Purpose |
 |---|---|
 | `.github/workflows/action-ralph.yml` | The workflow definition |
-| `.github/action-ralph/AGENT_LOOP_PROTOCOL.md` | Protocol injected into every agent prompt |
+| `action-ralph/AGENT_LOOP_PROTOCOL.md` | Protocol injected into every agent prompt |
+| `action-ralph/validation.md` | Validation checklist for the agent |
+| `action-ralph/lessons_learned.md` | Kibana-specific gotchas and patterns |
 
 ## Timeouts and cost guardrails
 

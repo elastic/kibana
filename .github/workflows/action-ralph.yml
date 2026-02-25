@@ -30,7 +30,7 @@ concurrency:
 jobs:
   # ---------------------------------------------------------------------------
   # Phase A: Bootstrap the Kibana monorepo and produce a warm-state artifact.
-  # For PR comments, checks out the PR branch instead of main.
+  # For PR comments, checks out the PR branch instead of the base branch.
   # Privilege: contents:read (implicit GITHUB_TOKEN for checkout only).
   # ---------------------------------------------------------------------------
   prepare:
@@ -96,7 +96,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_branch || 'main' }}
+          ref: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_branch || 'flash1293/action-ralph' }}
           fetch-depth: 1
           repository: ${{ steps.context.outputs.is_pr == 'true' && steps.context.outputs.pr_head_repo || github.repository }}
 
@@ -259,7 +259,7 @@ jobs:
           set -euo pipefail
 
           SPEC_FILE="/tmp/ralph-spec.md"
-          PROTOCOL_FILE=".github/action-ralph/AGENT_LOOP_PROTOCOL.md"
+          PROTOCOL_FILE="action-ralph/AGENT_LOOP_PROTOCOL.md"
           SESSION_DIR="/tmp/ralph-session"
           mkdir -p "$SESSION_DIR"
 
@@ -267,7 +267,7 @@ jobs:
           if [ "$IS_PR" = "true" ]; then
             SPEC_CONTEXT="Modifying existing PR #${PR_NUMBER}. Make file changes locally — a separate publish step handles git push."
           else
-            SPEC_CONTEXT="Creating new changes against main. Make file changes locally — a separate publish step handles PR creation."
+            SPEC_CONTEXT="Creating new changes against flash1293/action-ralph. Make file changes locally — a separate publish step handles PR creation."
           fi
 
           cat > "$SPEC_FILE" <<SPEC
@@ -359,8 +359,54 @@ jobs:
           cp "$SPEC_FILE" /tmp/agent-output/ralph-spec.md
           cat "${SESSION_DIR}"/run-*.md > /tmp/agent-output/agent-reasoning.md 2>/dev/null || true
 
-      - name: Create baseline marker for change detection
-        run: echo "baseline marker was set before the agent loop"
+      - name: Validate changed files
+        run: |
+          set -euo pipefail
+
+          # Find files changed by the agent (same heuristic as packaging step)
+          CHANGED=$(find . -newer /tmp/ralph-session/prompt-0001.md \
+            -not -path '*/node_modules/*' \
+            -not -path '*/.git/*' \
+            -not -name '*.log' \
+            -not -path '*/target/*' \
+            -not -path '/tmp/*' \
+            -type f 2>/dev/null || true)
+
+          if [ -z "$CHANGED" ]; then
+            echo "No changed files to validate."
+            exit 0
+          fi
+
+          # Run eslint on changed JS/TS files
+          LINT_FILES=$(echo "$CHANGED" | grep -E '\.(ts|tsx|js|jsx)$' || true)
+          if [ -n "$LINT_FILES" ]; then
+            echo "=== Running eslint on changed files ==="
+            echo "$LINT_FILES" | head -50 | xargs node scripts/eslint.js --fix 2>&1 | tee /tmp/ralph-session/lint-output.txt || true
+          fi
+
+          # Identify unique tsconfig.json projects for changed files and run type-check
+          TSCONFIGS=""
+          for f in $CHANGED; do
+            DIR=$(dirname "$f")
+            while [ "$DIR" != "." ] && [ "$DIR" != "/" ]; do
+              if [ -f "${DIR}/tsconfig.json" ]; then
+                TSCONFIGS=$(printf '%s\n%s' "$TSCONFIGS" "${DIR}/tsconfig.json")
+                break
+              fi
+              DIR=$(dirname "$DIR")
+            done
+          done
+
+          UNIQUE_TSCONFIGS=$(echo "$TSCONFIGS" | sort -u | head -3)
+          if [ -n "$UNIQUE_TSCONFIGS" ]; then
+            echo "=== Running type-check on touched projects ==="
+            for tc in $UNIQUE_TSCONFIGS; do
+              echo "Type-checking: $tc"
+              yarn test:type_check --project "$tc" 2>&1 | tee -a /tmp/ralph-session/typecheck-output.txt || true
+            done
+          fi
+
+          echo "Validation complete."
 
       - name: Detect and package changes
         env:
@@ -425,7 +471,7 @@ jobs:
       - name: Checkout target
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || 'main' }}
+          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || 'flash1293/action-ralph' }}
           fetch-depth: 1
           token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository }}
