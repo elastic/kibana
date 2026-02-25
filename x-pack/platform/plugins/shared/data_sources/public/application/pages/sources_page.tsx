@@ -23,6 +23,7 @@ export const SourcesPage: React.FC = () => {
   const { openFlyout: openAddSourceFlyout, flyout: addSourceFlyout } = useAddConnectorFlyout();
 
   const handleAddSource = useCallback(() => {
+    setSelectedDataSourceId(null);
     setShowSelectionFlyout(true);
   }, []);
 
