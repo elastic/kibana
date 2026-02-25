@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { TaskStatus, type TaskResult } from '@kbn/streams-schema';
+import { TaskStatus } from '@kbn/streams-schema';
+import type { TaskResult } from '@kbn/streams-schema';
 import type { StreamsTaskType } from '.';
 import type { TaskClient } from '../task_client';
 import type { FeaturesIdentificationTaskParams } from './features_identification';
@@ -25,26 +26,20 @@ export async function waitForSubtask<TParams extends {} = {}, TPayload extends {
 
   return await new Promise<TaskResult<TPayload>>((resolve, reject) => {
     intervalId = setInterval(async () => {
-      try {
-        const parentTask = await taskClient.get(parentTaskId);
+      const parentTask = await taskClient.get(parentTaskId);
 
-        if (parentTask.status === TaskStatus.BeingCanceled) {
-          await taskClient.cancel(subtaskId);
-        }
+      if (parentTask.status === TaskStatus.BeingCanceled) {
+        await taskClient.cancel(subtaskId);
+      }
 
-        const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
+      const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
-        if (result.status === TaskStatus.Failed) {
-          return reject(
-            new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`)
-          );
-        }
+      if (result.status === TaskStatus.Failed) {
+        reject(new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`));
+      }
 
-        if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
-          resolve(result);
-        }
-      } catch (error) {
-        reject(error);
+      if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
+        resolve(result);
       }
     }, sleepInterval);
   }).finally(() => {
