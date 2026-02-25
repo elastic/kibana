@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasPanelCapabilities } from '@kbn/presentation-publishing';
+import type { HasPanelCapabilities, PublishesIsBorderless } from '@kbn/presentation-publishing';
 import type {
   CanLockHoverActions,
   HasParentApi,
@@ -90,7 +90,8 @@ export interface DefaultPresentationPanelApi
         HasParentApi &
         CanLockHoverActions &
         CanOverrideHoverActions &
-        HasPanelCapabilities
+        HasPanelCapabilities &
+        PublishesIsBorderless
     > {}
 
 export type PresentationPanelProps<

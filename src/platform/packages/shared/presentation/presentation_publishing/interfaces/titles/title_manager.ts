@@ -13,10 +13,13 @@ import { initializeStateManager } from '../../state_manager/state_manager';
 import type { StateComparators, StateManager } from '../../state_manager/types';
 import type { PublishesWritableDescription } from './publishes_description';
 import type { PublishesWritableTitle } from './publishes_title';
+import type { PublishesWritableIsBorderless } from './publishes_is_borderless';
 
 export type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
-export type TitleManager = { api: PublishesWritableTitle & PublishesWritableDescription } & Pick<
+export type TitleManager = {
+  api: PublishesWritableTitle & PublishesWritableDescription & PublishesWritableIsBorderless;
+} & Pick<
   StateManager<SerializedTitles>,
   'anyStateChange$' | 'getLatestState' | 'reinitializeState'
 >;
@@ -25,24 +28,38 @@ const defaultTitlesState: WithAllKeys<SerializedTitles> = {
   title: undefined,
   description: undefined,
   hide_title: undefined,
+  is_borderless: undefined,
 };
 
 export const titleComparators: StateComparators<SerializedTitles> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
   hide_title: (a, b) => Boolean(a) === Boolean(b),
+  is_borderless: (a, b) => Boolean(a) === Boolean(b),
 };
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
   return (
     (state as SerializedTitles)?.title !== undefined ||
     (state as SerializedTitles)?.description !== undefined ||
-    (state as SerializedTitles)?.hide_title !== undefined
+    (state as SerializedTitles)?.hide_title !== undefined ||
+    (state as SerializedTitles)?.is_borderless !== undefined
   );
 };
 
-export interface TitlesApi extends PublishesWritableTitle, PublishesWritableDescription {}
+export interface TitlesApi
+  extends PublishesWritableTitle,
+    PublishesWritableDescription,
+    PublishesWritableIsBorderless {}
 
-export const initializeTitleManager = (initialTitlesState: SerializedTitles): TitleManager => {
-  return initializeStateManager(initialTitlesState, defaultTitlesState);
+export const initializeTitleManager = (
+  initialTitlesState: SerializedTitles,
+  options?: {
+    borderlessByDefault: boolean;
+  }
+): TitleManager => {
+  return initializeStateManager(initialTitlesState, {
+    ...defaultTitlesState,
+    is_borderless: options?.borderlessByDefault ?? defaultTitlesState.is_borderless,
+  });
 };

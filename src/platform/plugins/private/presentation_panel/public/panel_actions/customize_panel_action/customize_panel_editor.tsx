@@ -71,6 +71,7 @@ export const CustomizePanelEditor = ({
   const [timeRange, setTimeRange] = useState(
     api.timeRange$?.value ?? api.parentApi?.timeRange$?.value
   );
+  const [isPanelBorderless, setIsPanelBorderless] = useState(api.isBorderless$?.value);
 
   const initialFocusRef = useRef<HTMLInputElement | null>(null);
 
@@ -109,6 +110,7 @@ export const CustomizePanelEditor = ({
       api.setTitle?.(panelTitle);
     }
     if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
+    if (isPanelBorderless !== api.isBorderless$?.value) api.setIsBorderless?.(isPanelBorderless);
     if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 
     const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
@@ -282,6 +284,25 @@ export const CustomizePanelEditor = ({
     );
   };
 
+  const renderBorderlessToggleComponent = () => {
+    return (
+      <EuiFormRow>
+        <EuiSwitch
+          checked={Boolean(isPanelBorderless)}
+          data-test-subj="customizePanelBorderlessToggle"
+          id="borderlessToggle"
+          label={
+            <FormattedMessage
+              defaultMessage="Make panel borderless"
+              id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.borderlessToggleSwitch"
+            />
+          }
+          onChange={(e) => setIsPanelBorderless(e.target.checked)}
+        />
+      </EuiFormRow>
+    );
+  };
+
   const renderFilterDetails = () => {
     if (!apiPublishesUnifiedSearch(api)) return null;
 
@@ -308,6 +329,7 @@ export const CustomizePanelEditor = ({
       <EuiFlyoutBody>
         <EuiForm data-test-subj="customizePanelForm">
           {renderCustomTitleComponent()}
+          {renderBorderlessToggleComponent()}
           {renderCustomTimeRangeComponent()}
           {renderFilterDetails()}
         </EuiForm>

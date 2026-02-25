@@ -158,9 +158,10 @@ export const PresentationPanelInternal = <
   ...rest
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
-  const [dataLoading, blockingError] = useBatchedOptionalPublishingSubjects(
+  const [dataLoading, blockingError, isBorderless] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading$,
-    api?.blockingError$
+    api?.blockingError$,
+    api?.isBorderless$
   );
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
@@ -203,7 +204,13 @@ export const PresentationPanelInternal = <
   return hidePanelChrome ? (
     InnerPanel
   ) : (
-    <PresentationPanelChrome {...rest} api={api} setDragHandle={setDragHandle}>
+    <PresentationPanelChrome
+      {...rest}
+      api={api}
+      showBorder={isBorderless === undefined ? rest.showBorder : !isBorderless}
+      showShadow={isBorderless ? false : rest.showShadow}
+      setDragHandle={setDragHandle}
+    >
       {InnerPanel}
     </PresentationPanelChrome>
   );
