@@ -18,8 +18,7 @@ import type { User } from '../../../../common';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
 
-const renderWithIntl = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('UsersGridPage', () => {
   let history: ScopedHistory;

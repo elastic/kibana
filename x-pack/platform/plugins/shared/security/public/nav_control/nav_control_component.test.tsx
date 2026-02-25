@@ -47,8 +47,7 @@ const userProfile = {
 };
 const userMenuLinks$ = new BehaviorSubject([]);
 
-const renderWithIntl = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('SecurityNavControl', () => {
   beforeEach(() => {

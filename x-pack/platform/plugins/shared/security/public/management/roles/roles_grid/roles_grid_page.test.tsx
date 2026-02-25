@@ -16,8 +16,7 @@ import { RolesGridPage } from './roles_grid_page';
 import { rolesAPIClientMock } from '../index.mock';
 import type { RolesAPIClient } from '../roles_api_client';
 
-const renderWithIntl = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
@@ -163,7 +162,9 @@ describe('<RolesGridPage />', () => {
 
       expect(screen.getByTestId('edit-role-action-disabled-role')).toBeInTheDocument();
       expect(screen.getByTestId('clone-role-action-disabled-role')).toBeInTheDocument();
-      expect(screen.getByTestId('roleRowDescription-test-role-with-description')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('roleRowDescription-test-role-with-description')
+      ).toBeInTheDocument();
     });
   });
 

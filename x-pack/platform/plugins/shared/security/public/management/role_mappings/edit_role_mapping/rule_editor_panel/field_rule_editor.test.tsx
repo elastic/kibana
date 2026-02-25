@@ -13,8 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { FieldRuleEditor } from './field_rule_editor';
 import { FieldRule } from '../../model';
 
-const renderWithIntl = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 function assertValue(index: number, value: any) {
   const valueField = screen.getByTestId(`fieldRuleEditorValue-${index}`);

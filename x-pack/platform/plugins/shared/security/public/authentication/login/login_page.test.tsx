@@ -6,7 +6,7 @@
  */
 
 import { EuiThemeProvider } from '@elastic/eui';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 
