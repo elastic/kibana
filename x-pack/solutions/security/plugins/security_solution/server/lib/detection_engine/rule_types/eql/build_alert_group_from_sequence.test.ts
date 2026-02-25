@@ -354,6 +354,13 @@ describe('buildAlert', () => {
         const intersection = objectPairIntersection(a, b);
         expect(intersection).toEqual({ user: { emails: ['a@test.co'] } });
       });
+
+      test('should use last-wins when the same path appears via both notations in one object', () => {
+        const a = { 'user.email': 'dot@test.co', user: { email: 'nested@test.co' } };
+        const b = { user: { email: 'nested@test.co' } };
+        const intersection = objectPairIntersection(a, b);
+        expect(intersection).toEqual({ user: { email: 'nested@test.co' } });
+      });
     });
 
     test('should treat numbers and strings as unequal', () => {

@@ -250,33 +250,9 @@ const isPlainObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /**
- * Flattens an object to path-value pairs (paths as string arrays).
- * Dot-notation keys are expanded so 'user.email' and user: { email } yield the same path.
- */
-const flattenToPathValues = (obj: object): [string[], unknown][] => {
-  const output: [string[], unknown][] = [];
-  const stack: [object, string[]][] = [[obj, []]];
-  while (stack.length > 0 && stack.at(-1) != null) {
-    const [o, prefix] = stack.pop() as [object, string[]];
-    for (const [k, v] of Object.entries(o)) {
-      const path = prefix.concat(k.includes('.') ? k.split('.') : [k]);
-      if (isPlainObject(v)) {
-        stack.push([v, path]);
-      } else {
-        output.push([path, v]);
-      }
-    }
-  }
-  return output;
-};
-
-/**
- * Flattens an object to path-value pairs
- * and records which paths
- * came from dot-notation keys.
- * A path is "from dot" when it
- * was produced by expanding a
- * single key that contained '.'.
+ * Flattens an object to path-value pairs and records which paths came from
+ * dot-notation keys. A path is "from dot" when it was produced by expanding
+ * a single key that contained '.'.
  */
 const flattenToPathValuesWithNotation = (
   obj: object
@@ -284,7 +260,7 @@ const flattenToPathValuesWithNotation = (
   const pathValues: [string[], unknown][] = [];
   const dotPaths = new Set<string>();
   const stack: [object, string[]][] = [[obj, []]];
-  while (stack.length > 0 && stack.at(-1) != null) {
+  while (stack.length > 0) {
     const [o, prefix] = stack.pop() as [object, string[]];
     for (const [k, v] of Object.entries(o)) {
       const path = prefix.concat(k.includes('.') ? k.split('.') : [k]);
@@ -303,32 +279,22 @@ const flattenToPathValuesWithNotation = (
 };
 
 /**
+ * Flattens an object to path-value pairs (paths as string arrays).
+ * Dot-notation keys are expanded so 'user.email' and user: { email } yield the same path.
+ */
+const flattenToPathValues = (obj: object): [string[], unknown][] =>
+  flattenToPathValuesWithNotation(obj).pathValues;
+
+/**
  * Builds a nested object from path-value pairs.
  */
 const unflatten = (pathValues: [string[], unknown][]): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const [path, value] of pathValues) {
-    let current = result;
-    for (let i = 0; i < path.length - 1; i++) {
-      const p = path[i];
-      const next = current[p];
-      if (!isPlainObject(next)) {
-        current[p] = {};
-      }
-      current = current[p] as Record<string, unknown>;
-    }
-    current[path[path.length - 1]] = value;
+    setAtPath(result, path, value);
   }
   return result;
 };
-
-/**
- * Expands dot-notation keys into nested object form so that
- * { 'user.email': 'x' } and { user: { email: 'x' } } are equivalent.
- * Output is always in nested form (canonical for intersection result).
- */
-const normalizeToNested = (obj: object): Record<string, unknown> =>
-  unflatten(flattenToPathValues(obj));
 
 /** Result of intersecting two values: either a literal value to set, or a nested pair to process later. */
 type IntersectionResult =
@@ -346,14 +312,10 @@ const intersectValues = (aVal: unknown, bVal: unknown): IntersectionResult | und
   if (aVal === bVal) {
     return { kind: 'value', value: aVal };
   }
-  if (isArray(aVal) && isArray(bVal)) {
-    return { kind: 'value', value: lodashIntersection(aVal, bVal) };
-  }
-  if (isArray(aVal) && !isArray(bVal)) {
-    return { kind: 'value', value: lodashIntersection(aVal, [bVal]) };
-  }
-  if (!isArray(aVal) && isArray(bVal)) {
-    return { kind: 'value', value: lodashIntersection([aVal], bVal) };
+  if (isArray(aVal) || isArray(bVal)) {
+    const arrA = isArray(aVal) ? aVal : [aVal];
+    const arrB = isArray(bVal) ? bVal : [bVal];
+    return { kind: 'value', value: lodashIntersection(arrA, arrB) };
   }
   return undefined;
 };
@@ -440,10 +402,10 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
   if (a === undefined || b === undefined) {
     return undefined;
   }
-  const { dotPaths: aDotPaths } = flattenToPathValuesWithNotation(a);
-  const { dotPaths: bDotPaths } = flattenToPathValuesWithNotation(b);
-  const aNorm = normalizeToNested(a) as Record<string, unknown>;
-  const bNorm = normalizeToNested(b) as Record<string, unknown>;
+  const { pathValues: aPathValues, dotPaths: aDotPaths } = flattenToPathValuesWithNotation(a);
+  const { pathValues: bPathValues, dotPaths: bDotPaths } = flattenToPathValuesWithNotation(b);
+  const aNorm = unflatten(aPathValues);
+  const bNorm = unflatten(bPathValues);
   const intersectionNested: Record<string, unknown> = {};
   const stack: [Record<string, unknown>, Record<string, unknown>, Record<string, unknown>][] = [
     [intersectionNested, aNorm, bNorm],
