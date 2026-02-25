@@ -11,11 +11,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { getEntityDefinition } from '../../common/domain/definitions/registry';
-import type {
-  EntityType,
-  ManagedEntityDefinition,
-} from '../../common/domain/definitions/entity_schema';
+import type { EntityType } from '../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
@@ -49,6 +45,8 @@ import {
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import type { LogsExtractionClient } from './logs_extraction_client';
+import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
 
 interface AssetManagerDependencies {
