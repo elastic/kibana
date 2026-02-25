@@ -39,6 +39,8 @@ export function useQueriesApi(): QueriesApi {
         });
       },
       upsertQuery: async ({ query, streamName }: { query: StreamQuery; streamName: string }) => {
+        const { id, ...body } = query;
+
         await streamsRepositoryClient.fetch(
           'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
           {

@@ -36,7 +36,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import { StreamsESQLEditor } from '../../../esql_query_editor';
 import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { InfoPanel } from '../../../info_panel';
@@ -304,24 +303,13 @@ export function QueryDetailsFlyout({
                     disabled={isSaving}
                   />
                 </EuiFormRow>
-                <EuiFormRow label={QUERY_LABEL}>
-                  {isNativeEsqlQuery(item.query) ? (
-                    <StreamsESQLEditor
-                      query={{ esql: query }}
-                      onTextLangQueryChange={(newQuery) => setQuery(newQuery.esql)}
-                      onTextLangQuerySubmit={async () => {}}
-                      dataTestSubj="queriesTableQueryDetailsFlyoutQueryInput"
-                      isDisabled={isSaving}
-                    />
-                  ) : (
-                    <EuiFieldText
-                      data-test-subj="queriesTableQueryDetailsFlyoutQueryInput"
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      disabled={isSaving}
-                    />
-                  )}
-                </EuiFormRow>
+                <StreamsESQLEditor
+                  query={{ esql: query }}
+                  onTextLangQueryChange={(newQuery) => setQuery(newQuery.esql)}
+                  onTextLangQuerySubmit={async () => {}}
+                  dataTestSubj="queriesTableQueryDetailsFlyoutQueryInput"
+                  isDisabled={isSaving}
+                />
                 <EuiFormRow label={SEVERITY_LABEL}>
                   <SeveritySelector
                     severityScore={severityScore}
@@ -382,17 +370,7 @@ export function QueryDetailsFlyout({
 }
 
 function getQueryInputValue(item: SignificantEventItem) {
-  if (isNativeEsqlQuery(item.query)) {
-    return item.query.esql.query;
-  }
-
-  if (!item.query.kql?.query) {
-    return '';
-  }
-
-  return typeof item.query.kql.query === 'string'
-    ? item.query.kql.query
-    : JSON.stringify(item.query.kql.query);
+  return item.query.esql?.query ?? '';
 }
 
 function getDisplayQueryValue(item: SignificantEventItem) {
