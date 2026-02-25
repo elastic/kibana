@@ -7,7 +7,7 @@
 
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { collectValues as collect, oldestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
@@ -28,7 +28,9 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   entityTypeFallback: 'Identity',
   indexPatterns: [],
   fields: [
+    newestValue({ destination: 'entity.name', source: 'user.name' }),
     oldestValue({ source: 'user.entity.id' }),
+
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),
     collect({ source: 'user.name' }),
@@ -55,27 +57,27 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'host.name' }),
 
     collect({
-      source: `user.entity.relationships.Accesses_frequently`,
-      destination: 'entity.relationships.Accesses_frequently',
+      source: `user.entity.relationships.accesses_frequently`,
+      destination: 'entity.relationships.accesses_frequently',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: `user.entity.relationships.Owns`,
-      destination: 'entity.relationships.Owns',
+      source: `user.entity.relationships.owns`,
+      destination: 'entity.relationships.owns',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
 
     collect({
-      source: `user.entity.relationships.Supervises`,
-      destination: 'entity.relationships.Supervises',
+      source: `user.entity.relationships.supervises`,
+      destination: 'entity.relationships.supervises',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: `user.entity.relationships.Supervised_by`,
-      destination: 'entity.relationships.Supervised_by',
+      source: `user.entity.relationships.supervised_by`,
+      destination: 'entity.relationships.supervised_by',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),

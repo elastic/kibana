@@ -11,6 +11,7 @@ import { editableToolTypes } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
+import { TOOL_USED_BY_AGENTS_ERROR_CODE } from '../../common/http_api/tools';
 import type {
   ListToolsResponse,
   GetToolResponse,
@@ -23,6 +24,7 @@ import type {
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import { asError } from '../utils/as_error';
 
 export function registerToolsRoutes({
   router,
@@ -176,17 +178,30 @@ export function registerToolsRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, auditLogService } = getInternalServices();
         const createRequest: CreateToolPayload = request.body;
         const registry = await toolService.getRegistry({ request });
-        const tool = await registry.create(createRequest);
-        analyticsService?.reportToolCreated({
-          toolId: createRequest.id,
-          toolType: createRequest.type,
-        });
-        return response.ok<CreateToolResponse>({
-          body: await toDescriptorWithSchema(tool),
-        });
+        try {
+          const tool = await registry.create(createRequest);
+          analyticsService?.reportToolCreated({
+            toolId: createRequest.id,
+            toolType: createRequest.type,
+          });
+          auditLogService.logToolCreated(request, {
+            toolId: tool.id,
+            toolType: tool.type,
+          });
+          return response.ok<CreateToolResponse>({
+            body: await toDescriptorWithSchema(tool),
+          });
+        } catch (error) {
+          auditLogService.logToolCreated(request, {
+            toolId: createRequest.id,
+            toolType: createRequest.type,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -251,14 +266,26 @@ export function registerToolsRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, auditLogService } = getInternalServices();
         const { toolId } = request.params;
         const update: UpdateToolPayload = request.body;
         const registry = await toolService.getRegistry({ request });
-        const tool = await registry.update(toolId, update);
-        return response.ok<UpdateToolResponse>({
-          body: await toDescriptorWithSchema(tool),
-        });
+        try {
+          const tool = await registry.update(toolId, update);
+          auditLogService.logToolUpdated(request, {
+            toolId: tool.id,
+            toolType: tool.type,
+          });
+          return response.ok<UpdateToolResponse>({
+            body: await toDescriptorWithSchema(tool),
+          });
+        } catch (error) {
+          auditLogService.logToolUpdated(request, {
+            toolId,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -290,6 +317,15 @@ export function registerToolsRoutes({
                 meta: { description: 'The unique identifier of the tool to delete.' },
               }),
             }),
+            query: schema.object({
+              force: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'If true, removes the tool from agents that use it and then deletes it. If false and any agent uses the tool, the request returns 409 Conflict with the list of agents.',
+                },
+              }),
+            }),
           },
         },
         options: {
@@ -298,12 +334,58 @@ export function registerToolsRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { toolId } = request.params;
-        const { tools: toolService } = getInternalServices();
+        const { force = false } = request.query ?? {};
+        const {
+          tools: toolService,
+          agents: agentsService,
+          auditLogService,
+        } = getInternalServices();
+
+        if (!force) {
+          const { agents } = await agentsService.getAgentsUsingTools({
+            request,
+            toolIds: [toolId],
+          });
+          if (agents.length > 0) {
+            return response.conflict({
+              body: {
+                message:
+                  'Tool is used by one or more agents. Use force=true to remove it from agents and delete.',
+                attributes: {
+                  code: TOOL_USED_BY_AGENTS_ERROR_CODE,
+                  agents,
+                },
+              },
+            });
+          }
+        } else {
+          await agentsService.removeToolRefsFromAgents({
+            request,
+            toolIds: [toolId],
+          });
+        }
+
         const registry = await toolService.getRegistry({ request });
-        const success = await registry.delete(toolId);
-        return response.ok<DeleteToolResponse>({
-          body: { success },
-        });
+        try {
+          const success = await registry.delete(toolId);
+          if (success) {
+            auditLogService.logToolDeleted(request, { toolId });
+          } else {
+            auditLogService.logToolDeleted(request, {
+              toolId,
+              error: new Error('Tool delete returned false'),
+            });
+          }
+          return response.ok<DeleteToolResponse>({
+            body: { success },
+          });
+        } catch (error) {
+          auditLogService.logToolDeleted(request, {
+            toolId,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 

@@ -16,14 +16,17 @@ import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
-import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
+import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
+import { AuditLogService } from '../audit';
+import { createAgentExecutionService, createTaskHandler } from './execution';
 
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
   attachments: AttachmentService;
+  hooks: HooksService;
   skills: SkillService;
 }
 
@@ -37,6 +40,7 @@ export class ServiceManager {
       tools: new ToolsService(),
       agents: new AgentsService(),
       attachments: createAttachmentService(),
+      hooks: new HooksService(),
       skills: createSkillService(),
     };
 
@@ -44,6 +48,7 @@ export class ServiceManager {
       tools: this.services.tools.setup({ logger, workflowsManagement }),
       agents: this.services.agents.setup({ logger }),
       attachments: this.services.attachments.setup(),
+      hooks: this.services.hooks.setup({ logger }),
       skills: this.services.skills.setup(),
     };
 
@@ -58,7 +63,9 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    featureFlags,
     actions,
+    taskManager,
     trackingService,
     analyticsService,
   }: ServicesStartDeps): InternalStartServices {
@@ -97,6 +104,8 @@ export class ServiceManager {
       toolsService: tools,
     });
 
+    const hooks = this.services.hooks.start();
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -111,6 +120,7 @@ export class ServiceManager {
       attachmentsService: attachments,
       skillServiceStart: skillsServiceStart,
       trackingService,
+      hooks,
     });
     runner = runnerFactory.getRunner();
 
@@ -121,11 +131,33 @@ export class ServiceManager {
       spaces,
     });
 
-    const chat = createChatService({
-      logger: logger.get('chat'),
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
+    });
+
+    const taskHandler = createTaskHandler({
+      logger: logger.get('task-handler'),
+      elasticsearch,
       inference,
       conversationService: conversations,
       agentService: agents,
+      uiSettings,
+      savedObjects,
+      spaces,
+      trackingService,
+      analyticsService,
+    });
+
+    const execution = createAgentExecutionService({
+      logger: logger.get('execution'),
+      elasticsearch,
+      taskManager,
+      spaces,
+      inference,
+      conversationService: conversations,
+      agentService: agents,
+      attachmentsService: attachments,
       uiSettings,
       savedObjects,
       trackingService,
@@ -139,7 +171,14 @@ export class ServiceManager {
       skills: skillsServiceStart,
       conversations,
       runnerFactory,
-      chat,
+      auditLogService,
+      execution,
+      taskHandler,
+      hooks,
+      spaces,
+      featureFlags,
+      uiSettings,
+      savedObjects,
     };
 
     return this.internalStart;

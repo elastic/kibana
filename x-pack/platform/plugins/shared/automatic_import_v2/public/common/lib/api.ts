@@ -9,6 +9,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type {
   CreateAutoImportIntegrationResponse,
   GetAutoImportIntegrationResponse,
+  GetAllAutoImportIntegrationsResponse,
 } from '../../../common/model/api/integrations/integration.gen';
 
 import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
@@ -29,12 +30,26 @@ export interface RequestDeps {
 }
 
 export interface EpmPackageResponse {
-  items: [{ id: string; type: string }];
+  items: Array<{ id: string; type: string }>;
   _meta?: {
     install_source: string;
     name: string;
   };
 }
+
+export const runInstallPackage = async (
+  zipFile: Blob,
+  { http, abortSignal }: RequestDeps
+): Promise<EpmPackageResponse> =>
+  http.post<EpmPackageResponse>(FLEET_PACKAGES_PATH, {
+    headers: {
+      ...fleetDefaultHeaders,
+      Accept: 'application/zip',
+      'Content-Type': 'application/zip',
+    },
+    body: zipFile,
+    signal: abortSignal,
+  });
 
 export const getInstalledPackages = async ({
   http,
@@ -83,6 +98,15 @@ export const getIntegrationById = async ({
     }
   );
 
+export const getAllIntegrations = async ({
+  http,
+  abortSignal,
+}: RequestDeps): Promise<GetAllAutoImportIntegrationsResponse> =>
+  http.get<GetAllAutoImportIntegrationsResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
+    version: '1',
+    signal: abortSignal,
+  });
+
 export interface UploadSamplesRequest {
   integrationId: string;
   dataStreamId: string;
@@ -125,5 +149,59 @@ export const deleteDataStream = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}`,
     {
       version: '1',
+    }
+  );
+
+export interface ReanalyzeDataStreamRequest {
+  integrationId: string;
+  dataStreamId: string;
+  connectorId: string;
+}
+
+export interface ReanalyzeDataStreamResponse {
+  success: boolean;
+}
+
+export const reanalyzeDataStream = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  connectorId,
+}: RequestDeps & ReanalyzeDataStreamRequest): Promise<ReanalyzeDataStreamResponse> =>
+  http.put<ReanalyzeDataStreamResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/reanalyze`,
+    {
+      version: '1',
+      body: JSON.stringify({ connectorId }),
+      signal: abortSignal,
+    }
+  );
+
+export interface GetDataStreamResultsRequest {
+  integrationId: string;
+  dataStreamId: string;
+}
+
+export interface GetDataStreamResultsResponse {
+  ingest_pipeline: Record<string, unknown>;
+  results: Array<Record<string, unknown>>;
+}
+
+export const getDataStreamResults = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+}: RequestDeps & GetDataStreamResultsRequest): Promise<GetDataStreamResultsResponse> =>
+  http.get<GetDataStreamResultsResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/results`,
+    {
+      version: '1',
+      signal: abortSignal,
     }
   );

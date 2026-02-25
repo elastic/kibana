@@ -52,7 +52,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds option to edit report schedules [#241928]({{kib-pull}}241928).
 * Improves UI for specifying additional fields for IBM Resilient action [#238869]({{kib-pull}}238869).
 * Makes Agent ID the default observables type [#238533]({{kib-pull}}238533).
-* Adds `kibana.alert.index_pattern` to all alerts [#239450]({{kib-pull}}239450).
+* Adds `kibana.alert.index_pattern` to all Stack alerts. This change doesn't affect detection alerts [#239450]({{kib-pull}}239450).
 
 **Connectivity**:
 * Elastic will regularly be adding new AI models from 9.3 onwards which will appear as pre-configured AI connectors in  {{kib}}. Refer to [the Elastic Inference Service page](docs-content://explore-analyze/elastic-inference/eis.md) for more details.

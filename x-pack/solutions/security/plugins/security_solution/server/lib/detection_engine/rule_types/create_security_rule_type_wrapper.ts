@@ -218,7 +218,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const refresh = isPreview ? false : true;
 
-          ruleExecutionLogger.debug(`Starting Security Rule execution (interval: ${interval})`);
+          ruleExecutionLogger.debug(`Starting execution with interval: ${interval}`);
 
           await ruleExecutionLogger.logStatusChange({
             newStatus: RuleExecutionStatusEnum.running,
@@ -280,13 +280,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Data View not found ${exc}`,
+                  message: `Data view is not found.\nError: ${exc}`,
                   userError: true,
                 });
               } else {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Check for indices to search failed ${exc}`,
+                  message: `Check for indices to search failed.\nError: ${exc}`,
                 });
               }
 
@@ -514,6 +514,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
+                  totalEventsFound:
+                    (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
                   errors: result.errors.concat(runResult.errors),
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
@@ -545,7 +547,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
 
+            if (result.totalEventsFound != null) {
+              ruleExecutionLogger.info(`Found matching events: ${result.totalEventsFound}`);
+            }
+            const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
+            if (suppressedAlertsCount > 0) {
+              ruleExecutionLogger.info(`Alerts suppressed: ${suppressedAlertsCount}`);
+            }
+
             const createdSignalsCount = result.createdSignals.length;
+
+            if (result.totalEventsFound != null && result.totalEventsFound > 0) {
+              const unaccountedEvents =
+                result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
+              if (unaccountedEvents > 0) {
+                ruleExecutionLogger.info(
+                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions. This number doesn't include suppressed alerts.`
+                );
+              }
+            }
+
+            ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
@@ -591,11 +613,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
-                `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
+                `Indexed ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
                   spaceId
-                )} ${
+                )}".${
                   !isEmpty(tuples)
-                    ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    ? ` Searched between date ranges: ${JSON.stringify(tuples, null, 2)}.`
                     : ''
                 }`
               );
@@ -615,7 +637,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum.failed,
-              message: `An error occurred during rule execution: message: "${errorMessage}"`,
+              message: `An error occurred during rule execution. ${errorMessage}`,
               userError: checkErrorDetails(errorMessage).isUserError,
               metrics: {
                 searchDurations: result.searchAfterTimes,

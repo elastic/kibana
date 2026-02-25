@@ -67,6 +67,9 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
       fields.push(processor.from);
       if (processor.to) fields.push(processor.to);
       break;
+    case 'redact':
+      fields.push(processor.from);
+      break;
     case 'math':
       fields.push(processor.to);
       fields.push(...extractFieldsFromMathExpression(processor.expression));
@@ -86,6 +89,13 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
       processor.from.forEach((from) => {
         if (from.type === 'field') fields.push(from.value);
       });
+      break;
+    case 'network_direction':
+      fields.push(processor.source_ip, processor.destination_ip);
+      if (processor.target_field) fields.push(processor.target_field);
+      if ('internal_networks_field' in processor && processor.internal_networks_field) {
+        fields.push(processor.internal_networks_field);
+      }
       break;
     case 'drop_document':
     case 'manual_ingest_pipeline':

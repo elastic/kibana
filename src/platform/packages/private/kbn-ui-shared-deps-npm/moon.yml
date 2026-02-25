@@ -20,11 +20,12 @@ project:
 dependsOn:
   - '@kbn/repo-info'
 tags:
-  - is-webpack-built
+  - shared-common
   - package
   - prod
   - group-platform
   - private
+  - is-webpack-built
 fileGroups:
   src:
     - '**/*.ts'

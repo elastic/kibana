@@ -10,7 +10,8 @@ export type RuleDetailsTabs =
   | 'rule_exceptions'
   | 'endpoint_exceptions'
   | 'execution_results'
-  | 'history';
+  | 'history'
+  | 'execution_events';
 
 export function ruleDetailsUrl(ruleId: string, tab?: RuleDetailsTabs): string {
   return `/app/security/rules/id/${ruleId}${tab ? `/${tab}` : ''}`;

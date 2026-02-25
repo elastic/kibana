@@ -32,7 +32,7 @@ describe('ESQL routes', () => {
 
     expect(item1).toMatchObject({
       name: 'lookup_index1',
-      mode: 'lookup',
+      mode: 'Lookup',
       aliases: [],
     });
 
@@ -40,7 +40,7 @@ describe('ESQL routes', () => {
 
     expect(item2).toMatchObject({
       name: 'lookup_index2',
-      mode: 'lookup',
+      mode: 'Lookup',
       aliases: ['lookup_index2_alias1', 'lookup_index2_alias2'],
     });
   });
@@ -54,7 +54,7 @@ describe('ESQL routes', () => {
 
     expect(item1).toMatchObject({
       name: 'ts_index1',
-      mode: 'time_series',
+      mode: 'Timeseries',
       aliases: [],
     });
 
@@ -62,7 +62,7 @@ describe('ESQL routes', () => {
 
     expect(item2).toMatchObject({
       name: 'ts_index2',
-      mode: 'time_series',
+      mode: 'Timeseries',
       aliases: ['ts_index2_alias1', 'ts_index2_alias2'],
     });
   });
@@ -79,6 +79,20 @@ describe('ESQL routes', () => {
         expect.objectContaining({ name: 'ts_index2', type: 'Timeseries' }),
       ])
     );
+  });
+
+  it('can load ES|QL views (GET /internal/esql/views)', async () => {
+    const url = '/internal/esql/views';
+    const result = await testbed.GET(url).send().expect(200);
+
+    expect(result.body).toHaveProperty('views');
+    expect(Array.isArray(result.body.views)).toBe(true);
+    result.body.views.forEach((view: { name: string; query: string }) => {
+      expect(view).toHaveProperty('name');
+      expect(view).toHaveProperty('query');
+      expect(typeof view.name).toBe('string');
+      expect(typeof view.query).toBe('string');
+    });
   });
 
   it('can load the inference endpoints by type', async () => {
