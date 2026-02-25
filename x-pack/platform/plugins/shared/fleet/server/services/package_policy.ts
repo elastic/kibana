@@ -3885,9 +3885,11 @@ export function updatePackageInputs(
     if (originalInput === undefined) {
       // Handle input-level migration: the new input explicitly declares it replaces
       // an old input type. This merges input-level vars and enables the new input.
+      // Skip migration entirely if the new input itself is deprecated — a deprecated
+      // input should never be auto-enabled or have user configuration carried into it.
 
       let originalInputToMigrate: NewPackagePolicyInput | undefined;
-      if (update.migrate_from !== undefined) {
+      if (update.migrate_from !== undefined && !update.deprecated) {
         originalInputToMigrate = basePackagePolicy.inputs.find(
           (i) => i.type === update.migrate_from
         );
@@ -3903,8 +3905,8 @@ export function updatePackageInputs(
         }
       }
 
-      // Handle stream-level migration.
-      if (update.streams) {
+      // Handle stream-level migration (skipped when the new input is deprecated).
+      if (update.streams && !update.deprecated) {
         const streamMigrateFromCounters: Record<string, number> = {};
         let streamMigrationOccurred = false;
         // Track the first old input encountered during stream-level migration so we can

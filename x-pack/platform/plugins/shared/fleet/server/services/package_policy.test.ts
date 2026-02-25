@@ -8042,6 +8042,24 @@ describe('Package policy service', () => {
         expect(celInput?.enabled).toBe(false);
       });
 
+      it('does not migrate vars or enable the new input when it is deprecated (input-level migrate_from)', () => {
+        const deprecationInfo = { description: 'Use cel instead', replaced_by: { type: 'cel' } };
+        const result = updatePackageInputs(
+          makeBasePolicy(), // httpjson input with user-configured vars
+          makeCelPackageInfo(),
+          // cel input is deprecated — migration should be skipped entirely
+          makeCelInputsOverride({ deprecated: deprecationInfo }),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        expect(celInput).toBeDefined();
+        // Vars should NOT be carried over from the old httpjson input
+        expect(celInput?.vars?.url.value).toBe('http://new-default.com');
+        // The new input should not have been enabled by the migration logic
+        expect(celInput?.enabled).toBe(false);
+      });
+
       it('does not enable the new input for limited packages even when migration succeeds', () => {
         const limitedPackageInfo = makeCelPackageInfo();
         // Make it a limited (single-policy) package
@@ -8227,6 +8245,46 @@ describe('Package policy service', () => {
 
           // Stream vars should still be migrated even though the input is disabled
           expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/var/log/app.log');
+        });
+
+        it('should not migrate stream vars or enable the input when the new input is deprecated', () => {
+          const { policyWithHttpjsonOnly, celPackageInfoNoInputMigration } =
+            makeStreamOnlyMigrationFixtures(true);
+
+          // Mark the new cel input as deprecated
+          const deprecatedCelOverride: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              deprecated: { description: 'Use filestream instead' },
+              vars: {},
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { paths: { type: 'text', value: '/default/path.log' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            policyWithHttpjsonOnly,
+            celPackageInfoNoInputMigration,
+            deprecatedCelOverride,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput).toBeDefined();
+
+          // Deprecated input should not be enabled by the migration logic
+          expect(celInput?.enabled).toBe(false);
+
+          // Stream vars should NOT be carried over from the old httpjson stream
+          expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/default/path.log');
         });
       });
     });

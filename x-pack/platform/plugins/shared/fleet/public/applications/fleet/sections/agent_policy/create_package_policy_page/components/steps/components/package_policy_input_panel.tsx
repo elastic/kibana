@@ -228,7 +228,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                       </h3>
                     </EuiTitle>
                   </EuiFlexItem>
-                  {isUpgrade && packagePolicyInput.migrate_from && (
+                  {isUpgrade && packagePolicyInput.migrate_from && !isDeprecatedInput && (
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
                         type="info"
