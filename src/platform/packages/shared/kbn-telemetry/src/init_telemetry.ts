@@ -72,7 +72,7 @@ export const initTelemetry = (
   if (telemetryConfig.enabled) {
     if (telemetryConfig.tracing.enabled) {
       initTracing({ resource, tracingConfig: telemetryConfig.tracing });
-      maybeInitAutoInstrumentations();
+      maybeInitAutoInstrumentations(telemetryConfig.tracing.auto_instrumentations);
     }
 
     if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {

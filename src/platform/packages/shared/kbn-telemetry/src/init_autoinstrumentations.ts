@@ -11,8 +11,9 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { HapiInstrumentation } from '@opentelemetry/instrumentation-hapi';
+import type { AutoInstrumentationsConfig } from '@kbn/tracing-config';
 
-export function maybeInitAutoInstrumentations() {
+export function maybeInitAutoInstrumentations({ enabled }: AutoInstrumentationsConfig) {
   /**
    * Auto-instrumentation is intentionally opt-in.
    *
@@ -20,7 +21,7 @@ export function maybeInitAutoInstrumentations() {
    * instrumentation for tracing. For evals, enabling this provides request-scoped context
    * propagation (so W3C baggage like `kibana.evals.run_id` can be extracted and attached).
    */
-  if (process.env.KBN_OTEL_AUTO_INSTRUMENTATIONS === 'true') {
+  if (enabled) {
     // Register OpenTelemetry auto-instrumentations once per process.
     // NOTE: these instrumentations must not be enabled alongside Elastic APM.
     const INSTRUMENTATIONS_REGISTERED = Symbol.for('kbn.tracing.instrumentations_registered');

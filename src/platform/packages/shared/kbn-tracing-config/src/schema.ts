@@ -22,6 +22,8 @@ const otlpExportConfigSchema: Type<OTLPExportConfig> = schema.object({
   url: schema.string(),
   headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   scheduled_delay: scheduledDelay,
+  max_export_batch_size: schema.number({ defaultValue: 512 }),
+  max_queue_size: schema.number({ defaultValue: 2048 }),
 });
 
 const tracingExportConfigSchema: Type<TracingExporterConfig> = schema.oneOf([
@@ -45,5 +47,10 @@ export const tracingConfigSchema: Type<TracingConfig> = schema.object({
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),
   exporters: schema.oneOf([tracingExportConfigSchema, schema.arrayOf(tracingExportConfigSchema)], {
     defaultValue: [],
+  }),
+  auto_instrumentations: schema.object({
+    enabled: schema.boolean({
+      defaultValue: process.env.KBN_OTEL_AUTO_INSTRUMENTATIONS === 'true',
+    }),
   }),
 });
