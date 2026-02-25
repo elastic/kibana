@@ -46,18 +46,19 @@ jobs:
       github.event_name == 'workflow_dispatch'
       || (
         github.event_name == 'issue_comment'
-        && contains(github.event.comment.body, '/action-ralph')
+        && (contains(github.event.comment.body, '/action-ralph') || contains(github.event.comment.body, '/review-ralph'))
         && github.event.comment.user.login == 'flash1293'
       )
       || (
         github.event_name == 'pull_request_review_comment'
-        && contains(github.event.comment.body, '/action-ralph')
+        && (contains(github.event.comment.body, '/action-ralph') || contains(github.event.comment.body, '/review-ralph'))
         && github.event.comment.user.login == 'flash1293'
       )
     permissions:
       contents: read
       pull-requests: read
     outputs:
+      command_mode: ${{ steps.context.outputs.command_mode }}
       is_pr: ${{ steps.context.outputs.is_pr }}
       is_fork_pr: ${{ steps.context.outputs.is_fork_pr }}
       pr_number: ${{ steps.context.outputs.pr_number }}
@@ -72,6 +73,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          COMMAND_MODE="action"
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            if printf '%s' "$COMMENT_BODY" | grep -q '/review-ralph'; then
+              COMMAND_MODE="review"
+            fi
+          fi
+          echo "command_mode=${COMMAND_MODE}" >> "$GITHUB_OUTPUT"
           echo "default_branch=${{ github.event.repository.default_branch }}" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
             echo "is_pr=true" >> "$GITHUB_OUTPUT"
@@ -123,6 +132,7 @@ jobs:
   sandbox:
     name: "Phase B: Agent Loop"
     needs: prepare
+    if: needs.prepare.outputs.command_mode != 'review'
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
     timeout-minutes: 120
     permissions: {}
@@ -141,6 +151,7 @@ jobs:
           INPUT_MODEL: ${{ inputs.model }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
           COMMENT_PATH: ${{ github.event.comment.path }}
           COMMENT_LINE: ${{ github.event.comment.line }}
           COMMENT_START_LINE: ${{ github.event.comment.start_line }}
@@ -165,20 +176,20 @@ jobs:
             fi
           else
             PROMPT_TEXT=$(printf '%s' "$COMMENT_BODY" | sed -n 's|.*/action-ralph\s*||p' | head -1)
+            TARGET_ISSUE_NUMBER="${ISSUE_NUMBER:-$PR_NUMBER}"
+            ISSUE_COMMENTS_JSON=$(gh api "repos/${REPO}/issues/${TARGET_ISSUE_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
+            ISSUE_COMMENTS_SUMMARY=$(printf '%s' "$ISSUE_COMMENTS_JSON" | jq -r '
+              if length == 0 then
+                "(none)"
+              else
+                .[] | "- @" + .user.login + " (" + (.created_at // "unknown") + "): " +
+                ((.body // "") | gsub("\\r?\\n"; " ") | .[0:500])
+              end
+            ' 2>/dev/null || echo "(unavailable)")
 
             if [ "$IS_PR" = "true" ]; then
               # Collect recent PR conversation context.
-              ISSUE_COMMENTS_JSON=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
               REVIEW_COMMENTS_JSON=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
-
-              ISSUE_COMMENTS_SUMMARY=$(printf '%s' "$ISSUE_COMMENTS_JSON" | jq -r '
-                if length == 0 then
-                  "(none)"
-                else
-                  .[] | "- @" + .user.login + " (" + (.created_at // "unknown") + "): " +
-                  ((.body // "") | gsub("\\r?\\n"; " ") | .[0:500])
-                end
-              ' 2>/dev/null || echo "(unavailable)")
 
               REVIEW_COMMENTS_SUMMARY=$(printf '%s' "$REVIEW_COMMENTS_JSON" | jq -r '
                 if length == 0 then
@@ -221,8 +232,12 @@ jobs:
             else
               {
                 echo 'task<<RALPH_EOF'
-                echo "Issue context:"
+                echo "Original issue description:"
                 printf '%s\n' "$ISSUE_BODY"
+                echo ""
+                echo "Recent issue comments:"
+                printf '%s\n' "$ISSUE_COMMENTS_SUMMARY" | head -c 15000
+                echo ""
                 echo ""
                 echo "Task:"
                 printf '%s\n' "$PROMPT_TEXT"
@@ -367,6 +382,9 @@ jobs:
 
           ## PR title
           (set by agent before done; concise and descriptive)
+
+          ## PR summary
+          - (set by agent before done; 2-4 concise bullets for reviewers)
 
           ## Context
           ${SPEC_CONTEXT}
@@ -520,6 +538,8 @@ jobs:
           CHANGED_FILE="$AGENT_OUTPUT_DIR/changed-files.txt" \
           SPEC_FILE="$AGENT_OUTPUT_DIR/ralph-spec.md" \
           PR_TITLE_FILE="$AGENT_OUTPUT_DIR/pr-title.txt" \
+          PR_SUMMARY_FILE="$AGENT_OUTPUT_DIR/pr-summary.md" \
+          PROMPT_SUMMARY_FILE="$AGENT_OUTPUT_DIR/prompt-summary.txt" \
           TASK_PROMPT="$TASK_PROMPT" \
           python3 - <<'PY'
           import os
@@ -530,6 +550,8 @@ jobs:
           changed_file = Path(os.environ['CHANGED_FILE'])
           spec_file = Path(os.environ['SPEC_FILE'])
           pr_title_file = Path(os.environ['PR_TITLE_FILE'])
+          pr_summary_file = Path(os.environ['PR_SUMMARY_FILE'])
+          prompt_summary_file = Path(os.environ['PROMPT_SUMMARY_FILE'])
           task_prompt = os.environ.get('TASK_PROMPT', '')
 
           exclude_patterns = [
@@ -563,29 +585,55 @@ jobs:
 
           changed_file.write_text(''.join(f'{p}\n' for p in kept), encoding='utf-8')
 
-          # Parse "## PR title" from final spec.
+          # Parse "## PR title" and "## PR summary" from final spec.
           pr_title = ''
+          pr_summary_lines = []
           if spec_file.exists():
               lines = spec_file.read_text(encoding='utf-8', errors='ignore').splitlines()
-              in_title = False
+              section = ''
               for line in lines:
                   if re.match(r'^##\s+PR title\s*$', line):
-                      in_title = True
+                      section = 'title'
                       continue
-                  if in_title and re.match(r'^##\s+', line):
-                      break
-                  if in_title:
+                  if re.match(r'^##\s+PR summary\s*$', line):
+                      section = 'summary'
+                      continue
+                  if re.match(r'^##\s+', line):
+                      section = ''
+                      continue
+
+                  if section == 'title':
                       value = line.strip()
                       if value:
                           pr_title = value
-                          break
+                          section = ''
+                          continue
+                  elif section == 'summary':
+                      value = line.rstrip()
+                      if value.strip():
+                          pr_summary_lines.append(value)
 
-          placeholder = '(set by agent before done; concise and descriptive)'
-          if (not pr_title) or (pr_title == placeholder):
+          title_placeholder = '(set by agent before done; concise and descriptive)'
+          summary_placeholder = '(set by agent before done; 2-4 concise bullets for reviewers)'
+          if (not pr_title) or (pr_title == title_placeholder):
               compact = re.sub(r'\s+', ' ', task_prompt).strip()[:72]
               pr_title = f'AI: {compact}' if compact else 'AI: Automated change'
 
+          cleaned_summary = []
+          for line in pr_summary_lines:
+              if summary_placeholder in line:
+                  continue
+              cleaned_summary.append(line)
+          if not cleaned_summary:
+              compact = re.sub(r'\s+', ' ', task_prompt).strip()
+              if compact:
+                  cleaned_summary = [f'- {compact[:180]}']
+              else:
+                  cleaned_summary = ['- Implement requested changes and validations.']
+
           pr_title_file.write_text(pr_title, encoding='utf-8')
+          pr_summary_file.write_text('\n'.join(cleaned_summary) + '\n', encoding='utf-8')
+          prompt_summary_file.write_text(pr_title[:180], encoding='utf-8')
           PY
 
           FILE_COUNT=$(wc -l < "$AGENT_OUTPUT_DIR/changed-files.txt" | tr -d ' ')
@@ -601,8 +649,6 @@ jobs:
           tar czf "$AGENT_OUTPUT_DIR/agent-changes.tar.gz" \
             -T "$AGENT_OUTPUT_DIR/changed-files.txt"
 
-          printf '%s' "$TASK_PROMPT" | head -c 200 > "$AGENT_OUTPUT_DIR/prompt-summary.txt"
-
       - name: Upload agent output
         uses: actions/upload-artifact@v4
         with:
@@ -617,7 +663,7 @@ jobs:
   publish:
     name: "Phase C: Publish"
     needs: [prepare, sandbox]
-    if: needs.sandbox.result == 'success'
+    if: needs.prepare.outputs.command_mode != 'review' && needs.sandbox.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -663,10 +709,11 @@ jobs:
         run: |
           set -euo pipefail
           PROMPT_SUMMARY=$(cat /tmp/agent-output/prompt-summary.txt 2>/dev/null || echo "AI-generated changes")
+          PR_TITLE=$(cat /tmp/agent-output/pr-title.txt 2>/dev/null || echo "$PROMPT_SUMMARY")
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           CHANGED_COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
 
-          COMMIT_MSG="fix: ${PROMPT_SUMMARY}
+          COMMIT_MSG="fix: ${PR_TITLE}
 
           Generated by Action Ralph
           Files changed: ${CHANGED_COUNT}
@@ -679,6 +726,14 @@ jobs:
 
           {
             echo "Action Ralph applied changes from your \`/action-ralph\` request."
+            echo ""
+            echo "## Summary"
+            echo ""
+            if [ -f /tmp/agent-output/pr-summary.md ]; then
+              cat /tmp/agent-output/pr-summary.md
+            else
+              echo "- ${PROMPT_SUMMARY}"
+            fi
             echo ""
             echo "**Workflow run:** ${RUN_URL}"
             echo ""
@@ -723,7 +778,7 @@ jobs:
           git checkout -b "$BRANCH_NAME"
           CHANGED_COUNT=$(git diff --cached --name-only | wc -l | tr -d ' ')
 
-          COMMIT_MSG="feat: ${PROMPT_SUMMARY}
+          COMMIT_MSG="feat: ${PR_TITLE}
 
           Generated by Action Ralph
           Files changed: ${CHANGED_COUNT}
@@ -737,7 +792,11 @@ jobs:
           {
             echo "## Summary"
             echo ""
-            echo "**Prompt:** ${PROMPT_SUMMARY}"
+            if [ -f /tmp/agent-output/pr-summary.md ]; then
+              cat /tmp/agent-output/pr-summary.md
+            else
+              echo "- ${PROMPT_SUMMARY}"
+            fi
             echo ""
             echo "**Workflow run:** ${RUN_URL}"
             echo ""
@@ -789,3 +848,197 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # Phase B (review mode): Read-only PR analysis via /review-ralph.
+  # No bootstrap, no publish, no code changes.
+  # ---------------------------------------------------------------------------
+  review:
+    name: "Phase B: Review Ralph"
+    needs: prepare
+    if: needs.prepare.outputs.command_mode == 'review' && needs.prepare.outputs.is_pr == 'true'
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout PR source (read-only)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.pr_branch }}
+          fetch-depth: 1
+          repository: ${{ needs.prepare.outputs.pr_head_repo }}
+
+      - name: Install OpenCode CLI
+        run: curl -fsSL https://opencode.ai/install | bash
+
+      - name: Resolve review prompt and model
+        id: review_prompt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+          EVENT_NAME: ${{ github.event_name }}
+          COMMENT_PATH: ${{ github.event.comment.path }}
+          COMMENT_LINE: ${{ github.event.comment.line }}
+          COMMENT_START_LINE: ${{ github.event.comment.start_line }}
+          COMMENT_DIFF_HUNK: ${{ github.event.comment.diff_hunk }}
+          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
+        run: |
+          set -euo pipefail
+          DEFAULT_MODEL="litellm/${LITELLM_MODEL}"
+          PROMPT_TEXT=$(printf '%s' "$COMMENT_BODY" | sed -n 's|.*/review-ralph\s*||p' | head -1)
+
+          ISSUE_COMMENTS_JSON=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
+          REVIEW_COMMENTS_JSON=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
+
+          ISSUE_COMMENTS_SUMMARY=$(printf '%s' "$ISSUE_COMMENTS_JSON" | jq -r '
+            if length == 0 then "(none)"
+            else .[] | "- @" + .user.login + " (" + (.created_at // "unknown") + "): " +
+              ((.body // "") | gsub("\\r?\\n"; " ") | .[0:500])
+            end
+          ' 2>/dev/null || echo "(unavailable)")
+
+          REVIEW_COMMENTS_SUMMARY=$(printf '%s' "$REVIEW_COMMENTS_JSON" | jq -r '
+            if length == 0 then "(none)"
+            else .[] | "- @" + .user.login + " (" + (.created_at // "unknown") + ")" +
+              " [" + (.path // "unknown") + ":" + ((.line // .original_line // 0) | tostring) + "] " +
+              ((.body // "") | gsub("\\r?\\n"; " ") | .[0:500])
+            end
+          ' 2>/dev/null || echo "(unavailable)")
+
+          {
+            echo 'task<<RALPH_EOF'
+            echo "You are in review mode for PR #${PR_NUMBER}."
+            echo "Read the PR code and context, then answer the review request."
+            echo "Do NOT edit, create, or delete files."
+            echo "Return a concise markdown response between markers:"
+            echo "REVIEW_SUMMARY_BEGIN and REVIEW_SUMMARY_END"
+            echo ""
+            echo "Original PR description:"
+            printf '%s\n' "$ISSUE_BODY"
+            echo ""
+            echo "Recent issue/PR comments (last 20):"
+            printf '%s\n' "$ISSUE_COMMENTS_SUMMARY" | head -c 15000
+            echo ""
+            echo ""
+            echo "Recent inline review comments (last 20):"
+            printf '%s\n' "$REVIEW_COMMENTS_SUMMARY" | head -c 15000
+            echo ""
+            echo ""
+            if [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
+              echo "Current inline review comment context:"
+              echo "- Path: ${COMMENT_PATH:-unknown}"
+              echo "- Line: ${COMMENT_LINE:-unknown}"
+              echo "- Start line: ${COMMENT_START_LINE:-unknown}"
+              echo "- Diff hunk:"
+              printf '%s\n' "${COMMENT_DIFF_HUNK:-}"
+              echo ""
+            fi
+            echo "Review request:"
+            printf '%s\n' "$PROMPT_TEXT"
+            echo ""
+            echo "Output format:"
+            echo "REVIEW_SUMMARY_BEGIN"
+            echo "<your markdown review response>"
+            echo "REVIEW_SUMMARY_END"
+            echo 'RALPH_EOF'
+          } >> "$GITHUB_OUTPUT"
+          echo "model=${DEFAULT_MODEL}" >> "$GITHUB_OUTPUT"
+          echo "litellm_model=${DEFAULT_MODEL#litellm/}" >> "$GITHUB_OUTPUT"
+
+      - name: Create short-lived LiteLLM key
+        id: short_lived_key_review
+        env:
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          LITELLM_MODEL: ${{ steps.review_prompt.outputs.litellm_model }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          BASE="${LITELLM_BASE_URL%/}"
+          NO_V1="${BASE%/v1}"
+          API_KEY_ENDPOINT="${NO_V1}/key/generate"
+          FALLBACK_ENDPOINT="${BASE}/key/generate"
+          payload="$(jq -n --arg model "$LITELLM_MODEL" --arg alias "review-ralph-run-${RUN_ID}" '{models: [$model], duration: "90m", key_alias: $alias}')"
+          response="$(curl -fsS -X POST "$API_KEY_ENDPOINT" -H "Authorization: Bearer ${LITELLM_API_KEY}" -H "Content-Type: application/json" -d "$payload" 2>/dev/null || true)"
+          if [ -z "$response" ]; then
+            response="$(curl -fsS -X POST "$FALLBACK_ENDPOINT" -H "Authorization: Bearer ${LITELLM_API_KEY}" -H "Content-Type: application/json" -d "$payload")"
+          fi
+          short_key="$(printf '%s' "$response" | jq -r '.key // .token // .data.key // empty')"
+          if [ -z "$short_key" ] || [ "$short_key" = "null" ]; then
+            echo "::error::Failed to mint short-lived LiteLLM key."
+            exit 1
+          fi
+          echo "::add-mask::${short_key}"
+          echo "api_key=${short_key}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure OpenCode for review mode
+        env:
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          LITELLM_MODEL: ${{ steps.review_prompt.outputs.litellm_model }}
+        run: |
+          set -euo pipefail
+          cat > "$GITHUB_WORKSPACE/opencode.json" <<OCEOF
+          {
+            "\$schema": "https://opencode.ai/config.json",
+            "snapshot": false,
+            "provider": {
+              "litellm": {
+                "npm": "@ai-sdk/openai-compatible",
+                "name": "LiteLLM",
+                "options": {
+                  "baseURL": "${LITELLM_BASE_URL}",
+                  "apiKey": "{env:LITELLM_API_KEY}"
+                },
+                "models": {
+                  "${LITELLM_MODEL}": {
+                    "name": "${LITELLM_MODEL}"
+                  }
+                }
+              }
+            }
+          }
+          OCEOF
+
+      - name: Run read-only review
+        env:
+          LITELLM_API_KEY: ${{ steps.short_lived_key_review.outputs.api_key }}
+          MODEL: ${{ steps.review_prompt.outputs.model }}
+          TASK: ${{ steps.review_prompt.outputs.task }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RALPH_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime"
+          SESSION_DIR="$RALPH_DIR/session"
+          mkdir -p "$SESSION_DIR"
+          export HOME="$RALPH_DIR/home"
+          mkdir -p "$HOME"
+
+          opencode run "$TASK" --model "$MODEL" 2>&1 | tee "$SESSION_DIR/review-run.md"
+
+          awk '/REVIEW_SUMMARY_BEGIN/{flag=1;next}/REVIEW_SUMMARY_END/{flag=0}flag' "$SESSION_DIR/review-run.md" > "$SESSION_DIR/review-summary.md" || true
+          if [ ! -s "$SESSION_DIR/review-summary.md" ]; then
+            echo "- Review Ralph could not extract a structured summary; see workflow logs for full output." > "$SESSION_DIR/review-summary.md"
+          fi
+
+          if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+            echo "::error::Review mode must be read-only, but file changes were detected."
+            exit 1
+          fi
+
+          {
+            echo "Review Ralph response for your \`/review-ralph\` request."
+            echo ""
+            cat "$SESSION_DIR/review-summary.md"
+            echo ""
+            echo "---"
+            echo "**Workflow run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > /tmp/review-comment.md
+
+          gh pr comment "$PR_NUMBER" --body-file /tmp/review-comment.md

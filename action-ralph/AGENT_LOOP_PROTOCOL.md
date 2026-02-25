@@ -14,6 +14,7 @@ You are executing a spec in an iterative, multi-session loop inside a GitHub Act
 - Update the spec file (at the path provided below):
   - Mark the task complete (`[x]`).
   - Maintain `## PR title` with a concise, reviewer-friendly title (target <= 72 chars) that describes the implemented change.
+  - Maintain `## PR summary` with 2-4 concise bullets focused on what changed and why (not the raw prompt).
   - Append discoveries/gotchas to `## Additional Context`.
   - Adjust remaining tasks if reality differs (split/merge/reword as needed).
   - Update `## Status`:
