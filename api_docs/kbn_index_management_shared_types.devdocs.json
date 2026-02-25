@@ -3901,7 +3901,7 @@
         "label": "TemplateType",
         "description": [],
         "signature": [
-          "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""
+          "\"system\" | \"default\" | \"managed\" | \"cloudManaged\""
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/index_templates.ts",
         "lineNumber": 8,
