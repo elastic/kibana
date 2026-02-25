@@ -23,7 +23,7 @@ interface UseCombinedRiskScoreKpiResult {
 
 /**
  * Hook that aggregates risk score KPI data from all three entity types (user, host, service)
- * into a combined severity count for display in the threat hunting donut chart.
+ * into a combined severity count for display in the entity analytics home page donut chart.
  */
 export const useCombinedRiskScoreKpi = (skip?: boolean): UseCombinedRiskScoreKpiResult => {
   const { from, to } = useGlobalTime();

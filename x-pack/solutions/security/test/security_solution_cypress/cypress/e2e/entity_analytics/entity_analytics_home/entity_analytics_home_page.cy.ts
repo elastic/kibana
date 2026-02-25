@@ -9,27 +9,27 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL,
-  ENTITY_ANALYTICS_THREAT_HUNTING_URL,
+  ENTITY_ANALYTICS_HOME_PAGE_URL,
 } from '../../../urls/navigation';
 import {
   PAGE_TITLE,
   COMBINED_RISK_DONUT_CHART,
   ANOMALIES_PLACEHOLDER_PANEL,
-  THREAT_HUNTING_ENTITIES_TABLE,
-  THREAT_HUNTING_ENTITIES_TABLE_LOADED,
+  ENTITIES_TABLE,
+  ENTITIES_TABLE_LOADED,
   TIMELINE_ICON,
-} from '../../../screens/entity_analytics/threat_hunting';
+} from '../../../screens/entity_analytics/entity_analytics_home';
 import { WATCHLIST_FILTER_COMBO_BOX } from '../../../screens/entity_analytics/watchlist_filter';
 
 describe(
-  'Entity Threat Hunting page',
+  'Entity Analytics page',
   {
     tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityThreatHuntingEnabled',
+            'entityAnalyticsNewHomePageEnabled',
           ])}`,
         ],
       },
@@ -42,9 +42,9 @@ describe(
 
     beforeEach(() => {
       login();
-      visit(ENTITY_ANALYTICS_THREAT_HUNTING_URL);
+      visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       // Wait for the app to be ready - check that we haven't been redirected away
-      cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_THREAT_HUNTING_URL);
+      cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_HOME_PAGE_URL);
     });
 
     after(() => {
@@ -56,7 +56,7 @@ describe(
       // The page may show a loader initially while data view/sourcerer is loading
       cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
       // Verify the page title text is present
-      cy.get('h1').contains('Entity Threat Hunting').should('be.visible');
+      cy.get('h1').contains('Entity Analytics').should('be.visible');
     });
 
     it('renders KQL search bar', () => {
@@ -83,7 +83,7 @@ describe(
       // Wait for page to be fully loaded first
       cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
       // Wait for table to load - it may start with loading-true and then change to loading-false
-      cy.get(THREAT_HUNTING_ENTITIES_TABLE, { timeout: 30000 }).should('exist');
+      cy.get(ENTITIES_TABLE, { timeout: 30000 }).should('exist');
       // Verify the table content is rendered (either loading skeleton or actual table)
       cy.get(
         '[data-test-subj="paginated-basic-table"], [data-test-subj="initialLoadingPanelPaginatedTable"]',
@@ -110,7 +110,7 @@ describe(
       cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
 
       // Wait for table to load
-      cy.get(THREAT_HUNTING_ENTITIES_TABLE_LOADED, {
+      cy.get(ENTITIES_TABLE_LOADED, {
         timeout: 30000,
       }).should('exist');
 
@@ -143,7 +143,7 @@ describe(
       cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
 
       // Wait for table to load
-      cy.get(THREAT_HUNTING_ENTITIES_TABLE_LOADED, {
+      cy.get(ENTITIES_TABLE_LOADED, {
         timeout: 30000,
       }).should('exist');
 

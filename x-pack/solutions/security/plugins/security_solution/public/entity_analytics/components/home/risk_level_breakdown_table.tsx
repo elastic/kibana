@@ -66,7 +66,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         field: 'level',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevelBreakdown.riskLevel"
+            id="xpack.securitySolution.entityAnalytics.homePage.riskLevelBreakdown.riskLevel"
             defaultMessage="Risk level"
           />
         ),
@@ -80,7 +80,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         field: 'scoreRange',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevelBreakdown.riskScore"
+            id="xpack.securitySolution.entityAnalytics.homePage.riskLevelBreakdown.riskScore"
             defaultMessage="Risk score"
           />
         ),
@@ -94,7 +94,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         field: 'count',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevelBreakdown.numberOfEntities"
+            id="xpack.securitySolution.entityAnalytics.homePage.riskLevelBreakdown.numberOfEntities"
             defaultMessage="Number of entities"
           />
         ),

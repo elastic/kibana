@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { EntityThreatHuntingPage } from './entity_threat_hunting_page';
+import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
 import { TestProviders } from '../../common/mock';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -36,21 +36,21 @@ jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
   })),
 }));
 
-jest.mock('../components/threat_hunting/combined_risk_donut_chart', () => ({
+jest.mock('../components/home/combined_risk_donut_chart', () => ({
   CombinedRiskDonutChart: () => (
     <div data-test-subj="combined-risk-donut-chart">{'Donut Chart'}</div>
   ),
 }));
 
-jest.mock('../components/threat_hunting/anomalies_placeholder_panel', () => ({
+jest.mock('../components/home/anomalies_placeholder_panel', () => ({
   AnomaliesPlaceholderPanel: () => (
     <div data-test-subj="anomalies-placeholder-panel">{'Anomalies Placeholder'}</div>
   ),
 }));
 
-jest.mock('../components/threat_hunting/threat_hunting_entities_table', () => ({
-  ThreatHuntingEntitiesTable: () => (
-    <div data-test-subj="threat-hunting-entities-table">{'Entities Table'}</div>
+jest.mock('../components/home/entities_table', () => ({
+  EntitiesTable: () => (
+    <div data-test-subj="entity-analytics-home-entities-table">{'Entities Table'}</div>
   ),
 }));
 
@@ -58,7 +58,7 @@ const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockUseDataView = useDataView as jest.Mock;
 
-describe('EntityThreatHuntingPage', () => {
+describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -82,30 +82,30 @@ describe('EntityThreatHuntingPage', () => {
   it('renders the page title', () => {
     render(
       <MemoryRouter>
-        <EntityThreatHuntingPage />
+        <EntityAnalyticsHomePage />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByText('Entity Threat Hunting')).toBeInTheDocument();
+    expect(screen.getByText('Entity Analytics')).toBeInTheDocument();
   });
 
   it('renders the KQL search bar', () => {
     render(
       <MemoryRouter>
-        <EntityThreatHuntingPage />
+        <EntityAnalyticsHomePage />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
 
     // The SiemSearchBar should be rendered within FiltersGlobal
-    expect(screen.getByTestId('threatHuntingPage')).toBeInTheDocument();
+    expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
   it('renders the combined donut chart', () => {
     render(
       <MemoryRouter>
-        <EntityThreatHuntingPage />
+        <EntityAnalyticsHomePage />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
@@ -116,7 +116,7 @@ describe('EntityThreatHuntingPage', () => {
   it('renders the anomalies placeholder panel', () => {
     render(
       <MemoryRouter>
-        <EntityThreatHuntingPage />
+        <EntityAnalyticsHomePage />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
@@ -127,12 +127,12 @@ describe('EntityThreatHuntingPage', () => {
   it('renders the entities table', () => {
     render(
       <MemoryRouter>
-        <EntityThreatHuntingPage />
+        <EntityAnalyticsHomePage />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByTestId('threat-hunting-entities-table')).toBeInTheDocument();
+    expect(screen.getByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
   });
 
   it('renders loading spinner when sourcerer is loading', () => {
@@ -144,12 +144,12 @@ describe('EntityThreatHuntingPage', () => {
 
     render(
       <MemoryRouter>
-        <EntityThreatHuntingPage />
+        <EntityAnalyticsHomePage />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByTestId('threatHuntingLoader')).toBeInTheDocument();
+    expect(screen.getByTestId('entityAnalyticsHomePageLoader')).toBeInTheDocument();
   });
 
   it('renders empty prompt when indices do not exist', () => {
@@ -166,12 +166,12 @@ describe('EntityThreatHuntingPage', () => {
 
     render(
       <MemoryRouter>
-        <EntityThreatHuntingPage />
+        <EntityAnalyticsHomePage />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
 
     // EmptyPrompt should be rendered
-    expect(screen.queryByTestId('threatHuntingPage')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entityAnalyticsHomePage')).not.toBeInTheDocument();
   });
 });

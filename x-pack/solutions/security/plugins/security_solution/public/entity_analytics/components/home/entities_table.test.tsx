@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ThreatHuntingEntitiesTable } from './threat_hunting_entities_table';
+import { EntitiesTable } from './entities_table';
 import { TestProviders } from '../../../common/mock';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -72,7 +72,7 @@ const responseData: ListEntitiesResponse = {
   inspect: undefined,
 };
 
-describe('ThreatHuntingEntitiesTable', () => {
+describe('EntitiesTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -114,7 +114,7 @@ describe('ThreatHuntingEntitiesTable', () => {
   it('should render the table with entity data', () => {
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable />
+        <EntitiesTable />
       </TestProviders>
     );
 
@@ -124,11 +124,11 @@ describe('ThreatHuntingEntitiesTable', () => {
   it('should add timeline icon to entity name column', () => {
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable />
+        <EntitiesTable />
       </TestProviders>
     );
 
-    expect(screen.getByTestId('threat-hunting-timeline-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('entity-analytics-home-timeline-icon')).toBeInTheDocument();
   });
 
   it('should call investigateInTimeline when timeline icon is clicked', () => {
@@ -139,11 +139,11 @@ describe('ThreatHuntingEntitiesTable', () => {
 
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable />
+        <EntitiesTable />
       </TestProviders>
     );
 
-    const timelineIcon = screen.getByTestId('threat-hunting-timeline-icon');
+    const timelineIcon = screen.getByTestId('entity-analytics-home-timeline-icon');
     fireEvent.click(timelineIcon);
 
     expect(mockInvestigateInTimeline).toHaveBeenCalled();
@@ -156,17 +156,17 @@ describe('ThreatHuntingEntitiesTable', () => {
 
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable />
+        <EntitiesTable />
       </TestProviders>
     );
 
-    expect(screen.queryByTestId('threat-hunting-timeline-icon')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('entity-analytics-home-timeline-icon')).not.toBeInTheDocument();
   });
 
   it('should render risk score with custom color scheme', () => {
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable />
+        <EntitiesTable />
       </TestProviders>
     );
 
@@ -177,7 +177,7 @@ describe('ThreatHuntingEntitiesTable', () => {
   it('should call useEntitiesListQuery with correct parameters', () => {
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable />
+        <EntitiesTable />
       </TestProviders>
     );
 
@@ -204,7 +204,7 @@ describe('ThreatHuntingEntitiesTable', () => {
 
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable />
+        <EntitiesTable />
       </TestProviders>
     );
 
@@ -224,7 +224,7 @@ describe('ThreatHuntingEntitiesTable', () => {
 
     render(
       <TestProviders>
-        <ThreatHuntingEntitiesTable />
+        <EntitiesTable />
       </TestProviders>
     );
 

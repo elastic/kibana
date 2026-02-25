@@ -56,7 +56,7 @@ import {
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
 
-const THREAT_HUNTING_TABLE_ID = 'threat-hunting-table';
+const HOME_TABLE_ID = 'entity-analytics-home-table';
 
 /**
  * Creates data providers for timeline investigation based on entity type and name
@@ -73,7 +73,7 @@ const createEntityDataProviders = (
   const fieldName: string = EntityTypeToIdentifierField[entityType] || 'entity.id';
 
   const dataProviders = createDataProviders({
-    contextId: THREAT_HUNTING_TABLE_ID,
+    contextId: HOME_TABLE_ID,
     field: fieldName,
     values: entityName,
   });
@@ -117,7 +117,7 @@ const getRiskScoreColors = (
   }
 };
 
-export type ThreatHuntingEntitiesColumns = [
+export type EntitiesColumns = [
   Columns<Entity>,
   Columns<string, Entity>,
   Columns<string | undefined, Entity>,
@@ -127,7 +127,7 @@ export type ThreatHuntingEntitiesColumns = [
   Columns<string, Entity>
 ];
 
-const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
+const useEntitiesColumns = (): EntitiesColumns => {
   const { euiTheme } = useEuiTheme();
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
@@ -139,7 +139,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
     {
       name: (
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.actionsColumn.title"
+          id="xpack.securitySolution.entityAnalytics.homePage.actionsColumn.title"
           defaultMessage="Actions"
         />
       ),
@@ -155,8 +155,8 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
               id,
               params: {
                 [EntityPanelParamByType[entityType] ?? '']: entityName,
-                contextID: THREAT_HUNTING_TABLE_ID,
-                scopeId: THREAT_HUNTING_TABLE_ID,
+                contextID: HOME_TABLE_ID,
+                scopeId: HOME_TABLE_ID,
               },
             });
           }
@@ -181,7 +181,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.threatHunting.entityPreview.tooltip',
+                    'xpack.securitySolution.entityAnalytics.homePage.entityPreview.tooltip',
                     {
                       defaultMessage: 'Preview entity',
                     }
@@ -192,7 +192,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
                     iconType="expand"
                     onClick={handleFlyoutClick}
                     aria-label={i18n.translate(
-                      'xpack.securitySolution.entityAnalytics.threatHunting.entityPreview.ariaLabel',
+                      'xpack.securitySolution.entityAnalytics.homePage.entityPreview.ariaLabel',
                       {
                         defaultMessage: 'Preview entity with name {name}',
                         values: { name: entityName },
@@ -206,7 +206,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.threatHunting.investigateInTimeline',
+                    'xpack.securitySolution.entityAnalytics.homePage.investigateInTimeline',
                     {
                       defaultMessage: 'Investigate in timeline',
                     }
@@ -219,12 +219,12 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
                     color="text"
                     onClick={handleTimelineClick}
                     aria-label={i18n.translate(
-                      'xpack.securitySolution.entityAnalytics.threatHunting.investigateInTimeline',
+                      'xpack.securitySolution.entityAnalytics.homePage.investigateInTimeline',
                       {
                         defaultMessage: 'Investigate in timeline',
                       }
                     )}
-                    data-test-subj="threat-hunting-timeline-icon"
+                    data-test-subj="entity-analytics-home-timeline-icon"
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -238,7 +238,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
       field: 'entity.name',
       name: (
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.nameColumn.title"
+          id="xpack.securitySolution.entityAnalytics.homePage.nameColumn.title"
           defaultMessage="Name"
         />
       ),
@@ -261,7 +261,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
       field: 'entity.source',
       name: (
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.sourceColumn.title"
+          id="xpack.securitySolution.entityAnalytics.homePage.sourceColumn.title"
           defaultMessage="Source"
         />
       ),
@@ -278,7 +278,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
       field: 'asset.criticality',
       name: (
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.criticalityColumn.title"
+          id="xpack.securitySolution.entityAnalytics.homePage.criticalityColumn.title"
           defaultMessage="Criticality"
         />
       ),
@@ -293,7 +293,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
     {
       name: (
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.riskScoreColumn.title"
+          id="xpack.securitySolution.entityAnalytics.homePage.riskScoreColumn.title"
           defaultMessage="Risk score"
         />
       ),
@@ -331,12 +331,9 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
             >
               {riskScore !== undefined && riskScore !== null
                 ? formatRiskScoreWholeNumber(riskScore)
-                : i18n.translate(
-                    'xpack.securitySolution.entityAnalytics.threatHunting.riskScore.na',
-                    {
-                      defaultMessage: 'N/A',
-                    }
-                  )}
+                : i18n.translate('xpack.securitySolution.entityAnalytics.homePage.riskScore.na', {
+                    defaultMessage: 'N/A',
+                  })}
             </EuiText>
           </EuiBadge>
         );
@@ -345,7 +342,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
     {
       name: (
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.riskLevelColumn.title"
+          id="xpack.securitySolution.entityAnalytics.homePage.riskLevelColumn.title"
           defaultMessage="Risk Level"
         />
       ),
@@ -366,7 +363,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
       field: '@timestamp',
       name: (
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.lastUpdateColumn.title"
+          id="xpack.securitySolution.entityAnalytics.homePage.lastUpdateColumn.title"
           defaultMessage="Last Update"
         />
       ),
@@ -379,11 +376,11 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
   ];
 };
 
-export const ThreatHuntingEntitiesTable: React.FC = () => {
+export const EntitiesTable: React.FC = () => {
   const { deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const [activePage, setActivePage] = useState(0);
   const [limit, setLimit] = useState(10);
-  const { toggleStatus } = useQueryToggle(THREAT_HUNTING_TABLE_ID);
+  const { toggleStatus } = useQueryToggle(HOME_TABLE_ID);
   const [sorting, setSorting] = useState({
     field: '@timestamp',
     direction: Direction.desc,
@@ -435,7 +432,7 @@ export const ThreatHuntingEntitiesTable: React.FC = () => {
   const { data, isLoading, isRefetching, refetch, error } = useEntitiesListQuery(searchParams);
 
   useQueryInspector({
-    queryId: THREAT_HUNTING_TABLE_ID,
+    queryId: HOME_TABLE_ID,
     loading: isLoading || isRefetching,
     refetch,
     setQuery,
@@ -448,10 +445,10 @@ export const ThreatHuntingEntitiesTable: React.FC = () => {
     setActivePage(0);
   }, [sorting, limit, filter]);
 
-  const columns = useThreatHuntingColumns();
+  const columns = useEntitiesColumns();
 
   useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.queryError', {
+    i18n.translate('xpack.securitySolution.entityAnalytics.homePage.queryError', {
       defaultMessage: 'There was an error loading the entities list',
     }),
     error
@@ -459,20 +456,17 @@ export const ThreatHuntingEntitiesTable: React.FC = () => {
 
   return (
     <PaginatedTable
-      id={THREAT_HUNTING_TABLE_ID}
-      dataTestSubj="threat-hunting-entities-table"
+      id={HOME_TABLE_ID}
+      dataTestSubj="entity-analytics-home-entities-table"
       activePage={activePage}
       columns={columns}
       headerCount={data?.total ?? 0}
       titleSize="s"
-      headerTitle={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.threatHunting.tableTitle',
-        {
-          defaultMessage: 'Entities',
-        }
-      )}
+      headerTitle={i18n.translate('xpack.securitySolution.entityAnalytics.homePage.tableTitle', {
+        defaultMessage: 'Entities',
+      })}
       headerTooltip={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.threatHunting.tableTooltip',
+        'xpack.securitySolution.entityAnalytics.homePage.tableTooltip',
         {
           defaultMessage: 'Entity data can take a couple of minutes to appear',
         }
@@ -489,14 +483,14 @@ export const ThreatHuntingEntitiesTable: React.FC = () => {
       totalCount={data?.total ?? 0}
       itemsPerRow={[
         {
-          text: i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.rows', {
+          text: i18n.translate('xpack.securitySolution.entityAnalytics.homePage.rows', {
             values: { numRows: 10 },
             defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
           }),
           numberOfRow: 10,
         },
         {
-          text: i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.rows', {
+          text: i18n.translate('xpack.securitySolution.entityAnalytics.homePage.rows', {
             values: { numRows: 25 },
             defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
           }),

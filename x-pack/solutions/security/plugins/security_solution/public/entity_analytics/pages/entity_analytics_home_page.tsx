@@ -21,12 +21,12 @@ import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
 import { PageScope } from '../../data_view_manager/constants';
-import { CombinedRiskDonutChart } from '../components/threat_hunting/combined_risk_donut_chart';
-import { AnomaliesPlaceholderPanel } from '../components/threat_hunting/anomalies_placeholder_panel';
-import { ThreatHuntingEntitiesTable } from '../components/threat_hunting/threat_hunting_entities_table';
+import { CombinedRiskDonutChart } from '../components/home/combined_risk_donut_chart';
+import { AnomaliesPlaceholderPanel } from '../components/home/anomalies_placeholder_panel';
+import { EntitiesTable } from '../components/home/entities_table';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 
-export const EntityThreatHuntingPage = () => {
+export const EntityAnalyticsHomePage = () => {
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
@@ -65,19 +65,19 @@ export const EntityThreatHuntingPage = () => {
         />
       </FiltersGlobal>
 
-      <SecuritySolutionPageWrapper data-test-subj="threatHuntingPage">
+      <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsHomePage">
         <HeaderPage
           title={
             <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.threatHunting.pageTitle"
-              defaultMessage="Entity Threat Hunting"
+              id="xpack.securitySolution.entityAnalytics.homePage.pageTitle"
+              defaultMessage="Entity Analytics"
             />
           }
           rightSideItems={[<WatchlistFilter />]}
         />
 
         {isSourcererLoading ? (
-          <EuiLoadingSpinner size="l" data-test-subj="threatHuntingLoader" />
+          <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsHomePageLoader" />
         ) : (
           <EuiFlexGroup direction="column" gutterSize="l">
             {/* Donut Chart and Anomalies Panel Row */}
@@ -96,13 +96,13 @@ export const EntityThreatHuntingPage = () => {
 
             {/* Entities Table */}
             <EuiFlexItem>
-              <ThreatHuntingEntitiesTable />
+              <EntitiesTable />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
       </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsThreatHunting} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );
 };

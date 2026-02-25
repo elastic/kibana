@@ -44,7 +44,7 @@ export const CombinedRiskDonutChart = () => {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.threatHunting.entityRiskLevels"
+              id="xpack.securitySolution.entityAnalytics.homePage.entityRiskLevels"
               defaultMessage="Entity risk levels"
             />
           </h3>

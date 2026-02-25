@@ -15,7 +15,7 @@ export const AnomaliesPlaceholderPanel = () => {
     <EuiPanel data-test-subj="anomalies-placeholder-panel">
       <EuiText color="subdued" textAlign="center">
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.threatHunting.anomaliesPlaceholder"
+          id="xpack.securitySolution.entityAnalytics.homePage.anomaliesPlaceholder"
           defaultMessage="Anomaly explorer"
         />
       </EuiText>

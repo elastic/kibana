@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useNavigation } from '../../../common/lib/kibana';
 import {
-  ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
+  ENTITY_ANALYTICS_HOME_PAGE_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
 } from '../../../../common/constants';
 import {
@@ -97,7 +97,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
     (watchlistId?: string) => {
       const isCleared = !watchlistId;
       const mappedPath = watchlistId ? WATCHLIST_ROUTE_MAP[watchlistId] : undefined;
-      const nextPath = !isCleared && mappedPath ? mappedPath : ENTITY_ANALYTICS_THREAT_HUNTING_PATH;
+      const nextPath = !isCleared && mappedPath ? mappedPath : ENTITY_ANALYTICS_HOME_PAGE_PATH;
 
       navigateTo({
         path: nextPath,
