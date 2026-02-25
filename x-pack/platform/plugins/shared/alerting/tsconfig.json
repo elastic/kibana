@@ -75,6 +75,7 @@
     "@kbn/config",
     "@kbn/expect",
     "@kbn/cps",
+    "@kbn/response-ops-scheduling-types",
   ],
   "exclude": ["target/**/*"]
 }
