@@ -1,5 +1,9 @@
 # @kbn/edot-collector
 
+> **Note:** For Elasticsearch 9.x+, consider using [native OTLP endpoints](../../kbn-tracing-config/src/types.ts) instead.
+> The `elasticsearch` exporter sends traces directly to ES without Docker. This collector is primarily needed
+> for ES 8.x compatibility. See `@kbn/evals` README for the simplified native OTLP workflow.
+
 EDOT Collector (Elastic Distribution of OpenTelemetry Collector) CLI tool for Kibana development.
 
 This package provides a developer command to easily start an EDOT Collector instance in Gateway mode and connect it to your Elasticsearch cluster.

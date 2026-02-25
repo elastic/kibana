@@ -259,7 +259,7 @@ node -e "const o=JSON.parse(Buffer.from(process.env.KIBANA_TESTING_AI_CONNECTORS
 export EVALUATION_CONNECTOR_ID="eis-<model>"
 
 # 5) Start Scout (the evals config sets auto-preconfigure EIS connectors in Kibana from KIBANA_TESTING_AI_CONNECTORS)
-node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+node scripts/scout.js start-server --stateful --config-dir evals_tracing
 
 # 6) Enable CCM on the *Scout* ES cluster and wait for EIS endpoints
 node x-pack/platform/packages/shared/kbn-evals/scripts/local_repros/enable_eis_ccm.js
@@ -291,15 +291,37 @@ EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite agent-buil
 
 #### Local flow (trace capture)
 
-If you want local traces available for trace-based evaluators, run EDOT locally and start Scout using the built-in tracing config:
+If you want local traces available for trace-based evaluators, start Scout using the evals tracing config:
 
 ```bash
-node scripts/edot_collector.js
-node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+node scripts/scout.js start-server --stateful --config-dir evals_tracing
 node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>
 ```
 
-If you are _not_ using Scout to start Kibana (e.g. you are targeting your own dev Kibana), configure the HTTP exporter in `kibana.dev.yml`:
+With Elasticsearch 9.x+, traces flow directly to the native OTLP endpoint (`/_otlp/v1/traces`) — no Docker container or EDOT collector required.
+
+If you are _not_ using Scout to start Kibana (e.g. you are targeting your own dev Kibana), configure the elasticsearch exporter in `kibana.dev.yml`:
+
+```yaml
+telemetry.tracing.exporters:
+  - elasticsearch:
+      endpoint: 'http://localhost:9200'
+      username: 'elastic'
+      password: 'changeme'
+```
+
+<details>
+<summary><b>Legacy: EDOT Collector (ES 8.x)</b></summary>
+
+For Elasticsearch 8.x clusters that lack native OTLP support, run EDOT collector as a gateway:
+
+```bash
+node scripts/edot_collector.js
+node scripts/scout.js start-server --stateful --config-dir evals_tracing
+node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>
+```
+
+Configure the HTTP exporter in `kibana.dev.yml` to route through EDOT:
 
 ```yaml
 telemetry.tracing.exporters:
@@ -313,6 +335,8 @@ If you want EDOT to store traces in a specific Elasticsearch cluster, override v
 ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
 ```
 
+</details>
+
 If you want to view traces in the Phoenix UI, configure a Phoenix exporter in `kibana.dev.yml`:
 
 ```yaml
@@ -324,7 +348,7 @@ telemetry.tracing.exporters:
       api_key: '<my-api-key>'
 ```
 
-This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, you can just run the EDOT collector to capture traces locally (see `src/platform/packages/shared/kbn-edot-collector/README.md`).
+This is **optional** for the default (in-Kibana) executor. If you only care about trace-based evaluators stored in Elasticsearch, use the `evals_tracing` Scout config which sends traces directly to ES via native OTLP (ES 9.x+). For ES 8.x, see the EDOT collector documentation (`src/platform/packages/shared/kbn-edot-collector/README.md`).
 
 Create a Playwright config that delegates to the helper:
 
@@ -344,7 +368,7 @@ node scripts/scout.js start-server --arch stateful --domain classic
 If you want OTLP trace export enabled for evals, use the custom Scout config:
 
 ```bash
-node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+node scripts/scout.js start-server --stateful --config-dir evals_tracing
 ```
 
 Now run the tests exactly like a normal Scout/Playwright suite in another terminal:
@@ -366,23 +390,36 @@ By default, these evaluators query traces from the same Elasticsearch cluster as
 
 #### Prerequisites
 
-To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry.
+To enable trace-based evaluators, configure a tracing exporter. For Elasticsearch 9.x+, the native OTLP endpoint is recommended:
+
+```yaml
+telemetry.tracing.exporters:
+  - elasticsearch:
+      endpoint: 'http://localhost:9220'
+      username: 'elastic'
+      password: 'changeme'
+```
+
 You can also include the Phoenix exporter if you want traces visible in Phoenix (optional):
 
 ```yaml
 telemetry.tracing.exporters:
+  - elasticsearch:
+      endpoint: 'http://localhost:9220'
+      username: 'elastic'
+      password: 'changeme'
   - phoenix:
       base_url: 'https://<my-phoenix-host>'
       public_url: 'https://<my-phoenix-host>'
       project_name: '<my-name>'
       api_key: '<my-api-key>'
-  - http:
-      url: 'http://localhost:4318/v1/traces'
 ```
 
-#### Start EDOT Collector
+#### Start EDOT Collector (ES 8.x only)
 
-Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to receive and store traces. Ensure Docker is running, then execute:
+> **Note:** For ES 9.x+, skip this section — traces are sent directly to Elasticsearch via native OTLP.
+
+For ES 8.x, start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to receive and store traces. Ensure Docker is running, then execute:
 
 ```bash
 # Optionally use non-default ports using --http-port <http-port> or --grpc-port <grpc-port>
