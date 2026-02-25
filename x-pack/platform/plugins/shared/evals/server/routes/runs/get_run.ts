@@ -11,6 +11,8 @@ import {
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
   buildRouteValidationWithZod,
+  buildRunFilterQuery,
+  buildStatsAggregation,
   GetEvaluationRunRequestParams,
   GetEvaluationRunRequestQuery,
 } from '@kbn/evals-common';
@@ -44,14 +46,7 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-          const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
-          if (suiteId) {
-            must.push({ term: { 'suite.id': suiteId } });
-          }
-          if (modelId) {
-            must.push({ term: { 'task.model.id': modelId } });
-          }
-          const query = { bool: { must } };
+          const query = buildRunFilterQuery(runId, { suiteId, modelId });
 
           const metadataResponse = await esClient.search({
             index: EVALUATIONS_INDEX_PATTERN,
@@ -70,21 +65,7 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
             index: EVALUATIONS_INDEX_PATTERN,
             size: 0,
             query,
-            aggs: {
-              by_dataset: {
-                terms: { field: 'example.dataset.id', size: 10000 },
-                aggs: {
-                  dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
-                  by_evaluator: {
-                    terms: { field: 'evaluator.name', size: 1000 },
-                    aggs: {
-                      score_stats: { extended_stats: { field: 'evaluator.score' } },
-                      score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
-                    },
-                  },
-                },
-              },
-            },
+            aggs: buildStatsAggregation(),
           });
 
           const aggregations = aggResponse.aggregations as Record<string, any> | undefined;

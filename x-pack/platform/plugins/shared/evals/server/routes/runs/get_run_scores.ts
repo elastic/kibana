@@ -11,6 +11,8 @@ import {
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
   buildRouteValidationWithZod,
+  buildRunFilterQuery,
+  SCORES_SORT_ORDER,
   GetEvaluationRunScoresRequestParams,
   GetEvaluationRunScoresRequestQuery,
 } from '@kbn/evals-common';
@@ -44,24 +46,12 @@ export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies)
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-          const must: Array<Record<string, unknown>> = [{ term: { run_id: runId } }];
-          if (suiteId) {
-            must.push({ term: { 'suite.id': suiteId } });
-          }
-          if (modelId) {
-            must.push({ term: { 'task.model.id': modelId } });
-          }
-          const query = { bool: { must } };
+          const query = buildRunFilterQuery(runId, { suiteId, modelId });
 
           const searchResponse = await esClient.search({
             index: EVALUATIONS_INDEX_PATTERN,
             query,
-            sort: [
-              { 'example.dataset.name': { order: 'asc' as const } },
-              { 'example.index': { order: 'asc' as const } },
-              { 'evaluator.name': { order: 'asc' as const } },
-              { 'task.repetition_index': { order: 'asc' as const } },
-            ],
+            sort: SCORES_SORT_ORDER,
             size: 10000,
           });
 
