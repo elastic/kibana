@@ -172,7 +172,7 @@ async function installAssetsForDataStreamType(opts: {
     }
     if (!force) {
       logger.info(
-        `Data stream for dataset ${datasetName} already exists, skipping index template creation`
+        `Data stream for dataset ${datasetName} already exists, skipping data stream creation`
       );
       return;
     }
