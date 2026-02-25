@@ -288,6 +288,56 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
   });
 
+  describe('canResume()', () => {
+    it('returns true when step state has executionId', () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({
+        workflowId: 'w1',
+        executionId: 'exec-123',
+        startedAt: '2024-01-01T00:00:00Z',
+        pollCount: 0,
+      });
+
+      expect(strategy.canResume()).toBe(true);
+    });
+
+    it('returns false when step state is undefined', () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue(undefined);
+
+      expect(strategy.canResume()).toBe(false);
+    });
+
+    it('returns false when step state has no executionId', () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({ workflowId: 'w1' });
+
+      expect(strategy.canResume()).toBe(false);
+    });
+  });
+
+  describe('getExecutionIdForCancel()', () => {
+    it('returns executionId when step state has it', () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({
+        workflowId: 'w1',
+        executionId: 'exec-456',
+        startedAt: '2024-01-01T00:00:00Z',
+        pollCount: 1,
+      });
+
+      expect(strategy.getExecutionIdForCancel()).toBe('exec-456');
+    });
+
+    it('returns undefined when step state is undefined', () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue(undefined);
+
+      expect(strategy.getExecutionIdForCancel()).toBeUndefined();
+    });
+
+    it('returns undefined when step state has no executionId', () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({});
+
+      expect(strategy.getExecutionIdForCancel()).toBeUndefined();
+    });
+  });
+
   describe('output extraction', () => {
     const waitState = {
       workflowId: 'child-workflow-id',
