@@ -6,8 +6,10 @@
  */
 
 import { Builder } from '@elastic/esql';
-import type { ESQLAstCommand, ESQLAstItem, ESQLSingleAstItem } from '@elastic/esql/types';
 import type {
+  ESQLAstCommand,
+  ESQLAstItem,
+  ESQLSingleAstItem,
   BinaryExpressionArithmeticOperator,
   BinaryExpressionComparisonOperator,
 } from '@elastic/esql/types';

@@ -17,8 +17,7 @@ import {
   buildSourcesDefinitions,
   getLookupJoinSource,
 } from './sources';
-import { EsqlQuery, synth } from '@elastic/esql';
-import { Walker } from '@elastic/esql';
+import { EsqlQuery, synth, Walker } from '@elastic/esql';
 import type { ESQLAstJoinCommand } from '@elastic/esql/types';
 
 describe('specialIndicesToSuggestions()', () => {

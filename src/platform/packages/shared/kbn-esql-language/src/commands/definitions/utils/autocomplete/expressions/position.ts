@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isFunctionExpression, isInlineCast, isLiteral } from '@elastic/esql';
-import { within } from '@elastic/esql';
+import { isColumn, isFunctionExpression, isInlineCast, isLiteral, within } from '@elastic/esql';
 import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../../../registry/types';
 import { isNullCheckOperator } from './utils';

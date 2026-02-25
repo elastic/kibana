@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '@elastic/esql';
+import { isColumn, isIdentifier, isList, isOptionNode, isSource, Walker } from '@elastic/esql';
 import type {
   ESQLFunction,
   ESQLSingleAstItem,
@@ -18,7 +18,6 @@ import type {
   ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
-import { Walker } from '@elastic/esql';
 import { EDITOR_MARKER } from '../constants';
 
 export function isMarkerNode(node: ESQLAstItem | undefined): boolean {

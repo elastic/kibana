@@ -8,9 +8,13 @@
  */
 
 import { ParameterReplacer } from './parameter_replacer';
-import type { ESQLColumn } from '@elastic/esql/types';
+import type {
+  ESQLColumn,
+  ESQLFunction,
+  ESQLParamLiteral,
+  ESQLUnnamedParamLiteral,
+} from '@elastic/esql/types';
 import { Builder } from '@elastic/esql';
-import type { ESQLFunction, ESQLParamLiteral, ESQLUnnamedParamLiteral } from '@elastic/esql/types';
 
 function createParamLiteral(
   paramType: 'named' | 'positional',

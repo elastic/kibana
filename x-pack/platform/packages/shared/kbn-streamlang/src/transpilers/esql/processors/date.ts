@@ -6,8 +6,12 @@
  */
 
 import { Builder } from '@elastic/esql';
-import type { ESQLAstCommand } from '@elastic/esql/types';
-import type { ESQLFunction, ESQLMapEntry, FunctionSubtype } from '@elastic/esql/types';
+import type {
+  ESQLAstCommand,
+  ESQLFunction,
+  ESQLMapEntry,
+  FunctionSubtype,
+} from '@elastic/esql/types';
 import type { CommonDatePreset } from '../../../../types/formats';
 import type { DateProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';

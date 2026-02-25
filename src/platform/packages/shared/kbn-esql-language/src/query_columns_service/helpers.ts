@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
-import type { ESQLAstJoinCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
+import type { ESQLAstJoinCommand, ESQLAstPromqlCommand, ESQLAstCommand } from '@elastic/esql/types';
 import { BasicPrettyPrinter, isSource, synth, Walker } from '@elastic/esql';
-import type { ESQLAstCommand } from '@elastic/esql/types';
 import { esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '../..';
 import {
   UnmappedFieldsStrategy,

@@ -21,8 +21,11 @@ import {
   Walker,
   isInlineCast,
 } from '@elastic/esql';
-import type { ESQLCommand, ESQLFunction, ESQLAstItem, ESQLColumn } from '@elastic/esql/types';
 import type {
+  ESQLCommand,
+  ESQLFunction,
+  ESQLAstItem,
+  ESQLColumn,
   BinaryExpressionComparisonOperator,
   ESQLBinaryExpression,
   ESQLUnaryExpression,

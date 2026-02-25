@@ -8,9 +8,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLCommand, ESQLProperNode } from '@elastic/esql/types';
 import { EsqlQuery, Parser, Walker } from '@elastic/esql';
-import type { ESQLProperNode } from '@elastic/esql/types';
 import type { Annotation } from '../annotations';
 import { highlight } from './helpers';
 

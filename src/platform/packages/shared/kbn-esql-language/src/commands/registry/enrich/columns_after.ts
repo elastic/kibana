@@ -8,8 +8,7 @@
  */
 import { uniqBy } from 'lodash';
 import { isAssignment, isColumn, isOptionNode } from '@elastic/esql';
-import type { ESQLCommandOption } from '@elastic/esql/types';
-import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLCommandOption, ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
 import type { IAdditionalFields } from '../registry';
 
