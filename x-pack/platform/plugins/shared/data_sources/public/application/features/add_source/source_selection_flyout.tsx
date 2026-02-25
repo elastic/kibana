@@ -134,11 +134,7 @@ export const SourceSelectionFlyout: React.FC<SourceSelectionFlyoutProps> = ({
             <EuiFlexGrid columns={ITEMS_PER_ROW} gutterSize="m">
               {paginatedSources.map((source) => (
                 <EuiFlexItem key={source.id}>
-                  <ConnectorCard
-                    connector={source}
-                    onClick={() => onSelectSource(source)}
-                    data-test-subj={`sourceCard-${source.id}`}
-                  />
+                  <ConnectorCard connector={source} onClick={() => onSelectSource(source)} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>
