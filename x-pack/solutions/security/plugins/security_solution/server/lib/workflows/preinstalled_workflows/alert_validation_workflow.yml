@@ -26,6 +26,8 @@
 #     - Apply workflow tags to the seed alert.
 #     - Auto-close the alert if it meets the false-positive thresholds.
 #
+# NOTE: Do not edit this workflow directly as changes will be overridden by the preinstalled workflow.
+#
 # Author: Elastic
 # =============================================================================
 
