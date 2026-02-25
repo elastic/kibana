@@ -131,7 +131,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
                 return (
                   <EuiFormRow
                     label={fieldLabel}
-                    helpText={isInvalid ? undefined : helpText}
+                    helpText={helpText}
                     isInvalid={isInvalid}
                     error={errorMessage}
                   >
