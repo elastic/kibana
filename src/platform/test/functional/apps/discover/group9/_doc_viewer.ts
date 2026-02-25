@@ -266,7 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('hide null values switch - data view mode', function () {
       it('should hide fields with null values when toggled', async function () {
-        if (!await testSubjects.exists('select-text-based-language-btn')) {
+        if (!(await testSubjects.exists('select-text-based-language-btn'))) {
           await discover.selectDataViewMode();
           await discover.waitUntilTabIsLoaded();
         }
@@ -279,9 +279,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
 
-        let hideNullValuesSwitch = await testSubjects.find(
-          'unifiedDocViewerHideNullValuesSwitch'
-        );
+        let hideNullValuesSwitch = await testSubjects.find('unifiedDocViewerHideNullValuesSwitch');
         await hideNullValuesSwitch.click();
 
         await retry.waitFor('fields to be hidden', async () => {
@@ -290,9 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
-        hideNullValuesSwitch = await testSubjects.find(
-          'unifiedDocViewerHideNullValuesSwitch'
-        );
+        hideNullValuesSwitch = await testSubjects.find('unifiedDocViewerHideNullValuesSwitch');
         await hideNullValuesSwitch.click();
       });
     });
