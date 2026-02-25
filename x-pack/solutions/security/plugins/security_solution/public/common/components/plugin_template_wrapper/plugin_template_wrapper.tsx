@@ -10,12 +10,17 @@ import type { FC } from 'react';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../lib/kibana';
 
+export type PluginTemplateWrapperProps = KibanaPageTemplateProps & {
+  /** When true, the section has no bottom padding (e.g. for full-height filter sidebars). */
+  noSectionBottomPadding?: boolean;
+};
+
 /**
  * Uses securityLayout service to retrieve shared plugin wrapper component and renders plugin routes / children inside of it.
  *
  * The `template` prop can be used to alter the page layout for a given plugin route / all routes within a plugin - depending on the nesting.
  */
-export const PluginTemplateWrapper: FC<KibanaPageTemplateProps> = React.memo(
+export const PluginTemplateWrapper: FC<PluginTemplateWrapperProps> = React.memo(
   ({ children, ...rest }) => {
     const {
       services: {

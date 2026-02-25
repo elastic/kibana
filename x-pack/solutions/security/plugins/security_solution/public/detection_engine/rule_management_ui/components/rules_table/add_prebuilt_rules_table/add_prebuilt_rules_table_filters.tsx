@@ -8,73 +8,83 @@
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 import * as i18n from './translations';
 import { TagsFilterPopover } from '../rules_table_filters/tags_filter_popover';
 import { RuleSearchField } from '../rules_table_filters/rule_search_field';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 
-const FilterWrapper = styled(EuiFlexGroup)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
 /**
- * Collection of filters for filtering data within the Add Prebuilt Rules table.
- * Contains search bar and tag selection
+ * Search bar only for the Add Prebuilt Rules table. Renders at the top of the layout.
  */
-const AddPrebuiltRulesTableFiltersComponent = () => {
-  const {
-    state: { filterOptions, tags },
-    actions: { setFilterOptions },
-  } = useAddPrebuiltRulesTableContext();
+export const AddPrebuiltRulesTableSearchBar = React.memo(
+  function AddPrebuiltRulesTableSearchBar() {
+    const {
+      state: { filterOptions },
+      actions: { setFilterOptions },
+    } = useAddPrebuiltRulesTableContext();
 
-  const { tags: selectedTags } = filterOptions;
-
-  const handleOnSearch = useCallback(
-    (nameFilter: string) => {
-      setFilterOptions((filters) => ({
-        ...filters,
-        name: nameFilter.trim(),
-      }));
-    },
-    [setFilterOptions]
-  );
-
-  const handleSelectedTags = useCallback(
-    (newTags: string[]) => {
-      if (!isEqual(newTags, selectedTags)) {
+    const handleOnSearch = useCallback(
+      (nameFilter: string) => {
         setFilterOptions((filters) => ({
           ...filters,
-          tags: newTags,
+          name: nameFilter.trim(),
         }));
-      }
-    },
-    [selectedTags, setFilterOptions]
-  );
+      },
+      [setFilterOptions]
+    );
 
-  return (
-    <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
+    return (
       <RuleSearchField
         initialValue={filterOptions.name}
         onSearch={handleOnSearch}
         placeholder={i18n.SEARCH_PLACEHOLDER}
       />
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <TagsFilterPopover
-            onSelectedTagsChanged={handleSelectedTags}
-            selectedTags={selectedTags}
-            tags={tags}
-            data-test-subj="allRulesTagPopover"
-          />
-        </EuiFilterGroup>
-      </EuiFlexItem>
-    </FilterWrapper>
-  );
-};
+    );
+  }
+);
 
-AddPrebuiltRulesTableFiltersComponent.displayName = 'AddPrebuiltRulesTableFiltersComponent';
+AddPrebuiltRulesTableSearchBar.displayName = 'AddPrebuiltRulesTableSearchBar';
 
-export const AddPrebuiltRulesTableFilters = React.memo(AddPrebuiltRulesTableFiltersComponent);
+/**
+ * Sidebar content: tags filter for the Add Prebuilt Rules table.
+ */
+export const AddPrebuiltRulesTableFiltersSidebarContent = React.memo(
+  function AddPrebuiltRulesTableFiltersSidebarContent() {
+    const {
+      state: { filterOptions, tags },
+      actions: { setFilterOptions },
+    } = useAddPrebuiltRulesTableContext();
 
-AddPrebuiltRulesTableFilters.displayName = 'AddPrebuiltRulesTableFilters';
+    const { tags: selectedTags } = filterOptions;
+
+    const handleSelectedTags = useCallback(
+      (newTags: string[]) => {
+        if (!isEqual(newTags, selectedTags)) {
+          setFilterOptions((filters) => ({
+            ...filters,
+            tags: newTags,
+          }));
+        }
+      },
+      [selectedTags, setFilterOptions]
+    );
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <TagsFilterPopover
+              onSelectedTagsChanged={handleSelectedTags}
+              selectedTags={selectedTags}
+              tags={tags}
+              data-test-subj="allRulesTagPopover"
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+
+AddPrebuiltRulesTableFiltersSidebarContent.displayName =
+  'AddPrebuiltRulesTableFiltersSidebarContent';

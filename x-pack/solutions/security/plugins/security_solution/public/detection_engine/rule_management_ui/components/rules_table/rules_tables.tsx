@@ -29,7 +29,11 @@ import { useBulkActionsDryRun } from './bulk_actions/use_bulk_actions_dry_run';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
-import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
+import { RulesTableFiltersLayout } from './rules_table_filters/rules_table_filters_layout';
+import {
+  RulesTableSearchBar,
+  RulesTableFiltersSidebarContent,
+} from './rules_table_filters/rules_table_filters';
 import { AllRulesTabs } from './rules_table_toolbar';
 import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
@@ -382,30 +386,35 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               <EuiSpacer />
             </>
           )}
-          <RulesTableFilters selectedTab={selectedTab} />
-          <RulesTableWarnings warnings={warnings} />
-          <RulesTableUtilityBar
-            canBulkEdit={canEditRules}
-            onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
-            onToggleSelectAll={toggleSelectAll}
-            isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
-          />
-          <EuiBasicTable
-            itemId="id"
-            items={rules}
-            noItemsMessage={NO_ITEMS_MESSAGE}
-            onChange={tableOnChangeCallback}
-            pagination={paginationMemo}
-            selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
-            sorting={{
-              sort: {
-                // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
-                field: sortingOptions.field as keyof Rule,
-                direction: sortingOptions.order,
-              },
-            }}
-            {...tableProps}
-          />
+          <RulesTableFiltersLayout
+            searchBar={<RulesTableSearchBar />}
+            sidebarContent={<RulesTableFiltersSidebarContent selectedTab={selectedTab} />}
+            onClearFilters={rulesTableContext.actions.clearFilters}
+          >
+            <RulesTableWarnings warnings={warnings} />
+            <RulesTableUtilityBar
+              canBulkEdit={canEditRules}
+              onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
+              onToggleSelectAll={toggleSelectAll}
+              isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
+            />
+            <EuiBasicTable
+              itemId="id"
+              items={rules}
+              noItemsMessage={NO_ITEMS_MESSAGE}
+              onChange={tableOnChangeCallback}
+              pagination={paginationMemo}
+              selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
+              sorting={{
+                sort: {
+                  // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation
+                  field: sortingOptions.field as keyof Rule,
+                  direction: sortingOptions.order,
+                },
+              }}
+              {...tableProps}
+            />
+          </RulesTableFiltersLayout>
         </>
       )}
     </>
