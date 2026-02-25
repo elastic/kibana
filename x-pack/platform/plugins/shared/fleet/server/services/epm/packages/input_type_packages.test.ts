@@ -510,7 +510,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
       // Legacy index template from 1.x exists
       jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
-        name: 'logs-my_dataset',
+        name: 'logs-filestream.generic',
         _meta: { package: { name: 'filestream' } },
       } as any);
 
