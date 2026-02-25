@@ -62,13 +62,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.entity.relationships.communicates_with = TOP(MV_DEDUPE(TO_STRING(entity.relationships.Communicates_with)), 10) WHERE entity.relationships.Communicates_with IS NOT NULL,
  recent.entity.relationships.depends_on = TOP(MV_DEDUPE(TO_STRING(entity.relationships.Depends_on)), 10) WHERE entity.relationships.Depends_on IS NOT NULL,
  recent.entity.relationships.owns = TOP(MV_DEDUPE(TO_STRING(entity.relationships.Owns)), 10) WHERE entity.relationships.Owns IS NOT NULL,
- recent.entity.relationships.resolved_to = TOP(MV_DEDUPE(TO_STRING(entity.relationships.Resolved_to)), 10) WHERE entity.relationships.Resolved_to IS NOT NULL,
  recent.entity.relationships.owns_inferred = LAST(TO_STRING(entity.relationships.owns_inferred), @timestamp) WHERE entity.relationships.owns_inferred IS NOT NULL,
  recent.entity.relationships.accesses_infrequently = LAST(TO_STRING(entity.relationships.accesses_infrequently), @timestamp) WHERE entity.relationships.accesses_infrequently IS NOT NULL,
  recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(entity.relationships.resolution.resolved_to), @timestamp) WHERE entity.relationships.resolution.resolved_to IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE entity.relationships.resolution.risk.calculated_level IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(entity.relationships.resolution.risk.calculated_score, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(entity.relationships.resolution.risk.calculated_score_norm, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
+ recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
+ recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   
@@ -128,7 +127,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.relationships.communicates_with = MV_SLICE(MV_UNION(recent.entity.relationships.communicates_with, entity.relationships.communicates_with), 0, 9),
  entity.relationships.depends_on = MV_SLICE(MV_UNION(recent.entity.relationships.depends_on, entity.relationships.depends_on), 0, 9),
  entity.relationships.owns = MV_SLICE(MV_UNION(recent.entity.relationships.owns, entity.relationships.owns), 0, 9),
- entity.relationships.resolved_to = MV_SLICE(MV_UNION(recent.entity.relationships.resolved_to, entity.relationships.resolved_to), 0, 9),
  entity.relationships.owns_inferred = COALESCE(recent.entity.relationships.owns_inferred, entity.relationships.owns_inferred),
  entity.relationships.accesses_infrequently = COALESCE(recent.entity.relationships.accesses_infrequently, entity.relationships.accesses_infrequently),
  entity.relationships.resolution.resolved_to = COALESCE(recent.entity.relationships.resolution.resolved_to, entity.relationships.resolution.resolved_to),
@@ -194,7 +192,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  entity.relationships.communicates_with,
  entity.relationships.depends_on,
  entity.relationships.owns,
- entity.relationships.resolved_to,
  entity.relationships.owns_inferred,
  entity.relationships.accesses_infrequently,
  entity.relationships.resolution.resolved_to,
@@ -289,8 +286,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.entity.relationships.accesses_infrequently = LAST(TO_STRING(entity.relationships.accesses_infrequently), @timestamp) WHERE entity.relationships.accesses_infrequently IS NOT NULL,
  recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(entity.relationships.resolution.resolved_to), @timestamp) WHERE entity.relationships.resolution.resolved_to IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE entity.relationships.resolution.risk.calculated_level IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(entity.relationships.resolution.risk.calculated_score, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(entity.relationships.resolution.risk.calculated_score_norm, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
+ recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
+ recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   
@@ -526,8 +523,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.relationships.accesses_infrequently = LAST(TO_STRING(entity.relationships.accesses_infrequently), @timestamp) WHERE entity.relationships.accesses_infrequently IS NOT NULL,
  recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(entity.relationships.resolution.resolved_to), @timestamp) WHERE entity.relationships.resolution.resolved_to IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE entity.relationships.resolution.risk.calculated_level IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(entity.relationships.resolution.risk.calculated_score, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(entity.relationships.resolution.risk.calculated_score_norm, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
+ recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
+ recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
@@ -765,8 +762,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.relationships.accesses_infrequently = LAST(TO_STRING(entity.relationships.accesses_infrequently), @timestamp) WHERE entity.relationships.accesses_infrequently IS NOT NULL,
  recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(entity.relationships.resolution.resolved_to), @timestamp) WHERE entity.relationships.resolution.resolved_to IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE entity.relationships.resolution.risk.calculated_level IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(entity.relationships.resolution.risk.calculated_score, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(entity.relationships.resolution.risk.calculated_score_norm, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
+ recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
+ recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
@@ -976,8 +973,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.entity.relationships.accesses_infrequently = LAST(TO_STRING(entity.relationships.accesses_infrequently), @timestamp) WHERE entity.relationships.accesses_infrequently IS NOT NULL,
  recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(entity.relationships.resolution.resolved_to), @timestamp) WHERE entity.relationships.resolution.resolved_to IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE entity.relationships.resolution.risk.calculated_level IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(entity.relationships.resolution.risk.calculated_score, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(entity.relationships.resolution.risk.calculated_score_norm, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
+ recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
+ recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   
@@ -1146,8 +1143,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  recent.entity.relationships.accesses_infrequently = LAST(TO_STRING(entity.relationships.accesses_infrequently), @timestamp) WHERE entity.relationships.accesses_infrequently IS NOT NULL,
  recent.entity.relationships.resolution.resolved_to = LAST(TO_STRING(entity.relationships.resolution.resolved_to), @timestamp) WHERE entity.relationships.resolution.resolved_to IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_level = LAST(TO_STRING(entity.relationships.resolution.risk.calculated_level), @timestamp) WHERE entity.relationships.resolution.risk.calculated_level IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score = LAST(entity.relationships.resolution.risk.calculated_score, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
- recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(entity.relationships.resolution.risk.calculated_score_norm, @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
+ recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score IS NOT NULL,
+ recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   

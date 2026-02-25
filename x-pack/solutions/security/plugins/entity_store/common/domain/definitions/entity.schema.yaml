@@ -94,11 +94,6 @@ components:
               type: array
               items:
                 type: string
-            resolved_to:
-              type: array
-              items:
-                type: string
-              description: Entity IDs this entity resolves to (v2).
             supervises:
               type: array
               items:

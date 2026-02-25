@@ -75,10 +75,6 @@ export const EntityField = z
         depends_on: z.array(z.string()).optional(),
         owns: z.array(z.string()).optional(),
         accesses_frequently: z.array(z.string()).optional(),
-        /**
-         * Entity IDs this entity resolves to (v2).
-         */
-        resolved_to: z.array(z.string()).optional(),
         supervises: z.array(z.string()).optional(),
       })
       .strict()

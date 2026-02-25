@@ -13,12 +13,6 @@ import type {
 import { ENTITY_BASE_PREFIX } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
-
-/**
- * Entity Store v2 base mapping.
- * entity.source: keyword (array); entity.risk.*: mapping only, populated by maintainers.
- * labels and tags both kept; standardize in config if needed.
- */
 const BASE_ENTITY_INDEX_MAPPING = {
   '@timestamp': { type: 'date' },
   'event.ingested': { type: 'date' },

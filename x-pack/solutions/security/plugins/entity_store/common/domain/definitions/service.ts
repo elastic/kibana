@@ -36,27 +36,25 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     ...getCommonFieldDescriptions('service'),
     ...getEntityFieldsDescriptions('service'),
 
-    /* Relationships: keep one direction only, snake_case, keyword array */
     collect({
-      source: 'service.entity.relationships.Communicates_with',
+      source: 'service.entity.relationships.communicates_with',
       destination: 'entity.relationships.communicates_with',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: 'service.entity.relationships.Depends_on',
+      source: 'service.entity.relationships.depends_on',
       destination: 'entity.relationships.depends_on',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
 
-    /* Mapping only: populated by maintainers */
-    newestValue({
+    collect({
       source: 'entity.relationships.owns_inferred',
       destination: 'entity.relationships.owns_inferred',
       mapping: { type: 'keyword' },
     }),
-    newestValue({
+    collect({
       source: 'entity.relationships.accesses_infrequently',
       destination: 'entity.relationships.accesses_infrequently',
       mapping: { type: 'keyword' },

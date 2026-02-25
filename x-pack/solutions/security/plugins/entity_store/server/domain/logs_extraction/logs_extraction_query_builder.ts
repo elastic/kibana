@@ -251,12 +251,11 @@ function castSrcType(field: EntityField) {
     case 'integer':
       return `TO_INTEGER(${field.source})`;
     case 'float':
-      return `${field.source}`;
+      return `TO_DOUBLE(${field.source})`;
     case 'ip':
       return `TO_IP(${field.source})`;
-    case 'geo_point':
-      return `${field.source}`;
     // explicit no cast because it doesn't exist in ESQl
+    // and it's a breaking point
     case 'scaled_float':
       return `${field.source}`;
     default:

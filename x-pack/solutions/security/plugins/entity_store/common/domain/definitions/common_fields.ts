@@ -75,7 +75,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'date' },
     }),
 
-    /* Behaviors: rule/anomaly identifiers (replacing boolean behavior attributes) */
     collectValues({
       source: `${prefix}.behaviors.rule_names`,
       destination: 'entity.behaviors.rule_names',

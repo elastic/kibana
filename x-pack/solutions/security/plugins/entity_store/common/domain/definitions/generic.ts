@@ -9,10 +9,6 @@ import { collectValues as collect, newestValue } from './field_retention_operati
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 
-/**
- * Generic entity: no host.* or user.* (those belong to host/user definitions only).
- * Entity, asset, cloud, orchestrator, and relationship fields only.
- */
 export const genericEntityDefinition: EntityDefinitionWithoutId = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
@@ -22,6 +18,9 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
   },
   indexPatterns: [],
   fields: [
+    // entity.id doesn't need to be mapped because it's the main entity field
+    // and it's already mapped by default
+
     newestValue({ source: 'entity.name' }),
     ...getEntityFieldsDescriptions(),
 
@@ -55,68 +54,65 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
 
     ...getCommonFieldDescriptions('entity'),
 
-    /* Generic definition: relationship types (snake_case, keyword array) */
     collect({
-      source: 'entity.relationships.Accesses_frequently',
+      source: 'entity.relationships.accesses_frequently',
       destination: 'entity.relationships.accesses_frequently',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: 'entity.relationships.Communicates_with',
+      source: 'entity.relationships.communicates_with',
       destination: 'entity.relationships.communicates_with',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: 'entity.relationships.Depends_on',
+      source: 'entity.relationships.depends_on',
       destination: 'entity.relationships.depends_on',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: 'entity.relationships.Owns',
+      source: 'entity.relationships.owns',
       destination: 'entity.relationships.owns',
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     collect({
-      source: 'entity.relationships.Resolved_to',
-      destination: 'entity.relationships.resolved_to',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-
-    /* Mapping only: populated by maintainers */
-    newestValue({
       source: 'entity.relationships.owns_inferred',
       destination: 'entity.relationships.owns_inferred',
       mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
     }),
-    newestValue({
+    collect({
       source: 'entity.relationships.accesses_infrequently',
       destination: 'entity.relationships.accesses_infrequently',
       mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: 'entity.relationships.resolution.resolved_to',
       destination: 'entity.relationships.resolution.resolved_to',
       mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: 'entity.relationships.resolution.risk.calculated_level',
       destination: 'entity.relationships.resolution.risk.calculated_level',
       mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: 'entity.relationships.resolution.risk.calculated_score',
       destination: 'entity.relationships.resolution.risk.calculated_score',
       mapping: { type: 'float' },
+      allowAPIUpdate: true,
     }),
     newestValue({
       source: 'entity.relationships.resolution.risk.calculated_score_norm',
       destination: 'entity.relationships.resolution.risk.calculated_score_norm',
       mapping: { type: 'float' },
+      allowAPIUpdate: true,
     }),
   ],
 } as const satisfies EntityDefinitionWithoutId;
