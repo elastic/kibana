@@ -5,6 +5,7 @@
 - Always run selective validation for touched code; do not run all tests.
 - Pipe large test output to files so failures are searchable/replayable.
 - Actually execute validation before finalizing work.
+- For long-running validations, follow `action-ralph/test_execution.md` (background + poll + wait, do not skip).
 
 ## Unit tests
 
@@ -41,6 +42,34 @@ node scripts/i18n_check.js --fix
 - Do not run repo-wide lint/type-check unless the task requires it.
 - If scoped lint/type-check fails with dependency/project-map errors after switching branches, run `yarn kbn bootstrap` and retry.
 - Type-check can take a while on larger projects. If it runs longer than expected, pipe output to a file and check periodically.
+- Do not skip long-running scoped type-check commands. Run them in the background and poll until completion:
+
+```bash
+LOG_FILE="/tmp/ralph-typecheck.log"
+yarn test:type_check --project <touched-tsconfig-path> > "$LOG_FILE" 2>&1 &
+TYPECHECK_PID=$!
+while kill -0 "$TYPECHECK_PID" 2>/dev/null; do
+  sleep 10
+  echo "[type-check running] tail -n 40 $LOG_FILE"
+done
+wait "$TYPECHECK_PID"
+```
+
+## Long-running functional tests (Scout/FTR)
+
+- Use scoped test targets only (specific file/suite/config), never broad full-suite runs unless required.
+- Run long commands in the background with log file polling as documented in `action-ralph/test_execution.md`.
+- Common commands:
+
+```bash
+# Scout
+node scripts/scout.js run-tests --stateful --testFiles <spec-or-dir>
+
+# FTR
+yarn test:ftr --config <path/to/config> --grep "<target-suite-or-test>"
+```
+
+- Record command, log file path, and final pass/fail outcome in `## Additional Context`.
 
 ### Type-check caveats
 

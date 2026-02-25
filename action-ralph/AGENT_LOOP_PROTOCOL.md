@@ -37,6 +37,7 @@ Read `action-ralph/validation.md` for the full checklist. Key rules:
 - Always run selective validation for touched code; do not run all tests.
 - Pipe large test output to files so failures are searchable/replayable.
 - Actually execute validation before marking a task done.
+- For long-running checks (type-check, Scout, FTR, integration tests), follow `action-ralph/test_execution.md` and use background + poll + wait.
 
 ### Unit tests
 ```bash
@@ -53,6 +54,17 @@ yarn test:type_check --project <touched-tsconfig-path>
 - Do NOT run repo-wide lint/type-check unless the task requires it.
 - If type-check fails with project-map errors after branch changes, run `yarn kbn bootstrap` and retry.
 - Some bootstrap/type-check flows create untracked `*.d.ts` artifacts — don't include them in your changes.
+- If a scoped type-check may run for a long time, do not skip it. Start it with output redirected to a log file, then poll the process and tail/check the log until completion. Example:
+```bash
+LOG_FILE="/tmp/ralph-typecheck.log"
+yarn test:type_check --project <touched-tsconfig-path> > "$LOG_FILE" 2>&1 &
+TYPECHECK_PID=$!
+while kill -0 "$TYPECHECK_PID" 2>/dev/null; do
+  sleep 10
+  echo "[type-check still running]"
+done
+wait "$TYPECHECK_PID"
+```
 
 ## Kibana-specific gotchas
 
