@@ -87,6 +87,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
           ({ label, key, group, agents }): BuildkiteStep => ({
             label,
             command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+            cancel_on_build_failing: true,
             timeout_in_minutes: 60,
             agents,
             env: {

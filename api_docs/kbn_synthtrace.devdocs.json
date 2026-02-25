@@ -4524,7 +4524,7 @@
               ", modify: (template: ",
               "ClusterComponentTemplateSummary",
               ") => ",
-              "IndicesIndexState",
+              "IndicesPutIndexTemplateIndexTemplateMapping",
               ") => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
@@ -4561,7 +4561,7 @@
                   "(template: ",
                   "ClusterComponentTemplateSummary",
                   ") => ",
-                  "IndicesIndexState"
+                  "IndicesPutIndexTemplateIndexTemplateMapping"
                 ],
                 "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
                 "lineNumber": 46,

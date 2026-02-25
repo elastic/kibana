@@ -21,6 +21,290 @@
   },
   {
     "type": "object",
+    "description": "Synthetics stats overview embeddable schema",
+    "properties": {
+      "description": {
+        "type": "string"
+      },
+      "hide_title": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "string"
+      },
+      "drilldowns": {
+        "type": "array",
+        "maxItems": 100,
+        "items": {
+          "type": "object",
+          "properties": {
+            "encode_url": {
+              "type": "boolean",
+              "description": "When true, URL is escaped using percent encoding",
+              "default": true
+            },
+            "open_in_new_tab": {
+              "type": "boolean",
+              "default": true
+            },
+            "url": {
+              "type": "string",
+              "description": "Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable"
+            },
+            "label": {
+              "type": "string"
+            },
+            "trigger": {
+              "type": "string",
+              "enum": ["on_open_panel_menu"]
+            },
+            "type": {
+              "type": "string",
+              "enum": ["url_drilldown"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["url", "label", "trigger", "type"]
+        }
+      },
+      "filters": {
+        "type": "object",
+        "properties": {
+          "projects": {
+            "type": "array",
+            "description": "Filter by project",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          },
+          "tags": {
+            "type": "array",
+            "description": "Filter by tags",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          },
+          "monitor_ids": {
+            "type": "array",
+            "description": "Filter by monitor IDs",
+            "maxItems": 5000,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          },
+          "monitor_types": {
+            "type": "array",
+            "description": "Filter by monitor types",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          },
+          "locations": {
+            "type": "array",
+            "description": "Filter by monitor locations",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "additionalProperties": false
+  },
+  {
+    "type": "object",
+    "description": "Synthetics monitors embeddable schema",
+    "properties": {
+      "filters": {
+        "type": "object",
+        "properties": {
+          "projects": {
+            "type": "array",
+            "description": "Filter by project",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          },
+          "tags": {
+            "type": "array",
+            "description": "Filter by tags",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          },
+          "monitor_ids": {
+            "type": "array",
+            "description": "Filter by monitor IDs",
+            "maxItems": 5000,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          },
+          "monitor_types": {
+            "type": "array",
+            "description": "Filter by monitor types",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          },
+          "locations": {
+            "type": "array",
+            "description": "Filter by monitor locations",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Display label for the filter option"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Value for the filter option"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["label", "value"]
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "view": {
+        "description": "View mode for the monitors embeddable (defaults to cardView)",
+        "type": "string",
+        "enum": ["cardView", "compactView"]
+      },
+      "description": {
+        "type": "string"
+      },
+      "hide_title": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  },
+  {
+    "type": "object",
     "properties": {},
     "additionalProperties": true
   }
