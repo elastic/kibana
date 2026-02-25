@@ -866,8 +866,6 @@ jobs:
       pull-requests: read
     outputs:
       task: ${{ steps.review_prompt.outputs.task }}
-      model: ${{ steps.review_prompt.outputs.model }}
-      litellm_model: ${{ steps.review_prompt.outputs.litellm_model }}
 
     steps:
       - name: Resolve review prompt and model
@@ -886,7 +884,15 @@ jobs:
           LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
         run: |
           set -euo pipefail
+          if [ -z "${LITELLM_MODEL:-}" ]; then
+            echo "::error::LITELLM_MODEL secret is empty or missing."
+            exit 1
+          fi
           DEFAULT_MODEL="litellm/${LITELLM_MODEL}"
+          if [ "${DEFAULT_MODEL#litellm/}" = "" ]; then
+            echo "::error::Invalid default model. Expected litellm/<model>, got: ${DEFAULT_MODEL}"
+            exit 1
+          fi
           PROMPT_TEXT=$(printf '%s' "$COMMENT_BODY" | sed -n 's|.*/review-ralph\s*||p' | head -1)
 
           ISSUE_COMMENTS_JSON=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
@@ -945,7 +951,6 @@ jobs:
             echo 'RALPH_EOF'
           } >> "$GITHUB_OUTPUT"
           echo "model=${DEFAULT_MODEL}" >> "$GITHUB_OUTPUT"
-          echo "litellm_model=${DEFAULT_MODEL#litellm/}" >> "$GITHUB_OUTPUT"
 
   review_sandbox:
     name: "Review Phase B: Sandbox Analysis"
@@ -971,10 +976,14 @@ jobs:
         env:
           LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
           LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
-          LITELLM_MODEL: ${{ needs.review_prepare.outputs.litellm_model }}
+          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
           RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
+          if [ -z "${LITELLM_MODEL:-}" ]; then
+            echo "::error::LITELLM_MODEL secret is empty or missing."
+            exit 1
+          fi
           BASE="${LITELLM_BASE_URL%/}"
           NO_V1="${BASE%/v1}"
           API_KEY_ENDPOINT="${NO_V1}/key/generate"
@@ -995,9 +1004,13 @@ jobs:
       - name: Configure OpenCode for review mode
         env:
           LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
-          LITELLM_MODEL: ${{ needs.review_prepare.outputs.litellm_model }}
+          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
         run: |
           set -euo pipefail
+          if [ -z "${LITELLM_MODEL:-}" ]; then
+            echo "::error::LITELLM_MODEL secret is empty or missing."
+            exit 1
+          fi
           cat > "$GITHUB_WORKSPACE/opencode.json" <<OCEOF
           {
             "\$schema": "https://opencode.ai/config.json",
@@ -1023,10 +1036,14 @@ jobs:
       - name: Run read-only review
         env:
           LITELLM_API_KEY: ${{ steps.short_lived_key_review.outputs.api_key }}
-          MODEL: ${{ needs.review_prepare.outputs.model }}
+          MODEL: ${{ format('litellm/{0}', secrets.LITELLM_MODEL) }}
           TASK: ${{ needs.review_prepare.outputs.task }}
         run: |
           set -euo pipefail
+          if [ -z "${MODEL:-}" ] || [ "${MODEL#litellm/}" = "" ]; then
+            echo "::error::Review model is empty/invalid: '${MODEL:-<empty>}'"
+            exit 1
+          fi
           RALPH_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime"
           OUTPUT_DIR="$RALPH_DIR/review-output"
           mkdir -p "$OUTPUT_DIR"
