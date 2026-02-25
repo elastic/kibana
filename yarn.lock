@@ -6705,7 +6705,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-common@link:x-pack/platform/packages/shared/kbn-evals-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-phoenix-executor@link:x-pack/platform/packages/shared/kbn-evals-phoenix-executor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-plugin@link:x-pack/platform/plugins/shared/evals":
   version "0.0.0"
   uid ""
 
@@ -11895,7 +11903,7 @@
   resolved "https://registry.yarnpkg.com/@readme/openapi-schemas/-/openapi-schemas-3.1.0.tgz#5ff4b704af6a8b108f9d577fd87cf73e9e7b3178"
   integrity sha512-9FC/6ho8uFa8fV50+FPy/ngWN53jaUu4GRXlAjcxIRrzhltJnpKkBG2Tp0IDraFJeWrOpk84RJ9EMEEYzaI1Bw==
 
-"@redocly/ajv@8.17.1":
+"@redocly/ajv@8.17.1", "ajv@npm:@redocly/ajv@8.17.1":
   version "8.17.1"
   resolved "https://registry.yarnpkg.com/@redocly/ajv/-/ajv-8.17.1.tgz#e2b1722cbc8b4cd7e05da14a745d3ddd03293734"
   integrity sha512-EDtsGZS964mf9zAUXAl9Ew16eYbeyAFWhsPr0fX6oaJxgd8rApYlPBf0joyhnUHz88WxrigyFtTaqqzXNzPgqw==
@@ -15758,16 +15766,6 @@ ajv@^6.12.2, ajv@^6.12.4, ajv@^6.12.5:
     fast-json-stable-stringify "^2.0.0"
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
-
-"ajv@npm:@redocly/ajv@8.17.1":
-  version "8.17.1"
-  resolved "https://registry.yarnpkg.com/@redocly/ajv/-/ajv-8.17.1.tgz#e2b1722cbc8b4cd7e05da14a745d3ddd03293734"
-  integrity sha512-EDtsGZS964mf9zAUXAl9Ew16eYbeyAFWhsPr0fX6oaJxgd8rApYlPBf0joyhnUHz88WxrigyFtTaqqzXNzPgqw==
-  dependencies:
-    fast-deep-equal "^3.1.3"
-    fast-uri "^3.0.1"
-    json-schema-traverse "^1.0.0"
-    require-from-string "^2.0.2"
 
 "ajv@npm:@redocly/ajv@8.17.2":
   version "8.17.2"
