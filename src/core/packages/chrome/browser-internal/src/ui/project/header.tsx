@@ -113,6 +113,9 @@ const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppAction
   );
   return (
     <EuiHeaderLinks gutterSize="none" popoverBreakpoints="none">
+      {config.secondaryActions?.map((action, index) => (
+        <React.Fragment key={index}>{action}</React.Fragment>
+      ))}
       {hasOverflow && (
         <EuiPopover
           button={overflowButton}

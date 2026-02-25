@@ -68,7 +68,7 @@ const OverflowKeyPadSection: React.FC = () => (
 );
 
 /**
- * POC: Header app actions config for Cases (overflow with keypad + Settings, primary New button).
+ * Header app actions config for Cases (secondary New button + overflow with keypad + Settings).
  * Set when app mounts; platform clears on app change.
  */
 export function getCasesHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
@@ -89,7 +89,7 @@ export function getCasesHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
         ],
       },
     ],
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="new"
         size="xs"

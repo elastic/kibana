@@ -195,9 +195,9 @@ const DiscoverSaveButton: React.FC = () => {
 };
 
 /**
- * POC: Static header app actions config for Discover (overflow + New, Share, Save).
+ * POC: Static header app actions config for Discover (secondary: New, Share, overflow; primary: Save).
  * Same pattern as setHelpExtension: set when app mounts; cleared on app change.
- * @param openShareModal - Callback to open the shared Share modal (used by primary Share button and overflow Share keypad item).
+ * @param openShareModal - Callback to open the shared Share modal (used by secondary Share button and overflow Share keypad item).
  */
 export function getDiscoverHeaderAppActionsConfig(
   openShareModal: () => void
@@ -241,7 +241,7 @@ export function getDiscoverHeaderAppActionsConfig(
         ],
       },
     ],
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="new"
         size="xs"
@@ -261,7 +261,7 @@ export function getDiscoverHeaderAppActionsConfig(
       >
         Share
       </EuiButtonIcon>,
-      <DiscoverSaveButton key="save" />,
     ],
+    primaryActions: [<DiscoverSaveButton key="save" />],
   };
 }

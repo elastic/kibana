@@ -65,9 +65,8 @@ const FleetOverflowKeyPadSection: React.FC = () => (
 );
 
 /**
- * Header app actions config for the Fleet app (overflow panel + primary New button).
+ * Header app actions config for the Fleet app (secondary New button + overflow).
  * Set when app mounts; platform clears on app change.
- * Platform renders the overflow trigger automatically when overflowPanels are present.
  */
 export function getFleetHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
   return {
@@ -95,7 +94,7 @@ export function getFleetHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
         ],
       },
     ],
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="fleet-new"
         size="xs"

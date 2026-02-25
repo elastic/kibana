@@ -19,8 +19,7 @@ export interface SloHeaderAppActionsConfigDeps {
 }
 
 /**
- * Header app actions config for the SLOs app: overflow menu (Annotations, Docs, Manage, Settings)
- * and icon-only primary "New" button.
+ * Header app actions config for the SLOs app: secondary New button + overflow (Annotations, Docs, Manage, Settings).
  */
 export function getSloHeaderAppActionsConfig(
   deps: SloHeaderAppActionsConfigDeps
@@ -64,7 +63,7 @@ export function getSloHeaderAppActionsConfig(
         ],
       },
     ],
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="slo-new"
         size="xs"

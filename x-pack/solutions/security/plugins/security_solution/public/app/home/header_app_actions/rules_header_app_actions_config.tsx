@@ -97,8 +97,7 @@ const RulesOverflowKeyPadSection: React.FC<{ onCreateRule: () => void }> = ({ on
 
 /**
  * Header app actions config for the Security > Rules management page.
- * Overflow: keypad (New, Favorite, Share) + Add Elastic rules, Manage value lists, Import rules, divider, Settings.
- * Primary: plusInCircle add button (Create new rule).
+ * Secondary: plusInCircle add button (Create new rule). Overflow: keypad + Add Elastic rules, Manage value lists, Import rules, Settings.
  * Set when the Rules management page mounts; cleared when navigating away.
  */
 export function getRulesHeaderAppActionsConfig(
@@ -132,7 +131,7 @@ export function getRulesHeaderAppActionsConfig(
         ],
       },
     ],
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="rules-add"
         size="xs"

@@ -79,8 +79,7 @@ export interface StreamsHeaderAppActionsConfigDeps {
 }
 
 /**
- * Header app actions config for the Streams app: overflow menu (Settings link)
- * and icon-only primary "New" button (create classic stream).
+ * Header app actions config for the Streams app: secondary New button + overflow (Settings).
  */
 export function getStreamsHeaderAppActionsConfig(
   deps: StreamsHeaderAppActionsConfigDeps
@@ -103,7 +102,7 @@ export function getStreamsHeaderAppActionsConfig(
         ],
       },
     ],
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="streams-new"
         size="xs"
@@ -126,8 +125,7 @@ export interface StreamDetailHeaderAppActionsConfigDeps {
 }
 
 /**
- * Header app actions config for the Stream detail view: overflow (New, Favorite, Share keypad;
- * Docs; Feedback) and primary action button with Discover app icon.
+ * Header app actions config for the Stream detail view: secondary Discover icon + overflow (keypad, Docs, Feedback).
  */
 export function getStreamDetailHeaderAppActionsConfig(
   deps: StreamDetailHeaderAppActionsConfigDeps = {}
@@ -158,7 +156,7 @@ export function getStreamDetailHeaderAppActionsConfig(
         ],
       },
     ],
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="stream-detail-discover"
         size="xs"

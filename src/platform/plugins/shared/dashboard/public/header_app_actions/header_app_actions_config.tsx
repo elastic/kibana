@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -28,8 +28,24 @@ const noop = () => {};
 
 const EXPORT_PANEL_ID = 1;
 
-/** Synced from DashboardPrimaryActions so overflow menu can hide "Reset changes" in edit mode. */
+/** Shared edit mode state so overflow menu and secondary/primary actions stay in sync. */
 let dashboardHeaderIsEditMode = false;
+const editModeListeners: Array<(value: boolean) => void> = [];
+const setDashboardHeaderIsEditMode = (value: boolean) => {
+  dashboardHeaderIsEditMode = value;
+  editModeListeners.forEach((listener) => listener(value));
+};
+const useDashboardHeaderEditMode = (): [boolean, (value: boolean) => void] => {
+  const [isEditMode, setIsEditMode] = useState(dashboardHeaderIsEditMode);
+  useEffect(() => {
+    editModeListeners.push(setIsEditMode);
+    return () => {
+      const index = editModeListeners.indexOf(setIsEditMode);
+      if (index !== -1) editModeListeners.splice(index, 1);
+    };
+  }, []);
+  return [isEditMode, setDashboardHeaderIsEditMode];
+};
 
 const overflowKeyPadCss = css`
   justify-content: center;
@@ -57,6 +73,12 @@ const DashboardSaveSplitButton: React.FC = () => {
     background-color: transparent !important;
     height: 28px !important;
     margin-left: 4px;
+  `;
+  const secondaryActionButtonCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 0;
+    margin-right: 8px;
   `;
   const panels = [
     {
@@ -92,7 +114,7 @@ const DashboardSaveSplitButton: React.FC = () => {
       <EuiPopover
         button={React.cloneElement(
           <EuiSplitButton.ActionSecondary
-            css={primaryActionButtonCss}
+            css={secondaryActionButtonCss}
             iconType="arrowDown"
             aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
               defaultMessage: 'Save options',
@@ -112,14 +134,8 @@ const DashboardSaveSplitButton: React.FC = () => {
   );
 };
 
-const DashboardPrimaryActions: React.FC = () => {
-  const [isEditMode, setIsEditMode] = useState(false);
-  const primaryActionButtonCss = css`
-    background-color: transparent !important;
-    height: 28px !important;
-    margin-left: 4px;
-  `;
-
+const DashboardSecondaryActions: React.FC = () => {
+  const [isEditMode, setEditMode] = useDashboardHeaderEditMode();
   return (
     <>
       <EuiButtonIcon
@@ -143,62 +159,71 @@ const DashboardPrimaryActions: React.FC = () => {
           })}
         />
       )}
-      {isEditMode ? (
-        <>
-          <EuiButtonIcon
-            size="xs"
-            color="text"
-            iconType="logOut"
-            onClick={() => {
-              dashboardHeaderIsEditMode = false;
-              setIsEditMode(false);
-            }}
-            data-test-subj="headerGlobalNav-appActionsExitEditButton"
-            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.exitEditAriaLabel', {
-              defaultMessage: 'Exit edit',
-            })}
-          />
-          <DashboardSaveSplitButton />
-          <EuiButton
-            css={primaryButtonCss}
-            size="s"
-            color="success"
-            minWidth={false}
-            iconType="plusInCircle"
-            onClick={noop}
-            data-test-subj="headerGlobalNav-appActionsAddButton"
-            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.addAriaLabel', {
-              defaultMessage: 'Add',
-            })}
-          >
-            {i18n.translate('core.ui.chrome.headerGlobalNav.addButton', {
-              defaultMessage: 'Add',
-            })}
-          </EuiButton>
-        </>
-      ) : (
-        <EuiButton
-          css={primaryActionButtonCss}
-          size="s"
+      {isEditMode && (
+        <EuiButtonIcon
+          size="xs"
           color="text"
-          fill={false}
-          minWidth={false}
-          iconType="pencil"
-          onClick={() => {
-            dashboardHeaderIsEditMode = true;
-            setIsEditMode(true);
-          }}
-          data-test-subj="headerGlobalNav-appActionsEditButton"
-          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.editAriaLabel', {
-            defaultMessage: 'Edit',
+          iconType="logOut"
+          onClick={() => setEditMode(false)}
+          data-test-subj="headerGlobalNav-appActionsExitEditButton"
+          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.exitEditAriaLabel', {
+            defaultMessage: 'Exit edit',
           })}
-        >
-          {i18n.translate('core.ui.chrome.headerGlobalNav.editButton', {
-            defaultMessage: 'Edit',
-          })}
-        </EuiButton>
+        />
       )}
     </>
+  );
+};
+
+const DashboardPrimaryActions: React.FC = () => {
+  const [isEditMode, setEditMode] = useDashboardHeaderEditMode();
+  const primaryActionButtonCss = css`
+    background-color: transparent !important;
+    height: 28px !important;
+    margin-left: 4px;
+  `;
+
+  if (isEditMode) {
+    return (
+      <>
+        <EuiButton
+          css={primaryButtonCss}
+          size="s"
+          color="success"
+          minWidth={false}
+          iconType="plusInCircle"
+          onClick={noop}
+          data-test-subj="headerGlobalNav-appActionsAddButton"
+          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.addAriaLabel', {
+            defaultMessage: 'Add',
+          })}
+        >
+          {i18n.translate('core.ui.chrome.headerGlobalNav.addButton', {
+            defaultMessage: 'Add',
+          })}
+        </EuiButton>
+        <DashboardSaveSplitButton />
+      </>
+    );
+  }
+  return (
+    <EuiButton
+      css={primaryActionButtonCss}
+      size="s"
+      color="text"
+      fill={false}
+      minWidth={false}
+      iconType="pencil"
+      onClick={() => setEditMode(true)}
+      data-test-subj="headerGlobalNav-appActionsEditButton"
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.editAriaLabel', {
+        defaultMessage: 'Edit',
+      })}
+    >
+      {i18n.translate('core.ui.chrome.headerGlobalNav.editButton', {
+        defaultMessage: 'Edit',
+      })}
+    </EuiButton>
   );
 };
 
@@ -235,13 +260,13 @@ const DashboardOverflowKeyPadSection: React.FC = () => (
 );
 
 /**
- * Header app actions config for the Dashboards listing page: icon-only "New" button.
+ * Header app actions config for the Dashboards listing page: icon-only "New" button (secondary).
  */
 export function getDashboardListingHeaderAppActionsConfig(
   onCreateDashboard: () => void
 ): ChromeHeaderAppActionsConfig {
   return {
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="listing-new-dashboard"
         size="xs"
@@ -258,7 +283,7 @@ export function getDashboardListingHeaderAppActionsConfig(
 }
 
 /**
- * Header app actions config for the Dashboards app (overflow + Full screen, Share, Edit).
+ * Header app actions config for the Dashboards app (secondary: Share, Full screen, Exit; overflow; primary: Edit or Save+Add).
  * Same pattern as Discover: set when app mounts; cleared on app change.
  */
 export function getDashboardHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
@@ -311,6 +336,7 @@ export function getDashboardHeaderAppActionsConfig(): ChromeHeaderAppActionsConf
         ],
       },
     ],
+    secondaryActions: [<DashboardSecondaryActions key="dashboard-secondary-actions" />],
     primaryActions: [<DashboardPrimaryActions key="dashboard-primary-actions" />],
   };
 }

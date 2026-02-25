@@ -60,9 +60,8 @@ export interface ChromeHeaderAppActionsSavePopoverPanel {
  * Configuration for the global header app actions section.
  * Set by the current app via chrome.setHeaderAppActionsConfig(); cleared on app change.
  *
- * - Overflow is fixed: its menu content comes from overflowPanels.
- * - The other slots are app-specific: the app passes an ordered array of complete
- *   button elements (e.g. Discover: New, Share, Save; Dashboard: Full screen, Share, Edit).
+ * - Secondary actions (e.g. icon-only New, Share) render first, then the overflow button, then primary actions.
+ * - Overflow menu content comes from overflowPanels; overflow is always the last button in the secondary group.
  *
  * @public
  */
@@ -70,9 +69,13 @@ export interface ChromeHeaderAppActionsConfig {
   /** Panels for the overflow (•••) context menu. If provided and non-empty, the overflow button is shown. */
   overflowPanels?: ChromeHeaderAppActionsOverflowPanel[];
   /**
-   * Ordered array of complete button elements to show after the overflow button.
-   * Each item is app-specific (e.g. New, Share, Save for Discover; Full screen, Share, Edit for Dashboard).
-   * The app provides the full React element(s); the header just renders them in order.
+   * Ordered array of actions shown before the overflow button (secondary group).
+   * Typically icon-only buttons (e.g. New, Share). Overflow is rendered after these.
+   */
+  secondaryActions?: React.ReactNode[];
+  /**
+   * Ordered array of primary actions shown after the overflow button.
+   * Typically the main CTA(s), e.g. Save split button.
    */
   primaryActions?: React.ReactNode[];
 }
