@@ -93,6 +93,7 @@ async function muteInstanceWithOCC(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
+  // Conditional snooze is redundant when the rule is already muted globally.
   if (attributes.muteAll && isConditionalSnooze) {
     throw Boom.badRequest(
       `Unable to apply conditional snooze to alert instance "${alertInstanceId}" because rule "${ruleId}" is muted via muteAll`
@@ -101,6 +102,9 @@ async function muteInstanceWithOCC(
 
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
+  // Conditional snooze must be applied to both the rule SO (snoozedInstances) and the current
+  // AAD doc (ALERT_MUTED + snooze fields). Without indices we cannot update the doc, so we'd
+  // end up in a partial state until the next rule run. We throw to require full apply in one go.
   if (isConditionalSnooze && (!indices || indices.length === 0)) {
     throw Boom.badRequest(
       `Unable to apply conditional snooze to alert instance "${alertInstanceId}" because no alert indices are available for rule "${ruleId}"`
