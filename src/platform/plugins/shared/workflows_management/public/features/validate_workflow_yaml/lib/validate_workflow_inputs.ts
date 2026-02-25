@@ -200,11 +200,10 @@ function validateStepInputs(
   const workflowIdProp = step.propInfos['with.workflow-id'];
   if (!workflowIdProp) return results;
 
+  // with.inputs appears in propInfos only when it is a scalar (e.g. liquid template).
+  // When it is a map we have with.inputs.foo, with.inputs.bar etc. and no with.inputs entry.
   const inputsProp = step.propInfos['with.inputs'];
-  const inputsValue =
-    inputsProp?.valueNode && 'value' in inputsProp.valueNode
-      ? inputsProp.valueNode.value
-      : undefined;
+  const inputsValue = inputsProp ? getValueFromValueNode(inputsProp.valueNode) : undefined;
   if (inputsProp && typeof inputsValue === 'string' && isDynamicValue(inputsValue)) {
     return results;
   }
@@ -232,9 +231,15 @@ function validateStepInputs(
     }
   }
 
+  // When inputs is a map, propInfos has no 'with.inputs' entry; use first with.inputs.* child or workflow-id
+  const firstInputChildKey = Object.keys(step.propInfos).find(
+    (k) => k.startsWith(WITH_INPUTS_PREFIX) && k.length > WITH_INPUTS_PREFIX.length
+  );
+  const firstInputChildProp = firstInputChildKey ? step.propInfos[firstInputChildKey] : undefined;
   const missingRequiredAnchor =
-    step.propInfos['with.inputs']?.keyNode ??
-    step.propInfos['with.inputs']?.valueNode ??
+    inputsProp?.keyNode ??
+    inputsProp?.valueNode ??
+    firstInputChildProp?.keyNode ??
     workflowIdProp.valueNode ??
     workflowIdProp.keyNode;
 
@@ -317,10 +322,7 @@ function getStepValidationContext(
 } | null {
   const workflowIdProp = step.propInfos['with.workflow-id'];
   if (!workflowIdProp) return null;
-  const workflowId =
-    workflowIdProp.valueNode && 'value' in workflowIdProp.valueNode
-      ? workflowIdProp.valueNode.value
-      : undefined;
+  const workflowId = getValueFromValueNode(workflowIdProp.valueNode);
   if (typeof workflowId !== 'string' || !workflowId || isDynamicValue(workflowId)) return null;
   const childWorkflow = workflows[workflowId];
   const schema = childWorkflow?.inputsSchema;
@@ -346,10 +348,9 @@ export function validateWorkflowInputs(
       results.push(...validateStepInputs(ctx.step, ctx.childWorkflow, ctx.schema, lineCounter));
     } else {
       const workflowIdProp = step.propInfos['with.workflow-id'];
-      const workflowId =
-        workflowIdProp?.valueNode && 'value' in workflowIdProp.valueNode
-          ? workflowIdProp.valueNode.value
-          : undefined;
+      const workflowId = workflowIdProp
+        ? getValueFromValueNode(workflowIdProp.valueNode)
+        : undefined;
       if (
         typeof workflowId === 'string' &&
         workflowId.length > 0 &&

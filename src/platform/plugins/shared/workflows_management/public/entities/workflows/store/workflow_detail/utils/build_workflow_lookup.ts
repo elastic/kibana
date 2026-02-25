@@ -24,24 +24,16 @@ export interface StepInfo {
 export interface StepPropInfo {
   path: string[];
   keyNode: YAML.Scalar<unknown>;
-  /** Value node: scalar for leaf props, or YAMLMap when the value is a nested mapping (e.g. `inputs: { a: 1 }`). */
-  valueNode: YAML.Scalar<unknown> | YAML.YAMLMap<unknown, unknown>;
+  /** Value node: always a scalar (leaf property). Intermediate map nodes are not recorded in propInfos. */
+  valueNode: YAML.Scalar<unknown>;
 }
 
 /**
- * Get plain JavaScript value from a step property value node (Scalar or YAMLMap).
- * For mappings (e.g. `c: {}`) the node is a YAMLMap and must be converted via toJSON().
+ * Get plain JavaScript value from a step property value node (scalar).
  */
 export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unknown {
   if (!valueNode) return undefined;
-  const node = valueNode as { toJSON?: () => unknown; value?: unknown };
-  if (typeof node.toJSON === 'function') {
-    return node.toJSON();
-  }
-  if ('value' in valueNode) {
-    return (valueNode as { value: unknown }).value;
-  }
-  return undefined;
+  return (valueNode as { value?: unknown }).value;
 }
 
 /**
@@ -183,16 +175,17 @@ export function inspectStep(
   return result;
 }
 
+/**
+ * Collects step property metadata for leaf values only.
+ * Intermediate map nodes (e.g. `with.inputs` when it is a mapping) are not
+ * recorded; only scalar leaves (e.g. `with.inputs.field1`) appear in the result.
+ * So e.g. propInfos['with.inputs'] exists only when the value is a scalar (e.g.
+ * a liquid template string), not when it is a map. Consumers can assume every
+ * propInfo.valueNode is a Scalar.
+ */
 function visitStepProps(node: any, stack: string[] = []): Record<string, StepPropInfo> {
   const result: Record<string, StepPropInfo> = {};
   if (YAML.isMap(node.value)) {
-    const path = [...stack, node.key.value];
-    const composedKey = path.join('.');
-    result[composedKey] = {
-      path,
-      keyNode: node.key,
-      valueNode: node.value,
-    };
     stack.push(node.key.value);
     node.value.items.forEach((childNode: any) => {
       Object.assign(result, visitStepProps(childNode, stack));
