@@ -1,6 +1,6 @@
 > **⚠️ DISCLAIMER: Do not add production workflows in this directory**
 >
-> **Hardcoding workflows like this is not officially supported yet. Do not do this unless this is exclusively used for testing**
+> **Hardcoding workflows like this is not officially supported yet. Do not do this unless this is exclusively used internally**
 >
 > This implementation exists **only for development and testing purposes**. Workflows should be created and managed through the proper workflows management APIs or UI, system workflows are not supported yet.
 >
@@ -16,21 +16,13 @@ This directory contains preinstalled workflows that are automatically bootstrapp
 
 ### Enable Preinstalled Workflows Bootstrap
 
-To enable the automatic installation of preinstalled workflows, set the following feature flag in your `kibana.yml`:
+To enable the automatic installation of preinstalled workflows, set the following feature flag in your `kibana.dev.yml`:
 
 ```yaml
 xpack.securitySolution.preinstalledWorkflows.enabled: true
 ```
 
-**Note:** The default value is `true`, so workflows will be installed automatically unless explicitly disabled.
-
-### Enable Security Alerts Attachment
-
-To enable security alerts attachment functionality (required for alert_validation_workflow.yml workflow), set the following feature flag:
-
-```yaml
-xpack.aiAssistant.aiAgents.enabled: true
-```
+**Note:** The default value is `false`, so workflows will not be installed automatically unless explicitly enabled.
 
 Restart Kibana once these feature flags are enabled. This will install the workflows on startup.
 
@@ -58,7 +50,7 @@ curl --location 'http://localhost:5601/api/detection_engine/rules/_bulk_action' 
               "params": {
                 "subAction": "run",
                 "subActionParams": {
-                  "workflowId": "workflow-3cf6d7f4-864f-4722-834d-ae1743f445ee",
+                  "workflowId": "workflow-3cf6d7f4-864f-4722-834d-ae1743f445ea",
                   "summaryMode": false
                 }
               }
@@ -71,7 +63,7 @@ curl --location 'http://localhost:5601/api/detection_engine/rules/_bulk_action' 
 ```
 
 **Parameters:**
-- `workflowId`: The ID of the workflow to execute (e.g., `workflow-3cf6d7f4-864f-4722-834d-ae1743f445ee`)
+- `workflowId`: The ID of the workflow to execute (e.g., `workflow-3cf6d7f4-864f-4722-834d-ae1743f445ea`)
 - `summaryMode`: 
   - `false` - Run workflow per alert (executes separately for each individual alert)
   - `true` - Run workflow in summary mode (executes once with all alerts batched together)

@@ -199,7 +199,8 @@ export class PreinstalledWorkflowsBootstrap {
    * Check if workflow should be updated by comparing YAML
    */
   private shouldUpdate(existingYaml: string, fileYaml: string): boolean {
-    return this.normalizeYaml(existingYaml) !== this.normalizeYaml(fileYaml);
+    // return this.normalizeYaml(existingYaml) !== this.normalizeYaml(fileYaml);
+    return false // never update preinstalled workflows as the user may have made changes. 
   }
 
   /**

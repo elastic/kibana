@@ -177,15 +177,7 @@ export const buildAlertEntityGraphStepDefinition = createServerStepDefinition({
         min_entity_score,
         include_seed,
       } = context.input;
-      const spaceId = context.contextManager.getContext().workflow.spaceId;
-      // Alerts can come from the concrete internal index (e.g. `.internal.alerts-security.alerts-<space>-000001`).
-      // The public alias (e.g. `.alerts-security.alerts-<space>`) may not include internal backing indices in all deployments.
-      // Prefer searching the concrete internal index (exact name) when the seed came from an internal index,
-      // because some deployments/users can read the concrete index but wildcard expansion yields 0 hits.
-      const internalIndexPrefix = `.internal${DEFAULT_ALERTS_INDEX}-${spaceId}`;
-      const searchIndex = alertIndex.startsWith(internalIndexPrefix)
-        ? alertIndex
-        : `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+      const searchIndex = alertIndex
       const esClient = context.contextManager.getScopedEsClient();
 
       const entityFieldConfigs = (

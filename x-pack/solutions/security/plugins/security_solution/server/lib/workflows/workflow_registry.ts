@@ -9,7 +9,7 @@ export interface PreinstalledWorkflow {
   id: string;
   /**
    * Relative file path from the workflows directory to the YAML file
-   * Example: './preinstalled_workflows/alert_validation_worklfow.yml'
+   * Example: './preinstalled_workflows/alert_validation_workflow.yml'
    */
   filePath: string;
 }

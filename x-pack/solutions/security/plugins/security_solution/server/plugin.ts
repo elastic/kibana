@@ -705,11 +705,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.registerWorkflowSteps(plugins.workflowsExtensions);
 
     if (plugins.workflowsManagement) {
-      // Bootstrap pre-installed workflows after all plugins have completed start().
-      // WorkflowsService initializes asynchronously via core.getStartServices() during
-      // its own setup, so the management API is only usable once that promise resolves.
-      // Chaining on getStartServices() here (the standard Kibana deferred-work pattern)
-      // guarantees every plugin's start() has returned before we attempt any API calls.
       const workflowsManagement = plugins.workflowsManagement;
       core
         .getStartServices()
