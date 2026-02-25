@@ -98,15 +98,27 @@ export const useToggleEntityAnalytics = ({
     isMutationLoading: isLoading,
   });
 
+  const safeErrorMessage = (error: unknown): string => {
+    if (error && typeof error === 'object' && 'body' in error) {
+      const body = (error as { body?: { message?: string } }).body;
+      if (body && typeof body.message === 'string') return body.message;
+    }
+    return 'An unknown error occurred';
+  };
+
   const errors: EntityAnalyticsErrors = {
     riskEngine: [
-      ...(initRiskEngineMutation.isError ? [initRiskEngineMutation.error.body.message] : []),
-      ...(enableRiskEngineMutation.isError ? [enableRiskEngineMutation.error.body.message] : []),
-      ...(disableRiskEngineMutation.isError ? [disableRiskEngineMutation.error.body.message] : []),
+      ...(initRiskEngineMutation.isError ? [safeErrorMessage(initRiskEngineMutation.error)] : []),
+      ...(enableRiskEngineMutation.isError
+        ? [safeErrorMessage(enableRiskEngineMutation.error)]
+        : []),
+      ...(disableRiskEngineMutation.isError
+        ? [safeErrorMessage(disableRiskEngineMutation.error)]
+        : []),
     ],
     entityStore: [
       ...(enableEntityStoreMutation.isError
-        ? [(enableEntityStoreMutation.error as { body: { message: string } }).body.message]
+        ? [safeErrorMessage(enableEntityStoreMutation.error)]
         : []),
     ],
   };
@@ -151,6 +163,8 @@ export const useToggleEntityAnalytics = ({
 
         addSuccess(i18n.RISK_ENGINE_TURNED_ON, TOAST_OPTIONS);
       }
+    } catch {
+      // Errors are surfaced via mutation.isError states in the error panel
     } finally {
       setIsToggling(false);
     }

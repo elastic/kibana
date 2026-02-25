@@ -45,7 +45,10 @@ export const ClearEntityDataButton: React.FC<ClearEntityDataButtonProps> = ({
           titleProps={{ id: modalTitleId }}
           onCancel={closeClearModal}
           onConfirm={() => {
-            deleteEntityEngineMutation.mutateAsync().then(closeClearModal);
+            deleteEntityEngineMutation
+              .mutateAsync()
+              .then(closeClearModal)
+              .catch(() => {});
           }}
           cancelButtonText={
             <FormattedMessage

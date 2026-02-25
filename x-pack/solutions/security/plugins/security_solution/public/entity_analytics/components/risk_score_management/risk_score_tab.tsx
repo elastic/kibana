@@ -53,7 +53,6 @@ export const RiskScoreTab: React.FC<RiskScoreTabProps> = ({
 
   return (
     <>
-      <EuiHorizontalRule />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         {!selectedRiskEngineSettings && (
           <EuiFlexItem>

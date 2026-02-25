@@ -59,8 +59,8 @@ export const EntityAnalyticsErrorPanel: React.FC<{
         <p>{i18n.ERROR_PANEL_MESSAGE}</p>
         <EuiAccordion id="entity-analytics-errors" buttonContent={i18n.ERROR_PANEL_ERRORS}>
           <>
-            {allErrors.map((error) => (
-              <div key={error}>
+            {allErrors.map((error, index) => (
+              <div key={index}>
                 <EuiText size="s">{error}</EuiText>
                 <EuiSpacer size="s" />
               </div>

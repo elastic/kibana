@@ -9,12 +9,15 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
+import type { UseMutationResult } from '@kbn/react-query';
+
 import {
   EntityAnalyticsHealth,
   EntityAnalyticsErrorPanel,
   EntityAnalyticsToggle,
 } from './entity_analytics_toggle';
 import type { EntityAnalyticsStatus } from '../hooks/use_entity_analytics_status';
+import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 
 const mockToggle = jest.fn();
 jest.mock('../hooks/use_toggle_entity_analytics', () => ({
@@ -90,9 +93,15 @@ describe('EntityAnalyticsErrorPanel', () => {
 
 describe('EntityAnalyticsToggle', () => {
   const defaultProps = {
-    privileges: { isLoading: false, hasAllRequiredPrivileges: true } as never,
+    privileges: {
+      isLoading: false,
+      hasAllRequiredPrivileges: true,
+    } as RiskEngineMissingPrivilegesResponse,
     selectedSettingsMatchSavedSettings: true,
-    saveSelectedSettingsMutation: { isLoading: false, mutateAsync: jest.fn() } as never,
+    saveSelectedSettingsMutation: {
+      isLoading: false,
+      mutateAsync: jest.fn(),
+    } as unknown as UseMutationResult<void, unknown, void, unknown>,
   };
 
   beforeEach(() => {
@@ -152,7 +161,11 @@ describe('EntityAnalyticsToggle', () => {
   it('disables the switch when privileges are missing', () => {
     const props = {
       ...defaultProps,
-      privileges: { isLoading: false, hasAllRequiredPrivileges: false } as never,
+      privileges: {
+        isLoading: false,
+        hasAllRequiredPrivileges: false,
+        missingPrivileges: { clusterPrivileges: { enable: [], run: [] }, indexPrivileges: [] },
+      } as RiskEngineMissingPrivilegesResponse,
     };
     mockEntityEnginePrivilegesReturn = {
       data: { has_all_required: false },

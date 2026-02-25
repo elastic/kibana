@@ -44,7 +44,7 @@ export const RunRiskEngineButton: React.FC<RunRiskEngineButtonProps> = ({
   const runEngineEnabled = currentRiskEngineStatus === 'ENABLED';
 
   const [isLoadingRunRiskEngine, setIsLoadingRunRiskEngine] = useState(false);
-  const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
+  const { mutateAsync: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
 
   const userCanRunEngine =
@@ -66,10 +66,8 @@ export const RunRiskEngineButton: React.FC<RunRiskEngineButtonProps> = ({
   const handleRunEngineClick = async () => {
     setIsLoadingRunRiskEngine(true);
     try {
-      scheduleNowRiskEngine();
-      if (!isLoadingRunRiskEngine) {
-        addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
-      }
+      await scheduleNowRiskEngine();
+      addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
     } catch (error) {
       addError(error, { title: i18n.RISK_SCORE_ENGINE_RUN_FAILURE });
     } finally {
