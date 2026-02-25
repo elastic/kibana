@@ -191,7 +191,7 @@ export function getSystemPrompt({
           ', '
         )}), ${
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
-            ? `first check the \`${CONTEXT_FUNCTION_NAME}\` response (provided automatically) to find time range. If no time range is found in context,`
+            ? `first check the \`${CONTEXT_FUNCTION_NAME}\` tool response (provided automatically) to find time range. If no time range is found in context,`
             : ''
         } use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user. ${
           isFunctionAvailable(ALERTS_FUNCTION_NAME)
