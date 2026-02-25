@@ -108,6 +108,7 @@ export function ServiceHeaderBadges({
             sloCount={mostCriticalSloStatus.count}
             serviceName={serviceName}
             onClick={onSloClick}
+            telemetryLocation="service_view_badge"
           />
         </EuiFlexItem>
       )}

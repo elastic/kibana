@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import type { SloStatus } from '../../../common/service_inventory';
 import type { ApmIndicatorType } from '../../../common/slo_indicator_types';
 
 export interface TelemetryServiceSetupParams {
@@ -36,6 +37,7 @@ export interface SloCreateFlowStartedParams {
 
 export interface SloManageFlowStartedParams {
   location: 'service_inventory_badge' | 'service_view_badge';
+  sloStatus: SloStatus | 'noSLOs';
 }
 
 export interface SloAppRedirectClickedParams {

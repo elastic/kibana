@@ -9,6 +9,8 @@ import type { MouseEventHandler } from 'react';
 import React from 'react';
 import { EuiBadge, EuiToolTip, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import type { SloStatus } from '../../../../common/service_inventory';
 
 interface SloStatusConfig {
@@ -117,12 +119,16 @@ export function SloStatusBadge({
   sloCount,
   serviceName,
   onClick,
+  telemetryLocation,
 }: {
   sloStatus: SloStatus | 'noSLOs';
   sloCount?: number;
   serviceName: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
+  telemetryLocation?: 'service_inventory_badge' | 'service_view_badge';
 }) {
+  const { telemetry } = useKibana<ApmPluginStartDeps & ApmServices>().services;
+
   const config = SLO_STATUS_CONFIG[sloStatus];
   const cappedCount =
     config.showCount && sloCount
@@ -131,13 +137,20 @@ export function SloStatusBadge({
         : sloCount
       : undefined;
 
+  const onClickWithTelemetry: MouseEventHandler<HTMLButtonElement> = (e) => {
+    if (telemetryLocation) {
+      telemetry.reportSloManageFlowStarted({ sloStatus, location: telemetryLocation });
+    }
+    onClick(e);
+  };
+
   return (
     <EuiToolTip position="bottom" content={config.tooltipContent}>
       <EuiBadge
         data-test-subj="serviceInventorySloBadge"
         data-slo-status={sloStatus}
         color={config.color}
-        onClick={onClick}
+        onClick={onClickWithTelemetry}
         onClickAriaLabel={config.ariaLabel(serviceName)}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s">

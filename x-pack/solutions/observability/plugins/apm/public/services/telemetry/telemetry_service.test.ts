@@ -78,6 +78,7 @@ describe('TelemetryService', () => {
   it('should report slo manage flow started event with the properties', async () => {
     const params: SloManageFlowStartedParams = {
       location: 'service_inventory_badge',
+      sloStatus: 'noSLOs',
     };
 
     telemetry.reportSloManageFlowStarted(params);

@@ -96,6 +96,12 @@ const sloManageFlowStartedEventType: TelemetryEvent = {
         description: 'The location from which the SLO manage flow was started',
       },
     },
+    sloStatus: {
+      type: 'keyword',
+      _meta: {
+        description: 'The status of the SLOs related to the manage flow started event',
+      },
+    },
   },
 };
 
