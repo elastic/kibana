@@ -48,6 +48,41 @@ import { nanosToMicros } from '../nanos_to_micros';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
 
+/**
+ * Returns AAD snooze fields for a given instance from the rule's snoozedInstances.
+ * Used when building a new alert (e.g. re-fire after recovery) so the new document
+ * gets snooze detail fields from the rule SO even when there is no existingAlert.
+ */
+function getSnoozeFieldsFromRule(
+  alertInstanceId: string,
+  ruleData?: AlertRuleData
+): Partial<Record<string, unknown>> {
+  const entry = (ruleData?.snoozedInstances ?? []).find((e) => e.instanceId === alertInstanceId);
+  if (!entry) {
+    return {};
+  }
+  const fields: Partial<Record<string, unknown>> = {};
+  if (entry.expiresAt != null) {
+    fields[ALERT_SNOOZE_EXPIRES_AT] = entry.expiresAt;
+  }
+  if (entry.conditions != null && entry.conditions.length > 0) {
+    fields[ALERT_SNOOZE_CONDITIONS] = entry.conditions;
+    if (entry.conditionOperator != null) {
+      fields[ALERT_SNOOZE_CONDITION_OPERATOR] = entry.conditionOperator;
+    }
+    const snapshot: Record<string, string> = {};
+    for (const c of entry.conditions) {
+      if (c.snapshotValue != null) {
+        snapshot[c.field] = c.snapshotValue;
+      }
+    }
+    if (Object.keys(snapshot).length > 0) {
+      fields[ALERT_SNOOZE_SNAPSHOT] = snapshot;
+    }
+  }
+  return fields;
+}
+
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
@@ -103,19 +138,22 @@ export const buildNewAlert = <
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
 
-  const snoozeFromExisting =
+  const hasSnoozeOnExisting =
     existingAlert &&
     (existingAlert[ALERT_SNOOZE_EXPIRES_AT] != null ||
       existingAlert[ALERT_SNOOZE_CONDITIONS] != null ||
       existingAlert[ALERT_SNOOZE_CONDITION_OPERATOR] != null ||
-      existingAlert[ALERT_SNOOZE_SNAPSHOT] != null)
+      existingAlert[ALERT_SNOOZE_SNAPSHOT] != null);
+
+  const snoozeFromExisting =
+    hasSnoozeOnExisting && existingAlert
       ? {
           [ALERT_SNOOZE_EXPIRES_AT]: existingAlert[ALERT_SNOOZE_EXPIRES_AT],
           [ALERT_SNOOZE_CONDITIONS]: existingAlert[ALERT_SNOOZE_CONDITIONS],
           [ALERT_SNOOZE_CONDITION_OPERATOR]: existingAlert[ALERT_SNOOZE_CONDITION_OPERATOR],
           [ALERT_SNOOZE_SNAPSHOT]: existingAlert[ALERT_SNOOZE_SNAPSHOT],
         }
-      : {};
+      : getSnoozeFieldsFromRule(alertInstanceId, ruleData);
 
   return deepmerge.all(
     [

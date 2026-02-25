@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_INSTANCE_ID,
-  ALERT_RULE_UUID,
-  ALERT_STATUS,
   ALERT_MUTED,
+  ALERT_RULE_UUID,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import { nodeBuilder } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
@@ -63,6 +64,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     };
 
     const getAlerts = async () => {
+      await es.indices.refresh({ index: alertAsDataIndexPattern, ignore_unavailable: true });
       const {
         hits: { hits: alerts },
       } = await es.search({
@@ -75,6 +77,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     };
 
     const getAlertsByRuleId = async (ruleId: string): Promise<any[]> => {
+      await es.indices.refresh({ index: alertAsDataIndexPattern, ignore_unavailable: true });
       const {
         hits: { hits: alerts },
       } = await es.search({
@@ -517,7 +520,8 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         }
       });
 
-      // Snooze with far-future TTL
+      // Snooze with far-future TTL (capture so we can assert on re-fired alert doc)
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
       await supertest
         .post(
           `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${
@@ -525,7 +529,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           }/alert/alert1/_mute?validate_alerts_existence=false`
         )
         .set('kbn-xsrf', 'foo')
-        .send({ expires_at: new Date(Date.now() + 86400000).toISOString() })
+        .send({ expires_at: expiresAt })
         .expect(204);
 
       // Run 2: alert recovers (pattern[1] = false)
@@ -555,8 +559,8 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // The re-fired alert (run 3) creates a new doc with status=active.
-      // It should have ALERT_MUTED=true because snoozedInstances on the rule SO
-      // still contains 'alert1'. Retry to allow index refresh and persistence.
+      // It should have ALERT_MUTED=true and snooze detail fields (e.g. expires_at)
+      // materialized from the rule SO, since the new doc has no prior AAD document.
       await retry.try(async () => {
         await es.indices.refresh({ index: patternAadIndex, ignore_unavailable: true });
         const {
@@ -579,6 +583,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         expect(hits.length).to.be(1);
         const activeAlert: any = hits[0];
         expect(activeAlert._source[ALERT_MUTED]).to.be(true);
+        expect(activeAlert._source[ALERT_SNOOZE_EXPIRES_AT]).to.eql(expiresAt);
       });
 
       // Cleanup

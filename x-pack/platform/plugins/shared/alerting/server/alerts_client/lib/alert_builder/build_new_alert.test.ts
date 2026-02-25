@@ -17,6 +17,10 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_SNAPSHOT,
   ALERT_START,
   ALERT_STATUS,
   ALERT_UUID,
@@ -505,6 +509,7 @@ describe('buildNewAlert', () => {
     test('should set ALERT_MUTED to true when alert is in snoozedInstances', () => {
       const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
       legacyAlert.scheduleActions('default');
+      const expiresAt = new Date(Date.now() + 3600000).toISOString();
 
       const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
@@ -514,7 +519,7 @@ describe('buildNewAlert', () => {
           snoozedInstances: [
             {
               instanceId: 'alert-A',
-              expiresAt: new Date(Date.now() + 3600000).toISOString(),
+              expiresAt,
             },
           ],
         },
@@ -523,6 +528,47 @@ describe('buildNewAlert', () => {
       });
 
       expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBe(expiresAt);
+    });
+
+    test('should set snooze detail fields from rule when no existingAlert (re-fire after recovery)', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-B');
+      legacyAlert.scheduleActions('default');
+      const expiresAt = '2025-06-01T12:00:00.000Z';
+      const conditions = [
+        {
+          type: 'field_change',
+          field: 'kibana.alert.severity',
+          snapshotValue: 'critical',
+        },
+      ];
+
+      const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
+        legacyAlert,
+        existingAlert: undefined,
+        rule: alertRule,
+        ruleData: {
+          ...ruleData,
+          snoozedInstances: [
+            {
+              instanceId: 'alert-B',
+              expiresAt,
+              conditions,
+              conditionOperator: 'any' as const,
+            },
+          ],
+        },
+        timestamp: '2023-03-28T12:27:28.159Z',
+        kibanaVersion: '8.9.0',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBe(expiresAt);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITIONS]).toEqual(conditions);
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_CONDITION_OPERATOR]).toBe('any');
+      expect((result as Record<string, unknown>)[ALERT_SNOOZE_SNAPSHOT]).toEqual({
+        'kibana.alert.severity': 'critical',
+      });
     });
 
     test('should set ALERT_MUTED to false when alert instance ID is not in mutedInstanceIds', () => {
