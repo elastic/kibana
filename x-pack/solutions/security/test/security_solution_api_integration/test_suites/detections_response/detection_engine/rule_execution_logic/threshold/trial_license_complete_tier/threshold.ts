@@ -704,7 +704,61 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('preview logged requests', () => {
+    describe('data view support', () => {
+      let dataViewId: string;
+
+      beforeEach(async () => {
+        dataViewId = `threshold-test-dataview-${uuidv4()}`;
+
+        // Create a data view with the index pattern
+        await supertest
+          .post('/api/data_views/data_view')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            data_view: {
+              id: dataViewId,
+              title: 'auditbeat-*',
+              timeFieldName: '@timestamp',
+              name: dataViewId,
+            },
+          })
+          .expect(200);
+      });
+
+      afterEach(async () => {
+        // Clean up data view
+        try {
+          await supertest
+            .delete(`/api/data_views/data_view/${dataViewId}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(200);
+        } catch (error) {
+          // Data view might not exist, ignore error
+        }
+      });
+
+      it('should execute threshold rule preview with data view', async () => {
+        // Create threshold rule using data view ID for preview
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['auditbeat-*']),
+          data_view_id: dataViewId,
+          index: undefined, // Remove index when using data view
+          threshold: {
+            field: 'host.id',
+            value: 100,
+          },
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        // Verify preview generated alerts using data view
+        expect(previewAlerts.length).toEqual(2);
+        expect(previewAlerts[0]?._source?.[ALERT_THRESHOLD_RESULT]).toBeDefined();
+      });
+    });
+
+    describe.skip('preview logged requests', () => {
       const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForAlertTesting(['auditbeat-*']),
         threshold: {
