@@ -422,7 +422,9 @@ export class UserConnectorTokenClient {
       ? ` AND ${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.credentialType: "${credentialType}"`
       : '';
 
-    const profileUidFilter = `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND `;
+    const profileUidFilter = profileUid
+      ? `${USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.profileUid: "${profileUid}" AND `
+      : '';
 
     try {
       const result = await this.unsecuredSavedObjectsClient.find<UserConnectorToken>({

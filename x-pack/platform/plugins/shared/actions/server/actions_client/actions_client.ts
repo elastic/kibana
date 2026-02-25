@@ -550,17 +550,9 @@ export class ActionsClient {
       })
     );
 
-    try {
-      await this.context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
-    } catch (e) {
-      this.context.logger.error(
-        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
-      );
-    }
-
     const rawAction = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
     const {
-      attributes: { actionTypeId, config },
+      attributes: { actionTypeId, config, authMode },
     } = rawAction;
 
     let actionType: ActionType | undefined;
@@ -595,6 +587,18 @@ export class ActionsClient {
         );
       }
     }
+
+    try {
+      await this.context.connectorTokenClient.deleteConnectorTokens({
+        connectorId: id,
+        authMode,
+      });
+    } catch (e) {
+      this.context.logger.error(
+        `Failed to delete auth tokens for connector "${id}" after delete: ${e.message}`
+      );
+    }
+
     return result;
   }
 
