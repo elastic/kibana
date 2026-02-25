@@ -8,139 +8,16 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { EuiSelectableWrapper } from '@kbn/scout';
-import { METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ } from '../constants';
-
-interface PaginationLocators {
-  readonly container: Locator;
-  readonly prevButton: Locator;
-  readonly nextButton: Locator;
-  getPageButton(pageIndex: number): Locator;
-}
-
-function createPaginationLocators(container: Locator): Omit<PaginationLocators, 'container'> {
-  return {
-    prevButton: container.locator('[data-test-subj="pagination-button-previous"]'),
-    nextButton: container.locator('[data-test-subj="pagination-button-next"]'),
-    getPageButton: (pageIndex: number) =>
-      container.locator(`[data-test-subj="pagination-button-${pageIndex}"]`),
-  };
-}
-
-function createPagination(parentContainer: Locator): PaginationLocators {
-  const container = parentContainer.locator('[data-test-subj="metricsExperienceGridPagination"]');
-  return {
-    container,
-    ...createPaginationLocators(container),
-  };
-}
-
-interface FlyoutOverviewTab {
-  readonly tab: Locator;
-  readonly descriptionList: Locator;
-  readonly dimensionsPagination: PaginationLocators;
-  readonly dimensionsListItems: Locator;
-}
-
-interface FlyoutEsqlQueryTab {
-  readonly tab: Locator;
-  readonly codeBlock: Locator;
-}
-
-interface MetricsFlyout {
-  readonly container: Locator;
-  readonly overview: FlyoutOverviewTab;
-  readonly esqlQuery: FlyoutEsqlQueryTab;
-}
-
-interface ChartActions {
-  readonly viewDetails: Locator;
-  readonly copyToDashboard: Locator;
-  readonly explore: Locator;
-}
-
-interface BreakdownSelector {
-  readonly button: Locator;
-  readonly search: Locator;
-  readonly selectable: Locator;
-  getOption(dimensionName: string): Locator;
-  getButtonWithSelectedDimension(dimensionName: string): Locator;
-  selectDimension(dimensionName: string): Promise<void>;
-}
-
-function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
-  const selectableWrapper = new EuiSelectableWrapper(
-    page,
-    'metricsExperienceBreakdownSelectorSelectable'
-  );
-  const button = page.testSubj.locator('metricsExperienceBreakdownSelectorButton');
-  const selectable = page.testSubj.locator('metricsExperienceBreakdownSelectorSelectable');
-
-  return {
-    button,
-    search: page.testSubj.locator('metricsExperienceBreakdownSelectorSelectorSearch'),
-    selectable,
-    getOption: (dimensionName: string) =>
-      page.testSubj.locator(`metricsBreakdownOption-${dimensionName}`),
-    getButtonWithSelectedDimension: (dimensionName: string) =>
-      page.locator(
-        `[data-test-subj="metricsExperienceBreakdownSelectorButton"][data-selected-value*="${dimensionName}"]`
-      ),
-    selectDimension: async (dimensionName: string) => {
-      if (!(await selectable.isVisible())) {
-        await button.click();
-        await selectable.waitFor({ state: 'visible' });
-      }
-      await selectableWrapper.searchAndSelectFirst(dimensionName);
-    },
-  };
-}
-
-function createChartActions(page: ScoutPage): ChartActions {
-  return {
-    viewDetails: page.testSubj.locator(
-      'embeddablePanelAction-ACTION_METRICS_EXPERIENCE_VIEW_DETAILS'
-    ),
-    copyToDashboard: page.testSubj.locator(
-      'embeddablePanelAction-ACTION_METRICS_EXPERIENCE_COPY_TO_DASHBOARD'
-    ),
-    explore: page.testSubj.locator(
-      'embeddablePanelAction-ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB'
-    ),
-  };
-}
-
-function createDimensionsPagination(parentContainer: Locator): PaginationLocators {
-  const container = parentContainer.locator(
-    '[data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsPagination"]'
-  );
-  return {
-    container,
-    ...createPaginationLocators(container),
-  };
-}
-
-function createFlyout(page: ScoutPage): MetricsFlyout {
-  const container = page.testSubj.locator('metricsExperienceFlyout');
-  return {
-    container,
-    overview: {
-      tab: page.testSubj.locator('metricsExperienceFlyoutOverviewTab'),
-      descriptionList: page.testSubj.locator('metricsExperienceFlyoutOverviewTabDescriptionList'),
-      dimensionsPagination: createDimensionsPagination(container),
-      dimensionsListItems: page.testSubj
-        .locator('metricsExperienceFlyoutOverviewTabDimensionsList')
-        .locator(`[data-test-subj^="${METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ}-"]`),
-    },
-    esqlQuery: {
-      tab: page.testSubj.locator('metricsExperienceFlyoutEsqlQueryTab'),
-      codeBlock: page.testSubj.locator('metricsExperienceFlyoutEsqlQueryCodeBlock'),
-    },
-  };
-}
+import type { PaginationLocators } from './pagination';
+import { createPagination } from './pagination';
+import type { MetricsFlyout } from './flyout';
+import { createFlyout } from './flyout';
+import type { ChartActions } from './chart_actions';
+import { createChartActions } from './chart_actions';
+import type { BreakdownSelector } from './breakdown_selector';
+import { createBreakdownSelector } from './breakdown_selector';
 
 export class MetricsExperiencePage {
-  // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
   public readonly container: Locator;
   public readonly grid: Locator;
   public readonly cards: Locator;
@@ -153,6 +30,7 @@ export class MetricsExperiencePage {
   public readonly breakdownSelector: BreakdownSelector;
 
   constructor(page: ScoutPage) {
+    // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
     this.cards = this.grid.locator('[data-chart-index]');
