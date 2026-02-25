@@ -36,6 +36,7 @@ import {
   getAlertsDataViewTargetId,
   ALERTS_DATA_VIEW_TARGET_TYPE,
   ensureAlertsDataViewProfile,
+  ensureGlobalAnonymizationProfile,
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
@@ -166,7 +167,6 @@ export class AnonymizationPlugin
         throw err;
       }
     };
-
     const getLegacySettingsForNamespace = async (
       namespace: string
     ): Promise<string | undefined> => {
@@ -178,6 +178,7 @@ export class AnonymizationPlugin
     };
 
     const ensuredGlobalProfiles = new Map<string, number>();
+    const migratedLegacySettingsByNamespace = new Set<string>();
 
     const ensureGlobalProfileForNamespace = async ({
       namespace,
@@ -185,17 +186,30 @@ export class AnonymizationPlugin
       namespace: string;
     }): Promise<void> => {
       const now = Date.now();
+
+      // Ensure legacy settings migration is not missed when runtime anonymization
+      // happens before profiles `_find` in a space.
+      if (!migratedLegacySettingsByNamespace.has(namespace)) {
+        const legacySettings = await getLegacySettingsForNamespace(namespace);
+        await ensureAndMigrateGlobalProfile({
+          namespace,
+          profilesRepo,
+          logger: this.logger,
+          settingsString: legacySettings,
+        });
+        migratedLegacySettingsByNamespace.add(namespace);
+        ensuredGlobalProfiles.set(namespace, now);
+        return;
+      }
+
       const lastEnsuredAt = ensuredGlobalProfiles.get(namespace);
       if (lastEnsuredAt !== undefined && now - lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS) {
         return;
       }
-
-      const legacySettings = await getLegacySettingsForNamespace(namespace);
-      await ensureAndMigrateGlobalProfile({
+      await ensureGlobalAnonymizationProfile({
         namespace,
         profilesRepo,
         logger: this.logger,
-        settingsString: legacySettings,
       });
       ensuredGlobalProfiles.set(namespace, now);
     };

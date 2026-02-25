@@ -71,18 +71,19 @@ export class SaltService {
    */
   private async createSalt(namespace: string): Promise<string> {
     const id = getSaltSavedObjectId(namespace);
-    const soNamespace = namespace === 'default' ? undefined : namespace;
     const salt = randomBytes(SALT_LENGTH_BYTES).toString('hex');
 
-    const internalSoClient = this.savedObjects.getUnsafeInternalClient({
-      includedHiddenTypes: [ANONYMIZATION_SALT_SAVED_OBJECT_TYPE],
-    });
+    const internalSoClient = this.savedObjects
+      .getUnsafeInternalClient({
+        includedHiddenTypes: [ANONYMIZATION_SALT_SAVED_OBJECT_TYPE],
+      })
+      .asScopedToNamespace(namespace);
 
     try {
       await internalSoClient.create<SaltAttributes>(
         ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
         { salt },
-        { id, namespace: soNamespace }
+        { id }
       );
 
       this.logger.info(`Created anonymization salt for space: ${namespace}`);

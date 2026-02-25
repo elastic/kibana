@@ -30,6 +30,7 @@ jest.mock('./initialization', () => ({
 }));
 const initializationMock = jest.requireMock('./initialization') as {
   ensureAndMigrateGlobalProfile: jest.Mock;
+  ensureGlobalAnonymizationProfile: jest.Mock;
 };
 
 const createProfile = ({
@@ -209,7 +210,7 @@ describe('AnonymizationPlugin policy resolution', () => {
     expect(encryptedSavedObjects.registerType).toHaveBeenCalled();
   });
 
-  it('does not bootstrap global profile on start and lazily ensures it on policy resolution', async () => {
+  it('does not bootstrap global profile on start and lazily ensures/migrates it on first policy resolution', async () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const plugin = new AnonymizationPlugin(initializerContext);
     const coreStart = coreMock.createStart();
@@ -232,6 +233,7 @@ describe('AnonymizationPlugin policy resolution', () => {
     });
 
     expect(initializationMock.ensureAndMigrateGlobalProfile).not.toHaveBeenCalled();
+    expect(initializationMock.ensureGlobalAnonymizationProfile).not.toHaveBeenCalled();
 
     await start.getPolicyService().resolveEffectivePolicy('default', {
       type: 'data_view',
@@ -239,5 +241,6 @@ describe('AnonymizationPlugin policy resolution', () => {
     });
 
     expect(initializationMock.ensureAndMigrateGlobalProfile).toHaveBeenCalled();
+    expect(initializationMock.ensureGlobalAnonymizationProfile).not.toHaveBeenCalled();
   });
 });
