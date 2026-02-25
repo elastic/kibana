@@ -296,7 +296,7 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClient
 >;
 
-export type ShareableUrlLocatorParams = {
+export type ShareableLocatorParams = {
   timeRange: TimeRange | undefined;
 } & Record<string, unknown>;
 
@@ -347,7 +347,7 @@ export interface ShareContext {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
-    params: ShareableUrlLocatorParams;
+    params: ShareableLocatorParams;
   };
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
@@ -384,6 +384,7 @@ export interface ShareMenuItemLegacy extends ShareMenuItemBase {
 export interface ExportGenerationOpts {
   optimizedForPrinting?: boolean;
   intl: InjectedIntl;
+  useAbsoluteTime: boolean;
 }
 
 interface UrlParamExtensionProps {
