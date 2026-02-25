@@ -18,7 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApmPluginStartDeps } from '../../../plugin';
+import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import {
@@ -33,31 +34,37 @@ interface Props {
   environment: string;
 }
 
+const DEFAULT_INDICATOR_TYPE: ApmIndicatorType = 'sli.apm.transactionDuration';
+
 export function SloCallout({ dismissCallout, serviceName, environment }: Props) {
   const {
     core: { docLinks },
   } = useApmPluginContext();
-  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
+  const { slo: sloPlugin, telemetry } = useKibana<ApmPluginStartDeps & ApmServices>().services;
 
   const [createSloFlyoutOpen, setCreateSloFlyoutOpen] = useState(false);
 
+  useTrackMetric({ app: 'apm', metric: 'slo_callout_shown', metricType: METRIC_TYPE.LOADED });
+
   const openCreateSloFlyout = useCallback(() => {
+    telemetry.reportSloCreateFlowStarted({
+      location: 'service_view_slo_callout',
+      sloType: DEFAULT_INDICATOR_TYPE,
+    });
     setCreateSloFlyoutOpen(true);
-  }, []);
+  }, [telemetry]);
 
   const closeCreateSloFlyout = useCallback(() => {
     setCreateSloFlyoutOpen(false);
     dismissCallout();
   }, [dismissCallout]);
 
-  const defaultIndicatorType: ApmIndicatorType = 'sli.apm.transactionDuration';
-
   const CreateSloFlyout = createSloFlyoutOpen
     ? sloPlugin?.getCreateSLOFormFlyout({
         initialValues: {
           name: `APM SLO for ${serviceName}`,
           indicator: {
-            type: defaultIndicatorType,
+            type: DEFAULT_INDICATOR_TYPE,
             params: {
               service: serviceName,
               environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
