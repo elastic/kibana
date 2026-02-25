@@ -115,7 +115,7 @@ export async function getServiceSlos({
       serviceNames: [serviceName],
       ...(environment && environment !== ENVIRONMENT_ALL.value && { environment }),
       ...(kqlQuery && { kqlQuery }),
-      ...(statusFilters && statusFilters.length > 0 && { statusFilters }),
+      ...(statusFilters.?length > 0 && { statusFilters }),
     }),
   ]);
 
