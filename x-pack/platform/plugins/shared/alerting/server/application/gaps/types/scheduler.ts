@@ -12,7 +12,7 @@ export type SchedulerSoAttributes = TypeOf<typeof rawGapAutoFillSchedulerSchemaV
 export const GAP_AUTO_FILL_SCHEDULER_TASK_TYPE = 'gap-auto-fill-scheduler-task' as const;
 
 export const DEFAULT_RULES_BATCH_SIZE = 10;
-export const DEFAULT_GAPS_PER_PAGE = 5000;
+export const DEFAULT_GAPS_PER_PAGE = DEFAULT_RULES_BATCH_SIZE * 50;
 
 export const DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT = '60s' as const;
 
