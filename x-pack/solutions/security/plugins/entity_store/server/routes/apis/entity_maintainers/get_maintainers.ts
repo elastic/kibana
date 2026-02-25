@@ -10,7 +10,10 @@ import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants'
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import type { EntityMaintainerListEntry } from '../../../domain/entity_maintainers_client';
-import type { EntityMaintainerState, EntityMaintainerTaskStatus } from '../../../tasks/entity_maintainers/types';
+import type {
+  EntityMaintainerState,
+  EntityMaintainerTaskStatus,
+} from '../../../tasks/entity_maintainers/types';
 
 interface EntityMaintainerResponseItem {
   id: string;
@@ -54,13 +57,21 @@ export function registerGetMaintainers(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: false,
       },
-      wrapMiddlewares(async (ctx, _req, res): Promise<IKibanaResponse<{ list: EntityMaintainerResponseItem[] }>> => {
-        const entityStoreCtx = await ctx.entityStore;
-        const { entityMaintainersClient } = entityStoreCtx;
-        const maintainers = await entityMaintainersClient.getMaintainers();
-        const list: EntityMaintainerResponseItem[] = maintainers.map(toGetMaintainersResponseItem);
-        
-        return res.ok({ body: { list } });
-      })
+      wrapMiddlewares(
+        async (
+          ctx,
+          _req,
+          res
+        ): Promise<IKibanaResponse<{ list: EntityMaintainerResponseItem[] }>> => {
+          const entityStoreCtx = await ctx.entityStore;
+          const { entityMaintainersClient } = entityStoreCtx;
+          const maintainers = await entityMaintainersClient.getMaintainers();
+          const list: EntityMaintainerResponseItem[] = maintainers.map(
+            toGetMaintainersResponseItem
+          );
+
+          return res.ok({ body: { list } });
+        }
+      )
     );
 }

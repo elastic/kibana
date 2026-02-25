@@ -23,11 +23,7 @@ export class EntityMaintainersRegistry {
     return { id, ...config };
   }
 
-  register({
-    id,
-    interval,
-    description,
-  }: Omit<EntityMaintainerTaskEntry, 'taskStatus'>): void {
+  register({ id, interval, description }: Omit<EntityMaintainerTaskEntry, 'taskStatus'>): void {
     this.tasks.set(id, {
       interval,
       taskStatus: EntityMaintainerTaskStatus.NOT_STARTED,
@@ -35,10 +31,7 @@ export class EntityMaintainersRegistry {
     });
   }
 
-  update(
-    id: string,
-    overrides: Partial<Omit<EntityMaintainerRegistryData, 'id'>>
-  ): boolean {
+  update(id: string, overrides: Partial<Omit<EntityMaintainerRegistryData, 'id'>>): boolean {
     const existing = this.tasks.get(id);
     if (!existing) {
       return false;

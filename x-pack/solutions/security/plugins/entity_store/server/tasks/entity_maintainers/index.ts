@@ -79,7 +79,7 @@ export function registerEntityMaintainerTask({
         interval,
         description,
       });
-      
+
       taskManager.registerTaskDefinitions({
         [type]: {
           title,
