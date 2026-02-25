@@ -43,7 +43,6 @@ export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboard
                 from,
                 to,
                 connectorId,
-                saveQueries,
               },
             },
           }

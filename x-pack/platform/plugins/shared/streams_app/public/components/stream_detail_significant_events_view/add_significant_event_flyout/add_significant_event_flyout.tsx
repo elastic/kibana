@@ -83,15 +83,11 @@ export function AddSignificantEventFlyout({
     });
   }, [data.dataViews, definition.stream.name]);
 
-  const {
-    scheduleOnboardingTask,
-    getOnboardingTaskStatus,
-    cancelOnboardingTask,
-    acknowledgeOnboardingTask,
-  } = useOnboardingApi({
-    connectorId: aiFeatures?.genAiConnectors.selectedConnector,
-    saveQueries: false,
-  });
+  const { scheduleOnboardingTask, getOnboardingTaskStatus, cancelOnboardingTask } =
+    useOnboardingApi({
+      connectorId: aiFeatures?.genAiConnectors.selectedConnector,
+      saveQueries: false,
+    });
 
   const streamName = definition.stream.name;
 
@@ -123,8 +119,7 @@ export function AddSignificantEventFlyout({
   const getTaskStatus = useCallback(() => {
     gettingTaskStatus();
     getOnboardingTaskStatus(streamName).then(setTask).finally(stoppedGettingTaskStatus);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stoppedGettingTaskStatus, gettingTaskStatus]);
+  }, [stoppedGettingTaskStatus, gettingTaskStatus, streamName, getOnboardingTaskStatus]);
 
   useEffect(() => {
     // Skip initial status fetch when we are about to schedule a new generation on mount,
@@ -211,7 +206,7 @@ export function AddSignificantEventFlyout({
     }
   }, [selectedFlow]);
 
-  const generateQueries = (_systemsOverride?: System[]) => {
+  const generateQueries = () => {
     if (!aiFeatures?.genAiConnectors.selectedConnector) {
       return;
     }
@@ -412,9 +407,7 @@ export function AddSignificantEventFlyout({
                                 ? omit(nextQuery.feature, 'description')
                                 : undefined,
                             })),
-                          })
-                            .then(() => acknowledgeOnboardingTask(streamName))
-                            .finally(() => setIsSubmitting(false));
+                          }).finally(() => setIsSubmitting(false));
                           break;
                       }
                     }}

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -21,10 +22,7 @@ import { handleTaskAction } from '../../../utils/task_helpers';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
-const booleanFromQueryString = z
-  .union([z.boolean(), z.enum(['true', 'false']).transform((val) => val === 'true')])
-  .optional()
-  .default(true);
+const saveQueriesSchema = BooleanFromString.optional().default(true);
 
 export type OnboardingTaskResult = TaskResult<OnboardingResult>;
 
@@ -44,7 +42,7 @@ export const onboardingTaskRoute = createServerRoute({
   params: z.object({
     path: z.object({ streamName: z.string() }),
     query: z.object({
-      saveQueries: booleanFromQueryString,
+      saveQueries: saveQueriesSchema,
     }),
     body: taskActionSchema({
       from: timestampFromString,
@@ -62,11 +60,6 @@ export const onboardingTaskRoute = createServerRoute({
         .describe(
           'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
         ),
-      saveQueries: z
-        .boolean()
-        .optional()
-        .default(true)
-        .describe('When true, persist generated queries. When false, only store in task state.'),
     }),
   }),
   handler: async ({
@@ -88,7 +81,7 @@ export const onboardingTaskRoute = createServerRoute({
       body,
     } = params;
 
-    const saveQueries = body.action === 'schedule' ? body.saveQueries : query.saveQueries;
+    const { saveQueries } = query;
 
     const onboardingTaskId = getOnboardingTaskId(streamName, saveQueries);
 
@@ -143,7 +136,7 @@ export const onboardingStatusRoute = createServerRoute({
   params: z.object({
     path: z.object({ streamName: z.string() }),
     query: z.object({
-      saveQueries: booleanFromQueryString,
+      saveQueries: saveQueriesSchema,
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {

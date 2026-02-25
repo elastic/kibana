@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
+import { useOnboardingApi } from '../../../hooks/use_onboarding_api';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout';
@@ -49,8 +50,13 @@ export const EditSignificantEventFlyout = ({
     services: { telemetryClient },
   } = useKibana();
 
-  const { upsertQuery, bulk, acknowledgeGenerationTask } = useSignificantEventsApi({
+  const { upsertQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
+  });
+
+  const { acknowledgeOnboardingTask } = useOnboardingApi({
+    connectorId: aiFeatures?.genAiConnectors.selectedConnector,
+    saveQueries: false,
   });
 
   const onCloseFlyout = () => {
@@ -108,7 +114,7 @@ export const EditSignificantEventFlyout = ({
             ).then(
               async () => {
                 // Acknowledge the task after successful save
-                await acknowledgeGenerationTask().catch(() => {
+                await acknowledgeOnboardingTask(definition.stream.name).catch(() => {
                   // Ignore errors - task acknowledgment is not critical
                 });
 
