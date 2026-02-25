@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { mlEntityFieldSchema } from '@kbn/ml-anomaly-utils/schemas';
-import { serializedTimeRangeSchema, serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 
 export const severityThresholdSchema = schema.object({
   min: schema.number(),

@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { serializedTimeRangeSchema, serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { mlEntityFieldValueSchema } from '@kbn/ml-anomaly-utils/schemas';
 
 const baseUserInputProps = schema.object({

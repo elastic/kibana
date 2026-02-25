@@ -7,7 +7,10 @@
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { storedFilterSchema, querySchema } from '@kbn/es-query-server';
-import { serializedTimeRangeSchema, serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 
 export const SWIMLANE_TYPE = {
   OVERALL: 'overall',
