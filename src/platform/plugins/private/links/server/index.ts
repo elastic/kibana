@@ -12,6 +12,7 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 export type {
   DashboardLink,
   ExternalLink,
+  ExternalLinkOptions,
   Link,
   LinkOptions,
   LinksState,

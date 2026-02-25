@@ -13,3 +13,6 @@ import { v4 as uuidv4 } from 'uuid';
 export function generateId(): string {
   return uuidv4().replace(/-/g, '').slice(0, 12);
 }
+
+export const normalizeTitleName = (value: string): string =>
+  value.trim().toLowerCase().replace(/[ _]+/g, '_');
