@@ -65,7 +65,7 @@ import {
   ConfirmDeployAgentPolicyModal,
   IncompatibleAgentVersionCallout,
 } from '../../components';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../../services';
 
 import type { CreatePackagePolicyParams } from '../types';
 
@@ -258,12 +258,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Derive var_group_selections from policy for StepConfigurePackagePolicy
   // Note: StepDefinePackagePolicy handles its own initialization and state management
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(packageInfo?.var_groups, isAgentlessSelected);
-  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, isAgentlessSelected]);
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected);
+  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected]);
 
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {
