@@ -20,7 +20,6 @@ const AttackDiscoveryRunSplitButton: React.FC = () => {
   const primaryActionButtonCss = css`
     background-color: transparent !important;
     height: 28px !important;
-    margin-left: 4px;
   `;
   const primaryActionButtonSecondaryCss = css`
     background-color: transparent !important;
@@ -81,7 +80,6 @@ const AttackDiscoveryScheduleButton: React.FC = () => {
   const primaryActionButtonCss = css`
     background-color: transparent !important;
     height: 28px !important;
-    margin-left: 4px;
   `;
   return (
     <EuiButton

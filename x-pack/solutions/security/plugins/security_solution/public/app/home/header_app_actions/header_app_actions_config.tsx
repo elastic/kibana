@@ -54,20 +54,45 @@ export function getAlertsHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig 
 
 /**
  * Header app actions config for the Security > Dashboards landing page.
- * Single icon-only "New" (plusInCircle) primary action that navigates to create dashboard.
+ * Single icon-only "New" (plusInCircle) secondary action that navigates to create dashboard.
  * Set when the Security Dashboards landing page is active; cleared when navigating away (handled by GlobalHeader).
  */
 export function getSecurityDashboardsHeaderAppActionsConfig(
   onCreateDashboard: () => void
 ): ChromeHeaderAppActionsConfig {
   return {
-    primaryActions: [
+    secondaryActions: [
       <EuiButtonIcon
         key="security-dashboards-new"
         size="xs"
         color="text"
         iconType="plusInCircle"
         onClick={onCreateDashboard}
+        data-test-subj="headerGlobalNav-appActionsNewButton"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
+          defaultMessage: 'New',
+        })}
+      />,
+    ],
+  };
+}
+
+/**
+ * Header app actions config for the Security > Cases page.
+ * Single icon-only "New" (plusInCircle) secondary action that opens the create case flyout.
+ * Set when the Cases page is active (from Cases page); cleared on unmount.
+ */
+export function getSecurityCasesHeaderAppActionsConfig(
+  onCreateCase: () => void
+): ChromeHeaderAppActionsConfig {
+  return {
+    secondaryActions: [
+      <EuiButtonIcon
+        key="security-cases-new"
+        size="xs"
+        color="text"
+        iconType="plusInCircle"
+        onClick={onCreateCase}
         data-test-subj="headerGlobalNav-appActionsNewButton"
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
           defaultMessage: 'New',
@@ -85,21 +110,21 @@ export interface TimelinesHeaderAppActionsParams {
 
 /**
  * Header app actions config for the Security > Timelines page.
- * Icon-only "Import" and "New" primary actions. Set when the Timelines page is active (from TimelinesPage); cleared on unmount.
+ * Icon-only "Import" and "New" secondary actions. Set when the Timelines page is active (from TimelinesPage); cleared on unmount.
  */
 export function getTimelinesHeaderAppActionsConfig({
   onImport,
   onNew,
   showImport = true,
 }: TimelinesHeaderAppActionsParams): ChromeHeaderAppActionsConfig {
-  const primaryActions: React.ReactNode[] = [];
+  const secondaryActions: React.ReactNode[] = [];
   if (showImport) {
-    primaryActions.push(
+    secondaryActions.push(
       <EuiButtonIcon
         key="timelines-import"
         size="xs"
         color="text"
-        iconType="indexOpen"
+        iconType="download"
         onClick={onImport}
         data-test-subj="headerGlobalNav-appActionsImportButton"
         aria-label={i18n.translate('xpack.securitySolution.timelines.headerAppActions.importAriaLabel', {
@@ -108,7 +133,7 @@ export function getTimelinesHeaderAppActionsConfig({
       />
     );
   }
-  primaryActions.push(
+  secondaryActions.push(
     <EuiButtonIcon
       key="timelines-new"
       size="xs"
@@ -121,5 +146,5 @@ export function getTimelinesHeaderAppActionsConfig({
       })}
     />
   );
-  return { primaryActions };
+  return { secondaryActions };
 }

@@ -127,6 +127,11 @@ const getSecondaryToolbarCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =>
         {
           borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
         },
+
+      /* Divider between multiple buttons inside one wrapper (e.g. Dashboard Share + Exit) */
+      '& .euiButtonIcon + .euiButtonIcon': {
+        borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+      },
     }),
   controlGroupIconButton:
     euiTheme &&

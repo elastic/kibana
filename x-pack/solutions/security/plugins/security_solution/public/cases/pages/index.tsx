@@ -42,15 +42,18 @@ import { DocumentEventTypes } from '../../common/lib/telemetry';
 import { EaseAlertsTable } from '../components/ease/wrapper';
 import { EventsTableForCases } from '../components/case_events/table';
 import { CASES_FEATURES } from '..';
+import { getSecurityCasesHeaderAppActionsConfig } from '../../app/home/header_app_actions/header_app_actions_config';
 
 const CaseContainerComponent: React.FC = () => {
   const {
     application: { capabilities },
     cases,
+    chrome,
     telemetry,
   } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout();
   const dispatch = useDispatch();
   const { openFlyout } = useExpandableFlyoutApi();
   const {
@@ -66,6 +69,20 @@ const CaseContainerComponent: React.FC = () => {
   // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
   //  https://github.com/elastic/kibana/issues/218741
   const EASE = capabilities[SECURITY_FEATURE_ID].configurations;
+
+  useEffect(() => {
+    if (!chrome?.setHeaderAppActionsConfig) return;
+    if (userCasesPermissions?.create) {
+      chrome.setHeaderAppActionsConfig(
+        getSecurityCasesHeaderAppActionsConfig(() => createCaseFlyout.open())
+      );
+    } else {
+      chrome.setHeaderAppActionsConfig(undefined);
+    }
+    return () => {
+      chrome.setHeaderAppActionsConfig(undefined);
+    };
+  }, [chrome, createCaseFlyout, userCasesPermissions?.create]);
 
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
