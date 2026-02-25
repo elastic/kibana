@@ -274,6 +274,7 @@ export class ActionsClient {
       throw error;
     }
 
+    const authorizationCodeEnabled = this.context.authorizationCodeEnabled ?? false;
     const actionResults = new Array<ActionResult>();
 
     for (const connectorId of ids) {
@@ -286,6 +287,7 @@ export class ActionsClient {
           inMemoryConnector,
           id: connectorId,
           actionTypeRegistry: this.context.actionTypeRegistry,
+          authorizationCodeEnabled,
         });
 
         /**
@@ -337,7 +339,8 @@ export class ActionsClient {
         connectorFromSavedObject(
           action,
           isConnectorDeprecated(action.attributes),
-          this.context.actionTypeRegistry.isDeprecated(action.attributes.actionTypeId)
+          this.context.actionTypeRegistry.isDeprecated(action.attributes.actionTypeId),
+          authorizationCodeEnabled
         )
       );
     }

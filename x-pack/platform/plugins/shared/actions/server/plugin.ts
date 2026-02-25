@@ -222,7 +222,6 @@ const includedHiddenTypes = [
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
 export class ActionsPlugin
@@ -330,6 +329,10 @@ export class ActionsPlugin
 
     const authorizationCodeEnabled =
       this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
+    if (authorizationCodeEnabled) {
+      includedHiddenTypes.push(USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE);
+    }
+
     this.authTypeRegistry = new AuthTypeRegistry();
     registerAuthTypes(this.authTypeRegistry, {
       authorizationCodeEnabled,
@@ -340,7 +343,8 @@ export class ActionsPlugin
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
       plugins.taskManager.index,
-      this.inMemoryConnectors
+      this.inMemoryConnectors,
+      authorizationCodeEnabled
     );
 
     const usageCollection = plugins.usageCollection;
