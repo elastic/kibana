@@ -26,7 +26,6 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQueryClient } from '@kbn/react-query';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
@@ -36,11 +35,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
-import {
-  areSimilarResults,
-  keepPreviousWorkflowOrder,
-  shouldShowWorkflowsEmptyState,
-} from '../../../shared/utils/workflow_utils';
+import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
@@ -55,14 +50,11 @@ interface WorkflowListProps {
 
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { application, notifications } = useKibana().services;
-  const queryClient = useQueryClient();
   const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
   const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
-  const workflowsRef = useRef(workflows);
-  workflowsRef.current = workflows;
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {
@@ -93,18 +85,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const onRefresh = useCallback(
     async (previousWorkflowsOverride?: WorkflowListDto) => {
-      // Use the override when provided (e.g. pre-optimistic data captured before mutate),
-      // otherwise fall back to the current ref which may already reflect the optimistic update
-      const previousWorkflows = previousWorkflowsOverride ?? workflowsRef.current;
       const result = await refetch();
-
-      if (previousWorkflows && result.data && areSimilarResults(result.data, previousWorkflows)) {
-        const sorted = keepPreviousWorkflowOrder({
-          previousData: previousWorkflows,
-          freshData: result.data,
-        });
-        queryClient.setQueryData(['workflows', search], sorted);
-      }
 
       const currentSelectedItems = selectedItemsRef.current;
       if (result.data?.results && currentSelectedItems.length > 0) {
@@ -115,7 +96,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         setSelectedItems(updatedSelectedItems);
       }
     },
-    [refetch, queryClient, search]
+    [refetch]
   );
 
   const handleRunWorkflow = useCallback(
@@ -176,7 +157,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const handleToggleWorkflow = useCallback(
     (item: WorkflowListItemDto) => {
-      const preOptimisticWorkflows = workflowsRef.current;
       updateWorkflow.mutate(
         {
           id: item.id,
@@ -186,9 +166,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           skipRefetch: true,
         },
         {
-          onSuccess: () => {
-            onRefresh(preOptimisticWorkflows);
-          },
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
               toastLifeTimeMs: 3000,
@@ -198,7 +175,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         }
       );
     },
-    [notifications?.toasts, updateWorkflow, onRefresh]
+    [notifications?.toasts, updateWorkflow]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
