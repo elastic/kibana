@@ -300,7 +300,11 @@ const buildEventLogKqlFilter = ({
   GetExecutionEventsArgs,
   'searchTerm' | 'eventTypes' | 'logLevels' | 'dateStart' | 'dateEnd'
 >) => {
-  const filters = [`${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`];
+  const filters = [
+    `${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`,
+    // Only extract events that are meaningful to the user: final status, "running" status, execution metrics, or message events with a log level of trace, debug, or info
+    `(${f.TAGS}:final OR ${f.RULE_EXECUTION_STATUS}:running OR ${f.EVENT_ACTION}:${RuleExecutionEventTypeEnum['execution-metrics']} OR (${f.EVENT_ACTION}:${RuleExecutionEventTypeEnum.message} AND ${f.LOG_LEVEL}:(trace OR debug OR info)))`,
+  ];
 
   if (searchTerm?.length) {
     filters.push(`${f.MESSAGE}:${prepareKQLStringParam(searchTerm)}`);
@@ -327,10 +331,6 @@ const buildEventLogKqlFilter = ({
   if (dateRangeFilter.length) {
     filters.push(kqlAnd(dateRangeFilter));
   }
-
-  filters.push(
-    `(${f.TAGS}:final OR ${f.RULE_EXECUTION_STATUS}:running OR ${f.EVENT_ACTION}:${RuleExecutionEventTypeEnum['execution-metrics']} OR (${f.EVENT_ACTION}:${RuleExecutionEventTypeEnum.message} AND ${f.LOG_LEVEL}:(trace OR debug OR info)))`
-  );
 
   return kqlAnd(filters);
 };

@@ -279,14 +279,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Data view is not found.\nError: ${exc}`,
+                  message: `Data view is not found.\n${exc}`,
                   userError: true,
                   isFinal: true,
                 });
               } else {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.failed,
-                  message: `Check for indices to search failed.\nError: ${exc}`,
+                  message: `Check for indices to search failed.\n${exc}`,
                   isFinal: true,
                 });
               }
