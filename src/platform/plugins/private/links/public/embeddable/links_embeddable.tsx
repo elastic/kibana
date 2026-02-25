@@ -254,7 +254,7 @@ export const getLinksEmbeddableFactory = () => {
         return (
           <EuiPanel
             className={layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'}
-            paddingSize="xs"
+            paddingSize="none"
             data-shared-item
             data-rendering-count={1}
             data-test-subj="links--component"
@@ -282,6 +282,7 @@ export const getLinksEmbeddableFactory = () => {
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
+    padding: 0,
     '.linksPanelLink': {
       maxWidth: 'fit-content', // ensures that the error tooltip shows up **right beside** the link label
     },

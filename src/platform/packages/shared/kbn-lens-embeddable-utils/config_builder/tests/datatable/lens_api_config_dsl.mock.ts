@@ -268,6 +268,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     },
   },
   paging: 10,
+  show_row_numbers: true,
 } satisfies DatatableStateNoESQL;
 
 /**

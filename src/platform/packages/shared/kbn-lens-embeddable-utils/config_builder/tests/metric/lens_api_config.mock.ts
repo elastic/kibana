@@ -61,6 +61,8 @@ export const complexMetricAPIAttributes = {
           percentile: 95,
         },
       },
+      position: 'top',
+      title_weight: 'normal',
     },
     {
       type: 'secondary',
@@ -71,6 +73,9 @@ export const complexMetricAPIAttributes = {
         baseline: 100,
         palette: 'status',
         value: false,
+      },
+      alignments: {
+        value: 'left',
       },
     },
   ],

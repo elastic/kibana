@@ -14,11 +14,13 @@ import {
   AlertEventPropsSchema,
   BaseEventSchema,
   DynamicWorkflowContextSchema,
+  isTriggerType,
 } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { inferZodType } from '../../../../common/lib/zod';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
 export type WorkflowDefinitionForContext =
@@ -29,10 +31,42 @@ export type WorkflowDefinitionForContext =
         | Array<{ name: string; type: string; [key: string]: unknown }>;
     });
 
+function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
+  return schema instanceof z.ZodObject;
+}
+
+/**
+ * Build event schema from workflow triggers: base (spaceId) + alert props when present + custom trigger event schemas.
+ * Custom trigger event schemas are resolved via the triggerSchemas singleton (same pattern as stepSchemas for steps).
+ * Uses shape spread instead of deprecated Zod v4 .merge().
+ */
+function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.ZodType {
+  const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
+  let eventSchema: z.ZodType = hasAlertTrigger
+    ? z.object({
+        ...(BaseEventSchema as z.ZodObject<z.ZodRawShape>).shape,
+        ...(AlertEventPropsSchema as z.ZodObject<z.ZodRawShape>).shape,
+      })
+    : BaseEventSchema;
+  for (const trigger of triggers) {
+    const type = trigger?.type;
+    if (typeof type === 'string' && !isTriggerType(type)) {
+      const def = triggerSchemas.getTriggerDefinition(type);
+      if (def?.eventSchema && isZodObject(eventSchema) && isZodObject(def.eventSchema)) {
+        eventSchema = z.object({
+          ...eventSchema.shape,
+          ...def.eventSchema.shape,
+        });
+      }
+    }
+  }
+  return eventSchema.optional();
+}
+
 export function getWorkflowContextSchema(
   definition: WorkflowDefinitionForContext,
   yamlDocument?: Document | null
-) {
+): typeof DynamicWorkflowContextSchema {
   // If inputs is undefined, try to extract it from the YAML document
   let inputs = definition.inputs;
   if (inputs === undefined && yamlDocument) {
@@ -82,14 +116,7 @@ export function getWorkflowContextSchema(
     }
   }
 
-  // Build event schema dynamically based on defined triggers.
-  // Only include alert-specific properties (alerts, rule, params) when an alert trigger is present.
-  // spaceId is always included via BaseEventSchema.
-  const triggers = definition.triggers ?? [];
-  const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
-  const eventSchema = hasAlertTrigger
-    ? BaseEventSchema.merge(AlertEventPropsSchema).optional()
-    : BaseEventSchema.optional();
+  const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
 
   // Use DynamicWorkflowContextSchema instead of WorkflowContextSchema
   // This ensures compatibility with DynamicStepContextSchema.merge() in getContextSchemaForPath
@@ -111,5 +138,5 @@ export function getWorkflowContextSchema(
     }),
     // event schema is dynamic based on triggers
     event: eventSchema,
-  });
+  }) as typeof DynamicWorkflowContextSchema;
 }

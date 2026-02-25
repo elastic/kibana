@@ -29,7 +29,7 @@
           "\nType guard to check if a panel is a generic (non-Lens) panel."
         ],
         "signature": [
-          "(panel: { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }) => boolean"
+          "(panel: { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 83,
@@ -45,7 +45,7 @@
             "label": "panel",
             "description": [],
             "signature": [
-              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
             "lineNumber": 86,
@@ -68,7 +68,7 @@
           "\nType guard to check if a panel is a Lens panel."
         ],
         "signature": [
-          "(panel: { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }) => boolean"
+          "(panel: { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 76,
@@ -84,7 +84,7 @@
             "label": "panel",
             "description": [],
             "signature": [
-              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
             "lineNumber": 79,
@@ -135,7 +135,7 @@
             "label": "panel",
             "description": [],
             "signature": [
-              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+              "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
             "lineNumber": 129,
@@ -206,30 +206,11 @@
           "\nUnion type for dashboard panel entries.\n- LensAttachmentPanel: Lens visualization with config in API format (type: 'lens')\n- GenericAttachmentPanel: Non-Lens panels with raw config (type: actual embeddable type)"
         ],
         "signature": [
-          "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
+          "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 69,
         "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dashboard-agent-common",
-        "id": "def-common.DASHBOARD_AGENT_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DASHBOARD_AGENT_ID",
-        "description": [
-          "\nDashboard agent ID"
-        ],
-        "signature": [
-          "\"platform.dashboard.dashboard_agent\""
-        ],
-        "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
-        "lineNumber": 16,
-        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -266,7 +247,7 @@
           "\"dashboard:panel_added\""
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
-        "lineNumber": 21,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -285,7 +266,7 @@
           "\"dashboard:panels_removed\""
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -301,7 +282,7 @@
           "\nData for a dashboard attachment."
         ],
         "signature": [
-          "{ description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }"
+          "{ description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 119,
@@ -320,7 +301,7 @@
           "\nA dashboard section containing panels."
         ],
         "signature": [
-          "{ title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }"
+          "{ title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 100,
@@ -408,7 +389,7 @@
           "\nA Lens panel entry containing full visualization configuration in API format.\nAll Lens panels (whether created by the agent or extracted from existing dashboards)\nare stored in this unified format using LensApiSchemaType."
         ],
         "signature": [
-          "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }"
+          "{ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 33,
@@ -456,7 +437,7 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>, ",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }>, ",
           "ZodObject",
           "<{ type: ",
           "ZodString",
@@ -532,7 +513,7 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>, ",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }>, ",
           "ZodObject",
           "<{ type: ",
           "ZodString",
@@ -588,7 +569,7 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>, ",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }>, ",
           "ZodObject",
           "<{ type: ",
           "ZodString",
@@ -608,9 +589,9 @@
           "ZodTypeAny",
           ", { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }, { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }>]>, \"many\">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }, { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }>, \"many\">>; }, \"strip\", ",
+          ", { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }, { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }>, \"many\">>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }, { description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }>"
+          ", { description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }, { description: string; title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; sections?: { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }[] | undefined; savedObjectId?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 108,
@@ -662,7 +643,7 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>, ",
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }>, ",
           "ZodObject",
           "<{ type: ",
           "ZodString",
@@ -682,7 +663,7 @@
           "ZodTypeAny",
           ", { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }, { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; }>]>, \"many\">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }, { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }>"
+          ", { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }, { title: string; panels: ({ type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; } | { type: string; panelId: string; rawConfig: Record<string, unknown>; title?: string | undefined; })[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 93,
@@ -762,7 +743,7 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; query?: string | undefined; title?: string | undefined; }>"
+          ", { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }, { type: \"lens\"; visualization: Record<string, unknown>; panelId: string; esql?: string | undefined; title?: string | undefined; query?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/types.ts",
         "lineNumber": 20,
