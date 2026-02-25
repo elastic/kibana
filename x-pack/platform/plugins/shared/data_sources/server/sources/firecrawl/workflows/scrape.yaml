@@ -1,0 +1,25 @@
+version: '1'
+name: 'sources.firecrawl.scrape'
+description: 'Scrape a single URL and extract content as markdown or other formats. Use when you need the content of a specific webpage. Inputs: url (string), onlyMainContent (boolean, optional), waitFor (number, ms, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: url
+    type: string
+  - name: onlyMainContent
+    type: boolean
+    required: false
+    default: true
+  - name: waitFor
+    type: number
+    required: false
+steps:
+  - name: scrape-url
+    type: firecrawl.scrape
+    connector-id: <%= firecrawl-stack-connector-id %>
+    with:
+      url: "${{inputs.url}}"
+      onlyMainContent: ${{inputs.onlyMainContent}}
+      waitFor: ${{inputs.waitFor}}

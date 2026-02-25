@@ -1,0 +1,30 @@
+version: '1'
+name: 'sources.firecrawl.crawl'
+description: 'Start a crawl of a website. Returns a job ID; use get_crawl_status to check progress and get results. Inputs: url (string), limit (number, optional), maxDiscoveryDepth (number, optional), allowExternalLinks (boolean, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: url
+    type: string
+  - name: limit
+    type: number
+    required: false
+    default: 100
+  - name: maxDiscoveryDepth
+    type: number
+    required: false
+  - name: allowExternalLinks
+    type: boolean
+    required: false
+    default: false
+steps:
+  - name: start-crawl
+    type: firecrawl.crawl
+    connector-id: <%= firecrawl-stack-connector-id %>
+    with:
+      url: "${{inputs.url}}"
+      limit: ${{inputs.limit}}
+      maxDiscoveryDepth: ${{inputs.maxDiscoveryDepth}}
+      allowExternalLinks: ${{inputs.allowExternalLinks}}
