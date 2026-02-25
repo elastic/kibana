@@ -174,6 +174,40 @@ describe('Action Scheduler', () => {
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
   });
 
+  describe('getAlertsToAutoUnmute', () => {
+    test('returns alerts to auto-unmute when conditional snooze TTL has expired', async () => {
+      const actionScheduler = new ActionScheduler(
+        getSchedulerContext({
+          rule: getRule({
+            snoozedInstances: [
+              { instanceId: '2', expiresAt: new Date(Date.now() - 60000).toISOString() },
+            ],
+          }),
+        })
+      );
+      const activeAlerts = {
+        ...generateAlert({ id: 1 }),
+        ...generateAlert({ id: 2 }),
+      };
+      await actionScheduler.run({ activeAlerts, recoveredAlerts: {} });
+
+      const alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
+      expect(alertsToAutoUnmute).toHaveLength(1);
+      expect(alertsToAutoUnmute[0].alertInstanceId).toBe('2');
+      expect(alertsToAutoUnmute[0].reason).toContain('Time expiry reached');
+    });
+
+    test('returns empty array when no alerts qualify for auto-unmute', async () => {
+      const actionScheduler = new ActionScheduler(getSchedulerContext());
+      await actionScheduler.run({
+        activeAlerts: generateAlert({ id: 1 }),
+        recoveredAlerts: {},
+      });
+
+      expect(actionScheduler.getAlertsToAutoUnmute()).toEqual([]);
+    });
+  });
+
   test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
     // Mock two calls, one for check against actions[0] and the second for actions[1]
     mockActionsPlugin.isActionExecutable.mockReturnValueOnce(false);
