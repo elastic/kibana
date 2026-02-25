@@ -50,7 +50,7 @@ function transformGroupFilters(
 
   return {
     ...state,
-    group_by: groupBy,
+    group_by: groupBy ?? 'status',
     ...(filters ? { filters: fromStoredFilters(groupFilters.filters) } : {}),
     ...(kqlQuery ? { kql_query: kqlQuery } : {}),
   };
