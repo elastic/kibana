@@ -15,6 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
+import { z } from '@kbn/zod/v4';
 import { WorkflowsService } from './workflows_management_service';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
@@ -2163,7 +2164,7 @@ steps:
   });
 
   describe('getWorkflowExecution', () => {
-    it('should return workflow execution with steps', async () => {
+    it('should return workflow execution with steps, excluding I/O by default', async () => {
       // Mock the get call for execution (using direct GET by ID)
       const mockExecutionGetResponse = {
         _id: 'execution-1',
@@ -2214,7 +2215,7 @@ steps:
         id: 'execution-1',
       });
 
-      // Verify the step executions search call
+      // Verify the step executions search call (includeInput/includeOutput default to false)
       expect(mockEsClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
@@ -2222,6 +2223,7 @@ steps:
             must: [{ match: { workflowRunId: 'execution-1' } }, { term: { spaceId: 'default' } }],
           },
         },
+        _source: { excludes: ['input', 'output'] },
         sort: 'startedAt:desc',
         from: 0,
         size: 1000,
@@ -2605,6 +2607,25 @@ steps:
         featureId: expect.any(String),
         includeSystemActionTypes: false,
       });
+    });
+  });
+
+  describe('validateWorkflow', () => {
+    const mockRequest = {} as any;
+
+    it('should resolve the schema and delegate to validateWorkflowYaml', async () => {
+      const mockSchema = z.object({ name: z.string() });
+      jest.spyOn(service, 'getWorkflowZodSchema').mockResolvedValue(mockSchema);
+
+      const result = await service.validateWorkflow('name: Test', 'my-space', mockRequest);
+
+      expect(service.getWorkflowZodSchema).toHaveBeenCalledWith(
+        { loose: false },
+        'my-space',
+        mockRequest
+      );
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([]);
     });
   });
 });
