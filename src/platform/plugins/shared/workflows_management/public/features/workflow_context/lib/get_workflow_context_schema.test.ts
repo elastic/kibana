@@ -9,10 +9,12 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 import { getSchemaAtPath, getShape } from '@kbn/workflows/common/utils/zod';
+import { z } from '@kbn/zod/v4';
 import {
   getWorkflowContextSchema,
   type WorkflowDefinitionForContext,
 } from './get_workflow_context_schema';
+import { triggerSchemas } from '../../../trigger_schemas';
 
 describe('getWorkflowContextSchema - Nested Objects', () => {
   it('should handle nested object inputs for variable validation', () => {
@@ -447,5 +449,47 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     // event.spaceId should always be accessible
     const spaceIdResult = getSchemaAtPath(contextSchema, 'event.spaceId');
     expect(spaceIdResult.schema).toBeDefined();
+  });
+
+  it('should include custom trigger eventSchema properties when triggerSchemas.getTriggerDefinition returns a definition', () => {
+    const customEventSchema = z.object({
+      severity: z.string(),
+      message: z.string(),
+    });
+    // WorkflowYaml's trigger type union is built-in only; custom trigger types are supported at runtime
+    const workflow = {
+      ...baseWorkflow,
+      triggers: [{ type: 'example.custom_trigger' }],
+    } as unknown as WorkflowYaml;
+    const mockTriggerDefinition = {
+      id: 'example.custom_trigger',
+      title: 'Example custom trigger',
+      description: 'Test trigger for event schema merge',
+      eventSchema: customEventSchema,
+    };
+    const getTriggerDefinitionSpy = jest
+      .spyOn(triggerSchemas, 'getTriggerDefinition')
+      .mockImplementation((triggerType: string) =>
+        triggerType === 'example.custom_trigger' ? mockTriggerDefinition : undefined
+      );
+
+    try {
+      const contextSchema = getWorkflowContextSchema(workflow);
+      const eventResult = getSchemaAtPath(contextSchema, 'event');
+      expect(eventResult.schema).toBeDefined();
+
+      const eventShape = getShape(eventResult.schema!);
+      const eventKeys = Object.keys(eventShape);
+      expect(eventKeys).toContain('spaceId');
+      expect(eventKeys).toContain('severity');
+      expect(eventKeys).toContain('message');
+
+      const severityResult = getSchemaAtPath(contextSchema, 'event.severity');
+      expect(severityResult.schema).toBeDefined();
+      const messageResult = getSchemaAtPath(contextSchema, 'event.message');
+      expect(messageResult.schema).toBeDefined();
+    } finally {
+      getTriggerDefinitionSpy.mockRestore();
+    }
   });
 });

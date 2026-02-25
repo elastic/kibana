@@ -463,7 +463,7 @@
                   {
                     "parentPluginId": "@kbn/monaco",
                     "id": "def-common.PainlessCompletionAdapter.Unnamed.$1.Unnamed",
-                    "type": "Any",
+                    "type": "Function",
                     "tags": [],
                     "label": "Unnamed",
                     "description": [],
@@ -474,12 +474,33 @@
                     "lineNumber": 41,
                     "columnNumber": 7,
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/monaco",
+                        "id": "def-common.PainlessCompletionAdapter.Unnamed.$1.Unnamed.$1",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "uris",
+                        "description": [],
+                        "signature": [
+                          "Uri",
+                          "[]"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/completion_adapter.ts",
+                        "lineNumber": 41,
+                        "columnNumber": 8,
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
                   },
                   {
                     "parentPluginId": "@kbn/monaco",
                     "id": "def-common.PainlessCompletionAdapter.Unnamed.$1.Unnamed",
-                    "type": "Any",
+                    "type": "Function",
                     "tags": [],
                     "label": "Unnamed",
                     "description": [],
@@ -490,7 +511,27 @@
                     "lineNumber": 42,
                     "columnNumber": 7,
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/monaco",
+                        "id": "def-common.PainlessCompletionAdapter.Unnamed.$1.Unnamed.$1",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "arg0",
+                        "description": [],
+                        "signature": [
+                          "Uri"
+                        ],
+                        "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/completion_adapter.ts",
+                        "lineNumber": 42,
+                        "columnNumber": 8,
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "isRequired": true
+                      }
+                    ],
+                    "returnComment": []
                   }
                 ]
               },
@@ -944,7 +985,7 @@
           {
             "parentPluginId": "@kbn/monaco",
             "id": "def-common.ConsoleOutputParser.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -955,12 +996,32 @@
             "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ConsoleOutputParser.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/monaco",
             "id": "def-common.ConsoleOutputParser.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -971,7 +1032,44 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ConsoleOutputParser.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/types.ts",
+                "lineNumber": 47,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/monaco",
+                "id": "def-common.ConsoleOutputParser.Unnamed.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "reviver",
+                "description": [],
+                "signature": [
+                  "ConsoleParserReviver"
+                ],
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/types.ts",
+                "lineNumber": 47,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1794,7 +1892,7 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "\"type\" | \"keyword\" | \"field\" | \"property\" | \"class\" | \"method\" | \"constructor\""
+              "\"type\" | \"keyword\" | \"property\" | \"field\" | \"class\" | \"method\" | \"constructor\""
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/types.ts",
             "lineNumber": 33,
@@ -2360,7 +2458,7 @@
         "label": "PainlessCompletionKind",
         "description": [],
         "signature": [
-          "\"type\" | \"keyword\" | \"field\" | \"property\" | \"class\" | \"method\" | \"constructor\""
+          "\"type\" | \"keyword\" | \"property\" | \"field\" | \"class\" | \"method\" | \"constructor\""
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/types.ts",
         "lineNumber": 10,
