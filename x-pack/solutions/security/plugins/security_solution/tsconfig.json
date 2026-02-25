@@ -14,8 +14,7 @@
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
-    "../../../../../typings/**/*",
-    "emotion.d.ts"
+    "../../../../../typings/**/*"
   ],
   "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
@@ -195,7 +194,6 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
     "@kbn/automatic-import-plugin",
-    "@kbn/avc-banner",
     "@kbn/config",
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
@@ -275,6 +273,7 @@
     "@kbn/kql",
     "@kbn/babel-register",
     "@kbn/core-security-common",
-    "@kbn/entity-store"
+    "@kbn/entity-store",
+    "@kbn/as-code-filters-transforms"
   ]
 }

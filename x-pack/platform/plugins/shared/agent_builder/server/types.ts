@@ -27,8 +27,10 @@ import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { AgentRegistry } from './services/agents';
 import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
+import type { AgentExecutionService } from './services/execution';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -97,6 +99,32 @@ export interface AgentsSetup {
   register: (definition: BuiltInAgentDefinition) => void;
 }
 
+export interface AgentsStart {
+  /**
+   * Executes an agent with the given parameters.
+   * @deprecated use execution service instead.
+   */
+  runAgent: RunAgentFn;
+  /**
+   * Return an agent registry scoped to the current user and context.
+   */
+  getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+}
+
+/**
+ * AgentBuilder execution service's start contract
+ */
+export interface ExecutionStart {
+  /**
+   * Execute an agent.
+   */
+  executeAgent: AgentExecutionService['executeAgent'];
+  /**
+   * Retrieve an agent execution by its ID.
+   */
+  getExecution: AgentExecutionService['getExecution'];
+}
+
 /**
  * Setup contract of the agentBuilder plugin.
  */
@@ -130,11 +158,13 @@ export interface AgentBuilderPluginStart {
   /**
    * Agents service, to execute agents.
    */
-  agents: {
-    runAgent: RunAgentFn;
-  };
+  agents: AgentsStart;
   /**
    * Tools service, to manage or execute tools.
    */
   tools: ToolsStart;
+  /**
+   * Execution service, to execute agents and retrieve execution status.
+   */
+  execution: ExecutionStart;
 }

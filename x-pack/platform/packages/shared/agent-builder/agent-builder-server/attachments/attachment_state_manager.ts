@@ -157,7 +157,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   private getDefaultReadonly(type: string): boolean {
     const definition = this.options.getTypeDefinition(type);
-    return definition?.isReadonly ?? true;
+    return definition?.isReadonly ?? false;
   }
 
   private async validateAttachmentData(type: string, data: unknown): Promise<unknown> {

@@ -14,7 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { ESQLControlState } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ESQLControlsFlyout } from '.';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
@@ -149,13 +149,13 @@ describe('IdentifierControlForm', () => {
         grow: true,
         width: 'small',
         title: 'my control',
-        availableOptions: ['column2'],
-        selectedOptions: ['column2'],
-        variableName: 'myField',
-        variableType: ESQLVariableType.FIELDS,
-        esqlQuery: 'FROM foo | STATS BY',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        available_options: ['column2'],
+        selected_options: ['column2'],
+        variable_name: 'myField',
+        variable_type: ESQLVariableType.FIELDS,
+        esql_query: 'FROM foo | STATS BY',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <KibanaContextProvider services={services}>
@@ -180,13 +180,13 @@ describe('IdentifierControlForm', () => {
         grow: true,
         width: 'small',
         title: 'my control',
-        availableOptions: ['column2'],
-        selectedOptions: ['column2'],
-        variableName: 'myField',
-        variableType: ESQLVariableType.FIELDS,
-        esqlQuery: 'FROM foo | STATS BY',
-        controlType: EsqlControlType.STATIC_VALUES,
-      } as ESQLControlState;
+        available_options: ['column2'],
+        selected_options: ['column2'],
+        variable_name: 'myField',
+        variable_type: ESQLVariableType.FIELDS,
+        esql_query: 'FROM foo | STATS BY',
+        control_type: EsqlControlType.STATIC_VALUES,
+      } as OptionsListESQLControlState;
       const onEditControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
