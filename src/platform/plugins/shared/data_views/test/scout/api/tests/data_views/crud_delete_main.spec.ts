@@ -45,6 +45,7 @@ apiTest.describe(
         },
       });
 
+      expect(createResponse).toHaveStatusCode(200);
       const id = createResponse.body[SERVICE_KEY].id;
       createdIds.push(id);
 
@@ -95,6 +96,7 @@ apiTest.describe(
         },
       });
 
+      expect(createResponse).toHaveStatusCode(200);
       const id = createResponse.body[SERVICE_KEY].id;
       createdIds.push(id);
 
@@ -106,6 +108,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
+      expect(deleteResponse).toHaveStatusCode(200);
       expect(Object.keys(deleteResponse.body)).toHaveLength(0);
     });
   }
