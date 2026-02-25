@@ -23,8 +23,113 @@ export const Firecrawl: ConnectorSpec = {
     minimumLicense: 'basic',
     supportedFeatureIds: ['workflows'],
   },
+
+  auth: {
+    types: ['bearer'],
+  },
+
   schema: z.object({}),
-  actions: {},
+
+  actions: {
+    scrape: {
+      isTool: true,
+      description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.scrape.description', {
+        defaultMessage: 'Scrape a single URL and extract content (e.g. markdown)',
+      }),
+      input: z.object({
+        url: z.string().url().describe('The URL to scrape'),
+        onlyMainContent: z.boolean().optional().default(true),
+        waitFor: z.number().int().min(0).optional().default(0),
+      }),
+      handler: async (ctx, input) => {
+        const body: Record<string, unknown> = { url: input.url };
+        if (input.onlyMainContent !== undefined) body.onlyMainContent = input.onlyMainContent;
+        if (input.waitFor !== undefined && input.waitFor > 0) body.waitFor = input.waitFor;
+        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, body);
+        return response.data;
+      },
+    },
+
+    search: {
+      isTool: true,
+      description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.search.description', {
+        defaultMessage: 'Search the web and get full page content from results',
+      }),
+      input: z.object({
+        query: z.string().min(1).describe('Search query'),
+        limit: z.number().int().min(1).max(100).optional().default(5),
+      }),
+      handler: async (ctx, input) => {
+        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/search`, {
+          query: input.query,
+          limit: input.limit,
+        });
+        return response.data;
+      },
+    },
+
+    map: {
+      isTool: true,
+      description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.map.description', {
+        defaultMessage: 'Map a website to discover indexed URLs',
+      }),
+      input: z.object({
+        url: z.string().url().describe('Base URL to map'),
+        search: z.string().optional(),
+        limit: z.number().int().min(1).max(100_000).optional().default(5000),
+        includeSubdomains: z.boolean().optional().default(true),
+      }),
+      handler: async (ctx, input) => {
+        const body: Record<string, unknown> = {
+          url: input.url,
+          limit: input.limit,
+          includeSubdomains: input.includeSubdomains,
+        };
+        if (input.search !== undefined && input.search !== '') body.search = input.search;
+        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/map`, body);
+        return response.data;
+      },
+    },
+
+    crawl: {
+      isTool: true,
+      description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.crawl.description', {
+        defaultMessage: 'Start an asynchronous crawl of a website; returns a job ID',
+      }),
+      input: z.object({
+        url: z.string().url().describe('Base URL to start crawling from'),
+        limit: z.number().int().min(1).optional().default(100),
+        maxDiscoveryDepth: z.number().int().min(0).optional(),
+        allowExternalLinks: z.boolean().optional().default(false),
+      }),
+      handler: async (ctx, input) => {
+        const body: Record<string, unknown> = {
+          url: input.url,
+          limit: input.limit,
+          allowExternalLinks: input.allowExternalLinks,
+        };
+        if (input.maxDiscoveryDepth !== undefined) body.maxDiscoveryDepth = input.maxDiscoveryDepth;
+        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/crawl`, body);
+        return response.data;
+      },
+    },
+
+    getCrawlStatus: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.firecrawl.actions.getCrawlStatus.description',
+        { defaultMessage: 'Get the status and results of a crawl job' }
+      ),
+      input: z.object({
+        id: z.string().uuid().describe('Crawl job ID (UUID) from the crawl action'),
+      }),
+      handler: async (ctx, input) => {
+        const response = await ctx.client.get(`${FIRECRAWL_API_BASE}/v2/crawl/${input.id}`);
+        return response.data;
+      },
+    },
+  },
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.description', {
       defaultMessage: 'Verifies Firecrawl API key',
