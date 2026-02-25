@@ -136,7 +136,7 @@ describe('useFieldRulesPanelState', () => {
 
     const nextRules = onFieldRulesChange.mock.calls[0][0] as FieldRule[];
     const userRule = nextRules.find((rule) => rule.field === 'user.email');
-    expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: '' });
+    expect(userRule).toMatchObject({ allowed: true, anonymized: true, entityClass: undefined });
   });
 
   it('suggests entity class when toggling field to anonymize', () => {

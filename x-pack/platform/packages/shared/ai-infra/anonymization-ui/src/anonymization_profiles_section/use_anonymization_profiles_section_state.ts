@@ -12,6 +12,9 @@ import { createAnonymizationProfilesClient } from '../common/services/profiles/c
 import { useDeleteProfileFlow } from './hooks/use_delete_profile_flow';
 import { useProfileForm } from '../common/hooks/use_profile_form';
 import { useProfilesListView } from './hooks/use_profiles_list_view';
+import type { DeleteProfileFlowController } from './hooks/use_delete_profile_flow';
+import type { ProfileFormController } from '../common/hooks/use_profile_form';
+import type { ProfilesListViewController } from './hooks/use_profiles_list_view';
 
 export type AnonymizationMode = 'manage' | 'readOnly' | 'hidden';
 
@@ -41,6 +44,26 @@ interface UseAnonymizationProfilesSectionStateParams {
   onOpenConflictError?: (error: unknown) => void;
 }
 
+export interface AnonymizationProfilesSectionState {
+  listView: ProfilesListViewController;
+  deleteFlow: DeleteProfileFlowController;
+  form: ProfileFormController;
+  flyoutState: FlyoutState;
+  createConflictProfileId?: string;
+  hasCreateConflict: boolean;
+  effectiveMode: AnonymizationMode;
+  hasReadOnlyApiError: boolean;
+  isManageMode: boolean;
+  closeFlyout: () => void;
+  closeDeleteModal: () => void;
+  confirmDelete: () => Promise<void>;
+  openProfileById: (profileId: string) => Promise<void>;
+  submitFlyout: () => Promise<void>;
+  onCreateProfile: () => void;
+  onEditProfile: (profile: AnonymizationProfile) => void;
+  onTablePageChange: (page: number, size: number) => void;
+}
+
 const ANONYMIZATION_READ_ONLY_ERROR_KINDS = ['forbidden', 'unauthorized'] as const;
 
 const isProfilesApiError = (error: unknown): error is ProfilesApiErrorLike =>
@@ -60,7 +83,7 @@ export const useAnonymizationProfilesSectionState = ({
   onDeleteSuccess,
   onCreateConflict,
   onOpenConflictError,
-}: UseAnonymizationProfilesSectionStateParams) => {
+}: UseAnonymizationProfilesSectionStateParams): AnonymizationProfilesSectionState => {
   const [flyoutState, setFlyoutState] = useState<FlyoutState>(null);
   const [createConflict, setCreateConflict] = useState<CreateConflictState | null>(null);
 

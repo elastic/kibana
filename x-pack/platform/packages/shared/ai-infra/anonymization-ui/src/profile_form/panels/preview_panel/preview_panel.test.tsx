@@ -24,7 +24,7 @@ jest.mock('../../hooks/use_preview_panel_state', () => ({
   usePreviewPanelState: jest.fn(),
 }));
 
-const setContext = (overrides = {}) => {
+const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>> = {}) => {
   jest.mocked(useProfileFormContext).mockReturnValue({
     fieldRules: [],
     regexRules: [],
@@ -33,7 +33,7 @@ const setContext = (overrides = {}) => {
     targetId: 'logs-*',
     fetchPreviewDocument: jest.fn(),
     ...overrides,
-  });
+  } as unknown as ReturnType<typeof useProfileFormContext>);
 };
 
 const setPreviewState = (overrides = {}) => {

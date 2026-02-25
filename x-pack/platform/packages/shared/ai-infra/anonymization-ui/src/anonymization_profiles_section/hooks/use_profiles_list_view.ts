@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { AnonymizationProfile } from '@kbn/anonymization-common';
+import { toProfile } from '../../common/services/profiles/adapters';
 import type { AnonymizationProfilesClient } from '../../common/services/profiles/client';
 import { ensureProfilesApiError } from '../../common/services/profiles/errors';
 import type { ProfilesApiError } from '../../common/services/profiles/errors';
@@ -47,7 +48,7 @@ interface ProfileListViewState {
   error?: ProfilesApiError;
 }
 
-interface ProfilesListViewController extends ProfileListViewState {
+export interface ProfilesListViewController extends ProfileListViewState {
   setTargetType: (targetType: '' | TargetType) => void;
   setTargetId: (targetId: string) => void;
   setPage: (page: number) => void;
@@ -95,7 +96,7 @@ export const useProfilesListView = ({
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
   const profiles: ProfileListViewState['profiles'] = useMemo(
-    () => listData?.data ?? [],
+    () => (listData?.data ?? []).map((profile) => toProfile(profile)),
     [listData]
   );
 

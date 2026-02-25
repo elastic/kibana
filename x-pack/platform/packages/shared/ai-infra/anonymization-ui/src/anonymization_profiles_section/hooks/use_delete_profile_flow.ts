@@ -17,7 +17,7 @@ interface UseDeleteProfileFlowParams {
   context: ProfilesQueryContext;
 }
 
-interface DeleteProfileFlowController {
+export interface DeleteProfileFlowController {
   pendingProfileId?: string;
   isDeleting: boolean;
   error?: ProfilesApiError;

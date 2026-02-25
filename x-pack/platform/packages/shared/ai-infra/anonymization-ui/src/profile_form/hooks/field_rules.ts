@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldRule } from '@kbn/anonymization-common';
+import type { AnonymizationEntityClass, FieldRule } from '@kbn/anonymization-common';
 import {
   FIELD_RULE_ACTION_ALLOW,
   FIELD_RULE_ACTION_ANONYMIZE,
@@ -36,7 +36,7 @@ const ECS_BOOST_SCORE = 25;
 const DEFAULT_PRIORITY_BOOST_MAX = 40;
 
 interface FieldRuleActionOptions {
-  entityClass?: string;
+  entityClass?: AnonymizationEntityClass;
 }
 
 const toRuleByAction = (

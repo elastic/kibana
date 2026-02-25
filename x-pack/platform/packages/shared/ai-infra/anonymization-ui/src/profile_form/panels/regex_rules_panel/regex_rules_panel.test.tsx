@@ -99,7 +99,7 @@ describe('RegexRulesPanel', () => {
         {
           id: 'regex-1',
           type: 'regex',
-          entityClass: '',
+          entityClass: 'MISC',
           pattern: '',
           enabled: true,
         },
@@ -112,10 +112,6 @@ describe('RegexRulesPanel', () => {
       screen.getByText('Regex pattern and entity class are required for regex rules')
     ).toBeInTheDocument();
     expect(screen.getByLabelText('Regex pattern for rule regex-1')).toHaveAttribute(
-      'aria-invalid',
-      'true'
-    );
-    expect(screen.getByLabelText('Entity class for regex rule regex-1')).toHaveAttribute(
       'aria-invalid',
       'true'
     );

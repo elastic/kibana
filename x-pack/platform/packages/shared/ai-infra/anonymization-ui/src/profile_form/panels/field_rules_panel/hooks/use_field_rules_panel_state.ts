@@ -15,6 +15,7 @@ import {
 import { applyBulkFieldAction, applyFieldAction, rankFieldRules } from '../../../hooks/field_rules';
 import type { FIELD_ACTION_OPTIONS } from '../../../constants';
 import { FIELD_PAGE_SIZE, toFieldAction } from '../../../constants';
+import { isAnonymizationEntityClass } from '../../../../common/utils/is_anonymization_entity_class';
 import { countPolicies } from './policy_helpers';
 
 interface UseFieldRulesPanelStateParams {
@@ -116,16 +117,21 @@ export const useFieldRulesPanelState = ({
         if (!targetRule) {
           return prev;
         }
-        return applyFieldAction(prev, field, toFieldAction(targetRule), { entityClass });
+        return applyFieldAction(prev, field, toFieldAction(targetRule), {
+          entityClass: isAnonymizationEntityClass(entityClass) ? entityClass : undefined,
+        });
       });
     },
     [updateAllRules]
   );
 
   const applyBulkAction = useCallback(() => {
+    const nextEntityClass = isAnonymizationEntityClass(bulkEntityClass)
+      ? bulkEntityClass
+      : undefined;
     updateAllRules((prev) =>
       applyBulkFieldAction(prev, selectedFields, bulkAction, {
-        entityClass: bulkEntityClass,
+        entityClass: nextEntityClass,
       })
     );
   }, [bulkAction, bulkEntityClass, selectedFields, updateAllRules]);

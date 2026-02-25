@@ -18,6 +18,10 @@ const setupLoaderMock = ({
   isLoadingPreviewDocument = false,
   previewDocumentLoadError,
   previewDocumentSource = 'fallback' as const,
+}: {
+  isLoadingPreviewDocument?: boolean;
+  previewDocumentLoadError?: string;
+  previewDocumentSource?: 'target' | 'fallback';
 } = {}) => {
   jest.mocked(usePreviewDocumentLoader).mockReturnValue({
     isLoadingPreviewDocument,

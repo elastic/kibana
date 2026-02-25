@@ -34,7 +34,7 @@ interface UseProfileFormParams {
   initialProfile?: AnonymizationProfile;
 }
 
-interface ProfileFormController {
+export interface ProfileFormController {
   values: ProfileFormValues;
   validationErrors: ProfileFormValidationErrors;
   submitError?: ProfilesApiError;

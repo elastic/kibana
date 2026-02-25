@@ -78,7 +78,9 @@ describe('usePreviewDocumentLoader', () => {
         enabled: true,
       })
     );
-    const queryOptions = jest.mocked(useQuery).mock.calls[0][0];
+    const queryOptions = jest.mocked(useQuery).mock.calls[0][0] as {
+      onSuccess?: (document: Record<string, unknown> | null | undefined) => void;
+    };
     queryOptions.onSuccess?.({ message: 'hello' });
     expect(onPreviewDocumentLoaded).toHaveBeenCalledWith({ message: 'hello' });
   });

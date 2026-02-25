@@ -279,6 +279,11 @@ describe('useTargetIdSelectionActions', () => {
     });
 
     const onFieldRulesChange = jest.fn();
+    const initialProps: { targetType: TargetType; targetId: string } = {
+      targetType: TARGET_TYPE_DATA_VIEW,
+      targetId: 'dv-1',
+    };
+
     const { result, rerender } = renderHook(
       ({ targetType, targetId }: { targetType: TargetType; targetId: string }) =>
         useTargetIdSelectionActions({
@@ -290,10 +295,7 @@ describe('useTargetIdSelectionActions', () => {
           targetLookupClient,
         }),
       {
-        initialProps: {
-          targetType: TARGET_TYPE_DATA_VIEW,
-          targetId: 'dv-1',
-        },
+        initialProps,
       }
     );
 

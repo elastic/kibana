@@ -15,7 +15,7 @@ jest.mock('../../profile_form_context', () => ({
   useProfileFormContext: jest.fn(),
 }));
 
-const setContext = (overrides = {}) => {
+const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>> = {}) => {
   const onNerRulesChange = jest.fn();
   jest.mocked(useProfileFormContext).mockReturnValue({
     nerRules: [
@@ -31,7 +31,7 @@ const setContext = (overrides = {}) => {
     isManageMode: true,
     isSubmitting: false,
     ...overrides,
-  });
+  } as unknown as ReturnType<typeof useProfileFormContext>);
 
   return { onNerRulesChange };
 };

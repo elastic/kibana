@@ -22,17 +22,26 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { ANONYMIZATION_ENTITY_CLASSES, type RegexRule } from '@kbn/anonymization-common';
+import {
+  ANONYMIZATION_ENTITY_CLASSES,
+  type AnonymizationEntityClass,
+  type RegexRule,
+} from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { useProfileFormContext } from '../../profile_form_context';
+import { isAnonymizationEntityClass } from '../../../common/utils/is_anonymization_entity_class';
 
 const REGEX_RULE_STATE_ENABLED = 'enabled';
 const REGEX_RULE_STATE_DISABLED = 'disabled';
+const DEFAULT_ENTITY_CLASS: AnonymizationEntityClass = 'MISC';
 
 export const RegexRulesPanel = () => {
   const { regexRules, onRegexRulesChange, isManageMode, isSubmitting, regexRulesError } =
     useProfileFormContext();
-  const [regexDraft, setRegexDraft] = useState({ pattern: '', entityClass: 'MISC' });
+  const [regexDraft, setRegexDraft] = useState<{
+    pattern: string;
+    entityClass: AnonymizationEntityClass | '';
+  }>({ pattern: '', entityClass: DEFAULT_ENTITY_CLASS });
   const showValidationErrors = Boolean(regexRulesError);
   const entityClassOptions = [
     {
@@ -56,7 +65,7 @@ export const RegexRulesPanel = () => {
   const addRegexRule = useCallback(() => {
     const nextPattern = regexDraft.pattern.trim();
     const nextEntityClass = regexDraft.entityClass.trim();
-    if (!nextPattern || !nextEntityClass) {
+    if (!nextPattern || !isAnonymizationEntityClass(nextEntityClass)) {
       return;
     }
     onRegexRulesChange([
@@ -69,7 +78,7 @@ export const RegexRulesPanel = () => {
         enabled: true,
       },
     ]);
-    setRegexDraft({ pattern: '', entityClass: 'MISC' });
+    setRegexDraft({ pattern: '', entityClass: DEFAULT_ENTITY_CLASS });
   }, [onRegexRulesChange, regexDraft.entityClass, regexDraft.pattern, regexRules]);
 
   const removeRegexRule = useCallback(
@@ -146,7 +155,9 @@ export const RegexRulesPanel = () => {
             onChange={(event) =>
               updateRegexRule(
                 regexRules.findIndex((item) => item.id === rule.id),
-                { ...rule, entityClass: event.target.value }
+                isAnonymizationEntityClass(event.target.value)
+                  ? { ...rule, entityClass: event.target.value }
+                  : rule
               )
             }
             disabled={!isManageMode || isSubmitting}
@@ -312,7 +323,12 @@ export const RegexRulesPanel = () => {
               )}
               options={entityClassOptions}
               onChange={(event) =>
-                setRegexDraft((draft) => ({ ...draft, entityClass: event.target.value }))
+                setRegexDraft((draft) => ({
+                  ...draft,
+                  entityClass: isAnonymizationEntityClass(event.target.value)
+                    ? event.target.value
+                    : '',
+                }))
               }
               disabled={!isManageMode || isSubmitting}
               fullWidth
