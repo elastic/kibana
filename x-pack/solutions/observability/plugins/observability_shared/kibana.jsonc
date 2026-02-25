@@ -20,7 +20,8 @@
       "share"
     ],
     "optionalPlugins": [
-      "agentBuilder"
+      "agentBuilder",
+      "observabilityAgentBuilder"
     ],
     "requiredBundles": [
       "cases",
