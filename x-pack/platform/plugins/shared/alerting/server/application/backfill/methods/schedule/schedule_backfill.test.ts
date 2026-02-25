@@ -627,7 +627,7 @@ describe('scheduleBackfill()', () => {
           ],
         }),
       ];
-      authorization.ensureAuthorized.mockImplementationOnce(() => {
+      authorization.bulkEnsureAuthorized.mockImplementationOnce(() => {
         throw new Error('Unauthorized');
       });
 

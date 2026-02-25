@@ -122,6 +122,7 @@ EOF
 
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${connector_id}"
+        cancel_on_build_failing: true
         key: "kbn-evals-${group_key_safe}-${key_safe}"
         command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
         env:
@@ -137,6 +138,9 @@ EOF
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
         agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
           machineType: n2-standard-8
           preemptible: true
         retry:
