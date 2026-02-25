@@ -22,6 +22,8 @@
     "@kbn/i18n",
     "@kbn/react-kibana-context-render",
     "@kbn/react-query",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-router-server-mocks"
   ]
 }
