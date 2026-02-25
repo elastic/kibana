@@ -414,10 +414,7 @@ export interface ExpressionWrapperProps {
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
-  onData$: (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => void;
+  onData$: ReactExpressionRendererProps['onData$'];
   onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;

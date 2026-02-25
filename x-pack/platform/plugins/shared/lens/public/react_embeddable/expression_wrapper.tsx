@@ -13,7 +13,7 @@ import type {
 } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import type { UserMessage, LensInspector } from '@kbn/lens-common';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
@@ -27,10 +27,7 @@ export interface ExpressionWrapperProps {
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
-  onData$: (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => void;
+  onData$: ReactExpressionRendererProps['onData$'];
   onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
@@ -92,7 +89,6 @@ export function ExpressionWrapper({
         interactive={interactive}
         searchContext={searchContext}
         searchSessionId={searchSessionId}
-        // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRender$}
         inspectorAdapters={lensInspector.getInspectorAdapters()}
