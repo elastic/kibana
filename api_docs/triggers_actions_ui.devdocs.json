@@ -2950,7 +2950,7 @@
             "label": "validNormalizedTypes",
             "description": [],
             "signature": [
-              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"null\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\")[]"
+              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_shape\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"exponential_histogram\" | \"null\" | \"number_range\" | \"tdigest\")[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
             "lineNumber": 24,
@@ -6477,7 +6477,7 @@
         "label": "ValidNormalizedTypes",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"null\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_shape\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"exponential_histogram\" | \"null\" | \"number_range\" | \"tdigest\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
         "lineNumber": 10,
