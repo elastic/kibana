@@ -461,6 +461,7 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isUpgrade={isUpgrade}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               varGroupSelections={varGroupSelections}
             />
@@ -500,6 +501,7 @@ export const EditPackagePolicyForm = memo<{
       selectedTab,
       tabsViews,
       updatePackagePolicy,
+      isUpgrade,
       validationResults,
       varGroupSelections,
     ]

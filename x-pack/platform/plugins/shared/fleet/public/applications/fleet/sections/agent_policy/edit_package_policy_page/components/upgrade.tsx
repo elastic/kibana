@@ -159,25 +159,13 @@ const InputMigrationCallout = ({
     title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.inputMigrationTitle', {
       defaultMessage: 'Input type migration',
     })}
-    color="warning"
-    iconType="warning"
+    color="primary"
+    iconType="info"
   >
     <FormattedMessage
       id="xpack.fleet.upgradePackagePolicy.statusCallout.inputMigrationContent"
       defaultMessage="This upgrade replaces one or more input types. Your existing configuration has been automatically carried over."
     />
-    <EuiSpacer size="s" />
-    <ul>
-      {migratedInputs.map(({ from, to }) => (
-        <li key={from}>
-          <FormattedMessage
-            id="xpack.fleet.upgradePackagePolicy.statusCallout.inputMigrationItem"
-            defaultMessage="{from} → {to}"
-            values={{ from, to }}
-          />
-        </li>
-      ))}
-    </ul>
   </EuiCallOut>
 );
 

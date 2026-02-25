@@ -341,6 +341,7 @@ export enum RegistryStreamKeys {
   template_path = 'template_path',
   ingestion_method = 'ingestion_method',
   var_groups = 'var_groups',
+  migrate_from = 'migrate_from',
 }
 
 export interface RegistryStream {
@@ -353,6 +354,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.template_path]: string;
   [RegistryStreamKeys.ingestion_method]?: string;
   [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
+  [RegistryStreamKeys.migrate_from]?: string;
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };

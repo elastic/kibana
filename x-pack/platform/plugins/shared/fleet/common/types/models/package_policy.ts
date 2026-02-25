@@ -51,6 +51,7 @@ export interface NewPackagePolicyInputStream {
   vars?: PackagePolicyConfigRecord;
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
+  migrate_from?: string;
 }
 
 export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {

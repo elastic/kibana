@@ -7923,9 +7923,9 @@ describe('Package policy service', () => {
         expect(celInput?.vars?.interval.value).toBe('10s');
       });
 
-      it('enables the new input when migration succeeds', () => {
+      it('enables the new input when migration succeeds and the old input was enabled', () => {
         const result = updatePackageInputs(
-          makeBasePolicy(),
+          makeBasePolicy(), // httpjson input has enabled: true
           makeCelPackageInfo(),
           makeCelInputsOverride(),
           false
@@ -7933,6 +7933,18 @@ describe('Package policy service', () => {
 
         const celInput = result.inputs.find((i) => i.type === 'cel');
         expect(celInput?.enabled).toBe(true);
+      });
+
+      it('keeps the new input disabled when migration succeeds but the old input was disabled', () => {
+        const result = updatePackageInputs(
+          makeBasePolicy({ enabled: false }), // httpjson input disabled by the user
+          makeCelPackageInfo(),
+          makeCelInputsOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        expect(celInput?.enabled).toBe(false);
       });
 
       it('removes the old input type from the policy after migration', () => {
@@ -8054,6 +8066,157 @@ describe('Package policy service', () => {
         const celInput = result.inputs.find((i) => i.type === 'cel');
         expect(celInput).toBeDefined();
         expect(celInput?.vars?.url.value).toBe('http://example.com');
+      });
+
+      describe('when individual streams have migrate_from inside the datastream', () => {
+        it('should support stream-level migrate_from an input-level migration', () => {
+          const overrideWithBothLevels: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              migrate_from: 'httpjson',
+              vars: { url: { type: 'text', value: 'http://new-default.com' } },
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { tags: { type: 'text', value: 'cel-default-tag' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const result = updatePackageInputs(
+            makeBasePolicy(), // has httpjson with tags: 'httpjson-tag'
+            makeCelPackageInfo(),
+            overrideWithBothLevels,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput?.streams[0]?.vars?.tags?.value).toBe('httpjson-tag');
+        });
+
+        const makeStreamOnlyMigrationFixtures = (oldInputEnabled: boolean) => {
+          const policyWithHttpjsonOnly: NewPackagePolicy = {
+            name: 'stream-only-migration-policy',
+            description: '',
+            namespace: 'default',
+            enabled: true,
+            policy_id: 'xxxx',
+            policy_ids: ['xxxx'],
+            package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+            inputs: [
+              {
+                type: 'httpjson',
+                policy_template: 'template_1',
+                enabled: oldInputEnabled,
+                vars: {},
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { dataset: 'test_package.httpjson_log', type: 'logs' },
+                    vars: { paths: { type: 'text', value: '/var/log/app.log' } },
+                  },
+                ],
+              },
+            ],
+          };
+
+          const celOverrideStreamOnlyMigration: InputsOverride[] = [
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              vars: {},
+              streams: [
+                {
+                  enabled: true,
+                  migrate_from: 'httpjson',
+                  data_stream: { dataset: 'test_package.cel_log', type: 'logs' },
+                  vars: { paths: { type: 'text', value: '/default/path.log' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ];
+
+          const celPackageInfoNoInputMigration = {
+            ...makeCelPackageInfo(),
+            policy_templates: [
+              {
+                name: 'template_1',
+                title: 'Template 1',
+                description: 'Template 1',
+                inputs: [
+                  {
+                    type: 'cel',
+                    title: 'CEL',
+                    description: 'CEL Input',
+                    // No input-level migrate_from — only the stream declares it
+                    vars: [],
+                  },
+                ],
+              },
+            ],
+          } as unknown as PackageInfo;
+
+          return {
+            policyWithHttpjsonOnly,
+            celOverrideStreamOnlyMigration,
+            celPackageInfoNoInputMigration,
+          };
+        };
+
+        it('should enable a new input when stream-level migrate_from is declared and the old input was enabled', () => {
+          const {
+            policyWithHttpjsonOnly,
+            celOverrideStreamOnlyMigration,
+            celPackageInfoNoInputMigration,
+          } = makeStreamOnlyMigrationFixtures(true);
+
+          const result = updatePackageInputs(
+            policyWithHttpjsonOnly,
+            celPackageInfoNoInputMigration,
+            celOverrideStreamOnlyMigration,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput).toBeDefined();
+
+          // Old httpjson input was enabled → new cel input should be enabled too
+          expect(celInput?.enabled).toBe(true);
+
+          // Stream vars and enabled state should be carried over from the old httpjson stream
+          expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/var/log/app.log');
+          expect(celInput?.streams[0]?.enabled).toBe(true);
+        });
+
+        it('should keep the new input disabled when stream-level migrate_from is declared but the old input was disabled', () => {
+          const {
+            policyWithHttpjsonOnly,
+            celOverrideStreamOnlyMigration,
+            celPackageInfoNoInputMigration,
+          } = makeStreamOnlyMigrationFixtures(false);
+
+          const result = updatePackageInputs(
+            policyWithHttpjsonOnly,
+            celPackageInfoNoInputMigration,
+            celOverrideStreamOnlyMigration,
+            false
+          );
+
+          const celInput = result.inputs.find((i) => i.type === 'cel');
+          expect(celInput).toBeDefined();
+
+          // Old httpjson input was disabled → new cel input should remain disabled
+          expect(celInput?.enabled).toBe(false);
+
+          // Stream vars should still be migrated even though the input is disabled
+          expect(celInput?.streams[0]?.vars?.paths?.value).toBe('/var/log/app.log');
+        });
       });
     });
   });

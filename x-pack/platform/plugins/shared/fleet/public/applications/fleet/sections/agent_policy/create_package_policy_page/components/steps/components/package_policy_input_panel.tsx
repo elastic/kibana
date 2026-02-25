@@ -83,6 +83,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   varGroupSelections?: Record<string, string>;
 }> = memo(
   ({
@@ -94,6 +95,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
+    isUpgrade = false,
     varGroupSelections = {},
   }) => {
     const defaultDataStreamId = useDataStreamId();
@@ -177,7 +179,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                       </h3>
                     </EuiTitle>
                   </EuiFlexItem>
-                  {packagePolicyInput.migrate_from && (
+                  {isUpgrade && packagePolicyInput.migrate_from && (
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
                         type="info"

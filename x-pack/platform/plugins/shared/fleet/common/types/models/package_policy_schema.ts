@@ -72,6 +72,7 @@ const PackagePolicyStreamsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const PackagePolicyInputsSchema = {

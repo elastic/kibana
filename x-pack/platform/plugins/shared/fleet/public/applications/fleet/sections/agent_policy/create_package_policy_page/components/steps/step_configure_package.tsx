@@ -67,6 +67,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   noTopRule?: boolean;
   isEditPage?: boolean;
+  isUpgrade?: boolean;
   isAgentlessSelected?: boolean;
   varGroupSelections?: VarGroupSelection;
 }> = ({
@@ -78,6 +79,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted,
   noTopRule = false,
   isEditPage = false,
+  isUpgrade = false,
   isAgentlessSelected = false,
   varGroupSelections = {},
 }) => {
@@ -156,6 +158,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     }
                     forceShowErrors={submitAttempted}
                     isEditPage={isEditPage}
+                    isUpgrade={isUpgrade}
                     varGroupSelections={varGroupSelections}
                   />
                   <EuiHorizontalRule margin="m" />
