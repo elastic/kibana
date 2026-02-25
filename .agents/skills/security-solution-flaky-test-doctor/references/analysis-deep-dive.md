@@ -1,5 +1,14 @@
 # Analysis Deep Dive
 
+## Table of Contents
+- [Step 0: Common reasons tests become invalid](#step-0-common-reasons-tests-become-invalid)
+- [Step 2: Duplicate recommendation formats](#step-2-duplicate-recommendation-formats)
+- [Step 3: Layer recommendation format](#step-3-layer-recommendation-format)
+- [Step 4: When the test catches a real bug](#step-4-when-the-test-catches-a-real-application-bug)
+- [Step 4: Verify against documentation](#step-4-verify-against-documentation)
+- [Step 4: Diagnosing "Element Disabled" failures](#step-4-diagnosing-element-disabled-failures)
+- [Step 5: Pre-proposal checklist](#step-5-pre-proposal-checklist)
+
 Detailed guidance for Steps 0, 2, and 4 of the analysis framework.
 
 ## Step 0: Common reasons tests become invalid

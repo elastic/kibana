@@ -1,6 +1,12 @@
 ---
 name: security-solution-cypress-to-scout-migration
-description: Security Solution specific. Migrate Security Solution Cypress tests to Scout (Playwright) with triage gates that validate tests before migration. Includes duplicate detection, layer analysis, Cypress-to-Scout pattern mapping, and best practices. Use when migrating Security Solution Cypress (.cy.ts) tests to Scout or planning a migration batch.
+description: >
+  Security Solution specific. Migrate Security Solution Cypress E2E tests (.cy.ts) to Scout (Playwright).
+  Includes triage gates (duplicate detection, layer analysis, value assessment), Cypress-to-Scout pattern
+  mapping, data cleanup audit, and PR workflow. Use when: (1) migrating a Cypress test to Scout,
+  (2) converting .cy.ts to .spec.ts, (3) planning a Cypress-to-Scout migration batch, (4) rewriting
+  Cypress screens/tasks as Scout page objects, (5) asked "how do I move this Cypress test to Scout/Playwright",
+  (6) asked about differences between Cypress and Scout for Security Solution.
 ---
 
 # Security Solution — Cypress to Scout Migration
@@ -34,14 +40,22 @@ Exercise behavior in the least flaky automation layer first:
 
 A Cypress E2E test should only become a Scout E2E test if it genuinely tests a user workflow that cannot be verified at a lower layer.
 
-## Phase 1: Triage (before touching any code)
+## Tools
+
+- **Scaffold a spec file:** `bash scripts/scaffold_scout_spec.sh --name <name> --domain <path> [--type parallel|sequential]`
+- **Check selector validity:** `bash scripts/extract_selectors.sh <cypress-test-file>`
+- **Templates:** `assets/page_object_template.ts`, `assets/api_service_template.ts`
+
+All paths relative to this skill's directory.
+
+## Phase 1: Triage (before touching any code) `[medium freedom]`
 
 For each Cypress test, pass all five gates before migrating.
 
 ### Gate 0: Is the feature still valid?
 
 1. Check if the feature under test still exists in the codebase
-2. Verify test selectors (`data-test-subj`) still exist
+2. Run `scripts/extract_selectors.sh <test-file>` to verify selectors still exist
 3. Check if the feature was removed, redesigned, or moved behind a feature flag
 
 | Finding | Action |
@@ -106,19 +120,26 @@ If currently skipped or chronically flaky:
 
 Tests that pass all triage gates proceed here. **Do not port Cypress code 1:1.** Rewrite using Scout patterns.
 
-### Step 1: Determine test type
+### Step 1: Determine test type `[high freedom]`
 
 - **UI test** if it verifies user flows, page rendering, or interactive behavior
 - **API test** if the Cypress test primarily validates data via API assertions
 
-### Step 2: Set up Scout scaffold
+### Step 2: Set up Scout scaffold `[low freedom — use script]`
 
 If the plugin doesn't have a Scout test directory yet, read the `scout-create-scaffold` skill.
+
+Generate the spec file boilerplate:
+```bash
+bash scripts/scaffold_scout_spec.sh --name <spec_name> --domain <domain_path> --type parallel
+```
+
+Use `assets/page_object_template.ts` and `assets/api_service_template.ts` as starting points when creating new page objects or API services.
 
 - Tests go under `x-pack/solutions/security/plugins/security_solution/test/scout/`
 - Use `@kbn/scout-security` for imports
 
-### Step 3: Map Cypress patterns to Scout
+### Step 3: Map Cypress patterns to Scout `[medium freedom]`
 
 | Cypress | Scout |
 |---------|-------|
@@ -137,7 +158,7 @@ If the plugin doesn't have a Scout test directory yet, read the `scout-create-sc
 | `ftrConfig` (feature flags) | Kibana Core APIs (MKI/cloud) or custom server config (stateless) |
 | `esArchiver` (system indices) | **Forbidden** — use `kbnClient` |
 
-### Step 3b: Data cleanup audit
+### Step 3b: Data cleanup audit `[low freedom — must be thorough]`
 
 **Critical:** Cypress runs each spec in a clean environment, so many Cypress tests never clean up after themselves. Scout shares the environment across specs — leftover data will break other tests. **Do not trust the Cypress test's cleanup.** You must identify and clean all data regardless of what the Cypress test does.
 
@@ -173,7 +194,7 @@ spaceTest.beforeAll(async ({ apiServices }) => {
 
 Even if the Cypress test has no `afterEach` or cleanup logic, the Scout test **must** clean up everything it creates.
 
-### Step 4: Write the Scout test
+### Step 4: Write the Scout test `[high freedom]`
 
 Read the `scout-ui-testing` or `scout-api-testing` skill for implementation details.
 
@@ -191,7 +212,7 @@ Key rules:
 - **EUI wrappers** — Scout provides `EuiComboBoxWrapper`, `EuiDataGridWrapper`, `EuiSelectableWrapper`, etc. for stable EUI interactions
 - **All created data must be cleaned up** — see Step 3b above
 
-### Step 5: Review and verify
+### Step 5: Review and verify `[low freedom — mandatory checklist]`
 
 1. Run the `scout-best-practices-reviewer` skill against the new test
 2. **Make sure the test fails** — intentionally break the feature and confirm the test catches it

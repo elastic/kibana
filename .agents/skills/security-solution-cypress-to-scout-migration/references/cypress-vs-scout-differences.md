@@ -1,6 +1,15 @@
 # Cypress vs Scout Differences
 
-Understanding these differences is critical before migrating. Scout won't automatically solve flaky tests — the key is how you implement tests and follow best practices.
+## Table of Contents
+- [Folder Structure](#folder-structure)
+- [Authentication](#authentication)
+- [CI Execution & Parallelization](#ci-test-execution--parallelization)
+- [MKI Pipelines](#mki-pipelines)
+- [Local Execution](#local-test-execution)
+- [Test Labels/Tags](#test-labelstags)
+- [Test Patterns](#test-patterns)
+- [Serverless Tiers & Feature Flags](#serverless-tiers--feature-flags)
+- [Key Behavioral Differences](#key-behavioral-differences)
 
 ## Folder Structure
 

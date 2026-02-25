@@ -1,5 +1,14 @@
 # Team Conventions & Test Deletion
 
+## Table of Contents
+- [Spec File Execution Time](#spec-file-execution-time)
+- [Selectors](#selectors)
+- [Data & Cleanup Audit](#data--cleanup-audit)
+- [Test Deletion Guidelines](#test-deletion-guidelines)
+- [Orphaned Code Cleanup Checklist](#orphaned-code-cleanup-checklist)
+- [Flaky Test Runner](#flaky-test-runner)
+- [Flaky Test Process](#flaky-test-process)
+
 ## Spec File Execution Time
 
 A spec file should not take more than 10 minutes to execute. If it exceeds this:
@@ -7,54 +16,13 @@ A spec file should not take more than 10 minutes to execute. If it exceeds this:
 2. Consider moving some tests to API/unit layer
 3. Optimize setup/teardown
 
-## File Organization
-
-**Screens folder** (`cypress/screens/`): Extract all element selectors.
-```typescript
-export const ALERTS_TABLE = '[data-test-subj="alerts-table"]';
-```
-
-**Tasks folder** (`cypress/tasks/`): Extract user actions.
-```typescript
-export const openAlertDetails = (alertId: string) => {
-  cy.get(ALERT_ROW).contains(alertId).click();
-  cy.get(ALERT_DETAILS_FLYOUT).should('be.visible');
-};
-```
-
 ## Selectors
 
-Always use `data-test-subj` attributes:
-```typescript
-// Good
-cy.get('[data-test-subj="myButton"]');
-
-// Avoid — classes change, IDs may not be unique, indexes are brittle
-cy.get('.my-button');
-cy.get('#my-button');
-cy.get('[data-test-subj="row"]').eq(2);
-```
+Always use `data-test-subj` — never CSS classes, IDs, or `.eq(index)`.
 
 ## Data Setup
 
-Prefer API-based setup over `es_archive`:
-```typescript
-// Preferred
-beforeEach(() => {
-  cy.request('POST', '/api/detection_engine/rules', rulePayload);
-});
-```
-
-## Assertions
-
-| Assertion | Use Case |
-|-----------|----------|
-| `.should('be.visible')` | User-facing elements (buttons, avatars, text, modals) |
-| `.should('exist')` | Elements that may be hidden (DOM structure, hidden inputs) |
-| `.should('not.exist')` | Confirming element is removed from DOM |
-| `.should('not.be.visible')` | Confirming element is hidden but still in DOM |
-
-Prefer `be.visible` over `exist` for user-facing elements — it catches hidden elements, verifies dimensions, and confirms the element isn't covered.
+Prefer API-based setup. Use `cy.request()` in `beforeEach`, not `esArchiver`.
 
 ## Data & Cleanup Audit
 

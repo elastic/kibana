@@ -1,6 +1,11 @@
 ---
 name: security-solution-flaky-test-doctor
-description: Security Solution specific. Analyzes flaky or skipped Security Solution Cypress tests to determine root cause and recommend fixes. Use when a user asks about a flaky Cypress test, skipped test, test stability issue, or test failure analysis in Security Solution.
+description: >
+  Security Solution specific. Analyzes flaky, failing, or skipped Security Solution Cypress tests to
+  determine root cause and recommend fixes. Use when: (1) a user shares a flaky or skipped Cypress test,
+  (2) asked to fix a test that intermittently fails, (3) asked to unskip a test, (4) triaging a test
+  stability GitHub issue, (5) asked "why is this test flaky/failing", (6) asked to analyze test failures
+  in ESS/Serverless/MKI environments, (7) asked whether to fix, delete, or migrate a broken Cypress test.
 ---
 
 # Security Solution — Flaky Test Doctor
@@ -16,6 +21,12 @@ Analyze flaky or skipped Security Solution Cypress tests to determine root cause
 - Scout: `x-pack/solutions/security/plugins/security_solution/test/scout/`
 - API integration: `x-pack/solutions/security/test/security_solution_api_integration/`
 - Unit tests: co-located with source (`*.test.ts`, `*.test.tsx`)
+
+## Tools
+
+- **Quick diagnostic:** `bash scripts/check_test_status.sh <cypress-test-file>` — shows skip status, git history, tags, linked issues, and imported helpers. Run this first to gather context before analysis.
+
+Path relative to this skill's directory.
 
 ## Required sub-skills
 

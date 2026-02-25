@@ -1,129 +1,60 @@
-# Debugging Techniques & Environment Guide
+# Debugging & Environment Guide
+
+## Table of Contents
+- [Debugging Techniques](#debugging-techniques)
+- [Environment Guide](#environment-guide)
+- [MKI-Specific Issues](#mki-specific-issues)
+- [Environment Tag Combinations](#environment-tag-combinations)
 
 ## Debugging Techniques
 
-### Focus on a single test with `.only`
-
-```typescript
-it.only('adding new assignees via add button in flyout', () => { ... });
-// Or focus on a describe block
-describe.only('Updating assignees (single alert)', () => { ... });
-```
-
-Remove `.only` before committing.
-
-### Pause execution with `cy.pause()`
-
-```typescript
-it('test name', () => {
-  expandFirstAlert();
-  updateAssigneesViaAddButtonInFlyout(users);
-  cy.pause(); // Open DevTools to inspect state
-  alertDetailsFlyoutShowsAssignees(users);
-});
-```
-
-While paused: open DevTools (F12), inspect elements, check selectors, view network requests, step through remaining commands.
-
-### Debug specific assertions
-
-```typescript
-cy.get(ALERT_ASIGNEES_COLUMN).eq(0).then($el => {
-  cy.log('Column HTML:', $el.html());
-});
-
-cy.get('[data-test-subj*="Avatar"]').then($els => {
-  cy.log('Found avatars:', $els.length);
-});
-```
-
-### Combine for fast iteration
+Use `.only` + `cy.pause()` + `--headed` for fast iteration:
 
 ```typescript
 it.only('test name', () => {
   // ... setup ...
   cy.get(SELECTOR).then($el => { cy.log('State:', $el.html()); });
-  cy.pause();
+  cy.pause(); // F12 → inspect elements, network, selectors
   // ... assertion ...
 });
 ```
 
-Run in headed mode (`--headed`) to see the browser.
+Remove `.only` before committing.
 
 ## Environment Guide
 
-### General
-
-| Environment | Characteristics |
+| Environment | Key Differences |
 |-------------|----------------|
 | ESS | Full feature set, traditional deployment |
 | Serverless | Stateless, may have different feature flags |
-| MKI | Kubernetes-based, different auth, performance, API restrictions |
+| MKI | Kubernetes-based, different auth, API restrictions, slower infra |
 
-When flaky in only one environment, investigate: feature flag differences, timing/performance, auth flow differences, data availability.
+When flaky in only one environment, investigate: feature flag differences, timing/performance, auth flow differences.
 
-### MKI-Specific Issues
+## MKI-Specific Issues
 
-#### 403 Forbidden on API Calls
-
-**Root Cause:** Direct access to internal indices is restricted in MKI.
-
+**403 Forbidden:** Direct access to internal indices is restricted — use application APIs instead.
 ```typescript
 // Fails on MKI
 cy.request('PUT', '/.internal-index/_doc/1', data);
-
-// Use application API instead
+// Use application API
 cy.request('POST', '/api/security/some-endpoint', data);
 ```
 
-#### "Log in to your account" Page Displayed
+**"Log in to your account" page:** Session timeout from slow app performance. Fix the app (reduce API calls, optimize rendering).
 
-**Root Cause:** Performance issues cause session timeout. The app is too slow, causing the session to expire.
-**Fix:** Investigate and optimize the application (reduce API calls, optimize rendering, check for memory leaks).
+**Username assertions:** `system_indices_superuser` doesn't exist in MKI. Use `getDefaultUsername()` from `cypress/tasks/common/users.ts`.
 
-#### Username Assertions Failing
+**Feature flags:** No easy way to enable/disable in MKI. Skip with `@skipInServerlessMKI`.
 
-**Root Cause:** `system_indices_superuser` does not exist in MKI.
+**Infrastructure not ready:** Elements disabled, "shards not active" or "index not found" errors. Check server logs; add readiness waits or skip with `@skipInServerlessMKI`.
 
-```typescript
-// Fails on MKI
-cy.contains('system_indices_superuser');
-
-// Works everywhere
-import { getDefaultUsername } from '../tasks/common/users';
-cy.contains(getDefaultUsername());
-```
-
-Reference: `x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/common/users.ts`
-
-#### Functionality Missing Due to Feature Flag
-
-**Root Cause:** No easy way to enable/disable feature flags in MKI.
-**Fix:** Skip on MKI:
-
-```typescript
-describe('Feature requiring FF', { tags: ['@skipInServerlessMKI'] }, () => { ... });
-```
-
-#### Infrastructure Not Ready
-
-**Symptoms:** Elements disabled, API calls fail with "shards not active" or "index not found", MKI-only failures.
-**Root Cause:** MKI infrastructure (indices, shards, ML nodes) may not be ready when test starts.
-
-**Diagnosis:** Check server logs for "primary shards not active", "no node found", "index not ready".
-
-**Fix options:**
-1. Add infrastructure readiness checks to test setup
-2. Report as environment issue if it's a deployment problem
-3. Add appropriate waits for indices/shards to be active
-4. Skip on MKI with `@skipInServerlessMKI` if requirements can't be reliably met
-
-### Environment Tag Combinations
+## Environment Tag Combinations
 
 | Tags | Behavior |
 |------|----------|
-| `@ess`, `@serverless` | Runs in both ESS and Serverless PR CI |
-| `@ess`, `@serverless`, `@skipInServerless` | Runs in ESS PR CI + Serverless PR CI, skips MKI |
-| `@serverless`, `@skipInServerlessMKI` | Runs in Serverless PR CI, skips only MKI |
+| `@ess`, `@serverless` | Both ESS and Serverless PR CI |
+| `@ess`, `@serverless`, `@skipInServerless` | ESS PR CI + Serverless PR CI, skips MKI |
+| `@serverless`, `@skipInServerlessMKI` | Serverless PR CI, skips only MKI |
 
 The periodic pipeline and Kibana QA quality gate are MKI environments.
