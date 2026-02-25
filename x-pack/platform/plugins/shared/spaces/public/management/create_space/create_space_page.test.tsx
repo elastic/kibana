@@ -47,8 +47,7 @@ featuresStart.getFeatures.mockResolvedValue([
 const reportEvent = jest.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
-const renderWithIntl = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('ManageSpacePage', () => {
   beforeAll(() => {

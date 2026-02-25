@@ -301,7 +301,18 @@ describe('SpaceListInternal', () => {
 
         await userEvent.click(button!);
 
-        expect(getListText(container)).toEqual(['D!', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
+        expect(getListText(container)).toEqual([
+          'D!',
+          'A',
+          'B',
+          'C',
+          'D',
+          'E',
+          'F',
+          'G',
+          'H',
+          '+1',
+        ]);
         expect(button!.textContent).toEqual('show less');
       });
     });
