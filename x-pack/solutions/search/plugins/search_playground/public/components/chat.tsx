@@ -138,8 +138,8 @@ export const Chat = () => {
               paddingBottom: euiTheme.size.l,
               // don't allow the chat to shrink below 700px
               flexBasis: 0,
-              minWidth: 700,
-              minHeight: 300,
+              minWidth: '50em',
+              minHeight: '22em',
             }}
           >
             <EuiFlexGroup direction="column" className="eui-fullHeight">
