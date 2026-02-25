@@ -41,7 +41,7 @@ export const renderInferenceEndpointsMgmtApp = async (
   core: CoreStart,
   services: AppPluginStartDependencies,
   element: HTMLElement
-): Promise<() => void> => {
+) => {
   const { InferenceEndpointsOverview } = await import('./inference_endpoints_overview');
 
   ReactDOM.render(
@@ -57,5 +57,5 @@ export const renderInferenceEndpointsMgmtApp = async (
     element
   );
 
-  return () => void ReactDOM.unmountComponentAtNode(element);
+  return () => ReactDOM.unmountComponentAtNode(element);
 };
