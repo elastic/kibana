@@ -110,17 +110,6 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // options contains dashboard search results (which may not include the selected dashboard)
-  // mergedOptions = options + selectedOption
-  const mergedOptions = useMemo(() => {
-    if (!selectedOption) {
-      return options;
-    }
-
-    const hasSelectedDashboard = options.some(({ value }) => value === selectedOption.value);
-    return hasSelectedDashboard ? options : [selectedOption, ...options];
-  }, [selectedOption, options]);
-
   const navigationOptions = useMemo(() => {
     return {
       ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
@@ -144,7 +133,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
         <EuiComboBox<string>
           async
           selectedOptions={selectedOption ? [selectedOption] : undefined}
-          options={mergedOptions}
+          options={options}
           onChange={(nextSelectedOptions) => {
             setSelectedOption(nextSelectedOptions?.[0]);
             props.onChange({ ...props.state, dashboard_id: nextSelectedOptions?.[0]?.value });
