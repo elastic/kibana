@@ -9,7 +9,7 @@ import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionDurationActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_duration/register_transaction_duration_rule_type';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '../../../services';
