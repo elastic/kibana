@@ -539,9 +539,7 @@ describe('isSingleInputAndStreams behavior', () => {
     );
 
     await waitFor(() => {
-      expect(
-        renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
-      ).toBeInTheDocument();
+      expect(renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')).toBeInTheDocument();
       expect(
         renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
       ).not.toBeInTheDocument();
@@ -698,11 +696,7 @@ describe('isSingleInputAndStreams behavior', () => {
       ],
     };
 
-    const validationResults = validatePackagePolicy(
-      multiInputPolicy,
-      multiInputPackageInfo,
-      load
-    );
+    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, load);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={multiInputPackageInfo}
@@ -887,9 +881,7 @@ describe('isSingleInputAndStreams behavior', () => {
     );
 
     await waitFor(() => {
-      expect(
-        renderResult.getByTestId('deprecatedPolicyTemplateCallout')
-      ).toBeInTheDocument();
+      expect(renderResult.getByTestId('deprecatedPolicyTemplateCallout')).toBeInTheDocument();
     });
   });
 });
