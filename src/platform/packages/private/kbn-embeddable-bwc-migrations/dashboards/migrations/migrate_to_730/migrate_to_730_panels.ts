@@ -84,10 +84,13 @@ function migratePre61PanelToLatest(
 ): RawSavedDashboardPanel730ToLatest {
   if (panel.col === undefined || panel.row === undefined) {
     throw new Error(
-      i18n.translate('dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage', {
-        defaultMessage:
-          'Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected col and/or row fields',
-      })
+      i18n.translate(
+        'legacyEmbeddableMigrations.unableToMigratePanelDataForSixOneZeroErrorMessage',
+        {
+          defaultMessage:
+            'Unable to migrate panel data for "6.1.0" backwards compatibility, panel does not contain expected col and/or row fields',
+        }
+      )
     );
   }
 
@@ -143,11 +146,14 @@ function migrate610PanelToLatest(
   (['w', 'x', 'h', 'y'] as Array<keyof GridData>).forEach((key) => {
     if (panel.gridData[key] === undefined) {
       throw new Error(
-        i18n.translate('dashboard.panel.unableToMigratePanelDataForSixThreeZeroErrorMessage', {
-          defaultMessage:
-            'Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: {key}',
-          values: { key },
-        })
+        i18n.translate(
+          'legacyEmbeddableMigrations.unableToMigratePanelDataForSixThreeZeroErrorMessage',
+          {
+            defaultMessage:
+              'Unable to migrate panel data for "6.3.0" backwards compatibility, panel does not contain expected field: {key}',
+            values: { key },
+          }
+        )
       );
     }
   });
