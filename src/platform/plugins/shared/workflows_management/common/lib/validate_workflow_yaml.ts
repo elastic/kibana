@@ -12,6 +12,8 @@ import type { z } from '@kbn/zod/v4';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_names';
+import type { TriggerDefinitionForValidateTriggers } from './validate_triggers';
+import { validateTriggers } from './validate_triggers';
 import { parseWorkflowYamlToJSON } from './yaml';
 
 export type WorkflowDiagnosticSeverity = 'error' | 'warning' | 'info';
@@ -26,10 +28,20 @@ export interface WorkflowDiagnostic {
 export interface ValidateWorkflowResponse {
   valid: boolean;
   diagnostics: WorkflowDiagnostic[];
+  parsedWorkflow?: WorkflowYaml;
 }
 
-export function validateWorkflowYaml(yaml: string, zodSchema: z.ZodType): ValidateWorkflowResponse {
+export interface ValidateWorkflowYamlOptions {
+  triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
+}
+
+export function validateWorkflowYaml(
+  yaml: string,
+  zodSchema: z.ZodType,
+  options?: ValidateWorkflowYamlOptions
+): ValidateWorkflowResponse {
   const diagnostics: WorkflowDiagnostic[] = [];
+  let parsedWorkflow: WorkflowYaml | undefined;
 
   const parseResult = parseWorkflowYamlToJSON(yaml, zodSchema);
 
@@ -57,10 +69,10 @@ export function validateWorkflowYaml(yaml: string, zodSchema: z.ZodType): Valida
   }
 
   if (parseResult.success) {
+    parsedWorkflow = parseResult.data as unknown as WorkflowYaml;
+
     try {
-      const stepValidation = validateStepNameUniqueness(
-        parseResult.data as unknown as WorkflowYaml
-      );
+      const stepValidation = validateStepNameUniqueness(parsedWorkflow);
       for (const stepError of stepValidation.errors) {
         diagnostics.push({
           severity: 'error',
@@ -70,6 +82,17 @@ export function validateWorkflowYaml(yaml: string, zodSchema: z.ZodType): Valida
       }
     } catch {
       // Structure too malformed for step name validation
+    }
+
+    if (options?.triggerDefinitions) {
+      const triggerValidation = validateTriggers(parsedWorkflow, options.triggerDefinitions);
+      for (const triggerError of triggerValidation.errors) {
+        diagnostics.push({
+          severity: 'error',
+          message: triggerError.message,
+          source: 'trigger',
+        });
+      }
     }
   }
 
@@ -85,5 +108,6 @@ export function validateWorkflowYaml(yaml: string, zodSchema: z.ZodType): Valida
   return {
     valid: diagnostics.filter((d) => d.severity === 'error').length === 0,
     diagnostics,
+    parsedWorkflow,
   };
 }

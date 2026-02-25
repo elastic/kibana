@@ -11,6 +11,7 @@
 
 import { readFileSync } from 'fs';
 import Path from 'path';
+import { z } from '@kbn/zod/v4';
 import { validateWorkflowYaml } from './validate_workflow_yaml';
 import { getWorkflowZodSchema } from '../schema';
 
@@ -193,6 +194,99 @@ steps:
     });
   });
 
+  describe('trigger validation', () => {
+    const customTriggerId = 'custom-trigger';
+    const schemaWithCustomTrigger = getWorkflowZodSchema({}, [customTriggerId]);
+    const triggerDefinitions = [
+      {
+        id: customTriggerId,
+        eventSchema: z.object({
+          severity: z.string(),
+          host: z.string(),
+        }),
+      },
+    ];
+
+    it('should pass when a custom trigger has a valid KQL condition', () => {
+      const yaml = `
+version: '1'
+name: Valid Trigger Condition
+triggers:
+  - type: ${customTriggerId}
+    with:
+      condition: "event.severity: critical"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+`;
+      const result = validateWorkflowYaml(yaml, schemaWithCustomTrigger, { triggerDefinitions });
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.filter((d) => d.source === 'trigger')).toHaveLength(0);
+    });
+
+    it('should detect an invalid KQL condition in a custom trigger', () => {
+      const yaml = `
+version: '1'
+name: Invalid Trigger Condition
+triggers:
+  - type: ${customTriggerId}
+    with:
+      condition: "event.unknown_field: value"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+`;
+      const result = validateWorkflowYaml(yaml, schemaWithCustomTrigger, { triggerDefinitions });
+
+      expect(result.valid).toBe(false);
+      const triggerErrors = result.diagnostics.filter((d) => d.source === 'trigger');
+      expect(triggerErrors.length).toBeGreaterThan(0);
+    });
+
+    it('should skip trigger validation when no triggerDefinitions are provided', () => {
+      const yaml = `
+version: '1'
+name: No Trigger Defs
+triggers:
+  - type: ${customTriggerId}
+    with:
+      condition: "event.unknown_field: value"
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+`;
+      const result = validateWorkflowYaml(yaml, schemaWithCustomTrigger);
+
+      const triggerErrors = result.diagnostics.filter((d) => d.source === 'trigger');
+      expect(triggerErrors).toHaveLength(0);
+    });
+
+    it('should not validate conditions on built-in trigger types', () => {
+      const yaml = `
+version: '1'
+name: Built-in Trigger
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+`;
+      const result = validateWorkflowYaml(yaml, schema, { triggerDefinitions });
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.filter((d) => d.source === 'trigger')).toHaveLength(0);
+    });
+  });
+
   describe('multiple error sources', () => {
     it('should collect diagnostics from multiple sources without short-circuiting', () => {
       const yaml = `
@@ -233,7 +327,9 @@ steps:
 `;
       const result = validateWorkflowYaml(yaml, schema);
 
-      expect(result).toEqual({ valid: true, diagnostics: [] });
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([]);
+      expect(result.parsedWorkflow).toBeDefined();
     });
 
     it('should include severity, message, and source in each diagnostic', () => {
