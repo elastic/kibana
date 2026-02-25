@@ -35,9 +35,19 @@ export const muteAlertQuerySchema = schema.maybe(
 );
 
 const muteAlertBodyConditionSchema = schema.object({
-  type: schema.string({
-    meta: { description: 'Condition type, e.g. severity_change, severity_equals, field_change.' },
-  }),
+  type: schema.oneOf(
+    [
+      schema.literal('severity_change'),
+      schema.literal('field_change'),
+      schema.literal('severity_equals'),
+    ],
+    {
+      meta: {
+        description:
+          'Condition type evaluated by the alerting framework: severity_change, field_change, severity_equals.',
+      },
+    }
+  ),
   field: schema.string({
     meta: { description: 'The alert doc field to monitor.' },
   }),
