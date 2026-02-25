@@ -142,7 +142,7 @@ interface TraceWaterfallProps {
 }
 
 export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
-  const { data, loading, error } = useTrace(traceId);
+  const { data, isLoading, error } = useTrace(traceId);
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
   const [hideNoise, setHideNoise] = useState(true);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -213,7 +213,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
     [flatSpans, focusedIndex, handleSpanClick]
   );
 
-  if (loading) {
+  if (isLoading) {
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
         <EuiFlexItem grow={false}>
@@ -226,7 +226,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
   if (error) {
     return (
       <EuiCallOut title="Error loading trace" color="danger" iconType="error">
-        <p>{error}</p>
+        <p>{String(error)}</p>
       </EuiCallOut>
     );
   }

@@ -32,8 +32,8 @@ import { TraceWaterfall } from '../../components/trace_waterfall';
 export const RunDetailPage: React.FC = () => {
   const { runId } = useParams<{ runId: string }>();
   const history = useHistory();
-  const { data: runDetail, loading: runLoading, error: runError } = useEvaluationRun(runId);
-  const { data: scoresData, loading: scoresLoading } = useEvaluationRunScores(runId);
+  const { data: runDetail, isLoading: runLoading, error: runError } = useEvaluationRun(runId);
+  const { data: scoresData, isLoading: scoresLoading } = useEvaluationRunScores(runId);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
 
   const uniqueTraceIds = useMemo(() => {
@@ -107,7 +107,7 @@ export const RunDetailPage: React.FC = () => {
         {runError && (
           <>
             <EuiText color="danger" size="s">
-              <p>{runError}</p>
+              <p>{String(runError)}</p>
             </EuiText>
             <EuiSpacer size="m" />
           </>

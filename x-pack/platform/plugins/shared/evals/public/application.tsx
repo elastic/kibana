@@ -7,12 +7,15 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { RunsListPage } from './pages/runs_list';
 import { RunDetailPage } from './pages/run_detail';
+
+const queryClient = new QueryClient();
 
 const EvalsApp: React.FC<{ coreStart: CoreStart; history: AppMountParameters['history'] }> = ({
   coreStart,
@@ -21,12 +24,14 @@ const EvalsApp: React.FC<{ coreStart: CoreStart; history: AppMountParameters['hi
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={coreStart}>
-        <Router history={history}>
-          <Routes>
-            <Route exact path="/" component={RunsListPage} />
-            <Route path="/runs/:runId" component={RunDetailPage} />
-          </Routes>
-        </Router>
+        <QueryClientProvider client={queryClient}>
+          <Router history={history}>
+            <Routes>
+              <Route exact path="/" component={RunsListPage} />
+              <Route path="/runs/:runId" component={RunDetailPage} />
+            </Routes>
+          </Router>
+        </QueryClientProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );

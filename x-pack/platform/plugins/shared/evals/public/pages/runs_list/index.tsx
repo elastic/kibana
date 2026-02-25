@@ -29,7 +29,7 @@ export const RunsListPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
 
-  const { data, loading, error } = useEvaluationRuns({
+  const { data, isLoading, error } = useEvaluationRuns({
     page: pageIndex + 1,
     perPage: pageSize,
     branch: searchText || undefined,
@@ -131,7 +131,7 @@ export const RunsListPage: React.FC = () => {
         {error && (
           <>
             <EuiText color="danger" size="s">
-              <p>{error}</p>
+              <p>{String(error)}</p>
             </EuiText>
             <EuiSpacer size="m" />
           </>
@@ -139,7 +139,7 @@ export const RunsListPage: React.FC = () => {
         <EuiBasicTable<EvaluationRunSummary>
           items={data?.runs ?? []}
           columns={columns}
-          loading={loading}
+          loading={isLoading}
           pagination={pagination}
           onChange={onTableChange}
           rowProps={(item) => ({
