@@ -114,21 +114,15 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.query.severity_score);
   };
   const handleSaveQuery = async () => {
-    const updatedQuery = isNativeEsqlQuery(item.query)
-      ? {
-          ...item.query,
-          title: title.trim(),
-          esql: { query: query.trim() },
-          severity_score: severityScore,
-        }
-      : {
-          ...item.query,
-          title: title.trim(),
-          kql: { ...item.query.kql, query: query.trim() },
-          severity_score: severityScore,
-        };
-
-    await onSave(updatedQuery, item.stream_name);
+    await onSave(
+      {
+        ...item.query,
+        title: title.trim(),
+        esql: { query: query.trim() },
+        severity_score: severityScore,
+      },
+      item.stream_name
+    );
     setIsEditMode(false);
   };
 
@@ -136,7 +130,7 @@ export function QueryDetailsFlyout({
     {
       title: QUERY_LABEL,
       description: (
-        <EuiCodeBlock language={getQueryLanguage(item)} paddingSize="none" transparentBackground>
+        <EuiCodeBlock language="esql" paddingSize="none" transparentBackground>
           {getDisplayQueryValue(item)}
         </EuiCodeBlock>
       ),
@@ -404,10 +398,6 @@ function getQueryInputValue(item: SignificantEventItem) {
 function getDisplayQueryValue(item: SignificantEventItem) {
   const queryText = getQueryInputValue(item);
   return queryText || DEFAULT_QUERY_PLACEHOLDER;
-}
-
-function getQueryLanguage(item: SignificantEventItem): 'esql' | 'kql' {
-  return isNativeEsqlQuery(item.query) ? 'esql' : 'kql';
 }
 
 const QUERY_INFORMATION_TITLE = i18n.translate(

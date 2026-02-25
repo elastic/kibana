@@ -15,7 +15,7 @@ import { buildEsqlQuery, getIndexPatternsForStream, isNativeEsqlQuery } from '@k
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import type { ESQLCommand } from '@kbn/esql-language';
 import { conditionToESQLAst } from '@kbn/streamlang';
-import { isEqual, map, partition } from 'lodash';
+import { isEqual } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import { extractWhereExpression } from '../../../helpers/esql_helpers';

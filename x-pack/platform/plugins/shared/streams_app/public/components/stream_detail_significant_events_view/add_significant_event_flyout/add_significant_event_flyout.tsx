@@ -37,7 +37,7 @@ import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { validateQuery } from './common/validate_query';
+import { validateEsqlQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
@@ -153,17 +153,10 @@ export function AddSignificantEventFlyout({
     if (isNewlyCompleted) {
       setGeneratedQueries(
         task.queries
-          .filter((nextQuery) => {
-            const validation = validateQuery({
-              title: nextQuery.title,
-              kql: { query: nextQuery.kql },
-              esql: nextQuery.esql,
-            });
-            return validation.esql.isInvalid === false;
-          })
+          .filter((nextQuery) => validateEsqlQuery(nextQuery.esql.query).isInvalid === false)
           .map((nextQuery) => ({
             id: v4(),
-            kql: { query: nextQuery.kql },
+            kql: { query: '' },
             esql: nextQuery.esql,
             title: nextQuery.title,
             feature: nextQuery.feature,
@@ -298,12 +291,10 @@ export function AddSignificantEventFlyout({
                       <EuiSpacer size="m" />
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
-                        isEditMode={isEditMode}
                         setQuery={(next: StreamQuery) => setQueries([next])}
                         query={queries[0]}
                         setCanSave={setCanSave}
                         definition={definition.stream}
-                        systems={systems}
                       />
                     </>
                   )}

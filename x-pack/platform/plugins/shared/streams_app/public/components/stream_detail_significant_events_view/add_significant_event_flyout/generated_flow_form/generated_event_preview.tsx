@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
-import { isNativeEsqlQuery } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -23,11 +22,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { StreamsESQLEditor } from '../../../esql_query_editor';
 import { validateQuery } from '../common/validate_query';
-import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { SeveritySelector } from '../common/severity_selector';
 import { ALL_DATA_OPTION } from '../../system_selector';
 
@@ -36,7 +33,6 @@ interface GeneratedEventPreviewProps {
   query: StreamQuery;
   onSave: (query: StreamQuery) => void;
   systems: Omit<System, 'description'>[];
-  dataViews: DataView[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
 }
@@ -48,7 +44,6 @@ export function GeneratedEventPreview({
   setIsEditing,
   onSave,
   systems,
-  dataViews,
 }: GeneratedEventPreviewProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -233,53 +228,15 @@ export function GeneratedEventPreview({
           />
         </EuiFormRow>
 
-        <EuiFormRow
-          label={
-            <EuiFormLabel>
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldQueryLabel',
-                { defaultMessage: 'Query' }
-              )}
-            </EuiFormLabel>
-          }
-          {...(touched.esql && { ...validation.esql })}
-        >
-          {isNativeEsqlQuery(query) ? (
-            <StreamsESQLEditor
-              query={{ esql: query.esql.query }}
-              isDisabled={!isEditing}
-              onTextLangQueryChange={(newQuery) => setQuery({ ...query, esql: newQuery.esql })}
-              onTextLangQuerySubmit={async () => {}}
-            />
-          ) : (
-            <UncontrolledStreamsAppSearchBar
-              query={
-                query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
-              }
-              onQueryChange={() => {
-                setTouched((prev) => ({ ...prev, esql: true }));
-              }}
-              onQuerySubmit={(next) => {
-                setQuery({
-                  ...query,
-                  kql: {
-                    query: typeof next.query?.query === 'string' ? next.query.query : '',
-                  },
-                });
-                setTouched((prev) => ({ ...prev, esql: true }));
-              }}
-              showQueryInput
-              showSubmitButton={false}
-              isDisabled={!isEditing}
-              placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.queryPlaceholder',
-                { defaultMessage: 'Enter query' }
-              )}
-              indexPatterns={dataViews}
-              submitOnBlur
-            />
-          )}
-        </EuiFormRow>
+        <StreamsESQLEditor
+          query={{ esql: query.esql.query }}
+          isDisabled={!isEditing}
+          onTextLangQueryChange={(newQuery) => {
+            setTouched((prev) => ({ ...prev, esql: true }));
+            setQuery({ ...query, esql: { query: newQuery.esql } });
+          }}
+          onTextLangQuerySubmit={async () => {}}
+        />
       </EuiForm>
 
       <EuiHorizontalRule margin="m" />

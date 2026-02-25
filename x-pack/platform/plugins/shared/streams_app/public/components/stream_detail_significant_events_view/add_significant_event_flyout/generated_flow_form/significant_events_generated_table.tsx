@@ -20,7 +20,7 @@ import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
-import { validateQuery } from '../common/validate_query';
+import { validateEsqlQuery } from '../common/validate_query';
 import { GeneratedEventPreview } from './generated_event_preview';
 import { SeverityBadge } from '../../../significant_events_discovery/components/severity_badge/severity_badge';
 
@@ -77,7 +77,6 @@ export function SignificantEventsGeneratedTable({
           setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
           onSave={onEditQuery}
           systems={systems}
-          dataViews={dataViews}
         />
       );
     }
@@ -97,7 +96,6 @@ export function SignificantEventsGeneratedTable({
           setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
           onSave={onEditQuery}
           systems={systems}
-          dataViews={dataViews}
         />
       );
     }
@@ -157,8 +155,7 @@ export function SignificantEventsGeneratedTable({
         defaultMessage: 'Query',
       }),
       render: (_, item: StreamQuery) => {
-        const displayQuery = item.kql?.query || item.esql?.query || '';
-        return <EuiCodeBlock paddingSize="none">{displayQuery}</EuiCodeBlock>;
+        return <EuiCodeBlock paddingSize="none">{item.esql.query}</EuiCodeBlock>;
       },
     },
     {
@@ -183,12 +180,12 @@ export function SignificantEventsGeneratedTable({
       ),
       width: '20%',
       render: (query: StreamQuery) => {
-        const validation = validateQuery(query);
+        const validation = validateEsqlQuery(query.esql.query);
         return (
           <PreviewDataSparkPlot
             definition={definition}
             query={query}
-            isQueryValid={!validation.esql.isInvalid}
+            isQueryValid={!validation.isInvalid}
             showTitle={false}
             compressed={true}
             hideAxis={true}
@@ -219,6 +216,9 @@ export function SignificantEventsGeneratedTable({
         'xpack.streams.addSignificantEventFlyout.aiFlow.noQueriesMessage',
         { defaultMessage: 'No significant events queries generated' }
       )}
+      tableCaption={i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.tableCaption', {
+        defaultMessage: 'Significant events queries',
+      })}
     />
   );
 }

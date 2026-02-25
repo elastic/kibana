@@ -51,7 +51,7 @@ export function validateEsqlQuery(esqlQuery: string): FieldValidation {
   };
 }
 
-export function validateQuery(query: Partial<StreamQuery>): {
+export function validateQuery(query: Pick<StreamQuery, 'title' | 'esql'>): {
   title: FieldValidation;
   esql: FieldValidation;
 } {
