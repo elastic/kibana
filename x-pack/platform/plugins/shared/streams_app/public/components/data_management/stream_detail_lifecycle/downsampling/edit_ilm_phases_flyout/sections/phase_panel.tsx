@@ -33,6 +33,7 @@ export interface PhasePanelProps {
   isLoadingSearchableSnapshotRepositories?: boolean;
   onRefreshSearchableSnapshotRepositories?: () => void;
   onCreateSnapshotRepository?: () => void;
+  isMetricsStream: boolean;
 }
 
 export const PhasePanel = ({
@@ -48,6 +49,7 @@ export const PhasePanel = ({
   isLoadingSearchableSnapshotRepositories,
   onRefreshSearchableSnapshotRepositories,
   onCreateSnapshotRepository,
+  isMetricsStream,
 }: PhasePanelProps) => {
   const isHidden = selectedPhase !== phase;
 
@@ -109,7 +111,12 @@ export const PhasePanel = ({
         <>
           <EuiHorizontalRule margin="none" />
           <div css={sectionStyles}>
-            <DownsampleFieldSection form={form} phaseName={phase} dataTestSubj={dataTestSubj} />
+            <DownsampleFieldSection
+              form={form}
+              phaseName={phase}
+              dataTestSubj={dataTestSubj}
+              isMetricsStream={isMetricsStream}
+            />
           </div>
         </>
       )}
