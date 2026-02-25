@@ -3,14 +3,9 @@ steps:
     key: agent-builder-smoke-tests
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     steps:
       - command: .buildkite/scripts/steps/test/ftr_configs.sh
+        cancel_on_build_failing: true
         env:
           FTR_CONFIG: 'x-pack/platform/test/onechat/smoke_tests/config.stateful.ts'
           FTR_CONFIG_GROUP_KEY: 'ftr-agent-builder-smoke-tests'
