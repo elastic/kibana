@@ -137,11 +137,21 @@ export function AddSignificantEventFlyout({
     getTaskStatus();
   }, [generateOnMount, getTaskStatus, initialFlow]);
 
+  const pollTask = useCallback(
+    () => getOnboardingTaskStatus(streamName),
+    [getOnboardingTaskStatus, streamName]
+  );
+
+  const cancelOnboarding = useCallback(
+    () => cancelOnboardingTask(streamName),
+    [cancelOnboardingTask, streamName]
+  );
+
   const { cancelTask, isCancellingTask } = useTaskPolling({
     task,
-    onPoll: () => getOnboardingTaskStatus(streamName),
+    onPoll: pollTask,
     onRefresh: getTaskStatus,
-    onCancel: () => cancelOnboardingTask(streamName),
+    onCancel: cancelOnboarding,
   });
 
   const isGenerating =

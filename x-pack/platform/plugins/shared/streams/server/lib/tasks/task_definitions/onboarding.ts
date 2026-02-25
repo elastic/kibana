@@ -9,13 +9,14 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type {
   GeneratedSignificantEventQuery,
+  IdentifyFeaturesResult,
+  OnboardingResult,
   SignificantEventsQueriesGenerationResult,
+  TaskResult,
 } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
+import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
-import type { IdentifyFeaturesResult, OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { OnboardingStep } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import type { StreamsTaskType, TaskContext } from '.';
@@ -196,20 +197,26 @@ async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>
 
   return await new Promise<TaskResult<TPayload>>((resolve, reject) => {
     intervalId = setInterval(async () => {
-      const parentTask = await taskClient.get(parentTaskId);
+      try {
+        const parentTask = await taskClient.get(parentTaskId);
 
-      if (parentTask.status === TaskStatus.BeingCanceled) {
-        await taskClient.cancel(subtaskId);
-      }
+        if (parentTask.status === TaskStatus.BeingCanceled) {
+          await taskClient.cancel(subtaskId);
+        }
 
-      const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
+        const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
 
-      if (result.status === TaskStatus.Failed) {
-        reject(new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`));
-      }
+        if (result.status === TaskStatus.Failed) {
+          return reject(
+            new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`)
+          );
+        }
 
-      if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
-        resolve(result);
+        if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
+          resolve(result);
+        }
+      } catch (error) {
+        reject(error);
       }
     }, sleepInterval);
   }).finally(() => {
