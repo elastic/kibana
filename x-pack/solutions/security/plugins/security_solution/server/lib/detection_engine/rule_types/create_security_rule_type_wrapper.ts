@@ -513,14 +513,24 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
                 const createdSignals = result.createdSignals.concat(runResult.createdSignals);
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
+
+                // Some executors (e.g. Threshold, New Terms) don't report `totalEventsFound`.
+                // When neither the accumulated result nor the current run has a value, we keep
+                // it undefined so the wrapper doesn't log a misleading "Found matching events: 0".
+                const executorTracksTotalEventsFound =
+                  typeof result.totalEventsFound === 'number' ||
+                  typeof runResult.totalEventsFound === 'number';
+                const totalEventsFound = executorTracksTotalEventsFound
+                  ? (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0)
+                  : undefined;
+
                 result = {
                   bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
                   enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
-                  totalEventsFound:
-                    (result.totalEventsFound ?? 0) + (runResult.totalEventsFound ?? 0),
+                  totalEventsFound,
                   errors: result.errors.concat(runResult.errors),
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
