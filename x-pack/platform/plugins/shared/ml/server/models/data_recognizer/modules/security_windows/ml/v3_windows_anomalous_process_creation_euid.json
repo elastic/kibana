@@ -1,6 +1,9 @@
 {
   "description": "Security: Windows - Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms.",
-  "groups": ["security", "windows"],
+  "groups": [
+    "security",
+    "windows"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -12,7 +15,11 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["host.name", "process.name", "user.name"]
+    "influencers": [
+      "host.entity.id_computed",
+      "process.name",
+      "user.entity.id_computed"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

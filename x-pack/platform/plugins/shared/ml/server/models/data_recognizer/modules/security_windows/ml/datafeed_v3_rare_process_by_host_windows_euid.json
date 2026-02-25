@@ -1,5 +1,5 @@
 {
-  "job_id": "JOB_ID",
+  "job_id": "v3_rare_process_by_host_windows_euid",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -9,7 +9,12 @@
       "filter": [
         {
           "term": {
-            "event.provider": "Microsoft-Windows-PowerShell"
+            "event.category": "process"
+          }
+        },
+        {
+          "term": {
+            "event.type": "start"
           }
         }
       ],
@@ -40,11 +45,30 @@
       "must_not": {
         "terms": {
           "process.name": [
-            "elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat",
-            "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat",
-            "winlogbeat.exe", "winlogbeat"
+            "elastic-agent.exe",
+            "elastic-agent",
+            "metricbeat.exe",
+            "metricbeat",
+            "filebeat.exe",
+            "filebeat",
+            "packetbeat.exe",
+            "packetbeat",
+            "winlogbeat.exe",
+            "winlogbeat"
           ]
         }
+      }
+    }
+  },
+  "script_fields": {
+    "user.entity.id_computed": {
+      "script": {
+        "id": "euid_user_entity"
+      }
+    },
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
       }
     }
   }

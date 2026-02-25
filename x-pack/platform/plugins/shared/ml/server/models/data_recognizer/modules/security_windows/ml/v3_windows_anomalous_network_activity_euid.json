@@ -1,6 +1,9 @@
 {
   "description": "Security: Windows - Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.",
-  "groups": ["security", "windows"],
+  "groups": [
+    "security",
+    "windows"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -11,7 +14,12 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["host.name", "process.name", "user.name", "destination.ip"]
+    "influencers": [
+      "host.entity.id_computed",
+      "process.name",
+      "user.entity.id_computed",
+      "destination.ip"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

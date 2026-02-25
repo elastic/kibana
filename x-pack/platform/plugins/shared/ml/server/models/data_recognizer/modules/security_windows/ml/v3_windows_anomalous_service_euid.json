@@ -1,5 +1,8 @@
 {
-  "groups": ["security", "windows"],
+  "groups": [
+    "security",
+    "windows"
+  ],
   "description": "Security: Windows - Looks for rare and unusual Windows service names which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
@@ -11,7 +14,10 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["host.name", "winlog.event_data.ServiceName"]
+    "influencers": [
+      "host.entity.id_computed",
+      "winlog.event_data.ServiceName"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
