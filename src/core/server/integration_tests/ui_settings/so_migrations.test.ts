@@ -14,7 +14,8 @@ import { createTestHarness } from '../../../test_helpers/so_migrations';
  * These tests are a little unnecessary because these migrations are incredibly simple, however
  * this file serves as an example of how to use test_helpers/so_migrations.
  */
-describe('ui settings migrations', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/163273
+describe.skip('ui settings migrations', () => {
   let testHarness: SavedObjectTestHarness;
 
   beforeAll(async () => {

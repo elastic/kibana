@@ -42,7 +42,9 @@ const DEFAULT_FIELDS_TO_KEEP = [
 
 const RECENT_DATA_PREFIX = 'recent';
 // Some fields have only src and we need to fallback to it.
-const recentData = (dest: string) => `${RECENT_DATA_PREFIX}.${dest}`;
+function recentData(dest: string) {
+  return `${RECENT_DATA_PREFIX}.${dest}`;
+}
 
 export interface PaginationParams {
   timestampCursor: string;
@@ -68,16 +70,14 @@ interface LogsExtractionQueryParams {
   pagination?: PaginationParams;
 }
 
-export const buildLogsExtractionEsqlQuery = ({
-  indexPatterns,
-  entityDefinition: { fields, type, entityTypeFallback },
-  fromDateISO,
-  toDateISO,
-  docsLimit,
-  latestIndex,
-  recoveryId,
-  pagination,
-}: LogsExtractionQueryParams): string => {
+function buildExtractionSourceClause(params: {
+  indexPatterns: string[];
+  type: EntityType;
+  fromDateISO: string;
+  toDateISO: string;
+  recoveryId?: string;
+}): string {
+  const { indexPatterns, type, fromDateISO, toDateISO, recoveryId } = params;
   return (
     `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}` +
@@ -87,7 +87,36 @@ export const buildLogsExtractionEsqlQuery = ({
     `
   | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
       AND ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
-      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")` +
+      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")`
+  );
+}
+
+export function buildRemainingLogsCountQuery(params: {
+  indexPatterns: string[];
+  type: EntityType;
+  fromDateISO: string;
+  toDateISO: string;
+  recoveryId?: string;
+}): string {
+  return (
+    buildExtractionSourceClause(params) +
+    `
+  | STATS document_count = COUNT()`
+  );
+}
+
+export function buildLogsExtractionEsqlQuery({
+  indexPatterns,
+  entityDefinition: { fields, type, entityTypeFallback },
+  fromDateISO,
+  toDateISO,
+  docsLimit,
+  latestIndex,
+  recoveryId,
+  pagination,
+}: LogsExtractionQueryParams): string {
+  return (
+    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId }) +
     // Early construct the id (based on euid logic) so we can run stats per entity (equivalent to GROUP BY)
     `
   | EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
@@ -129,7 +158,7 @@ export const buildLogsExtractionEsqlQuery = ({
     ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} AS ${ENGINE_METADATA_UNTYPED_ID_FIELD}
   | KEEP ${fieldsToKeep(fields)}`
   );
-};
+}
 
 function recentFieldStats(fields: EntityField[]) {
   return fields

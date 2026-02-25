@@ -17,7 +17,8 @@ import {
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -65,7 +66,7 @@ export function QuickSearchVisor({
   onToggleVisor,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { kql, core } = kibana.services;
+  const { kql, core, data } = kibana.services;
   // Temporary flag to enable/disable the NL to ES|QL feature, will be removed once the feature is stable.
   const isNlToEsqlEnabled = core.featureFlags.getBooleanValue(NL_TO_ESQL_FLAG, false);
   const isDarkMode = useKibanaIsDarkMode();
@@ -77,6 +78,7 @@ export function QuickSearchVisor({
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
   const connectorCheckRef = useRef(false);
+  const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const kqlInputRef = useRef<HTMLDivElement>(null);
   const nlInputRef = useRef<HTMLInputElement>(null);
   const initializedRef = useRef(false);
@@ -185,6 +187,31 @@ export function QuickSearchVisor({
     }
   }, [query, selectedSources]);
 
+  const sourcesKey = useMemo(
+    () => selectedSources.map((source) => source.label).join(', '),
+    [selectedSources]
+  );
+
+  useEffect(() => {
+    if (!isVisible || !sourcesKey) {
+      setAdHocDataView(null);
+      return;
+    }
+    let cancelled = false;
+    getESQLAdHocDataview({
+      dataViewsService: data.dataViews,
+      query: `FROM ${sourcesKey}`,
+      options: { idPrefix: 'esql-visor' },
+    }).then((dataView) => {
+      if (!cancelled) {
+        setAdHocDataView(dataView);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isVisible, sourcesKey, data.dataViews]);
+
   useEffect(() => {
     if (isVisible) {
       if (visorMode === VisorMode.KQL && kqlInputRef.current) {
@@ -224,6 +251,7 @@ export function QuickSearchVisor({
       responsive={false}
       css={styles.visorContainer}
       data-test-subj="ESQLEditor-quick-search-visor"
+      {...(!isVisible && { inert: '' })}
     >
       <EuiFlexItem grow={false} css={styles.visorWrapper}>
         <EuiFlexGroup
@@ -260,7 +288,7 @@ export function QuickSearchVisor({
                     // If we remove the prop, the icon still appears (!!)
                     iconType=""
                     disableLanguageSwitcher={true}
-                    indexPatterns={selectedSources.map((source) => source.label)}
+                    indexPatterns={adHocDataView ? [adHocDataView] : []}
                     bubbleSubmitEvent={false}
                     query={{
                       query: searchValue,
