@@ -21,6 +21,10 @@ import { handleTaskAction } from '../../../utils/task_helpers';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
+const booleanFromQueryString = z
+  .union([z.boolean(), z.enum(['true', 'false']).transform((val) => val === 'true')])
+  .optional()
+  .default(true);
 
 export type OnboardingTaskResult = TaskResult<OnboardingResult>;
 
@@ -40,7 +44,7 @@ export const onboardingTaskRoute = createServerRoute({
   params: z.object({
     path: z.object({ streamName: z.string() }),
     query: z.object({
-      saveQueries: z.coerce.boolean().optional().default(true),
+      saveQueries: booleanFromQueryString,
     }),
     body: taskActionSchema({
       from: timestampFromString,
@@ -139,7 +143,7 @@ export const onboardingStatusRoute = createServerRoute({
   params: z.object({
     path: z.object({ streamName: z.string() }),
     query: z.object({
-      saveQueries: z.coerce.boolean().optional().default(true),
+      saveQueries: booleanFromQueryString,
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {

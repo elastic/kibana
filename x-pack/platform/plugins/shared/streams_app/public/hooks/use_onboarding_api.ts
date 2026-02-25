@@ -31,7 +31,7 @@ export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboard
       scheduleOnboardingTask: async (streamName: string) => {
         const { from, to } = getLast24HoursTimeRange();
 
-        await streamsRepositoryClient.fetch(
+        return streamsRepositoryClient.fetch(
           'POST /internal/streams/{streamName}/onboarding/_task',
           {
             signal,
@@ -71,6 +71,21 @@ export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboard
               query: { saveQueries },
               body: {
                 action: 'cancel' as const,
+              },
+            },
+          }
+        );
+      },
+      acknowledgeOnboardingTask: async (streamName: string) => {
+        await streamsRepositoryClient.fetch(
+          'POST /internal/streams/{streamName}/onboarding/_task',
+          {
+            signal,
+            params: {
+              path: { streamName },
+              query: { saveQueries },
+              body: {
+                action: 'acknowledge' as const,
               },
             },
           }
