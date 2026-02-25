@@ -25,13 +25,22 @@ export class DiscoverApp {
     await this.waitForDataViewSwitch();
   }
 
-  private async getVisibleDataViewSwitch() {
+  /**
+   * Navigate to Discover with extended timeout (30s) for data view switch visibility.
+   * Use this for parallel tests where ES/Kibana initialization can take longer
+   */
+  async gotoWithExtendedTimeout() {
+    await this.page.gotoApp('discover');
+    await this.waitForDataViewSwitch({ timeout: 30_000 });
+  }
+
+  private async getVisibleDataViewSwitch(options?: { timeout?: number }) {
     const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
     const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
 
     // There should be exactly one visible data view switch.
     // If both are visible (bug), fail explicitly instead of picking one
-    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible();
+    await expect(discoverSwitch.or(fallbackSwitch)).toBeVisible(options);
 
     const discoverVisible = await discoverSwitch.isVisible();
     const fallbackVisible = await fallbackSwitch.isVisible();
@@ -45,8 +54,8 @@ export class DiscoverApp {
     return discoverVisible ? discoverSwitch : fallbackSwitch;
   }
 
-  private async waitForDataViewSwitch() {
-    await this.getVisibleDataViewSwitch();
+  private async waitForDataViewSwitch(options?: { timeout?: number }) {
+    await this.getVisibleDataViewSwitch(options);
   }
 
   async selectDataView(name: string) {
