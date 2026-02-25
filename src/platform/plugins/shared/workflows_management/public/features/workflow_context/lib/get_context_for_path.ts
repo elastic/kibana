@@ -38,9 +38,10 @@ export function getContextSchemaForPath(
 ): typeof DynamicStepContextSchema {
   // getWorkflowContextSchema normalizes inputs internally, so it can handle both formats
   // Pass yamlDocument to allow extraction of inputs if definition.inputs is undefined
-  let schema = DynamicStepContextSchema.merge(
+  // Merge result has dynamic event type (ZodType); cast so schema satisfies typeof DynamicStepContextSchema
+  let schema: typeof DynamicStepContextSchema = DynamicStepContextSchema.merge(
     getWorkflowContextSchema(definition as WorkflowYaml, yamlDocument)
-  );
+  ) as typeof DynamicStepContextSchema;
 
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
@@ -79,8 +80,11 @@ function getStepContextSchemaEnrichmentEntries(
   stepId: string
 ) {
   const enrichments: { key: 'foreach'; value: z.ZodType }[] = [];
-  const predecessors = workflowExecutionGraph.getAllPredecessors(stepId);
-  for (const node of predecessors) {
+  const stack = workflowExecutionGraph.getNodeStack(stepId);
+
+  for (const nodeId of stack) {
+    const node = workflowExecutionGraph.getNode(nodeId);
+
     if (isEnterForeach(node)) {
       enrichments.push({
         key: 'foreach',

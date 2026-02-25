@@ -216,7 +216,8 @@ export class AlertsClient<
 
         const executionUuids = (executions.hits || [])
           .map((hit) => get(hit.fields, ALERT_RULE_EXECUTION_UUID))
-          .flat();
+          .flat()
+          .filter((uuid) => uuid !== null);
 
         const alerts = await this.search({
           size: (maxAlertLimit || DEFAULT_MAX_ALERTS) * 2,
