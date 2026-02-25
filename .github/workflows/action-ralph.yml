@@ -1060,7 +1060,7 @@ jobs:
           if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
             echo "::warning::Review mode produced local file changes; discarding and continuing with summary."
             git reset --hard >/dev/null 2>&1 || true
-            git clean -fd >/dev/null 2>&1 || true
+            git clean -fd -e .action-ralph-runtime >/dev/null 2>&1 || true
           fi
 
       - name: Upload review output
