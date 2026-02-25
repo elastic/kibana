@@ -25,3 +25,21 @@ steps:
     with:
       bucket: "${{ inputs.bucket }}"
       key: "${{ inputs.key }}"
+      maximumDownloadSizeBytes: "${{ inputs.maximumDownloadSizeBytes }}"
+  - name: extract_content
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /_ingest/pipeline/_simulate
+      body:
+        pipeline:
+          processors:
+            - attachment:
+                field: data
+                indexed_chars: -1
+                remove_binary: true
+        docs:
+          - _id: "${{steps.downloadFile.output.etag}}"
+            _source:
+              filename: "${{steps.downloadFile.output.key}}"
+              data: "${{steps.downloadFile.output.content}}"
