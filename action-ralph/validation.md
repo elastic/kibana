@@ -42,17 +42,29 @@ node scripts/i18n_check.js --fix
 - Do not run repo-wide lint/type-check unless the task requires it.
 - If scoped lint/type-check fails with dependency/project-map errors after switching branches, run `yarn kbn bootstrap` and retry.
 - Type-check can take a while on larger projects. If it runs longer than expected, pipe output to a file and check periodically.
-- Do not skip long-running scoped type-check commands. Run them in the background and poll until completion:
+- Do not skip long-running scoped type-check commands. Use the timeout-safe pattern from `action-ralph/test_execution.md` (start command once, then poll in separate short commands).
+
+Example:
 
 ```bash
 LOG_FILE="/tmp/ralph-typecheck.log"
-yarn test:type_check --project <touched-tsconfig-path> > "$LOG_FILE" 2>&1 &
-TYPECHECK_PID=$!
-while kill -0 "$TYPECHECK_PID" 2>/dev/null; do
-  sleep 10
-  echo "[type-check running] tail -n 40 $LOG_FILE"
-done
-wait "$TYPECHECK_PID"
+PID_FILE="/tmp/ralph-typecheck.pid"
+STATUS_FILE="/tmp/ralph-typecheck.exit"
+rm -f "$PID_FILE" "$STATUS_FILE"
+
+( yarn test:type_check --project <touched-tsconfig-path> > "$LOG_FILE" 2>&1; echo $? > "$STATUS_FILE" ) &
+echo $! > "$PID_FILE"
+
+# Poll this in separate short commands until complete:
+TYPECHECK_PID="$(cat "$PID_FILE")"
+if kill -0 "$TYPECHECK_PID" 2>/dev/null; then
+  echo "[type-check still running] $TYPECHECK_PID"
+  tail -n 40 "$LOG_FILE" || true
+  exit 10
+fi
+echo "[type-check completed] $TYPECHECK_PID"
+tail -n 80 "$LOG_FILE" || true
+cat "$STATUS_FILE"
 ```
 
 ## Long-running functional tests (Scout/FTR)

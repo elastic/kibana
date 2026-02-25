@@ -2,23 +2,43 @@
 
 Use this file when running validations that may take a long time (type-check, Scout, FTR, integration tests).
 
-## Core pattern: background + poll + wait
+## Core pattern: background + short poll commands
 
-Do not skip long-running checks. Run them in the background, write output to a log file, poll status, then `wait` for final exit code.
+Do not skip long-running checks. Start them once in the background, then poll with short commands.
+Avoid a single long `while` loop command, because command runners often enforce a per-command timeout (~5 minutes).
+
+### 1) Start command once
 
 ```bash
 LOG_FILE="/tmp/ralph-check.log"
-<your-command> > "$LOG_FILE" 2>&1 &
-CHECK_PID=$!
+PID_FILE="/tmp/ralph-check.pid"
+STATUS_FILE="/tmp/ralph-check.exit"
+rm -f "$PID_FILE" "$STATUS_FILE"
 
-while kill -0 "$CHECK_PID" 2>/dev/null; do
-  sleep 10
+( <your-command> > "$LOG_FILE" 2>&1; echo $? > "$STATUS_FILE" ) &
+echo $! > "$PID_FILE"
+```
+
+### 2) Poll command (run repeatedly in separate calls)
+
+```bash
+LOG_FILE="/tmp/ralph-check.log"
+PID_FILE="/tmp/ralph-check.pid"
+STATUS_FILE="/tmp/ralph-check.exit"
+CHECK_PID="$(cat "$PID_FILE")"
+
+if kill -0 "$CHECK_PID" 2>/dev/null; then
   echo "[still running] $CHECK_PID"
   tail -n 40 "$LOG_FILE" || true
-done
+  exit 10
+fi
 
-wait "$CHECK_PID"
+echo "[completed] $CHECK_PID"
+tail -n 80 "$LOG_FILE" || true
+test -f "$STATUS_FILE" && cat "$STATUS_FILE"
 ```
+
+Repeat the poll command until it reports completion. Treat `exit 10` as "still running" (not a failure).
 
 ## Scoped commands to prefer
 

@@ -54,16 +54,25 @@ yarn test:type_check --project <touched-tsconfig-path>
 - Do NOT run repo-wide lint/type-check unless the task requires it.
 - If type-check fails with project-map errors after branch changes, run `yarn kbn bootstrap` and retry.
 - Some bootstrap/type-check flows create untracked `*.d.ts` artifacts — don't include them in your changes.
-- If a scoped type-check may run for a long time, do not skip it. Start it with output redirected to a log file, then poll the process and tail/check the log until completion. Example:
+- If a scoped type-check may run for a long time, do not skip it. Use the timeout-safe pattern from `action-ralph/test_execution.md` (start once, poll in separate short commands). Example:
 ```bash
 LOG_FILE="/tmp/ralph-typecheck.log"
-yarn test:type_check --project <touched-tsconfig-path> > "$LOG_FILE" 2>&1 &
-TYPECHECK_PID=$!
-while kill -0 "$TYPECHECK_PID" 2>/dev/null; do
-  sleep 10
-  echo "[type-check still running]"
-done
-wait "$TYPECHECK_PID"
+PID_FILE="/tmp/ralph-typecheck.pid"
+STATUS_FILE="/tmp/ralph-typecheck.exit"
+rm -f "$PID_FILE" "$STATUS_FILE"
+
+( yarn test:type_check --project <touched-tsconfig-path> > "$LOG_FILE" 2>&1; echo $? > "$STATUS_FILE" ) &
+echo $! > "$PID_FILE"
+
+TYPECHECK_PID="$(cat "$PID_FILE")"
+if kill -0 "$TYPECHECK_PID" 2>/dev/null; then
+  echo "[type-check still running] $TYPECHECK_PID"
+  tail -n 40 "$LOG_FILE" || true
+  exit 10
+fi
+echo "[type-check completed] $TYPECHECK_PID"
+tail -n 80 "$LOG_FILE" || true
+cat "$STATUS_FILE"
 ```
 
 ## Kibana-specific gotchas
