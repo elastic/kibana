@@ -248,7 +248,11 @@ jobs:
           node-version-file: ".node-version"
 
       - name: Bootstrap Kibana
-        run: yarn kbn bootstrap --no-vscode
+        run: |
+          set -euo pipefail
+          # Moon occasionally fails with fs::rename when cache directories are missing/racy.
+          mkdir -p "$HOME/.moon/temp" "$HOME/.moon/plugins/toolchains"
+          yarn kbn bootstrap --no-vscode || yarn kbn bootstrap --no-vscode
         env:
           NODE_OPTIONS: "--max-old-space-size=8192"
 
