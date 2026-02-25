@@ -337,7 +337,7 @@
           "\nGet the background color for a button associated when popover is open."
         ],
         "signature": [
-          "({ color, euiTheme, isFilled, }: { color: \"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\"; euiTheme: ",
+          "({ color, euiTheme, isFilled, }: { color: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\"; euiTheme: ",
           "EuiThemeComputed",
           "<{}>; isFilled: boolean; }) => string | { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundNeutral: string; backgroundSuccess: string; backgroundWarning: string; backgroundRisk: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundPrimaryHover: string; backgroundAccentHover: string; backgroundAccentSecondaryHover: string; backgroundNeutralHover: string; backgroundSuccessHover: string; backgroundWarningHover: string; backgroundRiskHover: string; backgroundDangerHover: string; backgroundTextHover: string; backgroundPrimaryActive: string; backgroundAccentActive: string; backgroundAccentSecondaryActive: string; backgroundNeutralActive: string; backgroundSuccessActive: string; backgroundWarningActive: string; backgroundRiskActive: string; backgroundDangerActive: string; backgroundTextActive: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledNeutral: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledRisk: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundFilledPrimaryHover: string; backgroundFilledAccentHover: string; backgroundFilledAccentSecondaryHover: string; backgroundFilledNeutralHover: string; backgroundFilledSuccessHover: string; backgroundFilledWarningHover: string; backgroundFilledRiskHover: string; backgroundFilledDangerHover: string; backgroundFilledTextHover: string; backgroundFilledPrimaryActive: string; backgroundFilledAccentActive: string; backgroundFilledAccentSecondaryActive: string; backgroundFilledNeutralActive: string; backgroundFilledSuccessActive: string; backgroundFilledWarningActive: string; backgroundFilledRiskActive: string; backgroundFilledDangerActive: string; backgroundFilledTextActive: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptyNeutralHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyRiskHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; backgroundEmptyPrimaryActive: string; backgroundEmptyAccentActive: string; backgroundEmptyAccentSecondaryActive: string; backgroundEmptyNeutralActive: string; backgroundEmptySuccessActive: string; backgroundEmptyWarningActive: string; backgroundEmptyRiskActive: string; backgroundEmptyDangerActive: string; backgroundEmptyTextActive: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorNeutral: string; textColorSuccess: string; textColorWarning: string; textColorRisk: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledNeutral: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledRisk: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }"
         ],
@@ -368,7 +368,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\""
+                  "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\""
                 ],
                 "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/utils.tsx",
                 "lineNumber": 335,
@@ -1596,7 +1596,7 @@
         "signature": [
           "Omit<",
           "AppMenuItemCommon",
-          ", \"order\"> & { color?: \"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; } & { isFilled?: boolean | undefined; minWidth?: false | ",
+          ", \"order\"> & { color?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; } & { isFilled?: boolean | undefined; minWidth?: false | ",
           "Property",
           ".MinWidth<string | number> | undefined; }"
         ],
