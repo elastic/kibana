@@ -15,6 +15,7 @@ inputs:
   - name: waitFor
     type: number
     required: false
+    default: 0
 steps:
   - name: scrape-url
     type: firecrawl.scrape
