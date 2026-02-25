@@ -19,6 +19,21 @@ export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
   CommonTriggerDefinition<EventSchema>;
 
 /**
+ * Parameters passed to the trigger event handler when an event is emitted.
+ */
+export interface TriggerEventHandlerParams {
+  triggerId: string;
+  spaceId: string;
+  payload: Record<string, unknown>;
+}
+
+/**
+ * Handler invoked by the extensions plugin when emitEvent is called.
+ * Registered during setup to resolve subscriptions and run workflows.
+ */
+export type TriggerEventHandler = (params: TriggerEventHandlerParams) => Promise<void>;
+
+/**
  * Server-side plugin setup contract.
  * Exposes methods for other plugins to register server-side custom workflow steps and triggers.
  */
@@ -40,6 +55,14 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
   registerTriggerDefinition(definition: ServerTriggerDefinition): void;
+
+  /**
+   * Register the handler invoked when emitEvent is called.
+   * Should be called during the plugin's setup phase.
+   *
+   * @param handler - Function called with triggerId, spaceId, and payload when an event is emitted
+   */
+  registerTriggerEventHandler(handler: TriggerEventHandler): void;
 }
 
 /**

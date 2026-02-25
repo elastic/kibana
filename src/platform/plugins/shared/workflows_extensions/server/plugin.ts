@@ -14,6 +14,7 @@ import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
 import type {
+  TriggerEventHandler,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStart,
@@ -31,6 +32,7 @@ export class WorkflowsExtensionsServerPlugin
 {
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
+  private triggerEventHandler: TriggerEventHandler | null = null;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.stepRegistry = new ServerStepRegistry();
@@ -55,6 +57,9 @@ export class WorkflowsExtensionsServerPlugin
       },
       registerTriggerDefinition: (definition) => {
         this.triggerRegistry.register(definition);
+      },
+      registerTriggerEventHandler: (handler) => {
+        this.triggerEventHandler = handler;
       },
     };
   }
