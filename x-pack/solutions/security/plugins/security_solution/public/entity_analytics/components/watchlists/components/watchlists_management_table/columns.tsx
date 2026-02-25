@@ -27,7 +27,7 @@ const getWatchlistColumn = (): EuiBasicTableColumn<WatchlistTableItemType> =>
     ),
     width: COLUMN_WIDTHS.watchlist_name,
     render: (watchlistNames: string | string[]) =>
-      watchlistNames != null
+      watchlistNames !== null
         ? getRowItemsWithActions({
             values: Array.isArray(watchlistNames) ? watchlistNames : [watchlistNames],
             fieldName: 'watchlist.name',
