@@ -366,7 +366,7 @@ export class Cluster {
   private exec(installPath: string, opts: EsClusterExecOptions) {
     const {
       skipSecuritySetup = false,
-      reportTime = () => { },
+      reportTime = () => {},
       startTime,
       skipReadyCheck,
       readyTimeout,
@@ -475,9 +475,9 @@ export class Cluster {
         },
         tls: caCert
           ? {
-            ca: caCert,
-            rejectUnauthorized: true,
-          }
+              ca: caCert,
+              rejectUnauthorized: true,
+            }
           : undefined,
         Connection: HttpConnection,
         requestTimeout: 30_000,
