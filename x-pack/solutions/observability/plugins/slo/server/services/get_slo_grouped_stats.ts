@@ -106,7 +106,7 @@ export class GetSLOGroupedStats {
               forceExclude: true,
             }),
             ...(params.kqlQuery ? [getElasticsearchQueryOrThrow(params.kqlQuery)] : []),
-            ...(params.statusFilters && params.statusFilters.length > 0
+            ...(params?.statusFilters?.length > 0
               ? termsQuery('status', ...params.statusFilters)
               : []),
           ],
