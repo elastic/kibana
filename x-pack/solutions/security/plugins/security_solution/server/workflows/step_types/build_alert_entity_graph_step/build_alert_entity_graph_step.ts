@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { buildRelatedAlertsGraph } from './graph_builder';
 import { parseTimeWindowToMs } from './time_window';
 
@@ -177,7 +176,7 @@ export const buildAlertEntityGraphStepDefinition = createServerStepDefinition({
         min_entity_score,
         include_seed,
       } = context.input;
-      const searchIndex = alertIndex
+      const searchIndex = alertIndex;
       const esClient = context.contextManager.getScopedEsClient();
 
       const entityFieldConfigs = (
