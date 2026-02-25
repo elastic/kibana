@@ -20,7 +20,8 @@ import {
   type CriteriaWithPagination,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useEvaluationRuns, type RunSummary } from '../../hooks/use_evals_api';
+import type { EvaluationRunSummary } from '@kbn/evals-common';
+import { useEvaluationRuns } from '../../hooks/use_evals_api';
 
 export const RunsListPage: React.FC = () => {
   const history = useHistory();
@@ -34,7 +35,7 @@ export const RunsListPage: React.FC = () => {
     branch: searchText || undefined,
   });
 
-  const columns: Array<EuiBasicTableColumn<RunSummary>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<EvaluationRunSummary>> = useMemo(
     () => [
       {
         field: 'run_id',
@@ -61,14 +62,14 @@ export const RunsListPage: React.FC = () => {
       {
         field: 'task_model',
         name: 'Task Model',
-        render: (model: RunSummary['task_model']) => (
+        render: (model: EvaluationRunSummary['task_model']) => (
           <EuiBadge color="primary">{model.id}</EuiBadge>
         ),
       },
       {
         field: 'evaluator_model',
         name: 'Evaluator Model',
-        render: (model: RunSummary['evaluator_model']) => (
+        render: (model: EvaluationRunSummary['evaluator_model']) => (
           <EuiBadge color="accent">{model.id}</EuiBadge>
         ),
       },
@@ -91,7 +92,7 @@ export const RunsListPage: React.FC = () => {
       {
         field: 'ci',
         name: 'CI',
-        render: (ci: RunSummary['ci']) =>
+        render: (ci: EvaluationRunSummary['ci']) =>
           ci?.build_url ? (
             <EuiLink href={ci.build_url} target="_blank" external>
               Build
@@ -111,7 +112,7 @@ export const RunsListPage: React.FC = () => {
     pageSizeOptions: [10, 25, 50],
   };
 
-  const onTableChange = ({ page }: CriteriaWithPagination<RunSummary>) => {
+  const onTableChange = ({ page }: CriteriaWithPagination<EvaluationRunSummary>) => {
     if (page) {
       setPageIndex(page.index);
       setPageSize(page.size);
@@ -141,7 +142,7 @@ export const RunsListPage: React.FC = () => {
             <EuiSpacer size="m" />
           </>
         )}
-        <EuiBasicTable<RunSummary>
+        <EuiBasicTable<EvaluationRunSummary>
           items={data?.runs ?? []}
           columns={columns}
           loading={loading}

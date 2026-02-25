@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   EVALS_RUN_SCORES_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
+  buildRouteValidationWithZod,
+  GetEvaluationRunScoresRequestParams,
+  GetEvaluationRunScoresRequestQuery,
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
@@ -30,13 +32,8 @@ export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies)
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: schema.object({
-              runId: schema.string(),
-            }),
-            query: schema.object({
-              suite_id: schema.maybe(schema.string()),
-              model_id: schema.maybe(schema.string()),
-            }),
+            params: buildRouteValidationWithZod(GetEvaluationRunScoresRequestParams),
+            query: buildRouteValidationWithZod(GetEvaluationRunScoresRequestQuery),
           },
         },
       },

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   EVALS_RUNS_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
+  buildRouteValidationWithZod,
+  GetEvaluationRunsRequestQuery,
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
@@ -30,13 +31,7 @@ export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: schema.object({
-              suite_id: schema.maybe(schema.string()),
-              model_id: schema.maybe(schema.string()),
-              branch: schema.maybe(schema.string()),
-              page: schema.number({ defaultValue: 1, min: 1 }),
-              per_page: schema.number({ defaultValue: 25, min: 1, max: 100 }),
-            }),
+            query: buildRouteValidationWithZod(GetEvaluationRunsRequestQuery),
           },
         },
       },

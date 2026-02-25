@@ -25,11 +25,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useParams, useHistory } from 'react-router-dom';
-import {
-  useEvaluationRun,
-  useEvaluationRunScores,
-  type EvaluatorStatsSummary,
-} from '../../hooks/use_evals_api';
+import type { EvaluatorStats } from '@kbn/evals-common';
+import { useEvaluationRun, useEvaluationRunScores } from '../../hooks/use_evals_api';
 import { TraceWaterfall } from '../../components/trace_waterfall';
 
 export const RunDetailPage: React.FC = () => {
@@ -49,7 +46,7 @@ export const RunDetailPage: React.FC = () => {
     return Array.from(traceIds);
   }, [scoresData?.scores]);
 
-  const statsColumns: Array<EuiBasicTableColumn<EvaluatorStatsSummary>> = useMemo(
+  const statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>> = useMemo(
     () => [
       {
         field: 'dataset_name',
@@ -197,7 +194,7 @@ export const RunDetailPage: React.FC = () => {
           <h3>Evaluator Statistics</h3>
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiBasicTable<EvaluatorStatsSummary>
+        <EuiBasicTable<EvaluatorStats>
           items={runDetail?.stats ?? []}
           columns={statsColumns}
           loading={runLoading}

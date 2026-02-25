@@ -25,7 +25,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useTrace, type TraceSpan } from '../../hooks/use_evals_api';
+import type { TraceSpan } from '@kbn/evals-common';
+import { useTrace } from '../../hooks/use_evals_api';
 import {
   WaterfallItem,
   LABEL_WIDTH,

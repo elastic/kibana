@@ -8,7 +8,7 @@
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { TraceSpan } from '../../hooks/use_evals_api';
+import type { TraceSpan } from '@kbn/evals-common';
 
 interface SpanWithDepth extends TraceSpan {
   depth: number;

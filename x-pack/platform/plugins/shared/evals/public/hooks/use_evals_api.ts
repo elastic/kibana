@@ -13,66 +13,16 @@ import {
   EVALS_RUN_SCORES_URL,
   EVALS_TRACE_URL,
   API_VERSIONS,
+  type GetEvaluationRunsResponse,
+  type GetEvaluationRunResponse,
+  type GetEvaluationRunScoresResponse,
+  type GetTraceResponse,
 } from '@kbn/evals-common';
 
 interface UseApiState<T> {
   data: T | null;
   loading: boolean;
   error: string | null;
-}
-
-export interface RunSummary {
-  run_id: string;
-  timestamp: string;
-  suite_id?: string;
-  task_model: { id: string; family?: string; provider?: string };
-  evaluator_model: { id: string; family?: string; provider?: string };
-  git_branch: string | null;
-  git_commit_sha: string | null;
-  total_scores: number;
-  total_repetitions: number;
-  ci?: { build_url?: string };
-}
-
-export interface EvaluatorStatsSummary {
-  dataset_id: string;
-  dataset_name: string;
-  evaluator_name: string;
-  stats: {
-    mean: number;
-    median: number;
-    std_dev: number;
-    min: number;
-    max: number;
-    count: number;
-  };
-}
-
-export interface RunDetail {
-  run_id: string;
-  task_model?: { id: string; family?: string; provider?: string };
-  evaluator_model?: { id: string; family?: string; provider?: string };
-  total_repetitions?: number;
-  stats: EvaluatorStatsSummary[];
-}
-
-export interface TraceSpan {
-  span_id: string;
-  trace_id: string;
-  parent_span_id?: string;
-  name: string;
-  kind?: string;
-  status?: string;
-  start_time: string;
-  duration_ms: number;
-  attributes: Record<string, unknown>;
-}
-
-export interface TraceData {
-  trace_id: string;
-  spans: TraceSpan[];
-  total_spans: number;
-  duration_ms: number;
 }
 
 export const useEvaluationRuns = (params?: {
@@ -83,7 +33,7 @@ export const useEvaluationRuns = (params?: {
   perPage?: number;
 }) => {
   const { services } = useKibana();
-  const [state, setState] = useState<UseApiState<{ runs: RunSummary[]; total: number }>>({
+  const [state, setState] = useState<UseApiState<GetEvaluationRunsResponse>>({
     data: null,
     loading: true,
     error: null,
@@ -99,7 +49,7 @@ export const useEvaluationRuns = (params?: {
       if (params?.page) query.page = params.page;
       if (params?.perPage) query.per_page = params.perPage;
 
-      const data = await services.http!.get<{ runs: RunSummary[]; total: number }>(EVALS_RUNS_URL, {
+      const data = await services.http!.get<GetEvaluationRunsResponse>(EVALS_RUNS_URL, {
         query,
         version: API_VERSIONS.internal.v1,
       });
@@ -125,7 +75,7 @@ export const useEvaluationRuns = (params?: {
 
 export const useEvaluationRun = (runId: string) => {
   const { services } = useKibana();
-  const [state, setState] = useState<UseApiState<RunDetail>>({
+  const [state, setState] = useState<UseApiState<GetEvaluationRunResponse>>({
     data: null,
     loading: true,
     error: null,
@@ -136,7 +86,7 @@ export const useEvaluationRun = (runId: string) => {
       setState((prev) => ({ ...prev, loading: true, error: null }));
       try {
         const url = EVALS_RUN_URL.replace('{runId}', runId);
-        const data = await services.http!.get<RunDetail>(url, {
+        const data = await services.http!.get<GetEvaluationRunResponse>(url, {
           version: API_VERSIONS.internal.v1,
         });
         setState({ data, loading: false, error: null });
@@ -152,7 +102,7 @@ export const useEvaluationRun = (runId: string) => {
 
 export const useEvaluationRunScores = (runId: string) => {
   const { services } = useKibana();
-  const [state, setState] = useState<UseApiState<{ scores: any[]; total: number }>>({
+  const [state, setState] = useState<UseApiState<GetEvaluationRunScoresResponse>>({
     data: null,
     loading: true,
     error: null,
@@ -163,7 +113,7 @@ export const useEvaluationRunScores = (runId: string) => {
       setState((prev) => ({ ...prev, loading: true, error: null }));
       try {
         const url = EVALS_RUN_SCORES_URL.replace('{runId}', runId);
-        const data = await services.http!.get<{ scores: any[]; total: number }>(url, {
+        const data = await services.http!.get<GetEvaluationRunScoresResponse>(url, {
           version: API_VERSIONS.internal.v1,
         });
         setState({ data, loading: false, error: null });
@@ -179,7 +129,7 @@ export const useEvaluationRunScores = (runId: string) => {
 
 export const useTrace = (traceId: string | null) => {
   const { services } = useKibana();
-  const [state, setState] = useState<UseApiState<TraceData>>({
+  const [state, setState] = useState<UseApiState<GetTraceResponse>>({
     data: null,
     loading: false,
     error: null,
@@ -195,7 +145,7 @@ export const useTrace = (traceId: string | null) => {
       setState((prev) => ({ ...prev, loading: true, error: null }));
       try {
         const url = EVALS_TRACE_URL.replace('{traceId}', traceId);
-        const data = await services.http!.get<TraceData>(url, {
+        const data = await services.http!.get<GetTraceResponse>(url, {
           version: API_VERSIONS.internal.v1,
         });
         setState({ data, loading: false, error: null });

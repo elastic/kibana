@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   EVALS_TRACE_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   TRACES_INDEX_PATTERN,
+  buildRouteValidationWithZod,
+  GetTraceRequestParams,
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
@@ -42,9 +43,7 @@ export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => 
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: schema.object({
-              traceId: schema.string(),
-            }),
+            params: buildRouteValidationWithZod(GetTraceRequestParams),
           },
         },
       },
