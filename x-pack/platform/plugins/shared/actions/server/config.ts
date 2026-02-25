@@ -212,6 +212,13 @@ export const configSchema = schema.object({
     })
   ),
   rateLimiter: schema.maybe(rateLimiterSchema),
+  auth: schema.maybe(
+    schema.object({
+      oauth_authorization_code: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    })
+  ),
   oAuthRateLimit: oAuthRateLimitSchema,
 });
 

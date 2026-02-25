@@ -16,6 +16,7 @@ export interface ActionsPublicPluginSetup {
   ): ValidatedEmail[];
   enabledEmailServices: string[];
   isWebhookSslWithPfxEnabled?: boolean;
+  authorizationCodeEnabled?: boolean;
 }
 
 export interface Config {
@@ -32,18 +33,25 @@ export interface Config {
       };
     };
   };
+  auth: {
+    oauth_authorization_code: {
+      enabled: boolean;
+    };
+  };
 }
 
 export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
   private readonly allowedEmailDomains: string[] | null = null;
   private readonly enabledEmailServices: string[];
   private readonly webhookSslWithPfxEnabled: boolean;
+  private readonly authorizationCodeEnabled: boolean;
 
   constructor(ctx: PluginInitializerContext<Config>) {
     const config = ctx.config.get();
     this.allowedEmailDomains = config.email?.domain_allowlist || null;
     this.enabledEmailServices = Array.from(new Set(config.email?.services?.enabled || ['*']));
     this.webhookSslWithPfxEnabled = config.webhook?.ssl.pfx.enabled ?? true;
+    this.authorizationCodeEnabled = config.auth?.oauth_authorization_code.enabled ?? false;
   }
 
   public setup(): ActionsPublicPluginSetup {
@@ -52,6 +60,7 @@ export class Plugin implements CorePlugin<ActionsPublicPluginSetup> {
         validateEmails(this.allowedEmailDomains, emails, options),
       enabledEmailServices: this.enabledEmailServices,
       isWebhookSslWithPfxEnabled: this.webhookSslWithPfxEnabled,
+      authorizationCodeEnabled: this.authorizationCodeEnabled,
     };
   }
 
