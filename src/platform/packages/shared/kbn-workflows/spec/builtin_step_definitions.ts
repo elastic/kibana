@@ -8,15 +8,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import {
-  DataSetStepSchema,
-  ForEachStepSchema,
-  HttpStepSchema,
-  IfStepSchema,
-  MergeStepSchema,
-  ParallelStepSchema,
-  WaitStepSchema,
-} from './schema';
+import { DataSetStepSchema, ForEachStepSchema, IfStepSchema, WaitStepSchema } from './schema';
 
 /**
  * Step categories aligned with ActionsMenuGroup from workflows_extensions
@@ -37,7 +29,7 @@ export interface BuiltInStepDefinition {
  * In our schemas, `.describe()` is called on `z.literal('step_type')`.
  */
 function getTypeDescription(schema: z.ZodObject): string {
-  return (schema.shape as Record<string, z.ZodType>).type?.description ?? '';
+  return schema.shape.type?.description ?? '';
 }
 
 /**
@@ -88,60 +80,6 @@ export const builtInStepDefinitions: BuiltInStepDefinition[] = [
   type: wait
   with:
     duration: "30s"`,
-  },
-  {
-    type: 'http',
-    description: getTypeDescription(HttpStepSchema),
-    category: 'external',
-    schema: HttpStepSchema,
-    example: `- name: call_api
-  type: http
-  with:
-    url: "https://api.example.com/endpoint"
-    method: POST
-    headers:
-      Content-Type: application/json
-      Authorization: "Bearer {{ consts.api_key }}"
-    body:
-      query: "{{ inputs.search_query }}"
-    timeout: "10s"`,
-  },
-  {
-    type: 'parallel',
-    description: getTypeDescription(ParallelStepSchema),
-    category: 'flowControl',
-    schema: ParallelStepSchema,
-    example: `- name: parallel_lookups
-  type: parallel
-  branches:
-    - name: lookup_user
-      steps:
-        - name: get_user
-          type: http
-          with:
-            url: "https://api.example.com/users/{{ inputs.user_id }}"
-    - name: lookup_orders
-      steps:
-        - name: get_orders
-          type: http
-          with:
-            url: "https://api.example.com/orders?user={{ inputs.user_id }}"`,
-  },
-  {
-    type: 'merge',
-    description: getTypeDescription(MergeStepSchema),
-    category: 'flowControl',
-    schema: MergeStepSchema,
-    example: `- name: combine_results
-  type: merge
-  sources:
-    - lookup_user
-    - lookup_orders
-  steps:
-    - name: log_merged
-      type: console
-      with:
-        message: "User and orders fetched"`,
   },
   {
     type: 'data.set',
