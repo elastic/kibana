@@ -19,6 +19,9 @@ import type {
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
+
+export type OnDataCallback = NonNullable<ReactExpressionRendererProps['onData$']>;
 
 function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
   const fns = [

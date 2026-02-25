@@ -47,6 +47,7 @@ import {
   apiHasUserMessages,
   hasTablesAdapter,
   isPartialInspectorAdapters,
+  type OnDataCallback,
 } from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
 import { buildUserMessagesHelpers } from './user_messages/api';
@@ -193,10 +194,7 @@ export function loadEmbeddableData(
       }
     };
 
-    const onDataCallback = <TData, TInspectorAdapters extends unknown>(
-      _data: TData,
-      adapters?: TInspectorAdapters
-    ): void => {
+    const onDataCallback: OnDataCallback = (_data, adapters) => {
       internalApi.updateVisualizationContext({
         activeData: hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined,
       });

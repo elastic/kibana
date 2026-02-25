@@ -27,7 +27,6 @@ import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
   ReactExpressionRendererType,
-  ReactExpressionRendererProps,
 } from '@kbn/expressions-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -58,7 +57,11 @@ import {
   isLensMultiFilterEvent,
   isLensEditEvent,
 } from '../../../types_guards';
-import { hasRequestsAdapter, hasTablesAdapter } from '../../../react_embeddable/type_guards';
+import {
+  hasRequestsAdapter,
+  hasTablesAdapter,
+  type OnDataCallback,
+} from '../../../react_embeddable/type_guards';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
@@ -254,11 +257,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const removeSearchWarningMessagesRef = useRef<() => void>();
   const removeExpressionBuildErrorsRef = useRef<() => void>();
 
-  const onData$: ReactExpressionRendererProps['onData$'] = useCallback(
-    <TData, TInspectorAdapters extends unknown>(
-      _data: TData,
-      adapters?: TInspectorAdapters
-    ): void => {
+  const onData$: OnDataCallback = useCallback(
+    (_data, adapters) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
 
@@ -740,7 +740,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
   onRender$: () => void;
-  onData$: ReactExpressionRendererProps['onData$'];
+  onData$: OnDataCallback;
   onComponentRendered: () => void;
   displayOptions: VisualizationDisplayOptions | undefined;
 }) => {
