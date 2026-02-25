@@ -92,7 +92,7 @@ describe('Metric Schema', () => {
               range: 'absolute',
               steps: [
                 { lt: 0, color: 'blue' },
-                { gte: 100, color: 'red' },
+                { gte: 0, lte: 100, color: 'red' },
               ],
             },
           },
@@ -143,7 +143,7 @@ describe('Metric Schema', () => {
                 range: 'percentage',
                 steps: [
                   { lt: 0, color: 'blue' },
-                  { gte: 100, color: 'red' },
+                  { gte: 0, lte: 100, color: 'red' },
                 ],
               },
               fit: false,
@@ -170,7 +170,7 @@ describe('Metric Schema', () => {
                 range: 'percentage',
                 steps: [
                   { lt: 0, color: 'blue' },
-                  { gte: 100, color: 'red' },
+                  { gte: 0, lte: 100, color: 'red' },
                 ],
               },
               fit: false,
@@ -201,7 +201,7 @@ describe('Metric Schema', () => {
                 range: 'percentage',
                 steps: [
                   { lt: 0, color: 'blue' },
-                  { gte: 100, color: 'red' },
+                  { gte: 0, lte: 100, color: 'red' },
                 ],
               },
               fit: false,
@@ -510,7 +510,7 @@ describe('Metric Schema', () => {
               range: 'absolute',
               steps: [
                 { lt: 0, color: 'red' },
-                { gte: 1000, color: 'green' },
+                { gte: 0, lte: 1000, color: 'green' },
               ],
             },
             background_chart: {
