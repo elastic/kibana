@@ -534,7 +534,9 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
     } catch (err) {
       if (isConflictError(err) && attempt < MAX_RETRIES) {
         const delay = RETRY_BASE_DELAY_MS * attempt;
-        log.warning(`Root routing update: 409 conflict on attempt ${attempt}, retrying in ${delay}ms...`);
+        log.warning(
+          `Root routing update: 409 conflict on attempt ${attempt}, retrying in ${delay}ms...`
+        );
         await sleep(delay);
       } else {
         throw err;
@@ -612,7 +614,9 @@ async function createLargeWiredHierarchyViaImport(
         if (isConflictError(err) && attempt < MAX_RETRIES) {
           const delay = RETRY_BASE_DELAY_MS * attempt;
           log.warning(
-            `  Batch ${batchIndex + 1}/${totalBatches}: 409 conflict on attempt ${attempt}, retrying in ${delay}ms...`
+            `  Batch ${
+              batchIndex + 1
+            }/${totalBatches}: 409 conflict on attempt ${attempt}, retrying in ${delay}ms...`
           );
           await sleep(delay);
         } else {
