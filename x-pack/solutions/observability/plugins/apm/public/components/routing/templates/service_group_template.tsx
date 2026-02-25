@@ -15,7 +15,6 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
-import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 
 export function ServiceGroupTemplate({
   pageTitle,
@@ -122,39 +121,37 @@ export function ServiceGroupTemplate({
   );
 
   return (
-    <ApmIndexSettingsContextProvider>
-      <ApmMainTemplate
-        pageTitle={serviceGroupsPageTitle}
-        pageHeader={{
-          tabs,
-          breadcrumbs: !isAllServices
-            ? [
-                {
-                  text: (
-                    <>
-                      <EuiIcon size="s" type="arrowLeft" />{' '}
-                      {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
-                        defaultMessage: 'Return to service groups',
-                      })}
-                    </>
-                  ),
-                  color: 'primary',
-                  'aria-current': false,
-                  href: serviceGroupsLink,
-                },
-              ]
-            : undefined,
-          ...pageHeader,
-        }}
-        environmentFilter={environmentFilter}
-        showServiceGroupSaveButton={!isAllServices}
-        showServiceGroupsNav={isAllServices}
-        selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
-        {...pageTemplateProps}
-      >
-        {children}
-      </ApmMainTemplate>
-    </ApmIndexSettingsContextProvider>
+    <ApmMainTemplate
+      pageTitle={serviceGroupsPageTitle}
+      pageHeader={{
+        tabs,
+        breadcrumbs: !isAllServices
+          ? [
+              {
+                text: (
+                  <>
+                    <EuiIcon size="s" type="arrowLeft" />{' '}
+                    {i18n.translate('xpack.apm.serviceGroups.breadcrumb.return', {
+                      defaultMessage: 'Return to service groups',
+                    })}
+                  </>
+                ),
+                color: 'primary',
+                'aria-current': false,
+                href: serviceGroupsLink,
+              },
+            ]
+          : undefined,
+        ...pageHeader,
+      }}
+      environmentFilter={false}
+      showServiceGroupSaveButton={!isAllServices}
+      showServiceGroupsNav={false}
+      selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
+      {...pageTemplateProps}
+    >
+      {children}
+    </ApmMainTemplate>
   );
 }
 

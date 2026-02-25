@@ -6,6 +6,8 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ServiceGroupsButtonGroup } from '../service_groups/service_groups_button_group';
+import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -181,11 +183,13 @@ export function ServiceInventory() {
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
   const {
-    query: { rangeFrom, rangeTo, sortField },
+    query: { rangeFrom, rangeTo, sortField, serviceGroup },
   } = useApmParams('/services');
   const {
     services: { telemetry },
   } = useKibana<ApmPluginStartDeps & ApmServices>();
+
+  const selectedNavButton = serviceGroup ? 'serviceGroups' : 'allServices';
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
@@ -305,8 +309,16 @@ export function ServiceInventory() {
 
   return (
     <>
-      <SearchBar showTimeComparison />
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ApmEnvironmentFilter />
+        </EuiFlexItem>
+        <SearchBar showTimeComparison />
+      </EuiFlexGroup>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <TracesInDiscoverCallout />
         {displayMlCallout && mlCallout}
         <EuiFlexItem>

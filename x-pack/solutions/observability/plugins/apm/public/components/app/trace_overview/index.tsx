@@ -20,6 +20,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
     <Breadcrumb href="/traces" title={title} omitOnServerless>
       <ApmMainTemplate
         pageTitle={title}
+        environmentFilter={false}
         pageSectionProps={{
           contentProps: {
             style: {

@@ -38,6 +38,7 @@ export const dependencies = {
     path: '/dependencies/inventory',
     title: DependenciesInventoryTitle,
     element: <DependenciesInventory />,
+    environmentFilter: false,
     params: t.partial({
       query: t.intersection([
         t.type({

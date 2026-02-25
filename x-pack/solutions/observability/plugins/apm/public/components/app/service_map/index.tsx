@@ -6,7 +6,14 @@
  */
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
+import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef } from 'react';
 import { Subscription } from 'rxjs';
@@ -68,13 +75,20 @@ export function ServiceMapHome() {
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
-    <ServiceMap
-      environment={environment}
-      kuery={kuery}
-      start={start}
-      end={end}
-      serviceGroupId={serviceGroup}
-    />
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <ApmEnvironmentFilter />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ServiceMap
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+          serviceGroupId={serviceGroup}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
