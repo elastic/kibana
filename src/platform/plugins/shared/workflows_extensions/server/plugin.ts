@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  CustomRequestHandlerContext,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -21,7 +28,12 @@ import type {
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginStartDeps,
+  WorkflowsRouteHandlerContext,
 } from './types';
+
+type WorkflowsExtensionsRequestHandlerContext = CustomRequestHandlerContext<{
+  workflows: WorkflowsRouteHandlerContext;
+}>;
 
 export class WorkflowsExtensionsServerPlugin
   implements
@@ -35,6 +47,7 @@ export class WorkflowsExtensionsServerPlugin
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
   private triggerEventHandler: TriggerEventHandler | null = null;
+  private emitEventFn: ((params: EmitEventParams) => Promise<void>) | null = null;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.stepRegistry = new ServerStepRegistry();
@@ -52,6 +65,24 @@ export class WorkflowsExtensionsServerPlugin
     // Register HTTP route to expose trigger definitions for testing
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
     registerInternalStepDefinitions(core, this.stepRegistry);
+
+    core.http.registerRouteHandlerContext<
+      WorkflowsExtensionsRequestHandlerContext,
+      'workflows'
+    >('workflows', async (_context, request) => {
+      const [coreStart] = await core.getStartServices();
+      const { spaceId } = getSpaceIdFromPath(
+        request.url.pathname,
+        coreStart.http.basePath.serverBasePath
+      );
+      const emitEventFn = this.emitEventFn!;
+      return {
+        getWorkflowsClient: () => ({
+          emitEvent: (triggerId: string, payload: Record<string, unknown>) =>
+            emitEventFn({ triggerId, spaceId, payload, request }),
+        }),
+      };
+    });
 
     return {
       registerStepDefinition: (definition) => {
@@ -71,6 +102,12 @@ export class WorkflowsExtensionsServerPlugin
     _plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
     this.triggerRegistry.freeze();
+    // Store so the route handler context provider (registered in setup) can call it when requests arrive.
+    this.emitEventFn = (params: EmitEventParams) =>
+      emitEvent(params, {
+        triggerRegistry: this.triggerRegistry,
+        triggerEventHandler: this.triggerEventHandler,
+      });
 
     return {
       getStepDefinition: (stepTypeId: string) => {
@@ -85,11 +122,7 @@ export class WorkflowsExtensionsServerPlugin
       getAllTriggerDefinitions: () => {
         return this.triggerRegistry.list();
       },
-      emitEvent: (params: EmitEventParams) =>
-        emitEvent(params, {
-          triggerRegistry: this.triggerRegistry,
-          triggerEventHandler: this.triggerEventHandler,
-        }),
+      emitEvent: this.emitEventFn,
     };
   }
 

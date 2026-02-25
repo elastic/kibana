@@ -23,6 +23,8 @@ export type {
   EmitEventParams,
   ServerTriggerDefinition,
   TriggerEventHandlerParams,
+  WorkflowsClient,
+  WorkflowsRouteHandlerContext,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginSetupDeps,
