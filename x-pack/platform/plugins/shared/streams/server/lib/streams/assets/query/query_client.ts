@@ -45,6 +45,10 @@ import { computeRuleId } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
+export interface QueryLinkFilters {
+  ruleBacked?: boolean;
+}
+
 interface TermQueryOpts {
   queryEmptyString: boolean;
 }
@@ -313,8 +317,12 @@ export class QueryClient {
    * Returns all query links for given streams or
    * all query links if no stream names are provided.
    */
-  async getQueryLinks(streamNames: string[]): Promise<QueryLink[]> {
-    const filter = [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')];
+  async getQueryLinks(streamNames: string[], filters?: QueryLinkFilters): Promise<QueryLink[]> {
+    const filter = [
+      ...termsQuery(STREAM_NAME, streamNames),
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...termQuery(RULE_BACKED, filters?.ruleBacked),
+    ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -413,8 +421,16 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  async findQueries(streamNames: string[], query: string): Promise<QueryLink[]> {
-    const filter = [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')];
+  async findQueries(
+    streamNames: string[],
+    query: string,
+    filters?: QueryLinkFilters
+  ): Promise<QueryLink[]> {
+    const filter = [
+      ...termsQuery(STREAM_NAME, streamNames),
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...termQuery(RULE_BACKED, filters?.ruleBacked),
+    ];
 
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,

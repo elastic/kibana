@@ -14,23 +14,30 @@ import type { ChangePointType } from '@kbn/es-types/src';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
 import { LEGACY_RULE_BACKED_FALLBACK, type QueryLink } from '../../../common/queries';
-import type { QueryClient } from '../streams/assets/query/query_client';
+import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { streamNames?: string[]; from: Date; to: Date; bucketSize: string; query?: string },
+  params: {
+    streamNames?: string[];
+    from: Date;
+    to: Date;
+    bucketSize: string;
+    query?: string;
+    filters?: QueryLinkFilters;
+  },
   dependencies: {
     queryClient: QueryClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames = [], from, to, bucketSize, query } = params;
+  const { streamNames = [], from, to, bucketSize, query, filters } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(streamNames, query)
-    : await queryClient.getQueryLinks(streamNames);
+    ? await queryClient.findQueries(streamNames, query, filters)
+    : await queryClient.getQueryLinks(streamNames, filters);
 
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };

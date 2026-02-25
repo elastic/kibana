@@ -53,9 +53,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const { systems, refreshSystems, systemsLoading } = useStreamSystems(definition.stream.name);
   const [query, setQuery] = useState<string>('');
+  // Only show rule-backed queries in the stream detail view; the discovery page shows all queries.
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
     query,
+    ruleBacked: true,
   });
 
   const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
