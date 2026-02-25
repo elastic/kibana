@@ -110,7 +110,7 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
       {
         'data-test-subj': 'searchSideNav-InferenceEndpoints',
         deepLink: {
-          link: 'management:inference_endpoints',
+          link: 'searchInferenceEndpoints:inferenceEndpoints',
           shouldShowActiveForSubroutes: true,
         },
         id: 'inference_endpoints',

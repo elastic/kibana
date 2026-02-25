@@ -82,7 +82,7 @@ export class SearchInferenceEndpointsPlugin
           title: PLUGIN_TITLE,
           order: 2,
           async mount(params) {
-            const { renderApp } = await import('./application');
+            const { renderManagementApp } = await import('./application');
             const [coreStart, depsStart] = await core.getStartServices();
             const startDeps: AppPluginStartDependencies = {
               ...depsStart,
@@ -90,7 +90,7 @@ export class SearchInferenceEndpointsPlugin
               searchNavigation: undefined,
             };
 
-            return renderApp(coreStart, startDeps, params.element);
+            return renderManagementApp(coreStart, startDeps, params.element);
           },
         })
         .enable();
