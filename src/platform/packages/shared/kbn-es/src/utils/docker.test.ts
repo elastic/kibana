@@ -302,8 +302,8 @@ describe('verifyDockerInstalled()', () => {
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " info Verifying Docker is installed.",
-        "   │ info Docker Version 123",
+        " [34minfo[39m [1mVerifying Docker is installed.[22m",
+        "   │ [34minfo[39m Docker Version 123",
       ]
     `);
   });
@@ -340,8 +340,8 @@ describe('maybeCreateDockerNetwork()', () => {
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " info Checking status of elastic Docker network.",
-        "   │ info Created new network.",
+        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+        "   │ [34minfo[39m Created new network.",
       ]
     `);
   });
@@ -355,8 +355,8 @@ describe('maybeCreateDockerNetwork()', () => {
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " info Checking status of elastic Docker network.",
-        "   │ info Using existing network.",
+        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
+        "   │ [34minfo[39m Using existing network.",
       ]
     `);
   });
