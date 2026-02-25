@@ -13365,7 +13365,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -14066,7 +14066,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "lineNumber": 25,
@@ -24357,7 +24357,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -24974,7 +24974,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "lineNumber": 25,
@@ -33874,7 +33874,7 @@
               "\nThe Kibana normalized type of the column"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "lineNumber": 69,
@@ -40800,7 +40800,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"null\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -42006,7 +42006,7 @@
         "label": "MathArguments",
         "description": [],
         "signature": [
-          "{ expression: string; onError?: \"zero\" | \"false\" | \"null\" | \"throw\" | undefined; }"
+          "{ expression: string; onError?: \"false\" | \"null\" | \"zero\" | \"throw\" | undefined; }"
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/math.ts",
         "lineNumber": 14,
@@ -42108,7 +42108,7 @@
           "\nAllowed column names in a PointSeries"
         ],
         "signature": [
-          "\"text\" | \"color\" | \"size\" | \"x\" | \"y\""
+          "\"text\" | \"color\" | \"size\" | \"y\" | \"x\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/pointseries.ts",
         "lineNumber": 25,
@@ -46859,7 +46859,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"zero\" | \"false\" | \"null\" | \"throw\")[]"
+                      "(\"false\" | \"null\" | \"zero\" | \"throw\")[]"
                     ],
                     "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/math.ts",
                     "lineNumber": 61,

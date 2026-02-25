@@ -211,7 +211,7 @@
         "label": "WorkflowId",
         "description": [],
         "signature": [
-          "\"default\" | \"vector\" | \"semantic\""
+          "\"semantic\" | \"default\" | \"vector\""
         ],
         "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
         "lineNumber": 8,

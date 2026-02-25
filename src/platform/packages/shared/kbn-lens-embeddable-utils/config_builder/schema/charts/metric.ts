@@ -37,6 +37,7 @@ import {
 } from './shared';
 import {
   horizontalAlignmentSchema,
+  verticalAlignmentSchema,
   leftRightAlignmentSchema,
   beforeAfterAlignmentSchema,
 } from '../alignments';
@@ -178,6 +179,26 @@ const metricStatePrimaryMetricOptionsSchema = {
    * Where to apply the color (background or value)
    */
   apply_color_to: schema.maybe(applyColorToSchema),
+  /**
+   * Position of the primary metric value. Possible values:
+   * - 'top': Value appears above the labels
+   * - 'bottom': Value appears below the labels
+   */
+  position: schema.maybe(
+    verticalAlignmentSchema({
+      meta: { description: 'Position of the primary metric value (top or bottom)' },
+    })
+  ),
+  /**
+   * Font weight for title and subtitle. Possible values:
+   * - 'bold': Bold font weight
+   * - 'normal': Normal font weight
+   */
+  title_weight: schema.maybe(
+    schema.oneOf([schema.literal('bold'), schema.literal('normal')], {
+      meta: { description: 'Font weight for title and subtitle' },
+    })
+  ),
 };
 
 const metricStateSecondaryMetricOptionsSchema = {
@@ -217,6 +238,26 @@ const metricStateSecondaryMetricOptionsSchema = {
         { meta: { id: 'metricCompareToPrimary' } }
       ),
     ])
+  ),
+  /**
+   * Alignments for the secondary metric value.
+   */
+  alignments: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Alignment for secondary value. Possible values:
+         * - 'left': Align value to the left
+         * - 'center': Align value to the center
+         * - 'right': Align value to the right
+         */
+        value: horizontalAlignmentSchema({
+          meta: { description: 'Alignment for secondary value' },
+          defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
+        }),
+      },
+      { meta: { id: 'metricSecondaryMetricAlignments' } }
+    )
   ),
   /**
    * Color configuration
