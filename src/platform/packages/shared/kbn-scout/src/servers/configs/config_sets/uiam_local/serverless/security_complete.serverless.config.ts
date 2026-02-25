@@ -17,7 +17,6 @@ import type { ScoutServerConfig } from '../../../../../types';
 // Indicates whether the config is used on CI or locally.
 const isRunOnCI = process.env.CI;
 const elasticsearchServer = defaultConfig.servers.elasticsearch;
-const esPublicBaseUrl = `${elasticsearchServer.protocol}://${elasticsearchServer.hostname}:${elasticsearchServer.port}`;
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
