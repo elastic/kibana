@@ -73,6 +73,14 @@ import {
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { validateTriggers } from '../../common/lib/validate_triggers';
 import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
+
+/** Derives a list of trigger type ids from a workflow definition (e.g. ['manual', 'scheduled', 'cases.updated']). */
+function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefined): string[] {
+  const triggers = definition?.triggers ?? [];
+  return triggers
+    .map((t) => (t && typeof (t as { type?: string }).type === 'string' ? (t as { type: string }).type : null))
+    .filter((t): t is string => t != null);
+}
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -234,6 +242,7 @@ export class WorkflowsService {
       description: workflowToCreate.description,
       enabled: workflowToCreate.enabled,
       tags: workflowToCreate.tags || [],
+      triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
       yaml: workflow.yaml,
       definition: workflowToCreate.definition ?? null,
       createdBy: authenticatedUser,
@@ -475,7 +484,7 @@ export class WorkflowsService {
           ? parsedYaml.error.formattedZodError.issues.map((e) => e.message)
           : [parsedYaml.error.message];
       return {
-        updatedDataPatch: { definition: undefined, enabled: false, valid: false },
+        updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
         validationErrors,
         shouldUpdateScheduler: true,
       };
@@ -484,7 +493,7 @@ export class WorkflowsService {
     const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
     if (!stepValidation.isValid) {
       return {
-        updatedDataPatch: { definition: undefined, enabled: false, valid: false },
+        updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
         validationErrors: stepValidation.errors.map((e) => e.message),
         shouldUpdateScheduler: true,
       };
@@ -496,7 +505,7 @@ export class WorkflowsService {
     );
     if (!triggerValidation.valid) {
       return {
-        updatedDataPatch: { definition: undefined, enabled: false, valid: false },
+        updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
         validationErrors: triggerValidation.errors.map((e) => e.message),
         shouldUpdateScheduler: true,
       };
@@ -512,6 +521,7 @@ export class WorkflowsService {
         enabled: workflowDef.enabled,
         description: workflowDef.description,
         tags: workflowDef.tags,
+        triggerTypes: getTriggerTypesFromDefinition(workflowDef.definition),
         valid: true,
         yaml: workflowYaml,
       },
@@ -641,6 +651,9 @@ export class WorkflowsService {
       }
 
       const finalData: WorkflowProperties = { ...existingSource, ...updatedData };
+      if (finalData.triggerTypes === undefined) {
+        finalData.triggerTypes = getTriggerTypesFromDefinition(finalData.definition) ?? [];
+      }
 
       await this.workflowStorage.getClient().index({
         id,
@@ -757,6 +770,42 @@ export class WorkflowsService {
       deleted: ids.length - failures.length,
       failures,
     };
+  }
+
+  /**
+   * Returns all enabled, non-deleted workflows in the space that are subscribed to the given trigger type.
+   * Used by the event-driven handler to resolve which workflows to run when an event is emitted.
+   */
+  public async getWorkflowsSubscribedToTrigger(
+    triggerId: string,
+    spaceId: string
+  ): Promise<WorkflowDetailDto[]> {
+    if (!this.workflowStorage) {
+      throw new Error('WorkflowsService not initialized');
+    }
+
+    const searchResponse = await this.workflowStorage.getClient().search({
+      size: 1000,
+      track_total_hits: true,
+      query: {
+        bool: {
+          must: [
+            { term: { spaceId } },
+            { term: { enabled: true } },
+            { term: { triggerTypes: triggerId } },
+          ],
+          must_not: [{ exists: { field: 'deleted_at' } }],
+        },
+      },
+      sort: [{ updated_at: { order: 'desc' } }],
+    });
+
+    return searchResponse.hits.hits.map((hit) => {
+      if (!hit._source) {
+        throw new Error('Missing _source in search result');
+      }
+      return this.transformStorageDocumentToWorkflowDto(hit._id, hit._source as WorkflowProperties);
+    });
   }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
