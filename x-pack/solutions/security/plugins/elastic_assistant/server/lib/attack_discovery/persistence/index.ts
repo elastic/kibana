@@ -29,7 +29,7 @@ import { getAttackDiscoveryGenerationsQuery } from './get_attack_discovery_gener
 import { getCombinedFilter } from './get_combined_filter';
 import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_discovery_alerts_aggregation';
 import type { AttackDiscoveryAlertDocument } from '../schedules/types';
-import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
+import { transformSearchResponseToAlerts } from '../../../../../../../../platform/packages/shared/kbn-elastic-assistant-common/impl/utils/transform_search_response_to_alerts';
 import { getScheduledIndexPattern } from './get_scheduled_index_pattern';
 import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';
 

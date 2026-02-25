@@ -11,7 +11,7 @@ import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 
 import { getCreatedAttackDiscoveryAlerts } from '.';
 import { getResponseMock } from '../../../../../__mocks__/attack_discovery_alert_document_response';
-import * as transforms from '../../transforms/transform_search_response_to_alerts';
+import * as transforms from '../../../../../../../../../../platform/packages/shared/kbn-elastic-assistant-common/impl/utils/transform_search_response_to_alerts';
 
 describe('getCreatedAttackDiscoveryAlerts', () => {
   const attackDiscoveryAlertsIndex = 'test-index';

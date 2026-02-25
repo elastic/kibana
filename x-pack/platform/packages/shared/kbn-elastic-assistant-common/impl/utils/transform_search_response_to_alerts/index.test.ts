@@ -17,7 +17,7 @@ import { omit } from 'lodash/fp';
 
 import { transformSearchResponseToAlerts } from '.';
 import * as transformModule from './transform_attack_discovery_alert_document_to_api';
-import { getResponseMock } from '../../../../../__mocks__/attack_discovery_alert_document_response';
+import { getResponseMock } from '../../../../../../../solutions/security/plugins/elastic_assistant/server/__mocks__/attack_discovery_alert_document_response';
 import { ALERT_ATTACK_DISCOVERY_REPLACEMENTS } from '../../../schedules/fields/field_names';
 
 const createLoggerMock = (): Logger =>
