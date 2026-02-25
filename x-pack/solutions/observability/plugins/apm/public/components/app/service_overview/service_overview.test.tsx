@@ -6,11 +6,12 @@
  */
 
 import { composeStories } from '@storybook/react';
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as stories from './service_overview.stories';
 import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
-import { renderWithTheme } from '../../../utils/test_helpers';
+import { EuiThemeProvider } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 // Mock the usePerformanceContext hook
 jest.mock('@kbn/ebt-tools', () => ({
@@ -40,7 +41,13 @@ describe('ServiceOverview', () => {
     jest.clearAllMocks();
   });
   it('renders', async () => {
-    renderWithTheme(<Example />);
+    render(
+      <EuiThemeProvider>
+        <KibanaContextProvider services={{ usageCollection: { reportUiCounter: jest.fn() } }}>
+          <Example />
+        </KibanaContextProvider>
+      </EuiThemeProvider>
+    );
 
     expect(await screen.findByRole('heading', { name: 'Latency' })).toBeInTheDocument();
   });
