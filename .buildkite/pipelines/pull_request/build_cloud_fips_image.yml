@@ -1,17 +1,21 @@
 steps:
   - command: .buildkite/scripts/steps/fips/build_cloud_fips_image.sh
+    cancel_on_build_failing: true
     label: 'Build Cloud FIPS Image'
     agents:
       machineType: n2-standard-2
       preemptible: true
     depends_on:
       - build
+<<<<<<< HEAD
       - quick_checks
       - checks
       - linting
       - linting_with_types
       - check_types
       - check_oas_snapshot
+=======
+>>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621))
     timeout_in_minutes: 60
     soft_fail: true
     retry:

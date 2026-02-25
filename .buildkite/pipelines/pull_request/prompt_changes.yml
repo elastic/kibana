@@ -1,13 +1,13 @@
 steps:
-  - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+  - command: .buildkite/scripts/steps/checks/prompt_changes_detector.sh
     cancel_on_build_failing: true
-    label: 'Build Storybooks'
+    label: 'Check Prompt Changes'
     agents:
-      machineType: n2-standard-8
+      machineType: n2-standard-2
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
-    key: storybooks
-    timeout_in_minutes: 80
+      diskSizeGb: 115
+    timeout_in_minutes: 10
     retry:
       automatic:
         - exit_status: '-1'

@@ -1,5 +1,25 @@
 steps:
+<<<<<<< HEAD
+=======
+  - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
+    cancel_on_build_failing: true
+    label: 'Serverless Entity Analytics - Security Cypress Tests'
+    agents:
+      machineType: n2-standard-4
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    depends_on:
+      - build
+    timeout_in_minutes: 60
+    parallelism: 3
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+>>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621))
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
+    cancel_on_build_failing: true
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -7,12 +27,15 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
+<<<<<<< HEAD
       - quick_checks
       - checks
       - linting
       - linting_with_types
       - check_types
       - check_oas_snapshot
+=======
+>>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621))
     timeout_in_minutes: 60
     parallelism: 2
     retry:
