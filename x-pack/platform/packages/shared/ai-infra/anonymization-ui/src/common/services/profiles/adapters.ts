@@ -11,14 +11,19 @@ import type {
   FindAnonymizationProfilesQuery,
   FindAnonymizationProfilesResponse,
 } from '@kbn/anonymization-common';
-import {
-  FindAnonymizationProfilesResponse as findProfilesResponseSchema,
-  GetAnonymizationProfileResponse as profileResponseSchema,
-} from '@kbn/anonymization-common';
+import { anonymizationProfileSchema as profileSchema } from '@kbn/anonymization-common';
+import { z } from '@kbn/zod';
 import type { ProfilesListQuery, UpdateProfileInput } from '../../types/profiles';
 
+const findProfilesResponseSchema = z.object({
+  data: z.array(profileSchema),
+  page: z.number(),
+  perPage: z.number(),
+  total: z.number(),
+});
+
 export const toProfile = (profile: unknown): AnonymizationProfile => {
-  const parsed = profileResponseSchema.safeParse(profile);
+  const parsed = profileSchema.safeParse(profile);
   if (!parsed.success) {
     throw new Error('Invalid anonymization profile response payload');
   }

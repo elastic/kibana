@@ -12,6 +12,7 @@ import type {
   RegexRule,
   NerRule,
 } from '@kbn/anonymization-common';
+import { isGlobalAnonymizationProfileTarget, NER_MODEL_ID } from '@kbn/anonymization-common';
 import type { AnonymizationProfilesClient } from '../services/profiles/client';
 import { useCreateProfile } from '../services/profiles/hooks/use_create_profile';
 import { useUpdateProfile } from '../services/profiles/hooks/use_update_profile';
@@ -50,14 +51,24 @@ interface ProfileFormController {
   submit: () => Promise<ProfileFormSubmitResult | undefined>;
 }
 
+const normalizeNerRules = (nerRules: NerRule[]): NerRule[] =>
+  nerRules.map((rule) => ({
+    ...rule,
+    modelId: rule.modelId ?? NER_MODEL_ID,
+  }));
+
 const toInitialValues = (profile?: AnonymizationProfile): ProfileFormValues => ({
   name: profile?.name ?? '',
   description: profile?.description ?? '',
   targetType: profile?.targetType ?? TARGET_TYPE_INDEX,
   targetId: profile?.targetId ?? '',
-  fieldRules: profile?.rules.fieldRules ?? [],
+  fieldRules: profile
+    ? isGlobalAnonymizationProfileTarget(profile.targetType, profile.targetId)
+      ? []
+      : profile.rules.fieldRules ?? []
+    : [],
   regexRules: profile?.rules.regexRules ?? [],
-  nerRules: profile?.rules.nerRules ?? [],
+  nerRules: normalizeNerRules(profile?.rules.nerRules ?? []),
 });
 
 export const useProfileForm = ({
@@ -109,18 +120,27 @@ export const useProfileForm = ({
 
     try {
       if (isEdit && initialProfile) {
+        const isGlobalProfile = isGlobalAnonymizationProfileTarget(
+          initialProfile.targetType,
+          initialProfile.targetId
+        );
         const profile = await updateProfile({
           id: initialProfile.id,
           name: values.name,
           description: values.description || undefined,
           rules: {
-            fieldRules: values.fieldRules,
+            fieldRules: isGlobalProfile ? [] : values.fieldRules,
             regexRules: values.regexRules,
-            nerRules: values.nerRules,
+            nerRules: normalizeNerRules(values.nerRules),
           },
         });
         return { profile };
       }
+
+      const isGlobalProfile = isGlobalAnonymizationProfileTarget(
+        values.targetType,
+        values.targetId
+      );
 
       const profile = await createProfile({
         name: values.name,
@@ -128,9 +148,9 @@ export const useProfileForm = ({
         targetType: values.targetType,
         targetId: values.targetId,
         rules: {
-          fieldRules: values.fieldRules,
+          fieldRules: isGlobalProfile ? [] : values.fieldRules,
           regexRules: values.regexRules,
-          nerRules: values.nerRules,
+          nerRules: normalizeNerRules(values.nerRules),
         },
       });
       return { profile };
@@ -203,7 +223,8 @@ export const useProfileForm = ({
   );
 
   const setNerRules = useCallback(
-    (nerRules: NerRule[]) => setValues((prev) => ({ ...prev, nerRules })),
+    (nerRules: NerRule[]) =>
+      setValues((prev) => ({ ...prev, nerRules: normalizeNerRules(nerRules) })),
     []
   );
   const reset = useCallback(() => {

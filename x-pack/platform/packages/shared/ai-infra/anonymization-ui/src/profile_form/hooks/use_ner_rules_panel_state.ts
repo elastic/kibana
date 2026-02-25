@@ -6,7 +6,12 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { NER_ENTITY_CLASSES, type NerEntityClass, type NerRule } from '@kbn/anonymization-common';
+import {
+  NER_ENTITY_CLASSES,
+  NER_MODEL_ID,
+  type NerEntityClass,
+  type NerRule,
+} from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import type { TrustedNerModelOption } from '../../contracts';
 
@@ -32,8 +37,9 @@ export const useNerRulesPanelState = ({
   listTrustedNerModels,
   nerRulesError,
 }: UseNerRulesPanelStateParams) => {
+  const usesTrustedNerModelProvider = typeof listTrustedNerModels === 'function';
   const [nerDraft, setNerDraft] = useState({
-    modelId: '',
+    modelId: usesTrustedNerModelProvider ? '' : NER_MODEL_ID,
     allowedEntityClasses: DEFAULT_DRAFT_ALLOWED_ENTITIES,
   });
   const [trustedNerModelOptions, setTrustedNerModelOptions] = useState<
@@ -43,7 +49,6 @@ export const useNerRulesPanelState = ({
   const [trustedNerModelsError, setTrustedNerModelsError] = useState<string | undefined>();
 
   const hasTrustedNerModel = trustedNerModelOptions.length > 0;
-  const usesTrustedNerModelProvider = typeof listTrustedNerModels === 'function';
   const hasSingleTrustedNerModel =
     usesTrustedNerModelProvider && trustedNerModelOptions.length === 1;
   const singleTrustedNerModel = hasSingleTrustedNerModel ? trustedNerModelOptions[0] : undefined;
@@ -135,7 +140,7 @@ export const useNerRulesPanelState = ({
       },
     ]);
     setNerDraft({
-      modelId: singleTrustedNerModel?.value ?? '',
+      modelId: singleTrustedNerModel?.value ?? (usesTrustedNerModelProvider ? '' : NER_MODEL_ID),
       allowedEntityClasses: DEFAULT_DRAFT_ALLOWED_ENTITIES,
     });
   }, [
@@ -144,6 +149,7 @@ export const useNerRulesPanelState = ({
     nerRules,
     onNerRulesChange,
     singleTrustedNerModel,
+    usesTrustedNerModelProvider,
   ]);
 
   const setNerDraftModelId = useCallback((modelId: string) => {
@@ -186,9 +192,12 @@ export const useNerRulesPanelState = ({
       if (!usesTrustedNerModelProvider) {
         return trustedNerModelOptions;
       }
-      const hasCurrentModel = trustedNerModelOptions.some((option) => option.value === modelId);
-      if (!hasCurrentModel && modelId.trim().length > 0) {
-        return [{ value: modelId, text: modelId }, ...trustedNerModelOptions];
+      const normalizedModelId = modelId?.trim() ? modelId : NER_MODEL_ID;
+      const hasCurrentModel = trustedNerModelOptions.some(
+        (option) => option.value === normalizedModelId
+      );
+      if (!hasCurrentModel && normalizedModelId.trim().length > 0) {
+        return [{ value: normalizedModelId, text: normalizedModelId }, ...trustedNerModelOptions];
       }
       return trustedNerModelOptions;
     },

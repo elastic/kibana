@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiIcon, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isGlobalAnonymizationProfileTarget } from '@kbn/anonymization-common';
 import { FieldRulesPanel } from './panels/field_rules_panel/field_rules_panel';
 import { NerRulesPanel } from './panels/ner_rules_panel/ner_rules_panel';
 import { PreviewPanel } from './panels/preview_panel/preview_panel';
@@ -16,11 +17,48 @@ import { ProfileBasicsSection } from './sections/basics_section';
 import { ProfileFormNotices } from './sections/notices';
 import { useProfileFormContext } from './profile_form_context';
 
-export const ProfileFormContent = () => {
+interface ProfileTab {
+  id: string;
+  name: React.ReactNode;
+  content: React.ReactNode;
+}
+
+const renderTabName = ({
+  label,
+  hasError,
+  errorAriaLabelId,
+  errorAriaDefaultMessage,
+  errorTestSubj,
+}: {
+  label: string;
+  hasError: boolean;
+  errorAriaLabelId: string;
+  errorAriaDefaultMessage: string;
+  errorTestSubj: string;
+}) => (
+  <span>
+    {label}
+    {hasError ? (
+      <>
+        {' '}
+        <EuiIcon
+          type="warning"
+          color="danger"
+          size="s"
+          aria-label={i18n.translate(errorAriaLabelId, {
+            defaultMessage: errorAriaDefaultMessage,
+          })}
+          data-test-subj={errorTestSubj}
+        />
+      </>
+    ) : null}
+  </span>
+);
+
+const ProfileFormTabs = ({ isGlobalProfile }: { isGlobalProfile: boolean }) => {
   const {
     fieldRules,
     fieldRulesError,
-    isEdit,
     isManageMode,
     isSubmitting,
     nerRulesError,
@@ -30,121 +68,64 @@ export const ProfileFormContent = () => {
     targetIdField,
   } = useProfileFormContext();
 
-  const hasLoadedDataSource = isEdit || targetId.trim().length > 0 || fieldRules.length > 0;
-  const [selectedTabId, setSelectedTabId] = useState('fieldRules');
   const hasFieldRulesError = Boolean(fieldRulesError);
   const hasRegexRulesError = Boolean(regexRulesError);
   const hasNerRulesError = Boolean(nerRulesError);
 
-  useEffect(() => {
-    if (hasFieldRulesError) {
-      setSelectedTabId('fieldRules');
-      return;
-    }
-    if (hasRegexRulesError) {
-      setSelectedTabId('regexRules');
-      return;
-    }
-    if (hasNerRulesError) {
-      setSelectedTabId('nerRules');
-    }
-  }, [hasFieldRulesError, hasRegexRulesError, hasNerRulesError]);
-
-  const profileTabs = useMemo(
+  const tabs = useMemo<ProfileTab[]>(
     () => [
-      {
-        id: 'fieldRules',
-        name: (
-          <span>
-            {i18n.translate('anonymizationUi.profiles.flyout.tabs.fieldRules', {
-              defaultMessage: 'Field rules',
-            })}
-            {hasFieldRulesError ? (
-              <>
-                {' '}
-                <EuiIcon
-                  type="warning"
-                  color="danger"
-                  size="s"
-                  aria-label={i18n.translate(
-                    'anonymizationUi.profiles.flyout.tabs.fieldRulesErrorAriaLabel',
-                    {
-                      defaultMessage: 'Field rules tab has validation errors',
-                    }
-                  )}
-                  data-test-subj="anonymizationProfilesTabError-fieldRules"
+      ...(isGlobalProfile
+        ? []
+        : [
+            {
+              id: 'fieldRules',
+              name: renderTabName({
+                label: i18n.translate('anonymizationUi.profiles.flyout.tabs.fieldRules', {
+                  defaultMessage: 'Field rules',
+                }),
+                hasError: hasFieldRulesError,
+                errorAriaLabelId: 'anonymizationUi.profiles.flyout.tabs.fieldRulesErrorAriaLabel',
+                errorAriaDefaultMessage: 'Field rules tab has validation errors',
+                errorTestSubj: 'anonymizationProfilesTabError-fieldRules',
+              }),
+              content: (
+                <FieldRulesPanel
+                  fieldRules={fieldRules}
+                  onFieldRulesChange={onFieldRulesChange}
+                  validationError={fieldRulesError}
+                  selectedTargetName={
+                    targetIdField.selectedTargetDisplayName ?? (targetId.trim() || undefined)
+                  }
+                  isManageMode={isManageMode}
+                  isSubmitting={isSubmitting}
                 />
-              </>
-            ) : null}
-          </span>
-        ),
-        content: (
-          <FieldRulesPanel
-            fieldRules={fieldRules}
-            onFieldRulesChange={onFieldRulesChange}
-            validationError={fieldRulesError}
-            selectedTargetName={
-              targetIdField.selectedTargetDisplayName ?? (targetId.trim() || undefined)
-            }
-            isManageMode={isManageMode}
-            isSubmitting={isSubmitting}
-          />
-        ),
-      },
+              ),
+            },
+          ]),
       {
         id: 'regexRules',
-        name: (
-          <span>
-            {i18n.translate('anonymizationUi.profiles.flyout.tabs.regexRules', {
-              defaultMessage: 'Regex rules',
-            })}
-            {hasRegexRulesError ? (
-              <>
-                {' '}
-                <EuiIcon
-                  type="warning"
-                  color="danger"
-                  size="s"
-                  aria-label={i18n.translate(
-                    'anonymizationUi.profiles.flyout.tabs.regexRulesErrorAriaLabel',
-                    {
-                      defaultMessage: 'Regex rules tab has validation errors',
-                    }
-                  )}
-                  data-test-subj="anonymizationProfilesTabError-regexRules"
-                />
-              </>
-            ) : null}
-          </span>
-        ),
+        name: renderTabName({
+          label: i18n.translate('anonymizationUi.profiles.flyout.tabs.regexRules', {
+            defaultMessage: 'Regex rules',
+          }),
+          hasError: hasRegexRulesError,
+          errorAriaLabelId: 'anonymizationUi.profiles.flyout.tabs.regexRulesErrorAriaLabel',
+          errorAriaDefaultMessage: 'Regex rules tab has validation errors',
+          errorTestSubj: 'anonymizationProfilesTabError-regexRules',
+        }),
         content: <RegexRulesPanel />,
       },
       {
         id: 'nerRules',
-        name: (
-          <span>
-            {i18n.translate('anonymizationUi.profiles.flyout.tabs.nerRules', {
-              defaultMessage: 'NER rules',
-            })}
-            {hasNerRulesError ? (
-              <>
-                {' '}
-                <EuiIcon
-                  type="warning"
-                  color="danger"
-                  size="s"
-                  aria-label={i18n.translate(
-                    'anonymizationUi.profiles.flyout.tabs.nerRulesErrorAriaLabel',
-                    {
-                      defaultMessage: 'NER rules tab has validation errors',
-                    }
-                  )}
-                  data-test-subj="anonymizationProfilesTabError-nerRules"
-                />
-              </>
-            ) : null}
-          </span>
-        ),
+        name: renderTabName({
+          label: i18n.translate('anonymizationUi.profiles.flyout.tabs.nerRules', {
+            defaultMessage: 'NER rules',
+          }),
+          hasError: hasNerRulesError,
+          errorAriaLabelId: 'anonymizationUi.profiles.flyout.tabs.nerRulesErrorAriaLabel',
+          errorAriaDefaultMessage: 'NER rules tab has validation errors',
+          errorTestSubj: 'anonymizationProfilesTabError-nerRules',
+        }),
         content: <NerRulesPanel />,
       },
       {
@@ -156,18 +137,28 @@ export const ProfileFormContent = () => {
       },
     ],
     [
-      fieldRules,
-      fieldRulesError,
+      isGlobalProfile,
       hasFieldRulesError,
-      hasNerRulesError,
       hasRegexRulesError,
+      hasNerRulesError,
+      fieldRules,
+      onFieldRulesChange,
+      fieldRulesError,
+      targetIdField.selectedTargetDisplayName,
+      targetId,
       isManageMode,
       isSubmitting,
-      onFieldRulesChange,
-      targetId,
-      targetIdField.selectedTargetDisplayName,
     ]
   );
+
+  return <EuiTabbedContent tabs={tabs} data-test-subj="anonymizationProfilesFlyoutTabs" />;
+};
+
+export const ProfileFormContent = () => {
+  const { fieldRules, isEdit, targetType, targetId } = useProfileFormContext();
+
+  const isGlobalProfile = isGlobalAnonymizationProfileTarget(targetType, targetId);
+  const hasLoadedDataSource = isEdit || targetId.trim().length > 0 || fieldRules.length > 0;
 
   return (
     <>
@@ -176,12 +167,7 @@ export const ProfileFormContent = () => {
       {hasLoadedDataSource ? (
         <>
           <EuiSpacer size="m" />
-          <EuiTabbedContent
-            tabs={profileTabs}
-            selectedTab={profileTabs.find((tab) => tab.id === selectedTabId) ?? profileTabs[0]}
-            onTabClick={(tab) => setSelectedTabId(tab.id)}
-            data-test-subj="anonymizationProfilesFlyoutTabs"
-          />
+          <ProfileFormTabs isGlobalProfile={isGlobalProfile} />
         </>
       ) : (
         <>

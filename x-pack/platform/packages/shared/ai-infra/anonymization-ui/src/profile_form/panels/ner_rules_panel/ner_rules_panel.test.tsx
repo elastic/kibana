@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { NER_MODEL_ID } from '@kbn/anonymization-common';
 import { NerRulesPanel } from './ner_rules_panel';
 import { useProfileFormContext } from '../../profile_form_context';
 
@@ -46,6 +47,24 @@ describe('NerRulesPanel', () => {
 
     expect(screen.getByLabelText('Model id')).toBeInTheDocument();
     expect(screen.getByLabelText('Allowed entities')).toBeInTheDocument();
+  });
+
+  it('uses NER_MODEL_ID as default in manual mode when trusted models are not provided', () => {
+    setContext({
+      nerRules: [
+        {
+          id: 'ner-1',
+          type: 'ner',
+          modelId: undefined,
+          allowedEntityClasses: ['PER', 'ORG'],
+          enabled: true,
+        } as any,
+      ],
+    });
+    render(<NerRulesPanel />);
+
+    expect(screen.getByLabelText('Model id')).toHaveValue(NER_MODEL_ID);
+    expect(screen.getByLabelText('NER model id for rule ner-1')).toHaveValue(NER_MODEL_ID);
   });
 
   it('uses trusted model provider options when multiple models are available', async () => {

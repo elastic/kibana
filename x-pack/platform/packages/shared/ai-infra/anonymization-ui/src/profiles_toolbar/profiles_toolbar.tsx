@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiBadge,
   EuiButton,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -108,22 +107,6 @@ export const ProfilesToolbar = ({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        color="primary"
-        iconType="info"
-        title={i18n.translate('anonymizationUi.profiles.toolbar.integrationScopeTitle', {
-          defaultMessage: 'Integration scope contract',
-        })}
-      >
-        <p>
-          {i18n.translate('anonymizationUi.profiles.toolbar.integrationScopeDescription', {
-            defaultMessage:
-              'Replacements are resolved by reference (id or thread/execution scope) through inference-owned APIs. Profiles remain the policy source of truth.',
-          })}
-        </p>
-      </EuiCallOut>
 
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s" responsive>

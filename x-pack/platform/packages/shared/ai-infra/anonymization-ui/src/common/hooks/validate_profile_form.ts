@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NER_ENTITY_CLASSES } from '@kbn/anonymization-common';
+import { NER_ENTITY_CLASSES, NER_MODEL_ID } from '@kbn/anonymization-common';
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../target_types';
 import type { ProfileFormValidationErrors, ProfileFormValues } from './profile_form_types';
 
@@ -72,7 +72,8 @@ export const validateProfileForm = (values: ProfileFormValues): ProfileFormValid
   }
 
   const hasInvalidNerRule = values.nerRules.some((rule) => {
-    if (!rule.modelId.trim()) {
+    const modelId = rule.modelId ?? NER_MODEL_ID;
+    if (!modelId.trim()) {
       return true;
     }
 

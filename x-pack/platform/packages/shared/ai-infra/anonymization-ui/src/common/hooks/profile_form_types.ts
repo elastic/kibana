@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
-import type { FieldRule, RegexRule, NerRule } from '@kbn/anonymization-common';
+import type {
+  AnonymizationProfile,
+  FieldRule,
+  RegexRule,
+  NerRule,
+} from '@kbn/anonymization-common';
 import type { TargetType } from '../types/profiles';
 
 export interface ProfileFormValues {

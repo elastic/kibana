@@ -108,7 +108,8 @@ export const RegexRulesPanel = () => {
             }
             disabled={!isManageMode || isSubmitting}
             placeholder={i18n.translate('anonymizationUi.profiles.regexRules.patternPlaceholder', {
-              defaultMessage: 'Regex pattern (for example: /\\b\\d{1,3}(?:\\.\\d{1,3}){3}\\b/)',
+              defaultMessage:
+                "Regex pattern (for example: /\\b\\d'{1,3}'(?:\\.\\d'{1,3}')'{3}'\\b/)",
             })}
             fullWidth
           />

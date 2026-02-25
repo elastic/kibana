@@ -25,7 +25,12 @@ import {
   EuiTitle,
   EuiDescriptionList,
 } from '@elastic/eui';
-import { NER_ENTITY_CLASSES, type NerEntityClass, type NerRule } from '@kbn/anonymization-common';
+import {
+  NER_ENTITY_CLASSES,
+  NER_MODEL_ID,
+  type NerEntityClass,
+  type NerRule,
+} from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { useProfileFormContext } from '../../profile_form_context';
 import { useNerRulesPanelState } from '../../hooks/use_ner_rules_panel_state';
@@ -48,45 +53,33 @@ const toNerEntityClasses = (options: Array<EuiComboBoxOptionOption<string>>): Ne
 const toComboBoxOptions = (values: NerEntityClass[]): Array<EuiComboBoxOptionOption<string>> =>
   values.map((value) => ({ label: value }));
 
-export const NerRulesPanel = () => {
-  const {
-    nerRules,
-    isManageMode,
-    isSubmitting,
-    listTrustedNerModels,
-    onNerRulesChange,
-    nerRulesError,
-  } = useProfileFormContext();
+interface NerRulesTableProps {
+  nerRules: NerRule[];
+  showValidationErrors: boolean;
+  hasSingleTrustedNerModel: boolean;
+  singleTrustedNerModel?: { text: string };
+  usesTrustedNerModelProvider: boolean;
+  getModelOptionsForRule: (modelId: string) => Array<{ value: string; text: string }>;
+  updateRuleModelId: (id: string, modelId: string) => void;
+  updateRuleAllowedEntityClasses: (id: string, values: NerEntityClass[]) => void;
+  updateRuleEnabled: (id: string, enabled: boolean) => void;
+  isNerInputDisabled: boolean;
+  removeNerRuleById: (id: string) => void;
+}
 
-  const {
-    nerDraft,
-    trustedNerModelOptions,
-    singleTrustedNerModel,
-    trustedNerModelsError,
-    isTrustedNerModelsLoading,
-    usesTrustedNerModelProvider,
-    hasSingleTrustedNerModel,
-    hasTrustedNerModel,
-    isNerInputDisabled,
-    showValidationErrors,
-    addNerRule,
-    removeNerRuleById,
-    setNerDraftModelId,
-    setNerDraftAllowedEntities,
-    updateRuleModelId,
-    updateRuleAllowedEntityClasses,
-    updateRuleEnabled,
-    getModelOptionsForRule,
-    canAddRule,
-  } = useNerRulesPanelState({
-    nerRules,
-    onNerRulesChange,
-    isManageMode,
-    isSubmitting,
-    listTrustedNerModels,
-    nerRulesError,
-  });
-
+const NerRulesTable = ({
+  nerRules,
+  showValidationErrors,
+  hasSingleTrustedNerModel,
+  singleTrustedNerModel,
+  usesTrustedNerModelProvider,
+  getModelOptionsForRule,
+  updateRuleModelId,
+  updateRuleAllowedEntityClasses,
+  updateRuleEnabled,
+  isNerInputDisabled,
+  removeNerRuleById,
+}: NerRulesTableProps) => {
   const columns: Array<EuiBasicTableColumn<NerRule>> = [
     {
       field: 'modelId',
@@ -100,7 +93,8 @@ export const NerRulesPanel = () => {
         </EuiText>
       ),
       render: (_value: string, rule: NerRule) => {
-        const isInvalid = showValidationErrors && !rule.modelId.trim();
+        const modelId = rule.modelId ?? NER_MODEL_ID;
+        const isInvalid = showValidationErrors && !modelId.trim();
         if (hasSingleTrustedNerModel && singleTrustedNerModel) {
           return (
             <EuiText size="s">
@@ -120,8 +114,8 @@ export const NerRulesPanel = () => {
                   values: { id: rule.id },
                 }
               )}
-              options={getModelOptionsForRule(rule.modelId)}
-              value={rule.modelId}
+              options={getModelOptionsForRule(modelId)}
+              value={modelId}
               onChange={(event) => updateRuleModelId(rule.id, event.target.value)}
               disabled={isNerInputDisabled}
               fullWidth
@@ -132,7 +126,7 @@ export const NerRulesPanel = () => {
         return (
           <EuiFieldText
             compressed
-            value={rule.modelId}
+            value={modelId}
             isInvalid={isInvalid}
             aria-label={i18n.translate('anonymizationUi.profiles.nerRules.row.modelIdAriaLabel', {
               defaultMessage: 'NER model id for rule {id}',
@@ -183,7 +177,7 @@ export const NerRulesPanel = () => {
             }
             singleSelection={false}
             isClearable
-            disabled={isNerInputDisabled}
+            isDisabled={isNerInputDisabled}
             placeholder={i18n.translate(
               'anonymizationUi.profiles.nerRules.allowedEntitiesPlaceholder',
               {
@@ -266,6 +260,58 @@ export const NerRulesPanel = () => {
       ],
     },
   ];
+
+  return (
+    <EuiBasicTable
+      tableCaption={i18n.translate('anonymizationUi.profiles.nerRules.tableCaption', {
+        defaultMessage: 'NER rules',
+      })}
+      items={nerRules}
+      columns={columns}
+      compressed
+      data-test-subj="anonymizationProfilesNerRulesTable"
+    />
+  );
+};
+
+export const NerRulesPanel = () => {
+  const {
+    nerRules,
+    isManageMode,
+    isSubmitting,
+    listTrustedNerModels,
+    onNerRulesChange,
+    nerRulesError,
+  } = useProfileFormContext();
+
+  const {
+    nerDraft,
+    trustedNerModelOptions,
+    singleTrustedNerModel,
+    trustedNerModelsError,
+    isTrustedNerModelsLoading,
+    usesTrustedNerModelProvider,
+    hasSingleTrustedNerModel,
+    hasTrustedNerModel,
+    isNerInputDisabled,
+    showValidationErrors,
+    addNerRule,
+    removeNerRuleById,
+    setNerDraftModelId,
+    setNerDraftAllowedEntities,
+    updateRuleModelId,
+    updateRuleAllowedEntityClasses,
+    updateRuleEnabled,
+    getModelOptionsForRule,
+    canAddRule,
+  } = useNerRulesPanelState({
+    nerRules,
+    onNerRulesChange,
+    isManageMode,
+    isSubmitting,
+    listTrustedNerModels,
+    nerRulesError,
+  });
 
   return (
     <>
@@ -417,7 +463,7 @@ export const NerRulesPanel = () => {
                   defaultMessage: 'Select allowed entities',
                 }
               )}
-              disabled={isNerInputDisabled}
+              isDisabled={isNerInputDisabled}
               fullWidth
             />
           </EuiFormRow>
@@ -456,14 +502,18 @@ export const NerRulesPanel = () => {
           </p>
         </EuiCallOut>
       ) : (
-        <EuiBasicTable
-          tableCaption={i18n.translate('anonymizationUi.profiles.nerRules.tableCaption', {
-            defaultMessage: 'NER rules',
-          })}
-          items={nerRules}
-          columns={columns}
-          compressed
-          data-test-subj="anonymizationProfilesNerRulesTable"
+        <NerRulesTable
+          nerRules={nerRules}
+          showValidationErrors={showValidationErrors}
+          hasSingleTrustedNerModel={hasSingleTrustedNerModel}
+          singleTrustedNerModel={singleTrustedNerModel}
+          usesTrustedNerModelProvider={usesTrustedNerModelProvider}
+          getModelOptionsForRule={getModelOptionsForRule}
+          updateRuleModelId={updateRuleModelId}
+          updateRuleAllowedEntityClasses={updateRuleAllowedEntityClasses}
+          updateRuleEnabled={updateRuleEnabled}
+          isNerInputDisabled={isNerInputDisabled}
+          removeNerRuleById={removeNerRuleById}
         />
       )}
     </>

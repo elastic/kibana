@@ -6,7 +6,11 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
+import {
+  NER_MODEL_ID,
+  GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+  type AnonymizationProfile,
+} from '@kbn/anonymization-common';
 import { mapProfilesApiError } from '../services/profiles/errors';
 import { getConflictState } from '../services/profiles/hooks/get_conflict_state';
 import { useCreateProfile } from '../services/profiles/hooks/use_create_profile';
@@ -130,7 +134,12 @@ describe('useProfileForm', () => {
       result.current.setTargetType(TARGET_TYPE_INDEX);
       result.current.setTargetId('logs-foo');
       result.current.setFieldRules([
-        { field: 'host.name', allowed: true, anonymized: true, entityClass: '' },
+        {
+          field: 'host.name',
+          allowed: true,
+          anonymized: true,
+          entityClass: '',
+        } as unknown as Parameters<typeof result.current.setFieldRules>[0][number],
       ]);
     });
 
@@ -169,7 +178,7 @@ describe('useProfileForm', () => {
           pattern: '',
           entityClass: '',
           enabled: true,
-        },
+        } as unknown as Parameters<typeof result.current.setRegexRules>[0][number],
       ]);
     });
 
@@ -471,7 +480,7 @@ describe('useProfileForm', () => {
           id: 'ner-1',
           type: 'ner',
           modelId: 'model-1',
-          allowedEntityClasses: ['PERSON'],
+          allowedEntityClasses: ['PER'],
           enabled: true,
         },
       ]);
@@ -486,5 +495,83 @@ describe('useProfileForm', () => {
     expect(result.current.values.fieldRules).toEqual([]);
     expect(result.current.values.regexRules).toEqual([]);
     expect(result.current.values.nerRules).toEqual([]);
+  });
+
+  it('normalizes missing NER modelId to default constant when hydrating initial profile', async () => {
+    jest.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
+    jest.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
+
+    const profileWithLegacyNer = {
+      ...createProfile('legacy'),
+      rules: {
+        fieldRules: [],
+        regexRules: [],
+        nerRules: [
+          {
+            id: 'ner-legacy',
+            type: 'ner',
+            modelId: undefined,
+            allowedEntityClasses: ['PER'],
+            enabled: true,
+          },
+        ],
+      },
+    } as unknown as AnonymizationProfile;
+
+    const { result } = renderHook(() =>
+      useProfileForm({
+        client,
+        context: { spaceId: 'default' },
+        initialProfile: profileWithLegacyNer,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.values.nerRules[0].modelId).toBe(NER_MODEL_ID);
+    });
+  });
+
+  it('submits global profile updates without field rules', async () => {
+    const initialProfile = {
+      ...createProfile('global'),
+      targetType: TARGET_TYPE_INDEX,
+      targetId: GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+      rules: {
+        fieldRules: [{ field: 'user.name', allowed: true, anonymized: false }],
+        regexRules: [],
+        nerRules: [],
+      },
+    };
+    const updateMutateAsync = jest.fn().mockResolvedValue(initialProfile);
+    jest.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
+    jest
+      .mocked(useUpdateProfile)
+      .mockReturnValue(createUseUpdateProfileMutationMock({ mutateAsync: updateMutateAsync }));
+
+    const { result } = renderHook(() =>
+      useProfileForm({
+        client,
+        context: { spaceId: 'default' },
+        initialProfile,
+      })
+    );
+
+    act(() => {
+      result.current.setName('Global Profile');
+    });
+
+    await act(async () => {
+      await result.current.submit();
+    });
+
+    expect(updateMutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rules: {
+          fieldRules: [],
+          regexRules: [],
+          nerRules: [],
+        },
+      })
+    );
   });
 });

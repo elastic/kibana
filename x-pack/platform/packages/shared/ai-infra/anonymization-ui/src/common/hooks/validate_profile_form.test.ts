@@ -78,7 +78,12 @@ describe('validateProfileForm', () => {
   it('requires entity class for anonymized field rules', () => {
     const values = createValidValues();
     values.fieldRules = [
-      { field: 'host.name', allowed: true, anonymized: true, entityClass: '  ' },
+      {
+        field: 'host.name',
+        allowed: true,
+        anonymized: true,
+        entityClass: '  ',
+      } as unknown as ProfileFormValues['fieldRules'][number],
     ];
 
     expect(validateProfileForm(values)).toEqual({
@@ -112,12 +117,27 @@ describe('validateProfileForm', () => {
         modelId: 'model-1',
         allowedEntityClasses: ['PER', 'not-valid!'],
         enabled: true,
-      },
+      } as unknown as ProfileFormValues['nerRules'][number],
     ];
 
     expect(validateProfileForm(values)).toEqual({
       nerRules:
         'NER model id is required and allowed entities must be selected from PER, ORG, LOC, MISC.',
     });
+  });
+
+  it('accepts missing modelId in NER rules by using default fallback', () => {
+    const values = createValidValues();
+    values.nerRules = [
+      {
+        id: 'ner-1',
+        type: 'ner',
+        modelId: undefined,
+        allowedEntityClasses: ['PER', 'ORG'],
+        enabled: true,
+      } as any,
+    ];
+
+    expect(validateProfileForm(values)).toEqual({});
   });
 });

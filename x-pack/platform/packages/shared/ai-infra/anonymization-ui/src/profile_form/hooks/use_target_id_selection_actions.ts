@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FieldRule } from '@kbn/anonymization-common';
+import { isGlobalAnonymizationProfileTarget } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../../common/target_types';
 import { targetLookupQueryKeys } from '../../common/services/target_lookup/cache_keys';
@@ -79,6 +80,9 @@ export const useTargetIdSelectionActions = ({
 
       const trimmedTargetId = targetIdValue.trim();
       if (!trimmedTargetId) {
+        return true;
+      }
+      if (isGlobalAnonymizationProfileTarget(targetType, trimmedTargetId)) {
         return true;
       }
 

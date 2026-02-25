@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID } from '@kbn/anonymization-common';
 import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../../common/target_types';
 import type { TargetType } from '../types';
 import { useTargetIdSelectionActions } from './use_target_id_selection_actions';
@@ -47,6 +48,31 @@ describe('useTargetIdSelectionActions', () => {
         'Target id must resolve to a concrete index'
       );
     });
+  });
+
+  it('skips concrete-index validation for global profile target id', async () => {
+    const { result } = renderHook(() =>
+      useTargetIdSelectionActions({
+        targetType: TARGET_TYPE_INDEX,
+        targetId: GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+        includeHiddenAndSystemIndices: false,
+        onFieldRulesChange: jest.fn(),
+        queryClient: { fetchQuery },
+        targetLookupClient,
+      })
+    );
+
+    await act(async () => {
+      const isValid = await result.current.applyTargetIdSelection(
+        GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
+        {
+          hydrate: false,
+        }
+      );
+      expect(isValid).toBe(true);
+    });
+
+    expect(fetchQuery).not.toHaveBeenCalled();
   });
 
   it('hydrates field rules once per target key', async () => {
