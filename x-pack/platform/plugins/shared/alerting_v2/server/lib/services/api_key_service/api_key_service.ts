@@ -75,9 +75,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
       );
     }
 
-    const shouldGrantUiam = !!this.securityService.authc.apiKeys.uiam;
-
-    if (isUiamCredential(apiKey) && !shouldGrantUiam) {
+    if (isUiamCredential(apiKey) && !this.shouldGrantUiam()) {
       throw new Error('UIAM API keys should only be used in serverless environments');
     }
 
@@ -101,11 +99,8 @@ export class ApiKeyService implements ApiKeyServiceContract {
   }
 
   private async grantAPIKeyAttributes(name: string, username: string): Promise<ApiKeyAttributes> {
-    const shouldGrantUiam = !!this.securityService.authc.apiKeys.uiam;
-
     let uiamResult: GrantAPIKeyResult | null | undefined;
-
-    if (shouldGrantUiam) {
+    if (this.shouldGrantUiam()) {
       uiamResult = await this.securityService.authc.apiKeys.uiam?.grant(this.request, {
         name: `uiam-${name}`,
       });
@@ -146,5 +141,9 @@ export class ApiKeyService implements ApiKeyServiceContract {
       apiKeyOwner: username,
       apiKeyCreatedByUser: false,
     };
+  }
+
+  private shouldGrantUiam(): boolean {
+    return !!this.securityService.authc.apiKeys.uiam;
   }
 }
