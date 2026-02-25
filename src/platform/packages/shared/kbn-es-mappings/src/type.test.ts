@@ -25,7 +25,7 @@ describe('Type checking with TypeScript compiler', () => {
 
     // The expected errors inside the tests are in the following lines
     const errorLines = errorsByLine.map((error) => error.lineNumber);
-    expect(errorLines).toStrictEqual([46, 54, 61, 69, 90]);
+    expect(errorLines).toStrictEqual([46, 54, 61, 69, 91]);
 
     expect(errorsByLine).toMatchInlineSnapshot(`
       Array [
@@ -63,10 +63,10 @@ describe('Type checking with TypeScript compiler', () => {
         },
         Object {
           "errorMessage": "Property 'unknown' does not exist on type '{ name: TextMapping; age: IntegerMapping; }'.",
-          "lineNumber": 90,
+          "lineNumber": 91,
           "tsErrorLine": Array [
             "Type Error Explanation: Unknown object nested mapping properties are not allowed",
-            "Error Line [90]: export const unknownMappingErrors = objectMapping.properties.nestedObj.properties.unknown;",
+            "Error Line [91]: export const unknownMappingErrors = objectMapping.properties.nestedObj.properties.unknown;",
           ],
         },
       ]
