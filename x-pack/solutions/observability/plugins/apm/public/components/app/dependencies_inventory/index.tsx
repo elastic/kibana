@@ -10,11 +10,13 @@ import {
   unifiedSearchBarPlaceholder,
   getSearchBarBoolFilter,
 } from '../../../../common/dependencies';
+import { useApmHeaderAppActions } from '../../../header_app_actions/use_apm_header_app_actions';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { DependenciesInventoryTable } from './dependencies_inventory_table';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function DependenciesInventory() {
+  useApmHeaderAppActions();
   const {
     query: { environment },
   } = useApmParams('/dependencies/inventory');

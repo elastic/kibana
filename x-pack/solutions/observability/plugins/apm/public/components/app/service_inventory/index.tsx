@@ -28,7 +28,7 @@ import type { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
-import { getServiceInventoryHeaderAppActionsConfig } from '../../../header_app_actions/header_app_actions_config';
+import { useApmHeaderAppActions } from '../../../header_app_actions/use_apm_header_app_actions';
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
 import { TracesInDiscoverCallout } from './traces_in_discover_callout';
@@ -176,14 +176,7 @@ function useServicesDetailedStatisticsFetcher({
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
   const { onPageReady } = usePerformanceContext();
-  const { core } = useApmPluginContext();
-
-  useEffect(() => {
-    core.chrome.setHeaderAppActionsConfig(getServiceInventoryHeaderAppActionsConfig());
-    return () => {
-      core.chrome.setHeaderAppActionsConfig(undefined);
-    };
-  }, [core.chrome]);
+  useApmHeaderAppActions();
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;

@@ -32,6 +32,7 @@ import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { PluginContext } from '../context/plugin_context';
+import { useUxHeaderAppActions } from '../header_app_actions/use_ux_header_app_actions';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -53,6 +54,7 @@ export const uxRoutes: RouteDefinition[] = [
 ];
 
 function UxApp() {
+  useUxHeaderAppActions();
   const { http } = useKibanaServices();
   const basePath = http.basePath.get();
 

@@ -6,12 +6,14 @@
  */
 import React from 'react';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
+import { useApmHeaderAppActions } from '../../../header_app_actions/use_apm_header_app_actions';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { DependenciesInventoryTitle } from '../../routing/home/dependencies';
 import { DependencyDetailTemplate } from '../../routing/templates/dependency_detail_template';
 
 export function DependencyDetailView({ children }: { children: React.ReactChild }) {
+  useApmHeaderAppActions();
   const {
     query: {
       dependencyName,
