@@ -24,6 +24,42 @@ import {
   getColorByValuePalette,
 } from '../../shared_components';
 
+/**
+ * Returns whether a column's activeData is stale, i.e. the datasource spec
+ * (field or operation type) has changed since the last fetch.
+ */
+export function isActiveDataStale(
+  datasource: DatasourcePublicAPI,
+  columnId: string,
+  currentData?: Datatable
+): boolean {
+  if (!currentData) return true;
+
+  const datatableCol = getDatatableColumn(currentData, columnId);
+  if (!datatableCol) return false;
+
+  const tableSpec = datasource.getTableSpec();
+  const columnSpec = tableSpec.find((spec) => spec.columnId === columnId);
+  if (!columnSpec) return false;
+
+  const specFields = columnSpec.fields;
+  const dataField = datatableCol.meta?.field;
+
+  if (specFields.length > 0) {
+    if (dataField == null || !specFields.includes(dataField)) {
+      return true;
+    }
+    const specOpType = columnSpec.operationType;
+    const dataOpType = datatableCol.meta?.sourceParams?.operationType as string | undefined;
+    if (specOpType && dataOpType && specOpType !== dataOpType) {
+      return true;
+    }
+    return false;
+  }
+
+  return !!dataField;
+}
+
 export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
   { alignment }: C,
   isNumeric = false
@@ -140,10 +176,11 @@ export function getFixedColorConfiguration(
     }
 
     const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
+    const dataStale = isActiveDataStale(datasourceLayer, column.columnId, currentData);
     const { isCategory: isBucketable } = getAccessorType(
       datasourceLayer,
       column.columnId,
-      columnMeta?.type
+      dataStale ? undefined : columnMeta?.type
     );
     const dataBounds =
       getDataBoundsForAccessor(column.columnId, currentData, state.columns) ??

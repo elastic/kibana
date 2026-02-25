@@ -414,7 +414,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       let appliedPalette = hasColorConfigMismatch ? undefined : palette;
       let appliedColorMapping = hasColorConfigMismatch ? undefined : colorMapping;
 
-      const shouldApplyDefaults = (!palette && !colorMapping) || hasColorConfigMismatch;
+      const shouldApplyDefaults = !palette && !colorMapping && !hasColorConfigMismatch;
 
       if (shouldApplyDefaults) {
         if (colorByTerms) {

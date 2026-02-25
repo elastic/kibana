@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +30,6 @@ import {
   selectFramePublicAPI,
   useLensDispatch,
   selectHideTextBasedEditor,
-  updateVisualizationState,
 } from '../../../state_management';
 import {
   EXPRESSION_BUILD_ERROR_ID,
@@ -103,37 +102,6 @@ export function LensEditConfigurationFlyout({
   );
 
   const dispatch = useLensDispatch();
-
-  const stateFixAppliedRef = useRef(false);
-
-  useEffect(() => {
-    if (!framePublicAPI.activeData || !visualization.activeId || !visualization.state) {
-      return;
-    }
-    if (stateFixAppliedRef.current) {
-      return;
-    }
-    const fixedState = activeVisualization?.getFixedRuntimeState?.(
-      visualization.state,
-      framePublicAPI
-    );
-    if (fixedState && fixedState !== visualization.state) {
-      stateFixAppliedRef.current = true;
-      dispatch(
-        updateVisualizationState({
-          visualizationId: visualization.activeId,
-          newState: fixedState,
-        })
-      );
-    }
-  }, [
-    framePublicAPI.activeData,
-    visualization.activeId,
-    visualization.state,
-    activeVisualization,
-    dispatch,
-    framePublicAPI,
-  ]);
 
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;

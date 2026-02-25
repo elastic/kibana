@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { EuiButton } from '@elastic/eui';
 import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -74,6 +75,7 @@ import {
   getDataBoundsForAccessor,
   getFixedColorConfiguration,
   resolveColorDefaults,
+  isActiveDataStale,
 } from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -315,7 +317,12 @@ export const getDatatableVisualization = ({
     const getResolvedDisplayColors = (accessor: string) => {
       const { palette, colorMapping } = columnMap[accessor] ?? {};
       const columnMeta = getDatatableColumn(currentData, accessor)?.meta;
-      const { isCategory: isBucketable } = getAccessorType(datasource, accessor, columnMeta?.type);
+      const dataStale = datasource ? isActiveDataStale(datasource, accessor, currentData) : true;
+      const { isCategory: isBucketable } = getAccessorType(
+        datasource,
+        accessor,
+        dataStale ? undefined : columnMeta?.type
+      );
       const dataBounds =
         getDataBoundsForAccessor(accessor, currentData, state.columns) ?? getFallbackDataBounds();
       const { palette: resolvedPalette, colorMapping: resolvedColorMapping } = resolveColorDefaults(
@@ -679,46 +686,6 @@ export const getDatatableVisualization = ({
     };
   },
 
-  getPersistableState(state, datasource, datasourceState, activeData) {
-    const datasourceLayer = datasource?.getPublicAPI({
-      state: datasourceState?.state,
-      layerId: state.layerId,
-      indexPatterns: {},
-    });
-
-    // If no datasource, return state as-is
-    if (!datasourceLayer) {
-      return { state, references: [] };
-    }
-
-    const currentData =
-      activeData?.[state.layerId] ?? activeData?.[DatatableInspectorTables.Default];
-
-    const fixedState = getFixedColorConfiguration(
-      state,
-      datasourceLayer,
-      paletteService,
-      currentData
-    );
-
-    return {
-      state: fixedState ?? state,
-      references: [],
-    };
-  },
-
-  getFixedRuntimeState(state, frame) {
-    const { datasourceLayers, activeData } = frame;
-    const datasource = datasourceLayers?.[state.layerId];
-    if (!datasource) {
-      return undefined;
-    }
-    const currentData =
-      activeData?.[state.layerId] ?? activeData?.[DatatableInspectorTables.Default];
-
-    return getFixedColorConfiguration(state, datasource, paletteService, currentData);
-  },
-
   getTelemetryEventsOnSave(state, prevState) {
     const colorMappingEvents = state.columns.flatMap((col) => {
       const prevColumn = prevState?.columns?.find((prevCol) => prevCol.columnId === col.columnId);
@@ -868,12 +835,10 @@ export const getDatatableVisualization = ({
     ];
   },
 
-  getUserMessages(state, { frame }): UserMessage[] {
+  getUserMessages(state, { frame, setState }): UserMessage[] {
     const warnings: UserMessage[] = [];
     const { datasourceLayers, activeData } = frame;
     const datasource = datasourceLayers?.[state.layerId];
-    // When the active data comes from the embeddable side it might not have been indexed by layerId
-    // rather using a "default" key
     const currentData =
       activeData?.[state.layerId] ?? activeData?.[DatatableInspectorTables.Default];
 
@@ -881,58 +846,78 @@ export const getDatatableVisualization = ({
       return warnings;
     }
 
-    // Check for color config mismatches
-    state.columns.forEach((column, index) => {
+    const fixedState = getFixedColorConfiguration(state, datasource, paletteService, currentData);
+
+    const mismatchedColumnLabels: string[] = [];
+
+    state.columns.forEach((column) => {
       const { colorMode, palette, colorMapping } = column;
 
-      // Only check columns with coloring enabled
       if (!colorMode || colorMode === 'none') {
         return;
       }
 
       const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
+      const dataStale = isActiveDataStale(datasource, column.columnId, currentData);
       const { isCategory: isBucketable } = getAccessorType(
         datasource,
         column.columnId,
-        columnMeta?.type
+        dataStale ? undefined : columnMeta?.type
       );
-      const colorByTerms = isBucketable;
 
-      const hasColorConfigMismatch = hasIncompatibleColorConfig({
-        colorByTerms,
-        palette,
-        colorMapping,
-      });
-
-      if (hasColorConfigMismatch) {
+      if (
+        hasIncompatibleColorConfig({
+          colorByTerms: isBucketable,
+          palette,
+          colorMapping,
+        })
+      ) {
         const operation = datasource.getOperationForColumnId(column.columnId);
-        const columnLabel = `Column #${index + 1} ${
-          operation?.label ? `(${operation?.label})` : ''
-        }`;
-
-        warnings.push({
-          uniqueId: `${DATATABLE_COLOR_MISMATCH}_${column.columnId}`,
-          severity: 'warning',
-          shortMessage: i18n.translate(
-            'xpack.lens.datatableVisualization.colorMismatchShortMessage',
-            {
-              defaultMessage: 'Color configuration mismatch',
-            }
-          ),
-          longMessage: (
-            <FormattedMessage
-              id="xpack.lens.datatableVisualization.colorMismatchLongMessage"
-              defaultMessage="{columnLabel}: Incompatible color configuration. Defaults have been applied. Save the visualization to persist the fix, or edit the color settings to customize."
-              values={{
-                columnLabel: <strong>{columnLabel}</strong>,
-              }}
-            />
-          ),
-          fixableInEditor: true,
-          displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
-        });
+        mismatchedColumnLabels.push(operation?.label ?? column.columnId);
       }
     });
+
+    if (mismatchedColumnLabels.length > 0) {
+      const columnList = mismatchedColumnLabels.map((label) => `"${label}"`).join(', ');
+
+      warnings.push({
+        uniqueId: DATATABLE_COLOR_MISMATCH,
+        severity: 'warning',
+        shortMessage: i18n.translate(
+          'xpack.lens.datatableVisualization.colorMismatchShortMessage',
+          {
+            defaultMessage:
+              '{count, plural, one {Incompatible colors in one column} other {Incompatible colors in {count} columns}}',
+            values: { count: mismatchedColumnLabels.length },
+          }
+        ),
+        longMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.lens.datatableVisualization.colorMismatchLongMessage"
+              defaultMessage="Incompatible color configuration detected in {count, plural, one {column} other {columns}} {columnList}. Colors have been temporarily disabled for {count, plural, one {this column} other {these columns}}. Click {fixLabel} to apply a compatible configuration and save, or edit the color settings to customize."
+              values={{
+                count: mismatchedColumnLabels.length,
+                columnList: <strong>{columnList}</strong>,
+                fixLabel: <strong>{'Fix'}</strong>,
+              }}
+            />
+            {setState && fixedState && (
+              <EuiButton
+                data-test-subj="lensFixColorMismatchAction"
+                onClick={() => setState(fixedState)}
+              >
+                {i18n.translate('xpack.lens.datatableVisualization.colorMismatchFixActionLabel', {
+                  defaultMessage: 'Fix',
+                })}
+              </EuiButton>
+            )}
+          </>
+        ),
+        fixableInEditor: true,
+        displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+      });
+    }
 
     return warnings;
   },

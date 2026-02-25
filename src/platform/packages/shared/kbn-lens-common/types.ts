@@ -882,7 +882,7 @@ export interface DatasourceFixAction<T> {
 export interface DatasourcePublicAPI {
   datasourceId: string;
   datasourceAliasIds?: string[];
-  getTableSpec: () => Array<{ columnId: string; fields: string[] }>;
+  getTableSpec: () => Array<{ columnId: string; fields: string[]; operationType?: string }>;
   getOperationForColumnId: (columnId: string) => OperationDescriptor | null;
   /**
    * Collect all default visual values given the current state
