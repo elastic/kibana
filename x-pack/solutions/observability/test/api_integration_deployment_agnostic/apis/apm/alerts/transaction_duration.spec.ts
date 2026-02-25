@@ -9,7 +9,7 @@ import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionDurationActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_duration/register_transaction_duration_rule_type';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '../../../services';
@@ -208,6 +208,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
         expect(alerts[0]).property('transaction.name', 'tx-java');
+        expect(alerts[0])
+          .property('kibana.alert.grouping')
+          .eql({
+            service: {
+              name: 'opbeans-java',
+              environment: 'production',
+            },
+            transaction: {
+              type: 'request',
+              name: 'tx-java',
+            },
+          });
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {
@@ -308,6 +320,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
         expect(alerts[0]).property('transaction.name', 'tx-node');
+        expect(alerts[0])
+          .property('kibana.alert.grouping')
+          .eql({
+            service: {
+              name: 'opbeans-node',
+              environment: 'production',
+            },
+            transaction: {
+              type: 'request',
+              name: 'tx-node',
+            },
+          });
       });
 
       it('shows alert count=1 for opbeans-node on service inventory', async () => {
