@@ -4,8 +4,5 @@
 `description`:
 {{{description}}}
 
-`features`:
-{{{features}}}
-
 `dataset_analysis`:
 {{#dataset_analysis}}{{{dataset_analysis}}}{{/dataset_analysis}}{{^dataset_analysis}}Not provided here. Look for a computed feature of type `dataset_analysis` in the features list above.{{/dataset_analysis}}
