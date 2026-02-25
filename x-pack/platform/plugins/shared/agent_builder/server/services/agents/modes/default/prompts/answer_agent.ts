@@ -13,7 +13,7 @@ import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
 import { renderVisualizationPrompt } from './utils/visualizations';
-import { attachmentTypeInstructions } from './utils/attachments';
+import { attachmentTypeInstructions, renderAttachmentPrompt } from './utils/attachments';
 import type { PromptFactoryParams, AnswerAgentPromptRuntimeParams } from './types';
 
 type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimeParams;
@@ -80,6 +80,8 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ## CUSTOM RENDERING
 
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
+
+${renderAttachmentPrompt()}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
