@@ -561,11 +561,15 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
-      // We can determine this from context and request before creating the execution
       const isRunningInTaskManager =
         (context.triggeredBy as string | undefined) === 'scheduled' ||
         (context.source as string | undefined) === 'task-manager' ||
         request?.isFakeRequest === true;
+
+      // Child executions (triggered by a workflow step) must always be scheduled in their own task,
+      // never run inline in the parent's task. Otherwise the parent's runtime is blocked until the
+      // child becomes idle, and cancel/timeout on the parent cannot take effect until then.
+      const isChildExecution = (context.triggeredBy as string | undefined) === 'workflow-step';
 
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');
@@ -587,8 +591,8 @@ export class WorkflowsExecutionEnginePlugin
         };
       }
 
-      if (isRunningInTaskManager) {
-        // We're already in a task - execute directly without scheduling another task
+      if (isRunningInTaskManager && !isChildExecution) {
+        // We're already in a task and this is not a child - execute directly without scheduling another task
         this.logger.debug(
           `Executing workflow directly (already in Task Manager context): ${workflow.id}`
         );
@@ -609,10 +613,13 @@ export class WorkflowsExecutionEnginePlugin
           workflowsExecutionEngine,
         });
       } else {
+        // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
         await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
         this.logger.debug(
-          `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
+          `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
+            isChildExecution ? ' (child execution)' : ''
+          }`
         );
       }
 
