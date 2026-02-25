@@ -365,6 +365,9 @@ jobs:
           ## Status
           pending
 
+          ## PR title
+          (set by agent before done; concise and descriptive)
+
           ## Context
           ${SPEC_CONTEXT}
 
@@ -511,11 +514,79 @@ jobs:
           TRACKED_CHANGED=$(git diff --name-only 2>/dev/null || true)
           UNTRACKED_CHANGED=$(git ls-files --others --exclude-standard 2>/dev/null || true)
 
-          printf '%s\n%s\n' "$TRACKED_CHANGED" "$UNTRACKED_CHANGED" \
-            | awk 'NF { p=$0; sub(/^\.\//, "", p); if (!seen[p]++ && p !~ /^\.action-ralph-runtime\// && p !~ /^data\// && p !~ /(^|\/)node_modules\// && p !~ /(^|\/)target\// && p !~ /(^|\/)\.moon\// && p !~ /(^|\/)tsconfig\.type_check\.json$/ && p !~ /(^|\/)kbn-std\/.*\.d\.ts$/ && p !~ /\.log$/) print p }' \
-            | while IFS= read -r path; do
-                [ -f "$path" ] && printf '%s\n' "$path"
-              done > "$AGENT_OUTPUT_DIR/changed-files.txt"
+          printf '%s\n%s\n' "$TRACKED_CHANGED" "$UNTRACKED_CHANGED" > "$AGENT_OUTPUT_DIR/candidate-files.txt"
+
+          CANDIDATE_FILE="$AGENT_OUTPUT_DIR/candidate-files.txt" \
+          CHANGED_FILE="$AGENT_OUTPUT_DIR/changed-files.txt" \
+          SPEC_FILE="$AGENT_OUTPUT_DIR/ralph-spec.md" \
+          PR_TITLE_FILE="$AGENT_OUTPUT_DIR/pr-title.txt" \
+          TASK_PROMPT="$TASK_PROMPT" \
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          candidate_file = Path(os.environ['CANDIDATE_FILE'])
+          changed_file = Path(os.environ['CHANGED_FILE'])
+          spec_file = Path(os.environ['SPEC_FILE'])
+          pr_title_file = Path(os.environ['PR_TITLE_FILE'])
+          task_prompt = os.environ.get('TASK_PROMPT', '')
+
+          exclude_patterns = [
+              r'^\.action-ralph-runtime/',
+              r'^data/',
+              r'^opencode\.json$',
+              r'(^|/)node_modules/',
+              r'(^|/)target/',
+              r'(^|/)\.moon/',
+              r'(^|/)tsconfig\.type_check\.json$',
+              r'(^|/)kbn-std/.*\.d\.ts$',
+              r'\.log$',
+          ]
+          exclude_re = [re.compile(p) for p in exclude_patterns]
+
+          seen = set()
+          kept = []
+          for raw in candidate_file.read_text(encoding='utf-8', errors='ignore').splitlines():
+              p = raw.strip()
+              if not p:
+                  continue
+              if p.startswith('./'):
+                  p = p[2:]
+              if p in seen:
+                  continue
+              seen.add(p)
+              if any(rx.search(p) for rx in exclude_re):
+                  continue
+              if Path(p).is_file():
+                  kept.append(p)
+
+          changed_file.write_text(''.join(f'{p}\n' for p in kept), encoding='utf-8')
+
+          # Parse "## PR title" from final spec.
+          pr_title = ''
+          if spec_file.exists():
+              lines = spec_file.read_text(encoding='utf-8', errors='ignore').splitlines()
+              in_title = False
+              for line in lines:
+                  if re.match(r'^##\s+PR title\s*$', line):
+                      in_title = True
+                      continue
+                  if in_title and re.match(r'^##\s+', line):
+                      break
+                  if in_title:
+                      value = line.strip()
+                      if value:
+                          pr_title = value
+                          break
+
+          placeholder = '(set by agent before done; concise and descriptive)'
+          if (not pr_title) or (pr_title == placeholder):
+              compact = re.sub(r'\s+', ' ', task_prompt).strip()[:72]
+              pr_title = f'AI: {compact}' if compact else 'AI: Automated change'
+
+          pr_title_file.write_text(pr_title, encoding='utf-8')
+          PY
 
           FILE_COUNT=$(wc -l < "$AGENT_OUTPUT_DIR/changed-files.txt" | tr -d ' ')
           echo "Changed files: ${FILE_COUNT}"
@@ -572,6 +643,9 @@ jobs:
         run: |
           set -euo pipefail
           tar xzf /tmp/agent-output/agent-changes.tar.gz -C "$GITHUB_WORKSPACE"
+
+          # Runtime config file generated in sandbox must never be committed.
+          rm -f "$GITHUB_WORKSPACE/opencode.json"
 
           git config user.name "kibanamachine"
           git config user.email "42973632+kibanamachine@users.noreply.github.com"
@@ -637,6 +711,7 @@ jobs:
         run: |
           set -euo pipefail
           PROMPT_SUMMARY=$(cat /tmp/agent-output/prompt-summary.txt 2>/dev/null || echo "AI-generated changes")
+          PR_TITLE=$(cat /tmp/agent-output/pr-title.txt 2>/dev/null || echo "AI: ${PROMPT_SUMMARY}")
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           BRANCH_HASH=$(echo "$PROMPT_SUMMARY" | md5sum | head -c 8)
           if [ "${{ needs.prepare.outputs.is_pr }}" = "true" ] && [ "${{ needs.prepare.outputs.is_fork_pr }}" = "true" ]; then
@@ -695,7 +770,7 @@ jobs:
 
           gh pr create \
             --draft \
-            --title "AI: ${PROMPT_SUMMARY}" \
+            --title "${PR_TITLE}" \
             --label "ai-generated" \
             --body-file /tmp/pr-body.md
 

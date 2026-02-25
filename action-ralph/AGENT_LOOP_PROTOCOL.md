@@ -13,6 +13,7 @@ You are executing a spec in an iterative, multi-session loop inside a GitHub Act
 - **Sandboxed environment:** You do NOT have access to `gh`, `git push`, or any GitHub API. You can only read and write local files. A separate publish phase handles all git operations, PR creation, and PR comments after you're done. Your job is to make the right code changes and update the spec.
 - Update the spec file (at the path provided below):
   - Mark the task complete (`[x]`).
+  - Maintain `## PR title` with a concise, reviewer-friendly title (target <= 72 chars) that describes the implemented change.
   - Append discoveries/gotchas to `## Additional Context`.
   - Adjust remaining tasks if reality differs (split/merge/reword as needed).
   - Update `## Status`:
