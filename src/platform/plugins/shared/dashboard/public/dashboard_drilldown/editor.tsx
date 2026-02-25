@@ -22,7 +22,7 @@ import { DashboardNavigationOptionsEditor } from '../dashboard_navigation/option
 export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDrilldownState>) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
-  const [selectedDashboardOption, setSelectedDashboardOption] = useState<
+  const [selectedOption, setSelectedOption] = useState<
     EuiComboBoxOptionOption<string> | undefined
   >();
   const [isLoadingInitialDashboard, setIsLoadingInitialDashboard] = useState(false);
@@ -96,7 +96,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
         return;
       }
 
-      setSelectedDashboardOption({
+      setSelectedOption({
         value: initialDashboardId,
         label: result.attributes.title,
       });
@@ -111,17 +111,15 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
   }, []);
 
   // options contains dashboard search results (which may not include the selected dashboard)
-  // mergedOptions = options + selectedDashboardOption
+  // mergedOptions = options + selectedOption
   const mergedOptions = useMemo(() => {
-    if (!selectedDashboardOption) {
+    if (!selectedOption) {
       return options;
     }
 
-    const hasSelectedDashboard = options.some(
-      ({ value }) => value === selectedDashboardOption.value
-    );
-    return hasSelectedDashboard ? options : [selectedDashboardOption, ...options];
-  }, [selectedDashboardOption, options]);
+    const hasSelectedDashboard = options.some(({ value }) => value === selectedOption.value);
+    return hasSelectedDashboard ? options : [selectedOption, ...options];
+  }, [selectedOption, options]);
 
   const navigationOptions = useMemo(() => {
     return {
@@ -145,10 +143,10 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
       >
         <EuiComboBox<string>
           async
-          selectedOptions={selectedDashboardOption ? [selectedDashboardOption] : undefined}
+          selectedOptions={selectedOption ? [selectedOption] : undefined}
           options={mergedOptions}
           onChange={(nextSelectedOptions) => {
-            setSelectedDashboardOption(nextSelectedOptions?.[0]);
+            setSelectedOption(nextSelectedOptions?.[0]);
             props.onChange({ ...props.state, dashboard_id: nextSelectedOptions?.[0]?.value });
             if (error) {
               setError(undefined);
