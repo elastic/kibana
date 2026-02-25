@@ -11,6 +11,7 @@ import { editableToolTypes } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
+import { TOOL_USED_BY_AGENTS_ERROR_CODE } from '../../common/http_api/tools';
 import type {
   ListToolsResponse,
   GetToolResponse,
@@ -316,6 +317,15 @@ export function registerToolsRoutes({
                 meta: { description: 'The unique identifier of the tool to delete.' },
               }),
             }),
+            query: schema.object({
+              force: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'If true, removes the tool from agents that use it and then deletes it. If false and any agent uses the tool, the request returns 409 Conflict with the list of agents.',
+                },
+              }),
+            }),
           },
         },
         options: {
@@ -324,7 +334,37 @@ export function registerToolsRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { toolId } = request.params;
-        const { tools: toolService, auditLogService } = getInternalServices();
+        const { force = false } = request.query ?? {};
+        const {
+          tools: toolService,
+          agents: agentsService,
+          auditLogService,
+        } = getInternalServices();
+
+        if (!force) {
+          const { agents } = await agentsService.getAgentsUsingTools({
+            request,
+            toolIds: [toolId],
+          });
+          if (agents.length > 0) {
+            return response.conflict({
+              body: {
+                message:
+                  'Tool is used by one or more agents. Use force=true to remove it from agents and delete.',
+                attributes: {
+                  code: TOOL_USED_BY_AGENTS_ERROR_CODE,
+                  agents,
+                },
+              },
+            });
+          }
+        } else {
+          await agentsService.removeToolRefsFromAgents({
+            request,
+            toolIds: [toolId],
+          });
+        }
+
         const registry = await toolService.getRegistry({ request });
         try {
           const success = await registry.delete(toolId);
