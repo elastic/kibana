@@ -44,13 +44,17 @@ export const patchReadAuthEditRuleFields = async ({
     // Some read-privilege roles are only meant to edit exceptionsList.
     ...(isEqual(rule_source, existingRule.rule_source) ? {} : { rule_source }),
   };
+  const nextRuleWithRuleSource = {
+    ...nextRule,
+    rule_source: nextRule.rule_source ?? existingRule.rule_source,
+  };
 
   const operations = Object.keys(nextRule).map((field) => {
     const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
     return {
       field: camelCasedField,
       operation: 'set' as const,
-      value: getReadAuthFieldValue(field, nextRule),
+      value: getReadAuthFieldValue(field, nextRuleWithRuleSource),
     };
   });
 

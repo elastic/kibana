@@ -8,7 +8,6 @@
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
@@ -16,10 +15,12 @@ import { ENGINE_STATUS } from '../../../domain/constants';
 import { BadCRUDRequestError, EntityStoreNotRunningError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
+const ENTITY_TYPES = ['user', 'host', 'service', 'generic'] as const;
+
 const bodySchema = z.object({
   entities: z.array(
     z.object({
-      type: EntityType,
+      type: z.enum(ENTITY_TYPES),
       doc: Entity,
     })
   ),

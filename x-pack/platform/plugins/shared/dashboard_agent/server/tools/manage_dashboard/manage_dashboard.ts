@@ -47,7 +47,7 @@ const createEmptyDashboardData = (): DashboardAttachmentData => ({
   panels: [],
 });
 
-export const manageDashboardTool = (): BuiltinSkillBoundedTool => {
+export const manageDashboardTool = (): BuiltinSkillBoundedTool<typeof manageDashboardSchema> => {
   return {
     id: dashboardTools.manageDashboard,
     type: ToolType.builtin,

@@ -23,7 +23,11 @@ import type {
 } from '../types';
 import { registerGetDataOnScreenFunction } from '../../functions/get_data_on_screen';
 
-const toZodSchema = (schema: Record<string, unknown>): z.ZodTypeAny => {
+const toZodSchema = (schema: unknown): z.ZodTypeAny => {
+  if (!schema || typeof schema !== 'object') {
+    return z.any();
+  }
+
   const normalized =
     'properties' in schema && !('type' in schema) ? { type: 'object', ...schema } : schema;
 
@@ -72,7 +76,7 @@ export class ChatFunctionClient {
     } catch (error) {
       const errorMessage =
         error instanceof z.ZodError
-          ? error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          ? error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ')
           : error instanceof Error
           ? error.message
           : 'Unknown validation error';
