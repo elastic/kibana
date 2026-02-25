@@ -169,7 +169,8 @@ async function installAssetsForDataStreamType(opts: {
       throw new PackagePolicyValidationError(
         `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
       );
-    } else {
+    }
+    if (!force) {
       logger.info(
         `Data stream for dataset ${datasetName} already exists, skipping index template creation`
       );
@@ -191,7 +192,8 @@ async function installAssetsForDataStreamType(opts: {
       throw new PackagePolicyValidationError(
         `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
       );
-    } else {
+    }
+    if (!force) {
       logger.info(
         `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation`
       );

@@ -495,6 +495,52 @@ describe('installAssetsForInputPackagePolicy', () => {
       expect(types).toContain('metrics');
       expect(types).toContain('traces');
     });
+
+    it('should install new asset structure when force is true and index template already exists (e.g. upgrade from integration 1.x to input 2.x)', async () => {
+      jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+        installation: {
+          name: 'filestream',
+          version: '2.0.0',
+        },
+        packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
+        assetsMap: new Map(),
+        paths: [],
+      } as any);
+
+      jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+      // Legacy index template from 1.x exists
+      jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+        name: 'logs-my_dataset',
+        _meta: { package: { name: 'filestream' } },
+      } as any);
+
+      const mockedLogger = jest.mocked(appContextService.getLogger());
+
+      await installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      // Should install new component templates and ingest pipelines (not skip)
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
+    });
   });
 });
 
