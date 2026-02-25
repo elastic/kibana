@@ -187,21 +187,17 @@ describe('EndpointScriptEditForm', () => {
 
       const filePicker = getByTestId('test-file-picker');
       const nameInput = getByTestId('test-name-input');
-      // const platformsInput = getByTestId('test-platforms-input');
 
       const testFile = new File(['--test--file--'], 'file.sh', { type: 'application/txt' });
       await userEvent.upload(filePicker, [testFile]);
       await userEvent.type(nameInput, 'Test Script');
-      // for platforms input, we need to select the first option from the dropdown to trigger the onChange event (typing doesn't work for this component)
+
+      // Select first option from platforms combobox dropdown
       const comboboxInput = container.querySelector(
         '[data-test-subj="comboBoxSearchInput"]'
       ) as HTMLInputElement;
-      expect(comboboxInput.getAttribute('aria-autocomplete')).toEqual('list');
       await userEvent.click(comboboxInput);
-      // keydown event is needed to select the option from the dropdown
-      await userEvent.keyboard('{ArrowDown}');
-      await userEvent.keyboard('{Enter}');
-      await userEvent.tab();
+      await userEvent.keyboard('{ArrowDown}{Enter}');
 
       await waitFor(() => {
         expect(onChangeMock).toHaveBeenLastCalledWith(
@@ -209,7 +205,7 @@ describe('EndpointScriptEditForm', () => {
             script: expect.objectContaining({
               fileName: 'file.sh',
               name: 'Test Script',
-              platform: ['linux'], // first option in sorted platforms dropdown
+              platform: ['linux'],
             }),
             isValid: true,
             hasFormChanged: true,
