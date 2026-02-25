@@ -79,33 +79,39 @@ describe('EntityMaintainersRegistry', () => {
   });
 
   describe('update', () => {
-    it('should update taskStatus to started', () => {
+    it('should update taskStatus to started and return true', () => {
       registry.register({ id: 'maintainer-a', interval: '5m' });
-      registry.update('maintainer-a', { taskStatus: EntityMaintainerTaskStatus.STARTED });
+      expect(
+        registry.update('maintainer-a', { taskStatus: EntityMaintainerTaskStatus.STARTED })
+      ).toBe(true);
       expect(registry.getAll()).toEqual([
         { id: 'maintainer-a', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STARTED },
       ]);
     });
 
-    it('should update taskStatus to stopped', () => {
+    it('should update taskStatus to stopped and return true', () => {
       registry.register({ id: 'maintainer-a', interval: '5m' });
-      registry.update('maintainer-a', { taskStatus: EntityMaintainerTaskStatus.STOPPED });
+      expect(
+        registry.update('maintainer-a', { taskStatus: EntityMaintainerTaskStatus.STOPPED })
+      ).toBe(true);
       expect(registry.getAll()).toEqual([
         { id: 'maintainer-a', interval: '5m', taskStatus: EntityMaintainerTaskStatus.STOPPED },
       ]);
     });
 
-    it('should override interval when provided', () => {
+    it('should override interval when provided and return true', () => {
       registry.register({ id: 'maintainer-a', interval: '5m' });
-      registry.update('maintainer-a', { interval: '10m' });
+      expect(registry.update('maintainer-a', { interval: '10m' })).toBe(true);
       expect(registry.getAll()).toEqual([
         { id: 'maintainer-a', interval: '10m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
       ]);
     });
 
-    it('should do nothing when id does not exist', () => {
+    it('should do nothing and return false when id does not exist', () => {
       registry.register({ id: 'maintainer-a', interval: '5m' });
-      registry.update('maintainer-b', { taskStatus: EntityMaintainerTaskStatus.STOPPED });
+      expect(
+        registry.update('maintainer-b', { taskStatus: EntityMaintainerTaskStatus.STOPPED })
+      ).toBe(false);
       expect(registry.getAll()).toEqual([
         { id: 'maintainer-a', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
       ]);

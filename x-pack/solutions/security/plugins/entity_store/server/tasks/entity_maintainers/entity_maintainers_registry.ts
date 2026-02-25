@@ -33,12 +33,13 @@ export class EntityMaintainersRegistry {
   update(
     id: string,
     overrides: Partial<Omit<EntityMaintainerConfig, 'id'>>
-  ): void {
+  ): boolean {
     const existing = this.tasks.get(id);
     if (!existing) {
-      return;
+      return false;
     }
     this.tasks.set(id, { ...existing, ...overrides });
+    return true;
   }
 
   getAll(): EntityMaintainerTaskEntry[] {
