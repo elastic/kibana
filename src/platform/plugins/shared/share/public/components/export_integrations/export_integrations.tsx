@@ -210,13 +210,17 @@ export function ManagedFlyout({
               </EuiFlexItem>
             )}
           </Fragment>
-          <EuiFlexItem>
-            <TimeTypeSelection
-              timeRange={timeRange}
-              onTimeTypeChange={handleTimeTypeChange}
-              isAbsoluteTimeByDefault={isAbsoluteTimeByDefault}
-            />
-          </EuiFlexItem>
+          <Fragment>
+            {exportIntegration.config.supportsAbsoluteTime && (
+              <EuiFlexItem>
+                <TimeTypeSelection
+                  timeRange={timeRange}
+                  onTimeTypeChange={handleTimeTypeChange}
+                  isAbsoluteTimeByDefault={isAbsoluteTimeByDefault}
+                />
+              </EuiFlexItem>
+            )}
+          </Fragment>
           <Fragment>
             {exportIntegration?.config.copyAssetURIConfig && publicAPIEnabled && (
               <EuiFlexItem>

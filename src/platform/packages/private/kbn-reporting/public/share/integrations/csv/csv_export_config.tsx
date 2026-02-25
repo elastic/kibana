@@ -143,6 +143,7 @@ export const getShareMenuItems =
       exportType: reportType,
       label: 'CSV',
       icon: 'tableDensityNormal',
+      supportsAbsoluteTime: true,
       generateAssetExport: generateReportingJobCSV,
       helpText: (
         <FormattedMessage
