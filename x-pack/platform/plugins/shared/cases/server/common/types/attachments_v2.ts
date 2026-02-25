@@ -16,38 +16,13 @@ import type {
   AttachmentAttributesV2,
   UnifiedAttachmentAttributes,
 } from '../../../common/types/domain/attachment/v2';
+import type { CommonAttributes } from './attachments_v1';
 export type { AttachmentAttributesV2, UnifiedAttachmentAttributes };
-export type { AttachmentPersistedAttributes } from './attachments_v1';
-/**
- * Common attributes shared between old and new attachment schemas.
- * Preserved during transformation.
- */
-export interface CommonAttributes {
-  created_at: string;
-  created_by: {
-    username: string;
-    full_name?: string | null;
-    email?: string | null;
-    profile_uid?: string | null;
-  };
-  pushed_at?: string | null;
-  pushed_by?: {
-    username: string;
-    full_name?: string | null;
-    email?: string | null;
-    profile_uid?: string | null;
-  } | null;
-  updated_at?: string | null;
-  updated_by?: {
-    username: string;
-    full_name?: string | null;
-    email?: string | null;
-    profile_uid?: string | null;
-  } | null;
-}
+export type { AttachmentPersistedAttributes, CommonAttributes } from './attachments_v1';
 
 export type UnifiedAttachmentPersistedAttributes = UnifiedAttachmentAttributes & CommonAttributes;
-export type UnifiedAttachmentSavedObjectTransformed = SavedObject<UnifiedAttachmentAttributes>;
+export type UnifiedAttachmentSavedObjectTransformed =
+  SavedObject<UnifiedAttachmentPersistedAttributes>;
 
 export type AttachmentTransformedAttributesV2 = AttachmentAttributesV2;
 export type AttachmentSavedObjectTransformedV2 = SavedObject<AttachmentTransformedAttributesV2>;

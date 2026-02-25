@@ -12,13 +12,19 @@ import { commentAttachmentTransformer } from './comment';
 
 describe('common/attachments', () => {
   describe('getAttachmentTypeFromAttributes', () => {
-    it('returns COMMENT_ATTACHMENT_TYPE for null', () => {
-      expect(getAttachmentTypeFromAttributes(null)).toBe(COMMENT_ATTACHMENT_TYPE);
+    it('throws for null', () => {
+      expect(() => getAttachmentTypeFromAttributes(null)).toThrow(
+        'Invalid attributes: expected non-null object'
+      );
     });
 
-    it('returns COMMENT_ATTACHMENT_TYPE for non-object', () => {
-      expect(getAttachmentTypeFromAttributes('string')).toBe(COMMENT_ATTACHMENT_TYPE);
-      expect(getAttachmentTypeFromAttributes(42)).toBe(COMMENT_ATTACHMENT_TYPE);
+    it('throws for non-object', () => {
+      expect(() => getAttachmentTypeFromAttributes('string')).toThrow(
+        'Invalid attributes: expected non-null object'
+      );
+      expect(() => getAttachmentTypeFromAttributes(42)).toThrow(
+        'Invalid attributes: expected non-null object'
+      );
     });
 
     it('returns type when attributes have string type', () => {

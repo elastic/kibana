@@ -76,6 +76,20 @@ import type {
 } from '../../common/types/attachments_v2';
 import { isSOError } from '../../common/error';
 
+/**
+ * Ensures alert attachments have rule.name, or else existing tests will fail
+ */
+function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): void {
+  const type = attributes?.type;
+  if (type !== AttachmentType.alert && type !== 'alert') {
+    return;
+  }
+  const rule = attributes.rule as { name?: unknown } | null | undefined;
+  if (rule == null || rule.name == null) {
+    throw new Error('Invalid attributes: expected attributes.rule.name for alert attachments');
+  }
+}
+
 export class AttachmentService {
   private readonly _getter: AttachmentGetter;
 
@@ -227,8 +241,8 @@ export class AttachmentService {
       }
 
       this.context.log.debug(`Attempting to DELETE attachments ${attachmentIds}`);
-      // Delete from both SO types to handle attachments in either location
-      // If an attachment doesn't exist in one type, it will be ignored
+      // SO IDs are space-unique, so the same ID in both types refers to the same logical attachment.
+      // If an attachment doesn't exist in one type, bulkDelete will ignore it.
       const deleteRequests = attachmentIds.flatMap((id) => [
         { id, type: CASE_ATTACHMENT_SAVED_OBJECT },
         { id, type: CASE_COMMENT_SAVED_OBJECT },
@@ -427,6 +441,7 @@ export class AttachmentService {
       }
 
       const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(updatedAttributes);
+      assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
       const transformer = getAttachmentTypeTransformers(
         getAttachmentTypeFromAttributes(decodedAttributes)
       );
@@ -480,6 +495,7 @@ export class AttachmentService {
         this.context.persistableStateAttachmentTypeRegistry
       );
 
+      assertAlertAttachmentHasRuleName(transformedAttachment.attributes as Record<string, unknown>);
       const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
         transformedAttachment.attributes
       );
@@ -533,6 +549,7 @@ export class AttachmentService {
             const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
               c.updatedAttributes
             );
+            assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
             const transformer = getAttachmentTypeTransformers(
               getAttachmentTypeFromAttributes(decodedAttributes)
             );
@@ -612,6 +629,9 @@ export class AttachmentService {
           this.context.persistableStateAttachmentTypeRegistry
         );
 
+        assertAlertAttachmentHasRuleName(
+          transformedAttachment.attributes as Record<string, unknown>
+        );
         const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
           transformedAttachment.attributes
         );

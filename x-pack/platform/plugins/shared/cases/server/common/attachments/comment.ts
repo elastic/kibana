@@ -20,6 +20,10 @@ import type {
 import { decodeCommentAttachmentData } from '../../attachment_framework/attachments/comment';
 import type { AttachmentTypeTransformer } from './base';
 import { toUnifiedAttachmentType } from '.';
+import {
+  isLegacyAttachmentRequest,
+  isUnifiedValueAttachmentRequest,
+} from '../../../common/utils/attachments';
 
 // ---- Request layer (API / DTO) ----
 export function isLegacyPayloadCommentAttachment(
@@ -29,16 +33,14 @@ export function isLegacyPayloadCommentAttachment(
   comment: string;
   owner: string;
 } {
-  return (
-    typeof attachment === 'object' &&
-    attachment !== null &&
-    'type' in attachment &&
-    (attachment.type === AttachmentType.user || attachment.type === 'user') &&
-    'comment' in attachment &&
-    typeof (attachment as { comment: unknown }).comment === 'string' &&
-    'owner' in attachment &&
-    typeof (attachment as { owner: unknown }).owner === 'string'
-  );
+  if (!isLegacyAttachmentRequest(attachment)) {
+    return false;
+  }
+  const typeStr: string = (attachment as { type: string }).type;
+  if (typeStr !== AttachmentType.user && typeStr !== 'user') {
+    return false;
+  }
+  return 'comment' in attachment && 'owner' in attachment;
 }
 
 /**
@@ -50,29 +52,14 @@ export function isUnifiedPayloadCommentAttachment(
   type: 'comment';
   data: { content: string };
 } {
-  if (
-    typeof attachment !== 'object' ||
-    attachment === null ||
-    !('type' in attachment) ||
-    typeof (attachment as { type: unknown }).type !== 'string'
-  ) {
+  if (!isUnifiedValueAttachmentRequest(attachment)) {
     return false;
   }
-
-  const attachmentType = (attachment as { type: string }).type;
-  const normalizedType = toUnifiedAttachmentType(attachmentType);
-
-  if (normalizedType !== 'comment' && attachmentType !== 'comment') {
+  const normalizedType = toUnifiedAttachmentType(attachment.type);
+  if (normalizedType !== 'comment' && attachment.type !== 'comment') {
     return false;
   }
-
-  return (
-    'data' in attachment &&
-    attachment.data !== null &&
-    typeof attachment.data === 'object' &&
-    'content' in attachment.data &&
-    typeof (attachment.data as { content: unknown }).content === 'string'
-  );
+  return 'content' in attachment.data;
 }
 
 export function toUnifiedPayloadCommentAttachment(

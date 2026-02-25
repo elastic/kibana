@@ -6,16 +6,15 @@
  */
 
 import type { CasesClientArgs } from '../types';
-import { createCasesClient } from '..';
-import type { Case } from '../../../common/types/domain';
 
-export const getCaseOwner = async (caseId: string, clientArgs: CasesClientArgs) => {
-  const casesClient = createCasesClient(clientArgs);
-  const caseOwner = await casesClient.cases
-    .get({
-      id: caseId,
-      includeComments: false,
-    })
-    .then((c: Case) => c.owner);
-  return caseOwner;
+/**
+ * Returns the owner of a case. Used when resolving owner for unified (v2) attachments
+ * that do not include owner in the request payload.
+ */
+export const getCaseOwner = async (
+  caseId: string,
+  clientArgs: CasesClientArgs
+): Promise<string> => {
+  const theCase = await clientArgs.services.caseService.getCase({ id: caseId });
+  return theCase.attributes.owner;
 };

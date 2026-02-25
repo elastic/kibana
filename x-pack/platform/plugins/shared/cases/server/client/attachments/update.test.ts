@@ -152,7 +152,7 @@ describe('update', () => {
       page: 1,
     });
     attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
-      new Map([[caseID, { alerts: 0, userComments: 0, events: 0 }]])
+      new Map([[caseID, { alerts: 0, userComments: 1, events: 0 }]])
     );
     attachmentService.getter.get.mockResolvedValue(
       existingComment as unknown as Awaited<ReturnType<typeof attachmentService.getter.get>>

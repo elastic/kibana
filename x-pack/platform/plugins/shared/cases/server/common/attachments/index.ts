@@ -41,10 +41,11 @@ export function toUnifiedAttachmentType(type: string): string {
 /**
  * Returns the attachment type string from attributes (unified or legacy shape).
  * Used to select the correct transformer.
+ * @throws Error if attributes is null or not an object
  */
 export function getAttachmentTypeFromAttributes(attributes: unknown): string {
   if (attributes === null || typeof attributes !== 'object') {
-    return COMMENT_ATTACHMENT_TYPE;
+    throw new Error('Invalid attributes: expected non-null object');
   }
   const attrs = attributes as Record<string, unknown>;
   if (typeof attrs.type === 'string') {

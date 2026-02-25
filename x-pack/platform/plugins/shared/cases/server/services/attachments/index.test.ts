@@ -461,7 +461,7 @@ describe('AttachmentService', () => {
             attachmentId: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"rule,name\\""`
+          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
       });
 
@@ -477,7 +477,7 @@ describe('AttachmentService', () => {
             attachmentId: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"rule,name\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
+          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
       });
 
@@ -612,7 +612,7 @@ describe('AttachmentService', () => {
         await expect(
           service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }], owner })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"rule,name\\""`
+          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
       });
 
@@ -632,10 +632,11 @@ describe('AttachmentService', () => {
                 attachmentId: '1',
               },
             ],
+
             owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"rule,name\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
+          `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
       });
 

@@ -208,29 +208,29 @@ const decodeUnifiedReferenceAttachment = (
 };
 
 export const decodeUnifiedCommentRequest = (
-  comment: UnifiedAttachmentPayload,
+  attachment: UnifiedAttachmentPayload,
   unifiedRegistry: UnifiedAttachmentTypeRegistry
 ) => {
-  if (isUnifiedValueAttachmentRequest(comment)) {
-    decodeUnifiedValueAttachment(comment, unifiedRegistry);
-  } else if (isUnifiedReferenceAttachmentRequest(comment)) {
-    decodeUnifiedReferenceAttachment(comment, unifiedRegistry);
+  if (isUnifiedValueAttachmentRequest(attachment)) {
+    decodeUnifiedValueAttachment(attachment, unifiedRegistry);
+  } else if (isUnifiedReferenceAttachmentRequest(attachment)) {
+    decodeUnifiedReferenceAttachment(attachment, unifiedRegistry);
   } else {
-    assertUnreachable(comment);
+    assertUnreachable(attachment);
   }
 };
 
 export const decodeCommentRequestV2 = (
-  comment: AttachmentRequestV2,
+  attachment: AttachmentRequestV2,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
   unifiedRegistry: UnifiedAttachmentTypeRegistry
 ) => {
-  if (isLegacyAttachmentRequest(comment)) {
-    decodeCommentRequest(comment, externalRefRegistry);
-  } else if (isUnifiedAttachmentRequest(comment)) {
-    decodeUnifiedCommentRequest(comment, unifiedRegistry);
+  if (isLegacyAttachmentRequest(attachment)) {
+    decodeCommentRequest(attachment, externalRefRegistry);
+  } else if (isUnifiedAttachmentRequest(attachment)) {
+    decodeUnifiedCommentRequest(attachment, unifiedRegistry);
   } else {
-    assertUnreachable(comment);
+    assertUnreachable(attachment);
   }
 };
 

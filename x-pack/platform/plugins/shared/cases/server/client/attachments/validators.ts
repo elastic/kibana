@@ -62,10 +62,13 @@ export const validateUnifiedRegisteredAttachments = ({
   }
 
   const attachmentType = unifiedAttachmentTypeRegistry.get(query.type);
-  if (!attachmentType || !attachmentType.schemaValidator) {
+  if (!attachmentType) {
     throw Boom.badRequest(
       `Attachment type ${query.type} is not registered in unified attachment type registry.`
     );
+  }
+  if (!attachmentType.schemaValidator) {
+    throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema validator.`);
   }
   if (isUnifiedValueAttachmentRequest(query)) {
     attachmentType.schemaValidator(query.data);
