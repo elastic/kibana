@@ -105,7 +105,6 @@ dependsOn:
   - '@kbn/discover-shared-plugin'
   - '@kbn/response-ops-rule-form'
   - '@kbn/shared-ux-page-analytics-no-data-types'
-  - '@kbn/core-application-browser-mocks'
   - '@kbn/rison'
   - '@kbn/unified-tabs'
   - '@kbn/unified-histogram'
@@ -131,6 +130,8 @@ dependsOn:
   - '@kbn/es-query-constants'
   - '@kbn/esql'
   - '@kbn/controls-schemas'
+  - '@kbn/scout'
+  - '@kbn/synthtrace-client'
 tags:
   - plugin
   - prod
@@ -142,6 +143,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - .storybook/**/*
     - '!target/**/*'
 tasks:
