@@ -1,5 +1,5 @@
 {
-  "job_id": "JOB_ID",
+  "job_id": "v3_linux_network_connection_discovery_euid",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -65,18 +65,56 @@
             "should": [
               {
                 "term": {
-                  "process.name": "ps"
+                  "process.name": "netstat"
                 }
               },
               {
                 "term": {
-                  "process.name": "top"
+                  "process.name": "ss"
+                }
+              },
+              {
+                "term": {
+                  "process.name": "route"
+                }
+              },
+              {
+                "term": {
+                  "process.name": "showmount"
                 }
               }
             ]
           }
         }
-      ]
+      ],
+      "must_not": {
+        "terms": {
+          "process.name": [
+            "elastic-agent.exe",
+            "elastic-agent",
+            "metricbeat.exe",
+            "metricbeat",
+            "filebeat.exe",
+            "filebeat",
+            "packetbeat.exe",
+            "packetbeat",
+            "winlogbeat.exe",
+            "winlogbeat"
+          ]
+        }
+      }
+    }
+  },
+  "script_fields": {
+    "user.entity.id_computed": {
+      "script": {
+        "id": "euid_user_entity"
+      }
+    },
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
+      }
     }
   }
 }

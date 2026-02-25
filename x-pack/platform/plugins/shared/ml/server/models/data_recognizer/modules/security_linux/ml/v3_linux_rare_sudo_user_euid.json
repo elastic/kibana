@@ -1,17 +1,25 @@
 {
-  "description": "Security: Linux - Looks for sudo activity from an unusual user context. Unusual user context changes can be due to privilege escalation.",
-  "groups": ["security", "linux"],
+  "description": "Security: Linux - Looks for sudo activity from an unusual unique user identifier context. Unusual unique user identifier context changes can be due to privilege escalation.",
+  "groups": [
+    "security",
+    "linux"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
         "detector_description": "Detects rare usernames.",
         "function": "rare",
-        "by_field_name": "user.name",
+        "by_field_name": "user.entity.id_computed",
         "detector_index": 0
       }
     ],
-    "influencers": ["process.name", "host.name", "process.args", "user.name"]
+    "influencers": [
+      "process.name",
+      "host.entity.id_computed",
+      "process.args",
+      "user.entity.id_computed"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

@@ -1,6 +1,9 @@
 {
   "description": "Security: Linux - Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
-  "groups": ["security", "linux"],
+  "groups": [
+    "security",
+    "linux"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -11,7 +14,12 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["host.name", "process.name", "user.name", "destination.ip"]
+    "influencers": [
+      "host.entity.id_computed",
+      "process.name",
+      "user.entity.id_computed",
+      "destination.ip"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

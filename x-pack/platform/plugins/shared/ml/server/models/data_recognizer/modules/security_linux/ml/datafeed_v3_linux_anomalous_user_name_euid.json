@@ -1,5 +1,5 @@
 {
-  "job_id": "JOB_ID",
+  "job_id": "v3_linux_anomalous_user_name_euid",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -7,6 +7,11 @@
   "query": {
     "bool": {
       "filter": [
+        {
+          "term": {
+            "event.category": "process"
+          }
+        },
         {
           "term": {
             "event.type": "start"
@@ -59,57 +64,35 @@
               }
             ]
           }
-        },
-        {
-          "bool": {
-            "should": [
-              {
-                "term": {
-                  "process.name": "arp"
-                }
-              },
-              {
-                "term": {
-                  "process.name": "echo"
-                }
-              },
-              {
-                "term": {
-                  "process.name": "ethtool"
-                }
-              },
-              {
-                "term": {
-                  "process.name": "ifconfig"
-                }
-              },
-              {
-                "term": {
-                  "process.name": "ip"
-                }
-              },
-              {
-                "term": {
-                  "process.name": "iptables"
-                }
-              },
-              {
-                "term": {
-                  "process.name": "ufw"
-                }
-              }
-            ]
-          }
         }
       ],
       "must_not": {
         "terms": {
           "process.name": [
-            "elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", 
-            "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", 
-            "winlogbeat.exe", "winlogbeat"
+            "elastic-agent.exe",
+            "elastic-agent",
+            "metricbeat.exe",
+            "metricbeat",
+            "filebeat.exe",
+            "filebeat",
+            "packetbeat.exe",
+            "packetbeat",
+            "winlogbeat.exe",
+            "winlogbeat"
           ]
         }
+      }
+    }
+  },
+  "script_fields": {
+    "user.entity.id_computed": {
+      "script": {
+        "id": "euid_user_entity"
+      }
+    },
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
       }
     }
   }

@@ -1,5 +1,5 @@
 {
-  "job_id": "JOB_ID",
+  "job_id": "v3_linux_anomalous_network_activity_euid",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -7,6 +7,11 @@
   "query": {
     "bool": {
       "filter": [
+        {
+          "term": {
+            "event.category": "network"
+          }
+        },
         {
           "term": {
             "event.type": "start"
@@ -59,42 +64,68 @@
               }
             ]
           }
-        },
+        }
+      ],
+      "must_not": [
         {
           "bool": {
             "should": [
               {
                 "term": {
-                  "process.name": "netstat"
+                  "destination.ip": "127.0.0.1"
                 }
               },
               {
                 "term": {
-                  "process.name": "ss"
+                  "destination.ip": "127.0.0.53"
                 }
               },
               {
                 "term": {
-                  "process.name": "route"
+                  "destination.ip": "::"
                 }
               },
               {
                 "term": {
-                  "process.name": "showmount"
+                  "destination.ip": "::1"
+                }
+              },
+              {
+                "term": {
+                  "user.name": "jenkins"
                 }
               }
             ]
           }
+        },
+        {
+          "terms": {
+            "process.name": [
+              "elastic-agent.exe",
+              "elastic-agent",
+              "metricbeat.exe",
+              "metricbeat",
+              "filebeat.exe",
+              "filebeat",
+              "packetbeat.exe",
+              "packetbeat",
+              "winlogbeat.exe",
+              "winlogbeat"
+            ]
+          }
         }
-      ],
-      "must_not": {
-        "terms": {
-          "process.name": [
-            "elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", 
-            "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", 
-            "winlogbeat.exe", "winlogbeat"
-          ]
-        }
+      ]
+    }
+  },
+  "script_fields": {
+    "user.entity.id_computed": {
+      "script": {
+        "id": "euid_user_entity"
+      }
+    },
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
       }
     }
   }

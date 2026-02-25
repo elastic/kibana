@@ -1,6 +1,9 @@
 {
-  "description": "Security: Linux - Looks for processes that are unusual to all Linux hosts. Such unusual processes may indicate unauthorized software, malware, or persistence mechanisms.",
-  "groups": ["linux", "security"],
+  "description": "Security: Linux - Looks for anomalous access to the metadata service by an unusual process. The metadata service may be targeted in order to harvest credentials or user data scripts containing secrets.",
+  "groups": [
+    "linux",
+    "security"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -11,11 +14,15 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["host.name", "process.name", "user.name"]
+    "influencers": [
+      "host.entity.id_computed",
+      "user.entity.id_computed",
+      "process.name"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
-    "model_memory_limit": "512mb"
+    "model_memory_limit": "32mb"
   },
   "data_description": {
     "time_field": "@timestamp",
@@ -23,7 +30,7 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-linux-v3",
-    "security_app_display_name": "Anomalous Process for a Linux Population",
+    "security_app_display_name": "Unusual Linux Process Calling the Metadata Service",
     "managed": true,
     "job_revision": 4
   }
