@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/agent-builder-genai-utils'
-  - '@kbn/core-elasticsearch-server'
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
   - '@kbn/management-settings-ids'
@@ -41,6 +40,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/share-plugin'
 tags:
   - plugin
   - prod
