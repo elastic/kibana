@@ -882,6 +882,76 @@ describe('TemplatesService', () => {
     });
   });
 
+  describe('incrementUsageStats', () => {
+    it('increments usageCount and sets lastUsedAt for an existing template', async () => {
+      const service = createService();
+
+      jest.spyOn(service, 'getTemplate').mockResolvedValue({
+        id: 'so-1',
+        attributes: {
+          templateId: 'template-1',
+          name: 'Template',
+          usageCount: 5,
+          lastUsedAt: '2025-01-01T00:00:00.000Z',
+        },
+      } as SavedObject<Template>);
+
+      await service.incrementUsageStats('template-1');
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'so-1',
+            type: CASE_TEMPLATE_SAVED_OBJECT,
+            attributes: {
+              usageCount: 6,
+              lastUsedAt: expect.any(String),
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    it('sets usageCount to 1 when usageCount is undefined', async () => {
+      const service = createService();
+
+      jest.spyOn(service, 'getTemplate').mockResolvedValue({
+        id: 'so-1',
+        attributes: {
+          templateId: 'template-1',
+          name: 'Template',
+        },
+      } as SavedObject<Template>);
+
+      await service.incrementUsageStats('template-1');
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'so-1',
+            type: CASE_TEMPLATE_SAVED_OBJECT,
+            attributes: {
+              usageCount: 1,
+              lastUsedAt: expect.any(String),
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    it('does nothing when template does not exist', async () => {
+      const service = createService();
+
+      jest.spyOn(service, 'getTemplate').mockResolvedValue(undefined);
+
+      await service.incrementUsageStats('non-existent');
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+  });
+
   describe('deleteTemplate', () => {
     it('marks all matching templates as deleted', async () => {
       const service = createService();
