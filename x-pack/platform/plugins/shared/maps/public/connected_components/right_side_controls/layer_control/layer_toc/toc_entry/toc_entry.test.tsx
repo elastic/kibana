@@ -179,8 +179,9 @@ describe('TOCEntry', () => {
 
       expect(
         (
-          TOCEntry.getTOCEntryEditButton(LAYER_ID, (query: string) =>
-            component.find(query)
+          TOCEntry.getTOCEntryEditButton(
+            LAYER_ID,
+            (query: string) => component.find(query) as unknown as Element | null
           ) as ShallowWrapper | null
         )?.is('[data-test-subj="editLayerSettingsButton"]')
       ).toBe(true);
@@ -195,8 +196,9 @@ describe('TOCEntry', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      const element = TOCEntry.getTOCEntryEditButton(LAYER_ID, (query: string) =>
-        component.find(query)
+      const element = TOCEntry.getTOCEntryEditButton(
+        LAYER_ID,
+        (query: string) => component.find(query) as unknown as Element | null
       );
 
       const mockFocus = jest.fn();

@@ -90,7 +90,7 @@ export class TOCEntry extends Component<Props, State> {
 
   static showHiddenTOCEntryPopoverAction(
     actionElement: Element,
-    getQuerySelector = (element: Element) => (sel: string) => element.querySelector(sel)
+    getQuerySelector = (element: any) => (sel: string) => element.querySelector(sel)
   ) {
     const enclosingLayer = actionElement.closest('[data-layerid]');
     const querySelector = enclosingLayer ? getQuerySelector(enclosingLayer) : () => null;
