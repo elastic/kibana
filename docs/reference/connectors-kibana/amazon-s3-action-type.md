@@ -49,6 +49,7 @@ Download file
 :   Downloads a given object from a bucket
     - **bucket** (required) the bucket to download the object from
     - **key** (required) the key of the object to download
+    - **maximumDownloadSizeBytes** (optional) the size in bytes that the connector is allowed to download the content for. Default of 128 KB. If the file to download exceeds this amount, a link to the object in the AWS S3 Bucket will be returned instead of the content.
 
 
 ## Get API credentials [amazon-s3-api-credentials]

@@ -17,7 +17,7 @@ inputs:
 steps:
   - name: listBuckets
     type: amazon_s3.listBuckets
-    connector-id: <%= amazon-s3-stack-connector-id %>
+    connector-id: <%= amazon_s3-stack-connector-id %>
     with:
       region: "${{ inputs.region }}"
       prefix: "${{ inputs.prefix }}"

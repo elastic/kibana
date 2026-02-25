@@ -14,10 +14,14 @@ inputs:
     type: string
     required: true
     description: "The key of the file to download from the S3 bucket."
+  - name: maximumDownloadSizeBytes
+    type: number
+    required: false
+    description: "The maximum file size in bytes that can be downloaded through Kibana. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3. Default is 128 KB."
 steps:
   - name: downloadFile
     type: amazon_s3.downloadFile
-    connector-id: <%= amazon-s3-stack-connector-id %>
+    connector-id: <%= amazon_s3-stack-connector-id %>
     with:
       bucket: "${{ inputs.bucket }}"
       key: "${{ inputs.key }}"

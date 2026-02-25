@@ -19,6 +19,12 @@ import {
 } from '@aws-sdk/client-s3';
 
 /**
+ * Default maximum file size that can be downloaded (128 kilobytes)
+ * If the user requests a file larger than this, we will return a pre-signed URL for them to download the file directly from S3 instead of through Kibana.
+ */
+const MAX_DOWNLOAD_FILE_SIZE_BYTES = 128 * 1024;
+
+/**
  * Creates an S3 client using credentials and configuration.
  */
 function createS3Client(config: {
@@ -241,6 +247,7 @@ export const AmazonS3: ConnectorSpec = {
         const typedInput = input as {
           bucket: string;
           key: string;
+          maximumDownloadSizeBytes?: number;
         };
 
         try {
@@ -252,6 +259,24 @@ export const AmazonS3: ConnectorSpec = {
             Key: typedInput.key,
           });
           const metadata = await s3Client.send(headCommand);
+
+          // Check if file size exceeds the maximum allowed download size
+          const maxSize = typedInput.maximumDownloadSizeBytes ?? MAX_DOWNLOAD_FILE_SIZE_BYTES;
+          if (metadata.ContentLength && metadata.ContentLength > maxSize) {
+            const region = config.region || 'us-east-1';
+            const fileUrl = `https://${typedInput.bucket}.s3.${region}.amazonaws.com/${encodeURIComponent(typedInput.key)}`;
+            
+            return {
+              bucket: typedInput.bucket,
+              key: typedInput.key,
+              contentType: metadata.ContentType,
+              contentLength: metadata.ContentLength,
+              lastModified: metadata.LastModified?.toISOString(),
+              etag: metadata.ETag,
+              contentUrl: fileUrl,
+              message: `File size (${metadata.ContentLength} bytes) exceeds maximum downloadable size (${maxSize} bytes). Access the file using the provided link.`,
+            };
+          }
 
           // Download the file content
           const getCommand = new GetObjectCommand({

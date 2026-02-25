@@ -17,7 +17,7 @@ inputs:
 steps:
   - name: listBucketObjects
     type: amazon_s3.listBucketObjects
-    connector-id: <%= amazon-s3-stack-connector-id %>
+    connector-id: <%= amazon_s3-stack-connector-id %>
     with:
       bucket: "${{ inputs.bucket }}"
       prefix: "${{ inputs.prefix }}"
