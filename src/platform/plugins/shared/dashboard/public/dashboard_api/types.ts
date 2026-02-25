@@ -32,7 +32,7 @@ import type {
   PublishesDataViews,
   PublishesDescription,
   PublishesEditablePauseFetch,
-  PublishesIsBorderless,
+  PublishesHideBorder,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -144,7 +144,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesDescription &
-  PublishesIsBorderless &
+  PublishesHideBorder &
   Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
   PublishesReload &
   PublishesSavedObjectId &

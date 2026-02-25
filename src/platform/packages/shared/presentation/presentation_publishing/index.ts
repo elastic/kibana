@@ -171,11 +171,11 @@ export {
   type PublishesWritableTitle,
 } from './interfaces/titles/publishes_title';
 export {
-  apiPublishesIsBorderless,
-  apiPublishesWritableIsBorderless,
-  type PublishesIsBorderless,
-  type PublishesWritableIsBorderless,
-} from './interfaces/titles/publishes_is_borderless';
+  apiPublishesHideBorder,
+  apiPublishesWritableHideBorder,
+  type PublishesHideBorder,
+  type PublishesWritableHideBorder,
+} from './interfaces/titles/publishes_hide_border';
 export {
   initializeTitleManager,
   stateHasTitles,

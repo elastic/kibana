@@ -13,7 +13,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
-import type { PublishesIsBorderless, PublishesTitle } from '@kbn/presentation-publishing';
+import type { PublishesHideBorder, PublishesTitle } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -158,14 +158,14 @@ export const PresentationPanelInternal = <
   ...rest
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
-  const [dataLoading, blockingError, isPanelBorderless, parentIsBorderless] =
+  const [dataLoading, blockingError, panelHideBorder, parentHideBorder] =
     useBatchedOptionalPublishingSubjects(
       api?.dataLoading$,
       api?.blockingError$,
-      api?.isBorderless$,
-      (api?.parentApi as Partial<PublishesIsBorderless>)?.isBorderless$
+      api?.hideBorder$,
+      (api?.parentApi as Partial<PublishesHideBorder>)?.hideBorder$
     );
-  const isBorderless = Boolean(isPanelBorderless) || Boolean(parentIsBorderless);
+  const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
@@ -210,8 +210,8 @@ export const PresentationPanelInternal = <
     <PresentationPanelChrome
       {...rest}
       api={api}
-      showBorder={isBorderless ? false : rest.showBorder}
-      showShadow={isBorderless ? false : rest.showShadow}
+      showBorder={hideBorder ? false : rest.showBorder}
+      showShadow={hideBorder ? false : rest.showShadow}
       setDragHandle={setDragHandle}
     >
       {InnerPanel}

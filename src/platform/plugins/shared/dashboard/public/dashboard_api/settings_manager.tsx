@@ -90,7 +90,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
       description$: stateManager.api.description$,
       timeRestore$: stateManager.api.timeRestore$,
       hideTitle$: stateManager.api.hidePanelTitles$,
-      isBorderless$: stateManager.api.hidePanelBorders$,
+      hideBorder$: stateManager.api.hidePanelBorders$,
       settings: {
         autoApplyFilters$: stateManager.api.autoApplyFilters$,
         syncColors$: stateManager.api.syncColors$,

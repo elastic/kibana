@@ -13,12 +13,12 @@ import { initializeStateManager } from '../../state_manager/state_manager';
 import type { StateComparators, StateManager } from '../../state_manager/types';
 import type { PublishesWritableDescription } from './publishes_description';
 import type { PublishesWritableTitle } from './publishes_title';
-import type { PublishesWritableIsBorderless } from './publishes_is_borderless';
+import type { PublishesWritableHideBorder } from './publishes_hide_border';
 
 export type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
 export type TitleManager = {
-  api: PublishesWritableTitle & PublishesWritableDescription & PublishesWritableIsBorderless;
+  api: PublishesWritableTitle & PublishesWritableDescription & PublishesWritableHideBorder;
 } & Pick<
   StateManager<SerializedTitles>,
   'anyStateChange$' | 'getLatestState' | 'reinitializeState'
@@ -28,14 +28,14 @@ const defaultTitlesState: WithAllKeys<SerializedTitles> = {
   title: undefined,
   description: undefined,
   hide_title: undefined,
-  is_borderless: undefined,
+  hide_border: undefined,
 };
 
 export const titleComparators: StateComparators<SerializedTitles> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
   hide_title: (a, b) => Boolean(a) === Boolean(b),
-  is_borderless: (a, b) => Boolean(a) === Boolean(b),
+  hide_border: (a, b) => Boolean(a) === Boolean(b),
 };
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
@@ -43,14 +43,14 @@ export const stateHasTitles = (state: unknown): state is SerializedTitles => {
     (state as SerializedTitles)?.title !== undefined ||
     (state as SerializedTitles)?.description !== undefined ||
     (state as SerializedTitles)?.hide_title !== undefined ||
-    (state as SerializedTitles)?.is_borderless !== undefined
+    (state as SerializedTitles)?.hide_border !== undefined
   );
 };
 
 export interface TitlesApi
   extends PublishesWritableTitle,
     PublishesWritableDescription,
-    PublishesWritableIsBorderless {}
+    PublishesWritableHideBorder {}
 
 export const initializeTitleManager = (
   initialTitlesState: SerializedTitles,
@@ -60,6 +60,6 @@ export const initializeTitleManager = (
 ): TitleManager => {
   return initializeStateManager(initialTitlesState, {
     ...defaultTitlesState,
-    is_borderless: options?.borderlessByDefault ?? defaultTitlesState.is_borderless,
+    hide_border: options?.borderlessByDefault ?? defaultTitlesState.hide_border,
   });
 };

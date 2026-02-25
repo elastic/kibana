@@ -9,23 +9,22 @@
 
 import type { PublishingSubject } from '../../publishing_subject';
 
-export interface PublishesIsBorderless {
-  isBorderless$: PublishingSubject<boolean | undefined>;
+export interface PublishesHideBorder {
+  hideBorder$: PublishingSubject<boolean | undefined>;
 }
 
-export type PublishesWritableIsBorderless = PublishesIsBorderless & {
-  setIsBorderless: (borderless: boolean | undefined) => void;
+export type PublishesWritableHideBorder = PublishesHideBorder & {
+  setHideBorder: (hideBorder: boolean | undefined) => void;
 };
 
-export const apiPublishesIsBorderless = (
+export const apiPublishesHideBorder = (
   unknownApi: unknown | null
-): unknownApi is PublishesIsBorderless =>
-  Boolean(unknownApi && (unknownApi as PublishesIsBorderless).isBorderless$);
+): unknownApi is PublishesHideBorder =>
+  Boolean(unknownApi && (unknownApi as PublishesHideBorder).hideBorder$);
 
-export const apiPublishesWritableIsBorderless = (
+export const apiPublishesWritableHideBorder = (
   unknownApi: unknown | null
-): unknownApi is PublishesWritableIsBorderless =>
+): unknownApi is PublishesWritableHideBorder =>
   Boolean(
-    apiPublishesIsBorderless(unknownApi) &&
-      (unknownApi as PublishesWritableIsBorderless).setIsBorderless
+    apiPublishesHideBorder(unknownApi) && (unknownApi as PublishesWritableHideBorder).setHideBorder
   );

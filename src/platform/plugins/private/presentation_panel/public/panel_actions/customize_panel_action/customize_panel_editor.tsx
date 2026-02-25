@@ -71,7 +71,7 @@ export const CustomizePanelEditor = ({
   const [timeRange, setTimeRange] = useState(
     api.timeRange$?.value ?? api.parentApi?.timeRange$?.value
   );
-  const [isPanelBorderless, setIsPanelBorderless] = useState(api.isBorderless$?.value);
+  const [isPanelBorderless, setIsPanelBorderless] = useState(api.hideBorder$?.value);
 
   const initialFocusRef = useRef<HTMLInputElement | null>(null);
 
@@ -110,7 +110,7 @@ export const CustomizePanelEditor = ({
       api.setTitle?.(panelTitle);
     }
     if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
-    if (isPanelBorderless !== api.isBorderless$?.value) api.setIsBorderless?.(isPanelBorderless);
+    if (isPanelBorderless !== api.hideBorder$?.value) api.setHideBorder?.(isPanelBorderless);
     if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 
     const newTimeRange = hasOwnTimeRange ? timeRange : undefined;
