@@ -180,6 +180,7 @@ export const HelpPopover: React.FC<{
     if (solutionsRecommendedQueries.length) {
       recommendedQueries.push(
         ...solutionsRecommendedQueries.map((recommendedQuery) => {
+          // If the query is standalone, return the query string directly
           if (recommendedQuery.isStandalone) {
             return {
               label: recommendedQuery.name,
