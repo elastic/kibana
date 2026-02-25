@@ -852,4 +852,11 @@ export class DashboardApp {
     const editVisualizationConfigurationSelector = `[data-test-subj="hover-actions-${id}"] [data-test-subj="embeddablePanelAction-editPanel"]`;
     await this.page.locator(editVisualizationConfigurationSelector).click();
   }
+
+  /**
+   * Returns locator for a specific panel by embeddable id.
+   */
+  getPanelByEmbeddableId(id: string) {
+    return this.page.locator(`[data-test-embeddable-id="${id}"]`);
+  }
 }
