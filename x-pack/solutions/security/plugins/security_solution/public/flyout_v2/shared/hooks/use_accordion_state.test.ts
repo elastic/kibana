@@ -6,7 +6,7 @@
  */
 
 import type { ToggleReducerAction, UseAccordionStateValue } from './use_accordion_state';
-import { useAccordionState, toggleReducer } from './use_accordion_state';
+import { toggleReducer, useAccordionState } from './use_accordion_state';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 

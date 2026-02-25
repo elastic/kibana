@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { CONTENT_TEST_ID, ExpandableSection, HEADER_TEST_ID } from './expandable_section';
 
 const title = <p>{'title'}</p>;
@@ -26,7 +26,6 @@ describe('<ExpandableSection />', () => {
   it('should render ExpandableSection component', () => {
     const { getByTestId } = renderExpandableSection(false);
 
-    expect(getByTestId(headerTestId)).toBeInTheDocument();
     expect(getByTestId(headerTestId)).toHaveTextContent('title');
     expect(getByTestId(contentTestId)).toBeInTheDocument();
   });
@@ -43,10 +42,12 @@ describe('<ExpandableSection />', () => {
     expect(getByTestId(contentTestId)).toBeVisible();
   });
 
-  it('should expand the component when clicking on the arrow on header', () => {
+  it('should expand the component when clicking on the arrow on header', async () => {
     const { getByTestId } = renderExpandableSection(false);
 
-    getByTestId(headerTestId).click();
-    expect(getByTestId(contentTestId)).toBeInTheDocument();
+    await act(async () => {
+      getByTestId(headerTestId).click();
+      expect(getByTestId(contentTestId)).toBeInTheDocument();
+    });
   });
 });
