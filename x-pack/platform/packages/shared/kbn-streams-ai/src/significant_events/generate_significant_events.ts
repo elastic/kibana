@@ -33,6 +33,7 @@ import {
 interface Query {
   kql: string;
   title: string;
+  description: string;
   category: SignificantEventType;
   severity_score: number;
   evidence?: string[];

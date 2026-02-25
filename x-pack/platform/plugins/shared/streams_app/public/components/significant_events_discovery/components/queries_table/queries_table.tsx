@@ -166,11 +166,8 @@ export function QueriesTable() {
     onSuccess: async (_, variables) => {
       await invalidateQueriesData();
       setSelectedQuery((currentSelectedQuery) =>
-        currentSelectedQuery !== null
-          ? {
-              ...currentSelectedQuery,
-              query: variables.updatedQuery,
-            }
+        currentSelectedQuery?.id === variables.updatedQuery.id
+          ? variables.updatedQuery
           : currentSelectedQuery
       );
     },

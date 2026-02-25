@@ -40,6 +40,7 @@ import type { StreamQuery } from '@kbn/streams-schema';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
 import { SeveritySelector } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/severity_selector';
+import { useFetchQueryOccurrencesChartData } from '../../../../hooks/use_fetch_queries_occurrences_chart_data';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import {
   BACKED_STATUS_COLUMN,
@@ -87,6 +88,9 @@ export function QueryDetailsFlyout({
   const [title, setTitle] = useState(item.title);
   const [query, setQuery] = useState(getQueryInputValue(item));
   const [severityScore, setSeverityScore] = useState(item.severity_score);
+  const { data: queryOccurrencesChartData } = useFetchQueryOccurrencesChartData({
+    queryId: item.id,
+  });
 
   useEffect(() => {
     setIsActionsPopoverOpen(false);
@@ -97,14 +101,14 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.severity_score);
   }, [item]);
 
-  // const lastOccurredAt = useMemo(
-  //   () => formatLastOccurredAt(item.occurrences, DEFAULT_QUERY_PLACEHOLDER),
-  //   [item.occurrences]
-  // );
-  // const hasDetectedOccurrences = useMemo(
-  //   () => item.occurrences.some((occurrence) => occurrence.y > 0),
-  //   [item.occurrences]
-  // );
+  const lastOccurredAt = useMemo(
+    () => formatLastOccurredAt(queryOccurrencesChartData?.buckets ?? [], DEFAULT_QUERY_PLACEHOLDER),
+    [queryOccurrencesChartData?.buckets]
+  );
+  const hasDetectedOccurrences = useMemo(
+    () => (queryOccurrencesChartData?.buckets ?? []).some((occurrence) => occurrence.y > 0),
+    [queryOccurrencesChartData?.buckets]
+  );
   const isSaveDisabled = !title.trim() || !query.trim() || isSaving;
 
   const handleCancelEdit = () => {
@@ -144,10 +148,10 @@ export function QueryDetailsFlyout({
       title: IMPACT_COLUMN,
       description: <SeverityBadge score={item.severity_score} />,
     },
-    // {
-    //   title: LAST_OCCURRED_COLUMN,
-    //   description: <EuiText size="s">{lastOccurredAt}</EuiText>,
-    // },
+    {
+      title: LAST_OCCURRED_COLUMN,
+      description: <EuiText size="s">{lastOccurredAt}</EuiText>,
+    },
     {
       title: STREAM_COLUMN,
       description: <EuiBadge color="hollow">{item.stream_name}</EuiBadge>,
@@ -266,14 +270,14 @@ export function QueryDetailsFlyout({
                   ))}
                 </InfoPanel>
               </EuiFlexItem>
-              {/* <EuiFlexItem>
+              <EuiFlexItem>
                 <InfoPanel title={OCCURRENCES_COLUMN}>
                   {hasDetectedOccurrences ? (
                     <SparkPlot
-                      id={`query-details-occurrences-${item.query.id}`}
+                      id={`query-details-occurrences-${item.id}`}
                       name={OCCURRENCES_TOOLTIP_NAME}
                       type="bar"
-                      timeseries={item.occurrences}
+                      timeseries={queryOccurrencesChartData?.buckets ?? []}
                       annotations={[]}
                       height={160}
                     />
@@ -292,7 +296,7 @@ export function QueryDetailsFlyout({
                     </EuiFlexGroup>
                   )}
                 </InfoPanel>
-              </EuiFlexItem> */}
+              </EuiFlexItem>
             </EuiFlexGroup>
           )}
 

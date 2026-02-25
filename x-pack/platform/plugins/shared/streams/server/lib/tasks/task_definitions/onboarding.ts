@@ -273,11 +273,19 @@ export async function saveQueries(
     queries.map((query) => ({
       index: {
         id: v4(),
-        kql: { query: query.kql },
+        stream_name: streamName,
+        kql: query.kql,
         title: query.title,
+        description: query.description,
         feature: query.feature,
         severity_score: query.severity_score,
         evidence: query.evidence,
+        category: query.category,
+        type: query.type,
+        source: query.source,
+        model: query.model,
+        tags: query.tags,
+        created_at: query.created_at,
       },
     })),
     { createRules: false }

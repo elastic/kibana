@@ -1,7 +1,7 @@
 /***************************************************************
 *
 *   For the prompt generating LLM:
-*   
+*
 *   This is a fairly simple task, so the reasoning should be concise and not overly chatty,
 *   to keep response times low. The final output should be 2-3 sentences tops.
 *
@@ -132,6 +132,12 @@ Generate queries for the following categories, but only when applicable and ther
 
 ---
 
+## Query description
+
+Concise human-readable description of the query, what it does and why it's useful.
+
+---
+
 ## Generating the queries
 
 Use KQL to generate the queries.
@@ -139,7 +145,7 @@ Use KQL to generate the queries.
 /***************************************************************
 *
 *   For the prompt generating LLM:
-*   
+*
 *   Reference the block below using `{{{kql_guide}}}` in
 *   a section at the end called "System variables".
 *   Mustache will be used to render it into the system prompt. You
@@ -195,6 +201,6 @@ Use KQL to generate the queries.
 
 Available tools:
 - `get_stream_features`: Fetch stream features. For incremental retrieval, prefer `min_confidence` and `limit` (for example top 5 by confidence), and optionally pass `feature_types` to narrow by type. Returned features can include computed features (`dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`) when they match the request. Supported `feature_types` values are injected at runtime in `available_feature_types`: `{{{available_feature_types}}}`.
-- `add_queries`: Add one or more query suggestions (`title`, `kql`, `category`, `severity_score`, optional `evidence`).
+- `add_queries`: Add one or more query suggestions (`title`, `description`, `kql`, `category`, `severity_score`, optional `evidence`).
 
 Every call to `add_queries` returns success/failure details for each query, including syntax errors. You can and should add multiple queries in one go. Only call `add_queries` again if you wish to retry invalid queries or add additional high-value queries. Once you're satisfied with the result, call `complete()`.

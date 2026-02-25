@@ -17,6 +17,19 @@ interface StreamQueryBase {
   title: string;
 }
 
+
+export const streamQueryTypeSchema = z.enum(['match', 'stats']);
+export const streamQueryCategorySchema = z
+  .enum(['operational', 'error', 'resource_health', 'configuration', 'security'])
+  .optional();
+export const streamQuerySourceSchema = z
+  .enum(['ai_generated', 'user_created', 'predefined'])
+  .optional();
+
+export type StreamQueryType = z.infer<typeof streamQueryTypeSchema>;
+export type StreamQueryCategory = z.infer<typeof streamQueryCategorySchema>;
+export type StreamQuerySource = z.infer<typeof streamQuerySourceSchema>;
+
 export interface StreamQuery extends StreamQueryBase {
   stream_name: string;
   /**
@@ -44,10 +57,10 @@ export interface StreamQuery extends StreamQueryBase {
   severity_score?: number;
   evidence?: string[];
   description?: string;
-  type: 'match' | 'stats';
-  category: 'operational' | 'error' | 'resource_health' | 'configuration' | 'security';
+  type: StreamQueryType;
+  category?: StreamQueryCategory;
   tags: string[];
-  source?: 'ai_generated' | 'user_created' | 'predefined';
+  source?: StreamQuerySource;
   model?: string;
   created_at?: string;
   updated_at?: string;
@@ -58,23 +71,7 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   title: NonEmptyString,
 });
 
-export const streamQueryTypeSchema = z.enum(['match', 'stats']);
-export const streamQueryCategorySchema = z.enum([
-  'operational',
-  'error',
-  'resource_health',
-  'configuration',
-  'security',
-]);
-export const streamQuerySourceSchema = z
-  .enum(['ai_generated', 'user_created', 'predefined'])
-  .optional();
-
-export type StreamQueryType = z.infer<typeof streamQueryTypeSchema>;
-export type StreamQueryCategory = z.infer<typeof streamQueryCategorySchema>;
-export type StreamQuerySource = z.infer<typeof streamQuerySourceSchema>;
-
-export type StreamQueryInput = Omit<StreamQuery, 'esql' | 'created_at' | 'updated_at'>;
+export type StreamQueryInput = Omit<StreamQuery, 'esql' | 'updated_at'>;
 
 export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection(
   streamQueryBaseSchema,
@@ -119,6 +116,7 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
 
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
+  stream_name: NonEmptyString,
   feature: z
     .object({
       name: NonEmptyString,

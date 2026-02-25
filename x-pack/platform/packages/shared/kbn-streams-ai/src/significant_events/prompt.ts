@@ -84,6 +84,9 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                     title: {
                       type: 'string',
                     },
+                    description: {
+                      type: 'string',
+                    },
                     category: {
                       type: 'string',
                       enum: [
@@ -106,7 +109,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                       },
                     },
                   },
-                  required: ['kql', 'title', 'category', 'severity_score'],
+                  required: ['kql', 'title', 'description', 'category', 'severity_score'],
                 },
               },
             },

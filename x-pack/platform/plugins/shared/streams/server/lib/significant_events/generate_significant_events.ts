@@ -76,7 +76,10 @@ export async function generateSignificantEventDefinitions(
   return {
     queries: queries.map((query) => ({
       title: query.title,
-      kql: query.kql,
+      description: query.description,
+      kql: {
+        query: query.kql,
+      },
       feature,
       esql: {
         query: buildEsqlQuery(getIndexPatternsForStream(definition), {
@@ -86,6 +89,16 @@ export async function generateSignificantEventDefinitions(
       },
       severity_score: query.severity_score,
       evidence: query.evidence,
+      category: query.category,
+      source: 'ai_generated',
+      model: connectorId,
+      created_at: new Date().toISOString(),
+      /**
+       * Only `match` types are supported for now.
+       * Support for STATS queries: https://github.com/elastic/streams-program/issues/851
+       */
+      type: 'match',
+      tags: [],
     })),
     tokensUsed,
     toolUsage,

@@ -104,6 +104,7 @@ const upsertQueryRoute = createServerRoute({
     });
     await queryClient.upsert(definition, {
       id: queryId,
+      stream_name: body.stream_name,
       title: body.title,
       feature: body.feature,
       kql: {
@@ -111,6 +112,11 @@ const upsertQueryRoute = createServerRoute({
       },
       severity_score: body.severity_score,
       evidence: body.evidence,
+      description: body.description,
+      tags: body.tags,
+      type: body.type,
+      category: body.category,
+      source: body.source,
     });
 
     return {
