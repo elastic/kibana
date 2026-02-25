@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management_page';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
@@ -111,8 +112,8 @@ jest.mock(
   })
 );
 
-jest.mock('../components/risk_score_management/risk_score_enable_section', () => ({
-  RiskScoreEnableSection: () => 'Risk score enable section',
+jest.mock('../components/entity_analytics_toggle', () => ({
+  EntityAnalyticsToggle: () => 'Entity analytics toggle',
 }));
 jest.mock('../components/risk_score_management/risk_score_useful_links_section', () => ({
   RiskScoreUsefulLinksSection: () => 'Useful links',
@@ -124,6 +125,10 @@ jest.mock('../components/risk_score_management/risk_score_preview_section', () =
 
 jest.mock('../components/risk_score_management/alert_filters_kql_bar', () => ({
   AlertFiltersKqlBar: () => 'Alert filters',
+}));
+
+jest.mock('../components/asset_criticality_file_uploader/asset_criticality_file_uploader', () => ({
+  AssetCriticalityFileUploader: () => 'Asset criticality file uploader',
 }));
 
 const defaultRiskEngineSettings = {
@@ -177,9 +182,11 @@ describe('EntityAnalyticsManagementPage', () => {
   });
 
   const pageComponent = () => (
-    <QueryClientProvider client={new QueryClient()}>
-      <EntityAnalyticsManagementPage />
-    </QueryClientProvider>
+    <IntlProvider locale="en">
+      <QueryClientProvider client={new QueryClient()}>
+        <EntityAnalyticsManagementPage />
+      </QueryClientProvider>
+    </IntlProvider>
   );
 
   it('renders page title and tabs', () => {
@@ -191,7 +198,7 @@ describe('EntityAnalyticsManagementPage', () => {
 
   it('has the risk score tab selected by default with content visible', () => {
     render(pageComponent());
-    expect(screen.getByText('Risk score enable section')).toBeInTheDocument();
+    expect(screen.getByText('Entity analytics toggle')).toBeInTheDocument();
     expect(screen.getByText('Risk score preview')).toBeInTheDocument();
   });
 

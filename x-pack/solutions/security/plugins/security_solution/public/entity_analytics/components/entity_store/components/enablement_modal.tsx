@@ -5,218 +5,120 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
-  EuiModalFooter,
-  EuiButton,
   EuiHorizontalRule,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiText,
-  EuiButtonEmpty,
-  EuiCallOut,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import type { RiskEngineStatus, StoreStatus } from '../../../../../common/api/entity_analytics';
-import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
+
 import { useContractComponents } from '../../../../common/hooks/use_contract_component';
-import {
-  ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
-  ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
-  ENABLEMENT_WARNING_SELECT_TO_PROCEED,
-} from '../translations';
-import { EntityStoreMissingPrivilegesCallout } from './entity_store_missing_privileges_callout';
-import { useMissingRiskEnginePrivileges } from '../../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../../risk_engine_privileges_callout';
+import { useMissingRiskEnginePrivileges } from '../../../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../hooks/use_entity_engine_privileges';
-export interface Enablements {
-  riskScore: boolean;
-  entityStore: boolean;
-}
+import { EntityStoreMissingPrivilegesCallout } from './entity_store_missing_privileges_callout';
 
-export interface EntityStoreEnablementModalProps {
+interface EnablementConfirmationModalProps {
   visible: boolean;
-  toggle: (visible: boolean) => void;
-  enableStore: (enablements: Enablements) => () => void;
-  riskEngineStatus?: RiskEngineStatus;
-  entityStoreStatus?: StoreStatus;
+  onClose: () => void;
+  onConfirm: () => void;
 }
 
-const isInstallButtonEnabled = (
-  canInstallRiskScore: boolean,
-  canInstallEntityStore: boolean,
-  userHasEnabled: Enablements
-) => {
-  if (canInstallRiskScore || canInstallEntityStore) {
-    return userHasEnabled.riskScore || userHasEnabled.entityStore;
-  }
-
-  return false;
-};
-
-const ENTITY_STORE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.enablements.modal.store',
-  {
-    defaultMessage: 'Entity Store',
-  }
-);
-export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProps> = ({
+export const EnablementConfirmationModal: React.FC<EnablementConfirmationModalProps> = ({
   visible,
-  toggle,
-  enableStore,
-  riskEngineStatus,
-  entityStoreStatus,
+  onClose,
+  onConfirm,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
   const { data: entityEnginePrivileges, isLoading: isLoadingEntityEnginePrivileges } =
     useEntityEnginePrivileges();
 
-  const hasRiskScorePrivileges = !(
-    riskEnginePrivileges.isLoading || !riskEnginePrivileges?.hasAllRequiredPrivileges
-  );
-
-  const canInstallRiskScore =
-    hasRiskScorePrivileges && riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED;
-
-  const hasEntityStorePrivileges = !(
-    isLoadingEntityEnginePrivileges || !entityEnginePrivileges?.has_all_required
-  );
-
-  const canInstallEntityStore = hasEntityStorePrivileges && entityStoreStatus === 'not_installed';
-
-  const { euiTheme } = useEuiTheme();
-  const [toggleState, setToggleState] = useState({
-    riskScore: false,
-    entityStore: false,
-  });
-
-  /**
-   * Update the toggle state when the install status changes because privileges are async.
-   * We automatically toggle the switch when the user can enable the engine.
-   *
-   */
-  useEffect(() => {
-    setToggleState({
-      riskScore: canInstallRiskScore,
-      entityStore: canInstallEntityStore,
-    });
-  }, [canInstallRiskScore, canInstallEntityStore]);
-
-  const isInstallButtonDisabled = !isInstallButtonEnabled(
-    canInstallRiskScore,
-    canInstallEntityStore,
-    toggleState
-  );
-
   const { AdditionalChargesMessage } = useContractComponents();
 
-  const modalTitleId = useGeneratedHtmlId();
+  const hasRiskScorePrivileges =
+    !riskEnginePrivileges.isLoading && riskEnginePrivileges.hasAllRequiredPrivileges;
+  const hasEntityStorePrivileges =
+    !isLoadingEntityEnginePrivileges && entityEnginePrivileges?.has_all_required;
+
+  const isConfirmDisabled = !hasRiskScorePrivileges && !hasEntityStorePrivileges;
 
   if (!visible) {
     return null;
   }
-  const proceedWarning = (
-    <EuiCallOut
-      size="s"
-      color="danger"
-      css={css`
-        border-radius: ${euiTheme.border.radius.medium};
-      `}
-    >
-      <p>{ENABLEMENT_WARNING_SELECT_TO_PROCEED}</p>
-    </EuiCallOut>
-  );
+
   return (
     <EuiModal
-      onClose={() => toggle(false)}
+      onClose={onClose}
       aria-labelledby={modalTitleId}
-      data-test-subj="entityStoreEnablementModal"
+      data-test-subj="entityAnalyticsEnablementModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.enablements.modal.title"
-            defaultMessage="Entity Analytics Enablement"
+            id="xpack.securitySolution.entityAnalytics.enablement.modal.title"
+            defaultMessage="Enable Entity Analytics"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiFlexGroup direction="column">
-          <EuiFlexItem>{AdditionalChargesMessage && <AdditionalChargesMessage />}</EuiFlexItem>
+          {AdditionalChargesMessage && (
+            <EuiFlexItem>
+              <AdditionalChargesMessage />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
-            <EuiSwitch
-              label={
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.enablements.modal.risk"
-                  defaultMessage="Risk Score"
-                />
-              }
-              checked={toggleState.riskScore}
-              disabled={!canInstallRiskScore}
-              onChange={() => setToggleState((prev) => ({ ...prev, riskScore: !prev.riskScore }))}
-              data-test-subj="enablementRiskScoreSwitch"
-            />
+            <EuiText>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.enablement.modal.description"
+                defaultMessage="Enabling Entity Analytics will start the Risk Score engine and Entity Store. This provides real-time visibility into entity activity and stores data for entities observed in events."
+              />
+            </EuiText>
           </EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
           {!riskEnginePrivileges.isLoading && !riskEnginePrivileges.hasAllRequiredPrivileges && (
             <EuiFlexItem>
               <RiskEnginePrivilegesCallOut privileges={riskEnginePrivileges} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem>
-            <EuiText>{ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY}</EuiText>
-          </EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-          <EuiFlexItem>
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiSwitch
-                label={ENTITY_STORE}
-                checked={toggleState.entityStore}
-                disabled={!canInstallEntityStore}
-                onChange={() =>
-                  setToggleState((prev) => ({ ...prev, entityStore: !prev.entityStore }))
-                }
-                data-test-subj="enablementEntityStoreSwitch"
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {!entityEnginePrivileges || entityEnginePrivileges.has_all_required ? null : (
+          {entityEnginePrivileges && !entityEnginePrivileges.has_all_required && (
             <EuiFlexItem>
               <EntityStoreMissingPrivilegesCallout privileges={entityEnginePrivileges} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem>
-            <EuiText>{ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY}</EuiText>
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>
 
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {isInstallButtonDisabled && (canInstallRiskScore || canInstallEntityStore) ? (
-            <EuiFlexItem>{proceedWarning}</EuiFlexItem>
-          ) : null}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" justifyContent="flexEnd">
-              <EuiButtonEmpty onClick={() => toggle(false)}>{'Cancel'}</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={onClose}>
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.enablement.modal.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
               <EuiButton
-                onClick={enableStore(toggleState)}
+                onClick={onConfirm}
                 fill
-                isDisabled={isInstallButtonDisabled}
-                aria-disabled={isInstallButtonDisabled}
-                data-test-subj="entityStoreEnablementModalButton"
+                isDisabled={isConfirmDisabled}
+                data-test-subj="entityAnalyticsEnablementConfirmButton"
               >
                 <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.enablements.modal.enable"
+                  id="xpack.securitySolution.entityAnalytics.enablement.modal.enable"
                   defaultMessage="Enable"
                 />
               </EuiButton>
