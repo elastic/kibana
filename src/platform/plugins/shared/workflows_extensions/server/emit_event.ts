@@ -23,7 +23,7 @@ export interface EmitEventDeps {
  */
 export async function emitEvent(params: EmitEventParams, deps: EmitEventDeps): Promise<void> {
   const timestamp = new Date().toISOString();
-  const { triggerId, spaceId, payload } = params;
+  const { triggerId, spaceId, payload, request } = params;
   const { triggerRegistry, triggerEventHandler } = deps;
 
   if (!triggerRegistry.has(triggerId)) {
@@ -33,6 +33,6 @@ export async function emitEvent(params: EmitEventParams, deps: EmitEventDeps): P
   }
 
   if (triggerEventHandler) {
-    await triggerEventHandler({ timestamp, triggerId, spaceId, payload });
+    await triggerEventHandler({ timestamp, triggerId, spaceId, payload, request });
   }
 }

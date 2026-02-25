@@ -23,6 +23,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
+import { createTriggerEventHandler } from './event_driven/trigger_event_handler';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { initializeTriggerEventsDataStream } from './trigger_events_log';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
@@ -159,6 +160,13 @@ export class WorkflowsPlugin
     if (!this.spaces) {
       throw new Error('Spaces service not initialized');
     }
+
+    const triggerEventHandler = createTriggerEventHandler({
+      api: this.api,
+      logger: this.logger,
+    });
+
+    plugins.workflowsExtensions.registerTriggerEventHandler(triggerEventHandler);
 
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();

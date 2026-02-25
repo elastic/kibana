@@ -22,6 +22,7 @@ export type {
   EmitEventFn,
   EmitEventParams,
   ServerTriggerDefinition,
+  TriggerEventHandlerParams,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginSetupDeps,

@@ -15,6 +15,7 @@ import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
 import { emitEvent } from './emit_event';
 import type {
+  EmitEventParams,
   TriggerEventHandler,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginSetupDeps,
@@ -84,7 +85,7 @@ export class WorkflowsExtensionsServerPlugin
       getAllTriggerDefinitions: () => {
         return this.triggerRegistry.list();
       },
-      emitEvent: (params: { triggerId: string; spaceId: string; payload: Record<string, unknown> }) =>
+      emitEvent: (params: EmitEventParams) =>
         emitEvent(params, {
           triggerRegistry: this.triggerRegistry,
           triggerEventHandler: this.triggerEventHandler,

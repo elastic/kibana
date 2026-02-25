@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { z } from '@kbn/zod/v4';
@@ -26,6 +27,7 @@ export interface TriggerEventHandlerParams {
   triggerId: string;
   spaceId: string;
   payload: Record<string, unknown>;
+  request: KibanaRequest;
 }
 
 /**
@@ -41,6 +43,7 @@ export interface EmitEventParams {
   triggerId: string;
   spaceId: string;
   payload: Record<string, unknown>;
+  request: KibanaRequest;
 }
 
 /**
