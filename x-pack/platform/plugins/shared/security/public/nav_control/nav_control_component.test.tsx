@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiContextMenu } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -20,18 +19,6 @@ import * as UseCurrentUserImports from '../components/use_current_user';
 
 jest.mock('../components/use_current_user');
 jest.mock('react-use/lib/useObservable');
-
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  return {
-    ...actual,
-    EuiContextMenu: jest.fn((props: any) => <actual.EuiContextMenu {...props} />),
-  };
-});
-
-const MockedEuiContextMenu = EuiContextMenu as unknown as jest.MockedFunction<
-  typeof EuiContextMenu
->;
 
 const useObservableMock = useObservable as jest.Mock;
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
@@ -67,8 +54,6 @@ describe('SecurityNavControl', () => {
     useObservableMock.mockImplementation(
       (observable: BehaviorSubject<any>, initialValue = {}) => observable.value ?? initialValue
     );
-
-    MockedEuiContextMenu.mockClear();
   });
 
   it('should render an avatar when user profile has loaded', async () => {
@@ -153,88 +138,118 @@ describe('SecurityNavControl', () => {
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
 
-    const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
-    expect(lastCall[0].panels).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "content": <ContextMenuContent
-            closePopover={[Function]}
-            items={
-              Array [
-                Object {
-                  "data-test-subj": "profileLink",
-                  "href": "edit-profile-link",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="user"
-                  />,
-                  "name": <Memo(MemoizedFormattedMessage)
-                    defaultMessage="Edit profile"
-                    id="xpack.security.navControlComponent.editProfileLinkText"
-                  />,
-                  "onClick": [Function],
-                },
-                Object {
-                  "content": undefined,
-                  "data-test-subj": "userMenuLink__link1",
-                  "href": "path-to-link-1",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="empty"
-                  />,
-                  "name": "link1",
-                },
-                Object {
-                  "content": undefined,
-                  "data-test-subj": "userMenuLink__link2",
-                  "href": "path-to-link-2",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="empty"
-                  />,
-                  "name": "link2",
-                },
-                Object {
-                  "content": undefined,
-                  "data-test-subj": "userMenuLink__link3",
-                  "href": "path-to-link-3",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="empty"
-                  />,
-                  "name": "link3",
-                },
-                Object {
-                  "content": <div>
-                    Dummy Component
-                  </div>,
-                  "data-test-subj": "userMenuLink__dummyComponent",
-                  "href": "",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="empty"
-                  />,
-                  "name": "dummyComponent",
-                },
-                Object {
-                  "data-test-subj": "logoutLink",
-                  "href": "",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="exit"
-                  />,
-                  "name": <Memo(MemoizedFormattedMessage)
-                    defaultMessage="Log out"
-                    id="xpack.security.navControlComponent.logoutLinkText"
-                  />,
-                },
-              ]
-            }
-          />,
-          "id": 0,
-          "title": "full name",
-        },
-      ]
+    expect(screen.getByTestId('userMenu')).toMatchInlineSnapshot(`
+      <div
+        class="euiContextMenu chrNavControl__userMenu emotion-euiContextMenu"
+        data-test-subj="userMenu"
+        style="height: 0px;"
+      >
+        <div
+          class="euiContextMenuPanel emotion-euiContextMenuPanel-euiContextMenu__panel"
+          tabindex="-1"
+        >
+          <div
+            class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+            data-test-subj="contextMenuPanelTitle"
+          >
+            <span
+              class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+            >
+              full name
+            </span>
+          </div>
+          <div>
+            <div
+              class="euiContextMenuPanel emotion-euiContextMenuPanel"
+              tabindex="-1"
+            >
+              <div>
+                <a
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="profileLink"
+                  href="edit-profile-link"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="user"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    Edit profile
+                  </span>
+                </a>
+                <a
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="userMenuLink__link1"
+                  href="path-to-link-1"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    link1
+                  </span>
+                </a>
+                <a
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="userMenuLink__link2"
+                  href="path-to-link-2"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    link2
+                  </span>
+                </a>
+                <a
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="userMenuLink__link3"
+                  href="path-to-link-3"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    link3
+                  </span>
+                </a>
+                <div>
+                  Dummy Component
+                </div>
+                <div
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="logoutLink"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="exit"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    Log out
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 
@@ -261,63 +276,99 @@ describe('SecurityNavControl', () => {
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
 
-    const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
-    expect(lastCall[0].panels).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "content": <ContextMenuContent
-            closePopover={[Function]}
-            items={
-              Array [
-                Object {
-                  "content": undefined,
-                  "data-test-subj": "userMenuLink__link1",
-                  "href": "path-to-link-1",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="empty"
-                  />,
-                  "name": "link1",
-                },
-                Object {
-                  "content": undefined,
-                  "data-test-subj": "userMenuLink__link2",
-                  "href": "path-to-link-2",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="empty"
-                  />,
-                  "name": "link2",
-                },
-                Object {
-                  "content": undefined,
-                  "data-test-subj": "userMenuLink__link3",
-                  "href": "path-to-link-3",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="empty"
-                  />,
-                  "name": "link3",
-                },
-                Object {
-                  "data-test-subj": "logoutLink",
-                  "href": "",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="exit"
-                  />,
-                  "name": <Memo(MemoizedFormattedMessage)
-                    defaultMessage="Log out"
-                    id="xpack.security.navControlComponent.logoutLinkText"
-                  />,
-                },
-              ]
-            }
-          />,
-          "id": 0,
-          "title": "full name",
-        },
-      ]
+    expect(screen.getByTestId('userMenu')).toMatchInlineSnapshot(`
+      <div
+        class="euiContextMenu chrNavControl__userMenu emotion-euiContextMenu"
+        data-test-subj="userMenu"
+        style="height: 0px;"
+      >
+        <div
+          class="euiContextMenuPanel emotion-euiContextMenuPanel-euiContextMenu__panel"
+          tabindex="-1"
+        >
+          <div
+            class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+            data-test-subj="contextMenuPanelTitle"
+          >
+            <span
+              class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+            >
+              full name
+            </span>
+          </div>
+          <div>
+            <div
+              class="euiContextMenuPanel emotion-euiContextMenuPanel"
+              tabindex="-1"
+            >
+              <div>
+                <a
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="userMenuLink__link1"
+                  href="path-to-link-1"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    link1
+                  </span>
+                </a>
+                <a
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="userMenuLink__link2"
+                  href="path-to-link-2"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    link2
+                  </span>
+                </a>
+                <a
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="userMenuLink__link3"
+                  href="path-to-link-3"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="empty"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    link3
+                  </span>
+                </a>
+                <div
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="logoutLink"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="exit"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    Log out
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 
@@ -341,33 +392,51 @@ describe('SecurityNavControl', () => {
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
 
-    const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
-    expect(lastCall[0].panels).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "content": <ContextMenuContent
-            closePopover={[Function]}
-            items={
-              Array [
-                Object {
-                  "data-test-subj": "logoutLink",
-                  "href": "",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="exit"
-                  />,
-                  "name": <Memo(MemoizedFormattedMessage)
-                    defaultMessage="Log in"
-                    id="xpack.security.navControlComponent.loginLinkText"
-                  />,
-                },
-              ]
-            }
-          />,
-          "id": 0,
-          "title": "full name",
-        },
-      ]
+    expect(screen.getByTestId('userMenu')).toMatchInlineSnapshot(`
+      <div
+        class="euiContextMenu chrNavControl__userMenu emotion-euiContextMenu"
+        data-test-subj="userMenu"
+        style="height: 0px;"
+      >
+        <div
+          class="euiContextMenuPanel emotion-euiContextMenuPanel-euiContextMenu__panel"
+          tabindex="-1"
+        >
+          <div
+            class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+            data-test-subj="contextMenuPanelTitle"
+          >
+            <span
+              class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+            >
+              full name
+            </span>
+          </div>
+          <div>
+            <div
+              class="euiContextMenuPanel emotion-euiContextMenuPanel"
+              tabindex="-1"
+            >
+              <div>
+                <div
+                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  data-test-subj="logoutLink"
+                >
+                  <span
+                    class="emotion-euiContextMenu__icon"
+                    data-euiicon-type="exit"
+                  />
+                  <span
+                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                  >
+                    Log in
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `);
   });
 });
