@@ -1,39 +1,44 @@
 #!/usr/bin/env bash
-# Generates a Scout spec file with proper boilerplate for Security Solution.
+# Generates a Scout spec file with proper boilerplate for any Kibana plugin.
 #
 # Usage:
-#   bash .agents/skills/security-solution-cypress-to-scout-migration/scripts/scaffold_scout_spec.sh \
+#   bash .agents/skills/cypress-to-scout-migration/scripts/scaffold_scout_spec.sh \
 #     --name timeline_creation \
 #     --domain investigations/timelines \
+#     --plugin-test-dir x-pack/solutions/security/plugins/security_solution/test/scout/ui \
 #     --type parallel
 #
 # Options:
-#   --name    Spec name in snake_case (required)
-#   --domain  Subdirectory path under parallel_tests/ or tests/ (required)
-#   --type    "parallel" (default) or "sequential"
+#   --name            Spec name in snake_case (required)
+#   --domain          Subdirectory path under parallel_tests/ or tests/ (required)
+#   --plugin-test-dir Path to the plugin's test/scout/ui directory (required)
+#   --type            "parallel" (default) or "sequential"
+#   --scout-package   Scout package to import from (default: @kbn/scout)
 
 set -euo pipefail
 
 SPEC_NAME=""
 DOMAIN=""
 TEST_TYPE="parallel"
+PLUGIN_TEST_DIR=""
+SCOUT_PACKAGE="@kbn/scout"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --name)   SPEC_NAME="$2"; shift 2 ;;
-    --domain) DOMAIN="$2"; shift 2 ;;
-    --type)   TEST_TYPE="$2"; shift 2 ;;
+    --name)            SPEC_NAME="$2"; shift 2 ;;
+    --domain)          DOMAIN="$2"; shift 2 ;;
+    --plugin-test-dir) PLUGIN_TEST_DIR="$2"; shift 2 ;;
+    --type)            TEST_TYPE="$2"; shift 2 ;;
+    --scout-package)   SCOUT_PACKAGE="$2"; shift 2 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
 
-if [[ -z "$SPEC_NAME" || -z "$DOMAIN" ]]; then
-  echo "Error: --name and --domain are required"
-  echo "Usage: $0 --name <spec_name> --domain <domain_path> [--type parallel|sequential]"
+if [[ -z "$SPEC_NAME" || -z "$DOMAIN" || -z "$PLUGIN_TEST_DIR" ]]; then
+  echo "Error: --name, --domain, and --plugin-test-dir are required"
+  echo "Usage: $0 --name <spec_name> --domain <domain_path> --plugin-test-dir <path> [--type parallel|sequential] [--scout-package <pkg>]"
   exit 1
 fi
-
-PLUGIN_TEST_DIR="x-pack/solutions/security/plugins/security_solution/test/scout/ui"
 
 if [[ "$TEST_TYPE" == "parallel" ]]; then
   TARGET_DIR="${PLUGIN_TEST_DIR}/parallel_tests/${DOMAIN}"
@@ -52,7 +57,7 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
-cat > "$SPEC_FILE" << 'TEMPLATE'
+cat > "$SPEC_FILE" << TEMPLATE
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -63,17 +68,17 @@ cat > "$SPEC_FILE" << 'TEMPLATE'
 TEMPLATE
 
 if [[ "$TEST_TYPE" == "parallel" ]]; then
-  cat >> "$SPEC_FILE" << 'PARALLEL'
-import { spaceTest, tags } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/ui';
+  cat >> "$SPEC_FILE" << PARALLEL
+import { spaceTest, tags } from '${SCOUT_PACKAGE}';
+import { expect } from '${SCOUT_PACKAGE}/ui';
 
 spaceTest.describe(
   'TODO: describe suite',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [/* TODO: add tags e.g. ...tags.stateful.classic */] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
       // TODO: API-based setup
-      await browserAuth.loginAsPlatformEngineer();
+      await browserAuth.loginAsAdmin();
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
@@ -89,17 +94,17 @@ spaceTest.describe(
 );
 PARALLEL
 else
-  cat >> "$SPEC_FILE" << 'SEQUENTIAL'
-import { test, tags } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/ui';
+  cat >> "$SPEC_FILE" << SEQUENTIAL
+import { test, tags } from '${SCOUT_PACKAGE}';
+import { expect } from '${SCOUT_PACKAGE}/ui';
 
 test.describe(
   'TODO: describe suite',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [/* TODO: add tags e.g. ...tags.stateful.classic */] },
   () => {
     test.beforeEach(async ({ browserAuth, apiServices }) => {
       // TODO: API-based setup
-      await browserAuth.loginAsPlatformEngineer();
+      await browserAuth.loginAsAdmin();
     });
 
     test.afterEach(async ({ apiServices }) => {

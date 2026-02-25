@@ -15,7 +15,7 @@
 
 | Aspect | Cypress | Scout |
 |--------|---------|-------|
-| Location | Centralized test folder (`test/security_solution_cypress/`) | Tests closer to the plugin (`<plugin>/test/scout/`) |
+| Location | Centralized test folder (`test/<solution>_cypress/`) | Tests closer to the plugin (`<plugin>/test/scout/`) |
 | Organization | `cypress/e2e/<domain>/` | `test/scout/ui/{tests,parallel_tests}/` |
 
 ## Authentication
@@ -37,17 +37,11 @@ Scout uses SAML for both ESS and Serverless, making auth consistent across envir
 | Parallelization control | `parallelism` attribute in Buildkite YAML | `workers` attribute in Playwright config |
 | Parallelization method | Spec files distributed between CI jobs | Tests run in parallel in same Kibana/ES instances, isolated by spaces |
 
-**Critical implication:** In Scout, data created by one test may affect others. Use `spaceTest` + `scoutSpace` for isolation, and clean up in `afterAll`. Because Cypress runs each spec in a clean environment, most Cypress tests have **no cleanup logic at all**. When migrating, you must independently audit what the test creates and add explicit cleanup — do not assume the Cypress test's cleanup (or lack thereof) is sufficient.
+**Critical implication:** In Scout, data created by one test may affect others. Use `spaceTest` + `scoutSpace` for isolation, and clean up in `afterAll`. Most Cypress tests have **no cleanup logic** because the environment is reset per spec. When migrating, you must independently audit what the test creates and add explicit cleanup.
 
 ## MKI Pipelines
 
-| Aspect | Cypress | Scout |
-|--------|---------|-------|
-| Periodic pipeline | Active, managed by Security Engineering Productivity | Under development, will be managed by Appex QA |
-| Kibana QA quality gate | Active, subset of serverless tests | Under development |
-| Adding new tests | Managed by Security Engineering Productivity | Will be managed by Appex QA |
-
-**Important:** Scout does NOT currently run on MKI. If a Cypress test has `@serverless` tag, it provides MKI coverage that Scout cannot replace yet. Keep such Cypress tests until Scout MKI pipelines are ready.
+Scout does NOT currently run on MKI. If a Cypress test has a `@serverless` tag, it provides MKI coverage that Scout cannot replace yet. Keep such Cypress tests until Scout MKI pipelines are ready.
 
 ## Local Test Execution
 
@@ -56,19 +50,14 @@ Scout uses SAML for both ESS and Serverless, making auth consistent across envir
 | Environment setup | Cypress creates the environment automatically | You must create the environment first |
 | Server start | Automatic | `node scripts/scout.js start-server --stateful` in a separate terminal |
 | Running tests | Open Cypress UI or `cypress run` | `node scripts/scout.js run-tests --stateful --testFiles <path>` |
-| Debug mode | `--headed` + DevTools | `SCOUT_LOG_LEVEL=debug` or `npx playwright test --ui` |
 
 ## Test Labels/Tags
 
 | Aspect | Cypress | Scout |
 |--------|---------|-------|
 | Label type | Negative tags allowed (`@skipInEss`, `@skipInServerless`) | Positive tags only (due to Playwright's design) |
-| ESS | `@ess` | `tags.stateful.classic` |
-| Serverless | `@serverless` | `tags.serverless.security_complete` |
 | Skip mechanism | `@skipInEss`, `@skipInServerless`, `@skipInServerlessMKI` | No equivalent skip tags — use positive tags to include |
 | Validation | No runtime validation | Scout validates UI tags at runtime |
-
-Scout will gain more tagging flexibility (local-only tests, cloud-compatible tests), controlled by Appex QA.
 
 ## Test Patterns
 
