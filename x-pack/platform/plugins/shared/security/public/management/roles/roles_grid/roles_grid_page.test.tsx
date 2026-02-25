@@ -109,7 +109,7 @@ describe('<RolesGridPage />', () => {
   it('renders permission denied if required', async () => {
     apiClientMock.queryRoles.mockRejectedValue({ body: { statusCode: 403 } });
 
-    renderWithIntl(
+    const { container } = renderWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
@@ -126,6 +126,7 @@ describe('<RolesGridPage />', () => {
     await waitFor(() => {
       expect(screen.getByTestId('permissionDeniedMessage')).toBeInTheDocument();
     });
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   it('renders role actions as appropriate, escaping when necessary', async () => {
