@@ -29,6 +29,7 @@ export const SourcesPage: React.FC = () => {
   });
 
   const handleAddSource = useCallback(() => {
+    setSelectedDataSourceId(null);
     setShowSelectionFlyout(true);
   }, []);
 
