@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   useEuiTheme,
   EuiFlexGroup,
@@ -18,11 +18,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { WatchlistsFlyoutKey } from '../../../../../flyout/entity_details/shared/constants';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useWatchlistsTableData } from './hooks/use_watchlists_table_data';
 import { buildWatchlistsManagementTableColumns } from './columns';
+import type { WatchlistTableItemType } from './types';
 
 export const WATCHLISTS_MANAGEMENT_TABLE_ID = 'watchlistsManagementTableId';
 export const WATCHLISTS_MANAGEMENT_TABLE_QUERY_ID = 'watchlistsManagementTableQueryId';
@@ -30,7 +33,30 @@ export const WATCHLISTS_MANAGEMENT_TABLE_QUERY_ID = 'watchlistsManagementTableQu
 export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ spaceId }) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
-  const columns = buildWatchlistsManagementTableColumns(euiTheme);
+  const { openFlyout } = useExpandableFlyoutApi();
+  const onEdit = useCallback(
+    (record: WatchlistTableItemType) => {
+      openFlyout({
+        right: {
+          id: WatchlistsFlyoutKey,
+          params: {
+            mode: 'edit',
+            watchlistId: record.id,
+            watchlistName: record.name,
+          },
+        },
+      });
+    },
+    [openFlyout]
+  );
+  const onDelete = useCallback((record: WatchlistTableItemType) => {
+    window.alert(
+      i18n.translate('xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteAlert', {
+        defaultMessage: 'Delete watchlist is not implemented yet.',
+      })
+    );
+  }, []);
+  const columns = buildWatchlistsManagementTableColumns(euiTheme, onEdit, onDelete);
   const { visibleRecords, isLoading, hasError, refetch, inspect } = useWatchlistsTableData(
     spaceId,
     0,

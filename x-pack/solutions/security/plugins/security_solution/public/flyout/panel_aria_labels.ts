@@ -158,3 +158,8 @@ export const IOC_RIGHT_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.iocRight',
   { defaultMessage: 'Indicator of compromise details' }
 );
+
+export const WATCHLISTS_PANEL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.watchlists',
+  { defaultMessage: 'Watchlists' }
+);

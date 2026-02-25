@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { WatchlistsFlyoutKey } from '../../flyout/entity_details/shared/constants';
 import { Watchlists } from '../components/watchlists';
 
 const PAGE_TITLE = i18n.translate(
@@ -22,10 +25,33 @@ const PAGE_TITLE = i18n.translate(
 );
 
 export const EntityAnalyticsWatchlistsManagementPage = () => {
+  const { openFlyout } = useExpandableFlyoutApi();
+
+  const handleCreateClick = () => {
+    openFlyout({
+      right: {
+        id: WatchlistsFlyoutKey,
+        params: {
+          mode: 'create',
+        },
+      },
+    });
+  };
+
   return (
     <>
       <SecuritySolutionPageWrapper data-test-subj="watchlistManagementPage">
-        <HeaderPage title={PAGE_TITLE} />
+        <HeaderPage
+          title={PAGE_TITLE}
+          rightSideItems={[
+            <EuiButton iconType="plusInCircle" fill onClick={handleCreateClick}>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.watchlistsManagement.createButtonLabel"
+                defaultMessage="Create"
+              />
+            </EuiButton>,
+          ]}
+        />
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>
             <Watchlists />
