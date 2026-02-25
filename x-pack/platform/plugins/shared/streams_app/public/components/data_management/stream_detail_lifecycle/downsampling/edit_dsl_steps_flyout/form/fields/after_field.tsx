@@ -24,7 +24,7 @@ import {
   afterGreaterThanPreviousStep,
   afterMustBeInteger,
   afterMustBeNonNegative,
-  createAfterLessThanDataRetention,
+  afterSmallerThanDataRetention,
   requiredAfterValue,
 } from '../validations';
 import { useOnStepFieldErrorsChange } from '../error_tracking';
@@ -96,7 +96,7 @@ export const AfterField = ({
       ...(dataRetentionMs !== undefined && dataRetentionEsFormat
         ? [
             {
-              validator: createAfterLessThanDataRetention({
+              validator: afterSmallerThanDataRetention({
                 retentionMs: dataRetentionMs,
                 retentionEsFormat: dataRetentionEsFormat,
               }),

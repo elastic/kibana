@@ -115,7 +115,7 @@ export const afterGreaterThanPreviousStep: DslValidationFunc = (arg) => {
   }
 };
 
-export const createAfterLessThanDataRetention = ({
+export const afterSmallerThanDataRetention = ({
   retentionMs,
   retentionEsFormat,
 }: {
@@ -147,10 +147,10 @@ export const createAfterLessThanDataRetention = ({
     );
 
     // If a downsampling step happens after data retention, it will never execute before deletion.
-    if (ms >= 0 && ms > retentionMs) {
+    if (ms >= 0 && ms >= retentionMs) {
       return {
         message: i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanRetentionError', {
-          defaultMessage: 'Must be less than the data retention period ({retention}).',
+          defaultMessage: 'Must be smaller than the data retention period ({retention}).',
           values: { retention: retentionEsFormat },
         }),
       };

@@ -333,7 +333,7 @@ describe('EditDslStepsFlyout', () => {
         {
           initialSteps: {
             dsl: {
-              data_retention: '30d',
+              data_retention: '41d',
               downsample: [
                 { after: '30d', fixed_interval: '1h' },
                 { after: '40d', fixed_interval: '5d' },
@@ -368,7 +368,7 @@ describe('EditDslStepsFlyout', () => {
       await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
       expect(onSave).toHaveBeenCalledWith({
         dsl: {
-          data_retention: '30d',
+          data_retention: '41d',
           downsample: [{ after: '30d', fixed_interval: '1h' }],
         },
       });
@@ -504,7 +504,7 @@ describe('EditDslStepsFlyout', () => {
         {
           initialSteps: {
             dsl: {
-              data_retention: '30d',
+              data_retention: '40d',
               downsample: [
                 { after: '10d', fixed_interval: '1h' },
                 { after: '20d', fixed_interval: '2h' },

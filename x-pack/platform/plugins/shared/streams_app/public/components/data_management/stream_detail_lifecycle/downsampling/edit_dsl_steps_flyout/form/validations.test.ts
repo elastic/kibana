@@ -9,7 +9,7 @@ import type { ValidationFuncArg } from '@kbn/es-ui-shared-plugin/static/forms/ho
 
 import {
   afterGreaterThanPreviousStep,
-  createAfterLessThanDataRetention,
+  afterSmallerThanDataRetention,
   fixedIntervalMultipleOfPreviousStep,
   fixedIntervalMustBeAtLeastFiveMinutes,
 } from './validations';
@@ -172,11 +172,11 @@ describe('streams DSL steps flyout validations', () => {
     });
   });
 
-  describe('createAfterLessThanDataRetention', () => {
+  describe('afterSmallerThanDataRetention', () => {
     const dayMs = 86_400_000;
 
     it('fails when after is larger than data retention', () => {
-      const validate = createAfterLessThanDataRetention({
+      const validate = afterSmallerThanDataRetention({
         retentionMs: 30 * dayMs,
         retentionEsFormat: '30d',
       });
@@ -201,7 +201,7 @@ describe('streams DSL steps flyout validations', () => {
     });
 
     it('returns undefined when after is equal or smaller than data retention', () => {
-      const validate = createAfterLessThanDataRetention({
+      const validate = afterSmallerThanDataRetention({
         retentionMs: 30 * dayMs,
         retentionEsFormat: '30d',
       });
