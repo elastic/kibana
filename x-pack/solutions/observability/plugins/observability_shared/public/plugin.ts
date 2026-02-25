@@ -16,10 +16,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { BehaviorSubject, combineLatest, type Subscription } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_SESSION_TAG,
-} from '@kbn/observability-agent-builder-plugin/public';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
@@ -64,6 +60,9 @@ export interface ObservabilitySharedStart {
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
 export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugin['start']>;
 export type ProfilingLocators = ObservabilitySharedPluginSetup['locators']['profiling'];
+
+export const OBSERVABILITY_AGENT_ID = 'observability.agent';
+export const OBSERVABILITY_SESSION_TAG = 'observability';
 
 interface ObservabilitySharedLocators {
   infra: {

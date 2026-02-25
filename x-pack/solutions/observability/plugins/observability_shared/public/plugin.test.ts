@@ -12,10 +12,10 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { PublicAppInfo } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import {
+  ObservabilitySharedPlugin,
   OBSERVABILITY_AGENT_ID,
   OBSERVABILITY_SESSION_TAG,
-} from '@kbn/observability-agent-builder-plugin/public';
-import { ObservabilitySharedPlugin } from './plugin';
+} from './plugin';
 
 describe('ObservabilitySharedPlugin', () => {
   const createMockApp = (id: string, categoryId?: string): PublicAppInfo =>

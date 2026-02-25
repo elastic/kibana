@@ -50,7 +50,6 @@
     "@kbn/deeplinks-observability",
     "@kbn/home-sample-data-tab",
     "@kbn/agent-builder-plugin",
-    "@kbn/observability-agent-builder-plugin",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
