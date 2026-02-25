@@ -88,6 +88,10 @@ interface ValidateScheduleLimitParams {
 
 export type ValidateScheduleLimitResult = { interval: number; intervalAvailable: number } | null;
 
+/**
+ * Checks whether adding or updating the given schedule interval(s) would exceed the cluster's
+ * max scheduled runs per minute. Returns limit-exceeded details when over the cap, null otherwise.
+ */
 export const validateScheduleLimit = async (
   params: ValidateScheduleLimitParams
 ): Promise<ValidateScheduleLimitResult> => {

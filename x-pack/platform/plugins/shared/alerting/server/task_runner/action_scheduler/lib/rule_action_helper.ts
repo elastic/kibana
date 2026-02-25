@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { IntervalSchedule, RuleAction, ThrottledActions } from '../../../../common';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
+import type { RuleSchedule, RuleAction, ThrottledActions } from '../../../../common';
 import { parseDuration, RuleNotifyWhenTypeValues } from '../../../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {
@@ -93,7 +94,7 @@ export const getSummaryActionsFromTaskState = ({
 
 export const getSummaryActionTimeBounds = (
   action: RuleAction,
-  ruleSchedule: IntervalSchedule,
+  ruleSchedule: RuleSchedule,
   previousStartedAt: Date | null
 ): { start?: number; end?: number } => {
   if (!isSummaryAction(action)) {
@@ -109,12 +110,14 @@ export const getSummaryActionTimeBounds = (
     startDate = new Date(now - throttleMills);
   } else {
     // If action is not throttled, set time bounds to previousStartedAt - now
-    // If previousStartedAt is null, use the rule schedule interval
+    // If previousStartedAt is null, use the rule schedule interval when available
     if (previousStartedAt) {
       startDate = previousStartedAt;
-    } else {
+    } else if (isIntervalSchedule(ruleSchedule)) {
       const scheduleMillis = parseDuration(ruleSchedule.interval);
       startDate = new Date(now - scheduleMillis);
+    } else {
+      startDate = new Date(now - 60 * 60 * 1000); // fallback 1h when schedule has no interval (e.g. rrule)
     }
   }
 

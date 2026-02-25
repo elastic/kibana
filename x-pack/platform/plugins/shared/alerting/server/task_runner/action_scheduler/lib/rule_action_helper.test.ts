@@ -343,8 +343,28 @@ describe('rule_action_helper', () => {
       expect(end).toEqual(1620909217000);
       expect(end).toEqual(new Date(now).valueOf());
       expect(start).toEqual(1620909157000);
-      // start is end - schedule interval (1m)
+      // start is end - schedule interval (1m) when isIntervalSchedule(ruleSchedule)
       expect(start).toEqual(new Date('2021-05-13T12:32:37.000Z').valueOf());
+    });
+
+    test('returns start and end for summary action when schedule is rrule', () => {
+      const { start, end } = getSummaryActionTimeBounds(
+        {
+          ...mockSummaryAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
+        {
+          rrule: { freq: 3, interval: 1, tzid: 'UTC' },
+        },
+        null
+      );
+
+      expect(end).toEqual(1620909217000);
+      expect(end).toEqual(new Date(now).valueOf());
+      // start is end - 1h fallback when schedule has no interval
+      const oneHourMs = 60 * 60 * 1000;
+      expect(start).toEqual(1620909217000 - oneHourMs);
+      expect(start).toEqual(new Date('2021-05-13T11:33:37.000Z').valueOf());
     });
   });
 

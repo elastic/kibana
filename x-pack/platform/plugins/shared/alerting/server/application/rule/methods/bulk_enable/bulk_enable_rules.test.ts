@@ -7,6 +7,7 @@
 
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
+import type { RawRule } from '../../../../types';
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -53,6 +54,8 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
 jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
 }));
+
+const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -114,8 +117,75 @@ describe('bulkEnableRules', () => {
   let rulesClient: RulesClient;
   let actionsClient: jest.Mocked<ActionsClient>;
 
+  const rruleSchedule = {
+    rrule: {
+      dtstart: '2019-02-12T00:00:00.000Z',
+      freq: 3,
+      interval: 1,
+      tzid: 'UTC',
+      byhour: [22],
+      byminute: [0],
+    },
+  };
+
+  const disabledRuleWithRrule1 = {
+    ...disabledRule1,
+    attributes: {
+      ...disabledRule1.attributes,
+      schedule: rruleSchedule,
+    },
+  };
+
+  const disabledRuleWithRrule2 = {
+    ...disabledRule2,
+    attributes: {
+      ...disabledRule2.attributes,
+      schedule: rruleSchedule,
+    },
+  };
+
+  const enabledRuleForBulkOpsWithRrule1 = {
+    ...enabledRuleForBulkOps1,
+    attributes: {
+      ...enabledRuleForBulkOps1.attributes,
+      schedule: rruleSchedule,
+    },
+  };
+
+  const enabledRuleForBulkOpsWithRrule2 = {
+    ...enabledRuleForBulkOps2,
+    attributes: {
+      ...enabledRuleForBulkOps2.attributes,
+      schedule: rruleSchedule,
+    },
+  };
+
+  const returnedRuleForBulkOpsWithRrule1 = {
+    ...returnedRuleForBulkOps1,
+    schedule: rruleSchedule,
+  };
+
+  const returnedRuleForBulkOpsWithRrule2 = {
+    ...returnedRuleForBulkOps2,
+    schedule: rruleSchedule,
+  };
+
+  /** Response shape for the point-in-time finder mock; uses RawRule for schedule so interval | rrule is allowed. */
+  interface MockFinderRule {
+    id: string;
+    type: string;
+    attributes: Pick<RawRule, 'schedule'> & Record<string, unknown>;
+    references: unknown;
+    version?: string;
+    score?: number;
+  }
+
+  interface MockFinderResponse {
+    saved_objects: MockFinderRule[];
+  }
+
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [disabledRule1, disabledRule2] }
+    response: MockFinderResponse = { saved_objects: [disabledRule1, disabledRule2] }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -200,6 +270,73 @@ describe('bulkEnableRules', () => {
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
+  });
+
+  test('should enable rules with rrule schedules and call validateScheduleLimit with empty updatedInterval', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRuleWithRrule1, disabledRuleWithRrule2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOpsWithRrule1, enabledRuleForBulkOpsWithRrule2],
+    });
+
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
+    expect(validateScheduleLimit).toHaveBeenCalledWith({
+      context: expect.anything(),
+      updatedInterval: [],
+    });
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'id1',
+          attributes: expect.objectContaining({
+            enabled: true,
+            schedule: rruleSchedule,
+          }),
+        }),
+        expect.objectContaining({
+          id: 'id2',
+          attributes: expect.objectContaining({
+            enabled: true,
+            schedule: rruleSchedule,
+          }),
+        }),
+      ]),
+      { overwrite: true }
+    );
+
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(result).toStrictEqual({
+      errors: [],
+      rules: [returnedRuleForBulkOpsWithRrule1, returnedRuleForBulkOpsWithRrule2],
+      total: 2,
+      taskIdsFailedToBeEnabled: [],
+    });
+  });
+
+  test('should call validateScheduleLimit only with interval schedules when mix of interval and rrule rules', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRule1, disabledRuleWithRrule2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOpsWithRrule2],
+    });
+
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
+    expect(validateScheduleLimit).toHaveBeenCalledWith({
+      context: expect.anything(),
+      updatedInterval: ['5m'],
+    });
+
+    expect(result.errors).toEqual([]);
+    expect(result.rules).toHaveLength(2);
+    expect(result.total).toBe(2);
+    expect(result.taskIdsFailedToBeEnabled).toEqual([]);
   });
 
   test('should enable two rules and return right actions', async () => {
@@ -827,6 +964,54 @@ describe('bulkEnableRules', () => {
         total: 2,
         taskIdsFailedToBeEnabled: [],
       });
+    });
+
+    test('should schedule task with rrule when rule has rrule schedule and scheduledTaskId is not defined', async () => {
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield {
+              saved_objects: [
+                {
+                  ...disabledRuleWithRrule1,
+                  attributes: {
+                    ...disabledRuleWithRrule1.attributes,
+                    scheduledTaskId: null,
+                  },
+                },
+                disabledRuleWithRrule2,
+              ],
+            };
+          },
+        });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOpsWithRrule1, enabledRuleForBulkOpsWithRrule2],
+      });
+
+      await rulesClient.bulkEnableRules({ ids: ['id1', 'id2'] });
+
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'id1',
+          taskType: `alerting:fakeType`,
+          params: {
+            alertId: 'id1',
+            spaceId: 'default',
+            consumer: 'fakeConsumer',
+          },
+          schedule: rruleSchedule,
+          enabled: false,
+          state: {
+            alertInstances: {},
+            alertTypeState: {},
+            previousStartedAt: null,
+          },
+          scope: ['alerting'],
+        },
+      ]);
     });
 
     test('should schedule task when scheduledTaskId is not defined', async () => {

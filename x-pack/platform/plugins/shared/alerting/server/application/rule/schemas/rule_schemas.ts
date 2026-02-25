@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
+import { scheduleRruleSchemaV3 as scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+
 import {
   ruleLastRunOutcomeValues,
   ruleExecutionStatusValues,
@@ -22,9 +24,14 @@ import { artifactsSchema } from './artifacts_schema';
 
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
-export const intervalScheduleSchema = schema.object({
-  interval: schema.string(),
-});
+export { scheduleRruleSchemaV3 as scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+
+export const scheduleSchema = schema.oneOf([
+  schema.object({
+    interval: schema.string(),
+  }),
+  scheduleRruleSchema,
+]);
 
 export const ruleExecutionStatusSchema = schema.object({
   status: schema.oneOf([
@@ -160,7 +167,7 @@ export const ruleDomainSchema = schema.object({
   tags: schema.arrayOf(schema.string()),
   alertTypeId: schema.string(),
   consumer: schema.string(),
-  schedule: intervalScheduleSchema,
+  schedule: scheduleSchema,
   actions: schema.arrayOf(actionSchema),
   systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
   params: ruleParamsSchema,
@@ -204,7 +211,7 @@ export const ruleSchema = schema.object({
   tags: schema.arrayOf(schema.string()),
   alertTypeId: schema.string(),
   consumer: schema.string(),
-  schedule: intervalScheduleSchema,
+  schedule: scheduleSchema,
   actions: schema.arrayOf(actionSchema),
   systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
   params: ruleParamsSchema,

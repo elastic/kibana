@@ -30,6 +30,8 @@ export {
   scheduleRruleSchemaV3,
 } from './saved_objects';
 
+export { rruleScheduleV3 } from './saved_objects';
+
 export type { RruleSchedule } from './task';
 export { TaskStatus, TaskPriority, TaskCost } from './task';
 

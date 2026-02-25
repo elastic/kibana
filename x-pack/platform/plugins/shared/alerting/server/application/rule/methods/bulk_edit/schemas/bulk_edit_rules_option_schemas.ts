@@ -5,10 +5,15 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { notifyWhenSchema, actionRequestSchema, systemActionRequestSchema } from '../../../schemas';
+import {
+  notifyWhenSchema,
+  actionRequestSchema,
+  systemActionRequestSchema,
+  scheduleRruleSchema,
+} from '../../../schemas';
 import { rRuleRequestSchema } from '../../../../../../common/routes/r_rule';
-import { validateDuration } from '../../../validation';
 import { validateSnoozeSchedule } from '../validation';
+import { validateDuration } from '../../../validation';
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
 
@@ -41,7 +46,12 @@ const bulkEditActionsSchema = schema.object({
 const bulkEditScheduleSchema = schema.object({
   operation: schema.literal('set'),
   field: schema.literal('schedule'),
-  value: schema.object({ interval: schema.string({ validate: validateDuration }) }),
+  value: schema.oneOf([
+    schema.object({
+      interval: schema.string({ validate: validateDuration }),
+    }),
+    scheduleRruleSchema,
+  ]),
 });
 
 const bulkEditThrottleSchema = schema.object({

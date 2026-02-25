@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
@@ -126,11 +127,11 @@ async function updateWithOCC<Params extends RuleParams = never>(
   } = originalRuleSavedObject.attributes;
 
   let validationPayload: ValidateScheduleLimitResult = null;
-  if (enabled && schedule.interval !== data.schedule.interval) {
+  if (enabled && isIntervalSchedule(data.schedule)) {
     validationPayload = await validateScheduleLimit({
       context,
-      prevInterval: schedule?.interval,
       updatedInterval: data.schedule.interval,
+      ...(isIntervalSchedule(schedule) ? { prevInterval: schedule.interval } : {}),
     });
   }
 
@@ -188,14 +189,16 @@ async function updateWithOCC<Params extends RuleParams = never>(
   });
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
-  const intervalInMs = parseDuration(data.schedule.interval);
-  if (
-    intervalInMs < context.minimumScheduleIntervalInMs &&
-    context.minimumScheduleInterval.enforce
-  ) {
-    throw Boom.badRequest(
-      `Error updating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
-    );
+  if (isIntervalSchedule(data.schedule)) {
+    const intervalInMs = parseDuration(data.schedule.interval);
+    if (
+      intervalInMs < context.minimumScheduleIntervalInMs &&
+      context.minimumScheduleInterval.enforce
+    ) {
+      throw Boom.badRequest(
+        `Error updating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
+      );
+    }
   }
 
   const updateResult = await updateRuleAttributes<Params>({
@@ -208,10 +211,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
   });
 
   // Log warning if schedule interval is less than the minimum but we're not enforcing it
-  if (
-    intervalInMs < context.minimumScheduleIntervalInMs &&
-    !context.minimumScheduleInterval.enforce
-  ) {
+  if (isIntervalSchedule(data.schedule) && !context.minimumScheduleInterval.enforce) {
     context.logger.warn(
       `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
     );

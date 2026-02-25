@@ -6,6 +6,7 @@
  */
 
 import type { IEvent } from '@kbn/event-log-plugin/server';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import type { AlertSummary, SanitizedRuleWithLegacyId } from '../../types';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { alertSummaryFromEventLog } from '../../lib/alert_summary_from_event_log';
@@ -36,7 +37,9 @@ export async function getAlertSummary(
   });
 
   const dateNow = new Date();
-  const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
+  const durationMillis =
+    parseDuration(isIntervalSchedule(rule.schedule) ? rule.schedule.interval : '1m') *
+    (numberOfExecutions ?? 60);
   const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
   const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 

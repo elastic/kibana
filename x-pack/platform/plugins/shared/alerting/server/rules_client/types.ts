@@ -25,7 +25,7 @@ import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { DistributiveOmit } from '@elastic/eui';
 import type {
   RuleTypeRegistry,
-  IntervalSchedule,
+  RuleSchedule,
   SanitizedRule,
   RuleSnoozeSchedule,
   RawRuleAlertsFilter,
@@ -138,7 +138,7 @@ export interface ScheduleTaskOptions {
   id: string;
   consumer: string;
   ruleTypeId: string;
-  schedule: IntervalSchedule;
+  schedule: RuleSchedule;
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them
 }
 

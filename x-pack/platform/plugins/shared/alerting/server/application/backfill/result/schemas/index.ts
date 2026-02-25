@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { actionSchema as ruleActionSchema } from '../../../rule/schemas/action_schemas';
+import { scheduleSchema } from '../../../rule/schemas/rule_schemas';
 import { backfillInitiator } from '../../../../../common/constants';
 
 export const statusSchema = schema.oneOf([
@@ -41,7 +42,7 @@ export const backfillSchema = schema.object({
     apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
     consumer: schema.string(),
     enabled: schema.boolean(),
-    schedule: schema.object({ interval: schema.string() }),
+    schedule: scheduleSchema,
     createdBy: schema.nullable(schema.string()),
     updatedBy: schema.nullable(schema.string()),
     createdAt: schema.string(),

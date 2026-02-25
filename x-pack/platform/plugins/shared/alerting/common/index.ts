@@ -14,7 +14,7 @@ export type {
   RuleTypeParams,
   RuleActionParams,
   RuleActionParam,
-  IntervalSchedule,
+  RuleSchedule,
   RuleActionFrequency,
   AlertsFilterTimeframe,
   AlertsFilter,

@@ -23,15 +23,15 @@ import type {
 } from './types';
 import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
-import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
+import { getNextRuleRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
 import type {
-  IntervalSchedule,
   RawRuleExecutionStatus,
   RawRuleLastRun,
   RawRuleMonitoring,
   RuleExecutionStatus,
   RuleTypeRegistry,
 } from '../types';
+import type { RuleSchedule } from '../../common';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, isOk } from '../lib/result_type';
@@ -605,7 +605,7 @@ export class TaskRunner<
     schedule,
     runRuleResult,
   }: {
-    schedule: Result<IntervalSchedule, Error>;
+    schedule: Result<RuleSchedule, Error>;
     runRuleResult: Result<RunRuleResult, Error>;
   }) {
     const { executionStatus: execStatus, executionMetrics: execMetrics } =
@@ -618,10 +618,10 @@ export class TaskRunner<
 
         let nextRun: string | null = null;
         if (isOk(schedule)) {
-          nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
+          nextRun = getNextRuleRun({ startDate: startedAt, schedule: schedule.value });
         } else if (taskSchedule) {
-          // rules cannot use rrule for scheduling yet
-          nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+          // in case of rule execution error, we use the task schedule to calculate the next run
+          nextRun = getNextRuleRun({ startDate: startedAt, schedule: taskSchedule });
         }
 
         const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
@@ -707,7 +707,7 @@ export class TaskRunner<
     this.logger = createTaskRunnerLogger({ logger: this.logger, tags: [ruleId, this.ruleType.id] });
 
     let runRuleResult: Result<RunRuleResult, Error>;
-    let schedule: Result<IntervalSchedule, Error>;
+    let schedule: Result<RuleSchedule, Error>;
     let shouldDisableTask = false;
     try {
       const validatedRuleData = await this.prepareToRun();
@@ -798,8 +798,7 @@ export class TaskRunner<
 
     let nextRun: string | null = null;
     if (taskSchedule) {
-      // rules cannot use rrule for scheduling yet
-      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+      nextRun = getNextRuleRun({ startDate: startedAt, schedule: taskSchedule });
     }
 
     const outcomeMsg = [

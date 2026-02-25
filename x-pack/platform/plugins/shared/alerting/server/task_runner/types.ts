@@ -33,7 +33,7 @@ import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeParams,
-  IntervalSchedule,
+  RuleSchedule,
   RuleTaskState,
   SanitizedRule,
   RuleTypeState,
@@ -61,7 +61,7 @@ import type { MaintenanceWindowsService } from './maintenance_windows';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
-  schedule: IntervalSchedule | undefined;
+  schedule: RuleSchedule | undefined;
   taskRunError?: DecoratedError;
   shouldDeleteTask?: boolean;
   shouldDisableTask?: boolean;

@@ -23,6 +23,8 @@ export {
   scheduleRruleSchemaV3,
 } from './schemas/rrule';
 
+export { rruleScheduleV3 } from './schemas/rrule';
+
 export const TASK_SO_NAME = 'task';
 export const BACKGROUND_TASK_NODE_SO_NAME = 'background-task-node';
 export const INVALIDATE_API_KEY_SO_NAME = 'api_key_to_invalidate';
