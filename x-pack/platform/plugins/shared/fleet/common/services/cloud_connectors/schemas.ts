@@ -76,7 +76,8 @@ export const AZURE_CREDENTIAL_SCHEMA: CloudConnectorCredentialSchema = {
 /**
  * GCP cloud connector credential schema
  * Maps logical field names to their actual var key names used in package policies.
- * All three fields are secrets as defined in the integrations repo manifests.
+ * service_account and audience are non-secret text fields (type: text in integration manifests).
+ * Only gcp_credentials_cloud_connector_id is a secret.
  */
 export const GCP_CREDENTIAL_SCHEMA: CloudConnectorCredentialSchema = {
   provider: 'gcp',
@@ -84,12 +85,12 @@ export const GCP_CREDENTIAL_SCHEMA: CloudConnectorCredentialSchema = {
     serviceAccount: {
       primary: SERVICE_ACCOUNT_VAR_NAME, // 'service_account'
       aliases: [GCP_SERVICE_ACCOUNT_VAR_NAME], // 'gcp.credentials.service_account_email'
-      isSecret: true,
+      isSecret: false,
     },
     audience: {
       primary: AUDIENCE_VAR_NAME, // 'audience'
       aliases: [GCP_AUDIENCE_VAR_NAME], // 'gcp.credentials.audience'
-      isSecret: true,
+      isSecret: false,
     },
     gcpCredentialsCloudConnectorId: {
       primary: GCP_CREDENTIALS_CLOUD_CONNECTOR_ID, // 'gcp_credentials_cloud_connector_id'

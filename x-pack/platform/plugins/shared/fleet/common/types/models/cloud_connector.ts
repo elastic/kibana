@@ -38,8 +38,8 @@ export interface AzureCloudConnectorVars {
 }
 
 export interface GcpCloudConnectorVars {
-  service_account: CloudConnectorSecretVar;
-  audience: CloudConnectorSecretVar;
+  service_account: CloudConnectorVar;
+  audience: CloudConnectorVar;
   gcp_credentials_cloud_connector_id: CloudConnectorSecretVar;
 }
 

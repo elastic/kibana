@@ -71,14 +71,14 @@ describe('Cloud Connector Schemas', () => {
       const { serviceAccount } = GCP_CREDENTIAL_SCHEMA.fields;
       expect(serviceAccount.primary).toBe('service_account');
       expect(serviceAccount.aliases).toContain('gcp.credentials.service_account_email');
-      expect(serviceAccount.isSecret).toBe(true);
+      expect(serviceAccount.isSecret).toBe(false);
     });
 
     it('should have audience field with correct keys', () => {
       const { audience } = GCP_CREDENTIAL_SCHEMA.fields;
       expect(audience.primary).toBe('audience');
       expect(audience.aliases).toContain('gcp.credentials.audience');
-      expect(audience.isSecret).toBe(true);
+      expect(audience.isSecret).toBe(false);
     });
 
     it('should have gcpCredentialsCloudConnectorId field with correct keys', () => {

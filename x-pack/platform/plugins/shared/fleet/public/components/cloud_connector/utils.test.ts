@@ -504,6 +504,40 @@ describe('isCloudConnectorReusableEnabled - Azure provider', () => {
   });
 });
 
+describe('isCloudConnectorReusableEnabled - GCP provider', () => {
+  it('should return true for GCP CSPM when version meets requirement', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.3.0-preview06', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.4.0', 'cspm')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '4.0.0', 'cspm')).toBe(true);
+  });
+
+  it('should return false for GCP CSPM when version below requirement', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.3.0-preview05', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '3.2.0', 'cspm')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '2.0.0', 'cspm')).toBe(false);
+  });
+
+  it('should return true for GCP asset_inventory when version meets requirement', () => {
+    expect(
+      isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.5.0-preview04', 'asset_inventory')
+    ).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.6.0', 'asset_inventory')).toBe(true);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '2.0.0', 'asset_inventory')).toBe(true);
+  });
+
+  it('should return false for GCP asset_inventory when version below requirement', () => {
+    expect(
+      isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.5.0-preview03', 'asset_inventory')
+    ).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.4.0', 'asset_inventory')).toBe(false);
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '1.0.0', 'asset_inventory')).toBe(false);
+  });
+
+  it('should return false for GCP with unknown template names', () => {
+    expect(isCloudConnectorReusableEnabled(GCP_PROVIDER, '4.0.0', 'unknown_template')).toBe(false);
+  });
+});
+
 describe('Cloud Connector Type Guards', () => {
   describe('isAwsCloudConnectorVars', () => {
     it('should return true for AWS cloud connector vars with aws provider', () => {
@@ -1238,6 +1272,169 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
           packageInfo: azurePackageInfo,
           templateName: 'cspm',
           provider: AZURE_PROVIDER,
+        });
+
+        expect(result).toBeUndefined();
+      });
+    });
+  });
+
+  describe('GCP Provider Tests', () => {
+    let gcpInput: NewPackagePolicyInput;
+    let gcpPackageInfo: PackageInfo;
+
+    beforeEach(() => {
+      gcpInput = {
+        ...mockInput,
+        type: 'cloudbeat/cis_gcp',
+        policy_template: 'cspm',
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'cloud_security_posture.findings' },
+            vars: {
+              'gcp.account_type': { value: 'single-account', type: 'text' },
+            },
+          },
+        ],
+      };
+
+      gcpPackageInfo = {
+        ...mockPackageInfo,
+        policy_templates: [
+          {
+            name: 'cspm',
+            title: 'CSPM',
+            description: 'CSPM',
+            inputs: [
+              {
+                type: 'cloudbeat/cis_gcp',
+                title: 'GCP CIS',
+                description: 'GCP CIS compliance monitoring',
+                vars: [
+                  {
+                    name: 'cloud_shell_url_cloud_connectors',
+                    type: 'text',
+                    title: 'Cloud Shell URL',
+                    multi: false,
+                    required: false,
+                    show_user: false,
+                    default:
+                      'https://shell.cloud.google.com/cloudshell/ACCOUNT_TYPE/open?RESOURCE_ID',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      } as PackageInfo;
+    });
+
+    describe('Successful cases', () => {
+      it('should generate Cloud Shell URL for GCP with serverless enabled', () => {
+        const serverlessCloudSetup = {
+          ...mockGcpCloudSetup,
+          isCloudEnabled: false,
+          isServerlessEnabled: true,
+          serverless: { projectId: 'gcp-serverless-project' },
+        } as CloudSetup;
+
+        const result = getCloudConnectorRemoteRoleTemplate({
+          input: gcpInput,
+          cloud: serverlessCloudSetup,
+          packageInfo: gcpPackageInfo,
+          templateName: 'cspm',
+          provider: GCP_PROVIDER,
+        });
+
+        expect(result).toBe(
+          'https://shell.cloud.google.com/cloudshell/single-account/open?gcp-serverless-project'
+        );
+      });
+
+      it('should generate Cloud Shell URL for GCP with cloud ESS deployment', () => {
+        const result = getCloudConnectorRemoteRoleTemplate({
+          input: gcpInput,
+          cloud: mockGcpCloudSetup,
+          packageInfo: gcpPackageInfo,
+          templateName: 'cspm',
+          provider: GCP_PROVIDER,
+        });
+
+        expect(result).toBe(
+          'https://shell.cloud.google.com/cloudshell/single-account/open?gcp-kibana-id'
+        );
+      });
+
+      it('should use GCP single-account type by default', () => {
+        const gcpInputNoAccountType: NewPackagePolicyInput = {
+          ...gcpInput,
+          streams: [
+            {
+              ...gcpInput.streams[0],
+              vars: {},
+            },
+          ],
+        };
+
+        const result = getCloudConnectorRemoteRoleTemplate({
+          input: gcpInputNoAccountType,
+          cloud: mockGcpCloudSetup,
+          packageInfo: gcpPackageInfo,
+          templateName: 'cspm',
+          provider: GCP_PROVIDER,
+        });
+
+        expect(result).toContain('/single-account/');
+      });
+    });
+
+    describe('Failure cases', () => {
+      it('should return undefined when GCP Cloud Shell URL field is not found', () => {
+        const originalTemplate = gcpPackageInfo.policy_templates![0];
+        const packageInfoWithoutCloudShell = {
+          ...gcpPackageInfo,
+          policy_templates: [
+            {
+              ...originalTemplate,
+              ...('inputs' in originalTemplate && originalTemplate.inputs
+                ? {
+                    inputs: [
+                      {
+                        ...originalTemplate.inputs[0],
+                        vars: [],
+                      },
+                    ],
+                  }
+                : {}),
+            },
+          ],
+        } as PackageInfo;
+
+        const result = getCloudConnectorRemoteRoleTemplate({
+          input: gcpInput,
+          cloud: mockGcpCloudSetup,
+          packageInfo: packageInfoWithoutCloudShell,
+          templateName: 'cspm',
+          provider: GCP_PROVIDER,
+        });
+
+        expect(result).toBeUndefined();
+      });
+
+      it('should return undefined when no elastic resource ID is available for GCP', () => {
+        const noResourceCloudSetup = {
+          ...mockGcpCloudSetup,
+          isCloudEnabled: false,
+          isServerlessEnabled: false,
+        } as CloudSetup;
+
+        const result = getCloudConnectorRemoteRoleTemplate({
+          input: gcpInput,
+          cloud: noResourceCloudSetup,
+          packageInfo: gcpPackageInfo,
+          templateName: 'cspm',
+          provider: GCP_PROVIDER,
         });
 
         expect(result).toBeUndefined();

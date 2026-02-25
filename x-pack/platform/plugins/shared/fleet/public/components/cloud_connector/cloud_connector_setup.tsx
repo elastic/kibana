@@ -68,12 +68,16 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
   useEffect(() => {
-    setSelectedTabId(
-      cloudConnectorsCount && cloudConnectorsCount > 0
-        ? TABS.EXISTING_CONNECTION
-        : TABS.NEW_CONNECTION
-    );
-  }, [cloudConnectorsCount]);
+    if (isEditPage) {
+      setSelectedTabId(TABS.EXISTING_CONNECTION);
+    } else {
+      setSelectedTabId(
+        cloudConnectorsCount && cloudConnectorsCount > 0
+          ? TABS.EXISTING_CONNECTION
+          : TABS.NEW_CONNECTION
+      );
+    }
+  }, [cloudConnectorsCount, isEditPage]);
 
   // Ensure root-level supports_cloud_connector is true when this component is rendered
   if (!newPolicy.supports_cloud_connector) {

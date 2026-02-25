@@ -388,12 +388,13 @@ const extractPackagePolicyVars = (
       vars[GCP_CREDENTIALS_CLOUD_CONNECTOR_ID] || vars[GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME];
 
     if (serviceAccount && audience && gcpCredentials) {
-      // Type assertions are needed because PackagePolicyConfigRecordEntry in packagePolicy.inputs.streams[0].vars has loose types (type?: string, value?: any)
-      // while CloudConnectorSecretVar in GcpCloudConnectorVars expects specific literal types (type?: 'password', value: CloudConnectorSecretReference).
+      // Type assertions are needed because PackagePolicyConfigRecordEntry has loose types (type?: string, value?: any)
+      // service_account and audience are non-secret text fields (CloudConnectorVar);
+      // only gcp_credentials_cloud_connector_id is a secret (CloudConnectorSecretVar).
       // Runtime validation occurs in cloudConnectorService.validateCloudConnectorDetails()
       const gcpCloudConnectorVars: GcpCloudConnectorVars = {
-        service_account: serviceAccount as CloudConnectorSecretVar,
-        audience: audience as CloudConnectorSecretVar,
+        service_account: serviceAccount as CloudConnectorVar,
+        audience: audience as CloudConnectorVar,
         gcp_credentials_cloud_connector_id: gcpCredentials as CloudConnectorSecretVar,
       };
 

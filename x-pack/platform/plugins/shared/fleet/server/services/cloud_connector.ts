@@ -584,11 +584,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         );
       }
     } else if (cloudConnector.cloudProvider === 'gcp') {
-      // Type assertion is safe here because we perform runtime validation below
       const gcpVars = vars as GcpCloudConnectorVars;
-      // Validate that all required GCP fields have valid values (text or secret reference)
-      // GCP vars arrive as text from the form and are converted to secret references
-      // by extractGcpCloudConnectorSecrets during package policy creation
+      // service_account and audience are non-secret text fields;
+      // only gcp_credentials_cloud_connector_id is a secret reference
       const serviceAccount = gcpVars.service_account;
       const audience = gcpVars.audience;
       const gcpCredentials = gcpVars.gcp_credentials_cloud_connector_id;

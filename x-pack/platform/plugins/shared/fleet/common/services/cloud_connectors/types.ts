@@ -71,10 +71,12 @@ export interface NormalizedAzureCredentials {
 
 /**
  * Normalized GCP credentials extracted from package policy
+ * service_account and audience are non-secret text fields;
+ * only gcpCredentialsCloudConnectorId is a secret reference.
  */
 export interface NormalizedGcpCredentials {
-  serviceAccount?: string | { id: string; isSecretRef: boolean };
-  audience?: string | { id: string; isSecretRef: boolean };
+  serviceAccount?: string;
+  audience?: string;
   gcpCredentialsCloudConnectorId?: string | { id: string; isSecretRef: boolean };
 }
 

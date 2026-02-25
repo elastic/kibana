@@ -325,18 +325,13 @@ describe('CloudConnectorSelector', () => {
         accountType: SINGLE_ACCOUNT,
         vars: {
           service_account: {
-            value: {
-              isSecretRef: true,
-              id: 'test-service-account@project.iam.gserviceaccount.com',
-            },
-            type: 'password',
+            value: 'test-service-account@project.iam.gserviceaccount.com',
+            type: 'text',
           },
           audience: {
-            value: {
-              isSecretRef: true,
-              id: '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
-            },
-            type: 'password',
+            value:
+              '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+            type: 'text',
           },
           gcp_credentials_cloud_connector_id: {
             value: { isSecretRef: true, id: 'gcp-connector-id-1' },
@@ -354,15 +349,13 @@ describe('CloudConnectorSelector', () => {
         accountType: ORGANIZATION_ACCOUNT,
         vars: {
           service_account: {
-            value: { isSecretRef: true, id: 'org-service-account@project.iam.gserviceaccount.com' },
-            type: 'password',
+            value: 'org-service-account@project.iam.gserviceaccount.com',
+            type: 'text',
           },
           audience: {
-            value: {
-              isSecretRef: true,
-              id: '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/org-pool/providers/org-provider',
-            },
-            type: 'password',
+            value:
+              '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/org-pool/providers/org-provider',
+            type: 'text',
           },
           gcp_credentials_cloud_connector_id: {
             value: { isSecretRef: true, id: 'gcp-connector-id-2' },
@@ -423,14 +416,9 @@ describe('CloudConnectorSelector', () => {
       await user.click(screen.getByText('GCP Connector 1'));
 
       expect(mockSetCredentials).toHaveBeenCalledWith({
-        serviceAccount: {
-          isSecretRef: true,
-          id: 'test-service-account@project.iam.gserviceaccount.com',
-        },
-        audience: {
-          isSecretRef: true,
-          id: '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
-        },
+        serviceAccount: 'test-service-account@project.iam.gserviceaccount.com',
+        audience:
+          '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
         gcp_credentials_cloud_connector_id: { isSecretRef: true, id: 'gcp-connector-id-1' },
         cloudConnectorId: 'gcp-connector-1',
       });

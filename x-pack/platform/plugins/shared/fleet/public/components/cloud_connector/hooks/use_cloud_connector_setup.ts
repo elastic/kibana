@@ -185,12 +185,21 @@ export const useCloudConnectorSetup = (
     useState<CloudConnectorCredentials>(() => {
       // Use accessor to get vars from the correct location
       const vars = extractRawCredentialVars(newPolicy, packageInfo) ?? {};
-      return createInitialCredentials(vars);
+      const credentials = createInitialCredentials(vars);
+      if (newPolicy.cloud_connector_name) {
+        credentials.name = newPolicy.cloud_connector_name;
+      }
+      return credentials;
     });
 
   // State for existing connection form
   const [existingConnectionCredentials, setExistingConnectionCredentials] =
-    useState<CloudConnectorCredentials>({});
+    useState<CloudConnectorCredentials>(() => {
+      if (newPolicy.cloud_connector_id) {
+        return { cloudConnectorId: newPolicy.cloud_connector_id };
+      }
+      return {};
+    });
 
   // Extract account type from inputs
   const accountTypeFromInputs = useMemo(() => {
