@@ -40,19 +40,26 @@ export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
       },
       async (context, request, response) => {
         try {
-          const { suite_id: suiteId, model_id: modelId, branch, per_page: perPage } = request.query;
+          const {
+            suite_id: suiteId,
+            model_id: modelId,
+            branch,
+            page,
+            per_page: perPage,
+          } = request.query;
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
+          const pagination = { page, perPage };
           const aggResponse = await esClient.search({
             index: EVALUATIONS_INDEX_PATTERN,
             size: 0,
             query: buildRunsListingFilterQuery({ suiteId, modelId, branch }),
-            aggs: buildRunsListingAggregation({ perPage }),
+            aggs: buildRunsListingAggregation(pagination),
           });
 
           return response.ok({
-            body: parseRunsListingResponse(aggResponse.aggregations),
+            body: parseRunsListingResponse(aggResponse.aggregations, pagination),
           });
         } catch (error) {
           logger.error(`Failed to list evaluation runs: ${error}`);

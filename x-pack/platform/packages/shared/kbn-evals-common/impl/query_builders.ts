@@ -20,7 +20,8 @@ interface RunsListingFilterOptions {
   branch?: string;
 }
 
-interface RunsListingAggregationOptions {
+interface RunsListingPaginationOptions {
+  page: number;
   perPage: number;
 }
 
@@ -153,15 +154,19 @@ export const buildRunsListingFilterQuery = (
  * Returns the aggregation definition for listing runs with summary metadata.
  * Groups score documents by run_id and extracts the latest timestamp,
  * model info, git metadata, and CI info for each run.
+ *
+ * Terms aggregations don't support a native offset, so we over-fetch
+ * (page * perPage buckets) and let `parseRunsListingResponse` slice the
+ * correct window.
  */
-export const buildRunsListingAggregation = ({ perPage }: RunsListingAggregationOptions) => ({
+export const buildRunsListingAggregation = ({ page, perPage }: RunsListingPaginationOptions) => ({
   total_runs: {
     cardinality: { field: 'run_id' },
   },
   runs: {
     terms: {
       field: 'run_id',
-      size: perPage,
+      size: page * perPage,
       order: { latest_timestamp: 'desc' as const },
     },
     aggs: {
@@ -184,15 +189,21 @@ export const buildRunsListingAggregation = ({ perPage }: RunsListingAggregationO
 /**
  * Parses the raw ES aggregation response from a runs listing query
  * into a typed array of run summaries with a total count.
+ *
+ * Because terms aggregations don't support offset, the aggregation
+ * over-fetches and this function slices to the requested page window.
  */
 export const parseRunsListingResponse = (
-  aggregations: Record<string, unknown> | undefined
+  aggregations: Record<string, unknown> | undefined,
+  { page, perPage }: RunsListingPaginationOptions
 ): RunsListingResult => {
   const aggs: RunsListingAggregations | undefined = aggregations
     ? (aggregations as RunsListingAggregations)
     : undefined;
   const totalRuns = aggs?.total_runs?.value ?? 0;
-  const runBuckets = aggs?.runs?.buckets ?? [];
+  const allBuckets = aggs?.runs?.buckets ?? [];
+  const offset = (page - 1) * perPage;
+  const runBuckets = allBuckets.slice(offset, offset + perPage);
 
   const runs = runBuckets.map((bucket) => {
     const taskFamily = firstBucket(bucket.task_model_family);
