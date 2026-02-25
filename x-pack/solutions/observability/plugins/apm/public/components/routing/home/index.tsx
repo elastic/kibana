@@ -30,6 +30,11 @@ const ServiceGroupTemplate = dynamic(() =>
 const ServiceInventory = dynamic(() =>
   import('../../app/service_inventory').then((mod) => ({ default: mod.ServiceInventory }))
 );
+const ServiceInventoryCallouts = dynamic(() =>
+  import('../../app/service_inventory/service_inventory_callouts').then((mod) => ({
+    default: mod.ServiceInventoryCallouts,
+  }))
+);
 const ServiceMapHome = dynamic(() =>
   import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapHome }))
 );
@@ -53,11 +58,13 @@ function serviceGroupPage<TPath extends string>({
   element,
   title,
   serviceGroupContextTab,
+  contentAboveHeader,
 }: {
   path: TPath;
   element: React.ReactElement<any, any>;
   title: string;
   serviceGroupContextTab: ComponentProps<typeof ServiceGroupTemplate>['serviceGroupContextTab'];
+  contentAboveHeader?: React.ReactNode;
 }): Record<
   TPath,
   {
@@ -66,16 +73,25 @@ function serviceGroupPage<TPath extends string>({
     defaults: { query: { serviceGroup: string } };
   }
 > {
+  const templateElement = (
+    <ServiceGroupTemplate
+      pageTitle={title}
+      pagePath={path}
+      serviceGroupContextTab={serviceGroupContextTab}
+    >
+      {element}
+    </ServiceGroupTemplate>
+  );
+
   return {
     [path]: {
-      element: (
-        <ServiceGroupTemplate
-          pageTitle={title}
-          pagePath={path}
-          serviceGroupContextTab={serviceGroupContextTab}
-        >
-          {element}
-        </ServiceGroupTemplate>
+      element: contentAboveHeader ? (
+        <>
+          {contentAboveHeader}
+          {templateElement}
+        </>
+      ) : (
+        templateElement
       ),
       params: t.type({
         query: t.type({ serviceGroup: t.string }),
@@ -145,6 +161,7 @@ export const homeRoute = {
         title: ServiceInventoryTitle,
         element: <ServiceInventory />,
         serviceGroupContextTab: 'service-inventory',
+        contentAboveHeader: <ServiceInventoryCallouts />,
       }),
       ...serviceGroupPage({
         path: '/service-map',
