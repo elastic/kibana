@@ -286,6 +286,12 @@ function fromAPIMappingToAssignments(
   });
 }
 
+export function isLegacyColorPalette(
+  color: { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined
+): color is { palette: PaletteOutput } {
+  return 'palette' in (color ?? {});
+}
+
 export function fromColorMappingAPIToLensState(
   colorMapping: ColorMappingType | undefined
 ): { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined {

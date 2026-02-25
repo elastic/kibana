@@ -8,7 +8,11 @@
  */
 import type { ColumnState } from '@kbn/lens-common';
 import type { DatatableState } from '../../../../schema';
-import { fromColorMappingAPIToLensState, fromColorByValueAPIToLensState } from '../../../coloring';
+import {
+  fromColorMappingAPIToLensState,
+  fromColorByValueAPIToLensState,
+  isLegacyColorPalette,
+} from '../../../coloring';
 import { getAccessorName, isColorByValueColor, isColorMappingColor } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
@@ -25,7 +29,11 @@ function buildColorProps(
   const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
 
   if (isColorMappingColor(config.color)) {
-    return { colorMode, colorMapping: fromColorMappingAPIToLensState(config.color) };
+    const color = fromColorMappingAPIToLensState(config.color);
+    return {
+      colorMode,
+      colorMapping: !isLegacyColorPalette(color) ? color?.colorMapping : undefined,
+    };
   }
 
   if (isColorByValueColor(config.color)) {
