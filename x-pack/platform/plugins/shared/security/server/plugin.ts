@@ -536,7 +536,8 @@ export class SecurityPlugin
       const [host, defaultPort = '443'] = hostWithPort.split(':');
       const [esId, esPort = defaultPort] = esIdWithPort.split(':');
 
-      return `https://${esId}.${host}:${esPort}`;
+      const esHost = esId ? `${esId}.${host}` : host;
+      return `https://${esHost}:${esPort}`;
     } catch {
       this.logger.debug(`Failed to decode cloud.id: ${cloudId}`);
       return undefined;
