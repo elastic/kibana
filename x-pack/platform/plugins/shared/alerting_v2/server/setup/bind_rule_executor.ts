@@ -19,7 +19,7 @@ import {
   CreateAlertEventsStep,
   CreateRecoveryEventsStep,
 } from '../lib/rule_executor/steps';
-import { ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
+import { ApmMiddleware, ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
 import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
 
@@ -27,16 +27,14 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   /**
    * Middlewares
    */
+  bind(ApmMiddleware).toSelf().inSingletonScope();
   bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
 
   /**
-   * Middleware list
+   * Middleware list (first is outermost)
    */
   bind(RuleExecutionMiddlewaresToken)
-    .toDynamicValue(({ get }) => [
-      // Add more middleware here as needed
-      get(ErrorHandlingMiddleware),
-    ])
+    .toDynamicValue(({ get }) => [get(ApmMiddleware), get(ErrorHandlingMiddleware)])
     .inSingletonScope();
 
   /**
