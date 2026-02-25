@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
-import { isBinaryExpression, isIdentifier } from '@elastic/esql';
-import { Walker } from '@elastic/esql';
+import { isBinaryExpression, isIdentifier, Walker } from '@elastic/esql';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';

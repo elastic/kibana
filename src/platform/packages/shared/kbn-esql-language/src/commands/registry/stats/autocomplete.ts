@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { isAssignment, isColumn } from '@elastic/esql';
+import { isAssignment, isColumn, within } from '@elastic/esql';
 import type {
   ESQLCommandOption,
   ESQLColumn,
@@ -17,7 +17,6 @@ import type {
   ESQLAstAllCommands,
   ESQLAstQueryExpression,
 } from '@elastic/esql/types';
-import { within } from '@elastic/esql';
 import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
 import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';

@@ -8,7 +8,7 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
-import { EsqlQuery } from '@elastic/esql';
+import { EsqlQuery, parse, isHeaderCommand, Walker } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstItem,
@@ -16,8 +16,6 @@ import type {
   ESQLFunction,
   ESQLAstAllCommands,
 } from '@elastic/esql/types';
-import { isHeaderCommand, Walker } from '@elastic/esql';
-import { parse } from '@elastic/esql';
 import { esqlCommandRegistry } from '../../commands';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
 import { SuggestionOrderingEngine } from './utils';

@@ -8,9 +8,8 @@
  */
 
 import { isFunctionExpression, isOptionNode } from '@elastic/esql';
-import { within } from '@elastic/esql';
+import { within, Walker } from '@elastic/esql';
 import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
-import { Walker } from '@elastic/esql';
 import { Location } from './types';
 import { isTimeseriesSourceCommand } from '../definitions/utils/timeseries_check';
 

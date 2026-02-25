@@ -8,8 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { within } from '@elastic/esql';
-import { isOptionNode } from '@elastic/esql';
+import { within, isOptionNode } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAstJoinCommand,

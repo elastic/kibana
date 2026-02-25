@@ -12,8 +12,7 @@ import type {
   ESQLAstForkCommand,
   ESQLMessage,
 } from '@elastic/esql/types';
-import { Walker } from '@elastic/esql';
-import { isSubQuery } from '@elastic/esql';
+import { isSubQuery, Walker } from '@elastic/esql';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { errors } from '../../definitions/utils';

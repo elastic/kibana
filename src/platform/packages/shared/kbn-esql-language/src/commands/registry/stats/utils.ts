@@ -22,8 +22,8 @@ import {
   isLiteral,
   isAssignment,
   isColumn,
+  Walker,
 } from '@elastic/esql';
-import { Walker } from '@elastic/esql';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAstAllCommands, ESQLMessage, ESQLAst } from '@elastic/esql/types';
-import { Walker } from '@elastic/esql';
-import { isSubQuery } from '@elastic/esql';
+import { isSubQuery, Walker } from '@elastic/esql';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { errors } from '../../definitions/utils';
