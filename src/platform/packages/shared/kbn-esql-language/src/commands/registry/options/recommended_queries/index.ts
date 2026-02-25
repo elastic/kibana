@@ -258,6 +258,26 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
   // the templates are the recommended queries without the source command (FROM)
   const recommendedQueriesTemplates: ISuggestionItem[] = recommendedQueriesExtensions.map(
     (recommendedQuery) => {
+      if (recommendedQuery.isStatic) {
+        const queryText = prettifyQuery(recommendedQuery.query);
+        return {
+          label: recommendedQuery.name,
+          text: '',
+          detail: recommendedQuery.name ?? '',
+          ...(recommendedQuery.description
+            ? { documentation: { value: recommendedQuery.description } }
+            : {}),
+          kind: 'Issue',
+          sortText: 'D',
+          category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
+          command: {
+            id: 'esql.recommendedQuery.accept',
+            title: 'Accept recommended query',
+            arguments: [{ queryLabel: recommendedQuery.name, queryText }],
+          },
+        };
+      }
+
       const formattedQuery = prettifyQueryTemplate(recommendedQuery.query);
       return {
         label: recommendedQuery.name,

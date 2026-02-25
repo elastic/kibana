@@ -156,10 +156,23 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   }
 
   // Accept recommended query command
+  // When queryText is provided (static queries), replaces the entire editor content.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.recommendedQuery.accept', (...args) => {
-      const [, { queryLabel }] = args;
+      const [, { queryLabel, queryText }] = args;
       telemetryService.trackRecommendedQueryClicked(QuerySource.AUTOCOMPLETE, queryLabel);
+
+      if (queryText) {
+        const editor = editorRef.current;
+        const model = editor?.getModel();
+        if (editor && model) {
+          const fullRange = model.getFullModelRange();
+          editor.executeEdits('staticQuery', [{ range: fullRange, text: queryText }]);
+          const lastLine = model.getLineCount();
+          const lastColumn = model.getLineMaxColumn(lastLine);
+          editor.setPosition({ lineNumber: lastLine, column: lastColumn });
+        }
+      }
     })
   );
 
