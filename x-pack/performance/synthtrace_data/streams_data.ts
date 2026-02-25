@@ -514,20 +514,33 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
     });
   }
 
-  await kibanaServer.request({
-    path: `/api/streams/${WIRED_ROOT_STREAM}/_ingest`,
-    method: 'PUT',
-    headers: PUBLIC_API_HEADERS,
-    body: {
-      ingest: {
-        processing: { steps: [] },
-        settings: {},
-        wired: { fields: {}, routing: allRouting },
-        lifecycle: { inherit: {} },
-        failure_store: { inherit: {} },
-      },
-    },
-  });
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      await kibanaServer.request({
+        path: `/api/streams/${WIRED_ROOT_STREAM}/_ingest`,
+        method: 'PUT',
+        headers: PUBLIC_API_HEADERS,
+        body: {
+          ingest: {
+            processing: { steps: [] },
+            settings: {},
+            wired: { fields: {}, routing: allRouting },
+            lifecycle: { inherit: {} },
+            failure_store: { inherit: {} },
+          },
+        },
+      });
+      break;
+    } catch (err) {
+      if (isConflictError(err) && attempt < MAX_RETRIES) {
+        const delay = RETRY_BASE_DELAY_MS * attempt;
+        log.warning(`Root routing update: 409 conflict on attempt ${attempt}, retrying in ${delay}ms...`);
+        await sleep(delay);
+      } else {
+        throw err;
+      }
+    }
+  }
 
   log.info(`Root stream routing updated with ${count} routing rules`);
 }
@@ -586,13 +599,32 @@ async function createLargeWiredHierarchyViaImport(
         `archive ${Math.round(archiveBuffer.length / 1024)} KB, importing...`
     );
 
-    await uploadContentPack(kibanaServer, WIRED_ROOT_STREAM, archiveBuffer, {
-      objects: { all: {} },
-    });
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        await uploadContentPack(kibanaServer, WIRED_ROOT_STREAM, archiveBuffer, {
+          objects: { all: {} },
+        });
+        lastError = undefined;
+        break;
+      } catch (err) {
+        lastError = err;
+        if (isConflictError(err) && attempt < MAX_RETRIES) {
+          const delay = RETRY_BASE_DELAY_MS * attempt;
+          log.warning(
+            `  Batch ${batchIndex + 1}/${totalBatches}: 409 conflict on attempt ${attempt}, retrying in ${delay}ms...`
+          );
+          await sleep(delay);
+        } else {
+          throw err;
+        }
+      }
+    }
+    if (lastError) throw lastError;
     log.info(`  Batch ${batchIndex + 1}/${totalBatches}: imported successfully`);
 
     if (batchIndex < totalBatches - 1) {
-      await sleep(2000);
+      await sleep(3000);
     }
   }
 
