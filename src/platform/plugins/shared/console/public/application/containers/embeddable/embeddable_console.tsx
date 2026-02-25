@@ -143,8 +143,8 @@ export const EmbeddableConsole = ({
 
   const handleClickOutside = useCallback(
     (event: MouseEvent | TouchEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target?.closest) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
 
       // Only close when clicking inside the main app content area,
       // not on overlays (toasts, flyouts, modals) or chrome (header, nav, sidebar)
