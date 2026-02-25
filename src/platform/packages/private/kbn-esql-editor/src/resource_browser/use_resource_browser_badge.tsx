@@ -20,12 +20,14 @@ interface UseSourcesBadgeParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   openIndicesBrowser: (options?: { openedFrom?: IndicesBrowserOpenMode }) => void;
+  suppressSuggestionsRef: MutableRefObject<boolean>;
 }
 
 export const useSourcesBadge = ({
   editorRef,
   editorModel,
   openIndicesBrowser,
+  suppressSuggestionsRef,
 }: UseSourcesBadgeParams) => {
   const { euiTheme } = useEuiTheme();
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
@@ -127,11 +129,17 @@ export const useSourcesBadge = ({
           firstSupportedCommand.range.endColumn + 1
         );
         editor.setPosition(positionAfterCommand);
-        editor.revealPosition(positionAfterCommand);
+
+        suppressSuggestionsRef.current = true;
+
         openIndicesBrowser({ openedFrom: IndicesBrowserOpenMode.Badge });
+
+        // Remove focus from the editor immediately so there is no visible
+        // focus state while the popover mounts and takes over.
+        (editor.getDomNode()?.ownerDocument.activeElement as HTMLElement)?.blur();
       }
     },
-    [editorModel, editorRef, openIndicesBrowser]
+    [editorModel, editorRef, openIndicesBrowser, suppressSuggestionsRef]
   );
 
   return {
