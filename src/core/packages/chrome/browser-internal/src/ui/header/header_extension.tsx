@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 interface Props {
@@ -17,57 +17,28 @@ interface Props {
   containerClassName?: string;
 }
 
-export class HeaderExtension extends React.Component<Props> {
-  private readonly ref = React.createRef<HTMLDivElement>();
-  private unrender?: () => void;
+export const HeaderExtension = ({ extension, display, containerClassName }: Props) => {
+  const ref = useRef<HTMLDivElement>(null);
 
-  public componentDidMount() {
-    this.renderExtension();
-  }
+  useEffect(() => {
+    if (!ref.current || !extension) return;
+    const unrender = extension(ref.current);
+    return () => {
+      unrender?.();
+    };
+  }, [extension]);
 
-  public componentDidUpdate(prevProps: Props) {
-    if (this.props.extension === prevProps.extension) {
-      return;
-    }
-
-    this.unrenderExtension();
-    this.renderExtension();
-  }
-
-  public componentWillUnmount() {
-    this.unrenderExtension();
-  }
-
-  public render() {
-    return (
-      <div
-        css={css`
-          &:empty {
-            // empty containers should be removed from the layout flow
-            display: contents;
-          }
-        `}
-        ref={this.ref}
-        className={this.props.containerClassName}
-        style={{ display: this.props.display === 'inlineBlock' ? 'inline-block' : undefined }}
-      />
-    );
-  }
-
-  private renderExtension() {
-    if (!this.ref.current) {
-      throw new Error('<HeaderExtension /> mounted without ref');
-    }
-
-    if (this.props.extension) {
-      this.unrender = this.props.extension(this.ref.current);
-    }
-  }
-
-  private unrenderExtension() {
-    if (this.unrender) {
-      this.unrender();
-      this.unrender = undefined;
-    }
-  }
-}
+  return (
+    <div
+      css={css`
+        &:empty {
+          // empty containers should be removed from the layout flow
+          display: contents;
+        }
+      `}
+      ref={ref}
+      className={containerClassName}
+      style={{ display: display === 'inlineBlock' ? 'inline-block' : undefined }}
+    />
+  );
+};

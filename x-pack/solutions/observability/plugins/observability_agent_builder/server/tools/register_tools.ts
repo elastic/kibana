@@ -26,16 +26,8 @@ import {
   OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   createGetLogGroupsTool,
 } from './get_log_groups/tool';
-import {
-  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
-  createGetCorrelatedLogsTool,
-} from './get_correlated_logs/tool';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
 import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
-import {
-  createDownstreamDependenciesTool,
-  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-} from './get_downstream_dependencies/tool';
 import {
   createGetTraceMetricsTool,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
@@ -57,6 +49,10 @@ import {
   createGetTraceChangePointsTool,
 } from './get_trace_change_points/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
+import {
+  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
+  createGetServiceTopologyTool,
+} from './get_service_topology/tool';
 import { OBSERVABILITY_GET_TRACES_TOOL_ID, createGetTracesTool } from './get_traces/tool';
 
 const PLATFORM_TOOL_IDS = [
@@ -71,9 +67,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
-  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
-  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
   OBSERVABILITY_GET_TRACES_TOOL_ID,
@@ -82,6 +76,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
 ];
 
 export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
@@ -103,8 +98,6 @@ export async function registerTools({
     createGetAlertsTool({ core, logger }),
     createGetLogGroupsTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, dataRegistry, logger }),
-    createDownstreamDependenciesTool({ core, dataRegistry, logger }),
-    createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetTraceMetricsTool({ core, plugins, logger }),
     createGetTracesTool({ core, plugins, logger }),
@@ -113,6 +106,7 @@ export async function registerTools({
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
+    createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
   ];
 
   for (const tool of observabilityTools) {

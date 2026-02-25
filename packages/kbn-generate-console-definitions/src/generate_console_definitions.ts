@@ -44,6 +44,14 @@ const generatePatterns = (endpoint: SpecificationTypes.Endpoint): string[] => {
 const generateDocumentation = (endpoint: SpecificationTypes.Endpoint): string => {
   return endpoint.docUrl;
 };
+
+const generateServerlessDocumentation = (
+  endpoint: SpecificationTypes.Endpoint
+): string | undefined => {
+  const url = endpoint.docUrlServerless?.trim();
+  return url ? url : undefined;
+};
+
 interface GeneratedParameters {
   urlParams: DefinitionUrlParams;
   urlComponents: DefinitionUrlParams;
@@ -87,13 +95,21 @@ const generateDefinition = (
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
+  const documentationServerless = generateServerlessDocumentation(endpoint);
   const availability = generateAvailability(endpoint);
   let definition: EndpointDescription = {};
   const params = generateParameters(endpoint, schema);
   if (params) {
     definition = addParams(definition, params);
   }
-  definition = { ...definition, methods, patterns, documentation, availability };
+  definition = {
+    ...definition,
+    methods,
+    patterns,
+    documentation,
+    documentation_serverless: documentationServerless,
+    availability,
+  };
 
   return definition;
 };
