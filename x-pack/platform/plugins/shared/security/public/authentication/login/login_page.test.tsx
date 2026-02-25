@@ -18,28 +18,6 @@ import { LoginPage } from './login_page';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { LoginState } from '../../../common/login_state';
 
-jest.mock('./components', () => ({
-  DisabledLoginForm: ({ title, message }: { title: React.ReactNode; message: React.ReactNode }) => (
-    <div data-test-subj="disabledLoginForm">
-      <span data-test-subj="disabledLoginForm-title">{title}</span>
-      <span data-test-subj="disabledLoginForm-message">{message}</span>
-    </div>
-  ),
-  LoginForm: jest.fn((props: any) => (
-    <div
-      data-test-subj="loginFormComponent"
-      data-auth-provider-hint={props.authProviderHint || ''}
-      data-message-type={props.message?.type || ''}
-    >
-      <span data-test-subj="loginFormComponent-message">{props.message?.content || ''}</span>
-      {props.loginAssistanceMessage && (
-        <span data-test-subj="loginFormComponent-assistance">{props.loginAssistanceMessage}</span>
-      )}
-      {props.loginHelp && <span data-test-subj="loginFormComponent-help">{props.loginHelp}</span>}
-    </div>
-  )),
-}));
-
 const createLoginState = (options?: Partial<LoginState>) => {
   return {
     allowLogin: true,
@@ -98,7 +76,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
     });
 
@@ -118,7 +96,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
     });
   });
@@ -153,7 +131,10 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('disabledLoginForm')).toBeInTheDocument();
+        expect(
+          screen.getByText('A secure connection is required for log in')
+        ).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
     });
 
@@ -172,7 +153,10 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('disabledLoginForm')).toBeInTheDocument();
+        expect(
+          screen.getByText('Cannot connect to the Elasticsearch cluster')
+        ).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
     });
 
@@ -191,7 +175,12 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('disabledLoginForm')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Cannot connect to the Elasticsearch cluster currently configured for Kibana.'
+          )
+        ).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
     });
 
@@ -212,7 +201,8 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('disabledLoginForm')).toBeInTheDocument();
+        expect(screen.getByText('Unsupported login form layout.')).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
     });
 
@@ -233,7 +223,8 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('disabledLoginForm')).toBeInTheDocument();
+        expect(screen.getByText('Login is disabled.')).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
     });
 
@@ -257,7 +248,10 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('disabledLoginForm')).toBeInTheDocument();
+        expect(
+          screen.getByText('Cookies are required to log in to Elastic')
+        ).toBeInTheDocument();
+        expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
     });
   });
@@ -278,7 +272,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
     });
 
@@ -298,11 +292,10 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        const loginForm = screen.getByTestId('loginFormComponent');
-        expect(loginForm).toHaveAttribute('data-auth-provider-hint', 'basic1');
-        expect(screen.getByTestId('loginFormComponent-message')).toHaveTextContent(
-          'Your session has timed out. Please log in again.'
-        );
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your session has timed out. Please log in again.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -321,9 +314,9 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
-        expect(screen.getByTestId('loginFormComponent-assistance')).toHaveTextContent(
-          'This is an *important* message'
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(screen.getByTestId('loginAssistanceMessage')).toHaveTextContent(
+          'This is an important message'
         );
       });
     });
@@ -343,8 +336,8 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
-        expect(screen.getByTestId('loginFormComponent-help')).toHaveTextContent('**some-help**');
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(screen.getByTestId('loginHelpLink')).toBeInTheDocument();
       });
     });
   });
