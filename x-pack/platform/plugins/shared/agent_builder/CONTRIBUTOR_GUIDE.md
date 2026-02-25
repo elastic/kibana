@@ -395,7 +395,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   // Compact view rendered inline in the conversation
   renderInlineContent: ({ attachment, isSidebar }) => {
     if (isSidebar) {
-      // render some condensed in the sidebar only
+      // For example: render a condensed view in the sidebar only
     }
 
     return (
