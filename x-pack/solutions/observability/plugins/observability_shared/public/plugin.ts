@@ -24,7 +24,6 @@ import { createLazyObservabilityPageTemplate } from './components/page_template'
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-export { updateGlobalNavigation };
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
