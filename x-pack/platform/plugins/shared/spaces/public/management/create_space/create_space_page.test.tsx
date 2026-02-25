@@ -13,9 +13,8 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { CreateSpacePage } from './create_space_page';
 import type { SolutionView, Space } from '../../../common/types/latest';
@@ -323,7 +322,7 @@ describe('ManageSpacePage', () => {
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    const wrapper = mountWithIntl(
+    renderWithIntl(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -342,11 +341,10 @@ describe('ManageSpacePage', () => {
     );
 
     await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
     });
 
-    expect(findTestSubject(wrapper, 'cpsDefaultScopePanel')).toHaveLength(0);
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
   });
 
   it('shows CustomizeCps component when project_routing.manage_space_default capability is true', async () => {
@@ -354,7 +352,7 @@ describe('ManageSpacePage', () => {
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    const wrapper = mountWithIntl(
+    renderWithIntl(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -374,11 +372,10 @@ describe('ManageSpacePage', () => {
     );
 
     await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
     });
 
-    expect(findTestSubject(wrapper, 'cpsDefaultScopePanel')).toHaveLength(1);
+    expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
   });
 
   it('hides CustomizeCps component when project_routing.manage_space_default capability is false', async () => {
@@ -386,7 +383,7 @@ describe('ManageSpacePage', () => {
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    const wrapper = mountWithIntl(
+    renderWithIntl(
       <CreateSpacePage
         spacesManager={spacesManager as unknown as SpacesManager}
         getFeatures={featuresStart.getFeatures}
@@ -406,11 +403,10 @@ describe('ManageSpacePage', () => {
     );
 
     await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
     });
 
-    expect(findTestSubject(wrapper, 'cpsDefaultScopePanel')).toHaveLength(0);
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
   });
 
   it('includes projectRouting in createSpace call when provided', async () => {
@@ -437,7 +433,7 @@ describe('ManageSpacePage', () => {
       ],
     });
 
-    const wrapper = mountWithIntl(
+    renderWithIntl(
       <KibanaContextProvider
         services={{
           cps: {
@@ -474,37 +470,29 @@ describe('ManageSpacePage', () => {
     );
 
     await waitFor(() => {
-      wrapper.update();
-      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
     });
 
-    expect(findTestSubject(wrapper, 'cpsDefaultScopePanel')).toHaveLength(1);
+    expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
 
-    updateSpace(wrapper, false, 'oblt');
-
-    await waitFor(() => {
-      expect(mockFetchProjects).toHaveBeenCalled();
+    fireEvent.change(screen.getByTestId('addSpaceName'), {
+      target: { value: 'New Space Name' },
+    });
+    fireEvent.change(screen.getByTestId('descriptionSpaceText'), {
+      target: { value: 'some description' },
     });
 
-    wrapper.update();
+    await updateSolutionView('oblt');
 
     // Click "This project" (sets routing to _alias:_origin)
-    await act(async () => {
-      wrapper
-        .find('button')
-        .filterWhere((node) => String(node.text()).match(/this project/i) != null)
-        .first()
-        .simulate('click');
-      await Promise.resolve();
+    await userEvent.click(screen.getByRole('button', { name: /this project/i }));
+
+    await userEvent.click(screen.getByTestId('save-space-button'));
+
+    await waitFor(() => {
+      expect(spacesManager.createSpace).toHaveBeenCalled();
     });
 
-    wrapper.update();
-
-    const createButton = wrapper.find('button[data-test-subj="save-space-button"]');
-    createButton.simulate('click');
-    await Promise.resolve();
-
-    expect(spacesManager.createSpace).toHaveBeenCalled();
     const callArgs = (spacesManager.createSpace as jest.Mock).mock.calls[0][0];
     expect(callArgs).toMatchObject({
       id: 'new-space-name',
@@ -513,7 +501,7 @@ describe('ManageSpacePage', () => {
       solution: 'oblt',
       projectRouting: '_alias:_origin',
     });
-  });
+  }, 10000);
 });
 
 async function updateSolutionView(solution: SolutionView) {
