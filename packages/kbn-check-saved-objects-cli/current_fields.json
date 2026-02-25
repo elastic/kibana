@@ -91,6 +91,9 @@
     "updatedBy"
   ],
   "alerting_notification_policy": [
+    "apiKey",
+    "apiKeyCreatedByUser",
+    "apiKeyOwner",
     "createdAt",
     "createdBy",
     "description",
@@ -98,10 +101,7 @@
     "destinations.id",
     "destinations.type",
     "name",
-    "apiKey",
     "uiamApiKey",
-    "apiKeyOwner",
-    "apiKeyCreatedByUser",
     "updatedAt",
     "updatedBy"
   ],
