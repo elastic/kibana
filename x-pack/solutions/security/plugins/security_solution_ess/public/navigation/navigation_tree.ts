@@ -204,10 +204,6 @@ export const createNavigationTree = (
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
-            {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-            },
           ],
         },
         {

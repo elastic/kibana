@@ -14,8 +14,8 @@ const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
-    mockAddSuccess,
-    mockAddError,
+    addSuccess: mockAddSuccess,
+    addError: mockAddError,
   }),
 }));
 
@@ -31,7 +31,7 @@ jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
 }));
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: () => true,
+  useIsExperimentalFeatureEnabled: () => false,
 }));
 
 jest.mock('../api/hooks/use_risk_engine_status', () => ({
@@ -47,6 +47,56 @@ jest.mock('../api/hooks/use_schedule_now_risk_engine_mutation', () => ({
   useScheduleNowRiskEngineMutation: () => ({
     mutate: () => {},
   }),
+}));
+
+jest.mock('../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      docLinks: {
+        links: {
+          securitySolution: {
+            entityAnalytics: {
+              assetCriticality: 'https://example.com',
+            },
+          },
+        },
+      },
+    },
+  }),
+}));
+
+jest.mock('../../helper_hooks', () => ({
+  useHasSecurityCapability: () => true,
+}));
+
+jest.mock('../components/asset_criticality/use_asset_criticality', () => ({
+  useAssetCriticalityPrivileges: () => ({
+    isLoading: false,
+    data: { has_write_permissions: true },
+  }),
+}));
+
+jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
+  useEntityStoreStatus: () => ({
+    data: { status: 'not_installed', engines: [] },
+  }),
+  useEnableEntityStoreMutation: () => ({ isLoading: false, isError: false, mutate: jest.fn() }),
+  useStopEntityEngineMutation: () => ({ isLoading: false, mutate: jest.fn() }),
+  useDeleteEntityEngineMutation: () => ({ isLoading: false, isError: false, mutate: jest.fn() }),
+}));
+
+jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: () => ({
+    data: { has_all_required: true },
+  }),
+}));
+
+jest.mock('../components/entity_store/components/engines_status', () => ({
+  EngineStatus: () => <span>{'Mocked Engine Status Tab'}</span>,
+}));
+
+jest.mock('../hooks/use_enabled_entity_types', () => ({
+  useEntityStoreTypes: () => ['host', 'user'],
 }));
 
 const mockToggleSelectedClosedAlertsSetting = jest.fn();
@@ -132,9 +182,15 @@ describe('EntityAnalyticsManagementPage', () => {
     </QueryClientProvider>
   );
 
-  it('has the major sections of the page visible', () => {
+  it('renders page title and tabs', () => {
     render(pageComponent());
-    expect(screen.getByText('Entity risk score')).toBeInTheDocument();
+    expect(screen.getByText('Entity analytics')).toBeInTheDocument();
+    expect(screen.getByTestId('riskScoreTab')).toBeInTheDocument();
+    expect(screen.getByTestId('importEntitiesTab')).toBeInTheDocument();
+  });
+
+  it('has the risk score tab selected by default with content visible', () => {
+    render(pageComponent());
     expect(screen.getByText('Risk score enable section')).toBeInTheDocument();
     expect(screen.getByText('Risk score preview')).toBeInTheDocument();
   });
@@ -195,5 +251,11 @@ describe('EntityAnalyticsManagementPage', () => {
         isLoading: false,
       },
     });
+  });
+
+  it('switches to Import Entities tab when clicked', () => {
+    render(pageComponent());
+    fireEvent.click(screen.getByTestId('importEntitiesTab'));
+    expect(screen.queryByText('Risk score preview')).not.toBeInTheDocument();
   });
 });
