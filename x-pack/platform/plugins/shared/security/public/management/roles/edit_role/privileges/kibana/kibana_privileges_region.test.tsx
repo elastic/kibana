@@ -99,12 +99,14 @@ describe('<KibanaPrivileges>', () => {
     const props = buildProps();
     renderWithIntl(<KibanaPrivilegesRegion {...props} />);
     expect(screen.getByTestId('spaceAwarePrivilegeSection')).toBeInTheDocument();
+    expect(screen.queryByTestId('simplePrivilegeSection')).toBeNull();
   });
 
   it('renders simple privilege form when spaces is disabled', () => {
     const props = buildProps();
     renderWithIntl(<KibanaPrivilegesRegion {...props} spacesEnabled={false} />);
     expect(screen.getByTestId('simplePrivilegeSection')).toBeInTheDocument();
+    expect(screen.queryByTestId('spaceAwarePrivilegeSection')).toBeNull();
   });
 
   it('renders the transform error section when the role has a transform error', () => {
