@@ -222,5 +222,104 @@ steps:
         expect(nextStep?.status).toBe(ExecutionStatus.COMPLETED);
       });
     });
+
+    describe('data.set step with max-step-size', () => {
+      let workflowRunFixture: WorkflowRunFixture;
+
+      beforeAll(async () => {
+        workflowRunFixture = new WorkflowRunFixture();
+        const limit10kb = { getValueInBytes: () => 10 * 1024 };
+        (workflowRunFixture.configMock as any).maxResponseSize = limit10kb;
+        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit10kb;
+
+        const workflowYaml = `
+steps:
+  - name: generate_large_data
+    type: data.set
+    max-step-size: 10b
+    with:
+      some_key: "This string is definitely longer than 10 bytes"
+`;
+        await workflowRunFixture.runWorkflow({ workflowYaml });
+      });
+
+      it('data.set step fails when output exceeds step-level max-step-size', () => {
+        const stepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        );
+        const dataStep = stepExecutions.find((s) => s.stepId === 'generate_large_data');
+        expect(dataStep?.status).toBe(ExecutionStatus.FAILED);
+        expect(dataStep?.error?.type).toBe('StepSizeLimitExceeded');
+      });
+    });
+
+    describe('stack connector (Slack-like) respects max-step-size', () => {
+      let workflowRunFixture: WorkflowRunFixture;
+
+      beforeAll(async () => {
+        workflowRunFixture = new WorkflowRunFixture();
+        const limit1kb = { getValueInBytes: () => 1024 };
+        (workflowRunFixture.configMock as any).maxResponseSize = limit1kb;
+        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit1kb;
+
+        // large_response connector returns 5KB -- exceeds 1KB limit
+        const workflowYaml = `
+steps:
+  - name: slack_like_step
+    type: ${FakeConnectors.large_response.actionTypeId}
+    connector-id: ${FakeConnectors.large_response.name}
+    with:
+      sizeBytes: 5120
+`;
+        await workflowRunFixture.runWorkflow({ workflowYaml });
+      });
+
+      it('connector step output caught by Layer 2 base class guard', () => {
+        const stepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        );
+        const connectorStep = stepExecutions.find((s) => s.stepId === 'slack_like_step');
+        expect(connectorStep?.status).toBe(ExecutionStatus.FAILED);
+        expect(connectorStep?.error?.type).toBe('StepSizeLimitExceeded');
+      });
+    });
+
+    describe('input size check rejects oversized inputs before _run()', () => {
+      let workflowRunFixture: WorkflowRunFixture;
+
+      beforeAll(async () => {
+        workflowRunFixture = new WorkflowRunFixture();
+        const limit10kb = { getValueInBytes: () => 10 * 1024 };
+        (workflowRunFixture.configMock as any).maxResponseSize = limit10kb;
+        (workflowRunFixture.dependencies as any).config.maxResponseSize = limit10kb;
+
+        // Step 1: generate large output (under 10kb limit)
+        // Step 2: pass it as input to a step with 100b limit -- input check should fail
+        const workflowYaml = `
+steps:
+  - name: generate_data
+    type: ${FakeConnectors.large_response.actionTypeId}
+    connector-id: ${FakeConnectors.large_response.name}
+    with:
+      sizeBytes: 1024
+  - name: receive_large_input
+    type: data.set
+    max-step-size: 100b
+    with:
+      big_ref: "{{ steps.generate_data.output | json }}"
+`;
+        await workflowRunFixture.runWorkflow({ workflowYaml });
+      });
+
+      it('step fails when rendered input exceeds max-step-size', () => {
+        const stepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        );
+        const inputStep = stepExecutions.find((s) => s.stepId === 'receive_large_input');
+        expect(inputStep?.status).toBe(ExecutionStatus.FAILED);
+        expect(inputStep?.error?.type).toBe('StepSizeLimitExceeded');
+        expect(inputStep?.error?.message).toContain('input');
+      });
+    });
   });
 });

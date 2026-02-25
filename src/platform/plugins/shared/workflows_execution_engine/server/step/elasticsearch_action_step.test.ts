@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
@@ -292,6 +293,68 @@ describe('ElasticsearchActionStepImpl', () => {
           headers: { 'X-Custom-Header': 'value' },
         })
       );
+    });
+  });
+
+  describe('response size limit enforcement (Layer 1)', () => {
+    it('should map RequestAbortedError with size message to StepSizeLimitExceeded', async () => {
+      const sizeError = new errors.RequestAbortedError(
+        'The content length (15000000) is bigger than the maximum allowed string (10485760)'
+      );
+      mockEsClient.transport.request = jest.fn().mockRejectedValue(sizeError);
+
+      const step: ElasticsearchActionStep = {
+        name: 'size_limit_step',
+        type: 'elasticsearch.search',
+        spaceId: 'default',
+        with: {
+          index: 'large-index',
+          body: { query: { match_all: {} }, size: 10000 },
+        },
+      };
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(step.with);
+
+      expect(result.error).toBeDefined();
+      expect(result.error.type).toBe('StepSizeLimitExceeded');
+      expect(result.error.message).toContain('size_limit_step');
+      expect(result.error.details.limitBytes).toBe(10 * 1024 * 1024);
+      expect(result.output).toBeUndefined();
+    });
+
+    it('should NOT map other RequestAbortedError (non-size) to StepSizeLimitExceeded', async () => {
+      const abortError = new errors.RequestAbortedError('Request aborted by user');
+      mockEsClient.transport.request = jest.fn().mockRejectedValue(abortError);
+
+      const step: ElasticsearchActionStep = {
+        name: 'abort_step',
+        type: 'elasticsearch.search',
+        spaceId: 'default',
+        with: {
+          index: 'test',
+          body: { query: { match_all: {} } },
+        },
+      };
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(step.with);
+
+      expect(result.error).toBeDefined();
+      // Should be a generic error, not StepSizeLimitExceeded
+      expect(result.error.type).not.toBe('StepSizeLimitExceeded');
     });
   });
 });

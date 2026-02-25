@@ -316,7 +316,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         totalBytes += value.byteLength;
         if (maxSize > 0 && totalBytes > maxSize) {
           reader.cancel();
-          throw new ResponseSizeLimitError(totalBytes, maxSize, this.step.name);
+          const stepName =
+            this.step.name || (this.step as any).configuration?.name || (this.step as any).stepId;
+          throw new ResponseSizeLimitError(totalBytes, maxSize, stepName);
         }
         chunks.push(value);
       }

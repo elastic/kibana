@@ -115,6 +115,17 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     this.stepExecutionRuntime = stepExecutionRuntime;
     this.connectorExecutor = connectorExecutor as any;
     this.workflowExecutionRuntime = workflowExecutionRuntime;
+
+    // Auto-populate max-step-size from the graph node configuration.
+    // This ensures every step respects the YAML limit regardless of how
+    // the subclass constructs its step object (prevents the bug where
+    // step implementations forget to copy max-step-size).
+    if (!this.step['max-step-size']) {
+      const nodeConfig = (stepExecutionRuntime.node as any)?.configuration;
+      if (nodeConfig?.['max-step-size']) {
+        (this.step as any)['max-step-size'] = nodeConfig['max-step-size'];
+      }
+    }
   }
 
   public getName(): string {
@@ -141,6 +152,21 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     try {
       input = await this.getInput();
+
+      // Enforce input size limit before executing the step.
+      // Prevents oversized template-rendered inputs from being passed to _run().
+      if (input != null) {
+        const maxBytes = this.getMaxResponseSize();
+        if (maxBytes > 0) {
+          const inputSize = safeOutputSize(input);
+          if (inputSize > 0 && inputSize > maxBytes) {
+            const stepName =
+              this.step.name || (this.step as any).configuration?.name || (this.step as any).stepId;
+            throw new ResponseSizeLimitError(inputSize, maxBytes, `${stepName} (input)`);
+          }
+        }
+      }
+
       this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
@@ -153,7 +179,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
           const outputSize = safeOutputSize(result.output);
           // outputSize === -1 means non-serializable (stream, circular ref) -- skip check
           if (outputSize > 0 && outputSize > maxBytes) {
-            throw new ResponseSizeLimitError(outputSize, maxBytes, this.step.name);
+            const stepName =
+              this.step.name || (this.step as any).configuration?.name || (this.step as any).stepId;
+            throw new ResponseSizeLimitError(outputSize, maxBytes, stepName);
           }
         }
       }
@@ -205,7 +233,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
    * Subclasses use this for both Layer 1 (pre-emptive I/O enforcement) and Layer 2 (output guard).
    */
   protected getMaxResponseSize(): number {
-    // 1. Step-level override (from YAML)
+    // 1. Step-level override (from YAML -- auto-populated in constructor)
     const stepLimit = this.step['max-step-size'];
     if (stepLimit) {
       return parseByteSize(stepLimit);

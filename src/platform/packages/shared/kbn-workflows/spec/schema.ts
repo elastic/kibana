@@ -38,6 +38,7 @@ export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
   type: z.string(),
+  'max-step-size': ByteSizeSchema.optional(),
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
@@ -197,7 +198,6 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
   .merge(TimeoutPropSchema)
-  .merge(MaxStepSizePropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
@@ -240,6 +240,10 @@ export const FetcherConfigSchema = z
       .describe('Whether to follow HTTP redirects. Defaults to true'),
     max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
     keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
+    max_content_length: z
+      .number()
+      .optional()
+      .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();

@@ -115,9 +115,10 @@ describe('ResponseSizeLimitError', () => {
     expect(error.details?.limitBytes).toBe(1024);
   });
 
-  it('should handle unknown actual size (-1)', () => {
+  it('should not include actualBytes in details', () => {
     const error = new ResponseSizeLimitError(-1, 10 * 1024 * 1024, 'es_step');
-    expect(error.message).toContain('unknown size');
     expect(error.message).toContain('10 MB');
+    expect(error.message).toContain('exceeded the');
+    expect(error.details?.limitBytes).toBe(10 * 1024 * 1024);
   });
 });

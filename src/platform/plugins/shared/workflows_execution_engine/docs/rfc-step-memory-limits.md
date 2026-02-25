@@ -504,7 +504,7 @@ The PoC directly addresses the **critical path** items from the epic:
    - "HTTP step aborts download mid-stream when response exceeds configured limit" -- **Yes** (axios `maxContentLength`)
    - "Elasticsearch step aborts response mid-stream when it exceeds configured limit" -- **Yes** (`transport.request({ maxResponseSize })` -- native mid-stream abort)
    - "Post-hoc output size check rejects oversized step outputs before persisting" -- **Yes** (base class guard)
-   - "Heap pressure monitor triggers abort when V8 heap usage exceeds threshold" -- **No** (out of PoC scope, tracked separately in #15838)
+   - "Heap pressure monitor triggers abort when V8 heap usage exceeds threshold" -- **No** (deferred to research: [#16107](https://github.com/elastic/security-team/issues/16107))
    - "Per-step `max_response_size` YAML config is supported" -- **Yes**
    - "Connector step outputs are checked post-hoc" -- **Yes**
    - "Clear error messages" -- **Yes** (`ResponseSizeLimitError`)
@@ -518,7 +518,7 @@ The PoC directly addresses the **critical path** items from the epic:
 
 | Remaining Work | Related Issue | Priority |
 |---|---|---|
-| Heap pressure circuit breaker (`v8.getHeapStatistics()` in `runStackMonitor`) | #15838 | High |
+| Heap pressure circuit breaker (research needed -- no deterministic approach available) | [#16107](https://github.com/elastic/security-team/issues/16107) | Research |
 | Max step input size check (before `_run()`) | #15838 | Medium |
 | API response pagination and `_source_includes` filtering | #15746 | High |
 | Max steps per workflow (definition-time validation) | #15837 | Medium |

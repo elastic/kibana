@@ -15,6 +15,7 @@ import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import { ResponseSizeLimitError, formatBytes } from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -68,12 +69,29 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       }
 
       // Build final rendered inputs
-      const renderedInputs = isSubAction
+      let renderedInputs = isSubAction
         ? {
             subActionParams: withInputs,
             subAction: subActionName,
           }
         : withInputs;
+
+      // For HTTP-based connectors, inject max_content_length into the fetcher config
+      // so axios can abort mid-stream (Layer 1 OOM prevention).
+      // Supported: 'http' (system connector), '.webhook' (stack connector)
+      const rawType = step.type;
+      if (rawType === 'http' || rawType === '.webhook') {
+        const maxBytes = this.getMaxResponseSize();
+        if (maxBytes > 0) {
+          renderedInputs = {
+            ...renderedInputs,
+            fetcher: {
+              ...(renderedInputs.fetcher || {}),
+              max_content_length: maxBytes,
+            },
+          };
+        }
+      }
 
       const connectorIdRendered =
         this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
@@ -111,12 +129,64 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           error: undefined,
         };
       } else {
+        const errorMsg = serviceMessage ?? message ?? 'Unknown error';
+
+        // Detect maxContentLength exceeded from HTTP connectors and enrich the error
+        if (errorMsg.includes('maxContentLength')) {
+          const stepName =
+            step.name || (step as any).configuration?.name || (step as any).stepId;
+          const limitBytes = this.getMaxResponseSize();
+          const sizeLimitError = new ResponseSizeLimitError(-1, limitBytes, stepName);
+
+          // Best-effort: do a HEAD request to get the actual content-length
+          try {
+            const url = withInputs?.url || renderedInputs?.url;
+            if (url) {
+              const headResponse = await fetch(url, { method: 'HEAD' });
+              const contentLength = headResponse.headers.get('content-length');
+              const contentEncoding = headResponse.headers.get('content-encoding');
+              const isCompressed = !!contentEncoding && contentEncoding !== 'identity';
+
+              if (contentLength && sizeLimitError.details) {
+                const rawSize = parseInt(contentLength, 10);
+
+                if (isCompressed) {
+                  sizeLimitError.details._debug = {
+                    url,
+                    compressedSize: rawSize,
+                    compressedSizeFormatted: formatBytes(rawSize),
+                    contentEncoding,
+                    suggestion:
+                      `The remote resource is ${formatBytes(rawSize)} compressed (${contentEncoding}). ` +
+                      `The decompressed size is larger and exceeded the ${formatBytes(limitBytes)} limit. ` +
+                      `Increase max-step-size until the request succeeds.`,
+                  };
+                } else {
+                  sizeLimitError.details._debug = {
+                    url,
+                    actualContentLength: rawSize,
+                    actualContentLengthFormatted: formatBytes(rawSize),
+                    suggestedLimit: formatBytes(Math.ceil(rawSize * 1.1)),
+                    suggestion:
+                      `The remote resource is ${formatBytes(rawSize)}. ` +
+                      `Set max-step-size to at least ${formatBytes(Math.ceil(rawSize * 1.1))} to allow this request.`,
+                  };
+                }
+              }
+            }
+          } catch {
+            // HEAD request failed -- still return the size limit error without debug info
+          }
+
+          return { input: withInputs, output: undefined, error: sizeLimitError };
+        }
+
         return {
           input: withInputs,
           output: undefined,
           error: new ExecutionError({
             type: 'ConnectorExecutionError',
-            message: serviceMessage ?? message ?? 'Unknown error',
+            message: errorMsg,
           }),
         };
       }

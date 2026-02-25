@@ -75,10 +75,18 @@ export const request = async <T = unknown>({
     }
   }
 
-  const { maxContentLength, timeout: settingsTimeout } =
+  const { maxContentLength: defaultMaxContentLength, timeout: settingsTimeout } =
     configurationUtilities.getResponseSettings();
 
-  const { auth, ...restConfig } = config;
+  // If the caller provides a maxContentLength (e.g., from workflow step limits),
+  // use it instead of the global default. This allows per-request overrides.
+  const callerMaxContentLength = (config as AxiosRequestConfig).maxContentLength;
+  const maxContentLength =
+    callerMaxContentLength != null && callerMaxContentLength > 0
+      ? callerMaxContentLength
+      : defaultMaxContentLength;
+
+  const { auth, maxContentLength: _callerMax, ...restConfig } = config;
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: auth?.username,

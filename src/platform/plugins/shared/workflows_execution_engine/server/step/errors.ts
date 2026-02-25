@@ -86,15 +86,14 @@ export function safeOutputSize(output: unknown): number {
  */
 export class ResponseSizeLimitError extends ExecutionError {
   constructor(actualBytes: number, limitBytes: number, stepName: string) {
-    const actualStr = actualBytes > 0 ? formatBytes(actualBytes) : 'unknown size';
     super({
       type: 'StepSizeLimitExceeded',
       message:
-        `Step "${stepName}" exceeded the size limit: ` +
-        `${actualStr} > ${formatBytes(limitBytes)}. ` +
-        `Configure 'max-step-size' at the step or workflow level to adjust.`,
+        `Step "${stepName}" output was stopped because it exceeded the ` +
+        `${formatBytes(limitBytes)} size limit. ` +
+        `Configure 'max-step-size' at the step or workflow level to increase the limit, ` +
+        `or reduce the response size (e.g., filter fields, limit results).`,
       details: {
-        actualBytes: actualBytes > 0 ? actualBytes : undefined,
         limitBytes,
       },
     });
