@@ -69,11 +69,11 @@ function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: strin
       [
         tooLongs.length === 1
           ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. ` +
-          `This is not an error, and if you don't own this config then you can ignore this warning. ` +
-          `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
+            `This is not an error, and if you don't own this config then you can ignore this warning. ` +
+            `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
           : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. ` +
-          `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
-          `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
+            `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
+            `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
         '',
         ...tooLongs.map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
       ].join('\n')
@@ -242,14 +242,14 @@ export async function pickTestGroupRunOrder() {
    */
   const LIMIT_CONFIG_TYPE = process.env.LIMIT_CONFIG_TYPE
     ? process.env.LIMIT_CONFIG_TYPE.split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
+        .map((t) => t.trim())
+        .filter(Boolean)
     : ['unit', 'integration', 'functional'];
 
   const LIMIT_SOLUTIONS = process.env.LIMIT_SOLUTIONS
     ? process.env.LIMIT_SOLUTIONS.split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
+        .map((t) => t.trim())
+        .filter(Boolean)
     : undefined;
   if (LIMIT_SOLUTIONS) {
     const validSolutions = ['chat', 'observability', 'search', 'security'];
@@ -259,8 +259,8 @@ export async function pickTestGroupRunOrder() {
 
   const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
     ? process.env.FTR_CONFIG_PATTERNS.split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
+        .map((t) => t.trim())
+        .filter(Boolean)
     : undefined;
 
   const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
@@ -291,15 +291,15 @@ export async function pickTestGroupRunOrder() {
   const FTR_CONFIGS_DEPS =
     process.env.FTR_CONFIGS_DEPS !== undefined
       ? process.env.FTR_CONFIGS_DEPS.split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
+          .map((t) => t.trim())
+          .filter(Boolean)
       : ['build'];
 
   const JEST_CONFIGS_DEPS =
     process.env.JEST_CONFIGS_DEPS !== undefined
       ? process.env.JEST_CONFIGS_DEPS.split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
+          .map((t) => t.trim())
+          .filter(Boolean)
       : [];
 
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
@@ -336,18 +336,18 @@ export async function pickTestGroupRunOrder() {
 
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
     ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
-      cwd: process.cwd(),
-      absolute: false,
-      ignore: DISABLED_JEST_CONFIGS,
-    })
+        cwd: process.cwd(),
+        absolute: false,
+        ignore: DISABLED_JEST_CONFIGS,
+      })
     : [];
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
     ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
-      cwd: process.cwd(),
-      absolute: false,
-      ignore: DISABLED_JEST_CONFIGS,
-    })
+        cwd: process.cwd(),
+        absolute: false,
+        ignore: DISABLED_JEST_CONFIGS,
+      })
     : [];
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
@@ -365,11 +365,11 @@ export async function pickTestGroupRunOrder() {
       // try to get times from a recent successful job on this PR
       ...(prNumber
         ? [
-          {
-            prId: prNumber,
-            jobName: 'kibana-pull-request',
-          },
-        ]
+            {
+              prId: prNumber,
+              jobName: 'kibana-pull-request',
+            },
+          ]
         : []),
       // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
       // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
@@ -379,24 +379,24 @@ export async function pickTestGroupRunOrder() {
       pipelineSlug !== 'kibana-on-merge' &&
       pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
         ? [
-          {
-            branch: ownBranch,
-            jobName: pipelineSlug,
-          },
-          {
-            branch: trackedBranch,
-            jobName: pipelineSlug,
-          },
-        ]
+            {
+              branch: ownBranch,
+              jobName: pipelineSlug,
+            },
+            {
+              branch: trackedBranch,
+              jobName: pipelineSlug,
+            },
+          ]
         : []),
       // try to get times from the mergeBase commit
       ...(process.env.GITHUB_PR_MERGE_BASE
         ? [
-          {
-            commit: process.env.GITHUB_PR_MERGE_BASE,
-            jobName: 'kibana-on-merge',
-          },
-        ]
+            {
+              commit: process.env.GITHUB_PR_MERGE_BASE,
+              jobName: 'kibana-on-merge',
+            },
+          ]
         : []),
       // fallback to the latest times from the tracked branch
       {
