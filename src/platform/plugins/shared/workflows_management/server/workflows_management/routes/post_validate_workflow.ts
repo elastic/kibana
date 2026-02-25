@@ -21,7 +21,7 @@ const validateWorkflowBodySchema = z.object({
 export function registerPostValidateWorkflowRoute({ router, api, spaces }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workflows/_validate',
+      path: '/internal/workflows/_validate',
       options: WORKFLOW_ROUTE_OPTIONS,
       security: WORKFLOW_READ_SECURITY,
       validate: {
