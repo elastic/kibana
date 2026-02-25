@@ -13,6 +13,7 @@ import React, {
   useCallback,
   useRef,
   useMemo,
+  useEffect,
   useLayoutEffect,
 } from 'react';
 import { type Row } from '@tanstack/react-table';
@@ -127,9 +128,9 @@ export interface CascadeVirtualizerReturnValue
     | 'scrollOffset'
     | 'scrollElement'
     | 'range'
-  | 'measurementsCache'
-  | 'options'
-  | 'calculateRange'
+    | 'measurementsCache'
+    | 'options'
+    | 'calculateRange'
   > {
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<number, number>;
@@ -222,6 +223,37 @@ export const useAnchorVirtualizerToItemIndex = (
   }, [restoreScrollOffset]);
 };
 
+/**
+ * Defers overscan to zero on the initial render frame to reduce DOM node count
+ * and layout thrashing during mount. After the browser paints, the configured
+ * overscan is applied directly to the virtualizer options without triggering
+ * a React re-render.
+ *
+ * @returns An object with `initialOverscan` for the first render and an
+ * `applyDeferredOverscan` callback to invoke once the virtualizer is created.
+ */
+export const useDeferredOverscan = (overscan: number | undefined) => {
+  const overscanAppliedRef = useRef(false);
+  const resolvedOverscan = overscan ?? 1;
+  const initialOverscan = overscanAppliedRef.current ? resolvedOverscan : 0;
+
+  const applyDeferredOverscan = useCallback(
+    (virtualizerInstance: UseVirtualizerReturnType) => {
+      if (overscanAppliedRef.current) return;
+
+      const rafId = requestAnimationFrame(() => {
+        overscanAppliedRef.current = true;
+        virtualizerInstance.options.overscan = resolvedOverscan;
+      });
+
+      return () => cancelAnimationFrame(rafId);
+    },
+    [resolvedOverscan]
+  );
+
+  return { initialOverscan, applyDeferredOverscan };
+};
+
 export const useCascadeVirtualizer = <G extends GroupNode>({
   overscan,
   enableStickyGroupHeader,
@@ -236,6 +268,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
   const hasRestoredScrollPositionRef = useRef(false);
   const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
+  const { initialOverscan, applyDeferredOverscan } = useDeferredOverscan(overscan);
 
   const rangeExtractor = useCascadeVirtualizerRangeExtractor<G>({
     rows,
@@ -252,7 +285,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       count: rows.length,
       estimateSize: () => estimatedRowHeight,
       getScrollElement,
-      overscan,
+      overscan: initialOverscan,
       rangeExtractor,
       initialOffset,
       scrollMargin,
@@ -269,7 +302,7 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
     [
       rows.length,
       getScrollElement,
-      overscan,
+      initialOverscan,
       rangeExtractor,
       initialOffset,
       scrollMargin,
@@ -280,6 +313,10 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   );
 
   const virtualizerImpl = useVirtualizer(virtualizerOptions);
+
+  useEffect(() => {
+    return applyDeferredOverscan(virtualizerImpl);
+  }, [applyDeferredOverscan, virtualizerImpl]);
 
   useAnchorVirtualizerToItemIndex(
     virtualizerImpl,
