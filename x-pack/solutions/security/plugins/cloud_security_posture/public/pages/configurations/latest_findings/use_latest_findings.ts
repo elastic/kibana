@@ -94,16 +94,22 @@ const fieldsRequiredSortingByPainlessScript = [
 
 /**
  * Generates Painless sorting if the given field is matched or returns default sorting
- * This painless script will sort the field in case-insensitive manner
+ * This painless script will sort the field in case-insensitive manner.
+ * Missing values are placed last regardless of sort direction.
  */
 const getSortField = ({ field, direction }: { field: string; direction: string }) => {
   if (fieldsRequiredSortingByPainlessScript.includes(field)) {
+    // Use a high Unicode sentinel for ascending so missing values sort last,
+    // and an empty string for descending so missing values also sort last.
+    // Note: Painless double-quoted strings only support \\ and \" escapes,
+    // so we embed the actual U+FFFF character rather than a \uffff escape sequence.
+    const missingFallback = direction === 'asc' ? '\uffff' : '';
     return {
       _script: {
         type: 'string',
         order: direction,
         script: {
-          source: `doc.containsKey("${field}") && !doc["${field}"].empty ? doc["${field}"].value.toLowerCase() : ""`,
+          source: `doc.containsKey("${field}") && !doc["${field}"].empty ? doc["${field}"].value.toLowerCase() : "${missingFallback}"`,
           lang: 'painless',
         },
       },
