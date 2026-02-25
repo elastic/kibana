@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 
-const STREAM_NAME = 'logs';
+const STREAM_NAME = 'logs.otel';
 const SYSTEM_NAME = 'streams-system-validity-test';
 
 test.describe(

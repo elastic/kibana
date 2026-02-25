@@ -507,7 +507,7 @@
               "\nType of pallette"
             ],
             "signature": [
-              "\"categorical\" | \"gradient\""
+              "\"gradient\" | \"categorical\""
             ],
             "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
             "lineNumber": 28,
@@ -705,7 +705,7 @@
         "label": "KbnPaletteType",
         "description": [],
         "signature": [
-          "\"categorical\" | \"gradient\""
+          "\"gradient\" | \"categorical\""
         ],
         "path": "src/platform/packages/shared/kbn-palettes/classes/types.ts",
         "lineNumber": 10,
