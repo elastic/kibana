@@ -73,7 +73,7 @@ describe('Color util transforms', () => {
       } satisfies PaletteOutput<CustomPaletteParams>);
     });
 
-    it('should convert percentage range color with min/max values', () => {
+    it('should convert percentage range color with implied min/max values', () => {
       const colorByValue: ColorByValueType = {
         type: 'dynamic',
         range: 'percentage',
@@ -105,6 +105,43 @@ describe('Color util transforms', () => {
           colorStops: [
             { color: 'red', stop: 10 },
             { color: 'green', stop: 50 },
+          ],
+        },
+      } satisfies PaletteOutput<CustomPaletteParams>);
+    });
+
+    it.each<[name: string, min: number | undefined | null, max: number | undefined | null]>([
+      ['Infinity', -Infinity, Infinity],
+      ['null', null, null],
+      ['undefined', undefined, undefined],
+    ])('should convert ranges with implied min/max values as "%s"', (_, min, max) => {
+      const colorByValue: ColorByValueType = {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', gte: min, lt: 10 },
+          { color: 'yellow', gte: 10, lt: 50 },
+          { color: 'green', gte: 50, lte: max },
+        ],
+      };
+
+      const result = fromColorByValueAPIToLensState(colorByValue);
+
+      expect(result).toMatchObject({
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          rangeType: 'number',
+          // @ts-expect-error - This can be null
+          rangeMin: min ?? null, // uses null as fallback if undefined
+          // @ts-expect-error - This can be null
+          rangeMax: max ?? null, // uses null as fallback if undefined
+          stops: [
+            { color: 'red', stop: 10 },
+            { color: 'yellow', stop: 50 },
+            // @ts-expect-error - This can be null
+            { color: 'green', stop: max ?? null }, // uses null as fallback if undefined
           ],
         },
       } satisfies PaletteOutput<CustomPaletteParams>);
@@ -201,6 +238,44 @@ describe('Color util transforms', () => {
           { color: 'red', gte: 5, lt: 10 },
           { color: 'green', gte: 10, lt: 50 },
           { color: 'blue', gte: 50, lte: 95 },
+        ],
+      } satisfies ColorByValueType);
+    });
+
+    it.each<[name: string, min: number | undefined | null, max: number | undefined | null]>([
+      ['Infinity', -Infinity, Infinity],
+      ['null', null, null],
+      ['undefined', undefined, undefined],
+    ])('should convert with open-ended bounds as "%s"', (_, min, max) => {
+      const palette: PaletteOutput<CustomPaletteParams> = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          name: 'custom',
+          rangeType: 'number',
+          // @ts-expect-error - This can be null
+          rangeMin: min,
+          // @ts-expect-error - This can be null
+          rangeMax: max,
+          stops: [
+            { color: 'red', stop: 10 },
+            { color: 'yellow', stop: 50 },
+            { color: 'green', stop: 90 },
+          ],
+          continuity: 'all',
+          maxSteps: 5,
+        },
+      };
+
+      const result = fromColorByValueLensStateToAPI(palette);
+
+      expect(result).toEqual({
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { color: 'red', lt: 10 },
+          { color: 'yellow', gte: 10, lt: 50 },
+          { color: 'green', gte: 50 },
         ],
       } satisfies ColorByValueType);
     });

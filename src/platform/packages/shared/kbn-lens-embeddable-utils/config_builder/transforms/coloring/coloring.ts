@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isNil } from 'lodash';
-
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 
 import type {
@@ -99,6 +97,11 @@ export function fromColorByValueAPIToLensState(
   };
 }
 
+function getRangeValue(value?: number | null): number | null {
+  if (value === undefined || value === null || !isFinite(value)) return null;
+  return value;
+}
+
 export function fromColorByValueLensStateToAPI(
   config: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
@@ -111,10 +114,12 @@ export function fromColorByValueLensStateToAPI(
 
   const palette = colorParams.name ?? 'custom';
   const isLegacy = palette !== 'custom';
+  const rangeMin = getRangeValue(colorParams.rangeMin);
+  const rangeMax = getRangeValue(colorParams.rangeMax);
   const needsPaletteShift =
     isLegacy &&
-    ((colorParams.rangeMin != null && colorParams.rangeMin === originalStops.at(0)?.stop) ||
-      (colorParams.rangeMax != null && colorParams.rangeMax !== originalStops.at(-1)?.stop));
+    ((rangeMin !== null && rangeMin === originalStops.at(0)?.stop) ||
+      (rangeMax !== null && rangeMax !== originalStops.at(-1)?.stop));
 
   // legacy non-custom color stops are incorrectly configured for bwc and "fixed" in client logic
   // we need to return the incorrect stops to make it work as it does currently.
@@ -123,8 +128,7 @@ export function fromColorByValueLensStateToAPI(
     // @ts-expect-error - stop value can be null
     originalStops = originalStops.map((stop, i) => ({
       ...stop,
-      stop:
-        i === originalStops.length - 1 ? colorParams.rangeMax ?? null : originalStops[i + 1].stop,
+      stop: i === originalStops.length - 1 ? rangeMax : originalStops[i + 1].stop,
     }));
   }
 
@@ -144,7 +148,7 @@ export function fromColorByValueLensStateToAPI(
     const { stop: currentStop, color } = step;
     if (i === 0) {
       return {
-        ...(!isNil(colorParams.rangeMin) && { gte: colorParams.rangeMin }),
+        ...(rangeMin !== null && { gte: rangeMin }),
         lt: currentStop,
         color,
       };
@@ -156,7 +160,7 @@ export function fromColorByValueLensStateToAPI(
       return {
         gte: prevStop,
         // ignores stop value, current logic sets last stop to max domain not user defined rangeMax
-        ...(!isNil(colorParams.rangeMax) && { lte: colorParams.rangeMax }),
+        ...(rangeMax !== null && { lte: rangeMax }),
         color,
       };
     }
