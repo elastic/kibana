@@ -102,8 +102,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          'Request validation failed (Field "groupingBy": Invalid input: expected string, received array, Too big: expected array to have <=1 items)'
+        expect(res.serviceMessage).to.match(
+          /^Request validation failed \(Field "groupingBy": .*?(expected array to have <=1 items|Array must contain at most 1 element\(s\)).*\)$/
         );
       });
 

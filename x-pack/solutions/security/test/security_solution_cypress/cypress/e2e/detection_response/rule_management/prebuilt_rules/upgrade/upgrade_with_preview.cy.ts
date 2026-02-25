@@ -1054,6 +1054,7 @@ describe(
           visitRulesUpgradeTable();
           openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
 
+          toggleFieldAccordion('name');
           acceptFieldValue('name');
           acceptFieldValue('kql_query');
           acceptFieldValue('data_source');
@@ -1093,6 +1094,7 @@ describe(
           acceptFieldValue('tags');
 
           // Enter a new rule name
+          toggleFieldAccordion('name');
           switchFieldToEditMode('name');
           typeRuleName('Custom rule name');
           saveFieldValue('name');

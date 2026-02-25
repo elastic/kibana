@@ -244,14 +244,16 @@ describe(
 
         it('Updates a match blocklist item', () => {
           openBlocklist({ itemId });
+          selectSignatureField();
           selectOperator('is one of');
+          setMultiValue();
           submitBlocklist();
           validateSuccessPopup('update');
           validateRenderedCondition(IS_ONE_OF_EXPECTED_CONDITION);
         });
 
         it('Deletes a blocklist item', () => {
-          openBlocklist();
+          openBlocklist({ itemId });
           deleteBlocklistItem();
           validateSuccessPopup('delete');
         });

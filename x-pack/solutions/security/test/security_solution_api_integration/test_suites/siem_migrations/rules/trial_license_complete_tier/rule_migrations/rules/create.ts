@@ -157,11 +157,15 @@ export default ({ getService }: FtrProviderContext) => {
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
-        expect(response.body).toEqual({
-          statusCode: 400,
-          error: 'Bad Request',
-          message: '[request body]: 0.title: Required',
-        });
+        expect(response.body).toEqual(
+          expect.objectContaining({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringMatching(
+              /\[request body\]: 0\.title: (Required|Invalid input: expected string, received undefined)/
+            ),
+          })
+        );
       });
 
       it('should return an error when original rule description is not specified', async () => {

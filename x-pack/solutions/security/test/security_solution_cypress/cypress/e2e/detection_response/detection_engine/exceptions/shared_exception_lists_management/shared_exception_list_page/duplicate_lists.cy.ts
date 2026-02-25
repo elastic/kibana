@@ -113,6 +113,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Duplicate exception list with expired items', function () {
     duplicateSharedExceptionListFromListsManagementPageByListId(getExceptionList2().list_id, true);
+    waitForExceptionsTableToBeLoaded();
 
     // After duplication - check for new list
     assertExceptionListsExists([`${EXCEPTION_LIST_TO_DUPLICATE_NAME} [Duplicate]`]);
@@ -127,6 +128,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Duplicate exception list without expired items', function () {
     duplicateSharedExceptionListFromListsManagementPageByListId(getExceptionList2().list_id, false);
+    waitForExceptionsTableToBeLoaded();
 
     // After duplication - check for new list
     assertExceptionListsExists([`${EXCEPTION_LIST_TO_DUPLICATE_NAME} [Duplicate]`]);
