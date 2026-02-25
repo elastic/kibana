@@ -35,6 +35,9 @@ properties:
     nullable: true
   closed_by:
     $ref: 'case_response_closed_by_properties.yaml'
+  close_reason:
+    $ref: 'case_close_reason.yaml'
+    nullable: true
   comments:
     title: Case response properties for comments
     description: An array of comment objects for the case.

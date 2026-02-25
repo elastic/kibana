@@ -31,6 +31,7 @@ export interface CasePersistedAttributes {
   assignees: UserProfile[];
   closed_at: string | null;
   closed_by: User | null;
+  close_reason?: string | null;
   created_at: string;
   created_by: User;
   in_progress_at?: string | null;

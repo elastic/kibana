@@ -1963,7 +1963,7 @@ describe('update', () => {
       expect(updatedAttributes.time_to_resolve).toEqual(expect.any(Number));
     });
 
-    it('propagates closeReason to alerts without persisting it on cases', async () => {
+    it('propagates closeReason to alerts and persists it on cases', async () => {
       const closeReason = 'false_positive';
       const alertComment = {
         ...mockCaseComments[3],
@@ -2009,7 +2009,67 @@ describe('update', () => {
       const updatedAttributes =
         clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
 
+      expect(updatedAttributes.close_reason).toEqual(closeReason);
       expect(updatedAttributes).not.toHaveProperty('closeReason');
+    });
+
+    it('uses a persisted close_reason when syncAlerts is turned on for an already closed case', async () => {
+      const closeReason = 'duplicate';
+      const closedCase = {
+        ...mockCases[0],
+        attributes: {
+          ...mockCases[0].attributes,
+          status: CaseStatuses.closed,
+          close_reason: closeReason,
+          settings: {
+            ...mockCases[0].attributes.settings,
+            syncAlerts: false,
+          },
+        },
+      };
+      const alertComment = {
+        ...mockCaseComments[3],
+        references: [
+          {
+            ...mockCaseComments[3].references[0],
+            id: closedCase.id,
+          },
+        ],
+      };
+
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [closedCase],
+      });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [alertComment],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: closedCase.id,
+              version: closedCase.version ?? '',
+              settings: { syncAlerts: true },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'test-id',
+          index: 'test-index',
+          status: CaseStatuses.closed,
+          closingReason: closeReason,
+        },
+      ]);
     });
   });
 });

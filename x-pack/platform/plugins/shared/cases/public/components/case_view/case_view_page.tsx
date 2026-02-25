@@ -133,7 +133,11 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         </HeaderPage>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+            <CaseViewMetrics
+              data-test-subj="case-view-metrics"
+              caseId={caseData.id}
+              closeReason={caseData.closeReason}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
