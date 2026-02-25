@@ -445,6 +445,22 @@ jobs:
             fi
           done
 
+          FINAL_STATUS=$(awk '
+            BEGIN { in_status = 0 }
+            /^##[[:space:]]+Status[[:space:]]*$/ { in_status = 1; next }
+            in_status {
+              if ($0 ~ /^[[:space:]]*$/) next
+              gsub(/^[[:space:]]+|[[:space:]]+$/, "", $0)
+              print tolower($0)
+              exit
+            }
+          ' "$SPEC_FILE" 2>/dev/null || echo "unknown")
+
+          if [ "$FINAL_STATUS" != "done" ]; then
+            echo "::error::Spec status is '${FINAL_STATUS}' after loop. Failing run instead of publishing partial changes."
+            exit 1
+          fi
+
           # Copy the final spec for the publish phase
           cp "$SPEC_FILE" "$AGENT_OUTPUT_DIR/ralph-spec.md"
 
@@ -491,14 +507,31 @@ jobs:
           AGENT_OUTPUT_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime/agent-output"
           mkdir -p "$AGENT_OUTPUT_DIR"
 
-          # Collect all files that aren't part of the infrastructure
-          find . -newer "$GITHUB_WORKSPACE/.action-ralph-runtime/session/prompt-0001.md" \
-            -not -path '*/node_modules/*' \
-            -not -path '*/.git/*' \
-            -not -name '*.log' \
-            -not -path '*/target/*' \
-            -not -path '*/.action-ralph-runtime/*' \
-            -type f > "$AGENT_OUTPUT_DIR/changed-files.txt" 2>/dev/null || true
+          # Collect changed files from git state (more reliable than mtime-based detection).
+          TRACKED_CHANGED=$(git diff --name-only 2>/dev/null || true)
+          UNTRACKED_CHANGED=$(git ls-files --others --exclude-standard 2>/dev/null || true)
+
+          printf '%s\n%s\n' "$TRACKED_CHANGED" "$UNTRACKED_CHANGED" \
+            | awk '
+                NF {
+                  p=$0
+                  sub(/^\.\//, "", p)
+                  if (
+                    !seen[p]++
+                    && p !~ /^\.action-ralph-runtime\//
+                    && p !~ /^data\//
+                    && p !~ /(^|\/)node_modules\//
+                    && p !~ /(^|\/)target\//
+                    && p !~ /(^|\/)\.moon\//
+                    && p !~ /(^|\/)tsconfig\.type_check\.json$/
+                    && p !~ /(^|\/)kbn-std\/.*\.d\.ts$/
+                    && p !~ /\.log$/
+                  ) print p
+                }
+              ' \
+            | while IFS= read -r path; do
+                [ -f "$path" ] && printf '%s\n' "$path"
+              done > "$AGENT_OUTPUT_DIR/changed-files.txt"
 
           FILE_COUNT=$(wc -l < "$AGENT_OUTPUT_DIR/changed-files.txt" | tr -d ' ')
           echo "Changed files: ${FILE_COUNT}"
