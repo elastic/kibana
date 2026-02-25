@@ -88,6 +88,10 @@ async function unmuteInstanceWithOCC(
     return;
   }
 
+  if (!isSimpleMute && !isConditionalSnooze) {
+    return;
+  }
+
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
 
   if (isSimpleMute) {
@@ -101,16 +105,9 @@ async function unmuteInstanceWithOCC(
         updatedAt: new Date().toISOString(),
       }),
     });
+  }
 
-    if (indices && indices.length > 0) {
-      await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
-        ruleId,
-        alertInstanceIds: [alertInstanceId],
-        indices,
-        logger: context.logger,
-      });
-    }
-  } else if (isConditionalSnooze) {
+  if (isConditionalSnooze) {
     // Cancel conditional snooze: remove from snoozedInstances on rule SO and
     // clear ALERT_MUTED + snooze fields on the AAD doc.
     const updatedSnoozedInstances = snoozedInstances.filter(
@@ -127,14 +124,14 @@ async function unmuteInstanceWithOCC(
         updatedAt: new Date().toISOString(),
       }),
     });
+  }
 
-    if (indices && indices.length > 0) {
-      await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
-        ruleId,
-        alertInstanceIds: [alertInstanceId],
-        indices,
-        logger: context.logger,
-      });
-    }
+  if (indices && indices.length > 0) {
+    await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
+      ruleId,
+      alertInstanceIds: [alertInstanceId],
+      indices,
+      logger: context.logger,
+    });
   }
 }
