@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import {
@@ -27,45 +28,64 @@ import { createSecurityOsquerySkill } from './security_osquery_skill';
 import { SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL } from './security_rule_exceptions_preview_skill';
 import { SECURITY_THREAT_INTEL_SKILL } from './security_threat_intel_skill';
 import { SECURITY_TIMELINES_SKILL } from './security_timelines_skill';
+import { getEntityAnalyticsSkill } from './entity_analytics';
+import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
+
+interface RegisterSkillsOpts {
+  agentBuilder: AgentBuilderPluginSetup;
+  experimentalFeatures: ExperimentalFeatures;
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
+  kibanaVersion: string;
+  logger: Logger;
+  options: {
+    endpointAppContextService: EndpointAppContextService;
+    osquerySetup?: OsqueryPluginSetup;
+  };
+}
 
 /**
  * Registers all security agent builder skills with the agentBuilder plugin
  * using the new SkillDefinition-based registration API.
  */
-export const registerSkills = async (
-  agentBuilder: AgentBuilderPluginSetup,
-  experimentalFeatures: ExperimentalFeatures,
-  options: {
-    endpointAppContextService: EndpointAppContextService;
-    osquerySetup?: OsqueryPluginSetup;
-  }
-): Promise<void> => {
+export const registerSkills = async ({
+  agentBuilder,
+  experimentalFeatures,
+  getStartServices,
+  kibanaVersion,
+  logger,
+  options,
+}: RegisterSkillsOpts): Promise<void> => {
   const osquerySkill = createSecurityOsquerySkill({
     endpointAppContextService: options.endpointAppContextService,
     osquerySetup: options.osquerySetup,
   });
 
   await Promise.all([
-    agentBuilder.skill.registerSkill(GET_ALERTS_SKILL),
-    agentBuilder.skill.registerSkill(FORENSICS_ANALYTICS_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_LABS_SEARCH_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_CASES_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_DETECTION_RULES_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_TIMELINES_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_EXCEPTION_LISTS_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_ATTACK_DISCOVERY_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_ENDPOINT_READONLY_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_NETWORK_SKILL),
-    agentBuilder.skill.registerSkill(osquerySkill),
-    agentBuilder.skill.registerSkill(SECURITY_THREAT_INTEL_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_ALERT_SUPPRESSION_READONLY_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL),
-    agentBuilder.skill.registerSkill(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL),
+    agentBuilder.skills.register(GET_ALERTS_SKILL),
+    agentBuilder.skills.register(FORENSICS_ANALYTICS_SKILL),
+    agentBuilder.skills.register(SECURITY_LABS_SEARCH_SKILL),
+    agentBuilder.skills.register(SECURITY_CASES_SKILL),
+    agentBuilder.skills.register(SECURITY_DETECTION_RULES_SKILL),
+    agentBuilder.skills.register(SECURITY_TIMELINES_SKILL),
+    agentBuilder.skills.register(SECURITY_EXCEPTION_LISTS_SKILL),
+    agentBuilder.skills.register(SECURITY_ATTACK_DISCOVERY_SKILL),
+    agentBuilder.skills.register(SECURITY_ENDPOINT_READONLY_SKILL),
+    agentBuilder.skills.register(SECURITY_NETWORK_SKILL),
+    agentBuilder.skills.register(osquerySkill),
+    agentBuilder.skills.register(SECURITY_THREAT_INTEL_SKILL),
+    agentBuilder.skills.register(SECURITY_ALERT_SUPPRESSION_READONLY_SKILL),
+    agentBuilder.skills.register(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL),
+    agentBuilder.skills.register(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL),
   ]);
-
   if (experimentalFeatures.automaticTroubleshootingSkill) {
     await agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService)
     );
   }
+
+  await agentBuilder.skills.register(
+    getEntityAnalyticsSkill({ getStartServices, kibanaVersion, logger })
+  );
+
+  // agentBuilder.skills.register(alertAnalysisSampleSkill);
 };

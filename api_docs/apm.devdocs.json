@@ -1201,7 +1201,7 @@
           "IngestGetPipelineResponse",
           " | undefined; }; diagnosticsPrivileges: { index: Record<string, ",
           "SecurityHasPrivilegesPrivileges",
-          ">; cluster: Record<string, boolean>; hasAllClusterPrivileges: boolean; hasAllIndexPrivileges: boolean; hasAllPrivileges: boolean; }; apmIndices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
+          ">; cluster: Record<string, boolean>; hasAllClusterPrivileges: boolean; hasAllIndexPrivileges: boolean; hasAllPrivileges: boolean; }; apmIndices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
           "ApmEvent",
           "[]; invalidIndices?: ",
           "IndiciesItem",
@@ -7417,7 +7417,7 @@
           "StringC",
           ">; }>]>; }>, ",
           "APMRouteHandlerResources",
-          ", { _id: string; _index: string; _source: { id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dotted\" | \"solid\" | \"dashed\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"name\" | \"none\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }; }, ",
+          ", { _id: string; _index: string; _source: { id: string; } & { annotation: { title?: string | undefined; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"name\" | \"none\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; } & { event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /api/apm/services/{serviceName}/annotation/search 2023-10-31\": ",
           {
@@ -9411,7 +9411,7 @@
           },
           "<\"GET /internal/apm/data_view/index_pattern\", undefined, ",
           "APMRouteHandlerResources",
-          ", { apmDataViewIndexPattern: string; apmIndices: Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>; }, ",
+          ", { apmDataViewIndexPattern: string; apmIndices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }, ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/data_view/static\": ",
           {

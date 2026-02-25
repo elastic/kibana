@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { DashboardAgentSetupDependencies } from '../types';
-import { PLATFORM_DASHBOARD_SKILL } from './platform_dashboards_skill';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import { dashboardManagementSkill } from './dashboard_management_skill';
 
-export const registerSkills = async (setupDeps: DashboardAgentSetupDependencies): Promise<void> => {
-  await setupDeps.agentBuilder.skill.registerSkill(PLATFORM_DASHBOARD_SKILL);
+export const registerSkills = async (agentBuilder: AgentBuilderPluginSetup): Promise<void> => {
+  await agentBuilder.skills.register(dashboardManagementSkill);
 };
