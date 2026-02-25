@@ -127,6 +127,16 @@ export const kbnProjectTypeFromEs = new Map<string, string>([
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
+  /** Activate snapshot-docker behavior (security, readiness check, detached mode, etc.) */
+  snapshot?: boolean;
+  license?: string;
+  version?: string;
+  /** Container name. Defaults to 'es01'. Use unique names for parallel runs. */
+  name?: string;
+  /** When true, returns immediately after ES is ready instead of tailing logs. */
+  background?: boolean;
+  /** Host-side transport port to map to container port 9300. Defaults to port + 100. */
+  transportPort?: number;
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
@@ -806,9 +816,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   const resourceFileOverrides: Record<string, string> = resources
     ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
-        acc[basename(filePath)] = resolve(process.cwd(), filePath);
-        return acc;
-      }, {} as Record<string, string>)
+      acc[basename(filePath)] = resolve(process.cwd(), filePath);
+      return acc;
+    }, {} as Record<string, string>)
     : {};
 
   const tierSpecificRolesFileExists = (filePath: string): boolean => {
@@ -870,8 +880,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     ...(await getOperatorVolume(esProjectTypeFromKbn.get(projectType)!)),
 
     '--volume',
-    `${
-      ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
+    `${ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
     }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
     '--volume',
     `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}jwks/jwks.json:z`
@@ -992,17 +1001,17 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     },
     ...(options.ssl
       ? {
-          tls: {
-            ca: [fs.readFileSync(CA_CERT_PATH)],
-            // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
-            // for the ip which is not validated. As such we are getting the error
-            // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
-            // To work around that we are overriding the function checkServerIdentity too
-            checkServerIdentity: () => {
-              return undefined;
-            },
+        tls: {
+          ca: [fs.readFileSync(CA_CERT_PATH)],
+          // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+          // for the ip which is not validated. As such we are getting the error
+          // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+          // To work around that we are overriding the function checkServerIdentity too
+          checkServerIdentity: () => {
+            return undefined;
           },
-        }
+        },
+      }
       : {}),
   });
 
@@ -1110,7 +1119,14 @@ export function resolveDockerCmd(options: DockerOptions, image: string = DOCKER_
 /**
  * Runs an Elasticsearch Docker Container
  */
-export async function runDockerContainer(log: ToolingLog, options: DockerOptions) {
+export async function runDockerContainer(
+  log: ToolingLog,
+  options: DockerOptions
+): Promise<string | void> {
+  if (options.snapshot) {
+    return runDockerContainerInSnapshotMode(log, options);
+  }
+
   let image;
 
   if (!options.dockerCmd) {
@@ -1163,24 +1179,8 @@ async function getOperatorVolume(projectType: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Docker Snapshot Mode
+// Docker Snapshot Mode (activated by `snapshot: true` in DockerOptions)
 // ---------------------------------------------------------------------------
-
-export interface DockerSnapshotOptions extends EsClusterExecOptions {
-  license?: string;
-  version?: string;
-  port?: number;
-  ssl?: boolean;
-  kill?: boolean;
-  tag?: string;
-  image?: string;
-  /** Container name. Defaults to 'es01'. Use unique names for parallel runs. */
-  name?: string;
-  /** When true, returns immediately after ES is ready instead of tailing logs. */
-  background?: boolean;
-  /** Host-side transport port to map to container port 9300. Defaults to port + 100. */
-  transportPort?: number;
-}
 
 /**
  * Default esArgs for Docker snapshot mode.
@@ -1199,16 +1199,26 @@ const DEFAULT_DOCKER_SNAPSHOT_ESARGS: Array<[string, string]> = [
 ];
 
 /**
- * Runs an Elasticsearch Docker container with the same semantics as `yarn es snapshot`.
+ * Sanitize a path string into a valid Docker volume name.
+ * Strips leading dots/slashes and replaces path separators with hyphens.
+ */
+function toDockerVolumeName(rawPath: string): string {
+  const sanitized = rawPath.replace(/^[./\\]+/, '').replace(/[/\\]+/g, '-');
+  return `kbn-es-${sanitized || 'data'}`;
+}
+
+/**
+ * Runs an Elasticsearch Docker container with snapshot-equivalent semantics.
  *
  * - Applies the same default esArgs as the local snapshot flow
  * - Maps `--license=trial` → `xpack.license.self_generated.type=trial`
- * - Maps `-E path.data=<relative>` → a Docker volume mount
+ * - Maps `-E path.data=<path>` → a Docker volume (named volume if local path
+ *   doesn't exist, bind mount if it does)
  * - Waits for cluster readiness and sets up the native realm (passwords)
  */
-export async function runDockerSnapshotContainer(
+async function runDockerContainerInSnapshotMode(
   log: ToolingLog,
-  options: DockerSnapshotOptions
+  options: DockerOptions
 ): Promise<string> {
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);
@@ -1253,7 +1263,13 @@ export async function runDockerSnapshotContainer(
 
     if (k === 'path.data') {
       const hostPath = resolve(process.cwd(), v);
-      volumeMounts.push('--volume', `${hostPath}:/usr/share/elasticsearch/data`);
+      if (fs.existsSync(hostPath)) {
+        volumeMounts.push('--volume', `${hostPath}:/usr/share/elasticsearch/data`);
+      } else {
+        const volumeName = toDockerVolumeName(v);
+        log.info(`Local path '${v}' does not exist — using Docker volume '${volumeName}'`);
+        volumeMounts.push('--volume', `${volumeName}:/usr/share/elasticsearch/data`);
+      }
       continue;
     }
 
@@ -1335,11 +1351,11 @@ export async function runDockerSnapshotContainer(
     requestTimeout: 30_000,
     ...(options.ssl
       ? {
-          tls: {
-            ca: [fs.readFileSync(CA_CERT_PATH)],
-            checkServerIdentity: () => undefined,
-          },
-        }
+        tls: {
+          ca: [fs.readFileSync(CA_CERT_PATH)],
+          checkServerIdentity: () => undefined,
+        },
+      }
       : {}),
   });
 
@@ -1375,10 +1391,7 @@ export async function runDockerSnapshotContainer(
   return containerName;
 }
 
-export async function stopDockerSnapshotContainer(
-  log: ToolingLog,
-  containerName: string
-): Promise<void> {
+export async function stopDockerContainer(log: ToolingLog, containerName: string): Promise<void> {
   try {
     await execa('docker', ['kill', containerName]);
     log.info(`Docker container ${containerName} killed`);
