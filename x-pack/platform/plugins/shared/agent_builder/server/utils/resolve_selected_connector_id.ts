@@ -16,11 +16,18 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { PREFERRED_DEFAULT_CONNECTOR_ID } from '../../common/constants';
+import { getFirstRecommendedConnectorId } from '../../common/recommended_connectors';
 
 // TODO: Import from gen-ai-settings-plugin (package) once available
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 const selectDefaultConnector = ({ connectors }: { connectors: InferenceConnector[] }) => {
+  const recommendedId = getFirstRecommendedConnectorId(connectors.map((c) => c.connectorId));
+  if (recommendedId) {
+    const recommendedConnector = connectors.find((c) => c.connectorId === recommendedId);
+    if (recommendedConnector) return recommendedConnector;
+  }
+
   const preferredConnector = connectors.find(
     (connector) => connector.connectorId === PREFERRED_DEFAULT_CONNECTOR_ID
   );

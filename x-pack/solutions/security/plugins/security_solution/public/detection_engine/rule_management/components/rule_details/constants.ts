@@ -7,8 +7,17 @@
 
 import type { DiffableAllFields } from '../../../../../common/api/detection_engine';
 
-export const DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['50%', '50%'];
-export const LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['30%', '70%'];
+/**
+ * We subtract 4px from each column width to account for the 8px gap between the columns
+ */
+export const DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = [
+  'calc(50% - 4px)',
+  'calc(50% - 4px)',
+];
+export const LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = [
+  'calc(30% - 4px)',
+  'calc(70% - 4px)',
+];
 
 export const ABOUT_UPGRADE_FIELD_ORDER: Array<keyof DiffableAllFields> = [
   'version',
