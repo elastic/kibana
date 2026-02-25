@@ -26,15 +26,28 @@ export function getFocusedYamlPair(
     return null;
   }
 
-  const focusedProp: StepPropInfo | undefined = Object.entries(focusedStepInfo.propInfos)
-    .map(([, stepPropInfo]) => stepPropInfo)
-    .find(
-      (stepPropInfo) =>
-        stepPropInfo.valueNode &&
-        stepPropInfo.valueNode.range &&
-        stepPropInfo.valueNode.range[0] <= absolutePosition &&
-        absolutePosition <= stepPropInfo.valueNode.range[2]
-    );
+  const containingProps = Object.values(focusedStepInfo.propInfos).filter(
+    (stepPropInfo) =>
+      stepPropInfo.valueNode &&
+      stepPropInfo.valueNode.range &&
+      stepPropInfo.valueNode.range[0] <= absolutePosition &&
+      absolutePosition <= stepPropInfo.valueNode.range[2]
+  );
 
-  return focusedProp ?? null;
+  if (containingProps.length === 0) return null;
+  if (containingProps.length === 1) return containingProps[0];
+
+  // Prefer the most specific (narrowest range) so we get the leaf value (e.g. with.message)
+  // rather than a parent map (e.g. with) when the cursor is inside a scalar like "hey, this is @"
+  const [first, ...rest] = containingProps;
+  const narrowest = rest.reduce((best, prop) => {
+    const range = prop.valueNode?.range;
+    const bestRange = best.valueNode?.range;
+    if (!range || range.length < 3) return best;
+    if (!bestRange || bestRange.length < 3) return prop;
+    const span = range[2] - range[0];
+    const bestSpan = bestRange[2] - bestRange[0];
+    return span < bestSpan ? prop : best;
+  }, first);
+  return narrowest;
 }

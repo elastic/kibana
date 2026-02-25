@@ -24,7 +24,24 @@ export interface StepInfo {
 export interface StepPropInfo {
   path: string[];
   keyNode: YAML.Scalar<unknown>;
-  valueNode: YAML.Scalar<unknown>;
+  /** Value node: scalar for leaf props, or YAMLMap when the value is a nested mapping (e.g. `inputs: { a: 1 }`). */
+  valueNode: YAML.Scalar<unknown> | YAML.YAMLMap<unknown, unknown>;
+}
+
+/**
+ * Get plain JavaScript value from a step property value node (Scalar or YAMLMap).
+ * For mappings (e.g. `c: {}`) the node is a YAMLMap and must be converted via toJSON().
+ */
+export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unknown {
+  if (!valueNode) return undefined;
+  const node = valueNode as { toJSON?: () => unknown; value?: unknown };
+  if (typeof node.toJSON === 'function') {
+    return node.toJSON();
+  }
+  if ('value' in valueNode) {
+    return (valueNode as { value: unknown }).value;
+  }
+  return undefined;
 }
 
 /**
@@ -169,6 +186,13 @@ export function inspectStep(
 function visitStepProps(node: any, stack: string[] = []): Record<string, StepPropInfo> {
   const result: Record<string, StepPropInfo> = {};
   if (YAML.isMap(node.value)) {
+    const path = [...stack, node.key.value];
+    const composedKey = path.join('.');
+    result[composedKey] = {
+      path,
+      keyNode: node.key,
+      valueNode: node.value,
+    };
     stack.push(node.key.value);
     node.value.items.forEach((childNode: any) => {
       Object.assign(result, visitStepProps(childNode, stack));

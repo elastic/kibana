@@ -109,7 +109,11 @@ export function useYamlValidation(
         absolute: true,
       });
 
-      // Validations that don't require workflowDefinition or workflowGraph
+      // These validations only need the parsed YAML document, not the full workflow graph.
+      // They must run even when workflowGraph/workflowDefinition are unavailable
+      // (e.g. during editing when the YAML doesn't fully match the workflow schema yet)
+      // so that connector-id, step-name, liquid-template, custom-property, and
+      // workflow-inputs validation still provide feedback.
       const validationResults: YamlValidationResult[] = [
         ...validateStepNameUniqueness(yamlDocument),
         ...validateLiquidTemplate(model.getValue()),
@@ -120,7 +124,11 @@ export function useYamlValidation(
           : []),
       ];
 
-      // Validations that require workflowDefinition and workflowGraph
+      // Variable and JSON-schema-default validations require a fully parsed
+      // workflowGraph and workflowDefinition. When those are unavailable
+      // (e.g. YAML has structural issues that prevent graph construction),
+      // these validations are skipped gracefully; the remaining validators
+      // above still provide feedback.
       if (workflowGraph && workflowDefinition) {
         const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
         validationResults.push(

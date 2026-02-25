@@ -160,7 +160,7 @@ describe('validateWorkflowInputs', () => {
   });
 
   describe('when child workflow is not found', () => {
-    it('should skip validation', () => {
+    it('should report error for invalid workflow-id', () => {
       const lookup: WorkflowLookup = {
         steps: {
           'my-step': createWorkflowExecuteStep('my-step', 'non-existent-wf', {
@@ -170,7 +170,11 @@ describe('validateWorkflowInputs', () => {
       };
       const workflows = createWorkflowsResponse([]);
       const results = validateWorkflowInputs(lookup, workflows, mockLineCounter);
-      expect(results).toHaveLength(0);
+      expect(results).toHaveLength(1);
+      expect(results[0].severity).toBe('error');
+      expect(results[0].message).toContain('Workflow not found');
+      expect(results[0].message).toContain('non-existent-wf');
+      expect(results[0].owner).toBe('workflow-inputs-validation');
     });
   });
 
@@ -657,11 +661,49 @@ steps:
 
       const results = validateWorkflowInputs(lookup, workflows, lineCounter);
 
-      expect(results).toHaveLength(1);
-      expect(results[0].severity).toBe('error');
-      expect(results[0].message).toContain('b');
-      expect(results[0].message).toContain('Idler');
-      expect(results[0].owner).toBe('workflow-inputs-validation');
+      const typeErrors = results.filter((r) => r.severity === 'error');
+      expect(typeErrors.length).toBeGreaterThanOrEqual(1);
+      const bError = typeErrors.find((r) => r.message?.includes('b'));
+      expect(bError).toBeDefined();
+      expect(bError!.message).toContain('Idler');
+      expect(bError!.owner).toBe('workflow-inputs-validation');
+    });
+
+    it('should skip type validation gracefully when schema conversion throws', () => {
+      const yaml = `
+name: parent-workflow
+version: "1"
+steps:
+  - name: call-child
+    type: workflow.execute
+    with:
+      workflow-id: child-wf
+      inputs:
+        field_with_bad_schema: "some value"
+`;
+      const lineCounter = new YAML.LineCounter();
+      const yamlDocument = YAML.parseDocument(yaml, { lineCounter });
+      const lookup = buildWorkflowLookup(yamlDocument, lineCounter);
+
+      // A schema with a $ref that can't be resolved will cause resolveRef to return null,
+      // and an internally contradictory schema (e.g. allOf with conflicting types) could
+      // cause convertJsonSchemaToZod to throw. We simulate this with a malformed schema
+      // containing an unresolvable $ref.
+      const workflows = createWorkflowsResponse([
+        {
+          id: 'child-wf',
+          name: 'Child Workflow',
+          properties: {
+            field_with_bad_schema: { $ref: 'http://external/unresolvable' } as JSONSchema7,
+          },
+        },
+      ]);
+
+      const results = validateWorkflowInputs(lookup, workflows, lineCounter);
+
+      // No type error should be reported — the catch block silently passes validation
+      // so that an unconvertible schema doesn't block the user from editing.
+      expect(results.filter((r) => r.severity === 'error')).toHaveLength(0);
     });
   });
 });

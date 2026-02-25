@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Scalar } from 'yaml';
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { JsonValue } from '@kbn/utility-types';
@@ -258,7 +259,7 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
       stepType: stepInfo.stepType,
       isInWithBlock: false,
       stepNode: stepInfo.stepYamlNode,
-      typeNode: stepInfo.propInfos.type.valueNode,
+      typeNode: stepInfo.propInfos.type.valueNode as Scalar<unknown>,
     };
   }
 

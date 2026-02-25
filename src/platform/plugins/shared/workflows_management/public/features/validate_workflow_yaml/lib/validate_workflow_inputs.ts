@@ -10,37 +10,33 @@
 import type { JSONSchema7 } from 'json-schema';
 import type { LineCounter } from 'yaml';
 import { i18n } from '@kbn/i18n';
-import { resolveRef } from '@kbn/workflows/spec/lib/input_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
+import { convertJsonSchemaToZodWithRefs } from '../../../../common/lib/json_schema_to_zod';
+import { isDynamicValue } from '../../../../common/lib/regex';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
-import type {
-  StepInfo,
-  WorkflowLookup,
+import {
+  getValueFromValueNode,
+  type StepInfo,
+  type WorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { YamlValidationResult } from '../model/types';
 
 const WORKFLOW_EXECUTE_STEP_TYPES = ['workflow.execute', 'workflow.executeAsync'];
 const WITH_INPUTS_PREFIX = 'with.inputs.';
 
-function isLiquidTemplate(value: unknown): boolean {
-  return typeof value === 'string' && value.includes('${{');
-}
-
-function addUnknownKeyError(
-  results: YamlValidationResult[],
+function createUnknownKeyResult(
   step: StepInfo,
   topLevelInputName: string,
   childWorkflow: { name: string },
   schemaPropertyNames: Set<string>,
   propInfo: StepInfo['propInfos'][string],
   lineCounter: LineCounter
-): void {
+): YamlValidationResult | null {
   const keyRange = propInfo.keyNode?.range;
-  if (!keyRange) return;
+  if (!keyRange) return null;
   const startPos = lineCounter.linePos(keyRange[0]);
   const endPos = lineCounter.linePos(keyRange[1]);
-  results.push({
+  return {
     id: `workflow-inputs-unknown-${step.stepId}-${topLevelInputName}`,
     severity: 'warning',
     message: i18n.translate('workflows.validateWorkflowInputs.unknownInputKey', {
@@ -59,23 +55,22 @@ function addUnknownKeyError(
     endLineNumber: endPos.line,
     endColumn: endPos.col,
     hoverMessage: null,
-  });
+  };
 }
 
-function addTypeError(
-  results: YamlValidationResult[],
+function createTypeErrorResult(
   step: StepInfo,
   topLevelInputName: string,
   childWorkflow: { name: string },
   propInfo: StepInfo['propInfos'][string],
   lineCounter: LineCounter,
   errorMessages: string
-): void {
+): YamlValidationResult | null {
   const valueRange = propInfo.valueNode?.range ?? propInfo.keyNode?.range;
-  if (!valueRange) return;
+  if (!valueRange) return null;
   const startPos = lineCounter.linePos(valueRange[0]);
   const endPos = lineCounter.linePos(valueRange[1]);
-  results.push({
+  return {
     id: `workflow-inputs-type-${step.stepId}-${topLevelInputName}`,
     severity: 'error',
     message: i18n.translate('workflows.validateWorkflowInputs.invalidInputType', {
@@ -93,7 +88,83 @@ function addTypeError(
     endLineNumber: endPos.line,
     endColumn: endPos.col,
     hoverMessage: null,
-  });
+  };
+}
+
+function createMissingRequiredResult(
+  step: StepInfo,
+  requiredName: string,
+  childWorkflow: { name: string },
+  range: [number, number] | undefined,
+  lineCounter: LineCounter
+): YamlValidationResult | null {
+  if (!range) return null;
+  const startPos = lineCounter.linePos(range[0]);
+  const endPos = lineCounter.linePos(range[1]);
+  return {
+    id: `workflow-inputs-missing-${step.stepId}-${requiredName}`,
+    severity: 'error',
+    message: i18n.translate('workflows.validateWorkflowInputs.missingRequiredInput', {
+      defaultMessage: 'Required input "{inputName}" is missing for workflow "{workflowName}"',
+      values: {
+        inputName: requiredName,
+        workflowName: childWorkflow.name,
+      },
+    }),
+    owner: 'workflow-inputs-validation',
+    startLineNumber: startPos.line,
+    startColumn: startPos.col,
+    endLineNumber: endPos.line,
+    endColumn: endPos.col,
+    hoverMessage: null,
+  };
+}
+
+function processOneInputEntry(
+  step: StepInfo,
+  inputPath: string,
+  propInfo: StepInfo['propInfos'][string],
+  schemaPropertyNames: Set<string>,
+  childWorkflow: { id: string; name: string },
+  schema: JsonModelSchemaType,
+  lineCounter: LineCounter
+): YamlValidationResult[] {
+  const topLevelInputName = inputPath.split('.')[0];
+  if (inputPath !== topLevelInputName) {
+    return [];
+  }
+  if (!schemaPropertyNames.has(topLevelInputName)) {
+    const result = createUnknownKeyResult(
+      step,
+      topLevelInputName,
+      childWorkflow,
+      schemaPropertyNames,
+      propInfo,
+      lineCounter
+    );
+    return result ? [result] : [];
+  }
+  const rawValue = getValueFromValueNode(propInfo.valueNode);
+  if (isDynamicValue(rawValue) || !schema.properties) {
+    return [];
+  }
+  const propSchemaRaw = schema.properties[topLevelInputName];
+  if (!propSchemaRaw || typeof propSchemaRaw !== 'object') {
+    return [];
+  }
+  const errorMessages = validateInputValueType(rawValue, propSchemaRaw as JSONSchema7, schema);
+  if (!errorMessages) {
+    return [];
+  }
+  const result = createTypeErrorResult(
+    step,
+    topLevelInputName,
+    childWorkflow,
+    propInfo,
+    lineCounter,
+    errorMessages
+  );
+  return result ? [result] : [];
 }
 
 function validateInputValueType(
@@ -101,15 +172,16 @@ function validateInputValueType(
   propSchema: JSONSchema7,
   schema: JsonModelSchemaType
 ): string | null {
-  const resolvedSchema = propSchema.$ref ? resolveRef(propSchema.$ref, schema) : propSchema;
-  if (!resolvedSchema) return null;
   try {
-    const zodSchema = convertJsonSchemaToZod(resolvedSchema);
+    const zodSchema = convertJsonSchemaToZodWithRefs(propSchema, schema);
     const parseResult = zodSchema.safeParse(rawValue);
     if (!parseResult.success) {
       return parseResult.error.issues.map((issue) => issue.message).join('; ');
     }
   } catch {
+    // Gracefully skip type validation for schemas that convertJsonSchemaToZodWithRefs
+    // cannot handle (e.g. unsupported combinators, unresolvable $ref chains).
+    // Returning null means "no type error detected" so the user is not blocked.
     return null;
   }
   return null;
@@ -128,8 +200,12 @@ function validateStepInputs(
   const workflowIdProp = step.propInfos['with.workflow-id'];
   if (!workflowIdProp) return results;
 
-  const inputsScalarProp = step.propInfos['with.inputs'];
-  if (inputsScalarProp && isLiquidTemplate(inputsScalarProp.valueNode?.value)) {
+  const inputsProp = step.propInfos['with.inputs'];
+  const inputsValue =
+    inputsProp?.valueNode && 'value' in inputsProp.valueNode
+      ? inputsProp.valueNode.value
+      : undefined;
+  if (inputsProp && typeof inputsValue === 'string' && isDynamicValue(inputsValue)) {
     return results;
   }
 
@@ -139,75 +215,96 @@ function validateStepInputs(
 
   for (const [propKey, propInfo] of inputEntries) {
     const inputPath = propKey.slice(WITH_INPUTS_PREFIX.length);
-    const topLevelInputName = inputPath.split('.')[0];
-    providedInputNames.add(topLevelInputName);
-
-    if (inputPath !== topLevelInputName) {
-      // Nested property, skip type check here
-    } else if (!schemaPropertyNames.has(topLevelInputName)) {
-      addUnknownKeyError(
-        results,
-        step,
-        topLevelInputName,
-        childWorkflow,
-        schemaPropertyNames,
-        propInfo,
-        lineCounter
+    if (inputPath !== '') {
+      const topLevelInputName = inputPath.split('.')[0];
+      providedInputNames.add(topLevelInputName);
+      results.push(
+        ...processOneInputEntry(
+          step,
+          inputPath,
+          propInfo,
+          schemaPropertyNames,
+          childWorkflow,
+          schema,
+          lineCounter
+        )
       );
-    } else {
-      const rawValue = propInfo.valueNode?.value;
-      if (!isLiquidTemplate(rawValue) && schema.properties) {
-        const propSchemaRaw = schema.properties[topLevelInputName];
-        if (propSchemaRaw && typeof propSchemaRaw === 'object') {
-          const errorMessages = validateInputValueType(
-            rawValue,
-            propSchemaRaw as JSONSchema7,
-            schema
-          );
-          if (errorMessages) {
-            addTypeError(
-              results,
-              step,
-              topLevelInputName,
-              childWorkflow,
-              propInfo,
-              lineCounter,
-              errorMessages
-            );
-          }
-        }
-      }
     }
   }
 
-  for (const requiredName of requiredNames) {
-    if (!providedInputNames.has(requiredName)) {
-      const anchorRange = workflowIdProp.valueNode?.range ?? workflowIdProp.keyNode?.range;
-      if (anchorRange) {
-        const startPos = lineCounter.linePos(anchorRange[0]);
-        const endPos = lineCounter.linePos(anchorRange[1]);
-        results.push({
-          id: `workflow-inputs-missing-${step.stepId}-${requiredName}`,
-          severity: 'error',
-          message: i18n.translate('workflows.validateWorkflowInputs.missingRequiredInput', {
-            defaultMessage: 'Required input "{inputName}" is missing for workflow "{workflowName}"',
-            values: {
-              inputName: requiredName,
-              workflowName: childWorkflow.name,
-            },
-          }),
-          owner: 'workflow-inputs-validation',
-          startLineNumber: startPos.line,
-          startColumn: startPos.col,
-          endLineNumber: endPos.line,
-          endColumn: endPos.col,
-          hoverMessage: null,
-        });
-      }
-    }
-  }
+  const missingRequiredAnchor =
+    step.propInfos['with.inputs']?.keyNode ??
+    step.propInfos['with.inputs']?.valueNode ??
+    workflowIdProp.valueNode ??
+    workflowIdProp.keyNode;
+
+  results.push(
+    ...getMissingRequiredResults(
+      step,
+      childWorkflow,
+      requiredNames,
+      providedInputNames,
+      missingRequiredAnchor,
+      lineCounter
+    )
+  );
 
   return results;
+}
+
+function getMissingRequiredResults(
+  step: StepInfo,
+  childWorkflow: { name: string },
+  requiredNames: Set<string>,
+  providedInputNames: Set<string>,
+  anchorNode: { range?: unknown } | null | undefined,
+  lineCounter: LineCounter
+): YamlValidationResult[] {
+  const range =
+    anchorNode?.range && Array.isArray(anchorNode.range) && anchorNode.range.length >= 2
+      ? ([anchorNode.range[0], anchorNode.range[1]] as [number, number])
+      : undefined;
+  const out: YamlValidationResult[] = [];
+  for (const requiredName of requiredNames) {
+    if (!providedInputNames.has(requiredName)) {
+      const result = createMissingRequiredResult(
+        step,
+        requiredName,
+        childWorkflow,
+        range,
+        lineCounter
+      );
+      if (result) out.push(result);
+    }
+  }
+  return out;
+}
+
+function createWorkflowNotFoundResult(
+  step: StepInfo,
+  workflowId: string,
+  lineCounter: LineCounter
+): YamlValidationResult | null {
+  const workflowIdProp = step.propInfos['with.workflow-id'];
+  if (!workflowIdProp) return null;
+  const valueRange = workflowIdProp.valueNode?.range ?? workflowIdProp.keyNode?.range;
+  if (!valueRange) return null;
+  const startPos = lineCounter.linePos(valueRange[0]);
+  const endPos = lineCounter.linePos(valueRange[1]);
+  return {
+    id: `workflow-inputs-not-found-${step.stepId}`,
+    severity: 'error',
+    message: i18n.translate('workflows.validateWorkflowInputs.workflowNotFound', {
+      defaultMessage: 'Workflow not found for id "{workflowId}"',
+      values: { workflowId },
+    }),
+    owner: 'workflow-inputs-validation',
+    startLineNumber: startPos.line,
+    startColumn: startPos.col,
+    endLineNumber: endPos.line,
+    endColumn: endPos.col,
+    hoverMessage: null,
+  };
 }
 
 function getStepValidationContext(
@@ -220,8 +317,11 @@ function getStepValidationContext(
 } | null {
   const workflowIdProp = step.propInfos['with.workflow-id'];
   if (!workflowIdProp) return null;
-  const workflowId = workflowIdProp.valueNode?.value;
-  if (typeof workflowId !== 'string' || !workflowId || isLiquidTemplate(workflowId)) return null;
+  const workflowId =
+    workflowIdProp.valueNode && 'value' in workflowIdProp.valueNode
+      ? workflowIdProp.valueNode.value
+      : undefined;
+  if (typeof workflowId !== 'string' || !workflowId || isDynamicValue(workflowId)) return null;
   const childWorkflow = workflows[workflowId];
   const schema = childWorkflow?.inputsSchema;
   if (!schema?.properties || typeof schema.properties !== 'object') return null;
@@ -244,6 +344,21 @@ export function validateWorkflowInputs(
     const ctx = getStepValidationContext(step, workflows.workflows);
     if (ctx) {
       results.push(...validateStepInputs(ctx.step, ctx.childWorkflow, ctx.schema, lineCounter));
+    } else {
+      const workflowIdProp = step.propInfos['with.workflow-id'];
+      const workflowId =
+        workflowIdProp?.valueNode && 'value' in workflowIdProp.valueNode
+          ? workflowIdProp.valueNode.value
+          : undefined;
+      if (
+        typeof workflowId === 'string' &&
+        workflowId.length > 0 &&
+        !isDynamicValue(workflowId) &&
+        !workflows.workflows[workflowId]
+      ) {
+        const notFoundResult = createWorkflowNotFoundResult(step, workflowId, lineCounter);
+        if (notFoundResult) results.push(notFoundResult);
+      }
     }
   }
   return results;
