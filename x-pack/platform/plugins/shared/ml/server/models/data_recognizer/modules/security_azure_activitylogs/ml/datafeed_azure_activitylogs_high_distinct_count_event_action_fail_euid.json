@@ -1,0 +1,35 @@
+{
+  "job_id": "azure_activitylogs_high_distinct_count_event_action_fail_euid",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.dataset": "azure.activitylogs"
+          }
+        },
+        {
+          "term": {
+            "event.outcome": "failure"
+          }
+        },
+        {
+          "exists": {
+            "field": "event.action"
+          }
+        }
+      ]
+    }
+  },
+  "script_fields": {
+    "user.entity.id_computed": {
+      "script": {
+        "id": "euid_user_entity"
+      }
+    }
+  }
+}

@@ -1,6 +1,9 @@
 {
   "description": "Security: Azure Activity Logs - Looks for Azure activity event actions that, while not inherently suspicious or abnormal, are sourcing from a geolocation (city) that is unusual. This can be the result of compromised credentials or keys.",
-  "groups": ["security", "azure"],
+  "groups": [
+    "security",
+    "azure"
+  ],
   "analysis_config": {
     "bucket_span": "60m",
     "detectors": [
@@ -12,7 +15,11 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["user.email", "source.ip", "source.geo.city_name"]
+    "influencers": [
+      "user.entity.id_computed",
+      "source.ip",
+      "source.geo.city_name"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
