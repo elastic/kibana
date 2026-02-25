@@ -31,7 +31,12 @@ export interface SloOverviewFlyoutStatusFilteredParams {
   statuses: string[];
 }
 export interface SloCreateFlowStartedParams {
-  location: 'service_inventory_actions' | 'top_nav_button';
+  location:
+    | 'service_inventory_actions'
+    | 'top_nav_button'
+    | 'service_view_actions'
+    | 'service_view_slo_callout'
+    | 'empty_slo_overview_flyout';
   sloType: ApmIndicatorType;
 }
 
@@ -41,7 +46,7 @@ export interface SloManageFlowStartedParams {
 }
 
 export interface SloAppRedirectClickedParams {
-  location: `service_inventory_actions` | `top_nav_button`;
+  location: `service_inventory_actions` | `top_nav_button` | `service_view_actions`;
 }
 
 export interface ITelemetryClient {

@@ -7,7 +7,6 @@
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 
 export interface ActionSubItem {
@@ -40,6 +39,7 @@ interface ActionsContextMenuProps {
   button: React.ReactElement;
   id?: string;
   dataTestSubjPrefix?: string;
+  onTogglePopover?: (isPopoverOpen: boolean) => void;
 }
 
 export function ActionsContextMenu({
@@ -47,15 +47,17 @@ export function ActionsContextMenu({
   button,
   id = 'actions-context-menu',
   dataTestSubjPrefix = 'actionsContextMenu',
+  onTogglePopover,
 }: ActionsContextMenuProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
-  const trackEvent = useUiTracker({ app: 'apm' });
 
   const togglePopover = useCallback(() => {
-    trackEvent({ metric: 'service_inventory_actions_menu_opened', metricType: METRIC_TYPE.CLICK });
-    setIsPopoverOpen((prev) => !prev);
-  }, [trackEvent]);
+    setIsPopoverOpen((prev) => {
+      onTogglePopover?.(!prev);
+      return !prev;
+    });
+  }, [onTogglePopover]);
 
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
