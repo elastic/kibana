@@ -62,7 +62,7 @@ export class PerAlertActionScheduler<
 {
   private actions: RuleAction[] = [];
   private mutedAlertIdsSet: Set<string> = new Set();
-  private snoozedInstancesMap: Record<string, SnoozedInstanceConfig> = {};
+  private snoozedInstancesMap: Map<string, SnoozedInstanceConfig> = new Map();
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
 
@@ -85,14 +85,16 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
-    this.snoozedInstancesMap = (context.rule.snoozedInstances ?? []).reduce((acc, e) => {
-      acc[e.instanceId] = {
-        expiresAt: e.expiresAt,
-        conditions: e.conditions,
-        conditionOperator: e.conditionOperator,
-      };
-      return acc;
-    }, {} as Record<string, SnoozedInstanceConfig>);
+    this.snoozedInstancesMap = new Map(
+      (context.rule.snoozedInstances ?? []).map((e) => [
+        e.instanceId,
+        {
+          expiresAt: e.expiresAt,
+          conditions: e.conditions,
+          conditionOperator: e.conditionOperator,
+        },
+      ])
+    );
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -396,7 +398,7 @@ export class PerAlertActionScheduler<
   private evaluateSnoozeForAlert(
     alertId: string
   ): { shouldUnmute: boolean; reason?: string } | null {
-    const snoozeInstanceConfig = this.snoozedInstancesMap[alertId];
+    const snoozeInstanceConfig = this.snoozedInstancesMap.get(alertId);
     if (!snoozeInstanceConfig) {
       return null;
     }
