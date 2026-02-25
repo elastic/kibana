@@ -5,25 +5,37 @@
  * 2.0.
  */
 
-import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { spaceTest, tags } from '@kbn/scout-security';
+import { tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { DEFEND_WORKFLOWS_ROUTES } from '../../fixtures';
+import { spaceTest, DEFEND_WORKFLOWS_ROUTES } from '../../fixtures';
 
 spaceTest.describe(
-  'Defend Workflows - navigation cy',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  'Defend Workflows - RBAC navigation',
+  { tag: [...tags.stateful.classic] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
+    spaceTest(
+      'admin can access all management pages',
+      async ({ page, browserAuth }) => {
+        await browserAuth.loginAsAdmin();
 
-    spaceTest('loads page', async ({ page }) => {
-      await page.goto(DEFEND_WORKFLOWS_ROUTES.policies);
-      await page
-        .locator(testSubjSelector('globalLoadingIndicator-hidden'))
-        .waitFor({ state: 'visible' });
-      await expect(page.locator(testSubjSelector('policyListPage'))).toBeVisible();
-    });
+        for (const [, route] of Object.entries(DEFEND_WORKFLOWS_ROUTES)) {
+          await page.goto(route);
+          await page.waitForLoadingIndicatorHidden();
+          await expect(page.testSubj.locator('noPrivilegesPage')).toBeHidden();
+        }
+      }
+    );
+
+    spaceTest(
+      'viewer cannot access endpoint management pages',
+      async ({ page, browserAuth }) => {
+        await browserAuth.loginAsViewer();
+
+        await page.goto(DEFEND_WORKFLOWS_ROUTES.endpoints);
+        await page.waitForLoadingIndicatorHidden();
+
+        await expect(page.testSubj.locator('noPrivilegesPage')).toBeVisible();
+      }
+    );
   }
 );

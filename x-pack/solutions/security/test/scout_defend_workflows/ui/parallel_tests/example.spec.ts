@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'Defend Workflows - Example',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest('placeholder - replace with first migrated spec', async ({ page }) => {
-      await page.goto('/');
-      await expect(page).toHaveTitle(/Kibana/);
-    });
+    spaceTest(
+      'endpoint list page renders with mocked data',
+      async ({ pageObjects, endpointData }) => {
+        await pageObjects.endpointList.navigate();
+        await pageObjects.endpointList.waitForTableLoaded();
+        await expect(pageObjects.endpointList.endpointPage).toBeVisible();
+      }
+    );
   }
 );

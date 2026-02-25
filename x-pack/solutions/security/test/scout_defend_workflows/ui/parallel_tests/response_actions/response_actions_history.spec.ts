@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { spaceTest, tags } from '@kbn/scout-security';
+import { tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { DEFEND_WORKFLOWS_ROUTES } from '../../fixtures';
+import { spaceTest } from '../../fixtures';
 
 spaceTest.describe(
-  'Defend Workflows - response actions history',
+  'Defend Workflows - Response actions history',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest('loads response actions history page', async ({ page }) => {
-      await page.goto(DEFEND_WORKFLOWS_ROUTES.responseActionsHistory);
-      await page
-        .locator(testSubjSelector('globalLoadingIndicator-hidden'))
-        .waitFor({ state: 'visible' });
-      await expect(page.locator(testSubjSelector('responseActionsPage'))).toBeVisible();
-    });
+    spaceTest(
+      'loads the response actions history page',
+      async ({ pageObjects, endpointData }) => {
+        await pageObjects.responseActions.navigate();
+        await expect(pageObjects.responseActions.responsePage).toBeVisible();
+      }
+    );
   }
 );

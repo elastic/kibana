@@ -5,25 +5,54 @@
  * 2.0.
  */
 
-import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { spaceTest, tags } from '@kbn/scout-security';
+import { tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { DEFEND_WORKFLOWS_ROUTES } from '../../fixtures';
+import { spaceTest } from '../../fixtures';
 
 spaceTest.describe(
-  'Defend Workflows - endpoints mocked data',
+  'Defend Workflows - Endpoint list with mocked data',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest('loads endpoint list with mocked hosts', async ({ page }) => {
-      await page.goto(DEFEND_WORKFLOWS_ROUTES.endpoints);
-      await page
-        .locator(testSubjSelector('globalLoadingIndicator-hidden'))
-        .waitFor({ state: 'visible' });
-      await expect(page.locator(testSubjSelector('endpointPage'))).toBeVisible();
-    });
+    spaceTest(
+      'displays endpoint hosts in the list',
+      async ({ pageObjects, endpointData }) => {
+        await pageObjects.endpointList.navigate();
+        await pageObjects.endpointList.waitForTableLoaded();
+
+        const rowCount = await pageObjects.endpointList.getTableRowCount();
+        expect(rowCount).toBeGreaterThanOrEqual(endpointData.hostIds.length);
+      }
+    );
+
+    spaceTest(
+      'sorts by enrollment date descending by default',
+      async ({ page, pageObjects }) => {
+        const metadataResponse = page.waitForResponse(
+          (r) => r.url().includes('/api/endpoint/metadata') && r.status() === 200
+        );
+
+        await pageObjects.endpointList.navigate();
+        const response = await metadataResponse;
+        const body = await response.json();
+
+        expect(body.sortField).toBe('enrolled_at');
+        expect(body.sortDirection).toBe('desc');
+      }
+    );
+
+    spaceTest(
+      'can open endpoint details flyout',
+      async ({ page, pageObjects, endpointData }) => {
+        await pageObjects.endpointList.navigate();
+        await pageObjects.endpointList.waitForTableLoaded();
+
+        await pageObjects.endpointList.openEndpointDetails();
+        await expect(page.testSubj.locator('endpointDetailsFlyout')).toBeVisible();
+      }
+    );
   }
 );

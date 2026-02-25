@@ -5,25 +5,32 @@
  * 2.0.
  */
 
-import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { spaceTest, tags } from '@kbn/scout-security';
+import { tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { DEFEND_WORKFLOWS_ROUTES } from '../../fixtures';
+import { spaceTest } from '../../fixtures';
 
 spaceTest.describe(
-  'Defend Workflows - policy list',
+  'Defend Workflows - Policy list',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest('loads policy list and shows at least one policy', async ({ page }) => {
-      await page.goto(DEFEND_WORKFLOWS_ROUTES.policies);
-      await page
-        .locator(testSubjSelector('globalLoadingIndicator-hidden'))
-        .waitFor({ state: 'visible' });
-      await expect(page.locator(testSubjSelector('policyListPage'))).toBeVisible();
-    });
+    spaceTest(
+      'displays the policy list page with created policies',
+      async ({ pageObjects, endpointPolicy }) => {
+        await pageObjects.policy.navigateToList();
+        await expect(pageObjects.policy.policyListPage).toBeVisible();
+      }
+    );
+
+    spaceTest(
+      'can navigate to policy details',
+      async ({ pageObjects, endpointPolicy }) => {
+        await pageObjects.policy.navigateToDetails(endpointPolicy.integrationPolicyId);
+        await expect(pageObjects.policy.policyDetailsPage).toBeVisible();
+      }
+    );
   }
 );
