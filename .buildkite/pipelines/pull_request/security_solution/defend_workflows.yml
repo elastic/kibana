@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
@@ -9,11 +10,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
     parallelism: 24
     retry:
@@ -22,6 +18,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       enableNestedVirtualization: true
@@ -31,11 +28,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
     parallelism: 16
     retry:
