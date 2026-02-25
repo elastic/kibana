@@ -18,8 +18,9 @@ const listIndicesSchema = z.object({
     .describe(
       `Index pattern to match Elasticsearch indices, aliases and datastream names.
       - Correct examples: '.logs-*', '*data*', 'metrics-prod-*', 'my-specific-index', '*'
+      - Cross-cluster search (CCS): use cluster:pattern (e.g. 'remote:logs-*', '*:metrics-*'). Use the list_remote_clusters tool first to discover available remote clusters.
       - Should only be used if you are certain of a specific index pattern to filter on. *Do not try to guess*.
-      - Defaults to '*' to match all indices.`
+      - Defaults to '*' to match all local indices.`
     ),
 });
 
@@ -28,6 +29,9 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
     id: platformCoreTools.listIndices,
     type: ToolType.builtin,
     description: `List the indices, aliases and datastreams from the Elasticsearch cluster.
+With the default pattern '*', returns local indices only.
+
+To include remote cluster indices (cross-cluster search / CCS), first use the list_remote_clusters tool to discover available remote clusters, then pass an explicit cluster:pattern (e.g. remote:logs-*, *:metrics-*).
 
 The 'pattern' optional parameter is an index pattern which can be used to filter resources.
 This parameter should only be used when you already know of a specific pattern to filter on,
@@ -35,6 +39,11 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
     schema: listIndicesSchema,
     handler: async ({ pattern }, { esClient, logger }) => {
       logger.debug(`list indices tool called with pattern: ${pattern}`);
+      // Increase per-type limit when an explicit CCS pattern is used (contains ':'),
+      // since remote clusters may contribute many additional results.
+      // Note: the default '*' pattern only returns local indices. Use the
+      // list_remote_clusters tool to discover remote clusters first.
+      const perTypeLimit = pattern.includes(':') ? 50 : undefined;
       const {
         indices,
         data_streams: dataStreams,
@@ -42,6 +51,7 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
         warnings,
       } = await listSearchSources({
         pattern,
+        perTypeLimit,
         includeHidden: false,
         includeKibanaIndices: false,
         excludeIndicesRepresentedAsAlias: false,

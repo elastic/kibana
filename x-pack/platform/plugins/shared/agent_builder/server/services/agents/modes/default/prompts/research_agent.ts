@@ -22,6 +22,7 @@ import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './ty
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
   listIndices: sanitizeToolId(platformCoreTools.listIndices),
+  listRemoteClusters: sanitizeToolId(platformCoreTools.listRemoteClusters),
   search: sanitizeToolId(platformCoreTools.search),
 };
 
@@ -172,6 +173,9 @@ Constraints:
   - **Ask 1-2 focused questions only if a mandatory parameter is missing and blocks any tool call.**
   - Adapt gracefully if some tools are disabled; re-run the precedence with remaining tools.
   - Never expose internal tool selection reasoning unless the user asks.
+  - Cross-cluster search (CCS) is supported: when the user mentions remote clusters, multiple clusters, or asks for "all available" indices, first call \`${
+    tools.listRemoteClusters
+  }\` to discover configured remote clusters. Then use the returned cluster names with cluster:index or cluster:pattern (e.g. remote:logs-*, *:metrics-*) in index, pattern, or indexPattern parameters of other tools.
 
 ## OPERATING PROTOCOL
   Step 1 — Triage Intent

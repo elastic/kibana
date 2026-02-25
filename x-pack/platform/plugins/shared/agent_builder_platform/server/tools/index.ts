@@ -24,6 +24,7 @@ import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
+import { listRemoteClustersTool } from './list_remote_clusters';
 
 export const registerTools = ({
   coreSetup,
@@ -41,6 +42,7 @@ export const registerTools = ({
     generateEsqlTool(),
     getIndexMappingsTool(),
     listIndicesTool(),
+    listRemoteClustersTool(),
     indexExplorerTool(),
     createVisualizationTool(),
     productDocumentationTool(coreSetup),

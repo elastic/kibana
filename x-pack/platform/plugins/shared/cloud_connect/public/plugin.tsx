@@ -101,7 +101,7 @@ export class CloudConnectedPlugin
     // We use this registration pattern instead of having home depend on cloudConnect
     // because that would create a circular dependency (cloudConnect → management → home -> cloudConnect).
     if (this.homeSetup) {
-      this.homeSetup.addData.registerCloudConnectStatusHook(useCloudConnectStatus);
+      // this.homeSetup.addData.registerCloudConnectStatusHook(useCloudConnectStatus);
     }
 
     // We use this registration pattern instead of having management depend on cloudConnect

@@ -266,6 +266,8 @@ export function registerInternalToolsRoutes({
     wrapHandler(async (ctx, request, response) => {
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
       const { pattern } = request.query;
+      const includeRemoteClusters = pattern === '*';
+      const perTypeLimit = pattern.includes(':') || includeRemoteClusters ? 50 : undefined;
 
       const {
         indices,
@@ -273,6 +275,8 @@ export function registerInternalToolsRoutes({
         data_streams: dataStreams,
       } = await listSearchSources({
         pattern,
+        perTypeLimit,
+        includeRemoteClusters,
         includeHidden: false,
         includeKibanaIndices: false,
         excludeIndicesRepresentedAsAlias: true,

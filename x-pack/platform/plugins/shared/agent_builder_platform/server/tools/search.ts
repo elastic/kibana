@@ -16,7 +16,7 @@ const searchSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Index to search against. If not provided, will automatically select the best index to use based on the query.'
+      '(optional) Index, alias, or datastream to search against. Cross-cluster search (CCS) is supported: use cluster:index or cluster:pattern. If not provided, will automatically select the best index to use based on the query (default *).'
     ),
 });
 
@@ -26,6 +26,7 @@ export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
     type: ToolType.builtin,
     description: `A powerful tool for searching and analyzing data within your Elasticsearch cluster.
 It supports both full-text relevance searches and structured analytical queries.
+Cross-cluster search (CCS) is supported: you can specify a remote target as cluster:index or cluster:pattern.
 
 Use this tool for any query that involves finding documents, counting, aggregating, or summarizing data from a known index.
 
@@ -38,8 +39,8 @@ Examples of queries:
 - "show me the sales over the last year break down by month"
 
 Note:
-- The 'index' parameter can be used to specify which index to search against.
- If not provided, the tool will decide itself which is the best index to use.
+- The 'index' parameter can be used to specify which index (or cluster:index for remote) to search against.
+ If not provided, the tool will decide itself which is the best index to use (default *).
 - It is perfectly fine not to specify the 'index' parameter. It should only be specified when you already
  know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,

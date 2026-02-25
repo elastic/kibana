@@ -30,6 +30,7 @@ export const platformCoreTools = {
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
+  listRemoteClusters: platformCoreTool('list_remote_clusters'),
   // Attachment tools
   attachmentRead: platformCoreTool('attachment_read'),
   attachmentUpdate: platformCoreTool('attachment_update'),
@@ -58,6 +59,7 @@ export const editableToolTypes: ToolType[] = [
 export const defaultAgentToolIds = [
   platformCoreTools.search,
   platformCoreTools.listIndices,
+  platformCoreTools.listRemoteClusters,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
