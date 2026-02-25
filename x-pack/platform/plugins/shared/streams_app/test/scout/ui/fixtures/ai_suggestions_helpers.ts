@@ -55,8 +55,7 @@ export const BULK_MODAL_TEST_IDS = {
 } as const;
 
 export const BULK_ACCEPT_BUTTON_TEST_ID = 'streamsAppAcceptSelectedSuggestionsButton';
-export const SELECT_ALL_BUTTON_TEST_ID = 'streamsAppSelectAllSuggestionsButton';
-export const CLEAR_SELECTION_BUTTON_TEST_ID = 'streamsAppClearSelectionButton';
+export const MASTER_CHECKBOX_TEST_ID = 'streamsAppMasterSuggestionCheckbox';
 
 // Mock suggestion data constants
 export const MOCK_SUGGESTION_INFO: PartitionSuggestion = {
@@ -392,19 +391,27 @@ export async function clickBulkModalCancelButton(
 }
 
 /**
- * Clicks the "Select All" button to select all suggestions
+ * Clicks the master checkbox to toggle selection of all suggestions
  */
-export async function clickSelectAllButton(page: ScoutPage): Promise<void> {
-  const button = page.getByTestId(SELECT_ALL_BUTTON_TEST_ID);
-  await expect(button).toBeVisible();
-  await button.click();
+export async function clickMasterCheckbox(page: ScoutPage): Promise<void> {
+  const checkbox = page.getByTestId(MASTER_CHECKBOX_TEST_ID);
+  await expect(checkbox).toBeVisible();
+  await checkbox.click();
 }
 
 /**
- * Clicks the "Clear" button to clear all selections
+ * Returns the checked state of the master checkbox
  */
-export async function clickClearSelectionButton(page: ScoutPage): Promise<void> {
-  const button = page.getByTestId(CLEAR_SELECTION_BUTTON_TEST_ID);
-  await expect(button).toBeVisible();
-  await button.click();
+export async function isMasterCheckboxChecked(page: ScoutPage): Promise<boolean> {
+  const checkbox = page.getByTestId(MASTER_CHECKBOX_TEST_ID);
+  return checkbox.isChecked();
+}
+
+/**
+ * Returns whether the master checkbox is in indeterminate state
+ */
+export async function isMasterCheckboxIndeterminate(page: ScoutPage): Promise<boolean> {
+  const checkbox = page.getByTestId(MASTER_CHECKBOX_TEST_ID);
+  const ariaChecked = await checkbox.getAttribute('aria-checked');
+  return ariaChecked === 'mixed';
 }

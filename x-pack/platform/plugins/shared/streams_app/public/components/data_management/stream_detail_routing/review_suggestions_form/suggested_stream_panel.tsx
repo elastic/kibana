@@ -150,7 +150,7 @@ export function SuggestedStreamPanel({
 
   return (
     <SelectablePanel paddingSize="m" isSelected={isSelected || isSelectedForBulk}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id={`suggestion-checkbox-${index}`}

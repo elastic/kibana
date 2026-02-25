@@ -10,13 +10,13 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { NestedView } from '../../../nested_view';
 import { GenerateSuggestionButton } from './generate_suggestions_button';
@@ -98,6 +98,29 @@ export function ReviewSuggestionsForm({
 
   const { editSuggestion } = useStreamRoutingEvents();
 
+  const allSelected = selectedSuggestionIndexes.size === suggestions.length && suggestions.length > 0;
+  const someSelected = selectedSuggestionIndexes.size > 0 && selectedSuggestionIndexes.size < suggestions.length;
+  const noneSelected = selectedSuggestionIndexes.size === 0;
+
+  const handleMasterCheckboxChange = useCallback(() => {
+    if (allSelected || someSelected) {
+      clearSuggestionSelection();
+    } else {
+      selectAllSuggestions();
+    }
+  }, [allSelected, someSelected, clearSuggestionSelection, selectAllSuggestions]);
+
+  const masterCheckboxLabel = useMemo(() => {
+    if (allSelected) {
+      return i18n.translate('xpack.streams.reviewSuggestionsForm.deselectAllLabel', {
+        defaultMessage: 'Deselect all suggestions',
+      });
+    }
+    return i18n.translate('xpack.streams.reviewSuggestionsForm.selectAllLabel', {
+      defaultMessage: 'Select all suggestions',
+    });
+  }, [allSelected]);
+
   return (
     <>
       {ruleUnderReview && partitionForModal && (
@@ -144,6 +167,18 @@ export function ReviewSuggestionsForm({
           </>
         ) : (
           <>
+            <EuiCheckbox
+              id="master-suggestion-checkbox"
+              checked={allSelected}
+              indeterminate={someSelected}
+              onChange={handleMasterCheckboxChange}
+              label={i18n.translate('xpack.streams.reviewSuggestionsForm.selectAllCheckbox', {
+                defaultMessage: 'Select all',
+              })}
+              aria-label={masterCheckboxLabel}
+              data-test-subj="streamsAppMasterSuggestionCheckbox"
+            />
+            <EuiSpacer size="m" />
             {suggestions.map((partition, index) => (
               <NestedView key={partition.name} last={index === suggestions.length - 1}>
                 <SuggestedStreamPanel
@@ -163,6 +198,21 @@ export function ReviewSuggestionsForm({
             <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
               <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="check"
+                  size="s"
+                  fill
+                  onClick={onBulkAccept}
+                  disabled={noneSelected}
+                  data-test-subj="streamsAppAcceptSelectedSuggestionsButton"
+                >
+                  {i18n.translate('xpack.streams.reviewSuggestionsForm.acceptSelectedButton', {
+                    defaultMessage: 'Accept selected ({count})',
+                    values: { count: selectedSuggestionIndexes.size },
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <GenerateSuggestionButton
                   iconType="refresh"
                   size="s"
@@ -178,48 +228,6 @@ export function ReviewSuggestionsForm({
                   )}
                 </GenerateSuggestionButton>
               </EuiFlexItem>
-              {selectedSuggestionIndexes.size < suggestions.length && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    onClick={selectAllSuggestions}
-                    data-test-subj="streamsAppSelectAllSuggestionsButton"
-                  >
-                    {i18n.translate('xpack.streams.reviewSuggestionsForm.selectAllButton', {
-                      defaultMessage: 'Select all',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-              {selectedSuggestionIndexes.size > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    onClick={clearSuggestionSelection}
-                    data-test-subj="streamsAppClearSelectionButton"
-                  >
-                    {i18n.translate('xpack.streams.reviewSuggestionsForm.clearSelectionButton', {
-                      defaultMessage: 'Clear',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-              {selectedSuggestionIndexes.size > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    iconType="check"
-                    size="s"
-                    fill
-                    onClick={onBulkAccept}
-                    data-test-subj="streamsAppAcceptSelectedSuggestionsButton"
-                  >
-                    {i18n.translate('xpack.streams.reviewSuggestionsForm.acceptSelectedButton', {
-                      defaultMessage: 'Accept selected ({count})',
-                      values: { count: selectedSuggestionIndexes.size },
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </>
         )}
