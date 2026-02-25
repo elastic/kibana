@@ -118,7 +118,7 @@ export async function collectQueryData({
 
   return {
     title: query.query.title,
-    kql: query.query.kql.query,
+    kql: query.query.kql?.query ?? '',
     feature: query.query.feature
       ? { name: query.query.feature.name, filter: query.query.feature.filter }
       : undefined,

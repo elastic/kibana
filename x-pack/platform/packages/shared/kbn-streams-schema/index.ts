@@ -89,6 +89,10 @@ export {
 } from './src/fields';
 
 export {
+  type KqlQuery,
+  type EsqlQuery,
+  kqlQuerySchema,
+  esqlQuerySchema,
   type StreamQuery,
   type StreamQueryInput,
   type QueriesGetResponse,

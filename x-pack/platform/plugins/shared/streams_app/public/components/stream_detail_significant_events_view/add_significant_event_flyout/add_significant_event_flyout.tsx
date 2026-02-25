@@ -156,7 +156,6 @@ export function AddSignificantEventFlyout({
           .filter((nextQuery) => validateEsqlQuery(nextQuery.esql.query).isInvalid === false)
           .map((nextQuery) => ({
             id: v4(),
-            kql: { query: '' },
             esql: nextQuery.esql,
             title: nextQuery.title,
             feature: nextQuery.feature,

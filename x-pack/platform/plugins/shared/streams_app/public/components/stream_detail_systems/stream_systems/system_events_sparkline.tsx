@@ -31,7 +31,6 @@ export const SystemEventsSparklineLast24hrs = ({
         filter: system.filter,
         type: system.type,
       },
-      kql: { query: '' },
       esql: { query: '' },
       id: 'system-events-sparkline',
       title: system.name,

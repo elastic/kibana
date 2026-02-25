@@ -5,13 +5,22 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
-import type { StreamQueryInput } from '../queries';
+import type { KqlQuery } from '../queries';
 
+/**
+ * @deprecated Legacy helper that converts a KQL query + optional feature filter
+ * into an ES|QL query string. Only used for storage migration of pre-existing
+ * KQL-based queries.
+ */
 export const buildEsqlQuery = (
   indices: string[],
-  input: Pick<StreamQueryInput, 'kql' | 'feature'>,
+  input: {
+    kql: KqlQuery;
+    feature?: { name: string; filter: Condition; type: 'system' };
+  },
   includeMetadata: boolean = false
 ): string => {
   const fromCommand = Builder.command({

@@ -97,18 +97,9 @@ const upsertQueryRoute = createServerRoute({
     await assertEnterpriseLicense(licensing);
 
     const definition = await streamsClient.getStream(streamName);
-    await assertFeatureNotChanged({
-      queryClient,
-      streamName,
-      queries: [{ id: queryId, feature: body.feature }],
-    });
     await queryClient.upsert(definition, {
       id: queryId,
       title: body.title,
-      feature: body.feature,
-      kql: {
-        query: body.kql.query,
-      },
       esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,

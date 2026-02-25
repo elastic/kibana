@@ -11,11 +11,9 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { StreamQuery, StreamQueryInput, Streams } from '@kbn/streams-schema';
-import { buildEsqlQuery, getIndexPatternsForStream, isNativeEsqlQuery } from '@kbn/streams-schema';
+import { getIndexPatternsForStream } from '@kbn/streams-schema';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import type { ESQLCommand } from '@kbn/esql-language';
-import { conditionToESQLAst } from '@kbn/streamlang';
-import { isEqual } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import { extractWhereExpression } from '../../../helpers/esql_helpers';
@@ -101,12 +99,10 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
   definition: Streams.all.Definition,
   asset: TQueryLink
 ): QueryLink {
-  const indices = getIndexPatternsForStream(definition);
   return {
     ...asset,
     query: {
       ...asset.query,
-      esql: asset.query.esql ?? { query: buildEsqlQuery(indices, asset.query) },
     },
     [ASSET_UUID]: getQueryLinkUuid(definition.name, asset),
     stream_name: definition.name,
@@ -188,7 +184,7 @@ function toStorage(
     ...rest,
     [STREAM_NAME]: definition.name,
     [QUERY_TITLE]: query.title,
-    [QUERY_KQL_BODY]: query.kql.query,
+    [QUERY_KQL_BODY]: query.kql?.query ?? '',
     [QUERY_ESQL_QUERY]: query.esql.query,
     [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
     [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
@@ -201,11 +197,7 @@ function toStorage(
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
-  return (
-    currentQuery.kql.query !== nextQuery.kql.query ||
-    currentQuery.esql.query !== nextQuery.esql.query ||
-    !isEqual(currentQuery.feature, nextQuery.feature)
-  );
+  return currentQuery.esql.query !== nextQuery.esql.query;
 }
 
 function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
@@ -221,50 +213,37 @@ function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
 }
 
 /**
- * Builds the ES|QL query used by alerting rules. For native ES|QL queries
- * (where kql is empty), the stored query is parsed and reconstructed with
- * the authoritative stream indices, METADATA fields, and optional feature
- * filter. For legacy KQL-based queries, delegates to buildEsqlQuery.
+ * Builds the ES|QL query used by alerting rules. The stored `esql.query`
+ * is always the complete, authoritative query — for legacy KQL-based
+ * queries it already contains the feature filter (baked in by the storage
+ * migration), and for new queries it is the full ES|QL from the LLM or
+ * user. This function only replaces the FROM clause with the authoritative
+ * stream indices and METADATA fields.
  */
 function buildRuleEsqlQuery(indices: string[], query: StreamQuery): string {
-  if (isNativeEsqlQuery(query)) {
-    const whereExpr = extractWhereExpression(query.esql.query);
+  const whereExpr = extractWhereExpression(query.esql.query);
 
-    const fromCommand = Builder.command({
-      name: 'from',
-      args: [
-        Builder.expression.source.index(indices.join(',')),
-        Builder.option({
-          name: 'METADATA',
-          args: [
-            Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
-            Builder.expression.column({ args: [Builder.identifier('_source')] }),
-          ],
-        }),
-      ],
-    });
+  const fromCommand = Builder.command({
+    name: 'from',
+    args: [
+      Builder.expression.source.index(indices.join(',')),
+      Builder.option({
+        name: 'METADATA',
+        args: [
+          Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] }),
+          Builder.expression.column({ args: [Builder.identifier('_source')] }),
+        ],
+      }),
+    ],
+  });
 
-    const commands: ESQLCommand[] = [fromCommand];
+  const commands: ESQLCommand[] = [fromCommand];
 
-    if (whereExpr) {
-      const whereCondition = query.feature?.filter
-        ? Builder.expression.func.binary('and', [
-            whereExpr,
-            conditionToESQLAst(query.feature.filter),
-          ])
-        : whereExpr;
-
-      commands.push(Builder.command({ name: 'where', args: [whereCondition] }));
-    } else if (query.feature?.filter) {
-      commands.push(
-        Builder.command({ name: 'where', args: [conditionToESQLAst(query.feature.filter)] })
-      );
-    }
-
-    return BasicPrettyPrinter.print(Builder.expression.query(commands));
+  if (whereExpr) {
+    commands.push(Builder.command({ name: 'where', args: [whereExpr] }));
   }
 
-  return buildEsqlQuery(indices, query, true);
+  return BasicPrettyPrinter.print(Builder.expression.query(commands));
 }
 
 export class QueryClient {
@@ -655,7 +634,6 @@ export class QueryClient {
     options?: { createRules?: boolean }
   ) {
     const stream = definition.name;
-    const indices = getIndexPatternsForStream(definition);
 
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
@@ -669,13 +647,7 @@ export class QueryClient {
     const indexOperationsMap = new Map(
       operations
         .filter((operation) => operation.index)
-        .map((operation) => [
-          operation.index!.id,
-          {
-            ...operation.index!,
-            esql: operation.index!.esql ?? { query: buildEsqlQuery(indices, operation.index!) },
-          },
-        ])
+        .map((operation) => [operation.index!.id, operation.index!])
     );
     const deleteOperationIds = new Set(
       operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)
@@ -690,17 +662,7 @@ export class QueryClient {
         }),
       ...operations
         .filter((operation) => operation.index && !currentIds.has(operation.index!.id))
-        .map((operation) =>
-          toQueryLinkFromQuery(
-            {
-              ...operation.index!,
-              esql: operation.index!.esql ?? {
-                query: buildEsqlQuery(indices, operation.index!),
-              },
-            },
-            stream
-          )
-        ),
+        .map((operation) => toQueryLinkFromQuery(operation.index!, stream)),
     ];
 
     if (options?.createRules === false) {

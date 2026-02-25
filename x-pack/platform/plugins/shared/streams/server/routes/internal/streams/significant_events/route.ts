@@ -6,8 +6,6 @@
  */
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
-  buildEsqlQuery,
-  getIndexPatternsForStream,
   systemSchema,
   type Streams,
   type SignificantEventsQueriesGenerationResult,
@@ -32,30 +30,20 @@ import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 const dateFromString = z.string().transform((input) => new Date(input));
 
 /**
- * Back-fills `esql.query` on task results for legacy tasks that were completed
- * before the `esql.query` property was introduced. Without this, the client
- * would receive queries without the required `esql.query` field.
+ * Filters task results to only include queries that have a valid `esql.query`.
+ * Legacy tasks completed before ES|QL was introduced are silently dropped.
  */
 const ensureEsqlQuery = (
   result: SignificantEventsQueriesGenerationTaskResult,
-  definition: Streams.all.Definition
+  _definition: Streams.all.Definition
 ): SignificantEventsQueriesGenerationTaskResult => {
   if (!('queries' in result)) {
     return result;
   }
 
-  const indices = getIndexPatternsForStream(definition);
   return {
     ...result,
-    queries: result.queries.map((query) => ({
-      ...query,
-      esql: query.esql ?? {
-        query: buildEsqlQuery(indices, {
-          kql: { query: query.kql },
-          feature: query.feature,
-        }),
-      },
-    })),
+    queries: result.queries.filter((query) => !!query.esql?.query),
   };
 };
 
