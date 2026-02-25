@@ -98,8 +98,10 @@ export function ReviewSuggestionsForm({
 
   const { editSuggestion } = useStreamRoutingEvents();
 
-  const allSelected = selectedSuggestionIndexes.size === suggestions.length && suggestions.length > 0;
-  const someSelected = selectedSuggestionIndexes.size > 0 && selectedSuggestionIndexes.size < suggestions.length;
+  const allSelected =
+    selectedSuggestionIndexes.size === suggestions.length && suggestions.length > 0;
+  const someSelected =
+    selectedSuggestionIndexes.size > 0 && selectedSuggestionIndexes.size < suggestions.length;
   const noneSelected = selectedSuggestionIndexes.size === 0;
 
   const handleMasterCheckboxChange = useCallback(() => {
@@ -220,12 +222,9 @@ export function ReviewSuggestionsForm({
                   isLoading={isLoadingSuggestions}
                   aiFeatures={aiFeatures}
                 >
-                  {i18n.translate(
-                    'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-                    {
-                      defaultMessage: 'Regenerate',
-                    }
-                  )}
+                  {i18n.translate('xpack.streams.reviewSuggestionsForm.regenerateAllButton', {
+                    defaultMessage: 'Regenerate all',
+                  })}
                 </GenerateSuggestionButton>
               </EuiFlexItem>
             </EuiFlexGroup>
