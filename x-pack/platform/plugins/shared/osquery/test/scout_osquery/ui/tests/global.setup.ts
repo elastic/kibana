@@ -150,7 +150,8 @@ async function waitForAgents(
   }
 
   throw new Error(
-    `Timed out waiting for ${expectedCount} agents to come online (got ${lastCount}) after ${timeoutMs / 1000
+    `Timed out waiting for ${expectedCount} agents to come online (got ${lastCount}) after ${
+      timeoutMs / 1000
     }s`
   );
 }
@@ -342,8 +343,9 @@ globalSetupHook(
     } catch {
       log.info(
         '[osquery-setup] Docker is not available — skipping Fleet Server and agent provisioning. ' +
-        'Tests that require live agents will be filtered out by tag.'
+          'Tests that require live agents will be filtered out by tag.'
       );
+
       return;
     }
 
@@ -358,8 +360,8 @@ globalSetupHook(
 
     log.info(
       `[osquery-setup] Existing state: fleet-server=${fleetServerRunning}, ` +
-      `agent-0=${agent0Running}, agent-1=${agent1Running}, ` +
-      `online agents=${onlineAgents}/${EXPECTED_AGENT_COUNT}`
+        `agent-0=${agent0Running}, agent-1=${agent1Running}, ` +
+        `online agents=${onlineAgents}/${EXPECTED_AGENT_COUNT}`
     );
 
     if (
@@ -397,9 +399,9 @@ globalSetupHook(
 
     // ── 2. Clean up any stale containers ────────────────────────────────
     log.info('[osquery-setup] Cleaning up stale containers...');
-    await execa('docker', ['rm', '-f', FLEET_SERVER_CONTAINER]).catch(() => { });
+    await execa('docker', ['rm', '-f', FLEET_SERVER_CONTAINER]).catch(() => {});
     for (let i = 0; i < EXPECTED_AGENT_COUNT; i++) {
-      await execa('docker', ['rm', '-f', `${AGENT_CONTAINER_PREFIX}-${i}`]).catch(() => { });
+      await execa('docker', ['rm', '-f', `${AGENT_CONTAINER_PREFIX}-${i}`]).catch(() => {});
     }
 
     // ── 3. Fleet setup ─────────────────────────────────────────────────
@@ -435,7 +437,7 @@ globalSetupHook(
         } else if (defaultOutput.is_preconfigured) {
           log.info(
             `[osquery-setup] Default output "${defaultOutput.id}" is preconfigured with hosts=[${currentHosts}]. ` +
-            `Ensure --serverConfigSet osquery is used so the preconfigured output points to the Docker-accessible ES host.`
+              `Ensure --serverConfigSet osquery is used so the preconfigured output points to the Docker-accessible ES host.`
           );
         } else {
           await kbnClient.request<any>({
@@ -540,7 +542,15 @@ globalSetupHook(
 
         const result = await execa(
           'docker',
-          ['exec', FLEET_SERVER_CONTAINER, 'curl', '-sf', '--max-time', '2', 'http://localhost:8220/api/status'],
+          [
+            'exec',
+            FLEET_SERVER_CONTAINER,
+            'curl',
+            '-sf',
+            '--max-time',
+            '2',
+            'http://localhost:8220/api/status',
+          ],
           { reject: false }
         );
         if (result.exitCode === 0) {
@@ -555,6 +565,7 @@ globalSetupHook(
       } catch {
         // Container might not be ready yet
       }
+
       await new Promise((r) => setTimeout(r, 2_000));
     }
 

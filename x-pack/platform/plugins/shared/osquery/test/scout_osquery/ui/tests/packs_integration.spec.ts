@@ -110,7 +110,7 @@ test.describe(
           await page.testSubj
             .locator('fleetSetupLoading')
             .waitFor({ state: 'hidden', timeout: 60_000 })
-            .catch(() => { });
+            .catch(() => {});
           await page
             .getByRole('link', { name: agentPolicyName })
             .waitFor({ state: 'visible', timeout: 30_000 });
@@ -172,7 +172,7 @@ test.describe(
           const loadBtn = page.getByRole('button', {
             name: /Load Elastic prebuilt packs|Update Elastic prebuilt packs/,
           });
-          await loadBtn.click({ timeout: 5_000 }).catch(() => { });
+          await loadBtn.click({ timeout: 5_000 }).catch(() => {});
           await expect(loadBtn).not.toBeVisible({ timeout: 60_000 });
 
           const rows = page.locator('tbody > tr');

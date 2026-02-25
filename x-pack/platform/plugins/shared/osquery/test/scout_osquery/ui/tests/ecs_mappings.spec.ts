@@ -119,7 +119,7 @@ test.describe(
         await page.testSubj
           .locator('globalLoadingIndicator')
           .waitFor({ state: 'hidden', timeout: 15_000 })
-          .catch(() => { });
+          .catch(() => {});
         await searchInput.fill('');
         await searchInput.pressSequentially('users_elastic');
         const option = page.getByRole('option').filter({ hasText: /^users_elastic/ });
@@ -132,7 +132,7 @@ test.describe(
           await page.testSubj
             .locator('globalLoadingIndicator')
             .waitFor({ state: 'hidden', timeout: 5_000 })
-            .catch(() => { });
+            .catch(() => {});
           if (attempt === 4) {
             // Final attempt — let it fail with clear error
             await searchInput.click();

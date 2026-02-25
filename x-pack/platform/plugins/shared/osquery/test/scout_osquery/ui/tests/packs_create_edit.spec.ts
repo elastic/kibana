@@ -348,11 +348,11 @@ test.describe(
             await page.testSubj
               .locator('docsLoading')
               .waitFor({ state: 'visible' })
-              .catch(() => { });
+              .catch(() => {});
             await page.testSubj
               .locator('docsLoading')
               .waitFor({ state: 'hidden', timeout: 60_000 })
-              .catch(() => { });
+              .catch(() => {});
 
             // eslint-disable-next-line playwright/no-nth-methods -- first visible result in pack queries table
             const viewInLensButton = page.locator('[aria-label="View in Lens"]').first();
@@ -514,7 +514,7 @@ test.describe(
             await page.testSubj
               .locator('docsLoading')
               .waitFor({ state: 'hidden', timeout: 30_000 })
-              .catch(() => { });
+              .catch(() => {});
             const packQueryResultsDateCells = page.locator(
               'tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent'
             );
@@ -528,7 +528,7 @@ test.describe(
               await page.testSubj
                 .locator('docsLoading')
                 .waitFor({ state: 'hidden', timeout: 30_000 })
-                .catch(() => { });
+                .catch(() => {});
             }
           }
         });
@@ -693,7 +693,7 @@ test.describe(
           await packs.deleteAndConfirm('pack');
         });
       } finally {
-        await cleanupPack(kbnClient, packId).catch(() => { });
+        await cleanupPack(kbnClient, packId).catch(() => {});
       }
     });
   }

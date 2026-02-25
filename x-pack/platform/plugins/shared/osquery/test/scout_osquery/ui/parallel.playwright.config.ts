@@ -24,11 +24,11 @@ const config: ReturnType<typeof createPlaywrightConfig> = {
   retries: process.env.CI ? 1 : 0,
   ...(parallelJobCount && parallelJobIndex !== undefined
     ? {
-      shard: {
-        total: parallelJobCount,
-        current: parallelJobIndex + 1, // Buildkite is 0-based, Playwright is 1-based
-      },
-    }
+        shard: {
+          total: parallelJobCount,
+          current: parallelJobIndex + 1, // Buildkite is 0-based, Playwright is 1-based
+        },
+      }
     : {}),
 };
 
