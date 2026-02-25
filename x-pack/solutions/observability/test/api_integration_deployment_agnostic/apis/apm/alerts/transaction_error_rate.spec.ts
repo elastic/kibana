@@ -8,7 +8,7 @@
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionErrorRateActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '../../../services';
@@ -211,6 +211,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
         expect(alerts[0]).property('transaction.name', 'tx-java');
+        expect(alerts[0])
+          .property('kibana.alert.grouping')
+          .eql({
+            service: {
+              name: 'opbeans-java',
+              environment: 'production',
+            },
+            transaction: {
+              type: 'request',
+              name: 'tx-java',
+            },
+          });
       });
 
       it('produces an alert for opbeans-java with the correct reason', async () => {
@@ -312,6 +324,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(alerts[0]).property('service.environment', 'production');
         expect(alerts[0]).property('transaction.type', 'request');
         expect(alerts[0]).property('transaction.name', 'tx-node');
+        expect(alerts[0])
+          .property('kibana.alert.grouping')
+          .eql({
+            service: {
+              name: 'opbeans-node',
+              environment: 'production',
+            },
+            transaction: {
+              type: 'request',
+              name: 'tx-node',
+            },
+          });
       });
 
       it('produces an alert for opbeans-node with the correct reason', async () => {
