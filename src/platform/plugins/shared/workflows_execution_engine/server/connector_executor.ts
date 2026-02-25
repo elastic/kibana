@@ -56,10 +56,6 @@ export class ConnectorExecutor {
   }): Promise<ActionTypeExecutorResult<unknown>> {
     const { actionTypeId, actionId, input, abortController } = params;
 
-    if (abortController.signal.aborted) {
-      throw this.createAbortError(actionTypeId, actionId);
-    }
-
     const executeActionPromise = this.actionsClient.execute({
       actionId,
       params: input,

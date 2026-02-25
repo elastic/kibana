@@ -157,10 +157,13 @@ describe('ConnectorExecutor', () => {
       const connectorId = '123e4567-e89b-12d3-a456-426614174000';
       const testAbortController = new AbortController();
 
-      // Make execute take some time
+      // Make execute take some time, and abort mid-flight once the listener is registered
       mockActionsClient.execute.mockImplementation(
         () =>
           new Promise<ActionTypeExecutorResult<unknown>>((resolve) => {
+            // Abort after a short delay so the abort event listener in runConnector
+            // is already registered when the signal fires
+            setTimeout(() => testAbortController.abort(), 10);
             setTimeout(() => {
               resolve({
                 status: 'ok',
@@ -177,9 +180,6 @@ describe('ConnectorExecutor', () => {
         input,
         abortController: testAbortController,
       });
-
-      // Abort before execution completes
-      testAbortController.abort();
 
       await expect(executePromise).rejects.toThrow(
         `Action type "${connectorType}" with ID "${connectorId}" execution was aborted`
