@@ -1036,16 +1036,19 @@ describe('SearchSessionService', () => {
           sessions: {
             session1: {
               name: 'my_name',
+              appId: 'my_app_id',
               restoreState: undefined,
               locatorId: 'my_locator_id',
             },
             session2: {
               name: 'my_name',
+              appId: 'my_app_id',
               restoreState: undefined,
               locatorId: 'my_locator_id',
             },
             session3: {
               name: 'my_name',
+              appId: 'my_app_id',
               restoreState: undefined,
               locatorId: 'my_locator_id',
             },
