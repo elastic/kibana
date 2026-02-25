@@ -300,18 +300,52 @@ export class TaskStore {
     return userScopeAndApiKey;
   }
 
-  private async bulkGetDecryptedTaskApiKeys(ids: string[]) {
-    const result = new Map<string, string | undefined>();
+  private async bulkGetDecryptedTaskApiKeys(
+    ids: string[]
+  ): Promise<Map<string, string | undefined>> {
     if (!this.canEncryptSo() || !ids.length) {
-      return result;
+      return new Map<string, string | undefined>();
     }
 
+    const result = await this.getApiKeys(ids);
+
+    // the search doesn't wait for refresh, so may miss a newly created key
+    const idsOfMissingKeys = result
+      .entries()
+      .filter(([id, key]) => key === undefined)
+      .map(([id, key]) => id)
+      .toArray();
+
+    if (idsOfMissingKeys.length === 0) return result;
+
+    // do a refresh, and get the remaining keys
+    await this.esClient.indices.refresh({ index: this.index });
+
+    const missingResult = await this.getApiKeys(idsOfMissingKeys);
+
+    for (const [id, key] of result.entries()) {
+      if (key === undefined) {
+        const foundKey = missingResult.get(id);
+        if (foundKey === undefined) {
+          this.logger.error(`unable to obtain API key for task ${id}`);
+          result.delete(id);
+        } else {
+          result.set(id, foundKey);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private async getApiKeys(ids: string[]) {
     const kueryNode = nodeBuilder.or(
       ids.map((id) => {
         return nodeBuilder.is(`${TASK_SO_NAME}.id`, `${TASK_SO_NAME}:${id}`);
       })
     );
 
+    const result = new Map<string, string | undefined>();
     const finder =
       await this.esoClient!.createPointInTimeFinderDecryptedAsInternalUser<SerializedConcreteTaskInstance>(
         {
@@ -325,8 +359,8 @@ export class TaskStore {
         result.set(savedObject.id, savedObject.attributes.apiKey);
       });
     }
-    await finder.close();
 
+    await finder.close();
     return result;
   }
 
