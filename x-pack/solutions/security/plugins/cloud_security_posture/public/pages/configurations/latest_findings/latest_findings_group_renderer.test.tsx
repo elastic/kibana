@@ -140,7 +140,9 @@ describe('groupPanelRenderer - CLOUD_ACCOUNT_ID', () => {
     } as unknown as RawBucket<FindingsGroupingAggregation>;
 
     const { getByTestId, queryByTestId } = render(
-      <>{groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}</>
+      <>
+        {groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}
+      </>
     );
 
     expect(getByTestId('cis-benchmark-icon')).toBeInTheDocument();
@@ -160,7 +162,9 @@ describe('groupPanelRenderer - CLOUD_ACCOUNT_ID', () => {
     } as unknown as RawBucket<FindingsGroupingAggregation>;
 
     const { getByTestId, queryByTestId } = render(
-      <>{groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}</>
+      <>
+        {groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}
+      </>
     );
 
     expect(getByTestId('cloud-provider-icon')).toBeInTheDocument();
@@ -180,7 +184,9 @@ describe('groupPanelRenderer - CLOUD_ACCOUNT_ID', () => {
     } as unknown as RawBucket<FindingsGroupingAggregation>;
 
     const { getByText } = render(
-      <>{groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}</>
+      <>
+        {groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}
+      </>
     );
 
     expect(getByText('Google Cloud Platform')).toBeInTheDocument();
@@ -195,7 +201,9 @@ describe('groupPanelRenderer - CLOUD_ACCOUNT_ID', () => {
     } as unknown as RawBucket<FindingsGroupingAggregation>;
 
     const { getByText, queryByText } = render(
-      <>{groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}</>
+      <>
+        {groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}
+      </>
     );
 
     expect(getByText('CIS Azure')).toBeInTheDocument();
@@ -211,7 +219,9 @@ describe('groupPanelRenderer - CLOUD_ACCOUNT_ID', () => {
     } as unknown as RawBucket<FindingsGroupingAggregation>;
 
     const { queryByTestId } = render(
-      <>{groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}</>
+      <>
+        {groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, bucket, undefined, false)}
+      </>
     );
 
     expect(queryByTestId('cis-benchmark-icon')).not.toBeInTheDocument();
@@ -220,7 +230,14 @@ describe('groupPanelRenderer - CLOUD_ACCOUNT_ID', () => {
 
   it('renders NullGroup when nullGroupMessage is provided', () => {
     const { getByTestId } = render(
-      <>{groupPanelRenderer(FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID, baseBucket, 'No data', false)}</>
+      <>
+        {groupPanelRenderer(
+          FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID,
+          baseBucket,
+          'No data',
+          false
+        )}
+      </>
     );
 
     expect(getByTestId('null-group')).toBeInTheDocument();
