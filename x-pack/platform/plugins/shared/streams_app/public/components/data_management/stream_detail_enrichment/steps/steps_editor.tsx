@@ -12,6 +12,7 @@ import {
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -353,54 +354,6 @@ export const StepsEditor = React.memo(() => {
       );
     }
 
-    if (isSuggestionFailed) {
-      return (
-        <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
-          <div css={{ maxWidth: 400, margin: '0 auto', textAlign: 'left' }}>
-            <EuiCallOut
-              announceOnMount
-              title={i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedTitle',
-                { defaultMessage: 'Failed to generate suggestions' }
-              )}
-              color="warning"
-              size="s"
-              onDismiss={() => clearSuggestedSteps()}
-            >
-              <p>
-                {suggestionError ||
-                  i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedDescription',
-                    {
-                      defaultMessage:
-                        'Something went wrong while generating pipeline suggestions. You can try again.',
-                    }
-                  )}
-              </p>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <GenerateSuggestionButton
-                    aiFeatures={aiFeatures}
-                    iconType="refresh"
-                    size="s"
-                    onClick={(connectorId) =>
-                      suggestPipeline({ connectorId, streamName: stream.name })
-                    }
-                    isLoading={false}
-                  >
-                    {i18n.translate('xpack.streams.stepsEditor.tryAgainButtonLabel', {
-                      defaultMessage: 'Try again',
-                    })}
-                  </GenerateSuggestionButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiCallOut>
-          </div>
-        </NoStepsEmptyPrompt>
-      );
-    }
-
     if (suggestedPipeline && isViewingSuggestion) {
       return (
         <PipelineSuggestion
@@ -444,9 +397,95 @@ export const StepsEditor = React.memo(() => {
         </NoStepsEmptyPrompt>
       )}
       <ErrorPanels showBottomBar={hasChanges} />
+      {isSuggestionFailed && aiFeatures && (
+        <SuggestionFailedPanel
+          showBottomBar={hasChanges}
+          errorMessage={suggestionError}
+          onDismiss={clearSuggestedSteps}
+          onRetry={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
+          aiFeatures={aiFeatures}
+        />
+      )}
     </>
   );
 });
+
+interface SuggestionFailedPanelProps {
+  showBottomBar: boolean;
+  errorMessage?: string;
+  onDismiss: () => void;
+  onRetry: (connectorId: string) => void;
+  aiFeatures: NonNullable<ReturnType<typeof useAIFeatures>>;
+}
+
+const SuggestionFailedPanel = React.memo<SuggestionFailedPanelProps>(
+  ({ showBottomBar, errorMessage, onDismiss, onRetry, aiFeatures }) => {
+    return (
+      <div
+        css={css`
+          ${showBottomBar ? 'margin-bottom: 30px;' : ''}
+        `}
+      >
+        <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="warning">
+            <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedPanelTitle',
+                      { defaultMessage: 'Failed to generate suggestions' }
+                    )}
+                  </strong>
+                  <p>
+                    {errorMessage ||
+                      i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedPanelDescription',
+                        {
+                          defaultMessage:
+                            'Something went wrong while generating pipeline suggestions.',
+                        }
+                      )}
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <GenerateSuggestionButton
+                      aiFeatures={aiFeatures}
+                      iconType="refresh"
+                      size="s"
+                      color="warning"
+                      onClick={onRetry}
+                      isLoading={false}
+                    >
+                      {i18n.translate('xpack.streams.stepsEditor.tryAgainButtonLabel', {
+                        defaultMessage: 'Try again',
+                      })}
+                    </GenerateSuggestionButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      onClick={onDismiss}
+                      css={css`
+                        line-height: 32px;
+                      `}
+                    >
+                      {i18n.translate('xpack.streams.stepsEditor.dismissLabel', {
+                        defaultMessage: 'Dismiss',
+                      })}
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiPanel>
+      </div>
+    );
+  }
+);
 
 const clampTwoLines = css`
   display: -webkit-box;

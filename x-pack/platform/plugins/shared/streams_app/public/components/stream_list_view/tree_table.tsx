@@ -185,6 +185,9 @@ export function StreamsTreeTable({
     }, {} as Record<string, (typeof suggestionStatusResult.value)[number]>);
   }, [suggestionStatusResult]);
 
+  const isSuggestionStatusInitialLoading =
+    suggestionStatusResult.loading && !suggestionStatusResult.value;
+
   const hasInProgressSuggestions = React.useMemo(() => {
     if (!suggestionStatusResult.value) {
       return false;
@@ -551,7 +554,7 @@ export function StreamsTreeTable({
               <SuggestionStatusColumn
                 streamName={item.stream.name}
                 status={suggestionStatusByStream[item.stream.name]}
-                isLoading={suggestionStatusResult.loading}
+                isLoading={isSuggestionStatusInitialLoading}
               />
             ) : null,
         },

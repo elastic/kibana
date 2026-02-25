@@ -62,12 +62,6 @@ const createParentRef = (): InteractiveModeParentRef => {
 };
 
 describe('interactive mode pipeline suggestion polling', () => {
-  let notifySuggestionFailureMock: jest.Mock;
-
-  beforeEach(() => {
-    notifySuggestionFailureMock = jest.fn();
-  });
-
   afterEach(() => {
     jest.clearAllTimers();
     jest.useRealTimers();
@@ -194,7 +188,7 @@ describe('interactive mode pipeline suggestion polling', () => {
     actor.stop();
   });
 
-  it('shows error toast when task fails with TaskStatus.Failed', async () => {
+  it('stores error in context when task fails with TaskStatus.Failed', async () => {
     jest.useFakeTimers();
 
     const getPipelineSuggestionStatusMock = jest.fn(
@@ -219,9 +213,6 @@ describe('interactive mode pipeline suggestion polling', () => {
           GetPipelineSuggestionStatusInputMinimal
         >(async () => getPipelineSuggestionStatusMock()),
       },
-      actions: {
-        notifySuggestionFailure: notifySuggestionFailureMock,
-      },
     });
 
     const input = {
@@ -240,31 +231,16 @@ describe('interactive mode pipeline suggestion polling', () => {
     await waitForMatch(actor, 'pipelineSuggestion.idle');
     actor.send({ type: 'suggestion.generate', connectorId: 'connector-1' });
 
-    // Wait for the task to be checked and fail
-    await waitForMatch(actor, 'pipelineSuggestion.idle');
+    // Wait for the task to be checked and transition to failed state
+    await waitForMatch(actor, 'pipelineSuggestion.suggestionFailed');
 
-    expect(notifySuggestionFailureMock).toHaveBeenCalledTimes(1);
-    expect(notifySuggestionFailureMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: expect.anything(),
-        event: expect.objectContaining({
-          output: expect.objectContaining({
-            status: TaskStatus.Failed,
-            error: 'LLM connection failed',
-          }),
-        }),
-      }),
-      expect.objectContaining({
-        event: expect.objectContaining({
-          error: expect.any(Error),
-        }),
-      })
-    );
+    // Error should be stored in context for display in the UI
+    expect(actor.getSnapshot().context.suggestionError).toBe('LLM connection failed');
 
     actor.stop();
   });
 
-  it('shows error toast when polling API call fails', async () => {
+  it('stores error in context when polling API call fails', async () => {
     jest.useFakeTimers();
 
     const pollingError = new Error('Network error');
@@ -287,9 +263,6 @@ describe('interactive mode pipeline suggestion polling', () => {
           GetPipelineSuggestionStatusInputMinimal
         >(async () => getPipelineSuggestionStatusMock()),
       },
-      actions: {
-        notifySuggestionFailure: notifySuggestionFailureMock,
-      },
     });
 
     const input = {
@@ -308,23 +281,11 @@ describe('interactive mode pipeline suggestion polling', () => {
     await waitForMatch(actor, 'pipelineSuggestion.idle');
     actor.send({ type: 'suggestion.generate', connectorId: 'connector-1' });
 
-    // Wait for the polling to fail and transition back to idle
-    await waitForMatch(actor, 'pipelineSuggestion.idle');
+    // Wait for the polling to fail and transition to failed state
+    await waitForMatch(actor, 'pipelineSuggestion.suggestionFailed');
 
-    expect(notifySuggestionFailureMock).toHaveBeenCalledTimes(1);
-    expect(notifySuggestionFailureMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: expect.anything(),
-        event: expect.objectContaining({
-          error: pollingError,
-        }),
-      }),
-      expect.objectContaining({
-        event: expect.objectContaining({
-          error: pollingError,
-        }),
-      })
-    );
+    // Error should be stored in context for display in the UI
+    expect(actor.getSnapshot().context.suggestionError).toBe('Network error');
 
     actor.stop();
   });
@@ -443,10 +404,8 @@ describe('interactive mode pipeline suggestion polling', () => {
     actor.stop();
   });
 
-  it('shows error toast and acknowledges task when loading existing suggestion returns failed', async () => {
+  it('stores error in context when loading existing suggestion returns failed', async () => {
     jest.useFakeTimers();
-
-    const acknowledgeSuggestionTaskMock = jest.fn();
 
     // loadExistingSuggestion returns failed (task had failed before page load)
     const loadExistingSuggestionMock = jest.fn(async () => ({
@@ -469,10 +428,6 @@ describe('interactive mode pipeline suggestion polling', () => {
           GetPipelineSuggestionStatusInputMinimal
         >(async () => ({ status: TaskStatus.InProgress } as PipelineSuggestionTaskStatusResult)),
       },
-      actions: {
-        notifySuggestionFailure: notifySuggestionFailureMock,
-        acknowledgeSuggestionTask: acknowledgeSuggestionTaskMock,
-      },
     });
 
     const input = {
@@ -488,39 +443,14 @@ describe('interactive mode pipeline suggestion polling', () => {
     const actor = createActor(testMachine, { input });
     actor.start();
 
-    // Machine should start in loadingExistingSuggestion, then go to idle when failed
-    await waitForMatch(actor, 'pipelineSuggestion.idle');
+    // Machine should start in loadingExistingSuggestion, then go to suggestionFailed when failed
+    await waitForMatch(actor, 'pipelineSuggestion.suggestionFailed');
 
     expect(loadExistingSuggestionMock).toHaveBeenCalledTimes(1);
 
-    // Should show error toast for the pre-existing failed task
-    expect(notifySuggestionFailureMock).toHaveBeenCalledTimes(1);
-    expect(notifySuggestionFailureMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: expect.anything(),
-        event: expect.objectContaining({
-          output: expect.objectContaining({
-            type: 'failed',
-            error: 'LLM connection failed during background processing',
-          }),
-        }),
-      }),
-      expect.objectContaining({
-        event: expect.objectContaining({
-          error: expect.any(Error),
-        }),
-      })
-    );
-
-    // Should acknowledge/remove the failed task from the server
-    expect(acknowledgeSuggestionTaskMock).toHaveBeenCalledTimes(1);
-    expect(acknowledgeSuggestionTaskMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: expect.anything(),
-      }),
-      expect.objectContaining({
-        streamName: 'logs-generic-default',
-      })
+    // Error should be stored in context for display in the UI
+    expect(actor.getSnapshot().context.suggestionError).toBe(
+      'LLM connection failed during background processing'
     );
 
     actor.stop();
