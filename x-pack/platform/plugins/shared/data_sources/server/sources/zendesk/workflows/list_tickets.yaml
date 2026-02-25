@@ -16,6 +16,10 @@ inputs:
     required: false
     default: 25
     description: 'Number of tickets per page'
+  - name: include
+    type: string
+    required: false
+    description: 'Comma-separated sideloads, no spaces. E.g. users, users,groups, users,groups,organizations. Options: users, groups, organizations.'
 steps:
   - name: list-tickets
     type: zendesk.listTickets
@@ -23,6 +27,7 @@ steps:
     with:
       page: ${{inputs.page}}
       perPage: ${{inputs.per_page}}
+      include: "${{inputs.include}}"
   - name: map-tickets
     type: data.map
     items: ${{ steps['list-tickets'].output.tickets }}
@@ -40,6 +45,12 @@ steps:
         assignee_id: "${{ item.assignee_id }}"
         submitter_id: "${{ item.submitter_id }}"
         tags: "${{ item.tags }}"
+        users: ${{ steps['list-tickets'].output.users }}
+        groups: ${{ steps['list-tickets'].output.groups }}
+        organizations: ${{ steps['list-tickets'].output.organizations }}
+        next_page: ${{ steps['list-tickets'].output.next_page }}
+        count: ${{ steps['list-tickets'].output.count }}
+        previous_page: ${{ steps['list-tickets'].output.previous_page }}
 #        custom_fields:
 #          $map: { items: "${{ item.custom_fields }}", item: "cf" }
 #          id: "${{ cf.id }}"

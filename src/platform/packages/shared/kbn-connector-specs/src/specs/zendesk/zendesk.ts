@@ -87,6 +87,7 @@ export const ZendeskConnector: ConnectorSpec = {
         sortOrder: z.enum(['asc', 'desc']).optional(),
         page: z.number().optional(),
         perPage: z.number().optional(),
+        include: z.string().optional(),
       }),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -97,6 +98,7 @@ export const ZendeskConnector: ConnectorSpec = {
           ...(input.page !== undefined && input.page !== null && { page: input.page }),
           ...(input.perPage !== undefined && input.perPage !== null && { per_page: input.perPage }),
         };
+        if (input.include) params.include = input.include;
         const response = await ctx.client.get(`${baseUrl}/search`, { params });
         return response.data;
       },
@@ -106,12 +108,14 @@ export const ZendeskConnector: ConnectorSpec = {
       input: z.object({
         page: z.number().optional(),
         perPage: z.number().optional(),
+        include: z.string().optional(),
       }),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
-        const params: Record<string, number | undefined> = {};
+        const params: Record<string, string | number | undefined> = {};
         if (input.page !== undefined && input.page !== null) params.page = input.page;
         if (input.perPage !== undefined && input.perPage !== null) params.per_page = input.perPage;
+        if (input.include) params.include = input.include;
         const response = await ctx.client.get(`${baseUrl}/tickets.json`, { params });
         return response.data;
       },

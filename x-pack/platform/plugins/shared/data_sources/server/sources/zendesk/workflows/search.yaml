@@ -31,6 +31,10 @@ inputs:
     type: number
     required: false
     description: 'Results per page'
+  - name: include
+    type: string
+    required: false
+    description: 'Must use parentheses format type(sideload), no spaces. E.g. tickets(users), tickets(users,groups), users(identities). Match type to query (type:ticket -> tickets(...)).'
 steps:
   - name: search-zendesk
     type: zendesk.search
@@ -41,6 +45,7 @@ steps:
       sortOrder: "${{inputs.sort_order}}"
       page: ${{inputs.page}}
       perPage: ${{inputs.per_page}}
+      include: "${{inputs.include}}"
   - name: map-results
     type: data.map
     items: ${{ steps['search-zendesk'].output.results }}
@@ -59,6 +64,12 @@ steps:
         assignee_id: "${{ item.assignee_id }}"
         submitter_id: "${{ item.submitter_id }}"
         tags: "${{ item.tags }}"
+        users: ${{ steps['search-zendesk'].output.users }}
+        groups: ${{ steps['search-zendesk'].output.groups }}
+        next_page: ${{ steps['search-zendesk'].output.next_page }}
+        count: ${{ steps['search-zendesk'].output.count }}
+        previous_page: ${{ steps['search-zendesk'].output.previous_page }}
+        facets: ${{ steps['search-zendesk'].output.facets }}
         # custom_fields:
         #   $map: { items: "${{ item.custom_fields }}", item: "cf" }
         #   id: "${{ cf.id }}"
