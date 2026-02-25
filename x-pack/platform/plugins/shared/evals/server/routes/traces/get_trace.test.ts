@@ -129,7 +129,7 @@ describe('GET /internal/evals/traces/{traceId}', () => {
     expect(response.payload.duration_ms).toBe(0);
   });
 
-  it('computes total duration as the max span duration', async () => {
+  it('computes total duration as latestEnd minus earliestStart', async () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       hits: {
@@ -140,7 +140,7 @@ describe('GET /internal/evals/traces/{traceId}', () => {
               span_id: 's1',
               trace_id: 'trace-abc',
               name: 'a',
-              '@timestamp': '2025-06-01T00:00:00Z',
+              '@timestamp': '2025-06-01T00:00:00.000Z',
               duration: 2_000_000,
             },
           },
@@ -150,8 +150,8 @@ describe('GET /internal/evals/traces/{traceId}', () => {
               span_id: 's2',
               trace_id: 'trace-abc',
               name: 'b',
-              '@timestamp': '2025-06-01T00:00:00Z',
-              duration: 8_000_000,
+              '@timestamp': '2025-06-01T00:00:05.000Z',
+              duration: 3_000_000,
             },
           },
         ],
@@ -161,7 +161,8 @@ describe('GET /internal/evals/traces/{traceId}', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.payload.total_spans).toBe(2);
-    expect(response.payload.duration_ms).toBe(8);
+    // span s2 starts at T+5s and lasts 3ms, so latestEnd = 5003ms, earliestStart = 0ms
+    expect(response.payload.duration_ms).toBe(5003);
   });
 
   it('uses hit _id as span_id when source has no span_id', async () => {

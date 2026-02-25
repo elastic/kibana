@@ -109,7 +109,7 @@ describe('GET /internal/evals/runs', () => {
 
     expect(response.status).toBe(500);
     expect(response.payload).toEqual({
-      message: expect.stringContaining('Failed to list evaluation runs'),
+      message: 'Failed to list evaluation runs',
     });
     expect(logger.error).toHaveBeenCalled();
   });

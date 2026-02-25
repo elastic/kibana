@@ -13,12 +13,19 @@ import {
   buildRouteValidationWithZod,
   buildRunFilterQuery,
   buildStatsAggregation,
+  parseStatsAggregationResponse,
   buildModelDisplayId,
   GetEvaluationRunRequestParams,
   GetEvaluationRunRequestQuery,
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+
+interface EvalDocSource {
+  task?: { model?: { id?: string; family?: string; provider?: string } };
+  evaluator?: { model?: { id?: string; family?: string; provider?: string } };
+  run_metadata?: { total_repetitions?: number };
+}
 
 export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
@@ -49,15 +56,13 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
 
           const query = buildRunFilterQuery(runId, { suiteId, modelId });
 
-          const metadataResponse = await esClient.search({
+          const metadataResponse = await esClient.search<EvalDocSource>({
             index: EVALUATIONS_INDEX_PATTERN,
             query,
             size: 1,
           });
 
-          const firstDoc = metadataResponse.hits?.hits[0]?._source as
-            | Record<string, any>
-            | undefined;
+          const firstDoc = metadataResponse.hits?.hits[0]?._source;
           if (!firstDoc) {
             return response.notFound({ body: { message: `Run not found: ${runId}` } });
           }
@@ -69,45 +74,16 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
             aggs: buildStatsAggregation(),
           });
 
-          const aggregations = aggResponse.aggregations as Record<string, any> | undefined;
-          const datasetBuckets: any[] = aggregations?.by_dataset?.buckets ?? [];
+          const stats = parseStatsAggregationResponse(
+            aggResponse.aggregations as Record<string, unknown> | undefined
+          );
 
-          const stats = datasetBuckets.flatMap((datasetBucket: any) => {
-            const datasetId = datasetBucket.key;
-            const datasetName = datasetBucket.dataset_name?.buckets?.[0]?.key ?? datasetId;
-            const evaluatorBuckets: any[] = datasetBucket.by_evaluator?.buckets ?? [];
-
-            return evaluatorBuckets.map((evaluatorBucket: any) => {
-              const scoreStats = evaluatorBucket.score_stats;
-              const median = evaluatorBucket.score_median?.values?.['50.0'];
-
-              return {
-                dataset_id: datasetId,
-                dataset_name: datasetName,
-                evaluator_name: evaluatorBucket.key,
-                stats: {
-                  mean: scoreStats?.avg ?? 0,
-                  median: median ?? 0,
-                  std_dev: scoreStats?.std_deviation ?? 0,
-                  min: scoreStats?.min ?? 0,
-                  max: scoreStats?.max ?? 0,
-                  count: scoreStats?.count ?? 0,
-                },
-              };
-            });
-          });
-
-          const toModelDisplay = (model?: Record<string, unknown>) => {
+          const toModelDisplay = (model?: { id?: string; family?: string; provider?: string }) => {
             if (!model) return undefined;
-            const { id, family, provider } = model as {
-              id?: string;
-              family?: string;
-              provider?: string;
-            };
             return {
-              id: buildModelDisplayId(id, family, provider),
-              family,
-              provider,
+              id: buildModelDisplayId(model.id, model.family, model.provider),
+              family: model.family,
+              provider: model.provider,
             };
           };
 
@@ -124,7 +100,7 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
           logger.error(`Failed to get evaluation run: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to get evaluation run: ${error}` },
+            body: { message: 'Failed to get evaluation run' },
           });
         }
       }

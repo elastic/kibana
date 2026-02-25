@@ -8,6 +8,7 @@
 import {
   buildRunFilterQuery,
   buildStatsAggregation,
+  parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
   buildRunsListingFilterQuery,
   buildRunsListingAggregation,
@@ -272,6 +273,98 @@ describe('query_builders', () => {
 
     it('returns "unknown" when called with no arguments', () => {
       expect(buildModelDisplayId()).toBe('unknown');
+    });
+  });
+
+  describe('parseStatsAggregationResponse', () => {
+    it('returns empty array for undefined aggregations', () => {
+      expect(parseStatsAggregationResponse(undefined)).toEqual([]);
+    });
+
+    it('returns empty array when by_dataset has no buckets', () => {
+      expect(parseStatsAggregationResponse({ by_dataset: { buckets: [] } })).toEqual([]);
+    });
+
+    it('parses a dataset with evaluator buckets', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'correctness',
+                    score_stats: { avg: 0.8, std_deviation: 0.1, min: 0.5, max: 1.0, count: 10 },
+                    score_median: { values: { '50.0': 0.85 } },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        dataset_id: 'ds-1',
+        dataset_name: 'Dataset One',
+        evaluator_name: 'correctness',
+        stats: { mean: 0.8, median: 0.85, std_dev: 0.1, min: 0.5, max: 1.0, count: 10 },
+      });
+    });
+
+    it('falls back to dataset key when dataset_name bucket is empty', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-fallback',
+              dataset_name: { buckets: [] },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'eval-a',
+                    score_stats: {},
+                    score_median: { values: {} },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(result[0].dataset_name).toBe('ds-fallback');
+      expect(result[0].stats.mean).toBe(0);
+    });
+
+    it('defaults stats to 0 when score_stats fields are missing', () => {
+      const aggs = {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'ds-1',
+              by_evaluator: {
+                buckets: [{ key: 'eval-b' }],
+              },
+            },
+          ],
+        },
+      };
+
+      const result = parseStatsAggregationResponse(aggs);
+      expect(result[0].stats).toEqual({
+        mean: 0,
+        median: 0,
+        std_dev: 0,
+        min: 0,
+        max: 0,
+        count: 0,
+      });
     });
   });
 });

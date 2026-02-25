@@ -67,7 +67,7 @@ export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies)
           logger.error(`Failed to get evaluation run scores: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to get evaluation run scores: ${error}` },
+            body: { message: 'Failed to get evaluation run scores' },
           });
         }
       }

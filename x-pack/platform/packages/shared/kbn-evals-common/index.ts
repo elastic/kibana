@@ -11,10 +11,11 @@ export { buildRouteValidationWithZod } from './impl/schemas/common';
 export {
   buildRunFilterQuery,
   buildStatsAggregation,
+  parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
   buildRunsListingFilterQuery,
   buildRunsListingAggregation,
   parseRunsListingResponse,
   buildModelDisplayId,
 } from './impl/query_builders';
-export type { RunsListingResult } from './impl/query_builders';
+export type { RunsListingResult, RunDetailEvaluatorStat } from './impl/query_builders';

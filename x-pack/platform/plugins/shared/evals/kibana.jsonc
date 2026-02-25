@@ -16,8 +16,7 @@
       "evals"
     ],
     "requiredPlugins": [
-      "features",
-      "data"
+      "features"
     ],
     "optionalPlugins": [],
     "requiredBundles": [

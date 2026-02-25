@@ -65,7 +65,7 @@ export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
           logger.error(`Failed to list evaluation runs: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to list evaluation runs: ${error}` },
+            body: { message: 'Failed to list evaluation runs' },
           });
         }
       }

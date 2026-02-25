@@ -62,16 +62,14 @@ export const RunsListPage: React.FC = () => {
       {
         field: 'task_model',
         name: 'Task Model',
-        render: (model: EvaluationRunSummary['task_model']) => (
-          <EuiBadge color="primary">{model.id}</EuiBadge>
-        ),
+        render: (model: EvaluationRunSummary['task_model']) =>
+          model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
         field: 'evaluator_model',
         name: 'Evaluator Model',
-        render: (model: EvaluationRunSummary['evaluator_model']) => (
-          <EuiBadge color="accent">{model.id}</EuiBadge>
-        ),
+        render: (model: EvaluationRunSummary['evaluator_model']) =>
+          model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
       },
       {
         field: 'git_branch',

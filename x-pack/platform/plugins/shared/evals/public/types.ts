@@ -6,7 +6,6 @@
  */
 
 import type { ComponentType } from 'react';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
 
@@ -14,10 +13,6 @@ export interface EvalsPublicStart {
   TraceWaterfall: ComponentType<{ traceId: string }>;
 }
 
-export interface EvalsSetupDependencies {
-  data: DataPublicPluginSetup;
-}
+export type EvalsSetupDependencies = Record<string, never>;
 
-export interface EvalsStartDependencies {
-  data: DataPublicPluginStart;
-}
+export type EvalsStartDependencies = Record<string, never>;

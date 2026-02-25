@@ -6,19 +6,12 @@
  */
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
-} from '@kbn/data-plugin/server';
 
 export type EvalsPluginSetup = Record<string, never>;
 export type EvalsPluginStart = Record<string, never>;
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
-  data: DataPluginSetup;
 }
 
-export interface EvalsStartDependencies {
-  data: DataPluginStart;
-}
+export type EvalsStartDependencies = Record<string, never>;

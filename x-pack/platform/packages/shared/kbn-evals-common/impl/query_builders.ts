@@ -237,6 +237,82 @@ export const parseRunsListingResponse = (
 };
 
 // ---------------------------------------------------------------------------
+// Run detail response parser
+// ---------------------------------------------------------------------------
+
+interface StatsAggregations {
+  by_dataset?: {
+    buckets?: Array<{
+      key: string;
+      dataset_name?: TermsBucket;
+      by_evaluator?: {
+        buckets?: Array<{
+          key: string;
+          score_stats?: {
+            avg?: number;
+            std_deviation?: number;
+            min?: number;
+            max?: number;
+            count?: number;
+          };
+          score_median?: { values?: Record<string, number | null> };
+        }>;
+      };
+    }>;
+  };
+}
+
+export interface RunDetailEvaluatorStat {
+  dataset_id: string;
+  dataset_name: string;
+  evaluator_name: string;
+  stats: {
+    mean: number;
+    median: number;
+    std_dev: number;
+    min: number;
+    max: number;
+    count: number;
+  };
+}
+
+/**
+ * Parses the stats aggregation response from a run detail query
+ * into a typed array of per-evaluator, per-dataset statistics.
+ */
+export const parseStatsAggregationResponse = (
+  aggregations: Record<string, unknown> | undefined
+): RunDetailEvaluatorStat[] => {
+  const aggs = aggregations as StatsAggregations | undefined;
+  const datasetBuckets = aggs?.by_dataset?.buckets ?? [];
+
+  return datasetBuckets.flatMap((datasetBucket) => {
+    const datasetId = datasetBucket.key;
+    const datasetName = firstBucket(datasetBucket.dataset_name) ?? datasetId;
+    const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
+
+    return evaluatorBuckets.map((evaluatorBucket) => {
+      const scoreStats = evaluatorBucket.score_stats;
+      const median = evaluatorBucket.score_median?.values?.['50.0'];
+
+      return {
+        dataset_id: datasetId,
+        dataset_name: datasetName,
+        evaluator_name: evaluatorBucket.key,
+        stats: {
+          mean: scoreStats?.avg ?? 0,
+          median: median ?? 0,
+          std_dev: scoreStats?.std_deviation ?? 0,
+          min: scoreStats?.min ?? 0,
+          max: scoreStats?.max ?? 0,
+          count: scoreStats?.count ?? 0,
+        },
+      };
+    });
+  });
+};
+
+// ---------------------------------------------------------------------------
 // Model display helpers
 // ---------------------------------------------------------------------------
 

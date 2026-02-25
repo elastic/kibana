@@ -86,8 +86,14 @@ export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => 
             })
             .filter((span): span is NonNullable<typeof span> => span !== null);
 
-          const totalDurationMs =
-            spans.length > 0 ? spans.reduce((max, span) => Math.max(max, span.duration_ms), 0) : 0;
+          let totalDurationMs = 0;
+          if (spans.length > 0) {
+            const earliestStart = Math.min(...spans.map((s) => new Date(s.start_time).getTime()));
+            const latestEnd = Math.max(
+              ...spans.map((s) => new Date(s.start_time).getTime() + s.duration_ms)
+            );
+            totalDurationMs = latestEnd - earliestStart;
+          }
 
           return response.ok({
             body: {
@@ -101,7 +107,7 @@ export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => 
           logger.error(`Failed to get trace: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to get trace: ${error}` },
+            body: { message: 'Failed to get trace' },
           });
         }
       }

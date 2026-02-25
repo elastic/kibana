@@ -103,7 +103,10 @@ const flattenTree = (nodes: SpanNode[], hideNoise: boolean): SpanNode[] => {
   const result: SpanNode[] = [];
   const recurse = (nodeList: SpanNode[]) => {
     for (const node of nodeList) {
-      if (hideNoise && isNoiseSpan(node)) continue;
+      if (hideNoise && isNoiseSpan(node)) {
+        recurse(node.children);
+        continue;
+      }
       result.push(node);
       recurse(node.children);
     }
@@ -325,7 +328,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
                   <EuiBadge color="hollow">{noiseCount} hidden</EuiBadge>
                 </>
               )}{' '}
-              &middot; {data.duration_ms.toFixed(1)}ms total
+              &middot; {(data.duration_ms ?? 0).toFixed(1)}ms total
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -479,7 +482,7 @@ const tryFormatJson = (value: string): string => {
 // --- SpanDetail component ---
 
 const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, onClose }) => {
-  const categorized = useMemo(() => categorizeAttributes(span.attributes), [span.attributes]);
+  const categorized = useMemo(() => categorizeAttributes(span.attributes ?? {}), [span.attributes]);
   const hasTokens =
     categorized.tokens.input != null ||
     categorized.tokens.output != null ||
