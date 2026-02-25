@@ -40,6 +40,7 @@ const createSetupMock = () => {
     getActionsConfigurationUtilities: jest.fn().mockReturnValue({
       getAwsSesConfig: jest.fn(),
       getWebhookSettings: jest.fn(),
+      getActionsAuthTypeConfig: jest.fn().mockReturnValue({ authorizationCodeEnabled: false }),
     }),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
