@@ -29,6 +29,11 @@ export interface DataErrorsControl {
   onChange: (value: boolean) => void;
 }
 
+export interface ApproximateResultsControl {
+  enabled: boolean;
+  onChange: (value: boolean) => void;
+}
+
 export interface ESQLEditorProps {
   /** The aggregate type query */
   query: AggregateQuery;
@@ -90,6 +95,8 @@ export interface ESQLEditorProps {
   queryStats?: ESQLQueryStats;
   /** If true, automatically opens the quick search visor when the editor initially loads with a query that has only source commands */
   openVisorOnSourceCommands?: boolean;
+  /** Allows controlling the toggle for approximate (fast) query results. If not provided the toggle will be hidden */
+  approximateResultsControl?: ApproximateResultsControl;
 }
 
 interface ESQLVariableService {
