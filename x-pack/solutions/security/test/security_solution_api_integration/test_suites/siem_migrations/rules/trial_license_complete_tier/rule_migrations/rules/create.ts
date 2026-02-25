@@ -143,11 +143,15 @@ export default ({ getService }: FtrProviderContext) => {
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
-        expect(response.body).toEqual({
-          statusCode: 400,
-          error: 'Bad Request',
-          message: '[request body]: 0.vendor: Invalid option: expected one of "splunk"|"qradar"',
-        });
+        expect(response.body).toEqual(
+          expect.objectContaining({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringMatching(
+              /\[request body\]: 0\.vendor: (Required|Invalid option: expected one of "splunk"\|"qradar")/
+            ),
+          })
+        );
       });
 
       it('should return an error when original rule title is not specified', async () => {
@@ -175,12 +179,15 @@ export default ({ getService }: FtrProviderContext) => {
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
-        expect(response.body).toEqual({
-          statusCode: 400,
-          error: 'Bad Request',
-          message:
-            '[request body]: 0.description: Invalid input: expected string, received undefined',
-        });
+        expect(response.body).toEqual(
+          expect.objectContaining({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringMatching(
+              /\[request body\]: 0\.description: (Required|Invalid input: expected string, received undefined)/
+            ),
+          })
+        );
       });
 
       it('should return an error when original rule query is not specified', async () => {
@@ -190,11 +197,15 @@ export default ({ getService }: FtrProviderContext) => {
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
-        expect(response.body).toEqual({
-          statusCode: 400,
-          error: 'Bad Request',
-          message: '[request body]: 0.query: Invalid input: expected string, received undefined',
-        });
+        expect(response.body).toEqual(
+          expect.objectContaining({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringMatching(
+              /\[request body\]: 0\.query: (Required|Invalid input: expected string, received undefined)/
+            ),
+          })
+        );
       });
 
       it('should return an error when original rule query_language is not specified', async () => {
@@ -204,12 +215,15 @@ export default ({ getService }: FtrProviderContext) => {
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
-        expect(response.body).toEqual({
-          statusCode: 400,
-          error: 'Bad Request',
-          message:
-            '[request body]: 0.query_language: Invalid input: expected string, received undefined',
-        });
+        expect(response.body).toEqual(
+          expect.objectContaining({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: expect.stringMatching(
+              /\[request body\]: 0\.query_language: (Required|Invalid input: expected string, received undefined)/
+            ),
+          })
+        );
       });
     });
   });

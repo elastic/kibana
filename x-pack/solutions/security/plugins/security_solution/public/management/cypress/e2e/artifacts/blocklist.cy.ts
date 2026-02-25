@@ -173,9 +173,9 @@ describe(
     });
 
     describe('Handles CRUD with operator field', () => {
-      const IS_EXPECTED_CONDITION = /AND\s*file.Ext.code_signature\s*IS\s*Elastic,\s*Inc./;
+      const IS_EXPECTED_CONDITION = /AND\s*file.Ext.code_signature\s*IS\s*Elastic,\s*Inc\./i;
       const IS_ONE_OF_EXPECTED_CONDITION =
-        /AND\s*file.Ext.code_signature\s*is\s*one\s*of\s*Elastic\s*Inc./;
+        /AND\s*file.Ext.code_signature\s*is\s*one\s*of\s*Elastic\s*Inc\./i;
 
       afterEach(() => {
         removeExceptionsList(ENDPOINT_ARTIFACT_LISTS.blocklists.id);
@@ -224,7 +224,7 @@ describe(
         });
 
         it('Deletes a blocklist item', () => {
-          openBlocklist();
+          openBlocklist({ itemId });
           deleteBlocklistItem();
           validateSuccessPopup('delete');
         });

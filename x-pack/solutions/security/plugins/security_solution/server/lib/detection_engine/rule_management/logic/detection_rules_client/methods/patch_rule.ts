@@ -8,7 +8,7 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 import type {
   RulePatchProps,
@@ -64,6 +64,16 @@ export const patchRule = async ({
 
   validateNonCustomizablePatchFields(rulePatch, existingRule);
 
+  const rulePatchDefinedFields = Object.fromEntries(
+    Object.entries(rulePatchObjWithoutIds).filter(([key, value]) => {
+      if (value === undefined) {
+        return false;
+      }
+      const existingValue = (existingRule as Record<string, unknown>)[key];
+      return !isEqual(value, existingValue);
+    })
+  );
+
   /**
    * RBAC logic branch
    *
@@ -76,14 +86,14 @@ export const patchRule = async ({
    * need `all` privileges for rules.
    */
   if (
-    !isEmpty(rulePatchObjWithoutIds) &&
-    Object.keys(rulePatchObjWithoutIds).every((key) => isKeyUpdateableWithReadPermission(key))
+    !isEmpty(rulePatchDefinedFields) &&
+    Object.keys(rulePatchDefinedFields).every((key) => isKeyUpdateableWithReadPermission(key))
   ) {
     const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> = await patchReadAuthEditRuleFields(
       {
         rulesClient,
         // Don't want to pass ID fields to the read authz PATCH method as it will apply patches on all fields in the object
-        rulePatch: rulePatchObjWithoutIds,
+        rulePatch: rulePatchDefinedFields,
         existingRule,
         prebuiltRuleAssetClient,
       }
