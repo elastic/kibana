@@ -7,9 +7,14 @@
 
 import Boom from '@hapi/boom';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import {
+  createNotificationPolicyDataSchema,
+  updateNotificationPolicyDataSchema,
+} from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
@@ -28,11 +33,18 @@ export class NotificationPolicyClient {
   public async createNotificationPolicy(
     params: CreateNotificationPolicyParams
   ): Promise<NotificationPolicyResponse> {
+    const parsed = createNotificationPolicyDataSchema.safeParse(params.data);
+    if (!parsed.success) {
+      throw Boom.badRequest(
+        `Error validating create notification policy data - ${stringifyZodError(parsed.error)}`
+      );
+    }
+
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
     const attributes: NotificationPolicySavedObjectAttributes = {
-      ...params.data,
+      ...parsed.data,
       createdBy: userProfileUid,
       createdAt: now,
       updatedBy: userProfileUid,
@@ -90,6 +102,13 @@ export class NotificationPolicyClient {
   public async updateNotificationPolicy(
     params: UpdateNotificationPolicyParams
   ): Promise<NotificationPolicyResponse> {
+    const parsed = updateNotificationPolicyDataSchema.safeParse(params.data);
+    if (!parsed.success) {
+      throw Boom.badRequest(
+        `Error validating update notification policy data - ${stringifyZodError(parsed.error)}`
+      );
+    }
+
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
@@ -101,7 +120,7 @@ export class NotificationPolicyClient {
 
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
       ...existingAttrs,
-      ...params.data,
+      ...parsed.data,
       updatedBy: userProfileUid,
       updatedAt: now,
     };
