@@ -24,7 +24,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
   createRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
-      validate: () => ({
+      validate: {
         request: {
           body: createRequestBodySchema,
         },
@@ -33,7 +33,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
             body: () => createResponseBodySchema,
           },
         },
-      }),
+      },
     },
     async (ctx, req, res) => {
       try {

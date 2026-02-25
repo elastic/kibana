@@ -10,14 +10,12 @@
 import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import type { StateComparators } from '@kbn/presentation-publishing';
 import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
   initializeUnsavedChanges,
   getViewModeSubject,
-  initializeStateManager,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
@@ -40,18 +38,10 @@ import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check'
 import { markdownClient } from './markdown_client/markdown_client';
 import type { MarkdownAttributes } from '../server/markdown_saved_object';
 
-const defaultMarkdownState: MarkdownByValueState = {
-  content: '',
-};
-
 const flexCss = css({
   display: 'flex',
   flex: '1 1 100%',
 });
-
-const markdownComparators: StateComparators<MarkdownByValueState> = {
-  content: 'referenceEquality',
-};
 
 export const markdownEmbeddableFactory: EmbeddableFactory<
   MarkdownEmbeddableState,
@@ -59,26 +49,18 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const savedObjectId = (initialState as MarkdownByReferenceState).ref_id;
-    const isByReference = savedObjectId !== undefined;
-    const initialStoredState = isByReference
-      ? await loadFromLibrary(savedObjectId)
+    const libraryId = (initialState as MarkdownByReferenceState).ref_id;
+    const isByReference = libraryId !== undefined;
+    const initialLibraryState = isByReference
+      ? await loadFromLibrary(libraryId)
       : ({} as MarkdownAttributes);
 
     const titleManager = initializeTitleManager(initialState);
-    const markdownStateManager = initializeStateManager<MarkdownByValueState>(
-      {
-        content: isByReference
-          ? initialStoredState.content
-          : (initialState as MarkdownByValueState).content,
-      },
-      defaultMarkdownState
+    const content$ = new BehaviorSubject<string>(
+      isByReference ? initialLibraryState.content : (initialState as MarkdownByValueState).content
     );
-
-    const defaultTitle$ = new BehaviorSubject(initialStoredState?.title || initialState.title);
-    const defaultDescription$ = new BehaviorSubject(
-      initialStoredState?.description || initialState.description
-    );
+    const defaultTitle$ = new BehaviorSubject(initialLibraryState.title);
+    const defaultDescription$ = new BehaviorSubject(initialLibraryState.description);
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
@@ -87,18 +69,18 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 
     const serializeByValue = () => ({
       ...titleManager.getLatestState(),
-      ...markdownStateManager.getLatestState(),
+      content: content$.getValue(),
     });
 
-    const serializeByReference = (libraryId: string) => {
+    const serializeByReference = (refId: string) => {
       return {
         ...titleManager.getLatestState(),
-        ref_id: libraryId,
+        ref_id: refId,
       };
     };
 
     const serializeState = () =>
-      isByReference ? serializeByReference(savedObjectId) : serializeByValue();
+      isByReference ? serializeByReference(libraryId) : serializeByValue();
 
     const resetEditingState = () => {
       isEditing$.next(false);
@@ -115,14 +97,22 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       serializeState,
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        markdownStateManager.anyStateChange$
+        content$.pipe(map(() => undefined))
       ).pipe(map(() => undefined)),
       getComparators: () => {
-        return { ...titleComparators, ...markdownComparators, ref_id: 'skip' };
+        return {
+          ...titleComparators,
+          content: isByReference ? 'skip' : 'referenceEquality',
+          ref_id: 'skip',
+        };
       },
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved);
-        markdownStateManager.reinitializeState(lastSaved as MarkdownByValueState);
+        // There are no unsaved changes to reset for
+        // by reference 'content' since by reference 'content' is saved on apply.
+        if (!isByReference) {
+          content$.next((initialState as MarkdownByValueState).content);
+        }
       },
     });
 
@@ -158,7 +148,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       // Library transforms
       saveToLibrary: async (title: string) => {
         const { id } = await markdownClient.create({
-          ...markdownStateManager.getLatestState(),
+          content: content$.getValue(),
           title,
           description: titleManager.getLatestState().description,
         });
@@ -187,7 +177,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       api,
       Component: function MarkdownEmbeddableComponent() {
         const [content, isEditing, viewMode] = useBatchedPublishingSubjects(
-          markdownStateManager.api.content$,
+          content$,
           isEditing$,
           getViewModeSubject(api) ?? new BehaviorSubject('view')
         );
@@ -218,12 +208,12 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
               }}
               onSave={async (value: string): Promise<void> => {
                 resetEditingState();
-                markdownStateManager.api.setContent(value);
-                if (savedObjectId) {
-                  await markdownClient.update(savedObjectId, {
+                content$.next(value);
+                if (libraryId) {
+                  await markdownClient.update(libraryId, {
                     content: value,
-                    title: titleManager.api.title$!.getValue(),
-                    description: titleManager.api.description$!.getValue(),
+                    title: titleManager.api.title$.getValue(),
+                    description: titleManager.api.description$.getValue(),
                   });
                 }
                 if (isNewPanel$.getValue()) {
