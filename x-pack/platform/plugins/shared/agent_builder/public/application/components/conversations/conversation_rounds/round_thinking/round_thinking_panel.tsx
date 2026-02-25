@@ -129,7 +129,7 @@ export const RoundThinkingPanel = ({
                 <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
                 <InputOutputTokensDisplay modelUsage={rawRound.model_usage} />
               </EuiFlexGroup>
-              <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexEnd" grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexEnd">
                 {showTraceButton && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
