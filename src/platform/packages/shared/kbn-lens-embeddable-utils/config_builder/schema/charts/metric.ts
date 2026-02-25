@@ -18,7 +18,12 @@ import {
   esqlColumnSchema,
   esqlColumnOperationWithLabelAndFormatSchema,
 } from '../metric_ops';
-import { colorByValueAbsolute, staticColorSchema, applyColorToSchema } from '../color';
+import {
+  colorByValueAbsolute,
+  staticColorSchema,
+  applyColorToSchema,
+  colorByValueSchema,
+} from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -32,6 +37,7 @@ import {
 } from './shared';
 import {
   horizontalAlignmentSchema,
+  verticalAlignmentSchema,
   leftRightAlignmentSchema,
   beforeAfterAlignmentSchema,
 } from '../alignments';
@@ -168,11 +174,31 @@ const metricStatePrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
+  color: schema.maybe(schema.oneOf([colorByValueSchema, staticColorSchema])),
   /**
    * Where to apply the color (background or value)
    */
   apply_color_to: schema.maybe(applyColorToSchema),
+  /**
+   * Position of the primary metric value. Possible values:
+   * - 'top': Value appears above the labels
+   * - 'bottom': Value appears below the labels
+   */
+  position: schema.maybe(
+    verticalAlignmentSchema({
+      meta: { description: 'Position of the primary metric value (top or bottom)' },
+    })
+  ),
+  /**
+   * Font weight for title and subtitle. Possible values:
+   * - 'bold': Bold font weight
+   * - 'normal': Normal font weight
+   */
+  title_weight: schema.maybe(
+    schema.oneOf([schema.literal('bold'), schema.literal('normal')], {
+      meta: { description: 'Font weight for title and subtitle' },
+    })
+  ),
 };
 
 const metricStateSecondaryMetricOptionsSchema = {
@@ -212,6 +238,26 @@ const metricStateSecondaryMetricOptionsSchema = {
         { meta: { id: 'metricCompareToPrimary' } }
       ),
     ])
+  ),
+  /**
+   * Alignments for the secondary metric value.
+   */
+  alignments: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Alignment for secondary value. Possible values:
+         * - 'left': Align value to the left
+         * - 'center': Align value to the center
+         * - 'right': Align value to the right
+         */
+        value: horizontalAlignmentSchema({
+          meta: { description: 'Alignment for secondary value' },
+          defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
+        }),
+      },
+      { meta: { id: 'metricSecondaryMetricAlignments' } }
+    )
   ),
   /**
    * Color configuration
@@ -327,6 +373,15 @@ export const esqlMetricState = schema.object({
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
   meta: { id: 'metricChartSchema' },
+  validate: ({ metrics, breakdown_by }) => {
+    const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
+
+    if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
+      if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
+        return 'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.';
+      }
+    }
+  },
 });
 
 export type MetricState = TypeOf<typeof metricStateSchema>;

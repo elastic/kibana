@@ -66,15 +66,14 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
-import {
-  buildExecutionContext,
-  type ExecutionContext,
-} from '../lib/execution_context/build_execution_context';
+import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
+import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import { useLazyStepExecutionFetcher } from '../lib/execution_context/use_lazy_step_execution_fetcher';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
+  HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
@@ -369,6 +368,9 @@ export const WorkflowYAMLEditor = ({
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 
+        const httpHandler = new HttpMonacoConnectorStepHandler();
+        registerMonacoConnectorHandler(httpHandler);
+
         // Create unified providers with template expression support
         const providerConfig = {
           getYamlDocument: () => yamlDocumentRef.current || null,
@@ -496,7 +498,14 @@ export const WorkflowYAMLEditor = ({
         return;
       }
       if (isTriggerType(action.id) || triggerSchemas.isRegisteredTriggerId(action.id)) {
-        insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
+        const triggerDefinition = triggerSchemas.getTriggerDefinition(action.id);
+        insertTriggerSnippet(
+          model,
+          yamlDocumentCurrent,
+          action.id,
+          editor,
+          triggerDefinition?.snippets?.condition
+        );
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
