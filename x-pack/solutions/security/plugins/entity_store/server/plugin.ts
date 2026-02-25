@@ -23,6 +23,7 @@ import { EngineDescriptorType } from './domain/definitions/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
+import { registerEntityStoreStatusCollector } from './telemetry/collectors/register';
 
 export class EntityStorePlugin
   implements
@@ -49,6 +50,7 @@ export class EntityStorePlugin
 
     this.logger.debug('Registering telemetry events');
     registerTelemetry(core.analytics);
+    registerEntityStoreStatusCollector(this.logger, plugins.usageCollection);
 
     const router = core.http.createRouter<EntityStoreRequestHandlerContext>();
     core.http.registerRouteHandlerContext<EntityStoreRequestHandlerContext, typeof PLUGIN_ID>(
