@@ -492,7 +492,11 @@ describe('Color util transforms', () => {
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
-      const backToAPI = fromColorMappingLensStateToAPI(lensState);
+      expect(lensState).toBeDefined();
+      expect('colorMapping' in lensState!).toBe(true);
+      const backToAPI = fromColorMappingLensStateToAPI(
+        (lensState as { colorMapping: ColorMapping.Config }).colorMapping
+      );
 
       expect(backToAPI).toEqual(originalColorMapping);
     });
@@ -514,7 +518,11 @@ describe('Color util transforms', () => {
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
-      const backToAPI = fromColorMappingLensStateToAPI(lensState);
+      expect(lensState).toBeDefined();
+      expect('colorMapping' in lensState!).toBe(true);
+      const backToAPI = fromColorMappingLensStateToAPI(
+        (lensState as { colorMapping: ColorMapping.Config }).colorMapping
+      );
 
       expect(backToAPI).toEqual(originalColorMapping);
     });
@@ -539,7 +547,11 @@ describe('Color util transforms', () => {
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
-      const backToAPI = fromColorMappingLensStateToAPI(lensState);
+      expect(lensState).toBeDefined();
+      expect('colorMapping' in lensState!).toBe(true);
+      const backToAPI = fromColorMappingLensStateToAPI(
+        (lensState as { colorMapping: ColorMapping.Config }).colorMapping
+      );
 
       expect(backToAPI).toEqual(originalColorMapping);
     });
