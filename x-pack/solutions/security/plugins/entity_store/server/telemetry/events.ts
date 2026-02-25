@@ -89,14 +89,14 @@ export const ENTITY_STORE_DELETION_EVENT = {
 // Registration
 // ------------------------------------
 
-const ENTITY_STORE_TELEMETRY_EVENTS = [
+const events = [
   ENTITY_STORE_INITIALIZATION_EVENT,
   ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
   ENTITY_STORE_DELETION_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) => {
-  ENTITY_STORE_TELEMETRY_EVENTS.forEach((eventConfig: EventTypeOpts<{}>) => {
+  events.forEach((eventConfig: EventTypeOpts<{}>) => {
     analytics.registerEventType(eventConfig);
   });
 };
@@ -111,12 +111,11 @@ interface TelemetryEventMap {
   [ENTITY_STORE_INITIALIZATION_FAILURE_EVENT.eventType]: InitializationFailureEvent;
 }
 
-export type TelemetryReporter = ReturnType<typeof reportEvent>;
+export type TelemetryReporter = ReturnType<typeof createReportEvent>;
 
-export const reportEvent =
-  (analytics: AnalyticsServiceSetup) =>
-  <T extends (typeof ENTITY_STORE_TELEMETRY_EVENTS)[number]>(
+export const createReportEvent = (analytics: AnalyticsServiceSetup) => ({
+  reportEvent: <T extends (typeof events)[number]>(
     event: T,
     eventData: TelemetryEventMap[T['eventType']]
-  ) =>
-    analytics.reportEvent(event.eventType, eventData);
+  ) => analytics.reportEvent(event.eventType, eventData),
+});

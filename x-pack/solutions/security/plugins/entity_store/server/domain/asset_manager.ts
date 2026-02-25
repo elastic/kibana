@@ -65,7 +65,7 @@ interface AssetManagerDependencies {
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
   security: SecurityPluginStart;
-  analytics: { reportEvent: TelemetryReporter };
+  analytics: TelemetryReporter;
 }
 
 export class AssetManager {
@@ -77,7 +77,7 @@ export class AssetManager {
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
   private readonly security: SecurityPluginStart;
-  private readonly analytics: { reportEvent: TelemetryReporter };
+  private readonly analytics: TelemetryReporter;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;

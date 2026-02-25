@@ -22,7 +22,7 @@ import { registerUiSettings } from './infra/feature_flags/register';
 import { EngineDescriptorType } from './domain/definitions/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
-import { registerTelemetry, reportEvent } from './telemetry/events';
+import { registerTelemetry, createReportEvent } from './telemetry/events';
 
 export class EntityStorePlugin
   implements
@@ -60,7 +60,7 @@ export class EntityStorePlugin
           logger: this.logger,
           request,
           isServerless: this.isServerless,
-          analytics: { reportEvent: reportEvent(core.analytics) },
+          analytics: createReportEvent(core.analytics),
         })
     );
 

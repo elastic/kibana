@@ -26,7 +26,7 @@ interface EntityStoreApiRequestHandlerContextDeps {
   logger: Logger;
   request: KibanaRequest;
   isServerless: boolean;
-  analytics: { reportEvent: TelemetryReporter };
+  analytics: TelemetryReporter;
 }
 
 export async function createRequestHandlerContext({
