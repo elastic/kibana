@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { SloPopoverAndFlyout } from './slo_popover_flyout';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 const mockGetCreateSLOFormFlyout = jest.fn();
 
@@ -18,6 +19,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
       slo: {
         getCreateSLOFormFlyout: mockGetCreateSLOFormFlyout,
       },
+      telemetry: mockTelemetryClient,
       http: {
         basePath: {
           prepend: (path: string) => path,

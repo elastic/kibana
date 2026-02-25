@@ -21,6 +21,7 @@ import { ServiceInventoryFieldName } from '../../../../../common/service_invento
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 jest.mock('../../../../hooks/use_breakpoints', () => ({
   useBreakpoints: () => ({
@@ -57,6 +58,7 @@ const mockKibanaServices = {
   apmSourcesAccess: {
     getApmIndexSettings: jest.fn().mockResolvedValue({ apmIndexSettings: [] }),
   },
+  telemetry: mockTelemetryClient,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {

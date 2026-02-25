@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ServiceHeaderBadges } from './service_header_badges';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 const mockUseServiceSloContext = jest.fn();
 jest.mock('../../../../context/service_slo/use_service_slo_context', () => ({
@@ -31,6 +32,15 @@ jest.mock('../../../../hooks/use_fetcher', () => ({
     NOT_INITIATED: 'not_initiated',
   },
 }));
+
+const mockKibanaServices = jest.fn();
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useKibana: () => mockKibanaServices(),
+  };
+});
 
 const defaultProps = {
   serviceName: 'test-service',
@@ -89,6 +99,12 @@ function setupMocks({
   mockUseFetcher.mockReturnValue({
     data: { alertsCount },
     status: FETCH_STATUS.SUCCESS,
+  });
+
+  mockKibanaServices.mockReturnValue({
+    services: {
+      telemetry: mockTelemetryClient,
+    },
   });
 }
 
