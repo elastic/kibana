@@ -121,6 +121,12 @@ interface YamlValidationResultCustomPropertyValid extends YamlValidationResultBa
   owner: 'custom-property-validation';
 }
 
+interface YamlValidationResultTriggerConditionError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  owner: 'trigger-condition-validation';
+}
+
 export type CustomPropertyValidationResult =
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid;
@@ -139,6 +145,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'json-schema-default-validation',
   'custom-property-validation',
   'workflow-inputs-validation',
+  'trigger-condition-validation',
 ] as const;
 
 export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
@@ -158,4 +165,5 @@ export type YamlValidationResult =
   | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultCustomPropertyError
   | YamlValidationResultCustomPropertyValid
-  | YamlValidationResultWorkflowInputsError;
+  | YamlValidationResultWorkflowInputsError
+  | YamlValidationResultTriggerConditionError;

@@ -15,7 +15,6 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { UrlValidator } from '../lib/url_validator';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
@@ -120,10 +119,6 @@ export async function setupDependencies(
 
   const workflowTaskManager = new WorkflowTaskManager(taskManager);
 
-  const urlValidator = new UrlValidator({
-    allowedHosts: config.http.allowedHosts,
-  });
-
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,
     workflowRepository,
@@ -148,7 +143,6 @@ export async function setupDependencies(
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    urlValidator,
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
     enhancedDependencies

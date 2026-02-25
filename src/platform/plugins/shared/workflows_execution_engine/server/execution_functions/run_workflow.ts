@@ -11,6 +11,7 @@ import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { WorkflowsMeteringService } from '../metering';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
@@ -24,6 +25,7 @@ export async function runWorkflow({
   fakeRequest,
   dependencies,
   workflowsExecutionEngine,
+  meteringService,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -33,6 +35,7 @@ export async function runWorkflow({
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  meteringService?: WorkflowsMeteringService;
 }): Promise<void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
@@ -84,5 +87,26 @@ export async function runWorkflow({
     throw error;
   } finally {
     loopSpan?.end();
+  }
+
+  // Report metering after execution completes and state is flushed.
+  // This is fire-and-forget: the metering service handles retries and
+  // will no-op for non-terminal states (e.g., WAITING for resume).
+  if (meteringService) {
+    try {
+      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowRunId,
+        spaceId
+      );
+      if (finalExecution) {
+        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
+      }
+    } catch (err) {
+      logger.warn(
+        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
   }
 }

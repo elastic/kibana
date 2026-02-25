@@ -11,7 +11,6 @@ export const MonochromeIcons = new Set([
   'manual',
   'alert',
   'scheduled',
-  'http',
   'console',
   'if',
   'foreach',
@@ -21,6 +20,7 @@ export const MonochromeIcons = new Set([
   'workflow.execute',
   'workflow.executeAsync',
   // connector icons, which are monochrome and should be colored with currentColor
+  '.http',
   '.inference',
   '.email',
   '.gen-ai',

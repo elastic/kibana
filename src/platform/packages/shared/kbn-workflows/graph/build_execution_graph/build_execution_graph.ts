@@ -14,7 +14,6 @@ import type {
   DataSetStep,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
   StepWithForeach,
@@ -52,7 +51,6 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
   GraphNodeUnion,
-  HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
@@ -146,10 +144,6 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitDataSetStep(currentStep as DataSetStep, context);
   }
 
-  if ((currentStep as HttpStep).type === 'http') {
-    return visitHttpStep(currentStep as HttpStep, context);
-  }
-
   if ((currentStep as ElasticsearchStep).type?.startsWith('elasticsearch.')) {
     return visitElasticsearchStep(currentStep as ElasticsearchStep, context);
   }
@@ -205,26 +199,6 @@ export function visitDataSetStep(
     },
   };
   graph.setNode(dataSetNode.id, dataSetNode);
-
-  return graph;
-}
-
-export function visitHttpStep(
-  currentStep: HttpStep,
-  context: GraphBuildContext
-): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const graph = createTypedGraph({ directed: true });
-  const httpNode: HttpGraphNode = {
-    id: getStepId(currentStep, context),
-    type: 'http',
-    stepId,
-    stepType: currentStep.type,
-    configuration: {
-      ...currentStep,
-    },
-  };
-  graph.setNode(httpNode.id, httpNode);
 
   return graph;
 }
