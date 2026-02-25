@@ -7,22 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-
-export const applicationMock = (capabilities: {
-  [x: string]:
-    | boolean
-    | Readonly<{
-        [x: string]: boolean;
-      }>;
-}): {} => {
-  return {
-    application: {
-      ...applicationServiceMock.createStartContract(),
-      capabilities: {
-        ...applicationServiceMock.createStartContract().capabilities,
-        ...capabilities,
-      },
-    },
-  };
-};
+/**
+ * Field prefix used in trigger condition KQL (e.g. "event.severity").
+ * Use this when calling validateKqlAgainstSchema for trigger conditions so paths and error messages stay consistent.
+ */
+export const EVENT_FIELD_PREFIX = 'event.';

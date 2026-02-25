@@ -7,22 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-
-export const applicationMock = (capabilities: {
-  [x: string]:
-    | boolean
-    | Readonly<{
-        [x: string]: boolean;
-      }>;
-}): {} => {
-  return {
-    application: {
-      ...applicationServiceMock.createStartContract(),
-      capabilities: {
-        ...applicationServiceMock.createStartContract().capabilities,
-        ...capabilities,
-      },
-    },
-  };
-};
+export { WorkflowsMeteringService } from './metering_service';
+export type { UsageMetrics, UsageRecord, UsageSource } from './types';
+export { UsageReportingService } from './usage_reporting_service';
