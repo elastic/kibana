@@ -63,8 +63,6 @@ import {
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
   PREINSTALLED_WORKFLOWS_FEATURE_FLAG,
   PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT,
-  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
-  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
