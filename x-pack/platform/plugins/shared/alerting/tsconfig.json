@@ -8,7 +8,8 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
-    "common/**/*"
+    "common/**/*",
+    "test/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -73,7 +74,7 @@
     "@kbn/lazy-object",
     "@kbn/maintenance-windows-plugin",
     "@kbn/config",
-    "@kbn/expect",
+    "@kbn/expect"
   ],
   "exclude": ["target/**/*"]
 }
