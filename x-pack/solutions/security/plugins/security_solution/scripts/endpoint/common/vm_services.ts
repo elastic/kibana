@@ -230,6 +230,95 @@ ${chalk.red('NOTE:')} ${chalk.bold(
   return '';
 };
 
+const ensureVirtualBoxProvider = async (log: ToolingLog): Promise<void> => {
+  const isVboxKernelLoaded = async (): Promise<boolean> => {
+    try {
+      const result = await execa.command('VBoxManage --version', {
+        stdio: 'pipe',
+        all: true,
+      });
+      const combined = `${result.stdout}\n${result.stderr}`;
+      if (combined.toLowerCase().includes('kernel module is not loaded')) {
+        log.warning('VBoxManage reports kernel module not loaded');
+        return false;
+      }
+      log.info(`VirtualBox version: ${result.stdout.trim()}`);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  if (await isVboxKernelLoaded()) {
+    return;
+  }
+
+  const tryLoadModules = async (): Promise<boolean> => {
+    for (const cmd of [
+      'sudo modprobe vboxdrv',
+      'sudo /sbin/vboxconfig',
+      'sudo /sbin/rcvboxdrv setup',
+    ]) {
+      try {
+        await execa.command(cmd, { stdio: 'pipe' });
+        if (await isVboxKernelLoaded()) {
+          log.info(`VirtualBox kernel module loaded via: ${cmd}`);
+          return true;
+        }
+      } catch {
+        log.debug(`Recovery command failed: ${cmd}`);
+      }
+    }
+    return false;
+  };
+
+  const upgradeToVbox71 = async (): Promise<boolean> => {
+    log.info('Upgrading to VirtualBox 7.1 (supports newer kernels)...');
+    try {
+      await execa.command('sudo apt-get install -y --no-install-recommends virtualbox-7.1', {
+        stdio: 'pipe',
+      });
+      return (await tryLoadModules()) && (await isVboxKernelLoaded());
+    } catch {
+      log.debug('virtualbox-7.1 package not available or install failed');
+      return false;
+    }
+  };
+
+  log.warning('VirtualBox kernel module not loaded, attempting recovery...');
+
+  if (await tryLoadModules()) {
+    return;
+  }
+
+  log.warning('Kernel module build failed, upgrading to VirtualBox 7.1...');
+
+  if (await upgradeToVbox71()) {
+    log.info('VirtualBox 7.1 upgrade successful');
+    return;
+  }
+
+  const diagnostics: string[] = [];
+  for (const diagCmd of [
+    'VBoxManage --version 2>&1',
+    'lsmod | grep vbox || echo "no vbox modules"',
+    'uname -r',
+    'dpkg -l | grep -i virtualbox 2>/dev/null || echo "no vbox packages"',
+    'dkms status 2>/dev/null || echo "dkms not available"',
+  ]) {
+    try {
+      const { stdout } = await execa.command(diagCmd, { stdio: 'pipe', shell: true });
+      diagnostics.push(`${diagCmd}: ${stdout.trim()}`);
+    } catch {
+      diagnostics.push(`${diagCmd}: (failed)`);
+    }
+  }
+
+  throw new Error(
+    `VirtualBox kernel module could not be loaded.\nDiagnostics:\n${diagnostics.join('\n')}`
+  );
+};
+
 interface CreateVagrantVmOptions extends BaseVmCreateOptions {
   type: SupportedVmManager & 'vagrant';
 

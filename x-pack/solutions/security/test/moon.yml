@@ -69,6 +69,7 @@ fileGroups:
     - '!security_solution_api_integration/**/*'
     - '!security_solution_endpoint/**/*'
     - '!scout_defend_workflows/ui/**/*'
+    - '!security-solution-evals/**/*'
     - '!*/packages/**/*'
     - '!*/*/packages/**/*'
 tasks: {}

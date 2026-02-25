@@ -52,7 +52,7 @@
             "tags": [],
             "label": "streamType",
             "description": [
-              "- Optional stream type to filter available actions\nReturns null if schema generation fails, allowing fallback to basic syntax highlighting"
+              "- Optional stream type to filter available actions"
             ],
             "signature": [
               {
@@ -516,7 +516,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+              "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
             "lineNumber": 64,
@@ -1069,7 +1069,7 @@
         "label": "StepStatus",
         "description": [],
         "signature": [
-          "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+          "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
         "lineNumber": 47,
