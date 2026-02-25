@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import {
   createKibanaPrivileges,
@@ -16,7 +17,6 @@ import {
 } from '@kbn/security-role-management-model/src/__fixtures__';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import type { PrivilegeSummaryTableProps } from './privilege_summary_table';
@@ -115,14 +115,17 @@ const expectNoPrivileges = (displayedPrivileges: any, expectSubFeatures: boolean
 };
 
 const setup = async (props: PrivilegeSummaryTableProps) => {
-  const wrapper = mountWithIntl(<PrivilegeSummaryTable {...props} />);
-
-  // lazy-load SpaceAvatar
+  let container!: HTMLElement;
   await act(async () => {
-    wrapper.update();
+    const result = render(
+      <I18nProvider>
+        <PrivilegeSummaryTable {...props} />
+      </I18nProvider>
+    );
+    container = result.container;
   });
 
-  return wrapper;
+  return container;
 };
 
 describe('PrivilegeSummaryTable', () => {
@@ -143,7 +146,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -151,7 +154,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expectNoPrivileges(displayedPrivileges, allowSubFeaturePrivileges);
       });
@@ -171,7 +174,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -179,7 +182,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expectNoPrivileges(displayedPrivileges, allowSubFeaturePrivileges);
       });
@@ -199,7 +202,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -207,7 +210,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expectNoPrivileges(displayedPrivileges, allowSubFeaturePrivileges);
       });
@@ -225,7 +228,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -233,7 +236,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -305,7 +308,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -313,7 +316,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -383,7 +386,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -391,7 +394,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -463,7 +466,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -471,7 +474,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -546,7 +549,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -554,7 +557,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -670,7 +673,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -678,7 +681,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -794,7 +797,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -802,7 +805,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -920,7 +923,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -928,7 +931,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -1046,7 +1049,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1060,7 +1063,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -1184,7 +1187,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -1192,7 +1195,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges).toEqual({
           excluded_from_base: {
@@ -1342,7 +1345,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces,
           kibanaPrivileges,
           role,
@@ -1350,7 +1353,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges.with_require_all_spaces_sub_features).toEqual({
           'default, space-1': {
@@ -1395,7 +1398,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1410,7 +1413,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges.with_require_all_spaces_sub_features).toEqual({
           '*': {
@@ -1467,7 +1470,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1482,7 +1485,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
           '*': {
@@ -1523,7 +1526,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1538,7 +1541,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges.with_require_all_spaces_sub_features).toEqual({
           '*': {
@@ -1593,7 +1596,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1608,7 +1611,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
           '*': {
@@ -1646,7 +1649,7 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = await setup({
+        const container = await setup({
           spaces: [
             {
               id: ALL_SPACES_ID,
@@ -1661,7 +1664,7 @@ describe('PrivilegeSummaryTable', () => {
           spacesApiUi,
         });
 
-        const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
+        const displayedPrivileges = getDisplayedFeaturePrivileges(container, role);
 
         expect(displayedPrivileges.with_require_all_spaces_for_feature_and_sub_features).toEqual({
           '*': {

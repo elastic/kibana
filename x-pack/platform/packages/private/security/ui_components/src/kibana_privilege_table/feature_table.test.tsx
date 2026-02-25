@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiIconTip, EuiThemeProvider } from '@elastic/eui';
+import { EuiThemeProvider } from '@elastic/eui';
+import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createFeature,
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import { FeatureTable } from './feature_table';
@@ -46,28 +47,30 @@ const setup = (config: TestConfig) => {
 
   const onChange = jest.fn();
   const onChangeAll = jest.fn();
-  const wrapper = mountWithIntl(
-    <EuiThemeProvider>
-      <FeatureTable
-        role={config.role}
-        privilegeCalculator={calculator}
-        kibanaPrivileges={kibanaPrivileges}
-        onChange={onChange}
-        onChangeAll={onChangeAll}
-        showAdditionalPermissionsMessage={true}
-        canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
-        privilegeIndex={config.privilegeIndex}
-        allSpacesSelected={true}
-      />
-    </EuiThemeProvider>
+  const { container } = render(
+    <I18nProvider>
+      <EuiThemeProvider>
+        <FeatureTable
+          role={config.role}
+          privilegeCalculator={calculator}
+          kibanaPrivileges={kibanaPrivileges}
+          onChange={onChange}
+          onChangeAll={onChangeAll}
+          showAdditionalPermissionsMessage={true}
+          canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
+          privilegeIndex={config.privilegeIndex}
+          allSpacesSelected={true}
+        />
+      </EuiThemeProvider>
+    </I18nProvider>
   );
 
   const displayedPrivileges = config.calculateDisplayedPrivileges
-    ? getDisplayedFeaturePrivileges(wrapper)
+    ? getDisplayedFeaturePrivileges(container)
     : undefined;
 
   return {
-    wrapper,
+    container,
     onChange,
     onChangeAll,
     displayedPrivileges,
@@ -253,7 +256,7 @@ describe('FeatureTable', () => {
             feature: {},
           },
         ]);
-        const { wrapper, onChangeAll } = setup({
+        const { container, onChangeAll } = setup({
           role,
           features: kibanaFeatures,
           privilegeIndex: 0,
@@ -261,8 +264,8 @@ describe('FeatureTable', () => {
           canCustomizeSubFeaturePrivileges,
         });
 
-        findTestSubject(wrapper, 'changeAllPrivilegesButton').simulate('click');
-        findTestSubject(wrapper, 'changeAllPrivileges-read').simulate('click');
+        fireEvent.click(container.querySelector('[data-test-subj="changeAllPrivilegesButton"]')!);
+        fireEvent.click(document.querySelector('[data-test-subj="changeAllPrivileges-read"]')!);
 
         expect(onChangeAll).toHaveBeenCalledWith(['read']);
       });
@@ -279,7 +282,7 @@ describe('FeatureTable', () => {
             },
           },
         ]);
-        const { wrapper, onChangeAll } = setup({
+        const { container, onChangeAll } = setup({
           role,
           features: kibanaFeatures,
           privilegeIndex: 0,
@@ -287,8 +290,8 @@ describe('FeatureTable', () => {
           canCustomizeSubFeaturePrivileges,
         });
 
-        findTestSubject(wrapper, 'changeAllPrivilegesButton').simulate('click');
-        findTestSubject(wrapper, 'changeAllPrivileges-none').simulate('click');
+        fireEvent.click(container.querySelector('[data-test-subj="changeAllPrivilegesButton"]')!);
+        fireEvent.click(document.querySelector('[data-test-subj="changeAllPrivileges-none"]')!);
 
         expect(onChangeAll).toHaveBeenCalledWith([]);
       });
@@ -361,7 +364,7 @@ describe('FeatureTable', () => {
       },
     ]);
 
-    const { wrapper } = setup({
+    const { container } = setup({
       role,
       features: kibanaFeatures,
       privilegeIndex: 1,
@@ -370,15 +373,16 @@ describe('FeatureTable', () => {
     });
 
     kibanaFeatures.forEach((feature) => {
-      const { arrowDisplay } = wrapper
-        .find(EuiAccordion)
-        .filter(`#featurePrivilegeControls_${feature.id}`)
-        .props();
+      const childWrapper = container.querySelector(`#featurePrivilegeControls_${feature.id}`);
+      const accordion = childWrapper?.closest('[data-test-subj="featurePrivilegeControls"]');
+      const arrowButton = accordion?.querySelector(
+        '.euiAccordion__arrow, [class*="euiAccordion__arrow"]'
+      );
 
       if (!feature.subFeatures || feature.subFeatures.length === 0) {
-        expect(arrowDisplay).toEqual('none');
+        expect(arrowButton).toBeNull();
       } else {
-        expect(arrowDisplay).toEqual('left');
+        expect(arrowButton).not.toBeNull();
       }
     });
   });
@@ -856,7 +860,7 @@ describe('FeatureTable', () => {
       },
     });
 
-    const { wrapper } = setup({
+    const { container } = setup({
       role,
       features: [reservedFeature],
       privilegeIndex: 0,
@@ -864,11 +868,11 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(findTestSubject(wrapper, 'reservedFeatureDescription').text()).toMatchInlineSnapshot(
-      `"this is my reserved feature description"`
-    );
+    expect(
+      container.querySelector('[data-test-subj="reservedFeatureDescription"]')?.textContent
+    ).toMatchInlineSnapshot(`"this is my reserved feature description"`);
 
-    expect(findTestSubject(wrapper, 'primaryFeaturePrivilegeControl')).toHaveLength(0);
+    expect(container.querySelector('[data-test-subj="primaryFeaturePrivilegeControl"]')).toBeNull();
   });
 
   it('renders subtext for features that define an optional description', () => {
@@ -887,7 +891,7 @@ describe('FeatureTable', () => {
       description: 'a description of my feature',
     });
 
-    const { wrapper } = setup({
+    const { container } = setup({
       role,
       features: [featureWithDescription],
       privilegeIndex: 0,
@@ -895,10 +899,12 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(true);
+    expect(
+      container.querySelector('[data-test-subj="featurePrivilegeDescriptionText"]')
+    ).not.toBeNull();
 
     expect(
-      findTestSubject(wrapper, 'featurePrivilegeDescriptionText').text()
+      container.querySelector('[data-test-subj="featurePrivilegeDescriptionText"]')?.textContent
     ).toMatchInlineSnapshot(`"a description of my feature"`);
   });
 
@@ -917,7 +923,7 @@ describe('FeatureTable', () => {
       name: 'Some Feature',
     });
 
-    const { wrapper } = setup({
+    const { container } = setup({
       role,
       features: [featureWithDescription],
       privilegeIndex: 0,
@@ -925,7 +931,9 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(false);
+    expect(
+      container.querySelector('[data-test-subj="featurePrivilegeDescriptionText"]')
+    ).toBeNull();
   });
 
   it('renders renders the primary feature controls when both primary and reserved privileges are specified', () => {
@@ -954,7 +962,7 @@ describe('FeatureTable', () => {
       },
     });
 
-    const { displayedPrivileges, wrapper } = setup({
+    const { displayedPrivileges, container } = setup({
       role,
       features: [reservedFeature],
       privilegeIndex: 0,
@@ -962,7 +970,7 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(findTestSubject(wrapper, 'reservedFeatureDescription')).toHaveLength(0);
+    expect(container.querySelector('[data-test-subj="reservedFeatureDescription"]')).toBeNull();
     expect(displayedPrivileges).toEqual({
       reserved_feature: {
         primaryFeaturePrivilege: 'none',
@@ -1058,7 +1066,7 @@ describe('FeatureTable', () => {
       }),
     ];
 
-    const { wrapper } = setup({
+    const { container } = setup({
       role,
       features,
       privilegeIndex: 0,
@@ -1066,19 +1074,19 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    const fooCategory = findTestSubject(wrapper, 'featureCategory_foo');
-    const barCategory = findTestSubject(wrapper, 'featureCategory_bar');
+    const fooCategory = container.querySelector('[data-test-subj="featureCategory_foo"]')!;
+    const barCategory = container.querySelector('[data-test-subj="featureCategory_bar"]')!;
 
-    expect(fooCategory).toHaveLength(1);
-    expect(barCategory).toHaveLength(1);
+    expect(fooCategory).not.toBeNull();
+    expect(barCategory).not.toBeNull();
 
-    expect(findTestSubject(fooCategory, 'categoryLabel').text()).toMatchInlineSnapshot(
-      `"1 / 2 features granted"`
-    );
+    expect(
+      within(fooCategory as HTMLElement).getByTestId('categoryLabel').textContent
+    ).toMatchInlineSnapshot(`"1 / 2 features granted"`);
 
-    expect(findTestSubject(barCategory, 'categoryLabel').text()).toMatchInlineSnapshot(
-      `"2 / 2 features granted"`
-    );
+    expect(
+      within(barCategory as HTMLElement).getByTestId('categoryLabel').textContent
+    ).toMatchInlineSnapshot(`"2 / 2 features granted"`);
   });
 
   describe('Info Icon Tooltip for Customized Subfeature privileges', () => {
@@ -1131,7 +1139,7 @@ describe('FeatureTable', () => {
         ] as SubFeatureConfig[],
       });
 
-      const { wrapper } = setup({
+      const { container } = setup({
         role,
         features: [feature],
         privilegeIndex: 0,
@@ -1139,15 +1147,13 @@ describe('FeatureTable', () => {
         canCustomizeSubFeaturePrivileges: true,
       });
 
-      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
-      categoryExpander.simulate('click');
+      fireEvent.click(container.querySelector('[data-test-subj="featureCategoryButton_foo"]')!);
 
-      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
-      featureExpander.simulate('click').simulate('click');
+      const featureExpander = container.querySelector('[data-test-subj="featureTableCell"]')!;
+      fireEvent.click(featureExpander);
+      fireEvent.click(featureExpander);
 
-      const { type } = wrapper.find(EuiIconTip).props();
-
-      expect(type).toBe('info');
+      expect(container.querySelector('[data-euiicon-type="info"]')).not.toBeNull();
     });
 
     it('should render if there are custom privileges and the accordion has not been toggled (i.e. on load)', () => {
@@ -1199,7 +1205,7 @@ describe('FeatureTable', () => {
         ] as SubFeatureConfig[],
       });
 
-      const { wrapper } = setup({
+      const { container } = setup({
         role,
         features: [feature],
         privilegeIndex: 0,
@@ -1207,9 +1213,7 @@ describe('FeatureTable', () => {
         canCustomizeSubFeaturePrivileges: true,
       });
 
-      const { type } = wrapper.find(EuiIconTip).props();
-
-      expect(type).toBe('info');
+      expect(container.querySelector('[data-euiicon-type="info"]')).not.toBeNull();
     });
 
     it('should not render if there are custom privileges and the accordion is open', () => {
@@ -1261,7 +1265,7 @@ describe('FeatureTable', () => {
         ] as SubFeatureConfig[],
       });
 
-      const { wrapper } = setup({
+      const { container } = setup({
         role,
         features: [feature],
         privilegeIndex: 0,
@@ -1269,15 +1273,11 @@ describe('FeatureTable', () => {
         canCustomizeSubFeaturePrivileges: true,
       });
 
-      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
-      categoryExpander.simulate('click');
+      fireEvent.click(container.querySelector('[data-test-subj="featureCategoryButton_foo"]')!);
 
-      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
-      featureExpander.simulate('click');
+      fireEvent.click(container.querySelector('[data-test-subj="featureTableCell"]')!);
 
-      const { type } = wrapper.find(EuiIconTip).props();
-
-      expect(type).toBe('empty');
+      expect(container.querySelector('[data-euiicon-type="info"]')).toBeNull();
     });
 
     it('should not render if there are NOT custom privileges and the accordion has not been toggled (i.e on load)', () => {
@@ -1329,7 +1329,7 @@ describe('FeatureTable', () => {
         ] as SubFeatureConfig[],
       });
 
-      const { wrapper } = setup({
+      const { container } = setup({
         role,
         features: [feature],
         privilegeIndex: 0,
@@ -1337,9 +1337,7 @@ describe('FeatureTable', () => {
         canCustomizeSubFeaturePrivileges: true,
       });
 
-      const { type } = wrapper.find(EuiIconTip).props();
-
-      expect(type).toBe('empty');
+      expect(container.querySelector('[data-euiicon-type="info"]')).toBeNull();
     });
 
     it('should not render if there are NOT custom privileges and the accordion has been toggled open then toggled closed', () => {
@@ -1391,7 +1389,7 @@ describe('FeatureTable', () => {
         ] as SubFeatureConfig[],
       });
 
-      const { wrapper } = setup({
+      const { container } = setup({
         role,
         features: [feature],
         privilegeIndex: 0,
@@ -1399,15 +1397,13 @@ describe('FeatureTable', () => {
         canCustomizeSubFeaturePrivileges: true,
       });
 
-      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
-      categoryExpander.simulate('click');
+      fireEvent.click(container.querySelector('[data-test-subj="featureCategoryButton_foo"]')!);
 
-      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
-      featureExpander.simulate('click').simulate('click');
+      const featureExpander = container.querySelector('[data-test-subj="featureTableCell"]')!;
+      fireEvent.click(featureExpander);
+      fireEvent.click(featureExpander);
 
-      const { type } = wrapper.find(EuiIconTip).props();
-
-      expect(type).toBe('empty');
+      expect(container.querySelector('[data-euiicon-type="info"]')).toBeNull();
     });
   });
   describe('Optional description for sub-features', () => {
@@ -1446,7 +1442,7 @@ describe('FeatureTable', () => {
           },
         ] as SubFeatureConfig[],
       });
-      const { wrapper } = setup({
+      const { container } = setup({
         role,
         features: [feature],
         privilegeIndex: 0,
@@ -1454,16 +1450,13 @@ describe('FeatureTable', () => {
         canCustomizeSubFeaturePrivileges: true,
       });
 
-      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
-      categoryExpander.simulate('click');
+      fireEvent.click(container.querySelector('[data-test-subj="featureCategoryButton_foo"]')!);
+      fireEvent.click(container.querySelector('[data-test-subj="featureTableCell"]')!);
 
-      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
-      featureExpander.simulate('click');
-
-      expect(findTestSubject(wrapper, 'subFeatureDescription').exists()).toEqual(true);
-      expect(findTestSubject(wrapper, 'subFeatureDescription').text()).toMatchInlineSnapshot(
-        `"some sub feature description"`
-      );
+      expect(container.querySelector('[data-test-subj="subFeatureDescription"]')).not.toBeNull();
+      expect(
+        container.querySelector('[data-test-subj="subFeatureDescription"]')?.textContent
+      ).toMatchInlineSnapshot(`"some sub feature description"`);
     });
     it('should not render description subtext if undefined', () => {
       const feature = createFeature({
@@ -1489,7 +1482,7 @@ describe('FeatureTable', () => {
           },
         ] as SubFeatureConfig[],
       });
-      const { wrapper } = setup({
+      const { container } = setup({
         role,
         features: [feature],
         privilegeIndex: 0,
@@ -1497,13 +1490,10 @@ describe('FeatureTable', () => {
         canCustomizeSubFeaturePrivileges: true,
       });
 
-      const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
-      categoryExpander.simulate('click');
+      fireEvent.click(container.querySelector('[data-test-subj="featureCategoryButton_foo"]')!);
+      fireEvent.click(container.querySelector('[data-test-subj="featureTableCell"]')!);
 
-      const featureExpander = findTestSubject(wrapper, 'featureTableCell');
-      featureExpander.simulate('click');
-
-      expect(findTestSubject(wrapper, 'subFeatureDescription').exists()).toEqual(false);
+      expect(container.querySelector('[data-test-subj="subFeatureDescription"]')).toBeNull();
     });
   });
 });
