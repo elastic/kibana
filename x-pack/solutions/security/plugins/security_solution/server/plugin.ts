@@ -63,6 +63,8 @@ import {
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
   PREINSTALLED_WORKFLOWS_FEATURE_FLAG,
   PREINSTALLED_WORKFLOWS_FEATURE_FLAG_DEFAULT,
+  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
+  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -270,20 +272,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
-  }
-
-  private registerWorkflowSteps(
-    workflowsExtensions: SecuritySolutionPluginSetupDependencies['workflowsExtensions']
-  ): void {
-    if (!workflowsExtensions) {
-      return;
-    }
-
-    try {
-      registerWorkflowSteps(workflowsExtensions);
-    } catch (error) {
-      this.logger.error(`Error registering security workflow steps: ${error}`);
-    }
   }
 
   public setup(
@@ -702,7 +690,21 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
 
-    this.registerWorkflowSteps(plugins.workflowsExtensions);
+    if(plugins.workflowsExtensions) {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+            await registerWorkflowSteps(workflowsExtensions, coreStart);
+        }).catch((error) => {
+          this.logger.error(
+            `[RegisterAlertValidationSteps] Error registering alert validation steps: ${error.message}`,
+            {
+              error: error.stack,
+            }
+          );
+        });
+    }
 
     if (plugins.workflowsManagement) {
       const workflowsManagement = plugins.workflowsManagement;

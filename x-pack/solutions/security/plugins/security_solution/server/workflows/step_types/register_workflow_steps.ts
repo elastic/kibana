@@ -8,13 +8,23 @@
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
+import { CoreStart } from '@kbn/core/server';
+import { REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG, REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin
  */
-export const registerWorkflowSteps = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
-): void => {
-  workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
-  workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
+export const registerWorkflowSteps = async (
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  coreStart: CoreStart
+): Promise<void> => {
+  const registerAlertValidationStepsEnabled = await coreStart.featureFlags.getBooleanValue(
+    REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
+    REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT
+  );
+
+  if (registerAlertValidationStepsEnabled) {
+    workflowsExtensions.registerStepDefinition(renderAlertNarrativeStepDefinition);
+    workflowsExtensions.registerStepDefinition(buildAlertEntityGraphStepDefinition);
+  }
 };
