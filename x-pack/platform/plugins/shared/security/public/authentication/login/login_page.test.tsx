@@ -86,7 +86,7 @@ describe('LoginPage', () => {
       customBrandingMock.customBranding$ = of({ logo: 'logo' });
       httpMock.get.mockResolvedValue(createLoginState());
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           customBranding={customBrandingMock}
@@ -99,6 +99,7 @@ describe('LoginPage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 
@@ -121,7 +122,7 @@ describe('LoginPage', () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ requiresSecureConnection: true }));
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -137,13 +138,14 @@ describe('LoginPage', () => {
         ).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when a connection to ES is not available', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ layout: 'error-es-unavailable' }));
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -159,13 +161,14 @@ describe('LoginPage', () => {
         ).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when xpack is not available', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ layout: 'error-xpack-unavailable' }));
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -183,6 +186,7 @@ describe('LoginPage', () => {
         ).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when an unknown loginState layout is provided', async () => {
@@ -191,7 +195,7 @@ describe('LoginPage', () => {
         createLoginState({ layout: 'error-asdf-asdf-unknown' as any })
       );
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -205,6 +209,7 @@ describe('LoginPage', () => {
         expect(screen.getByText('Unsupported login form layout.')).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when login is not enabled', async () => {
@@ -213,7 +218,7 @@ describe('LoginPage', () => {
         createLoginState({ selector: { enabled: false, providers: [] } })
       );
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -227,6 +232,7 @@ describe('LoginPage', () => {
         expect(screen.getByText('Login is disabled.')).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders warning when cookies are disabled and document is not embedded inside iframe', async () => {
@@ -238,7 +244,7 @@ describe('LoginPage', () => {
         writable: true,
       });
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -254,6 +260,7 @@ describe('LoginPage', () => {
         ).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 
@@ -262,7 +269,7 @@ describe('LoginPage', () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -275,6 +282,7 @@ describe('LoginPage', () => {
       await waitFor(() => {
         expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('properly passes query string parameters to the form', async () => {
@@ -304,7 +312,7 @@ describe('LoginPage', () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -320,13 +328,14 @@ describe('LoginPage', () => {
           'This is an important message'
         );
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     it('renders as expected when loginHelp is set', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState({ loginHelp: '**some-help**' }));
 
-      renderPage(
+      const { container } = renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -340,6 +349,7 @@ describe('LoginPage', () => {
         expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
         expect(screen.getByTestId('loginHelpLink')).toBeInTheDocument();
       });
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 
