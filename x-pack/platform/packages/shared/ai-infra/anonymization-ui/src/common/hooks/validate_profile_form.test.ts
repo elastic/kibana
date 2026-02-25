@@ -82,8 +82,8 @@ describe('validateProfileForm', () => {
         field: 'host.name',
         allowed: true,
         anonymized: true,
-        entityClass: '  ',
-      } as unknown as ProfileFormValues['fieldRules'][number],
+        entityClass: undefined,
+      },
     ];
 
     expect(validateProfileForm(values)).toEqual({
@@ -114,10 +114,10 @@ describe('validateProfileForm', () => {
       {
         id: 'ner-1',
         type: 'ner',
-        modelId: 'model-1',
-        allowedEntityClasses: ['PER', 'not-valid!'],
+        modelId: '',
+        allowedEntityClasses: [],
         enabled: true,
-      } as unknown as ProfileFormValues['nerRules'][number],
+      },
     ];
 
     expect(validateProfileForm(values)).toEqual({
@@ -135,7 +135,7 @@ describe('validateProfileForm', () => {
         modelId: undefined,
         allowedEntityClasses: ['PER', 'ORG'],
         enabled: true,
-      } as any,
+      },
     ];
 
     expect(validateProfileForm(values)).toEqual({});

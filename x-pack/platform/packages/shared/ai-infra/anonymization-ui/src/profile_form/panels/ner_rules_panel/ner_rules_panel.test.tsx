@@ -10,28 +10,29 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NER_MODEL_ID } from '@kbn/anonymization-common';
 import { NerRulesPanel } from './ner_rules_panel';
 import { useProfileFormContext } from '../../profile_form_context';
+import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
 jest.mock('../../profile_form_context', () => ({
   useProfileFormContext: jest.fn(),
 }));
 
-const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>> = {}) => {
+const setContext = (overrides: Parameters<typeof buildProfileFormContextValue>[0] = {}) => {
   const onNerRulesChange = jest.fn();
   jest.mocked(useProfileFormContext).mockReturnValue({
-    nerRules: [
-      {
-        id: 'ner-1',
-        type: 'ner',
-        modelId: 'ner-model-v1',
-        allowedEntityClasses: ['PER', 'ORG'],
-        enabled: true,
-      },
-    ],
+    ...buildProfileFormContextValue({
+      nerRules: [
+        {
+          id: 'ner-1',
+          type: 'ner',
+          modelId: 'ner-model-v1',
+          allowedEntityClasses: ['PER', 'ORG'],
+          enabled: true,
+        },
+      ],
+    }),
     onNerRulesChange,
-    isManageMode: true,
-    isSubmitting: false,
     ...overrides,
-  } as unknown as ReturnType<typeof useProfileFormContext>);
+  });
 
   return { onNerRulesChange };
 };
@@ -58,7 +59,7 @@ describe('NerRulesPanel', () => {
           modelId: undefined,
           allowedEntityClasses: ['PER', 'ORG'],
           enabled: true,
-        } as any,
+        },
       ],
     });
     render(<NerRulesPanel />);

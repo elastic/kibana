@@ -15,6 +15,7 @@ import {
   FIELD_RULE_ACTION_ANONYMIZE,
   FIELD_RULE_ACTION_DENY,
 } from '../../hooks/field_rule_actions';
+import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
 jest.mock('../../profile_form_context', () => ({
   useProfileFormContext: jest.fn(),
@@ -24,44 +25,44 @@ jest.mock('../../hooks/use_preview_panel_state', () => ({
   usePreviewPanelState: jest.fn(),
 }));
 
-const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>> = {}) => {
-  jest.mocked(useProfileFormContext).mockReturnValue({
-    fieldRules: [],
-    regexRules: [],
-    isSubmitting: false,
-    targetType: 'index',
-    targetId: 'logs-*',
-    fetchPreviewDocument: jest.fn(),
-    ...overrides,
-  } as unknown as ReturnType<typeof useProfileFormContext>);
-};
+const setContext = (overrides = {}) =>
+  jest.mocked(useProfileFormContext).mockReturnValue(
+    buildProfileFormContextValue({
+      targetId: 'logs-*',
+      ...overrides,
+    })
+  );
+
+const createBasePreviewState = () => ({
+  previewInput: '{"host":{"name":"web-1"}}',
+  setPreviewInput: jest.fn(),
+  previewViewMode: 'table' as const,
+  setPreviewViewMode: jest.fn(),
+  previewValueMode: 'original' as const,
+  setPreviewValueMode: jest.fn(),
+  parsedPreviewDocument: { host: { name: 'web-1' } },
+  previewRows: [
+    {
+      field: 'host.name',
+      action: FIELD_RULE_ACTION_ALLOW,
+      originalValue: 'web-1',
+      anonymizedValue: 'web-1',
+    },
+  ],
+  transformedPreviewDocument: { host: { name: 'web-1' } },
+  isLoadingPreviewDocument: false,
+  previewDocumentLoadError: undefined,
+  previewDocumentSource: 'fallback' as const,
+  isControlsDisabled: false,
+  isInvalidPreviewJson: false,
+  isEmptyPreviewRows: false,
+});
 
 const setPreviewState = (overrides = {}) => {
   jest.mocked(usePreviewPanelState).mockReturnValue({
-    previewInput: '{"host":{"name":"web-1"}}',
-    setPreviewInput: jest.fn(),
-    previewViewMode: 'table',
-    setPreviewViewMode: jest.fn(),
-    previewValueMode: 'original',
-    setPreviewValueMode: jest.fn(),
-    parsedPreviewDocument: { host: { name: 'web-1' } },
-    previewRows: [
-      {
-        field: 'host.name',
-        action: FIELD_RULE_ACTION_ALLOW,
-        originalValue: 'web-1',
-        anonymizedValue: 'web-1',
-      },
-    ],
-    transformedPreviewDocument: { host: { name: 'web-1' } },
-    isLoadingPreviewDocument: false,
-    previewDocumentLoadError: undefined,
-    previewDocumentSource: 'fallback',
-    isControlsDisabled: false,
-    isInvalidPreviewJson: false,
-    isEmptyPreviewRows: false,
+    ...createBasePreviewState(),
     ...overrides,
-  } as never);
+  });
 };
 
 describe('PreviewPanel', () => {

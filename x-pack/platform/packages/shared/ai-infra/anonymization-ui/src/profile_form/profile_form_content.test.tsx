@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { TARGET_TYPE_INDEX } from '../common/target_types';
 import { GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID } from '@kbn/anonymization-common';
 import { ProfileFormContent } from './profile_form_content';
 import { useProfileFormContext } from './profile_form_context';
+import { buildProfileFormContextValue } from './test_fixtures/profile_form_context_value';
 
 jest.mock('./profile_form_context', () => ({
   useProfileFormContext: jest.fn(),
@@ -18,21 +18,12 @@ jest.mock('./profile_form_context', () => ({
 
 const setContext = (overrides = {}) => {
   jest.mocked(useProfileFormContext).mockReturnValue({
-    fieldRules: [],
-    fieldRulesError: undefined,
-    isEdit: true,
-    isManageMode: true,
-    isSubmitting: false,
-    nerRulesError: undefined,
-    onFieldRulesChange: jest.fn(),
-    regexRulesError: undefined,
-    targetType: TARGET_TYPE_INDEX,
-    targetId: 'logs-default',
-    targetIdField: {
-      selectedTargetDisplayName: undefined,
-    },
+    ...buildProfileFormContextValue(),
     ...overrides,
-  } as any);
+    fieldRulesError: undefined,
+    nerRulesError: undefined,
+    regexRulesError: undefined,
+  });
 };
 
 describe('ProfileFormContent', () => {

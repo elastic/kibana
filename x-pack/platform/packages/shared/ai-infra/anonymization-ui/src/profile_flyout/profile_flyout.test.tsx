@@ -9,8 +9,11 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ProfileFlyout } from './profile_flyout';
+import type { ProfileFormProps } from '../profile_form/profile_form_props';
+import type { ProfileFormContextValue } from '../profile_form/profile_form_context';
+import type { UseTargetIdFieldResult } from '../profile_form/hooks/use_target_id_field';
 
-const createBaseTargetIdField = () => ({
+const createBaseTargetIdField = (): UseTargetIdFieldResult => ({
   targetIdOptions: [],
   selectedTargetIdOptions: [],
   selectedTargetDisplayName: '',
@@ -30,10 +33,10 @@ let mockTargetIdField = createBaseTargetIdField();
 jest.mock('../profile_form/profile_form_provider', () => {
   const mockReact = jest.requireActual('react');
   const { ProfileFormContextProvider } = jest.requireActual('../profile_form/profile_form_context');
+  type MockProfileFormProviderProps = React.PropsWithChildren<ProfileFormProps>;
 
   return {
-    // @ts-expect-error Jest mock props are runtime-only in this test.
-    ProfileFormProvider: (providerProps) => {
+    ProfileFormProvider: (providerProps: MockProfileFormProviderProps) => {
       const { children, ...props } = providerProps;
       const onSubmitWithTargetValidation = async () => {
         const isTargetValid = await mockTargetIdField.validateAndHydrateTargetId();
@@ -42,15 +45,18 @@ jest.mock('../profile_form/profile_form_provider', () => {
         }
         await props.onSubmit();
       };
+      const value: ProfileFormContextValue = {
+        ...props,
+        onSubmit: onSubmitWithTargetValidation,
+        targetIdField: mockTargetIdField,
+        includeHiddenAndSystemIndices: false,
+        onIncludeHiddenAndSystemIndicesChange: jest.fn(),
+      };
 
       return mockReact.createElement(
         ProfileFormContextProvider,
         {
-          value: {
-            ...props,
-            onSubmit: onSubmitWithTargetValidation,
-            targetIdField: mockTargetIdField,
-          },
+          value,
         },
         children
       );

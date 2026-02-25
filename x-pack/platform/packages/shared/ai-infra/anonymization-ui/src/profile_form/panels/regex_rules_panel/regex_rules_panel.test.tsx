@@ -9,28 +9,29 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { RegexRulesPanel } from './regex_rules_panel';
 import { useProfileFormContext } from '../../profile_form_context';
+import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
 jest.mock('../../profile_form_context', () => ({
   useProfileFormContext: jest.fn(),
 }));
 
-const setContext = (overrides: Partial<ReturnType<typeof useProfileFormContext>> = {}) => {
+const setContext = (overrides = {}) => {
   const onRegexRulesChange = jest.fn();
   jest.mocked(useProfileFormContext).mockReturnValue({
-    regexRules: [
-      {
-        id: 'regex-1',
-        type: 'regex',
-        entityClass: 'MISC',
-        pattern: '/geoip\\..*/',
-        enabled: true,
-      },
-    ],
+    ...buildProfileFormContextValue({
+      regexRules: [
+        {
+          id: 'regex-1',
+          type: 'regex',
+          entityClass: 'MISC',
+          pattern: '/geoip\\..*/',
+          enabled: true,
+        },
+      ],
+    }),
     onRegexRulesChange,
-    isManageMode: true,
-    isSubmitting: false,
     ...overrides,
-  } as unknown as ReturnType<typeof useProfileFormContext>);
+  });
 
   return { onRegexRulesChange };
 };
