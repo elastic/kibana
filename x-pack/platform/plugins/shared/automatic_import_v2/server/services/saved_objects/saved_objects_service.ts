@@ -124,8 +124,11 @@ export class AutomaticImportSavedObjectService {
       const integrationData: IntegrationAttributes = {
         integration_id: existingIntegration.integration_id,
         created_by: existingIntegration.created_by,
+        created_by_profile_uid:
+          data.created_by_profile_uid ?? existingIntegration.created_by_profile_uid,
         last_updated_by: data.last_updated_by ?? existingIntegration.last_updated_by,
         last_updated_at: new Date().toISOString(),
+        status: data.status ?? existingIntegration.status,
         metadata: {
           ...existingIntegration.metadata,
           ...data.metadata,

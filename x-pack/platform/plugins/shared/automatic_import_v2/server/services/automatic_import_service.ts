@@ -49,7 +49,10 @@ import { TASK_STATUSES } from './saved_objects/constants';
  * - 'processing' if any data stream is processing
  * - 'pending' otherwise (no data streams or all pending)
  */
-function deriveIntegrationStatus(dataStreams: DataStreamAttributes[]): TaskStatus {
+function deriveIntegrationStatus(
+  integration: IntegrationAttributes,
+  dataStreams: DataStreamAttributes[]
+): TaskStatus {
   if (dataStreams.length === 0) {
     return 'pending' as TaskStatus;
   }
@@ -63,6 +66,9 @@ function deriveIntegrationStatus(dataStreams: DataStreamAttributes[]): TaskStatu
     return 'processing' as TaskStatus;
   }
   if (statuses.every((s) => s === TASK_STATUSES.completed)) {
+    if (integration.status === TASK_STATUSES.approved) {
+      return 'approved' as TaskStatus;
+    }
     return 'completed' as TaskStatus;
   }
   return 'pending' as TaskStatus;
@@ -162,6 +168,8 @@ export class AutomaticImportService {
           ...existing,
           last_updated_by: authenticatedUser.username,
           last_updated_at: new Date().toISOString(),
+          status:
+            existing.status === TASK_STATUSES.approved ? TASK_STATUSES.completed : existing.status,
           metadata: {
             ...existing.metadata,
             ...(integrationParams.title ? { title: integrationParams.title } : {}),
@@ -205,7 +213,7 @@ export class AutomaticImportService {
       version: integrationSO.metadata.version,
       createdBy: integrationSO.created_by,
       createdByProfileUid: integrationSO.created_by_profile_uid,
-      status: deriveIntegrationStatus(dataStreamsSO),
+      status: deriveIntegrationStatus(integrationSO, dataStreamsSO),
       dataStreams: dataStreamsResponses,
     };
     return integrationResponse;
@@ -236,7 +244,7 @@ export class AutomaticImportService {
           version: integration.metadata.version,
           createdBy: integration.created_by,
           createdByProfileUid: integration.created_by_profile_uid,
-          status: deriveIntegrationStatus(dataStreams),
+          status: deriveIntegrationStatus(integration, dataStreams),
           dataStreams: dataStreamsResponses,
         };
       })
@@ -280,6 +288,7 @@ export class AutomaticImportService {
       ...existing,
       last_updated_by: authenticatedUser.username,
       last_updated_at: new Date().toISOString(),
+      status: TASK_STATUSES.approved,
       metadata: {
         ...existing.metadata,
       },
