@@ -1,6 +1,9 @@
 {
   "description": "Security: Packetbeat - Looks for unusual HTTP or TLS destination domain activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
-  "groups": ["security", "packetbeat"],
+  "groups": [
+    "security",
+    "packetbeat"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -10,7 +13,11 @@
         "by_field_name": "server.domain"
       }
     ],
-    "influencers": ["host.name", "destination.ip", "source.ip"]
+    "influencers": [
+      "host.entity.id_computed",
+      "destination.ip",
+      "source.ip"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

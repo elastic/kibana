@@ -1,6 +1,9 @@
 {
   "description": "Security: Packetbeat - Looks for unusual web browsing URL activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
-  "groups": ["security", "packetbeat"],
+  "groups": [
+    "security",
+    "packetbeat"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -10,7 +13,10 @@
         "by_field_name": "url.full"
       }
     ],
-    "influencers": ["host.name", "destination.ip"]
+    "influencers": [
+      "host.entity.id_computed",
+      "destination.ip"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

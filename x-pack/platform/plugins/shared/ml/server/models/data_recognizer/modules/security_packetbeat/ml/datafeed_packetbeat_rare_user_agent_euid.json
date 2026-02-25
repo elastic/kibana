@@ -1,0 +1,63 @@
+{
+  "job_id": "packetbeat_rare_user_agent_euid",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "agent.type": "packetbeat"
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "event.dataset": "http"
+          }
+        },
+        {
+          "term": {
+            "event.dataset": "network_traffic.http"
+          }
+        }
+      ],
+      "minimum_should_match": 1,
+      "must_not": [
+        {
+          "wildcard": {
+            "user_agent.original": {
+              "value": "Mozilla*"
+            }
+          }
+        },
+        {
+          "terms": {
+            "process.name": [
+              "elastic-agent.exe",
+              "elastic-agent",
+              "metricbeat.exe",
+              "metricbeat",
+              "filebeat.exe",
+              "filebeat",
+              "packetbeat.exe",
+              "packetbeat",
+              "winlogbeat.exe",
+              "winlogbeat"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "script_fields": {
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
+      }
+    }
+  }
+}
