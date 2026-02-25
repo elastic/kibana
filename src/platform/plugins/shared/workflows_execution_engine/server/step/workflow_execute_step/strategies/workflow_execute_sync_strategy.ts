@@ -157,9 +157,14 @@ export class WorkflowExecuteSyncStrategy {
             `Using workflow.output from child workflow execution ${state.executionId}`
           );
         } else {
-          // Fallback: Extract output from step executions (legacy behavior)
+          // Fallback: Extract output from step executions (legacy behavior).
+          // Use getStepExecutionsByWorkflowExecution (mget by stepExecutionIds) for real-time
+          // data; search is only visible after refresh. See get_workflow_execution.ts.
           const stepExecutions =
-            await this.stepExecutionRepository.searchStepExecutionsByExecutionId(state.executionId);
+            await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
+              state.executionId,
+              execution.stepExecutionIds
+            );
           // Convert EsWorkflowStepExecution to WorkflowStepExecutionDto (omit spaceId)
           const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
             omit(exec, ['spaceId'])

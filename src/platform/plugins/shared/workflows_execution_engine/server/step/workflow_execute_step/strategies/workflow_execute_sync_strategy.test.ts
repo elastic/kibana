@@ -47,7 +47,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
     } as any;
 
     mockStepRepo = {
-      searchStepExecutionsByExecutionId: jest.fn().mockResolvedValue([]),
+      getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
     } as any;
 
     mockStepRuntime = {
@@ -291,7 +291,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
         status: 'completed',
         output: { message: 'from workflow.output' },
       });
-      expect(mockStepRepo.searchStepExecutionsByExecutionId).not.toHaveBeenCalled();
+      expect(mockStepRepo.getStepExecutionsByWorkflowExecution).not.toHaveBeenCalled();
     });
 
     it('should fall back to step executions when no context output', async () => {
@@ -299,9 +299,10 @@ describe('WorkflowExecuteSyncStrategy', () => {
         id: 'child-exec-1',
         status: ExecutionStatus.COMPLETED,
         context: {},
+        stepExecutionIds: ['step-1'],
       } as any);
 
-      mockStepRepo.searchStepExecutionsByExecutionId.mockResolvedValue([
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
         {
           id: 'step-1',
           stepId: 'step1',
@@ -315,7 +316,10 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       expect(result.status).toBe('completed');
       expect(result.output).toEqual({ data: 'from last step' });
-      expect(mockStepRepo.searchStepExecutionsByExecutionId).toHaveBeenCalledWith('child-exec-1');
+      expect(mockStepRepo.getStepExecutionsByWorkflowExecution).toHaveBeenCalledWith(
+        'child-exec-1',
+        ['step-1']
+      );
     });
 
     it('should return null output when no step executions exist', async () => {
@@ -323,9 +327,10 @@ describe('WorkflowExecuteSyncStrategy', () => {
         id: 'child-exec-1',
         status: ExecutionStatus.COMPLETED,
         context: {},
+        stepExecutionIds: [],
       } as any);
 
-      mockStepRepo.searchStepExecutionsByExecutionId.mockResolvedValue([]);
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([]);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
@@ -338,9 +343,10 @@ describe('WorkflowExecuteSyncStrategy', () => {
         id: 'child-exec-1',
         status: ExecutionStatus.COMPLETED,
         context: {},
+        stepExecutionIds: ['step-exec-1', 'step-exec-2'],
       } as any);
 
-      mockStepRepo.searchStepExecutionsByExecutionId.mockResolvedValue([
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
         {
           id: 'step-exec-1',
           stepId: 'step1',
@@ -368,9 +374,10 @@ describe('WorkflowExecuteSyncStrategy', () => {
         id: 'child-exec-1',
         status: ExecutionStatus.COMPLETED,
         context: {},
+        stepExecutionIds: ['step-exec-1', 'step-exec-2', 'step-exec-3'],
       } as any);
 
-      mockStepRepo.searchStepExecutionsByExecutionId.mockResolvedValue([
+      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
         {
           id: 'step-exec-1',
           stepId: 'step1',

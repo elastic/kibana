@@ -83,6 +83,7 @@ const createMockInit = (
 
   const stepExecutionRepository = {
     searchStepExecutionsByExecutionId: jest.fn().mockResolvedValue([]),
+    getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<StepExecutionRepository>;
 
   const workflowLogger = {
