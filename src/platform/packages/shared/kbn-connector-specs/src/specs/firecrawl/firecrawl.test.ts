@@ -43,6 +43,7 @@ describe('Firecrawl', () => {
   it('should have a test handler', () => {
     expect(Firecrawl.test).toBeDefined();
     expect(typeof Firecrawl.test?.handler).toBe('function');
+    expect(Firecrawl.test?.description).toBeDefined();
   });
 
   describe('test handler', () => {
@@ -75,6 +76,21 @@ describe('Firecrawl', () => {
 
       expect(result.ok).toBe(false);
       expect(result.message).toContain('Failed to connect');
+      expect(result.message).toContain('Invalid API key');
+    });
+
+    it('should return failure with specific message when API returns 401', async () => {
+      const err = new Error('Unauthorized') as Error & { response?: { status: number } };
+      err.response = { status: 401 };
+      mockClient.post.mockRejectedValue(err);
+
+      if (!Firecrawl.test) {
+        throw new Error('Test handler not defined');
+      }
+      const result = await Firecrawl.test.handler(mockContext);
+
+      expect(result.ok).toBe(false);
+      expect(result.message).toContain('Invalid or missing API key');
     });
   });
 });
