@@ -37,7 +37,7 @@ export const renderApp = async (
   return () => ReactDOM.unmountComponentAtNode(element);
 };
 
-export const renderManagementApp = async (
+export const renderInferenceEndpointsMgmtApp = async (
   core: CoreStart,
   services: AppPluginStartDependencies,
   element: HTMLElement
@@ -57,7 +57,5 @@ export const renderManagementApp = async (
     element
   );
 
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
+  return () => void ReactDOM.unmountComponentAtNode(element);
 };
