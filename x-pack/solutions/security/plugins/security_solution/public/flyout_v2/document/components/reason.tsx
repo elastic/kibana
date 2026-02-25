@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../common/lib/kibana';
-import { getField } from '../../shared/utils';
-import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
+import { useIsAlertDocument } from '../../shared/hooks/use_is_alert_document';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
   REASON_TITLE_TEST_ID,
 } from './test_ids';
-import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export const ALERT_REASON_BANNER = {
   title: i18n.translate(
@@ -38,59 +32,52 @@ export const ALERT_REASON_BANNER = {
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
-export const Reason: FC = () => {
-  const { telemetry } = useKibana().services;
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
-    useDocumentDetailsContext();
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const alertReason = getField(getFieldsData(ALERT_REASON));
+export interface ReasonProps {
+  /**
+   * Alert/event document
+   */
+  hit: DataTableRecord;
+  /**
+   * Callback to show the full reason panel when clicking "Show full reason".
+   * If not provided, no button is rendered.
+   */
+  onShowFullReason?: () => void;
+}
 
-  const { openPreviewPanel } = useExpandableFlyoutApi();
-  const openRulePreview = useCallback(() => {
-    openPreviewPanel({
-      id: DocumentDetailsAlertReasonPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-        banner: ALERT_REASON_BANNER,
-      },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: scopeId,
-      panel: 'preview',
-    });
-  }, [eventId, openPreviewPanel, indexName, scopeId, telemetry]);
+export const Reason: FC<ReasonProps> = ({ hit, onShowFullReason }) => {
+  const isAlert = useIsAlertDocument(hit);
+  const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
 
   const viewPreview = useMemo(
-    () => (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="expand"
-          onClick={openRulePreview}
-          iconSide="right"
-          data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.about.reason.alertReasonButtonAriaLabel',
-            {
-              defaultMessage: 'Show full reason',
-            }
-          )}
-          disabled={!alertReason}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
-            defaultMessage="Show full reason"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    ),
-    [alertReason, openRulePreview]
+    () =>
+      onShowFullReason ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="expand"
+            onClick={onShowFullReason}
+            iconSide="right"
+            data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.right.about.reason.alertReasonButtonAriaLabel',
+              {
+                defaultMessage: 'Show full reason',
+              }
+            )}
+            disabled={!reason}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
+              defaultMessage="Show full reason"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      ) : null,
+    [onShowFullReason, reason]
   );
 
-  const alertReasonText = alertReason ? (
-    alertReason
+  const alertReasonText = reason ? (
+    reason
   ) : (
     <FormattedMessage
       id="xpack.securitySolution.flyout.right.about.reason.noReasonDescription"

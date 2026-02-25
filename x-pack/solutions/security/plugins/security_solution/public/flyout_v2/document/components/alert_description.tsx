@@ -17,6 +17,7 @@ import {
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
+import { useIsAlertDocument } from '../../shared/hooks/use_is_alert_document';
 
 export interface AlertDescriptionProps {
   /**
@@ -41,7 +42,7 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
   onShowRuleSummary,
   ruleSummaryDisabled,
 }) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, 'event.kind') as string) === 'signal', [hit]);
+  const isAlert = useIsAlertDocument(hit);
 
   const ruleDescription = useMemo(
     () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
