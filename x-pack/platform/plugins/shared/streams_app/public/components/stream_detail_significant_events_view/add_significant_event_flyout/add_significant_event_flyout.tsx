@@ -108,8 +108,10 @@ export function AddSignificantEventFlyout({
   const [isGettingTaskStatus, { on: gettingTaskStatus, off: stoppedGettingTaskStatus }] =
     useBoolean(false);
 
-  const [{ loading: isSchedulingGenerationTask }, doScheduleOnboardingTask] =
-    useAsyncFn(scheduleOnboardingTask);
+  const [{ loading: isSchedulingGenerationTask }, doScheduleOnboardingTask] = useAsyncFn(
+    scheduleOnboardingTask,
+    [scheduleOnboardingTask]
+  );
 
   const scheduleTask = () => {
     setTask(defaultTask);
