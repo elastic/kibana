@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiModal,
@@ -423,12 +424,6 @@ export const ManageIntegrationActions: React.FC<{
                   defaultMessage="Review & Approve"
                 />
               </EuiContextMenuItem>,
-              <EuiContextMenuItem key="download" icon="download" onClick={closePopover}>
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.actions.downloadZip"
-                  defaultMessage="Download .zip package"
-                />
-              </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="edit"
                 icon="pencil"
@@ -444,8 +439,7 @@ export const ManageIntegrationActions: React.FC<{
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="delete"
-                icon="trash"
-                color="danger"
+                icon={<EuiIcon type="trash" color="danger" />}
                 onClick={openDeleteConfirm}
               >
                 <EuiTextColor color="danger">
