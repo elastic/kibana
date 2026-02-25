@@ -15,6 +15,7 @@ export interface ActionSubItem {
   onClick?: () => void;
   href?: string;
   icon?: string;
+  isDisabled?: boolean;
 }
 
 export interface Action {
@@ -23,6 +24,7 @@ export interface Action {
   onClick?: () => void;
   href?: string;
   icon?: string;
+  isDisabled?: boolean;
   items?: ActionSubItem[];
 }
 
@@ -102,14 +104,16 @@ export function ActionsContextMenu({
             items: action.items!.map((subItem) => ({
               name: subItem.name,
               icon: subItem.icon,
-              ...(subItem.href
-                ? { href: subItem.href, target: '_self' }
-                : {
-                    onClick: () => {
-                      subItem.onClick?.();
-                      closePopover();
-                    },
-                  }),
+              disabled: subItem.isDisabled,
+              ...(!subItem.isDisabled &&
+                (subItem.href
+                  ? { href: subItem.href, target: '_self' as const }
+                  : {
+                      onClick: () => {
+                        subItem.onClick?.();
+                        closePopover();
+                      },
+                    })),
               'data-test-subj': `${dataTestSubjPrefix}Item-${subItem.id}`,
             })),
           });
@@ -117,16 +121,18 @@ export function ActionsContextMenu({
           mainPanelItems.push({
             name: action.name,
             icon: action.icon,
-            ...(action.href
-              ? { href: action.href, target: '_self' }
-              : {
-                  onClick: action.onClick
-                    ? () => {
-                        action.onClick!();
-                        closePopover();
-                      }
-                    : undefined,
-                }),
+            disabled: action.isDisabled,
+            ...(!action.isDisabled &&
+              (action.href
+                ? { href: action.href, target: '_self' as const }
+                : {
+                    onClick: action.onClick
+                      ? () => {
+                          action.onClick!();
+                          closePopover();
+                        }
+                      : undefined,
+                  })),
             'data-test-subj': `${dataTestSubjPrefix}Item-${action.id}`,
           });
         }

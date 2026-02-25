@@ -30,7 +30,7 @@ export function useServiceActions({
 }: UseServiceActionsParams): TableActions<ServiceListItem> {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
-  const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
+  const sloListLocator = share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID);
 
   const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
@@ -148,6 +148,7 @@ export function useServiceActions({
               defaultMessage: 'Manage SLOs',
             }),
             icon: 'tableOfContents',
+            isDisabled: !sloListLocator,
             href: (item) => getManageSlosUrl(sloListLocator, { serviceName: item.serviceName }),
           },
         ],
