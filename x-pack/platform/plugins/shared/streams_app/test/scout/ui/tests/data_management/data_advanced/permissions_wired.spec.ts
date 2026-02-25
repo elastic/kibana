@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 
-const WIRED_STREAM = 'logs';
+const WIRED_STREAM = 'logs.otel';
 
 test.describe(
   'Advanced tab permissions - Wired streams',
