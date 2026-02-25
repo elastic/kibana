@@ -951,10 +951,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloBadge')).toHaveAttribute(
-        'data-slo-status',
-        'noData'
-      );
+      const badge = screen.getByTestId('serviceInventorySloBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute('data-slo-status', 'noData');
       expect(screen.getByText('No data')).toBeInTheDocument();
     });
 
