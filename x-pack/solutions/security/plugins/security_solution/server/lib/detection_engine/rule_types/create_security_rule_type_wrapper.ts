@@ -40,6 +40,7 @@ import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/
 import { createResultObject } from './utils';
 import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
+import { logExecutionTotals } from './utils/log_execution_totals';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -562,27 +563,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
 
-            if (result.totalEventsFound != null) {
-              ruleExecutionLogger.info(`Found matching events: ${result.totalEventsFound}`);
-            }
-            const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
-            if (suppressedAlertsCount > 0) {
-              ruleExecutionLogger.info(`Alerts suppressed: ${suppressedAlertsCount}`);
-            }
-
             const createdSignalsCount = result.createdSignals.length;
 
-            if (result.totalEventsFound != null && result.totalEventsFound > 0) {
-              const unaccountedEvents =
-                result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
-              if (unaccountedEvents > 0) {
-                ruleExecutionLogger.info(
-                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions. This number doesn't include suppressed alerts.`
-                );
-              }
-            }
-
-            ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
+            logExecutionTotals(ruleExecutionLogger, {
+              ruleType: params.type,
+              totalEventsFound: result.totalEventsFound,
+              suppressedAlertsCount: result.suppressedAlertsCount,
+              createdSignalsCount,
+            });
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
