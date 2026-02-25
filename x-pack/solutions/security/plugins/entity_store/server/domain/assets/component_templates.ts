@@ -10,7 +10,7 @@ import type {
   EntityDefinition,
   EntityType,
 } from '../../../common/domain/definitions/entity_schema';
-import { ENTITY_BASE_PREFIX } from '../constants';
+import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2 } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 const BASE_ENTITY_INDEX_MAPPING = {
@@ -28,7 +28,7 @@ const BASE_ENTITY_INDEX_MAPPING = {
 } as const satisfies MappingProperties;
 
 export const getComponentTemplateName = (type: EntityType, namespace: string) =>
-  `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-latest@platform`;
+  `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${type}_${namespace}-latest@platform`;
 
 export const getEntityDefinitionComponentTemplate = (
   definition: EntityDefinition,
@@ -52,7 +52,7 @@ const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => (
 });
 
 export const getUpdatesComponentTemplateName = (type: EntityType, namespace: string) =>
-  `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-updates@platform`;
+  `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${type}_${namespace}-updates@platform`;
 
 export const getUpdatesEntityDefinitionComponentTemplate = (
   definition: EntityDefinition,
