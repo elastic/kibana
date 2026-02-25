@@ -46,6 +46,102 @@ describe('Firecrawl', () => {
     expect(Firecrawl.test?.description).toBeDefined();
   });
 
+  it('should use bearer auth type', () => {
+    expect(Firecrawl.auth).toBeDefined();
+    expect(Firecrawl.auth?.types).toContain('bearer');
+  });
+
+  describe('scrape action', () => {
+    it('should scrape URL and return response data', async () => {
+      const mockData = { success: true, data: { markdown: '# Hello' } };
+      mockClient.post.mockResolvedValue({ data: mockData });
+
+      const result = await Firecrawl.actions.scrape.handler(mockContext, {
+        url: 'https://example.com',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.firecrawl.dev/v2/scrape',
+        expect.objectContaining({ url: 'https://example.com' })
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('search action', () => {
+    it('should search with query and return response data', async () => {
+      const mockData = { success: true, data: [] };
+      mockClient.post.mockResolvedValue({ data: mockData });
+
+      const result = await Firecrawl.actions.search.handler(mockContext, {
+        query: 'test query',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith('https://api.firecrawl.dev/v2/search', {
+        query: 'test query',
+        limit: 5,
+      });
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('map action', () => {
+    it('should map URL and return response data', async () => {
+      const mockData = { success: true, links: [] };
+      mockClient.post.mockResolvedValue({ data: mockData });
+
+      const result = await Firecrawl.actions.map.handler(mockContext, {
+        url: 'https://example.com',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.firecrawl.dev/v2/map',
+        expect.objectContaining({
+          url: 'https://example.com',
+          limit: 5000,
+          includeSubdomains: true,
+        })
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('crawl action', () => {
+    it('should start crawl and return response data', async () => {
+      const mockData = { success: true, id: '550e8400-e29b-41d4-a716-446655440000' };
+      mockClient.post.mockResolvedValue({ data: mockData });
+
+      const result = await Firecrawl.actions.crawl.handler(mockContext, {
+        url: 'https://example.com',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.firecrawl.dev/v2/crawl',
+        expect.objectContaining({
+          url: 'https://example.com',
+          limit: 100,
+          allowExternalLinks: false,
+        })
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getCrawlStatus action', () => {
+    it('should get crawl status by id and return response data', async () => {
+      const crawlId = '550e8400-e29b-41d4-a716-446655440000';
+      const mockData = { status: 'completed', total: 10, completed: 10 };
+      mockClient.get.mockResolvedValue({ data: mockData });
+
+      const result = await Firecrawl.actions.getCrawlStatus.handler(mockContext, { id: crawlId });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `https://api.firecrawl.dev/v2/crawl/${crawlId}`
+      );
+      expect(result).toEqual(mockData);
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       mockClient.post.mockResolvedValue({ data: { success: true } });
