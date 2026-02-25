@@ -65,8 +65,13 @@ export class ConnectorTokenClient {
     this.userClient = new UserConnectorTokenClient(options);
   }
 
-  private getScope(profileUid?: string): typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE {
-    return profileUid ? PER_USER_TOKEN_SCOPE : SHARED_TOKEN_SCOPE;
+  private getScope(
+    profileUid?: string,
+    authMode?: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE
+  ): typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE {
+    return profileUid || (authMode && authMode === PER_USER_TOKEN_SCOPE)
+      ? PER_USER_TOKEN_SCOPE
+      : SHARED_TOKEN_SCOPE;
   }
 
   private parseTokenId(id: string): {
@@ -193,8 +198,9 @@ export class ConnectorTokenClient {
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
+    authMode?: typeof PER_USER_TOKEN_SCOPE | typeof SHARED_TOKEN_SCOPE;
   }): Promise<void> {
-    const scope = this.getScope(options.profileUid);
+    const scope = this.getScope(options.profileUid, options.authMode);
     this.log({
       method: 'deleteConnectorTokens',
       scope,

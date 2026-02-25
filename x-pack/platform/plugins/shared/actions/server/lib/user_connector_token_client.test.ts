@@ -563,6 +563,70 @@ describe('UserConnectorTokenClient', () => {
         })
       );
     });
+
+    test('deletes all user tokens for connectorId when profileUid is not provided', async () => {
+      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+
+      const findResult = {
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'token-user-a',
+            type: 'user_connector_token',
+            attributes: {
+              profileUid: 'user-a',
+              connectorId: '123',
+              credentialType: 'oauth',
+              credentials: {},
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            score: 1,
+            references: [],
+          },
+          {
+            id: 'token-user-b',
+            type: 'user_connector_token',
+            attributes: {
+              profileUid: 'user-b',
+              connectorId: '123',
+              credentialType: 'oauth',
+              credentials: {},
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
+
+      // Simulate connector deletion: no profileUid, delete all tokens for the connector
+      await userClient.deleteConnectorTokens({
+        profileUid: undefined as unknown as string,
+        connectorId: '123',
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'user_connector_token',
+          filter: expect.not.stringContaining('profileUid'),
+        })
+      );
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'user_connector_token',
+        'token-user-a'
+      );
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'user_connector_token',
+        'token-user-b'
+      );
+    });
   });
 
   describe('updateOrReplace()', () => {
