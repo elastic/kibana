@@ -374,6 +374,11 @@ export interface TaskInstance {
   apiKey?: string;
 
   /**
+   * UIAM API key (when provisioned) for tasks that have been converted from legacy API keys.
+   */
+  uiamApiKey?: string;
+
+  /**
    * Meta data related to the API key associated with this task
    */
   userScope?: TaskUserScope;

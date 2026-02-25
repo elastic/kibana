@@ -72,6 +72,7 @@ import {
   registerInvalidateApiKeyTask,
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
+import { UiamApiKeyProvisioningTask } from './uiam_api_key_provisioning';
 
 export interface TaskManagerSetupContract {
   /**
@@ -148,6 +149,7 @@ export class TaskManagerPlugin
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
+  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
 
@@ -287,6 +289,12 @@ export class TaskManagerPlugin
       this.definitions
     );
 
+    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({ logger: this.logger });
+    this.uiamApiKeyProvisioningTask.register({
+      coreSetup: core,
+      taskTypeDictionary: this.definitions,
+    });
+
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
         `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
@@ -317,9 +325,10 @@ export class TaskManagerPlugin
   }
 
   public start(
-    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    core: CoreStart,
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
+    const { http, savedObjects, elasticsearch, executionContext, security } = core;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
@@ -449,6 +458,14 @@ export class TaskManagerPlugin
       this.config.invalidate_api_key_task.interval
     ).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
+
+    this.uiamApiKeyProvisioningTask
+      ?.start({
+        core,
+        taskScheduling,
+        removeIfExists: (id: string) => removeIfExists(taskStore, id),
+      })
+      .catch(() => {});
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
