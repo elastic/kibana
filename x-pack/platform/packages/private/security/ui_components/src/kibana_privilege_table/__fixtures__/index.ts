@@ -5,65 +5,67 @@
  * 2.0.
  */
 
-import type { EuiButtonGroupProps, EuiCheckboxProps } from '@elastic/eui';
-import { EuiAccordion, EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
-import type { ReactWrapper } from 'enzyme';
+import { fireEvent } from '@testing-library/react';
 
-import { findTestSubject } from '@kbn/test-jest-helpers';
+export function getDisplayedFeaturePrivileges(container: HTMLElement) {
+  const categoryExpander = container.querySelector(
+    '[data-test-subj="featureCategory_foo_accordionToggle"]'
+  );
+  if (categoryExpander) fireEvent.click(categoryExpander);
 
-import { SubFeatureForm } from '../sub_feature_form';
-
-export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {
-  const categoryExpander = findTestSubject(wrapper, 'featureCategoryButton_foo');
-  categoryExpander.simulate('click');
-
-  const allExpanderButtons = findTestSubject(wrapper, 'featureTableCell');
-  allExpanderButtons.forEach((button) => button.simulate('click'));
-
-  const featurePrivilegeControls = wrapper
-    .find(EuiAccordion)
-    .filter('[data-test-subj="featurePrivilegeControls"]');
-
-  return featurePrivilegeControls.reduce((acc, featureControls) => {
-    const buttonGroup = featureControls
-      .find(EuiButtonGroup)
-      .filter('[data-test-subj="primaryFeaturePrivilegeControl"]');
-    const { name, idSelected } = buttonGroup.props();
-    expect(name).toBeDefined();
-    expect(idSelected).toBeDefined();
-
-    const featureId = name!.substr(`featurePrivilege_`.length);
-    const primaryFeaturePrivilege = idSelected!.substr(`${featureId}_`.length);
-    const subFeaturePrivileges = [];
-
-    const subFeatureForm = featureControls.find(SubFeatureForm);
-    if (subFeatureForm.length > 0) {
-      const independentPrivileges = (
-        subFeatureForm.find(EuiCheckbox) as ReactWrapper<EuiCheckboxProps>
-      ).reduce((acc2, checkbox) => {
-        const { id: privilegeId, checked } = checkbox.props();
-        return checked ? [...acc2, privilegeId] : acc2;
-      }, [] as string[]);
-
-      const mutuallyExclusivePrivileges = (
-        subFeatureForm.find(EuiButtonGroup) as ReactWrapper<EuiButtonGroupProps>
-      ).reduce((acc2, subPrivButtonGroup) => {
-        const { idSelected: selectedSubPrivilege } = subPrivButtonGroup.props();
-        return selectedSubPrivilege && selectedSubPrivilege !== 'none'
-          ? [...acc2, selectedSubPrivilege]
-          : acc2;
-      }, [] as string[]);
-
-      subFeaturePrivileges.push(...independentPrivileges, ...mutuallyExclusivePrivileges);
+  const allExpanderButtons = container.querySelectorAll(
+    '[data-test-subj*="_accordionToggle"]'
+  );
+  allExpanderButtons.forEach((button) => {
+    if (button.getAttribute('data-test-subj')?.includes('featurePrivilegeControls_')) {
+      fireEvent.click(button);
     }
+  });
 
-    return {
-      ...acc,
-      [featureId]: {
-        ...acc[featureId],
-        primaryFeaturePrivilege,
-        subFeaturePrivileges,
-      },
-    };
-  }, {} as Record<string, { primaryFeaturePrivilege: string; subFeaturePrivileges: string[] }>);
+  const featurePrivilegeControls = container.querySelectorAll(
+    '[data-test-subj="featurePrivilegeControls"]'
+  );
+
+  return Array.from(featurePrivilegeControls).reduce(
+    (acc, featureControls) => {
+      const childWrapper = featureControls.querySelector('[id^="featurePrivilegeControls_"]');
+      const featureId = childWrapper
+        ? childWrapper.id.replace('featurePrivilegeControls_', '')
+        : '';
+      if (!featureId) return acc;
+
+      const primaryControl = featureControls.querySelector(
+        '[data-test-subj="primaryFeaturePrivilegeControl"]'
+      );
+      if (!primaryControl) return acc;
+
+      const selectedBtn = primaryControl.querySelector('[aria-pressed="true"]');
+      const idSelected = selectedBtn?.getAttribute('data-test-subj') ?? '';
+      const primaryFeaturePrivilege = idSelected.substring(`${featureId}_`.length);
+
+      const subFeaturePrivileges: string[] = [];
+
+      featureControls.querySelectorAll('input[type="checkbox"]:checked').forEach((cb) => {
+        subFeaturePrivileges.push((cb as HTMLInputElement).id);
+      });
+
+      featureControls.querySelectorAll('[aria-pressed="true"]').forEach((btn) => {
+        if (primaryControl.contains(btn)) return;
+        const subId = btn.getAttribute('data-test-subj') ?? '';
+        if (subId && subId !== 'none') {
+          subFeaturePrivileges.push(subId);
+        }
+      });
+
+      return {
+        ...acc,
+        [featureId]: {
+          ...acc[featureId],
+          primaryFeaturePrivilege,
+          subFeaturePrivileges,
+        },
+      };
+    },
+    {} as Record<string, { primaryFeaturePrivilege: string; subFeaturePrivileges: string[] }>
+  );
 }
