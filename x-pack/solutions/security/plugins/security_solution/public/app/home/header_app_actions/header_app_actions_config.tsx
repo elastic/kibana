@@ -76,3 +76,50 @@ export function getSecurityDashboardsHeaderAppActionsConfig(
     ],
   };
 }
+
+export interface TimelinesHeaderAppActionsParams {
+  onImport: () => void;
+  onNew: () => void;
+  showImport?: boolean;
+}
+
+/**
+ * Header app actions config for the Security > Timelines page.
+ * Icon-only "Import" and "New" primary actions. Set when the Timelines page is active (from TimelinesPage); cleared on unmount.
+ */
+export function getTimelinesHeaderAppActionsConfig({
+  onImport,
+  onNew,
+  showImport = true,
+}: TimelinesHeaderAppActionsParams): ChromeHeaderAppActionsConfig {
+  const primaryActions: React.ReactNode[] = [];
+  if (showImport) {
+    primaryActions.push(
+      <EuiButtonIcon
+        key="timelines-import"
+        size="xs"
+        color="text"
+        iconType="indexOpen"
+        onClick={onImport}
+        data-test-subj="headerGlobalNav-appActionsImportButton"
+        aria-label={i18n.translate('xpack.securitySolution.timelines.headerAppActions.importAriaLabel', {
+          defaultMessage: 'Import',
+        })}
+      />
+    );
+  }
+  primaryActions.push(
+    <EuiButtonIcon
+      key="timelines-new"
+      size="xs"
+      color="text"
+      iconType="plusInCircle"
+      onClick={onNew}
+      data-test-subj="headerGlobalNav-appActionsNewButton"
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
+        defaultMessage: 'New',
+      })}
+    />
+  );
+  return { primaryActions };
+}

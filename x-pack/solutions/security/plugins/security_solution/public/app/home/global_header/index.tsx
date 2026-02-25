@@ -20,6 +20,7 @@ import {
   DASHBOARDS_PATH,
   RULES_PATH,
   SecurityPageName,
+  TIMELINES_PATH,
 } from '../../../../common/constants';
 
 const RULES_MANAGEMENT_PATH = `${RULES_PATH}/management`;
@@ -73,6 +74,7 @@ export const GlobalHeader = React.memo(() => {
   const dashboardViewPath = isDashboardViewPath(pathname);
   const isOnSecurityDashboardsLandingPage =
     (pathname === DASHBOARDS_PATH || pathname === `${DASHBOARDS_PATH}/`) && !dashboardViewPath;
+  const isOnTimelinesPage = pathname === TIMELINES_PATH || pathname.startsWith(`${TIMELINES_PATH}/`);
 
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
@@ -111,6 +113,9 @@ export const GlobalHeader = React.memo(() => {
         chrome.setHeaderAppActionsConfig(
           getSecurityDashboardsHeaderAppActionsConfig(onCreateSecurityDashboard)
         );
+      } else if (isOnTimelinesPage) {
+        // Timelines page sets and clears its own config in TimelinesPage
+        return;
       } else {
         chrome.setHeaderAppActionsConfig(undefined);
       }
@@ -124,6 +129,7 @@ export const GlobalHeader = React.memo(() => {
     isOnAttackDiscoveryPage,
     isOnRulesManagementPage,
     isOnSecurityDashboardsLandingPage,
+    isOnTimelinesPage,
     onCreateSecurityDashboard,
   ]);
 
