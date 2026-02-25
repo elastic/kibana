@@ -221,14 +221,13 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
       expect(result).toBe('Bearer new-access-token');
     });
 
-    it('calls requestOAuthRefreshToken with correct arguments including scope', async () => {
+    it('passes tokenUrl, clientId, clientSecret, and scope to requestOAuthRefreshToken', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
       });
       (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
 
-    it('passes tokenUrl, clientId, clientSecret, and scope to requestOAuthRefreshToken', async () => {
       await getOAuthAuthorizationCodeAccessToken({ ...baseOpts, scope: 'openid profile' });
 
       expect(requestOAuthRefreshToken).toHaveBeenCalledWith(

@@ -32,6 +32,10 @@ export interface GetStoredTokenWithRefreshOpts {
    */
   forceRefresh?: boolean;
   isPerUser?: boolean;
+  /** Required when `isPerUser` is true to look up the per-user stored token. */
+  profileUid?: string;
+  /** Used in log messages to identify the auth mode (e.g. 'per-user'). */
+  authMode?: string;
   /**
    * Called when a refresh is needed. Receives the stored refresh token
    * and must return a new token response from the auth server.
@@ -85,7 +89,9 @@ export const getStoredTokenWithRefresh = async ({
   logger,
   connectorTokenClient,
   forceRefresh = false,
-  isPerUser = true,
+  isPerUser = false,
+  profileUid,
+  authMode,
   doRefresh,
 }: GetStoredTokenWithRefreshOpts): Promise<string | null> => {
   // Acquire lock for this connector to prevent concurrent token refreshes
@@ -160,19 +166,7 @@ export const getStoredTokenWithRefresh = async ({
     // Refresh the token
     logger.debug(`Refreshing access token for connectorId: ${connectorId}`);
     try {
-      const tokenResult = await requestOAuthRefreshToken(
-        tokenUrl,
-        logger,
-        {
-          refreshToken: storedRefreshToken,
-          clientId,
-          clientSecret,
-          scope,
-          ...additionalFields,
-        },
-        configurationUtilities,
-        shouldUseBasicAuth
-      );
+      const tokenResult = await doRefresh(storedRefreshToken);
 
       const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 

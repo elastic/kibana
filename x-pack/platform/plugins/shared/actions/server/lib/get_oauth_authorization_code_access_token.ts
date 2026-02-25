@@ -83,6 +83,9 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     logger,
     connectorTokenClient,
     forceRefresh,
+    isPerUser,
+    profileUid,
+    authMode,
     doRefresh: (refreshToken) =>
       requestOAuthRefreshToken(
         tokenUrl,
