@@ -110,7 +110,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 monitoring: match.monitoring,
                 snooze_schedule: match.snooze_schedule,
                 ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
-                is_snoozed_until: null,
               };
 
               expect(match).to.eql(expected);
@@ -303,7 +302,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 monitoring: match.monitoring,
                 snooze_schedule: match.snooze_schedule,
                 ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
-                is_snoozed_until: null,
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -382,7 +380,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 artifacts: { dashboards: [], investigation_guide: { blob: '' } },
                 tags: [myTag],
                 snooze_schedule: [],
-                is_snoozed_until: null,
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
@@ -393,7 +390,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 },
                 tags: [myTag],
                 snooze_schedule: [],
-                is_snoozed_until: null,
               });
               break;
             default:
@@ -474,7 +470,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 tags: [myTag],
                 execution_status: matchFirst.execution_status,
                 snooze_schedule: [],
-                is_snoozed_until: null,
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
@@ -483,7 +478,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 tags: [myTag],
                 execution_status: matchSecond.execution_status,
                 snooze_schedule: [],
-                is_snoozed_until: null,
               });
               break;
             default:

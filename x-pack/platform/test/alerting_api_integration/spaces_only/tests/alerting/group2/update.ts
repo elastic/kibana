@@ -80,10 +80,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           created_at: response.body.created_at,
           updated_at: response.body.updated_at,
           execution_status: response.body.execution_status,
-          mapped_params: {
-            risk_score: 40,
-            severity: '40-medium',
-          },
           ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
           ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
         });
@@ -407,24 +403,29 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
     });
 
     describe('artifacts', () => {
-      it('should not return dashboards in the response', async () => {
-        const expectedArtifacts = {
-          artifacts: {
-            dashboards: [
-              {
-                id: 'dashboard-1',
-              },
-            ],
-            investigation_guide: {
-              blob: '## Summary',
+      it('should return artifacts in the response', async () => {
+        const createArtifacts = {
+          dashboards: [
+            {
+              id: 'dashboard-1',
             },
+          ],
+          investigation_guide: {
+            blob: '## Summary',
+          },
+        };
+
+        const updateArtifacts = {
+          dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+          investigation_guide: {
+            blob: '## Summary',
           },
         };
 
         const createResponse = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData(expectedArtifacts))
+          .send(getTestRuleData({ artifacts: createArtifacts }))
           .expect(200);
 
         const esResponse = await es.get<SavedObject<RawRule>>(
@@ -454,16 +455,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
-            artifacts: {
-              dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
-              investigation_guide: {
-                blob: '## Summary',
-              },
-            },
+            artifacts: updateArtifacts,
           })
           .expect(200);
 
-        expect(updateResponse.body.artifacts).to.be(undefined);
+        expect(updateResponse.body.artifacts).to.eql(updateArtifacts);
 
         const esUpdateResponse = await es.get<SavedObject<RawRule>>(
           {
@@ -472,6 +468,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           },
           { meta: true }
         );
+
         expect((esUpdateResponse.body._source as any)?.alert.artifacts.dashboards ?? {}).to.eql([
           {
             refId: 'dashboard_0',
@@ -480,9 +477,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             refId: 'dashboard_1',
           },
         ]);
-        expect((esUpdateResponse.body._source as any)?.alert.artifacts.investigation_guide).to.eql({
-          blob: '## Summary',
-        });
       });
 
       it('should not allow updating of dashboards with > dashboard length limit', async () => {
