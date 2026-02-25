@@ -9,7 +9,7 @@ import { getFindingsQuery } from './use_latest_findings';
 
 describe('getFindingsQuery', () => {
   const baseOptions = {
-    query: { bool: { filter: [], must_not: [] } },
+    query: { bool: { filter: [], must: [], must_not: [], should: [] } },
     sort: [['@timestamp', 'desc']],
     enabled: true,
     pageSize: 25,
