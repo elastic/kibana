@@ -106,3 +106,41 @@ export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
     defaultMessage: 'Could not schedule a task to onboard stream',
   }
 );
+
+export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
+  {
+    defaultMessage: 'Discover Insights',
+  }
+);
+
+export const INSIGHTS_SCHEDULING_FAILURE_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.insightsSchedulingErrorTitle',
+  {
+    defaultMessage: 'Could not start insight generation',
+  }
+);
+
+export function getInsightsCompleteToastTitle(count: number): string {
+  return i18n.translate(
+    'xpack.streams.significantEventsDiscovery.streamsView.insightsCompleteToastTitle',
+    {
+      defaultMessage: '{count} {count, plural, one {insight} other {insights}} found',
+      values: { count },
+    }
+  );
+}
+
+export const INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.insightsCompleteToastViewButton',
+  {
+    defaultMessage: 'View insights',
+  }
+);
+
+export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.noInsightsToastTitle',
+  {
+    defaultMessage: 'No insights found',
+  }
+);

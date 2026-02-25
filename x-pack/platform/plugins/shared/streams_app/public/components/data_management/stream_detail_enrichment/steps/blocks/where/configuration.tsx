@@ -17,9 +17,9 @@ import { i18n } from '@kbn/i18n';
 import type { Condition, StreamlangConditionBlockWithUIAttributes } from '@kbn/streamlang';
 import { isConditionComplete } from '@kbn/streamlang';
 import { isEqual } from 'lodash';
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, forwardRef, useCallback } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { useForm, FormProvider, useController } from 'react-hook-form';
+import { useForm, FormProvider, useController, useFormContext } from 'react-hook-form';
 import type { DeepPartial } from 'utility-types';
 import { useSelector } from '@xstate/react';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
@@ -77,6 +77,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
     });
 
     const isValid = methods.formState.isValid;
+    const hasConditionError = 'condition' in methods.formState.errors;
 
     useEffect(() => {
       const { unsubscribe } = methods.watch((value) => {
@@ -144,7 +145,7 @@ export const WhereBlockConfiguration = forwardRef<HTMLDivElement, WhereBlockConf
                   size="s"
                   fill
                   onClick={methods.handleSubmit(handleSubmit)}
-                  disabled={!canSave || !isValid}
+                  disabled={!canSave || !isValid || hasConditionError}
                 >
                   {isConfigured
                     ? i18n.translate(
@@ -172,6 +173,25 @@ export const WhereBlockConditionEditor = () => {
       validate: (value) => isConditionComplete(value as Condition | undefined),
     },
   });
+  const { setError, clearErrors } = useFormContext<ConditionBlockFormState>();
+
+  const handleValidityChange = useCallback(
+    (isValid: boolean) => {
+      if (isValid) {
+        clearErrors('condition');
+        return;
+      }
+
+      setError('condition', {
+        type: 'manual',
+        message: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.invalidConditionJsonError',
+          { defaultMessage: 'Invalid JSON' }
+        ),
+      });
+    },
+    [clearErrors, setError]
+  );
 
   if (field.value === undefined) {
     return null;
@@ -181,6 +201,7 @@ export const WhereBlockConditionEditor = () => {
     <ProcessorConditionEditorWrapper
       condition={field.value as unknown as Condition}
       onConditionChange={field.onChange as (condition: Condition) => void}
+      onValidityChange={handleValidityChange}
     />
   );
 };

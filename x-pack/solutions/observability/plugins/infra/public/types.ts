@@ -43,6 +43,7 @@ import type {
   LogsSharedClientStartExports,
 } from '@kbn/logs-shared-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -91,6 +92,7 @@ export interface InfraClientStartDeps {
   discover: DiscoverStart;
   dashboard: DashboardStart;
   embeddable: EmbeddableStart;
+  inspector: InspectorPluginStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   logsDataAccess: LogsDataAccessPluginStart;

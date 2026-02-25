@@ -10,7 +10,7 @@
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { isEmpty } from 'lodash';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
@@ -57,6 +57,7 @@ export const deserializeSavedObjectState = async ({
   time_range,
   title: embeddableTitle,
   description: embeddableDescription,
+
   hide_title,
 }: VisualizeByReferenceState) => {
   // Load a saved visualization from the library
@@ -116,7 +117,7 @@ export const serializeState: (props: {
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
-  getDynamicActionsState?: (() => DynamicActionsSerializedState) | undefined;
+  drilldowns?: SerializedDrilldowns;
   time_range?: VisualizeRuntimeState['time_range'];
 }) => VisualizeEmbeddableState = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
@@ -124,15 +125,14 @@ export const serializeState: (props: {
   id,
   savedObjectProperties,
   linkedToLibrary,
-  getDynamicActionsState,
+  drilldowns,
   time_range,
 }) => {
-  const dynamicActionsState = getDynamicActionsState ? getDynamicActionsState() : {};
   // save by reference
   if (linkedToLibrary && id) {
     return {
       ...(titles ? titles : {}),
-      ...dynamicActionsState,
+      ...(drilldowns ? drilldowns : {}),
       ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
       ...(time_range ? { time_range } : {}),
       savedObjectId: id,
@@ -142,7 +142,7 @@ export const serializeState: (props: {
   return {
     ...(titles ? titles : {}),
     ...savedObjectProperties,
-    ...dynamicActionsState,
+    ...(drilldowns ? drilldowns : {}),
     ...(time_range ? { time_range } : {}),
     savedVis: {
       ...serializedVis,
