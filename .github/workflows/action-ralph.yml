@@ -850,30 +850,26 @@ jobs:
           GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
 
   # ---------------------------------------------------------------------------
-  # Phase B (review mode): Read-only PR analysis via /review-ralph.
-  # No bootstrap, no publish, no code changes.
+  # Review mode split into three phases:
+  # 1) prepare prompt/context with GH read permissions
+  # 2) run opencode in sandbox with permissions:{}
+  # 3) publish comment with GH write permissions
   # ---------------------------------------------------------------------------
-  review:
-    name: "Phase B: Review Ralph"
+  review_prepare:
+    name: "Review Phase A: Build Context"
     needs: prepare
     if: needs.prepare.outputs.command_mode == 'review' && needs.prepare.outputs.is_pr == 'true'
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
-    timeout-minutes: 30
+    timeout-minutes: 15
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
+    outputs:
+      task: ${{ steps.review_prompt.outputs.task }}
+      model: ${{ steps.review_prompt.outputs.model }}
+      litellm_model: ${{ steps.review_prompt.outputs.litellm_model }}
 
     steps:
-      - name: Checkout PR source (read-only)
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.pr_branch }}
-          fetch-depth: 1
-          repository: ${{ needs.prepare.outputs.pr_head_repo }}
-
-      - name: Install OpenCode CLI
-        run: curl -fsSL https://opencode.ai/install | bash
-
       - name: Resolve review prompt and model
         id: review_prompt
         env:
@@ -951,12 +947,31 @@ jobs:
           echo "model=${DEFAULT_MODEL}" >> "$GITHUB_OUTPUT"
           echo "litellm_model=${DEFAULT_MODEL#litellm/}" >> "$GITHUB_OUTPUT"
 
+  review_sandbox:
+    name: "Review Phase B: Sandbox Analysis"
+    needs: [prepare, review_prepare]
+    if: needs.prepare.outputs.command_mode == 'review' && needs.prepare.outputs.is_pr == 'true'
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    timeout-minutes: 30
+    permissions: {}
+
+    steps:
+      - name: Checkout PR source (read-only)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.pr_branch }}
+          fetch-depth: 1
+          repository: ${{ needs.prepare.outputs.pr_head_repo }}
+
+      - name: Install OpenCode CLI
+        run: curl -fsSL https://opencode.ai/install | bash
+
       - name: Create short-lived LiteLLM key
         id: short_lived_key_review
         env:
           LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
           LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
-          LITELLM_MODEL: ${{ steps.review_prompt.outputs.litellm_model }}
+          LITELLM_MODEL: ${{ needs.review_prepare.outputs.litellm_model }}
           RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
@@ -980,7 +995,7 @@ jobs:
       - name: Configure OpenCode for review mode
         env:
           LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
-          LITELLM_MODEL: ${{ steps.review_prompt.outputs.litellm_model }}
+          LITELLM_MODEL: ${{ needs.review_prepare.outputs.litellm_model }}
         run: |
           set -euo pipefail
           cat > "$GITHUB_WORKSPACE/opencode.json" <<OCEOF
@@ -1008,25 +1023,22 @@ jobs:
       - name: Run read-only review
         env:
           LITELLM_API_KEY: ${{ steps.short_lived_key_review.outputs.api_key }}
-          MODEL: ${{ steps.review_prompt.outputs.model }}
-          TASK: ${{ steps.review_prompt.outputs.task }}
-          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
-          GH_TOKEN: ${{ github.token }}
+          MODEL: ${{ needs.review_prepare.outputs.model }}
+          TASK: ${{ needs.review_prepare.outputs.task }}
         run: |
           set -euo pipefail
           RALPH_DIR="$GITHUB_WORKSPACE/.action-ralph-runtime"
-          SESSION_DIR="$RALPH_DIR/session"
-          mkdir -p "$SESSION_DIR"
+          OUTPUT_DIR="$RALPH_DIR/review-output"
+          mkdir -p "$OUTPUT_DIR"
           export HOME="$RALPH_DIR/home"
           mkdir -p "$HOME"
 
-          opencode run "$TASK" --model "$MODEL" 2>&1 | tee "$SESSION_DIR/review-run.md"
+          opencode run "$TASK" --model "$MODEL" 2>&1 | tee "$OUTPUT_DIR/review-run.md"
 
-          awk '/REVIEW_SUMMARY_BEGIN/{flag=1;next}/REVIEW_SUMMARY_END/{flag=0}flag' "$SESSION_DIR/review-run.md" > "$SESSION_DIR/review-summary.md" || true
-          if [ ! -s "$SESSION_DIR/review-summary.md" ]; then
-            echo "- Review Ralph could not extract a structured summary; see workflow logs for full output." > "$SESSION_DIR/review-summary.md"
+          awk '/REVIEW_SUMMARY_BEGIN/{flag=1;next}/REVIEW_SUMMARY_END/{flag=0}flag' "$OUTPUT_DIR/review-run.md" > "$OUTPUT_DIR/review-summary.md" || true
+          if [ ! -s "$OUTPUT_DIR/review-summary.md" ]; then
+            echo "- Review Ralph could not extract a structured summary; see workflow logs for full output." > "$OUTPUT_DIR/review-summary.md"
           fi
-          cp "$SESSION_DIR/review-summary.md" /tmp/review-summary.md
 
           if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
             echo "::warning::Review mode produced local file changes; discarding and continuing with summary."
@@ -1034,10 +1046,43 @@ jobs:
             git clean -fd >/dev/null 2>&1 || true
           fi
 
+      - name: Upload review output
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-output
+          path: ${{ github.workspace }}/.action-ralph-runtime/review-output/
+          retention-days: 1
+
+  review_publish:
+    name: "Review Phase C: Publish Comment"
+    needs: [prepare, review_sandbox]
+    if: needs.prepare.outputs.command_mode == 'review' && needs.prepare.outputs.is_pr == 'true' && needs.review_sandbox.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Download review output
+        uses: actions/download-artifact@v4
+        with:
+          name: review-output
+          path: /tmp/review-output
+
+      - name: Post review summary comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+        run: |
+          set -euo pipefail
           {
             echo "Review Ralph response for your request."
             echo ""
-            cat /tmp/review-summary.md
+            if [ -f /tmp/review-output/review-summary.md ]; then
+              cat /tmp/review-output/review-summary.md
+            else
+              echo "- Review summary artifact missing."
+            fi
             echo ""
             echo "---"
             echo "**Workflow run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
