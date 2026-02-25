@@ -184,7 +184,7 @@
         "label": "DiscoverAppState",
         "description": [],
         "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-        "lineNumber": 50,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -202,7 +202,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -227,7 +227,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -252,7 +252,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -270,7 +270,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -289,7 +289,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -307,7 +307,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -340,7 +340,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -358,7 +358,7 @@
               "string[][] | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -376,7 +376,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -401,7 +401,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -419,7 +419,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -437,7 +437,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -455,7 +455,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 99,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -473,7 +473,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 103,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -491,7 +491,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 107,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -509,7 +509,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 111,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -534,7 +534,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
