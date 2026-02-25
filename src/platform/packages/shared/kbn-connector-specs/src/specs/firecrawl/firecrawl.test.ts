@@ -75,6 +75,7 @@ describe('FirecrawlConnector', () => {
 
       const result = await FirecrawlConnector.actions.search.handler(mockContext, {
         query: 'test query',
+        limit: 5,
       });
 
       expect(mockClient.post).toHaveBeenCalledWith('https://api.firecrawl.dev/v2/search', {
@@ -92,6 +93,8 @@ describe('FirecrawlConnector', () => {
 
       const result = await FirecrawlConnector.actions.map.handler(mockContext, {
         url: 'https://example.com',
+        limit: 5000,
+        includeSubdomains: true,
       });
 
       expect(mockClient.post).toHaveBeenCalledWith(
@@ -113,6 +116,8 @@ describe('FirecrawlConnector', () => {
 
       const result = await FirecrawlConnector.actions.crawl.handler(mockContext, {
         url: 'https://example.com',
+        limit: 100,
+        allowExternalLinks: false,
       });
 
       expect(mockClient.post).toHaveBeenCalledWith(
