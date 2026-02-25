@@ -7,13 +7,28 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { AggregateQuery } from '@kbn/es-query';
 import { createFormWrapper } from '../../test_utils';
 import { QueryFieldGroup } from './query_field_group';
 
-// Mock CodeEditorField since it requires Monaco which is complex to set up in tests
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditorField: ({ placeholder, 'aria-label': ariaLabel }: any) => (
-    <textarea placeholder={placeholder} aria-label={ariaLabel} data-test-subj="mockedCodeEditor" />
+// Mock ESQLLangEditor since it requires complex Kibana services
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: ({
+    query,
+    onTextLangQueryChange,
+    dataTestSubj,
+  }: {
+    query: AggregateQuery;
+    onTextLangQueryChange: (query: AggregateQuery) => void;
+    dataTestSubj?: string;
+  }) => (
+    <div data-test-subj={dataTestSubj}>
+      <textarea
+        data-test-subj={`${dataTestSubj}-input`}
+        value={query.esql}
+        onChange={(e) => onTextLangQueryChange({ esql: e.target.value })}
+      />
+    </div>
   ),
 }));
 
@@ -53,10 +68,10 @@ describe('QueryFieldGroup', () => {
       </Wrapper>
     );
 
-    expect(screen.getByTestId('mockedCodeEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleV2FormEvaluationQueryField')).toBeInTheDocument();
   });
 
-  it('renders the editor with correct placeholder', () => {
+  it('renders the editor input', () => {
     const Wrapper = createFormWrapper();
 
     render(
@@ -65,19 +80,7 @@ describe('QueryFieldGroup', () => {
       </Wrapper>
     );
 
-    expect(screen.getByPlaceholderText('FROM logs-* | WHERE ...')).toBeInTheDocument();
-  });
-
-  it('renders the editor with accessible aria-label', () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <QueryFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByLabelText('ES|QL query editor')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleV2FormEvaluationQueryField-editor-input')).toBeInTheDocument();
   });
 
   it('renders with pre-filled query value', () => {
@@ -97,5 +100,8 @@ describe('QueryFieldGroup', () => {
 
     // The component should render without errors with pre-filled values
     expect(screen.getByText('Query')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleV2FormEvaluationQueryField-editor-input')).toHaveValue(
+      'FROM metrics-* | STATS count()'
+    );
   });
 });

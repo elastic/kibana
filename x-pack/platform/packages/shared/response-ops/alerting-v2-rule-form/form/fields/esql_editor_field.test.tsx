@@ -6,29 +6,42 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EsqlEditorField, EDITOR_HEIGHT_INLINE, EDITOR_HEIGHT_DEFAULT } from './esql_editor_field';
 import { createFormWrapper } from '../../test_utils';
+import type { AggregateQuery } from '@kbn/es-query';
 
-// Mock the CodeEditorField component
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditorField: ({
-    value,
-    onChange,
-    placeholder,
+// Mock the ESQLLangEditor component from @kbn/esql/public
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: ({
+    query,
+    onTextLangQueryChange,
+    errors,
+    warning,
+    isDisabled,
     dataTestSubj,
   }: {
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
+    query: AggregateQuery;
+    onTextLangQueryChange: (query: AggregateQuery) => void;
+    errors?: Error[];
+    warning?: string;
+    isDisabled?: boolean;
     dataTestSubj?: string;
   }) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-    />
+    <div data-test-subj={dataTestSubj}>
+      <textarea
+        data-test-subj={`${dataTestSubj}-input`}
+        value={query.esql}
+        onChange={(e) => onTextLangQueryChange({ esql: e.target.value })}
+        disabled={isDisabled}
+      />
+      {errors?.map((error, i) => (
+        <div key={i} data-test-subj={`${dataTestSubj}-error`}>
+          {error.message}
+        </div>
+      ))}
+      {warning && <div data-test-subj={`${dataTestSubj}-warning`}>{warning}</div>}
+    </div>
   ),
 }));
 
@@ -40,7 +53,7 @@ describe('EsqlEditorField', () => {
       }),
     });
 
-    expect(screen.getByTestId('test-editor')).toHaveValue('FROM logs-*');
+    expect(screen.getByTestId('test-editor-editor-input')).toHaveValue('FROM logs-*');
   });
 
   it('renders with empty value when form field is empty', () => {
@@ -50,7 +63,7 @@ describe('EsqlEditorField', () => {
       }),
     });
 
-    expect(screen.getByTestId('test-editor')).toHaveValue('');
+    expect(screen.getByTestId('test-editor-editor-input')).toHaveValue('');
   });
 
   it('renders label', () => {
@@ -85,22 +98,82 @@ describe('EsqlEditorField', () => {
     expect(screen.getByText('Enter an ES|QL query')).toBeInTheDocument();
   });
 
-  it('renders placeholder when provided', () => {
+  it('updates form value on change', () => {
+    render(<EsqlEditorField name="evaluation.query.base" dataTestSubj="test-editor" />, {
+      wrapper: createFormWrapper({
+        evaluation: { query: { base: 'FROM logs-*' } },
+      }),
+    });
+
+    const input = screen.getByTestId('test-editor-editor-input');
+    fireEvent.change(input, { target: { value: 'FROM metrics-*' } });
+
+    expect(input).toHaveValue('FROM metrics-*');
+  });
+
+  it('displays server errors when provided', () => {
+    const serverError = new Error('Query execution failed');
     render(
       <EsqlEditorField
         name="evaluation.query.base"
-        placeholder="FROM logs-* | WHERE ..."
         dataTestSubj="test-editor"
+        errors={[serverError]}
       />,
       {
-        wrapper: createFormWrapper({}),
+        wrapper: createFormWrapper({
+          evaluation: { query: { base: 'FROM logs-*' } },
+        }),
       }
     );
 
-    expect(screen.getByTestId('test-editor')).toHaveAttribute(
-      'placeholder',
-      'FROM logs-* | WHERE ...'
+    expect(screen.getByTestId('test-editor-editor-error')).toHaveTextContent(
+      'Query execution failed'
     );
+  });
+
+  it('displays server warnings when provided', () => {
+    render(
+      <EsqlEditorField
+        name="evaluation.query.base"
+        dataTestSubj="test-editor"
+        warning="Query is deprecated"
+      />,
+      {
+        wrapper: createFormWrapper({
+          evaluation: { query: { base: 'FROM logs-*' } },
+        }),
+      }
+    );
+
+    expect(screen.getByTestId('test-editor-editor-warning')).toHaveTextContent(
+      'Query is deprecated'
+    );
+  });
+
+  it('disables editor when disabled prop is true', () => {
+    render(
+      <EsqlEditorField name="evaluation.query.base" dataTestSubj="test-editor" disabled={true} />,
+      {
+        wrapper: createFormWrapper({
+          evaluation: { query: { base: 'FROM logs-*' } },
+        }),
+      }
+    );
+
+    expect(screen.getByTestId('test-editor-editor-input')).toBeDisabled();
+  });
+
+  it('disables editor when readOnly prop is true', () => {
+    render(
+      <EsqlEditorField name="evaluation.query.base" dataTestSubj="test-editor" readOnly={true} />,
+      {
+        wrapper: createFormWrapper({
+          evaluation: { query: { base: 'FROM logs-*' } },
+        }),
+      }
+    );
+
+    expect(screen.getByTestId('test-editor-editor-input')).toBeDisabled();
   });
 
   describe('exported constants', () => {

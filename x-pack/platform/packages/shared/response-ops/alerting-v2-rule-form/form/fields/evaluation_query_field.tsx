@@ -23,19 +23,13 @@ export const EvaluationQueryField: React.FC<EvaluationQueryFieldProps> = ({
   return (
     <EsqlEditorField
       name="evaluation.query.base"
-      ariaLabel={i18n.translate('xpack.alertingV2.ruleForm.evaluationQueryAriaLabel', {
-        defaultMessage: 'ES|QL query editor',
-      })}
-      placeholder={i18n.translate('xpack.alertingV2.ruleForm.evaluationQueryPlaceholder', {
-        defaultMessage: 'FROM logs-* | WHERE ...',
-      })}
       height={height}
       dataTestSubj={DATA_TEST_SUBJ}
       rules={{
         required: i18n.translate('xpack.alertingV2.ruleForm.queryRequiredError', {
           defaultMessage: 'ES|QL query is required.',
         }),
-        validate: (value: string) => validateEsqlQuery(value) ?? true,
+        validate: (value: string | undefined) => (value ? validateEsqlQuery(value) ?? true : true),
       }}
     />
   );

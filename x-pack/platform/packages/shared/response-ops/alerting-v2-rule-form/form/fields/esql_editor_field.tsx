@@ -5,37 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CodeEditorField } from '@kbn/code-editor';
+import { ESQLLangEditor } from '@kbn/esql/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { FormValues } from '../types';
 
-// Standard ES|QL editor heights from @kbn/esql-editor
+// Standard ES|QL editor heights matching @kbn/esql-editor
 const EDITOR_HEIGHT_INLINE = 140; // For inline editing/flyouts
 const EDITOR_HEIGHT_DEFAULT = 80; // Minimal editor
 
 /** Allowed field paths for ES|QL query fields */
 type EsqlQueryFieldPath = 'evaluation.query.base'; // | 'recovery_policy.query.base' in the future
-
-// Standard ES|QL editor Monaco options
-const ESQL_EDITOR_OPTIONS = {
-  fontSize: 14,
-  lineHeight: 22,
-  lineNumbers: 'on' as const,
-  folding: false,
-  automaticLayout: true,
-  minimap: { enabled: false },
-  scrollBeyondLastLine: false,
-  wordWrap: 'on' as const,
-  wrappingIndent: 'none' as const,
-  padding: { top: 8, bottom: 8 },
-  renderLineHighlight: 'line' as const,
-  scrollbar: {
-    horizontal: 'hidden' as const,
-    vertical: 'auto' as const,
-  },
-};
 
 export interface EsqlEditorFieldProps {
   /** The field path in the form - constrained to valid ES|QL query field paths */
@@ -50,7 +32,7 @@ export interface EsqlEditorFieldProps {
   helpText?: React.ReactNode;
   /** Placeholder text for the input */
   placeholder?: string;
-  /** Height of the editor (default: 140 for flyouts, 80 for minimal) */
+  /** Height of the editor (default: 140 for flyouts) */
   height?: string | number;
   /** Whether the field should take full width */
   fullWidth?: boolean;
@@ -63,13 +45,25 @@ export interface EsqlEditorFieldProps {
   /** Validation rules for react-hook-form */
   rules?: {
     required?: string;
-    validate?: (value: string | undefined) => string | boolean | true;
+    /** Validation function - can be sync or async. Return true for valid, or error string for invalid. */
+    validate?: (value: string | undefined) => string | boolean | Promise<string | boolean>;
   };
+  /** Server-side errors to display in the editor */
+  errors?: Error[];
+  /** Server-side warning to display in the editor */
+  warning?: string;
 }
 
 /**
- * An ES|QL editor field component using Monaco with ES|QL syntax highlighting.
- * Uses react-hook-form Controller for form integration.
+ * An ES|QL editor field component using the full ESQLLangEditor with syntax highlighting,
+ * autocomplete, and validation. Uses react-hook-form Controller for form integration.
+ *
+ * Features:
+ * - Full ES|QL syntax highlighting and autocomplete
+ * - Real-time client-side validation with error markers
+ * - Server-side error/warning display
+ * - Query history support
+ * - Inline editing mode optimized for flyouts
  *
  * @example
  * ```tsx
@@ -88,15 +82,15 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = ({
   name,
   label,
   labelTooltip,
-  ariaLabel,
   helpText,
-  placeholder,
   height = EDITOR_HEIGHT_INLINE,
   fullWidth = true,
   dataTestSubj,
   disabled = false,
   readOnly = false,
   rules,
+  errors: serverErrors,
+  warning: serverWarning,
 }) => {
   const { control } = useFormContext<FormValues>();
 
@@ -112,37 +106,78 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = ({
     )
   ) : undefined;
 
-  const editorOptions = {
-    ...ESQL_EDITOR_OPTIONS,
-    readOnly: readOnly || disabled,
-  };
+  // Convert string value to AggregateQuery format for ESQLLangEditor
+  const stringToQuery = useCallback((value: string | undefined): AggregateQuery => {
+    return { esql: value ?? '' };
+  }, []);
+
+  // Convert AggregateQuery back to string for form storage
+  const queryToString = useCallback((query: AggregateQuery): string => {
+    return query.esql;
+  }, []);
+
+  // Memoize editor style to prevent unnecessary re-renders
+  const editorStyle = useMemo(
+    () => ({
+      minHeight: typeof height === 'number' ? `${height}px` : height,
+    }),
+    [height]
+  );
+
+  // No-op submit handler - form submission is handled by parent
+  const handleQuerySubmit = useCallback(async () => {}, []);
 
   return (
     <Controller
       control={control}
       name={name}
       rules={rules}
-      render={({ field, fieldState }) => (
-        <EuiFormRow
-          label={labelElement}
-          helpText={helpText}
-          isInvalid={!!fieldState.error}
-          error={fieldState.error?.message}
-          fullWidth={fullWidth}
-        >
-          <CodeEditorField
-            languageId="esql"
-            value={(field.value as string) ?? ''}
-            onChange={(newValue) => field.onChange(newValue || undefined)}
-            height={height}
+      render={({ field, fieldState }) => {
+        const query = stringToQuery(field.value as string);
+
+        const handleQueryChange = (newQuery: AggregateQuery) => {
+          field.onChange(queryToString(newQuery));
+        };
+
+        // Combine form validation errors with server errors
+        const combinedErrors: Error[] | undefined = (() => {
+          const errs: Error[] = serverErrors ? [...serverErrors] : [];
+          if (fieldState.error?.message) {
+            errs.push(new Error(fieldState.error.message));
+          }
+          return errs.length > 0 ? errs : undefined;
+        })();
+
+        return (
+          <EuiFormRow
+            label={labelElement}
+            helpText={helpText}
+            isInvalid={!!fieldState.error}
+            error={fieldState.error?.message}
             fullWidth={fullWidth}
-            placeholder={placeholder}
-            options={editorOptions}
-            dataTestSubj={dataTestSubj}
-            aria-label={ariaLabel}
-          />
-        </EuiFormRow>
-      )}
+          >
+            <div style={editorStyle} data-test-subj={dataTestSubj}>
+              <ESQLLangEditor
+                query={query}
+                onTextLangQueryChange={handleQueryChange}
+                onTextLangQuerySubmit={handleQuerySubmit}
+                errors={combinedErrors}
+                warning={serverWarning}
+                isLoading={false}
+                isDisabled={disabled || readOnly}
+                hideRunQueryButton
+                editorIsInline
+                hasOutline
+                hideQueryHistory
+                disableAutoFocus
+                expandToFitQueryOnMount
+                mergeExternalMessages
+                dataTestSubj={`${dataTestSubj}-editor`}
+              />
+            </div>
+          </EuiFormRow>
+        );
+      }}
     />
   );
 };

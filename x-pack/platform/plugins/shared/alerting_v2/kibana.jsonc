@@ -15,6 +15,7 @@
       "spaces",
       "data",
       "dataViews",
+      "esql",
       "security"
     ],
     "optionalPlugins": ["management"],
