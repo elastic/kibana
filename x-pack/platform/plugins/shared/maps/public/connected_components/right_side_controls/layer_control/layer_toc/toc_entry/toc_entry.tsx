@@ -82,7 +82,7 @@ export class TOCEntry extends Component<Props, State> {
 
   static getTOCEntryEditButton(
     layerId: string | null,
-    querySelector = document.querySelector // For testing
+    querySelector: (selector: string) => Element | null = (sel) => document.querySelector(sel) // For testing
   ) {
     if (!layerId) return null;
     return querySelector(`[data-layerid="${layerId}"] button[data-edit-button]`);
@@ -90,7 +90,7 @@ export class TOCEntry extends Component<Props, State> {
 
   static showHiddenTOCEntryPopoverAction(
     actionElement: Element,
-    getQuerySelector = (element: any) => Reflect.get(element, 'querySelector') // For testing
+    getQuerySelector = (element: Element) => (sel: string) => element.querySelector(sel)
   ) {
     const enclosingLayer = actionElement.closest('[data-layerid]');
     const querySelector = enclosingLayer ? getQuerySelector(enclosingLayer) : () => null;
