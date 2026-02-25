@@ -14,7 +14,7 @@ import React, { useCallback, useState } from 'react';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
-import type { ApmPluginStartDeps } from '../../../../plugin';
+import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceName } from '../../../../hooks/use_service_name';
@@ -41,7 +41,7 @@ interface Props {
 }
 
 export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
-  const { slo } = useKibana<ApmPluginStartDeps>().services;
+  const { slo, telemetry } = useKibana<ApmPluginStartDeps & ApmServices>().services;
   const { query } = useApmParams('/*');
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutState, setFlyoutState] = useState<{
@@ -75,12 +75,24 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
           ? [
               {
                 name: createLatencySloLabel,
-                onClick: () => openFlyout('sli.apm.transactionDuration'),
+                onClick: () => {
+                  telemetry.reportSloCreateFlowStarted({
+                    sloType: 'sli.apm.transactionDuration',
+                    location: 'top_nav_button',
+                  });
+                  openFlyout('sli.apm.transactionDuration');
+                },
                 'data-test-subj': 'apmSlosMenuItemCreateLatencySlo',
               },
               {
                 name: createAvailabilitySloLabel,
-                onClick: () => openFlyout('sli.apm.transactionErrorRate'),
+                onClick: () => {
+                  telemetry.reportSloCreateFlowStarted({
+                    sloType: 'sli.apm.transactionErrorRate',
+                    location: 'top_nav_button',
+                  });
+                  openFlyout('sli.apm.transactionErrorRate');
+                },
                 'data-test-subj': 'apmSlosMenuItemCreateAvailabilitySlo',
               },
             ]
@@ -92,6 +104,8 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
                 href: manageSlosUrl,
                 icon: 'tableOfContents',
                 'data-test-subj': 'apmSlosMenuItemManageSlos',
+                onClick: () =>
+                  telemetry.reportSloAppRedirectClicked({ location: 'top_nav_button' }),
               },
             ]
           : []),
@@ -128,7 +142,10 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
             color="primary"
             iconType="arrowDown"
             iconSide="right"
-            onClick={() => setPopoverOpen((prevState) => !prevState)}
+            onClick={() => {
+              telemetry.reportSloTopNavClicked();
+              setPopoverOpen((prevState) => !prevState);
+            }}
             data-test-subj="apmSlosHeaderLink"
           >
             {sloLabel}
