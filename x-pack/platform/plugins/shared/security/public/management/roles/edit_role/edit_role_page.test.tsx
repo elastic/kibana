@@ -43,9 +43,7 @@ jest.mock('./privileges', () => {
       return (
         <div data-test-subj="elasticsearchPrivilegesMock">
           <div data-test-subj="indexPrivileges-indices" />
-          {props.canUseRemoteIndices && (
-            <div data-test-subj="indexPrivileges-remote_indices" />
-          )}
+          {props.canUseRemoteIndices && <div data-test-subj="indexPrivileges-remote_indices" />}
         </div>
       );
     },
@@ -59,9 +57,7 @@ jest.mock('./privileges/kibana/simple_privilege_section', () => ({
 jest.mock('./privileges/kibana/space_aware_privilege_section', () => ({
   SpaceAwarePrivilegeSection: ({ uiCapabilities }: any) => (
     <div data-test-subj="spaceAwarePrivilegeSectionMock">
-      {!uiCapabilities?.spaces?.manage && (
-        <div data-test-subj="userCannotManageSpacesCallout" />
-      )}
+      {!uiCapabilities?.spaces?.manage && <div data-test-subj="userCannotManageSpacesCallout" />}
     </div>
   ),
 }));
@@ -309,9 +305,7 @@ describe('<EditRolePage />', () => {
 
       await waitForRender();
 
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(true);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
       expectReadOnlyFormButtons();
     });
 
@@ -339,9 +333,7 @@ describe('<EditRolePage />', () => {
       expect(screen.getByTestId('reservedRoleBadgeTooltip')).toBeInTheDocument();
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(true);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
       expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
       expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
       expectReadOnlyFormButtons();
@@ -371,9 +363,7 @@ describe('<EditRolePage />', () => {
       expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(true);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
       expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
       expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
       expectSaveFormButtons();
@@ -392,9 +382,7 @@ describe('<EditRolePage />', () => {
 
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(false);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
       expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
       expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
       expectSaveFormButtons();
@@ -455,9 +443,7 @@ describe('<EditRolePage />', () => {
 
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(false);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
       expectSaveFormButtons();
     });
 
@@ -549,9 +535,7 @@ describe('<EditRolePage />', () => {
 
       await waitForRender();
 
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(true);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
       expectReadOnlyFormButtons();
     });
 
@@ -580,9 +564,7 @@ describe('<EditRolePage />', () => {
       expect(screen.getByTestId('reservedRoleBadgeTooltip')).toBeInTheDocument();
       expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(true);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
       expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
       expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
       expectReadOnlyFormButtons();
@@ -613,9 +595,7 @@ describe('<EditRolePage />', () => {
       expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
       expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(true);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
       expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
       expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
       expectSaveFormButtons();
@@ -694,9 +674,7 @@ describe('<EditRolePage />', () => {
 
       expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(false);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
       expect(screen.getByTestId('indexPrivileges-indices')).toBeInTheDocument();
       expect(screen.getByTestId('indexPrivileges-remote_indices')).toBeInTheDocument();
       expectSaveFormButtons();
@@ -758,9 +736,7 @@ describe('<EditRolePage />', () => {
 
       expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(false);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
       expectSaveFormButtons();
     });
 
@@ -895,9 +871,7 @@ describe('<EditRolePage />', () => {
     expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
     expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
     expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-    expect(
-      (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-    ).toBe(true);
+    expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
     expect(MockedElasticsearchPrivileges).toHaveBeenCalledWith(
       expect.objectContaining({ buildFlavor: 'serverless' })
     );
@@ -952,7 +926,9 @@ describe('<EditRolePage />', () => {
       await waitForRender();
 
       const formRow = screen.getByTestId('roleNameFormRow');
-      expect(within(formRow).getByText('A role with this name already exists.')).toBeInTheDocument();
+      expect(
+        within(formRow).getByText('A role with this name already exists.')
+      ).toBeInTheDocument();
       expectSaveFormButtons();
       expect(screen.getByTestId('roleFormSaveButton')).toBeDisabled();
     });
@@ -985,7 +961,9 @@ describe('<EditRolePage />', () => {
       await waitForRender();
 
       const formRow = screen.getByTestId('roleNameFormRow');
-      expect(within(formRow).getByText('A role with this name already exists.')).toBeInTheDocument();
+      expect(
+        within(formRow).getByText('A role with this name already exists.')
+      ).toBeInTheDocument();
       expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
       expectSaveFormButtons();
       expect(screen.getByTestId('roleFormSaveButton')).toBeDisabled();
@@ -1044,9 +1022,7 @@ describe('<EditRolePage />', () => {
       ).not.toBeInTheDocument();
       expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
-      expect(
-        (screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled
-      ).toBe(false);
+      expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
       expect(MockedElasticsearchPrivileges).toHaveBeenCalledWith(
         expect.objectContaining({ buildFlavor: 'serverless' })
       );

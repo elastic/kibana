@@ -49,19 +49,19 @@ const setup = (config: TestConfig) => {
   const onChangeAll = jest.fn();
   const { container } = render(
     <I18nProvider>
-    <EuiThemeProvider>
-      <FeatureTable
-        role={config.role}
-        privilegeCalculator={calculator}
-        kibanaPrivileges={kibanaPrivileges}
-        onChange={onChange}
-        onChangeAll={onChangeAll}
-        showAdditionalPermissionsMessage={true}
-        canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
-        privilegeIndex={config.privilegeIndex}
-        allSpacesSelected={true}
-      />
-    </EuiThemeProvider>
+      <EuiThemeProvider>
+        <FeatureTable
+          role={config.role}
+          privilegeCalculator={calculator}
+          kibanaPrivileges={kibanaPrivileges}
+          onChange={onChange}
+          onChangeAll={onChangeAll}
+          showAdditionalPermissionsMessage={true}
+          canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
+          privilegeIndex={config.privilegeIndex}
+          allSpacesSelected={true}
+        />
+      </EuiThemeProvider>
     </I18nProvider>
   );
 
@@ -373,11 +373,11 @@ describe('FeatureTable', () => {
     });
 
     kibanaFeatures.forEach((feature) => {
-      const childWrapper = container.querySelector(
-        `#featurePrivilegeControls_${feature.id}`
-      );
+      const childWrapper = container.querySelector(`#featurePrivilegeControls_${feature.id}`);
       const accordion = childWrapper?.closest('[data-test-subj="featurePrivilegeControls"]');
-      const arrowButton = accordion?.querySelector('.euiAccordion__arrow, [class*="euiAccordion__arrow"]');
+      const arrowButton = accordion?.querySelector(
+        '.euiAccordion__arrow, [class*="euiAccordion__arrow"]'
+      );
 
       if (!feature.subFeatures || feature.subFeatures.length === 0) {
         expect(arrowButton).toBeNull();
@@ -872,9 +872,7 @@ describe('FeatureTable', () => {
       container.querySelector('[data-test-subj="reservedFeatureDescription"]')?.textContent
     ).toMatchInlineSnapshot(`"this is my reserved feature description"`);
 
-    expect(
-      container.querySelector('[data-test-subj="primaryFeaturePrivilegeControl"]')
-    ).toBeNull();
+    expect(container.querySelector('[data-test-subj="primaryFeaturePrivilegeControl"]')).toBeNull();
   });
 
   it('renders subtext for features that define an optional description', () => {
@@ -972,9 +970,7 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(
-      container.querySelector('[data-test-subj="reservedFeatureDescription"]')
-    ).toBeNull();
+    expect(container.querySelector('[data-test-subj="reservedFeatureDescription"]')).toBeNull();
     expect(displayedPrivileges).toEqual({
       reserved_feature: {
         primaryFeaturePrivilege: 'none',
@@ -1457,9 +1453,7 @@ describe('FeatureTable', () => {
       fireEvent.click(container.querySelector('[data-test-subj="featureCategoryButton_foo"]')!);
       fireEvent.click(container.querySelector('[data-test-subj="featureTableCell"]')!);
 
-      expect(
-        container.querySelector('[data-test-subj="subFeatureDescription"]')
-      ).not.toBeNull();
+      expect(container.querySelector('[data-test-subj="subFeatureDescription"]')).not.toBeNull();
       expect(
         container.querySelector('[data-test-subj="subFeatureDescription"]')?.textContent
       ).toMatchInlineSnapshot(`"some sub feature description"`);

@@ -9,13 +9,13 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 
+import { I18nProvider } from '@kbn/i18n-react';
 import {
   createFeature,
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
 import { getDisplayedFeaturePrivileges } from '@kbn/security-ui-components/src/kibana_privilege_table/__fixtures__';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { Space } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
@@ -85,9 +85,7 @@ describe('PrivilegeSpaceForm', () => {
       onCancel: jest.fn(),
     });
 
-    expect(
-      container.querySelector('[data-test-subj="basePrivilegeButtonGroup"]')
-    ).toBeNull();
+    expect(container.querySelector('[data-test-subj="basePrivilegeButtonGroup"]')).toBeNull();
   });
 
   it('renders when a base privilege is selected', () => {

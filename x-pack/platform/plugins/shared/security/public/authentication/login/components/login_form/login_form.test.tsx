@@ -114,9 +114,7 @@ describe('LoginForm', () => {
 
     expectPageMode(PageMode.Form);
 
-    expect(screen.getByTestId('loginInfoMessage')).toHaveTextContent(
-      'Hey this is an info message'
-    );
+    expect(screen.getByTestId('loginInfoMessage')).toHaveTextContent('Hey this is an info message');
   });
 
   it('renders `Need help?` link if login help text is provided.', () => {
