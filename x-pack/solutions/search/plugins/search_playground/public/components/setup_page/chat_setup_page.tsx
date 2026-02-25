@@ -29,21 +29,21 @@ import { CreateIndexButton } from './create_index_button';
 import { UploadFileButton } from '../upload_file_button';
 import { PlaygroundBodySection } from '../playground_body_section';
 
-const EmptyPromptContentStyle = css`
-  max-inline-size: 36em;
-  margin: auto;
-`;
-const EmptyPromptStyle = css`
-  .euiEmptyPrompt__content {
-    max-inline-size: 56em;
-    inline-size: 100%;
-  }
+const EmptyPromptContentStyle = css({
+  maxInlineSize: '36em',
+  margin: 'auto',
+});
+const EmptyPromptStyle = css({
+  '.euiEmptyPrompt__content': {
+    maxInlineSize: '56em',
+    inlineSize: '100%',
+  },
 
-  .euiEmptyPrompt__footer {
-    max-inline-size: 36em;
-    margin: auto;
-  }
-`;
+  '.euiEmptyPrompt__footer': {
+    maxInlineSize: '36em',
+    margin: 'auto',
+  },
+});
 
 export const ChatSetupPage: React.FC = () => {
   const usageTracker = useUsageTracker();
