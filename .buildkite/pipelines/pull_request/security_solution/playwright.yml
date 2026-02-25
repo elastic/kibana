@@ -1,18 +1,27 @@
 steps:
+<<<<<<< HEAD:.buildkite/pipelines/pull_request/security_solution/playwright.yml
   - command: .buildkite/scripts/steps/functional/security_solution_playwright.sh
     label: 'Playwright - Security Solution Tests'
+=======
+  - command: .buildkite/scripts/steps/test/cspm_agentless_scout.sh
+    cancel_on_build_failing: true
+    label: 'CSPM Agentless Scout E2E Tests'
+>>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621)):.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml
     agents:
       machineType: n2-standard-4
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
+<<<<<<< HEAD:.buildkite/pipelines/pull_request/security_solution/playwright.yml
       - quick_checks
       - checks
       - linting
       - linting_with_types
       - check_types
       - check_oas_snapshot
+=======
+>>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621)):.buildkite/pipelines/pull_request/security_solution/cspm_agentless_scout.yml
     timeout_in_minutes: 60
     parallelism: 1
     retry:
