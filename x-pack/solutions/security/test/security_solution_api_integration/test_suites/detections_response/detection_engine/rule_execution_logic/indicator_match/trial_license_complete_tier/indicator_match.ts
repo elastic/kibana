@@ -31,6 +31,7 @@ import type { ThreatMapping } from '@kbn/security-solution-plugin/common/api/det
 import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
+import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 import type { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
@@ -52,6 +53,7 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -2763,6 +2765,111 @@ export default ({ getService }: FtrProviderContext) => {
         const alert = previewAlerts[0]._source;
         expect(alert?.user?.name).toEqual('user1');
         expect(alert?.host?.name).toEqual('server');
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const timestamp = new Date().toISOString();
+
+        // Create event documents with different namespaces
+        const eventDocNamespace1 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          user: { name: 'user1' },
+          host: { name: 'server' },
+        };
+        const eventDocNamespace2 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          user: { name: 'user2' },
+          host: { name: 'server' },
+        };
+        const eventDocNamespace3 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          user: { name: 'user3' },
+          host: { name: 'server' },
+        };
+
+        // Create threat indicators
+        const threatIndicatorDoc = (threatId: string, threatTimestamp: string) => ({
+          id: threatId,
+          '@timestamp': threatTimestamp,
+          data_stream: { namespace: 'namespace1' },
+          agent: { type: 'threat' },
+          user: { name: 'user1' },
+          host: { name: 'server' },
+        });
+
+        await indexListOfDocuments([
+          eventDocNamespace1,
+          eventDocNamespace2,
+          eventDocNamespace3,
+          threatIndicatorDoc(uuidv4(), timestamp),
+        ]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...createThreatMatchRule({
+            index: ['ecs_compliant'],
+            query: `* and NOT agent.type:"threat"`,
+            threat_index: ['ecs_compliant'],
+            threat_query: '* and agent.type:"threat"',
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    field: 'user.name',
+                    value: 'user.name',
+                    type: 'mapping',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'host.name',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+          }),
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1, not namespace2 or namespace3
+        // (namespace1 matches the threat indicator, namespace2 and namespace3 don't)
+        expect(previewAlerts.length).toEqual(1);
+        // @ts-expect-error namespace does not exist on type
+        expect(previewAlerts[0]._source?.data_stream?.namespace).toEqual('namespace1');
       });
     });
   });

@@ -37,14 +37,22 @@ export function transformPanelsOut(
   JSON.parse(panelsJSON).forEach((panel: SavedDashboardPanel) => {
     const panelReferences = getPanelReferences(containerReferences ?? [], panel);
     const { sectionId } = panel.gridData;
+    const panelProperties = transformPanelProperties(
+      panel,
+      panelReferences,
+      containerReferences,
+      isDashboardAppRequest
+    );
+
     if (sectionId) {
-      sectionsMap[sectionId].panels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences, isDashboardAppRequest)
-      );
+      if (!sectionsMap[sectionId]) {
+        logger?.warn(`Panel references non-existent section "${sectionId}", treating as top-level`);
+        topLevelPanels.push(panelProperties);
+      } else {
+        sectionsMap[sectionId].panels.push(panelProperties);
+      }
     } else {
-      topLevelPanels.push(
-        transformPanelProperties(panel, panelReferences, containerReferences, isDashboardAppRequest)
-      );
+      topLevelPanels.push(panelProperties);
     }
   });
   return [...topLevelPanels, ...Object.values(sectionsMap)];
