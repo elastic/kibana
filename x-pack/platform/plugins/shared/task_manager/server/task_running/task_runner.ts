@@ -27,6 +27,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -63,13 +64,14 @@ import type {
 } from '../task';
 import { isFailedRunResult, TaskStatus } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError, isUserError } from './errors';
+import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_OUTCOMES } from '../constants';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -130,6 +132,7 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
+  eventLogger: IEventLogger;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -184,6 +187,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
+  private eventLogger: IEventLogger;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -211,6 +215,7 @@ export class TaskManagerRunner implements TaskRunner {
     allowReadingInvalidState,
     strategy,
     getPollInterval,
+    eventLogger,
   }: Opts) {
     this.basePathService = basePathService;
     this.instance = asPending(sanitizeInstance(instance));
@@ -232,6 +237,7 @@ export class TaskManagerRunner implements TaskRunner {
     });
     this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
+    this.eventLogger = eventLogger;
   }
 
   /**
@@ -409,6 +415,15 @@ export class TaskManagerRunner implements TaskRunner {
       });
 
       const originalTaskCancel = this.task.cancel;
+
+      const logTaskCancelEvent = () => {
+        this.logTaskRunEvent(
+          this.instance.task,
+          stopTaskTimer(),
+          EVENT_LOG_OUTCOMES.cancel,
+          `Task ${this.taskType} "${this.id}" has been cancelled.`
+        );
+      };
       this.task.cancel = async function () {
         abortController.abort();
 
@@ -416,6 +431,9 @@ export class TaskManagerRunner implements TaskRunner {
         if (stopUpdatingLongRunningTasks) {
           stopUpdatingLongRunningTasks();
         }
+
+        logTaskCancelEvent();
+
         if (originalTaskCancel) return originalTaskCancel.call(this);
       };
 
@@ -868,6 +886,13 @@ export class TaskManagerRunner implements TaskRunner {
                 taskTiming
               )
             );
+            this.logTaskRunEvent(
+              task,
+              taskTiming,
+              EVENT_LOG_OUTCOMES.failure,
+              `Task ${this.taskType} "${this.id}" failed.`,
+              taskRunError
+            );
           } else {
             this.onTaskEvent(
               asTaskRunEvent(
@@ -875,6 +900,12 @@ export class TaskManagerRunner implements TaskRunner {
                 asOk({ ...processedResult, isExpired: taskHasExpired }),
                 taskTiming
               )
+            );
+            this.logTaskRunEvent(
+              task,
+              taskTiming,
+              EVENT_LOG_OUTCOMES.success,
+              `Task ${this.taskType} "${this.id}" completed successfully.`
             );
           }
         } catch (err) {
@@ -890,6 +921,13 @@ export class TaskManagerRunner implements TaskRunner {
               }),
               taskTiming
             )
+          );
+          this.logTaskRunEvent(
+            task,
+            taskTiming,
+            EVENT_LOG_OUTCOMES.failure,
+            `Task ${this.taskType} "${this.id}" failed.`,
+            err as Error
           );
           throw err;
         }
@@ -908,6 +946,13 @@ export class TaskManagerRunner implements TaskRunner {
             }),
             taskTiming
           )
+        );
+        this.logTaskRunEvent(
+          task,
+          taskTiming,
+          EVENT_LOG_OUTCOMES.failure,
+          `Task ${this.taskType} "${this.id}" failed.`,
+          error
         );
       }
     );
@@ -1002,6 +1047,44 @@ export class TaskManagerRunner implements TaskRunner {
       clearTimeout(timer);
     };
     return stop;
+  }
+
+  private logTaskRunEvent(
+    task: ConcreteTaskInstance,
+    taskTiming: TaskTiming,
+    outcome: string,
+    message: string,
+    error?: Error | DecoratedError
+  ): void {
+    const runDurationMs = taskTiming.stop - taskTiming.start;
+    const scheduleDelayMs =
+      task.startedAt && task.scheduledAt
+        ? task.startedAt.getTime() - task.scheduledAt.getTime()
+        : undefined;
+    const errorDetails = error
+      ? {
+          message: error.message,
+          ...(error.stack ? { stack_trace: error.stack } : {}),
+        }
+      : {};
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskRun,
+        outcome,
+        duration: runDurationMs,
+        start: new Date(taskTiming.start).toISOString(),
+        end: new Date(taskTiming.stop).toISOString(),
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          scheduled: task.scheduledAt.toISOString(),
+          ...(scheduleDelayMs != null ? { schedule_delay: scheduleDelayMs } : {}),
+        },
+      },
+      message,
+      ...(errorDetails ? { error: errorDetails } : {}),
+    });
   }
 }
 

@@ -18,3 +18,13 @@ export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
   'report:execute',
   'report:execute-scheduled',
 ];
+
+export const EVENT_LOG_PROVIDER = 'taskManager';
+export const EVENT_LOG_ACTIONS = {
+  taskRun: 'task-run',
+};
+export const EVENT_LOG_OUTCOMES = {
+  cancel: 'cancelled',
+  success: 'success',
+  failure: 'failure',
+};
