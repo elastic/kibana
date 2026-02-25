@@ -135,7 +135,6 @@ const DiscoverSaveButton: React.FC = () => {
   const saveSplitButtonCss = css`
     background-color: transparent !important;
     height: 28px !important;
-    margin-left: 4px;
   `;
   const saveSplitButtonSecondaryCss = css`
     background-color: transparent !important;

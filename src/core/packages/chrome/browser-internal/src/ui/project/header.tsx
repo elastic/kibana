@@ -97,11 +97,67 @@ const overflowMenuCss = css`
   width: 240px;
 `;
 
+/** POC: toolbar styles for secondary actions (mirrored from kbn-unified-data-table render_custom_toolbar controlGroup / controlGroupIconButton). */
+const getSecondaryToolbarCss = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => ({
+  controlGroup:
+    euiTheme &&
+    css({
+      position: 'relative',
+      overflow: 'hidden',
+      borderRadius: euiTheme.border.radius.small,
+      display: 'inline-flex',
+      alignItems: 'stretch',
+      flexDirection: 'row',
+
+      '&::after': {
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        borderRadius: 'inherit',
+        pointerEvents: 'none',
+      },
+
+      '& .headerAppActionsSecondaryToolbarControlIconButton .euiButtonIcon': {
+        borderRadius: 0,
+        border: 'none',
+      },
+
+      '& .headerAppActionsSecondaryToolbarControlIconButton + .headerAppActionsSecondaryToolbarControlIconButton':
+        {
+          borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        },
+    }),
+  controlGroupIconButton:
+    euiTheme &&
+    css({
+      '.euiToolTipAnchor .euiButtonIcon, .euiButtonIcon': {
+        inlineSize: '28px',
+        blockSize: '28px',
+        minWidth: '28px',
+        minHeight: '28px',
+        borderRadius: 'inherit',
+
+        '&:hover, &:active, &:focus': {
+          background: 'transparent',
+          animation: 'none !important',
+          transform: 'none !important',
+        },
+      },
+    }),
+});
+
 const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppActionsConfig }> = ({
   config,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const hasOverflow = config.overflowPanels && config.overflowPanels.length > 0;
+  const secondaryToolbarCss = getSecondaryToolbarCss({ euiTheme });
+  const hasSecondaryActions =
+    config.secondaryActions && config.secondaryActions.length > 0;
+  const showToolbar = hasSecondaryActions || hasOverflow;
+
   const overflowButton = (
     <EuiButtonIcon
       color="text"
@@ -111,26 +167,46 @@ const GlobalHeaderAppActionsFromConfig: React.FC<{ config: ChromeHeaderAppAction
       data-test-subj="headerGlobalNav-appActionsOverflowButton"
     />
   );
+
   return (
-    <EuiHeaderLinks gutterSize="none" popoverBreakpoints="none">
-      {config.secondaryActions?.map((action, index) => (
-        <React.Fragment key={index}>{action}</React.Fragment>
-      ))}
-      {hasOverflow && (
-        <EuiPopover
-          button={overflowButton}
-          isOpen={isOverflowOpen}
-          closePopover={() => setIsOverflowOpen(false)}
-          anchorPosition="downLeft"
-          panelPaddingSize="none"
+    <EuiHeaderLinks gutterSize="xs" popoverBreakpoints="none">
+      {showToolbar && (
+        <div
+          className="headerAppActionsSecondaryToolbarControlGroup"
+          css={secondaryToolbarCss.controlGroup}
+          data-test-subj="headerGlobalNav-appActionsSecondaryToolbar"
         >
-          <EuiContextMenu
-            css={overflowMenuCss}
-            size="s"
-            panels={config.overflowPanels as ComponentProps<typeof EuiContextMenu>['panels']}
-            initialPanelId={0}
-          />
-        </EuiPopover>
+          {config.secondaryActions?.map((action, index) => (
+            <div
+              key={index}
+              className="headerAppActionsSecondaryToolbarControlIconButton"
+              css={secondaryToolbarCss.controlGroupIconButton}
+            >
+              {action}
+            </div>
+          ))}
+          {hasOverflow && (
+            <div
+              className="headerAppActionsSecondaryToolbarControlIconButton"
+              css={secondaryToolbarCss.controlGroupIconButton}
+            >
+              <EuiPopover
+                button={overflowButton}
+                isOpen={isOverflowOpen}
+                closePopover={() => setIsOverflowOpen(false)}
+                anchorPosition="downLeft"
+                panelPaddingSize="none"
+              >
+                <EuiContextMenu
+                  css={overflowMenuCss}
+                  size="s"
+                  panels={config.overflowPanels as ComponentProps<typeof EuiContextMenu>['panels']}
+                  initialPanelId={0}
+                />
+              </EuiPopover>
+            </div>
+          )}
+        </div>
       )}
       {config.primaryActions?.map((action, index) => (
         <React.Fragment key={index}>{action}</React.Fragment>
