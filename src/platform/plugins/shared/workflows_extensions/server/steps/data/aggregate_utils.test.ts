@@ -15,6 +15,8 @@ import {
   parseGroupKeyValues,
 } from './aggregate_utils';
 
+const KEY_DELIMITER = '\0';
+
 describe('getFieldValue', () => {
   it('should extract a top-level field', () => {
     expect(getFieldValue({ name: 'Alice' }, 'name')).toBe('Alice');
@@ -102,9 +104,21 @@ describe('groupItemsByKeys', () => {
   it('should group by multiple keys', () => {
     const groups = groupItemsByKeys(items, ['status', 'priority']);
     expect(groups.size).toBe(3);
-    expect(groups.get('"open"::"high"')?.length).toBe(2);
-    expect(groups.get('"open"::"low"')?.length).toBe(1);
-    expect(groups.get('"closed"::"low"')?.length).toBe(1);
+    expect(groups.get(`"open"${KEY_DELIMITER}"high"`)?.length).toBe(2);
+    expect(groups.get(`"open"${KEY_DELIMITER}"low"`)?.length).toBe(1);
+    expect(groups.get(`"closed"${KEY_DELIMITER}"low"`)?.length).toBe(1);
+  });
+
+  it('should handle field values containing the old :: delimiter', () => {
+    const itemsWithDelimiter = [
+      { status: 'open::urgent', priority: 'high' },
+      { status: 'open::urgent', priority: 'high' },
+      { status: 'closed', priority: 'low' },
+    ];
+    const groups = groupItemsByKeys(itemsWithDelimiter, ['status', 'priority']);
+    expect(groups.size).toBe(2);
+    const urgentGroup = groups.get(`"open::urgent"${KEY_DELIMITER}"high"`);
+    expect(urgentGroup?.length).toBe(2);
   });
 
   it('should handle missing keys as undefined', () => {
@@ -114,6 +128,14 @@ describe('groupItemsByKeys', () => {
 
   it('should handle empty items', () => {
     const groups = groupItemsByKeys([], ['key']);
+    expect(groups.size).toBe(0);
+  });
+
+  it('should stop early when abort signal is fired', () => {
+    const controller = new AbortController();
+    controller.abort();
+    const largeItems = Array.from({ length: 5000 }, (_, i) => ({ key: i }));
+    const groups = groupItemsByKeys(largeItems, ['key'], controller.signal);
     expect(groups.size).toBe(0);
   });
 });
@@ -168,7 +190,7 @@ describe('parseGroupKeyValues', () => {
   });
 
   it('should parse multiple keys', () => {
-    expect(parseGroupKeyValues('"open"::"high"', ['status', 'priority'])).toEqual({
+    expect(parseGroupKeyValues(`"open"${KEY_DELIMITER}"high"`, ['status', 'priority'])).toEqual({
       status: 'open',
       priority: 'high',
     });
@@ -180,5 +202,11 @@ describe('parseGroupKeyValues', () => {
 
   it('should handle null values', () => {
     expect(parseGroupKeyValues('null', ['field'])).toEqual({ field: null });
+  });
+
+  it('should handle values containing :: in them', () => {
+    expect(parseGroupKeyValues('"open::urgent"', ['status'])).toEqual({
+      status: 'open::urgent',
+    });
   });
 });

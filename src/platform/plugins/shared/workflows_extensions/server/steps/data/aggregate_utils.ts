@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const MAX_AGGREGATE_ITEMS = 100_000;
+
+// Null character cannot appear in JSON.stringify output, making it collision-safe
+const KEY_DELIMITER = '\0';
+
 interface Metric {
   name: string;
   operation: 'count' | 'sum' | 'avg' | 'min' | 'max';
@@ -24,6 +29,10 @@ interface BucketConfig {
   ranges: BucketRange[];
 }
 
+/**
+ * Safely traverses nested fields via dot notation.
+ * e.g. getFieldValue({ user: { name: 'Bob' } }, 'user.name') => 'Bob'
+ */
 export function getFieldValue(item: unknown, field: string): unknown {
   if (typeof item !== 'object' || item === null) {
     return undefined;
@@ -60,31 +69,49 @@ export function computeMetric(items: unknown[], metric: Metric): number | null {
       return values.reduce((acc, v) => acc + v, 0);
     case 'avg':
       return values.reduce((acc, v) => acc + v, 0) / values.length;
+    // Using reduce instead of Math.min/max to avoid call stack overflow on large arrays (>50k)
     case 'min':
-      return Math.min(...values);
+      return values.reduce((acc, v) => (v < acc ? v : acc), values[0]);
     case 'max':
-      return Math.max(...values);
+      return values.reduce((acc, v) => (v > acc ? v : acc), values[0]);
   }
 }
 
-export function groupItemsByKeys(items: unknown[], keys: string[]): Map<string, unknown[]> {
+/**
+ * Groups items into a Map keyed by a composite of the requested field values.
+ * Each key part is JSON.stringify'd and joined with a null-char delimiter
+ * to avoid collision with user data (e.g. values containing "::").
+ */
+export function groupItemsByKeys(
+  items: unknown[],
+  keys: string[],
+  abortSignal?: AbortSignal
+): Map<string, unknown[]> {
   const groups = new Map<string, unknown[]>();
 
-  for (const item of items) {
-    const keyParts = keys.map((key) => JSON.stringify(getFieldValue(item, key)));
-    const compositeKey = keyParts.join('::');
+  for (let i = 0; i < items.length; i++) {
+    if (i % 1000 === 0 && abortSignal?.aborted) {
+      break;
+    }
+
+    const keyParts = keys.map((key) => JSON.stringify(getFieldValue(items[i], key)));
+    const compositeKey = keyParts.join(KEY_DELIMITER);
 
     const group = groups.get(compositeKey);
     if (group) {
-      group.push(item);
+      group.push(items[i]);
     } else {
-      groups.set(compositeKey, [item]);
+      groups.set(compositeKey, [items[i]]);
     }
   }
 
   return groups;
 }
 
+/**
+ * Assigns an item to a bucket range based on a numeric field.
+ * Ranges are half-open intervals: [from, to)
+ */
 export function assignBucket(item: unknown, config: BucketConfig): string | null {
   const value = getFieldValue(item, config.field);
 
@@ -117,8 +144,12 @@ function formatRangeLabel(range: BucketRange): string {
   return '*';
 }
 
+/**
+ * Inverse of the composite key built by groupItemsByKeys —
+ * splits the key and JSON.parse's each part back to its original value.
+ */
 export function parseGroupKeyValues(compositeKey: string, keys: string[]): Record<string, unknown> {
-  const parts = compositeKey.split('::');
+  const parts = compositeKey.split(KEY_DELIMITER);
   const result: Record<string, unknown> = {};
 
   for (let i = 0; i < keys.length; i++) {

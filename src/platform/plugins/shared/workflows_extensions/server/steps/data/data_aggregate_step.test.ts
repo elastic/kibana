@@ -330,6 +330,21 @@ describe('dataAggregateStepDefinition', () => {
 
       expect(output[0].avg_name).toBeNull();
     });
+
+    it('should return error when items exceed MAX_AGGREGATE_ITEMS', async () => {
+      const largeItems = Array.from({ length: 100_001 }, (_, i) => ({ key: i }));
+      const context = createMockContext(
+        { items: largeItems },
+        {
+          group_by: ['key'],
+          metrics: [{ name: 'count', operation: 'count' }],
+        }
+      );
+
+      const result = await dataAggregateStepDefinition.handler(context);
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain('exceeding the maximum');
+    });
   });
 
   describe('schema validation', () => {

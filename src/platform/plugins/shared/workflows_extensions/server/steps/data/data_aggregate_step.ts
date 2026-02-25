@@ -11,6 +11,7 @@ import {
   assignBucket,
   computeMetric,
   groupItemsByKeys,
+  MAX_AGGREGATE_ITEMS,
   parseGroupKeyValues,
 } from './aggregate_utils';
 import { dataAggregateStepCommonDefinition } from '../../../common/steps/data';
@@ -40,20 +41,15 @@ function buildAggregatedResults(
   groups: Map<string, unknown[]>,
   groupByKeys: string[],
   metrics: Metric[],
-  bucketLabels: Map<string, string> | null
+  hasBuckets: boolean
 ): Array<Record<string, unknown>> {
   const results: Array<Record<string, unknown>> = [];
 
   for (const [compositeKey, groupItems] of groups) {
     const record = parseGroupKeyValues(compositeKey, groupByKeys);
 
-    if (bucketLabels) {
-      const bucketKey = compositeKey.split('::').pop() ?? '';
-      try {
-        record._bucket = JSON.parse(bucketKey);
-      } catch {
-        record._bucket = bucketKey;
-      }
+    if (hasBuckets) {
+      record._bucket = record._bucket ?? null;
     }
 
     for (const metric of metrics) {
@@ -84,6 +80,28 @@ function sortResults(
   });
 }
 
+function applyOrderAndLimit(
+  results: Array<Record<string, unknown>>,
+  orderBy: string | undefined,
+  order: string | undefined,
+  limit: number | undefined,
+  logger: { debug: (msg: string) => void }
+): Array<Record<string, unknown>> {
+  let output = results;
+
+  if (orderBy) {
+    output = sortResults(output, orderBy, order ?? 'asc');
+  }
+
+  if (limit && limit < output.length) {
+    logger.debug(`Limiting results from ${output.length} to ${limit}`);
+    output = output.slice(0, limit);
+  }
+
+  logger.debug(`Aggregation complete: ${output.length} group(s)`);
+  return output;
+}
+
 export const dataAggregateStepDefinition = createServerStepDefinition({
   ...dataAggregateStepCommonDefinition,
   handler: async (context) => {
@@ -109,6 +127,14 @@ export const dataAggregateStepDefinition = createServerStepDefinition({
         return { output: [] };
       }
 
+      if (items.length > MAX_AGGREGATE_ITEMS) {
+        return {
+          error: new Error(
+            `Input array has ${items.length} items, exceeding the maximum of ${MAX_AGGREGATE_ITEMS}.`
+          ),
+        };
+      }
+
       const validation = validateMetrics(metrics);
       if (!validation.valid) {
         return { error: validation.error };
@@ -124,37 +150,21 @@ export const dataAggregateStepDefinition = createServerStepDefinition({
         return { error: new Error('Step was aborted before aggregation started') };
       }
 
-      let effectiveGroupByKeys = groupBy;
-      let bucketLabels: Map<string, string> | null = null;
-
       if (buckets) {
-        bucketLabels = new Map<string, string>();
-        const bucketedItems: Array<{ item: unknown; bucket: string }> = [];
-
-        for (let i = 0; i < items.length; i++) {
-          if (i % 1000 === 0 && context.abortSignal.aborted) {
-            return { error: new Error('Step was aborted during bucketing') };
-          }
-          const bucketLabel = assignBucket(items[i], buckets);
-          if (bucketLabel !== null) {
-            bucketedItems.push({ item: items[i], bucket: bucketLabel });
-          }
-        }
-
-        const wrappedItems = bucketedItems.map(({ item, bucket }) => ({
-          ...(item as Record<string, unknown>),
-          _bucket: bucket,
-        }));
-
-        effectiveGroupByKeys = [...groupBy, '_bucket'];
-        const groups = groupItemsByKeys(wrappedItems, effectiveGroupByKeys);
-        const results = buildAggregatedResults(groups, effectiveGroupByKeys, metrics, bucketLabels);
-
-        return { output: applyOrderAndLimit(results, orderBy, order, limit, context.logger) };
+        return aggregateWithBuckets(
+          items,
+          groupBy,
+          metrics,
+          buckets,
+          orderBy,
+          order,
+          limit,
+          context
+        );
       }
 
-      const groups = groupItemsByKeys(items, effectiveGroupByKeys);
-      const results = buildAggregatedResults(groups, effectiveGroupByKeys, metrics, null);
+      const groups = groupItemsByKeys(items, groupBy, context.abortSignal);
+      const results = buildAggregatedResults(groups, groupBy, metrics, false);
 
       return { output: applyOrderAndLimit(results, orderBy, order, limit, context.logger) };
     } catch (error) {
@@ -166,24 +176,41 @@ export const dataAggregateStepDefinition = createServerStepDefinition({
   },
 });
 
-function applyOrderAndLimit(
-  results: Array<Record<string, unknown>>,
+/**
+ * Handles the bucketed aggregation path: assigns each item to a bucket range,
+ * then injects _bucket as an additional grouping key so the standard
+ * groupItemsByKeys + buildAggregatedResults pipeline handles the rest.
+ */
+function aggregateWithBuckets(
+  items: unknown[],
+  groupBy: string[],
+  metrics: Metric[],
+  buckets: { field: string; ranges: Array<{ from?: number; to?: number; label?: string }> },
   orderBy: string | undefined,
   order: string | undefined,
   limit: number | undefined,
-  logger: { debug: (msg: string) => void }
-): Array<Record<string, unknown>> {
-  let output = results;
+  context: { abortSignal: AbortSignal; logger: { debug: (msg: string) => void } }
+): { output: Array<Record<string, unknown>> } | { error: Error } {
+  const bucketedItems: Array<{ item: unknown; bucket: string }> = [];
 
-  if (orderBy) {
-    output = sortResults(output, orderBy, order ?? 'asc');
+  for (let i = 0; i < items.length; i++) {
+    if (i % 1000 === 0 && context.abortSignal.aborted) {
+      return { error: new Error('Step was aborted during bucketing') };
+    }
+    const bucketLabel = assignBucket(items[i], buckets);
+    if (bucketLabel !== null) {
+      bucketedItems.push({ item: items[i], bucket: bucketLabel });
+    }
   }
 
-  if (limit && limit < output.length) {
-    logger.debug(`Limiting results from ${output.length} to ${limit}`);
-    output = output.slice(0, limit);
-  }
+  const wrappedItems = bucketedItems.map(({ item, bucket }) => ({
+    ...(item as Record<string, unknown>),
+    _bucket: bucket,
+  }));
 
-  logger.debug(`Aggregation complete: ${output.length} group(s)`);
-  return output;
+  const effectiveKeys = [...groupBy, '_bucket'];
+  const groups = groupItemsByKeys(wrappedItems, effectiveKeys, context.abortSignal);
+  const results = buildAggregatedResults(groups, effectiveKeys, metrics, true);
+
+  return { output: applyOrderAndLimit(results, orderBy, order, limit, context.logger) };
 }
