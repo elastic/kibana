@@ -507,9 +507,12 @@ describe('inside query', () => {
 });
 
 describe('aggregation functions (by clause)', () => {
-  test('suggests by after aggregation name before opening paren', async () => {
+  test('suggests by and wrapped arguments after aggregation name', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+
     await expectPromqlSuggestions('PROMQL sum ', {
-      textsContain: [promqlByCompleteItem.text, '($0) '],
+      textsContain: [promqlByCompleteItem.text, ...numericFields.map((name) => `(${name})`)],
+      labelsContain: ['avg', 'rate'],
       textsNotContain: [pipeCompleteItem.text],
     });
   });

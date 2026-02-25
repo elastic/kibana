@@ -8,11 +8,7 @@
  */
 
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
-import {
-  pipeCompleteItem,
-  promqlByCompleteItem,
-  promqlOpenParensCompleteItem,
-} from '../../../../registry/complete_items';
+import { pipeCompleteItem, promqlByCompleteItem } from '../../../../registry/complete_items';
 import type { PromQLFunctionParamType } from '../../../types';
 import { getPromqlFunctionParamTypes } from '../../promql';
 import { suggestOperators } from './operators';
@@ -44,7 +40,7 @@ export function suggestGrouping(input: SuggestGroupingInput): ISuggestionItem[] 
   } = input;
 
   if (isAfterAggregationName) {
-    return [promqlByCompleteItem, promqlOpenParensCompleteItem];
+    return [promqlByCompleteItem, ...buildVectorSuggestions(columns, [], true)];
   }
 
   if (preGroupedAgg) {
