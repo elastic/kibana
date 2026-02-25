@@ -63,7 +63,7 @@ export interface EsqlEditorFieldProps {
   /** Validation rules for react-hook-form */
   rules?: {
     required?: string;
-    validate?: (value: string) => string | boolean | true;
+    validate?: (value: string | undefined) => string | boolean | true;
   };
 }
 
