@@ -7,6 +7,7 @@
 import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 import type { RawRule } from '../../../../types';
 import { resetMonitoringLastRun, getNextRuleRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -24,7 +25,6 @@ import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { EnableRuleParams } from './types';
 import { enableRuleParamsSchema } from './schemas';
-import { isIntervalSchedule } from '@kbn/response-ops-scheduling-types';
 
 export async function enableRule(
   context: RulesClientContext,
