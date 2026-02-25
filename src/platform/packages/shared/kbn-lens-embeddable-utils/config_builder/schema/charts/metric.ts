@@ -50,7 +50,7 @@ const compareToSchemaShared = schema.object(
       schema.boolean({ meta: { description: 'Show value' }, defaultValue: true })
     ),
   },
-  { meta: { id: 'metricChartCompareToShared', title: 'Metric Compare To Shared' } }
+  { meta: { id: 'metricChartCompareToShared', title: 'Compare To Shared' } }
 );
 
 const barBackgroundChartSchema = schema.object({
@@ -83,7 +83,7 @@ export const complementaryVizSchemaESQL = barBackgroundChartSchema.extends(
      */
     max_value: esqlColumnSchema,
   },
-  { meta: { id: 'metricComplementaryBar', title: 'Metric Complementary Bar' } }
+  { meta: { id: 'metricComplementaryBar', title: 'Complementary Bar' } }
 );
 
 const metricStateBackgroundChartSchemaNoESQL = {
@@ -141,7 +141,7 @@ const metricStatePrimaryMetricOptionsSchema = {
         labels: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
         value: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       },
-      meta: { id: 'metricPrimaryMetricAlignments', title: 'Metric Primary Metric Alignments' },
+      meta: { id: 'metricPrimaryMetricAlignments', title: 'Primary Metric Alignments' },
     }
   ),
   /**
@@ -171,7 +171,7 @@ const metricStatePrimaryMetricOptionsSchema = {
       {
         meta: {
           id: 'metricIconConfig',
-          title: 'Metric Icon Configuration',
+          title: 'Icon Configuration',
           description: 'Icon configuration for primary metric',
         },
       }
@@ -235,13 +235,13 @@ const metricStateSecondaryMetricOptionsSchema = {
           to: schema.literal('baseline'),
           baseline: schema.number({ meta: { description: 'Baseline value' }, defaultValue: 0 }),
         },
-        { meta: { id: 'metricCompareToBaseline', title: 'Metric Compare To Baseline' } }
+        { meta: { id: 'metricCompareToBaseline', title: 'Compare To Baseline' } }
       ),
       compareToSchemaShared.extends(
         {
           to: schema.literal('primary'),
         },
-        { meta: { id: 'metricCompareToPrimary', title: 'Metric Compare To Primary' } }
+        { meta: { id: 'metricCompareToPrimary', title: 'Compare To Primary' } }
       ),
     ])
   ),

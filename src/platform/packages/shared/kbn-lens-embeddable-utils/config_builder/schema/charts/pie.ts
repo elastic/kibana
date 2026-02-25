@@ -48,7 +48,7 @@ const pieStateSharedSchema = {
       {
         meta: {
           id: 'pieLegend',
-          title: 'Pie/Donut Legend',
+          title: 'Legend',
           description: 'Legend configuration for pie/donut chart',
         },
       }

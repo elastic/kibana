@@ -53,7 +53,7 @@ const heatmapSharedStateSchema = {
     schema.object(legendSchemaProps, {
       meta: {
         id: 'heatmapLegend',
-        title: 'Heatmap Legend',
+        title: 'Legend',
         description: 'Legend configuration',
       },
     })
@@ -72,7 +72,7 @@ const heatmapSharedStateSchema = {
             {
               meta: {
                 id: 'heatmapXAxis',
-                title: 'Heatmap X Axis',
+                title: 'X Axis',
                 description: 'X axis configuration',
               },
             }
@@ -87,7 +87,7 @@ const heatmapSharedStateSchema = {
             {
               meta: {
                 id: 'heatmapYAxis',
-                title: 'Heatmap Y Axis',
+                title: 'Y Axis',
                 description: 'Y axis configuration',
               },
             }
@@ -97,7 +97,7 @@ const heatmapSharedStateSchema = {
       {
         meta: {
           id: 'heatmapAxes',
-          title: 'Heatmap Axes',
+          title: 'Axes',
           description: 'Axis configuration for X and Y axes',
         },
       }
@@ -117,7 +117,7 @@ const heatmapSharedStateSchema = {
           })
         ),
       },
-      { meta: { id: 'heatmapCells', title: 'Heatmap Cells', description: 'Cells configuration' } }
+      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
     )
   ),
 };

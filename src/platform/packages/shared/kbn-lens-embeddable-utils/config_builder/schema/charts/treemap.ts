@@ -46,7 +46,7 @@ const treemapSharedStateSchema = {
       {
         meta: {
           id: 'treemapLegend',
-          title: 'Treemap Legend',
+          title: 'Legend',
           description: 'Configuration for the treemap chart legend appearance and behavior',
         },
       }

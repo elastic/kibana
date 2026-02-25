@@ -55,7 +55,7 @@ export const waffleStateSharedSchema = {
       {
         meta: {
           id: 'waffleLegend',
-          title: 'Waffle Legend',
+          title: 'Legend',
           description: 'Legend configuration for waffle chart',
         },
       }

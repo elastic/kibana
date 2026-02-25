@@ -39,7 +39,7 @@ const mosaicStateSharedSchema = {
       {
         meta: {
           id: 'mosaicLegend',
-          title: 'Mosaic Legend',
+          title: 'Legend',
           description: 'Legend configuration for mosaic chart appearance and behavior',
         },
       }

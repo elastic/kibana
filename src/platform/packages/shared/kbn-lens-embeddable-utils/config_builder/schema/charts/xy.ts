@@ -294,7 +294,7 @@ const xySharedSettings = {
       {
         meta: {
           id: 'xyLegend',
-          title: 'XY Chart Legend',
+          title: 'Legend',
           description: 'Legend configuration for XY chart',
         },
       }
@@ -369,7 +369,7 @@ const xySharedSettings = {
       {
         meta: {
           id: 'xyAxis',
-          title: 'XY Axis',
+          title: 'Axis',
           description: 'Axis configuration for X, left Y, and right Y axes',
         },
       }
@@ -409,7 +409,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'xyLayerNoESQL',
-      title: 'XY Layer (DSL)',
+      title: 'Layer (DSL)',
       description: 'Data layer for standard queries with metrics and buckets',
     },
   }
@@ -447,7 +447,7 @@ const xyDataLayerSchemaESQL = schema.object(
   {
     meta: {
       id: 'xyLayerESQL',
-      title: 'XY Layer (ES|QL)',
+      title: 'Layer (ES|QL)',
       description: 'Data layer for ES|QL queries with column references',
     },
   }
@@ -539,7 +539,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
   {
     meta: {
       id: 'xyReferenceLineLayerNoESQL',
-      title: 'XY Reference Line Layer (DSL)',
+      title: 'Reference Line Layer (DSL)',
       description: 'Reference line layer for standard queries',
     },
   }
@@ -562,7 +562,7 @@ const referenceLineLayerSchemaESQL = schema.object(
   {
     meta: {
       id: 'xyReferenceLineLayerESQL',
-      title: 'XY Reference Line Layer (ES|QL)',
+      title: 'Reference Line Layer (ES|QL)',
       description: 'Reference line layer for ES|QL queries',
     },
   }
@@ -720,7 +720,7 @@ const annotationLayerSchema = schema.object(
   {
     meta: {
       id: 'xyAnnotationLayerNoESQL',
-      title: 'XY Annotation Layer (DSL)',
+      title: 'Annotation Layer (DSL)',
       description: 'Layer containing annotations (query-based, points, and ranges)',
     },
   }

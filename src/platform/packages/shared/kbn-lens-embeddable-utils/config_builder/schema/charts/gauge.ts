@@ -33,7 +33,7 @@ const gaugeStateSharedOptionsSchema = {
           {
             meta: {
               id: 'gaugeShapeBullet',
-              title: 'Gauge Shape (Bullet)',
+              title: 'Shape (Bullet)',
               description: 'Bullet gauge shape',
             },
           }
@@ -49,7 +49,7 @@ const gaugeStateSharedOptionsSchema = {
           {
             meta: {
               id: 'gaugeShapeCircular',
-              title: 'Gauge Shape (Circular)',
+              title: 'Shape (Circular)',
               description: 'Circular gauge shape',
             },
           }
