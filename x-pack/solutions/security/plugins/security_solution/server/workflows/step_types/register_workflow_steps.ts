@@ -6,10 +6,13 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { CoreStart } from '@kbn/core/server';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
-import { CoreStart } from '@kbn/core/server';
-import { REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG, REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT } from '@kbn/security-solution-plugin/common/constants';
+import {
+  REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
+  REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
+} from '../../../common/constants';
 
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin
