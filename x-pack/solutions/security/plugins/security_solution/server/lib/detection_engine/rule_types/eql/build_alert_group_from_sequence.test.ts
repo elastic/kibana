@@ -341,11 +341,11 @@ describe('buildAlert', () => {
         expect(intersection).toEqual({ a: { b: { c: 42 } } });
       });
 
-      test('should merge when both use dot notation for the same path', () => {
+      test('should merge when both use dot notation for the same path and keep the dot notation', () => {
         const a = { 'user.email': 'a@test.co' };
         const b = { 'user.email': 'a@test.co' };
         const intersection = objectPairIntersection(a, b);
-        expect(intersection).toEqual({ user: { email: 'a@test.co' } });
+        expect(intersection).toEqual({ 'user.email': 'a@test.co' });
       });
 
       test('should merge when use dot notation and nested notation are arrays', () => {

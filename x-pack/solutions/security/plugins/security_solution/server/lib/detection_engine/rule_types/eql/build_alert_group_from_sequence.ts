@@ -271,6 +271,38 @@ const flattenToPathValues = (obj: object): [string[], unknown][] => {
 };
 
 /**
+ * Flattens an object to path-value pairs
+ * and records which paths
+ * came from dot-notation keys.
+ * A path is "from dot" when it
+ * was produced by expanding a
+ * single key that contained '.'.
+ */
+const flattenToPathValuesWithNotation = (
+  obj: object
+): { pathValues: [string[], unknown][]; dotPaths: Set<string> } => {
+  const pathValues: [string[], unknown][] = [];
+  const dotPaths = new Set<string>();
+  const stack: [object, string[], boolean][] = [[obj, [], false]];
+  while (stack.length > 0 && stack.at(-1) != null) {
+    const [o, prefix, parentFromDot] = stack.pop() as [object, string[], boolean];
+    for (const [k, v] of Object.entries(o)) {
+      const path = prefix.concat(k.includes('.') ? k.split('.') : [k]);
+      const keyWasDot = k.includes('.');
+      if (isPlainObject(v)) {
+        stack.push([v, path, keyWasDot]);
+      } else {
+        pathValues.push([path, v]);
+        if (keyWasDot) {
+          dotPaths.add(path.join('.'));
+        }
+      }
+    }
+  }
+  return { pathValues, dotPaths };
+};
+
+/**
  * Builds a nested object from path-value pairs.
  */
 const unflatten = (pathValues: [string[], unknown][]): Record<string, unknown> => {
@@ -355,6 +387,42 @@ const pruneEmptyNestedObjects = (obj: Record<string, unknown>): void => {
 const hasDefinedValues = (obj: Record<string, unknown>): boolean =>
   Object.values(obj).some((v) => v !== undefined);
 
+/** Sets a value at a nested path, creating intermediate objects as needed. */
+const setAtPath = (obj: Record<string, unknown>, path: string[], value: unknown): void => {
+  let current = obj;
+  for (let i = 0; i < path.length - 1; i++) {
+    const p = path[i];
+    const next = current[p];
+    if (!isPlainObject(next)) {
+      current[p] = {};
+    }
+    current = current[p] as Record<string, unknown>;
+  }
+  current[path[path.length - 1]] = value;
+};
+
+/**
+ * Converts a normalized (nested) intersection result to output form:
+ * paths that were dot notation in both inputs stay as dot keys; others stay nested.
+ */
+const applyNotationPreference = (
+  intersectionNested: Record<string, unknown>,
+  aDotPaths: Set<string>,
+  bDotPaths: Set<string>
+): Record<string, unknown> => {
+  const pathValues = flattenToPathValues(intersectionNested);
+  const result: Record<string, unknown> = {};
+  for (const [path, value] of pathValues) {
+    const pathStr = path.join('.');
+    if (aDotPaths.has(pathStr) && bDotPaths.has(pathStr)) {
+      result[pathStr] = value;
+    } else {
+      setAtPath(result, path, value);
+    }
+  }
+  return result;
+};
+
 /**
  * Finds the intersection of two objects iteratively by
  * finding the "intersection" of each of their common keys'
@@ -372,11 +440,13 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
   if (a === undefined || b === undefined) {
     return undefined;
   }
+  const { dotPaths: aDotPaths } = flattenToPathValuesWithNotation(a);
+  const { dotPaths: bDotPaths } = flattenToPathValuesWithNotation(b);
   const aNorm = normalizeToNested(a) as Record<string, unknown>;
   const bNorm = normalizeToNested(b) as Record<string, unknown>;
-  const intersection: Record<string, unknown> = {};
+  const intersectionNested: Record<string, unknown> = {};
   const stack: [Record<string, unknown>, Record<string, unknown>, Record<string, unknown>][] = [
-    [intersection, aNorm, bNorm],
+    [intersectionNested, aNorm, bNorm],
   ];
   while (stack.length > 0) {
     const [target, aObj, bObj] = stack.pop() as [
@@ -399,6 +469,9 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
       }
     }
   }
-  pruneEmptyNestedObjects(intersection);
-  return hasDefinedValues(intersection) ? intersection : undefined;
+  pruneEmptyNestedObjects(intersectionNested);
+  if (!hasDefinedValues(intersectionNested)) {
+    return undefined;
+  }
+  return applyNotationPreference(intersectionNested, aDotPaths, bDotPaths);
 };
