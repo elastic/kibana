@@ -135,6 +135,22 @@ describe('schema validation', () => {
 
       expect(() => overviewEmbeddableSchema.validate(minimalState)).not.toThrow();
     });
+
+    it('should validate group overview state with empty group_filters or missing group_by', () => {
+      const stateWithEmptyGroupFilters = {
+        group_filters: {},
+        overview_mode: 'groups' as const,
+      };
+      expect(() => overviewEmbeddableSchema.validate(stateWithEmptyGroupFilters)).not.toThrow();
+
+      const stateWithGroupFiltersWithoutGroupBy = {
+        group_filters: { groups: ['healthy'] },
+        overview_mode: 'groups' as const,
+      };
+      expect(() =>
+        overviewEmbeddableSchema.validate(stateWithGroupFiltersWithoutGroupBy)
+      ).not.toThrow();
+    });
   });
 
   it('should validate single overview state with optional fields omitted', () => {

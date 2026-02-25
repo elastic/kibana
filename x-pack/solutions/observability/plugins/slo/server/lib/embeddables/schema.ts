@@ -42,7 +42,7 @@ const groupBySchema = schema.oneOf([
 const GroupOverviewCustomSchema = schema.object({
   group_filters: schema.maybe(
     schema.object({
-      group_by: groupBySchema,
+      group_by: schema.maybe(groupBySchema),
       groups: schema.maybe(schema.arrayOf(schema.string())),
       filters: schema.maybe(schema.arrayOf(asCodeFilterSchema)),
       kql_query: schema.maybe(schema.string()),

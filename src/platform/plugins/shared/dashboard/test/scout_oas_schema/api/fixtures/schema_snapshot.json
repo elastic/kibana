@@ -154,10 +154,7 @@
         "type": "string"
        }
       },
-      "additionalProperties": false,
-      "required": [
-       "group_by"
-      ]
+      "additionalProperties": false
      },
      "overview_mode": {
       "type": "string",
