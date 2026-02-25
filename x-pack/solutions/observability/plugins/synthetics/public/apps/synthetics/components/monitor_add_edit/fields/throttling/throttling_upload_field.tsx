@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormAppend, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Validation } from '../../../../../../../common/types';
@@ -69,11 +69,7 @@ export const ThrottlingUploadField = ({
         onChange={(event) => handleInputChange(event.target.value)}
         onBlur={() => onFieldBlur?.('upload')}
         data-test-subj="syntheticsBrowserUploadSpeed"
-        append={
-          <EuiText size="xs">
-            <strong>Mbps</strong>
-          </EuiText>
-        }
+        append={<EuiFormAppend label="Mbps" />}
         readOnly={readOnly}
       />
     </EuiFormRow>

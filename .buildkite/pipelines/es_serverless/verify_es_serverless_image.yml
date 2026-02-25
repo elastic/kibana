@@ -110,7 +110,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 4
+        parallelism: 5
         retry:
           automatic:
             - exit_status: '-1'
@@ -127,7 +127,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 10
+        parallelism: 11
         retry:
           automatic:
             - exit_status: '-1'
@@ -144,7 +144,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 5
+        parallelism: 6
         retry:
           automatic:
             - exit_status: '-1'
@@ -178,7 +178,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'
@@ -212,7 +212,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'
@@ -263,7 +263,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'

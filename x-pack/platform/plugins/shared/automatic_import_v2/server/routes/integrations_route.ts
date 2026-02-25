@@ -65,10 +65,14 @@ const getAllIntegrationsRoute = (
             (integration) => ({
               integrationId: integration.integrationId,
               title: integration.title,
+              logo: integration.logo,
               totalDataStreamCount: integration.dataStreams.length,
               successfulDataStreamCount: integration.dataStreams.filter(
                 (dataStream) => dataStream.status === 'completed'
               ).length,
+              version: integration.version,
+              createdBy: integration.createdBy,
+              createdByProfileUid: integration.createdByProfileUid,
               status: integration.status,
             })
           ) as AllIntegrationsResponseIntegration[];

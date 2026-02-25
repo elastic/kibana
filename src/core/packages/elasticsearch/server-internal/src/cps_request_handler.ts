@@ -11,44 +11,45 @@ import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import type { OnRequestHandler } from '@kbn/core-elasticsearch-client-server-internal';
 
-const LOCAL_PROJECT_ROUTING = '_alias:_origin';
-
 /** @internal */
-export class CpsRequestHandler {
-  constructor(private readonly cpsEnabled: boolean) {}
-
-  public readonly onRequest: OnRequestHandler = (_ctx, params, _options) => {
+export function getCpsRequestHandler(
+  cpsEnabled: boolean,
+  projectRouting: string
+): OnRequestHandler {
+  return (_ctx, params, _options) => {
     const body = isPlainObject(params.body) ? (params.body as Record<string, unknown>) : undefined;
 
-    if (this.cpsEnabled) {
-      if (this.shouldApplyProjectRouting(params.meta?.acceptedParams))
+    if (cpsEnabled) {
+      if (shouldApplyProjectRouting(params.meta?.acceptedParams)) {
         if (body?.pit) {
           // The project_routing is set by the openPit API, and thus part of the PIT context.
-          this.stripProjectRouting(body);
+          stripProjectRouting(body);
         } else {
-          this.injectProjectRouting(params, body);
+          injectProjectRouting(projectRouting, params, body);
         }
+      }
     } else {
-      this.stripProjectRouting(body);
+      stripProjectRouting(body);
     }
   };
+}
 
-  private stripProjectRouting(body: Record<string, unknown> | undefined): void {
-    if (body?.project_routing != null) {
-      delete body.project_routing;
-    }
+function stripProjectRouting(body: Record<string, unknown> | undefined): void {
+  if (body?.project_routing != null) {
+    delete body.project_routing;
   }
+}
 
-  private injectProjectRouting(
-    params: Parameters<OnRequestHandler>[1],
-    body: Record<string, unknown> | undefined
-  ): void {
-    if (!body?.project_routing) {
-      set(params, 'body.project_routing', LOCAL_PROJECT_ROUTING);
-    }
+function injectProjectRouting(
+  projectRouting: string,
+  params: Parameters<OnRequestHandler>[1],
+  body: Record<string, unknown> | undefined
+): void {
+  if (!body?.project_routing) {
+    set(params, 'body.project_routing', projectRouting);
   }
+}
 
-  private shouldApplyProjectRouting(acceptedParams: string[] | undefined): boolean {
-    return Boolean(acceptedParams?.includes('project_routing'));
-  }
+function shouldApplyProjectRouting(acceptedParams: string[] | undefined): boolean {
+  return Boolean(acceptedParams?.includes('project_routing'));
 }
