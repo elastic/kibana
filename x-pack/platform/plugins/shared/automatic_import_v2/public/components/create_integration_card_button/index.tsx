@@ -11,6 +11,6 @@ import type { CreateIntegrationSideCardButtonComponent } from './types';
 
 export const getCreateIntegrationSideCardButtonLazy =
   (): CreateIntegrationSideCardButtonComponent =>
-    React.memo(function CreateIntegrationSideCardButtonLazy(props) {
-      return <CreateIntegrationSideCardButton {...props} />;
+    React.memo(function CreateIntegrationSideCardButtonLazy() {
+      return <CreateIntegrationSideCardButton />;
     });
