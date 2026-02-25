@@ -895,7 +895,7 @@ export class StreamsClient {
     // For root streams, also disable in Elasticsearch
     if (isRootStream) {
       try {
-        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+        await this.dependencies.currentUser.transport.request({
           method: 'POST',
           path: `_streams/${name}/_disable`,
         });
