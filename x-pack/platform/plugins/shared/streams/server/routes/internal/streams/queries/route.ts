@@ -7,23 +7,17 @@
 
 import { z } from '@kbn/zod';
 import type { QueriesGetResponse, QueriesOccurrencesGetResponse } from '@kbn/streams-schema';
-import { sortForQueriesTable } from '../../../../lib/significant_events/utils';
+import { orderBy } from 'lodash';
+import {
+  streamQueryCategorySchema,
+  streamQuerySourceSchema,
+  streamQueryTypeSchema,
+} from '@kbn/streams-schema/src/queries';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 
 const dateFromString = z.string().transform((input) => new Date(input));
-
-const requestParamsSchema = z.object({
-  from: dateFromString.describe('Start of the time range'),
-  to: dateFromString.describe('End of the time range'),
-  bucketSize: z.string().describe('Size of time buckets for aggregation'),
-  query: z.string().optional().describe('Query string to filter significant events queries'),
-  streamNames: z
-    .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()).optional())
-    .describe('Stream names to filter significant events'),
-});
 
 export const getUnbackedQueriesCountRoute = createServerRoute({
   endpoint: 'GET /internal/streams/queries/_unbacked_count',
@@ -84,7 +78,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const all = await queryClient.getAllUnbackedQueries();
+    const all = await queryClient.getUnbackedQueryLinks();
     const requestedQueryIds = params?.body?.queryIds ?? [];
 
     let toPromote = all;
@@ -121,10 +115,35 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
   },
 });
 
-const getDiscoveryQueriesRoute = createServerRoute({
+const getQueriesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries',
   params: z.object({
-    query: requestParamsSchema.extend({
+    query: z.object({
+      search: z.string().optional().describe('Query string to filter significant events queries'),
+      streamName: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(z.string()).optional()
+        )
+        .describe('Stream names to filter significant events'),
+      type: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(streamQueryTypeSchema).optional()
+        )
+        .describe('Query types to filter by'),
+      category: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(streamQueryCategorySchema).optional()
+        )
+        .describe('Query categories to filter by'),
+      source: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(streamQuerySourceSchema).optional()
+        )
+        .describe('Query sources to filter by'),
       page: z.coerce.number().int().min(1).optional().describe('Page number (1-based)'),
       perPage: z.coerce
         .number()
@@ -146,39 +165,75 @@ const getDiscoveryQueriesRoute = createServerRoute({
     },
   },
   handler: async ({ params, request, getScopedClients, server }): Promise<QueriesGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames, page = 1, perPage = 10 } = params.query;
+    const { search, streamName, type, category, source, page = 1, perPage = 10 } = params.query;
 
-    const { significant_events: queries } = await readSignificantEventsFromAlertsIndices(
-      {
-        from,
-        to,
-        bucketSize,
-        query,
-        streamNames,
-      },
-      { queryClient, scopedClusterClient }
+    const [queries, unbackedQueryLinks] = await Promise.all([
+      queryClient.getQueries({
+        streamName,
+        type,
+        category,
+        source,
+        search: search?.trim(),
+      }),
+      queryClient.getUnbackedQueryLinks(),
+    ]);
+
+    const sortedQueries = orderBy(
+      queries,
+      [(query) => query.severity_score ?? 0, (query) => query.title],
+      ['desc', 'asc']
     );
-
-    const sortedQueries = sortForQueriesTable(queries);
     const total = queries.length;
     const start = (page - 1) * perPage;
     const queriesPage = start >= total ? [] : sortedQueries.slice(start, start + perPage);
+    const filteredQueryIds = new Set(queries.map((query) => query.id));
+    const unbacked = unbackedQueryLinks
+      .filter((queryLink) => filteredQueryIds.has(queryLink.query.id))
+      .map((queryLink) => queryLink.query.id);
 
-    return { queries: queriesPage, page, perPage, total };
+    return { queries: queriesPage, unbacked, page, perPage, total };
   },
 });
 
-const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_queries/_occurrences',
+const getQueriesOccurrencesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_queries/_occurrences_histogram',
   params: z.object({
-    query: requestParamsSchema,
+    query: z.object({
+      from: dateFromString.describe('Start of the time range'),
+      to: dateFromString.describe('End of the time range'),
+      bucketSize: z.string().describe('Size of time buckets for aggregation'),
+      search: z.string().optional().describe('Query string to filter significant events queries'),
+      streamName: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(z.string()).optional()
+        )
+        .describe('Stream names to filter significant events'),
+      type: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(streamQueryTypeSchema).optional()
+        )
+        .describe('Query types to filter by'),
+      category: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(streamQueryCategorySchema).optional()
+        )
+        .describe('Query categories to filter by'),
+      source: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(streamQuerySourceSchema).optional()
+        )
+        .describe('Query sources to filter by'),
+    }),
   }),
   options: {
     access: 'internal',
@@ -197,44 +252,81 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<QueriesOccurrencesGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames } = params.query;
+    const { from, to, bucketSize, search, streamName, type, category, source } = params.query;
 
-    const { aggregated_occurrences: aggregatedOccurrenceBuckets } =
-      await readSignificantEventsFromAlertsIndices(
-        {
-          from,
-          to,
-          bucketSize,
-          query,
-          streamNames,
-        },
-        { queryClient, scopedClusterClient }
-      );
+    const queries = await queryClient.getQueries({
+      streamName,
+      type,
+      category,
+      source,
+      search: search?.trim(),
+    });
 
-    const occurrencesHistogram = aggregatedOccurrenceBuckets.map((bucket) => ({
-      x: bucket.date,
-      y: bucket.count,
-    }));
+    return await queryClient.getQueryRuleOccurrences({
+      from,
+      to,
+      bucketSize,
+      filter: { queryId: queries.map((query) => query.id) },
+    });
+  },
+});
 
-    const totalOccurrences = aggregatedOccurrenceBuckets.reduce(
-      (sum, bucket) => sum + bucket.count,
-      0
-    );
+const getQueryOccurrencesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_queries/{queryId}/_occurrences',
+  params: z.object({
+    path: z.object({
+      queryId: z.string(),
+    }),
+    query: z.object({
+      from: dateFromString.describe('Start of the time range'),
+      to: dateFromString.describe('End of the time range'),
+      bucketSize: z.string().describe('Size of time buckets for aggregation'),
+    }),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Read occurrences for a single query',
+    description: 'Returns occurrences histogram for a single query across the selected time range.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<QueriesOccurrencesGetResponse> => {
+    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
-    return { occurrences_histogram: occurrencesHistogram, total_occurrences: totalOccurrences };
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { queryId } = params.path;
+    const { from, to, bucketSize } = params.query;
+
+    return queryClient.getQueryRuleOccurrences({
+      from,
+      to,
+      bucketSize,
+      filter: { queryId },
+    });
   },
 });
 
 export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
-  ...getDiscoveryQueriesRoute,
-  ...getDiscoveryQueriesOccurrencesRoute,
+  ...getQueriesRoute,
+  ...getQueriesOccurrencesRoute,
+  ...getQueryOccurrencesRoute,
 };

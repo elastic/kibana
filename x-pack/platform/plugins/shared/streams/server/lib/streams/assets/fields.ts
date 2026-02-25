@@ -14,12 +14,20 @@ export const ASSET_TYPE = 'asset.type';
 export const RULE_BACKED = 'rule_backed';
 
 export const QUERY_TITLE = 'query.title';
+export const QUERY_DESCRIPTION = 'query.description';
 export const QUERY_KQL_BODY = 'query.kql.query';
 export const QUERY_ESQL_QUERY = 'query.esql.query';
 export const QUERY_SEVERITY_SCORE = 'query.severity_score';
+export const QUERY_TYPE = 'query.type';
+export const QUERY_CATEGORY = 'query.category';
+export const QUERY_EVIDENCE = 'query.evidence';
+export const QUERY_TAGS = 'query.tags';
+export const QUERY_SOURCE = 'query.source';
+export const QUERY_MODEL = 'query.model';
+export const QUERY_CREATED_AT = 'query.created_at';
+export const QUERY_UPDATED_AT = 'query.updated_at';
 
 // Initially features were called systems, for backward compatibility we need to keep the same field names
 export const QUERY_FEATURE_NAME = 'experimental.query.system.name';
 export const QUERY_FEATURE_FILTER = 'experimental.query.system.filter';
 export const QUERY_FEATURE_TYPE = 'experimental.query.system.type';
-export const QUERY_EVIDENCE = 'experimental.query.evidence';

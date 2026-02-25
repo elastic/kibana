@@ -28,15 +28,15 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import React, { useState, useCallback, useMemo } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { StreamQuery } from '@kbn/streams-schema';
 import {
   DISCOVERY_QUERIES_QUERY_KEY,
   useFetchDiscoveryQueries,
-  type SignificantEventQueryRow,
 } from '../../../../hooks/use_fetch_discovery_queries';
 import {
   DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
-  useFetchDiscoveryQueriesOccurrences,
-} from '../../../../hooks/use_fetch_discovery_queries_occurrences';
+  useFetchQueriesAggregatedOccurrencesChartData,
+} from '../../../../hooks/use_fetch_queries_aggregated_occurrences_chart_data';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/use_queries_api';
 import {
@@ -64,7 +64,6 @@ import {
   NOT_PROMOTED_BADGE_LABEL,
   NOT_PROMOTED_TOOLTIP_CONTENT,
   OCCURRENCES_COLUMN,
-  OCCURRENCES_TOOLTIP_NAME,
   OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
   OPEN_IN_DISCOVER_ACTION_TITLE,
   PROMOTED_BADGE_LABEL,
@@ -87,7 +86,8 @@ import {
 } from './translations';
 import { PromoteAction } from './promote_action';
 import { QueryDetailsFlyout } from './query_details_flyout';
-import { formatLastOccurredAt } from './utils';
+import { QueryLastOccurredCell } from './query_last_occurred_cell';
+import { QueryOccurrencesSparkPlotCell } from './query_occurrences_spark_plot_cell';
 
 const DEFAULT_PAGINATION = { index: 0, size: 10 };
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
@@ -110,7 +110,7 @@ export function QueriesTable() {
     size: number;
   }>({ ...DEFAULT_PAGINATION });
 
-  const [selectedQuery, setSelectedQuery] = useState<SignificantEventQueryRow | null>(null);
+  const [selectedQuery, setSelectedQuery] = useState<StreamQuery | null>(null);
   const {
     data: queriesData,
     isLoading: queriesLoading,
@@ -120,7 +120,9 @@ export function QueriesTable() {
     page: pagination.index + 1,
     perPage: pagination.size,
   });
-  const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
+  const { data: occurrencesChartData } = useFetchQueriesAggregatedOccurrencesChartData({
+    search: searchQuery,
+  });
   const {
     data: streamsData,
     isLoading: streamsLoading,
@@ -156,7 +158,7 @@ export function QueriesTable() {
   const saveQueryMutation = useMutation<
     void,
     Error,
-    { updatedQuery: SignificantEventQueryRow['query']; streamName: string }
+    { updatedQuery: StreamQuery; streamName: string }
   >({
     mutationFn: async ({ updatedQuery, streamName }) => {
       await upsertQuery({ query: updatedQuery, streamName });
@@ -194,20 +196,17 @@ export function QueriesTable() {
     },
   });
 
-  const onTableChange = useCallback(
-    ({ page }: CriteriaWithPagination<SignificantEventQueryRow>) => {
-      if (!page) {
-        return;
-      }
+  const onTableChange = useCallback(({ page }: CriteriaWithPagination<StreamQuery>) => {
+    if (!page) {
+      return;
+    }
 
-      setPagination(page);
-    },
-    []
-  );
+    setPagination(page);
+  }, []);
 
   const tableItems = queriesData?.queries ?? [];
 
-  const columns: Array<EuiBasicTableColumn<SignificantEventQueryRow>> = useMemo(() => {
+  const columns: Array<EuiBasicTableColumn<StreamQuery>> = useMemo(() => {
     const streamDefinitions = streamsData?.streams ?? [];
     const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
@@ -216,7 +215,7 @@ export function QueriesTable() {
         field: 'details',
         name: '',
         width: '40px',
-        render: (_: unknown, item: SignificantEventQueryRow) => (
+        render: (_: unknown, item: StreamQuery) => (
           <EuiButtonIcon
             data-test-subj="queriesDiscoveryDetailsButton"
             iconType="expand"
@@ -226,66 +225,51 @@ export function QueriesTable() {
         ),
       },
       {
-        field: 'query.title',
+        field: 'title',
         name: TITLE_COLUMN,
-        render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiLink onClick={() => {}}>{item.query.title}</EuiLink>
+        render: (_: unknown, item: StreamQuery) => (
+          <EuiLink onClick={() => {}}>{item.title}</EuiLink>
         ),
       },
       {
-        field: 'query.severity_score',
+        field: 'severity_score',
         name: IMPACT_COLUMN,
-        render: (_: unknown, item: SignificantEventQueryRow) => {
-          return <SeverityBadge score={item.query.severity_score} />;
-        },
-      },
-      {
-        field: 'occurrences',
-        name: LAST_OCCURRED_COLUMN,
-        render: (_: unknown, item: SignificantEventQueryRow) => {
-          return <EuiText size="s">{formatLastOccurredAt(item.occurrences)}</EuiText>;
-        },
-      },
-      {
-        field: 'occurrences',
-        name: OCCURRENCES_COLUMN,
-        width: '160px',
-        align: 'center',
-        render: (_: unknown, item: SignificantEventQueryRow) => {
-          return (
-            <SparkPlot
-              id={`sparkplot-${item.query.id}`}
-              name={OCCURRENCES_TOOLTIP_NAME}
-              type="bar"
-              timeseries={item.occurrences}
-              annotations={[]}
-              compressed
-              hideAxis
-              height={32}
-            />
-          );
+        render: (_: unknown, item: StreamQuery) => {
+          return <SeverityBadge score={item.severity_score} />;
         },
       },
       {
         field: 'stream_name',
         name: STREAM_COLUMN,
-        render: (_: unknown, item: SignificantEventQueryRow) => (
+        render: (_: unknown, item: StreamQuery) => (
           <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
         ),
       },
       {
+        field: 'id',
+        name: LAST_OCCURRED_COLUMN,
+        render: (queryId: string) => <QueryLastOccurredCell queryId={queryId} />,
+      },
+      {
+        field: 'id',
+        name: OCCURRENCES_COLUMN,
+        width: '160px',
+        align: 'center',
+        render: (queryId: string) => <QueryOccurrencesSparkPlotCell queryId={queryId} />,
+      },
+      {
         field: 'rule_backed',
         name: BACKED_STATUS_COLUMN,
-        render: (_: unknown, item: SignificantEventQueryRow) => {
+        render: (_: unknown, item: StreamQuery) => {
+          const isBacked = !queriesData?.unbacked.includes(item.id);
+
           return (
             <EuiToolTip
-              content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
+              content={isBacked ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
             >
               <span tabIndex={0}>
-                {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
-                {!item.rule_backed && (
-                  <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>
-                )}
+                {isBacked && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
+                {!isBacked && <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>}
               </span>
             </EuiToolTip>
           );
@@ -309,9 +293,7 @@ export function QueriesTable() {
                 return;
               }
 
-              discoverLocator?.navigate(
-                buildDiscoverParams(item.query, definition.stream, timeState)
-              );
+              discoverLocator?.navigate(buildDiscoverParams(item, definition.stream, timeState));
             },
             isPrimary: true,
             'data-test-subj': 'significant_events_table_open_in_discover_action',
@@ -321,14 +303,14 @@ export function QueriesTable() {
             color: 'primary',
             name: PROMOTE_QUERY_ACTION_TITLE,
             description: PROMOTE_QUERY_ACTION_DESCRIPTION,
-            render: (item: SignificantEventQueryRow) => {
-              return <PromoteAction item={item} />;
+            render: (item: StreamQuery) => {
+              return <PromoteAction query={item} unbacked={queriesData?.unbacked ?? []} />;
             },
           },
         ],
       },
     ];
-  }, [share.url.locators, streamsData, timeState]);
+  }, [queriesData?.unbacked, share.url.locators, streamsData?.streams, timeState]);
 
   const isLoading = queriesLoading || streamsLoading;
   if (isLoading) {
@@ -411,7 +393,7 @@ export function QueriesTable() {
                 id="aggregated-occurrences"
                 name={CHART_SERIES_NAME}
                 type="bar"
-                timeseries={occurrencesData?.occurrences_histogram ?? []}
+                timeseries={occurrencesChartData?.buckets ?? []}
                 annotations={[]}
                 height={180}
               />
@@ -431,7 +413,7 @@ export function QueriesTable() {
           `}
           tableCaption={TABLE_CAPTION}
           columns={columns}
-          itemId={(item) => item.query.id}
+          itemId={(item) => item.id}
           items={tableItems}
           loading={queriesLoading || streamsLoading}
           noItemsMessage={!queriesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''}
@@ -447,6 +429,7 @@ export function QueriesTable() {
       {selectedQuery && (
         <QueryDetailsFlyout
           item={selectedQuery}
+          unbackedQueryIds={queriesData?.unbacked ?? []}
           onClose={() => setSelectedQuery(null)}
           onSave={(updatedQuery, streamName) =>
             saveQueryMutation.mutateAsync({ updatedQuery, streamName })

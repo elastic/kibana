@@ -86,9 +86,18 @@ export {
   type StreamQueryInput,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
+  type StreamQueryType,
+  type StreamQueryCategory,
+  type StreamQuerySource,
+  type GetQueriesFilters,
+  type QueryRuleOccurrences,
+  type QueryRuleOccurrencesHistogramBucket,
   upsertStreamQueryRequestSchema,
   streamQuerySchema,
   streamQueryInputSchema,
+  streamQueryTypeSchema,
+  streamQueryCategorySchema,
+  streamQuerySourceSchema,
 } from './src/queries';
 
 export {

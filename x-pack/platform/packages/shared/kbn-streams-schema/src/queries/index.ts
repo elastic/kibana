@@ -11,7 +11,6 @@ import { NonEmptyString } from '@kbn/zod-helpers';
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
-import type { SignificantEventsResponse } from '../api/significant_events';
 
 interface StreamQueryBase {
   id: string;
@@ -19,6 +18,7 @@ interface StreamQueryBase {
 }
 
 export interface StreamQuery extends StreamQueryBase {
+  stream_name: string;
   /**
    * @deprecated Use esql.query instead. Will be removed in a future version.
    */
@@ -43,6 +43,14 @@ export interface StreamQuery extends StreamQueryBase {
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
+  description?: string;
+  type: 'match' | 'stats';
+  category: 'operational' | 'error' | 'resource_health' | 'configuration' | 'security';
+  tags: string[];
+  source?: 'ai_generated' | 'user_created' | 'predefined';
+  model?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
@@ -50,11 +58,28 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   title: NonEmptyString,
 });
 
-export type StreamQueryInput = Omit<StreamQuery, 'esql'>;
+export const streamQueryTypeSchema = z.enum(['match', 'stats']);
+export const streamQueryCategorySchema = z.enum([
+  'operational',
+  'error',
+  'resource_health',
+  'configuration',
+  'security',
+]);
+export const streamQuerySourceSchema = z
+  .enum(['ai_generated', 'user_created', 'predefined'])
+  .optional();
+
+export type StreamQueryType = z.infer<typeof streamQueryTypeSchema>;
+export type StreamQueryCategory = z.infer<typeof streamQueryCategorySchema>;
+export type StreamQuerySource = z.infer<typeof streamQuerySourceSchema>;
+
+export type StreamQueryInput = Omit<StreamQuery, 'esql' | 'created_at' | 'updated_at'>;
 
 export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection(
   streamQueryBaseSchema,
   z.object({
+    stream_name: NonEmptyString,
     feature: z
       .object({
         name: NonEmptyString,
@@ -67,15 +92,24 @@ export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection
     }),
     severity_score: z.number().optional(),
     evidence: z.array(z.string()).optional(),
+    description: z.string().optional(),
+    type: streamQueryTypeSchema,
+    category: streamQueryCategorySchema,
+    tags: z.array(z.string()),
+    source: streamQuerySourceSchema,
+    model: z.string().optional(),
   })
 );
 
 export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
   streamQueryInputSchema,
   z.object({
+    stream_name: NonEmptyString,
     esql: z.object({
       query: z.string().describe('Full ES|QL query.'),
     }),
+    created_at: z.string().datetime().optional(),
+    updated_at: z.string().datetime().optional(),
   })
 );
 
@@ -97,16 +131,38 @@ export const upsertStreamQueryRequestSchema = z.object({
   }),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
+  description: z.string().optional(),
+  type: streamQueryTypeSchema,
+  category: streamQueryCategorySchema,
+  tags: z.array(z.string()),
+  source: streamQuerySourceSchema,
+  model: z.string().optional(),
 });
 
+export interface GetQueriesFilters {
+  streamName?: string | string[];
+  type?: StreamQueryType[];
+  category?: StreamQueryCategory[];
+  source?: StreamQuerySource[];
+  search?: string;
+}
+
+export interface QueryRuleOccurrencesHistogramBucket {
+  date: string;
+  count: number;
+}
+
+export interface QueryRuleOccurrences {
+  buckets: QueryRuleOccurrencesHistogramBucket[];
+  total: number;
+}
+
 export interface QueriesGetResponse {
-  queries: SignificantEventsResponse[];
+  queries: StreamQuery[];
+  unbacked: string[];
   page: number;
   perPage: number;
   total: number;
 }
 
-export interface QueriesOccurrencesGetResponse {
-  occurrences_histogram: Array<{ x: string; y: number }>;
-  total_occurrences: number;
-}
+export type QueriesOccurrencesGetResponse = QueryRuleOccurrences;

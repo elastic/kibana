@@ -7,24 +7,39 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { QueriesOccurrencesGetResponse } from '@kbn/streams-schema';
+import type {
+  QueryRuleOccurrencesHistogramBucket,
+  QueriesOccurrencesGetResponse,
+  StreamQueryCategory,
+  StreamQuerySource,
+  StreamQueryType,
+} from '@kbn/streams-schema';
 import moment from 'moment';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 import { useFetchErrorToast } from './use_fetch_error_toast';
 
-export interface DiscoveryQueriesOccurrencesFetchResult {
-  occurrences_histogram: Array<{ x: number; y: number }>;
-  total_occurrences: number;
+export interface QueriesAggregatedOccurrencesChartData {
+  buckets: Array<{ x: number; y: number }>;
+  total: number;
 }
 
 export const DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY = ['discoveryQueriesOccurrences'] as const;
 
-export const useFetchDiscoveryQueriesOccurrences = (
-  options: { name?: string; query?: string } | undefined = {},
+interface QueryOccurrencesFilters {
+  name?: string;
+  streamName?: string | string[];
+  search?: string;
+  type?: StreamQueryType[];
+  category?: StreamQueryCategory[];
+  source?: StreamQuerySource[];
+}
+
+export const useFetchQueriesAggregatedOccurrencesChartData = (
+  options: QueryOccurrencesFilters | undefined = {},
   deps: unknown[] = []
 ) => {
-  const { name, query } = options ?? {};
+  const { name, streamName, search, type, category, source } = options ?? {};
   const {
     dependencies: {
       start: {
@@ -36,10 +51,11 @@ export const useFetchDiscoveryQueriesOccurrences = (
   const showFetchErrorToast = useFetchErrorToast();
 
   const { timeState } = useTimefilter();
+  const normalizedStreamName = streamName ?? (name ? [name] : undefined);
 
   const fetchDiscoveryQueriesOccurrences = async ({
     signal,
-  }: QueryFunctionContext): Promise<DiscoveryQueriesOccurrencesFetchResult | undefined> => {
+  }: QueryFunctionContext): Promise<QueriesAggregatedOccurrencesChartData | undefined> => {
     const isoFrom = new Date(timeState.start).toISOString();
     const isoTo = new Date(timeState.end).toISOString();
 
@@ -60,15 +76,18 @@ export const useFetchDiscoveryQueriesOccurrences = (
     const intervalString = `${bucketSize.asSeconds()}s`;
 
     const response: QueriesOccurrencesGetResponse = await streamsRepositoryClient.fetch(
-      'GET /internal/streams/_queries/_occurrences',
+      'GET /internal/streams/_queries/_occurrences_histogram',
       {
         params: {
           query: {
             from: isoFrom,
             to: isoTo,
             bucketSize: intervalString,
-            query: query?.trim() ?? '',
-            streamNames: name ? [name] : undefined,
+            search: search?.trim() ?? '',
+            streamName: normalizedStreamName,
+            type,
+            category,
+            source,
           },
         },
         signal: signal ?? null,
@@ -76,23 +95,24 @@ export const useFetchDiscoveryQueriesOccurrences = (
     );
 
     return {
-      occurrences_histogram: response.occurrences_histogram.map(
-        (bucket: { x: string; y: number }) => ({
-          x: new Date(bucket.x).getTime(),
-          y: bucket.y,
-        })
-      ),
-      total_occurrences: response.total_occurrences,
+      buckets: response.buckets.map((bucket: QueryRuleOccurrencesHistogramBucket) => ({
+        x: new Date(bucket.date).getTime(),
+        y: bucket.count,
+      })),
+      total: response.total,
     };
   };
 
-  return useQuery<DiscoveryQueriesOccurrencesFetchResult | undefined, Error>({
+  return useQuery<QueriesAggregatedOccurrencesChartData | undefined, Error>({
     queryKey: [
       ...DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
-      name,
+      normalizedStreamName,
       timeState.start,
       timeState.end,
-      query,
+      search,
+      type,
+      category,
+      source,
       ...deps,
     ],
     queryFn: fetchDiscoveryQueriesOccurrences,

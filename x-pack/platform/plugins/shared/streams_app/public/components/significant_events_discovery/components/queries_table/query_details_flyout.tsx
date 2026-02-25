@@ -36,7 +36,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
 import { SeveritySelector } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/severity_selector';
@@ -57,11 +57,12 @@ import { formatLastOccurredAt } from './utils';
 import { AssetImage } from '../../../asset_image';
 
 interface QueryDetailsFlyoutProps {
-  item: SignificantEventItem;
+  item: StreamQuery;
+  unbackedQueryIds: string[];
   isSaving: boolean;
   isDeleting: boolean;
   onClose: () => void;
-  onSave: (updatedQuery: SignificantEventItem['query'], streamName: string) => Promise<void>;
+  onSave: (updatedQuery: StreamQuery, streamName: string) => Promise<void>;
   onDelete: (queryId: string, streamName: string) => Promise<void>;
 }
 
@@ -69,6 +70,7 @@ const DEFAULT_QUERY_PLACEHOLDER = '--';
 
 export function QueryDetailsFlyout({
   item,
+  unbackedQueryIds,
   isSaving,
   isDeleting,
   onClose,
@@ -82,42 +84,42 @@ export function QueryDetailsFlyout({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [title, setTitle] = useState(item.query.title);
+  const [title, setTitle] = useState(item.title);
   const [query, setQuery] = useState(getQueryInputValue(item));
-  const [severityScore, setSeverityScore] = useState(item.query.severity_score);
+  const [severityScore, setSeverityScore] = useState(item.severity_score);
 
   useEffect(() => {
     setIsActionsPopoverOpen(false);
     setIsDeleteModalVisible(false);
     setIsEditMode(false);
-    setTitle(item.query.title);
+    setTitle(item.title);
     setQuery(getQueryInputValue(item));
-    setSeverityScore(item.query.severity_score);
+    setSeverityScore(item.severity_score);
   }, [item]);
 
-  const lastOccurredAt = useMemo(
-    () => formatLastOccurredAt(item.occurrences, DEFAULT_QUERY_PLACEHOLDER),
-    [item.occurrences]
-  );
-  const hasDetectedOccurrences = useMemo(
-    () => item.occurrences.some((occurrence) => occurrence.y > 0),
-    [item.occurrences]
-  );
+  // const lastOccurredAt = useMemo(
+  //   () => formatLastOccurredAt(item.occurrences, DEFAULT_QUERY_PLACEHOLDER),
+  //   [item.occurrences]
+  // );
+  // const hasDetectedOccurrences = useMemo(
+  //   () => item.occurrences.some((occurrence) => occurrence.y > 0),
+  //   [item.occurrences]
+  // );
   const isSaveDisabled = !title.trim() || !query.trim() || isSaving;
 
   const handleCancelEdit = () => {
     setIsEditMode(false);
-    setTitle(item.query.title);
+    setTitle(item.title);
     setQuery(getQueryInputValue(item));
-    setSeverityScore(item.query.severity_score);
+    setSeverityScore(item.severity_score);
   };
   const handleSaveQuery = async () => {
     await onSave(
       {
-        ...item.query,
+        ...item,
         title: title.trim(),
         kql: {
-          ...item.query.kql,
+          ...item.kql,
           query: query.trim(),
         },
         severity_score: severityScore,
@@ -126,6 +128,8 @@ export function QueryDetailsFlyout({
     );
     setIsEditMode(false);
   };
+
+  const isBacked = !unbackedQueryIds.includes(item.id);
 
   const infoListItems = [
     {
@@ -138,12 +142,12 @@ export function QueryDetailsFlyout({
     },
     {
       title: IMPACT_COLUMN,
-      description: <SeverityBadge score={item.query.severity_score} />,
+      description: <SeverityBadge score={item.severity_score} />,
     },
-    {
-      title: LAST_OCCURRED_COLUMN,
-      description: <EuiText size="s">{lastOccurredAt}</EuiText>,
-    },
+    // {
+    //   title: LAST_OCCURRED_COLUMN,
+    //   description: <EuiText size="s">{lastOccurredAt}</EuiText>,
+    // },
     {
       title: STREAM_COLUMN,
       description: <EuiBadge color="hollow">{item.stream_name}</EuiBadge>,
@@ -151,12 +155,10 @@ export function QueryDetailsFlyout({
     {
       title: BACKED_STATUS_COLUMN,
       description: (
-        <EuiToolTip
-          content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
-        >
+        <EuiToolTip content={isBacked ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}>
           <span tabIndex={0}>
-            {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
-            {!item.rule_backed && <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>}
+            {isBacked && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
+            {!isBacked && <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>}
           </span>
         </EuiToolTip>
       ),
@@ -177,7 +179,7 @@ export function QueryDetailsFlyout({
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiTitle size="m">
-                <h2 id={flyoutTitleId}>{item.query.title}</h2>
+                <h2 id={flyoutTitleId}>{item.title}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -264,7 +266,7 @@ export function QueryDetailsFlyout({
                   ))}
                 </InfoPanel>
               </EuiFlexItem>
-              <EuiFlexItem>
+              {/* <EuiFlexItem>
                 <InfoPanel title={OCCURRENCES_COLUMN}>
                   {hasDetectedOccurrences ? (
                     <SparkPlot
@@ -290,7 +292,7 @@ export function QueryDetailsFlyout({
                     </EuiFlexGroup>
                   )}
                 </InfoPanel>
-              </EuiFlexItem>
+              </EuiFlexItem> */}
             </EuiFlexGroup>
           )}
 
@@ -356,7 +358,7 @@ export function QueryDetailsFlyout({
             setIsDeleteModalVisible(false);
           }}
           onConfirm={async () => {
-            await onDelete(item.query.id, item.stream_name);
+            await onDelete(item.id, item.stream_name);
             setIsDeleteModalVisible(false);
           }}
           cancelButtonText={CANCEL_BUTTON_LABEL}
@@ -372,18 +374,16 @@ export function QueryDetailsFlyout({
   );
 }
 
-function getQueryInputValue(item: SignificantEventItem) {
-  if (!item.query.kql?.query) {
+function getQueryInputValue(query: StreamQuery) {
+  if (!query.kql?.query) {
     return '';
   }
 
-  return typeof item.query.kql.query === 'string'
-    ? item.query.kql.query
-    : JSON.stringify(item.query.kql.query);
+  return typeof query.kql.query === 'string' ? query.kql.query : JSON.stringify(query.kql.query);
 }
 
-function getDisplayQueryValue(item: SignificantEventItem) {
-  const queryText = getQueryInputValue(item);
+function getDisplayQueryValue(query: StreamQuery) {
+  const queryText = getQueryInputValue(query);
   return queryText || DEFAULT_QUERY_PLACEHOLDER;
 }
 

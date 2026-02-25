@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsMultiBucketAggregateBase,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { StreamQuery, StreamQueryInput, Streams } from '@kbn/streams-schema';
+import type {
+  GetQueriesFilters,
+  QueryRuleOccurrences,
+  StreamQuery,
+  StreamQueryCategory,
+  StreamQueryInput,
+  StreamQuerySource,
+  StreamQueryType,
+  Streams,
+} from '@kbn/streams-schema';
 import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
-import { isEqual, map, partition } from 'lodash';
+import { isArray, isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -28,19 +40,29 @@ import {
   ASSET_ID,
   ASSET_TYPE,
   ASSET_UUID,
+  QUERY_CATEGORY,
+  QUERY_CREATED_AT,
+  QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_EVIDENCE,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
   QUERY_FEATURE_TYPE,
   QUERY_KQL_BODY,
+  QUERY_MODEL,
   QUERY_SEVERITY_SCORE,
+  QUERY_SOURCE,
+  QUERY_TAGS,
   QUERY_TITLE,
+  QUERY_TYPE,
+  QUERY_UPDATED_AT,
   RULE_BACKED,
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
 import { getRuleIdFromQueryLink } from './helpers/query';
+import { parseError } from '../../errors/parse_error';
+import { SecurityError } from '../../errors/security_error';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
@@ -131,6 +153,10 @@ interface QueryBulkDeleteOperation {
 
 export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
 
+interface QueryRuleOccurrencesFilter {
+  queryId?: string | string[];
+}
+
 function fromStorage(link: StoredQueryLink): QueryLink {
   const storageFields: QueryLinkStorageFields & {
     [QUERY_FEATURE_NAME]: string;
@@ -138,13 +164,29 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     [QUERY_FEATURE_TYPE]: 'system';
     [QUERY_EVIDENCE]?: string[];
     [RULE_BACKED]?: boolean;
+    [QUERY_DESCRIPTION]?: string;
+    [QUERY_TYPE]?: StreamQueryType;
+    [QUERY_CATEGORY]?: StreamQueryCategory;
+    [QUERY_TAGS]?: string[];
+    [QUERY_SOURCE]?: StreamQuerySource;
+    [QUERY_MODEL]?: string;
+    [QUERY_CREATED_AT]?: string;
+    [QUERY_UPDATED_AT]?: string;
   } = link as StoredQueryLink & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
     [QUERY_FEATURE_TYPE]: 'system';
     [QUERY_EVIDENCE]?: string[];
     [RULE_BACKED]?: boolean;
+    [QUERY_DESCRIPTION]?: string;
+    [QUERY_TYPE]?: StreamQueryType;
+    [QUERY_CATEGORY]?: StreamQueryCategory;
+    [QUERY_TAGS]?: string[];
+    [QUERY_MODEL]?: string;
+    [QUERY_CREATED_AT]?: string;
+    [QUERY_UPDATED_AT]?: string;
   };
+
   return {
     ...storageFields,
     stream_name: link[STREAM_NAME],
@@ -152,6 +194,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
+      stream_name: link[STREAM_NAME],
       kql: {
         query: storageFields[QUERY_KQL_BODY],
       },
@@ -167,6 +210,14 @@ function fromStorage(link: StoredQueryLink): QueryLink {
         : undefined,
       severity_score: storageFields[QUERY_SEVERITY_SCORE],
       evidence: storageFields[QUERY_EVIDENCE],
+      description: storageFields[QUERY_DESCRIPTION],
+      type: storageFields[QUERY_TYPE] ?? 'match',
+      category: storageFields[QUERY_CATEGORY] ?? 'operational',
+      tags: storageFields[QUERY_TAGS] ?? [],
+      source: storageFields[QUERY_SOURCE],
+      model: storageFields[QUERY_MODEL],
+      created_at: storageFields[QUERY_CREATED_AT],
+      updated_at: storageFields[QUERY_UPDATED_AT],
     },
   } satisfies QueryLink;
 }
@@ -191,6 +242,14 @@ function toStorage(
     [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
+    [QUERY_DESCRIPTION]: query.description,
+    [QUERY_TYPE]: query.type,
+    [QUERY_CATEGORY]: query.category,
+    [QUERY_TAGS]: query.tags,
+    [QUERY_SOURCE]: query.source,
+    [QUERY_MODEL]: query.model,
+    [QUERY_CREATED_AT]: query.created_at,
+    [QUERY_UPDATED_AT]: query.updated_at,
     [RULE_BACKED]: ruleBacked,
   } as unknown as StoredQueryLink;
 }
@@ -218,6 +277,7 @@ export class QueryClient {
       storageClient: IStorageClient<QueryStorageSettings, StoredQueryLink>;
       soClient: SavedObjectsClientContract;
       rulesClient: RulesClient;
+      scopedClusterClient: IScopedClusterClient;
       logger: Logger;
     },
     private readonly isSignificantEventsEnabled: boolean = false
@@ -338,27 +398,143 @@ export class QueryClient {
   }
 
   /**
-   * Returns all query links that are stored but do not have a backing Kibana rule for the given stream.
-   * Used internally by promoteQueries.
+   * Returns queries optionally filtered by stream, type/category/source, and full-text query.
    */
-  private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
+  async getQueries(filters?: GetQueriesFilters): Promise<StreamQuery[]> {
+    const streamNames = filters?.streamName
+      ? Array.isArray(filters.streamName)
+        ? filters.streamName
+        : [filters.streamName]
+      : [];
+
     const filter = [
-      ...termQuery(STREAM_NAME, streamName),
       ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, false),
+      ...termsQuery(STREAM_NAME, streamNames),
+      ...termsQuery(QUERY_TYPE, filters?.type),
+      ...termsQuery(QUERY_CATEGORY, filters?.category),
+      ...termsQuery(QUERY_SOURCE, filters?.source),
     ];
 
-    const assetsResponse = await this.dependencies.storageClient.search({
+    const should = [
+      ...wildcardQuery(QUERY_TITLE, filters?.search),
+      ...wildcardQuery(QUERY_DESCRIPTION, filters?.search),
+      ...wildcardQuery(QUERY_ESQL_QUERY, filters?.search),
+      ...wildcardQuery(QUERY_EVIDENCE, filters?.search),
+    ];
+
+    const query: QueryDslQueryContainer = {
+      bool: {
+        filter,
+        ...(should.length > 0 ? { should, minimum_should_match: 1 } : {}),
+      },
+    };
+
+    const queriesResponse = await this.dependencies.storageClient.search({
       size: 10_000,
       track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-        },
-      },
+      query,
     });
 
-    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source).query);
+  }
+
+  /**
+   * Returns an aggregated occurrences histogram across all selected query rules.
+   */
+  async getQueryRuleOccurrences(params: {
+    from: Date;
+    to: Date;
+    bucketSize: string;
+    filter?: QueryRuleOccurrencesFilter;
+  }): Promise<QueryRuleOccurrences> {
+    const { from, to, bucketSize, filter } = params;
+
+    const queryIds = filter?.queryId
+      ? Array.isArray(filter.queryId)
+        ? filter.queryId
+        : [filter.queryId]
+      : [];
+
+    const queryLinks = await this.getQueryLinks([]);
+    const filteredQueryLinks =
+      queryIds.length > 0
+        ? queryLinks.filter((queryLink) => queryIds.includes(queryLink.query.id))
+        : queryLinks;
+
+    if (filteredQueryLinks.length === 0) {
+      return { buckets: [], total: 0 };
+    }
+
+    const ruleIds = filteredQueryLinks.map((queryLink) => getRuleIdFromQueryLink(queryLink));
+
+    const response = await this.dependencies.scopedClusterClient.asCurrentUser
+      .search<
+        unknown,
+        {
+          aggregated_occurrences: AggregationsMultiBucketAggregateBase<{
+            key_as_string: string;
+            key: number;
+            doc_count: number;
+          }>;
+        }
+      >({
+        index: '.alerts-streams.alerts-default',
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: from.toISOString(),
+                    lte: to.toISOString(),
+                  },
+                },
+              },
+              {
+                terms: {
+                  'kibana.alert.rule.uuid': ruleIds,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          aggregated_occurrences: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: bucketSize,
+              extended_bounds: {
+                min: from.toISOString(),
+                max: to.toISOString(),
+              },
+            },
+          },
+        },
+      })
+      .catch((error) => {
+        const { type, message } = parseError(error);
+        if (type === 'security_exception') {
+          throw new SecurityError(
+            `Cannot read query rule occurrences, insufficient privileges: ${message}`,
+            { cause: error }
+          );
+        }
+        throw error;
+      });
+
+    const aggregatedOccurrencesBuckets = response.aggregations?.aggregated_occurrences?.buckets;
+    const buckets = isArray(aggregatedOccurrencesBuckets)
+      ? aggregatedOccurrencesBuckets.map((bucket) => ({
+          date: bucket.key_as_string,
+          count: bucket.doc_count,
+        }))
+      : [];
+    const total = buckets.reduce((sum, bucket) => sum + bucket.count, 0);
+
+    return {
+      buckets,
+      total,
+    };
   }
 
   /**
@@ -384,8 +560,13 @@ export class QueryClient {
   /**
    * Returns all query links across streams that do not have a backing Kibana rule.
    */
-  async getAllUnbackedQueries(): Promise<QueryLink[]> {
-    const filter = [...termQuery(ASSET_TYPE, 'query'), ...termQuery(RULE_BACKED, false)];
+  async getUnbackedQueryLinks(streamName?: string | string[]): Promise<QueryLink[]> {
+    const streamNames = streamName ? (Array.isArray(streamName) ? streamName : [streamName]) : [];
+    const filter = [
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...termQuery(RULE_BACKED, false),
+      ...termsQuery(STREAM_NAME, streamNames),
+    ];
 
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -691,7 +872,7 @@ export class QueryClient {
       return { promoted: 0 };
     }
 
-    const unbacked = await this.getUnbackedQueries(streamName);
+    const unbacked = await this.getUnbackedQueryLinks(streamName);
     const idSet = new Set(queryIds);
     const toPromote = unbacked.filter((link) => idSet.has(link.query.id));
 
