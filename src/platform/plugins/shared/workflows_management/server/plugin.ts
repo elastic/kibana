@@ -25,7 +25,11 @@ import {
 import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
 import { createTriggerEventHandler } from './event_driven/trigger_event_handler';
 import { WorkflowsManagementFeatureConfig } from './features';
-import { initializeTriggerEventsDataStream } from './trigger_events_log';
+import {
+  initializeTriggerEventsDataStream,
+  initializeTriggerEventsClient,
+  type TriggerEventsDataStreamClient,
+} from './trigger_events_log';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
   WorkflowsRequestHandlerContext,
@@ -55,6 +59,7 @@ export class WorkflowsPlugin
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private triggerEventsClient: TriggerEventsDataStreamClient | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -164,6 +169,7 @@ export class WorkflowsPlugin
     const triggerEventHandler = createTriggerEventHandler({
       api: this.api,
       logger: this.logger,
+      getTriggerEventsClient: () => this.triggerEventsClient,
     });
 
     plugins.workflowsExtensions.registerTriggerEventHandler(triggerEventHandler);
@@ -181,6 +187,8 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
+
+    void this.initializeTriggerEventsClient(core);
 
     stepSchemas.initialize(plugins.workflowsExtensions);
 
@@ -201,6 +209,16 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Started');
 
     return {};
+  }
+
+  private async initializeTriggerEventsClient(core: CoreStart): Promise<void> {
+    try {
+      this.triggerEventsClient = await initializeTriggerEventsClient(core.dataStreams);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to initialize trigger events data stream client: ${error instanceof Error ? error.message : String(error)}. Event audit logging will be skipped.`
+      );
+    }
   }
 
   public stop() {}

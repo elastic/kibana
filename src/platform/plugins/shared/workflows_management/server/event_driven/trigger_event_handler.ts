@@ -12,25 +12,51 @@ import type { Logger } from '@kbn/core/server';
 import type { TriggerEventHandlerParams } from '@kbn/workflows-extensions/server';
 import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 import { validateWorkflowForExecution } from '../connectors/workflows/validate_workflow_for_execution';
+import {
+  writeTriggerEvent,
+  type TriggerEventsDataStreamClient,
+} from '../trigger_events_log';
 
 export interface CreateTriggerEventHandlerParams {
   api: WorkflowsManagementApi;
   logger: Logger;
+  getTriggerEventsClient: () => TriggerEventsDataStreamClient | null;
 }
 
 /**
  * Creates the trigger event handler that runs when emitEvent is called.
- * Resolves workflows subscribed to the trigger, runs each with the event payload in parallel.
+ * Writes the event to the trigger-events data stream (audit), then resolves workflows
+ * subscribed to the trigger and runs each with the event payload in parallel.
  * Uses the request from emitEvent so executions are attributed to the calling user.
  */
 export function createTriggerEventHandler({
   api,
   logger,
+  getTriggerEventsClient,
 }: CreateTriggerEventHandlerParams): (params: TriggerEventHandlerParams) => Promise<void> {
   return async (params: TriggerEventHandlerParams): Promise<void> => {
-    const { triggerId, spaceId, payload, request } = params;
+    const { timestamp, triggerId, spaceId, payload, request } = params;
 
     const workflows = await api.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+    const subscriptions = workflows.map((w) => w.id);
+
+    const client = getTriggerEventsClient();
+    if (client) {
+      try {
+        await writeTriggerEvent(client, {
+          timestamp,
+          triggerId,
+          spaceId,
+          subscriptions,
+          payload,
+        });
+      } catch (error) {
+        logger.warn(
+          `Failed to write trigger event to data stream (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+
     if (workflows.length === 0) {
       return;
     }
