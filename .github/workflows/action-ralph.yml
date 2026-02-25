@@ -17,6 +17,11 @@ on:
         required: false
         default: "5"
         type: string
+      runner:
+        description: "Runner label for prepare/sandbox jobs (default: ubuntu-latest)"
+        required: false
+        default: "ubuntu-latest"
+        type: string
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -35,8 +40,8 @@ jobs:
   # ---------------------------------------------------------------------------
   prepare:
     name: "Phase A: Bootstrap"
-    runs-on: ubuntu-24.04-arm64-8core
-    timeout-minutes: 30
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    timeout-minutes: 45
     if: >-
       github.event_name == 'workflow_dispatch'
       || (
@@ -135,6 +140,8 @@ jobs:
             --exclude='./data' \
             --exclude='*.log' \
             -C "$GITHUB_WORKSPACE" .
+          echo "Warm state artifact size:"
+          ls -lh /tmp/kibana-warm-state.tar.gz
 
       - name: Upload warm state artifact
         uses: actions/upload-artifact@v4
@@ -154,7 +161,7 @@ jobs:
   sandbox:
     name: "Phase B: Agent Loop"
     needs: prepare
-    runs-on: ubuntu-24.04-arm64-8core
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
     timeout-minutes: 45
     permissions: {}
 
