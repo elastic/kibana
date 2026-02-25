@@ -81,9 +81,20 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
+    replace: jest.fn(),
+    createHref: jest.fn(({ pathname, search = '', hash = '' }) => `${pathname}${search}${hash}`),
+    listen: jest.fn(() => jest.fn()),
+    location: {
+      pathname: '/triggersActions/rules/',
+      search: '',
+      hash: '',
+      state: undefined,
+    },
   }),
   useLocation: () => ({
     pathname: '/triggersActions/rules/',
+    search: '',
+    hash: '',
   }),
 }));
 
@@ -93,6 +104,10 @@ jest.mock('../../../lib/action_connector_api', () => ({
 
 jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
+}));
+
+jest.mock('./rule_route', () => ({
+  RuleRouteWithApi: () => <div data-test-subj="ruleRouteWithApi" />,
 }));
 
 const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
@@ -896,35 +911,6 @@ describe('rule_details', () => {
         .first();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeFalsy();
-    });
-  });
-
-  describe('refresh button', () => {
-    it('should call requestRefresh when clicked', async () => {
-      const rule = mockRule();
-      const requestRefresh = jest.fn();
-      const wrapper = mountWithIntl(
-        <QueryClientProvider client={queryClient}>
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={[]}
-            {...mockRuleApis}
-            requestRefresh={requestRefresh}
-          />
-        </QueryClientProvider>
-      );
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').last();
-      expect(refreshButton.exists()).toBeTruthy();
-
-      refreshButton.simulate('click');
-      expect(requestRefresh).toHaveBeenCalledTimes(1);
     });
   });
 

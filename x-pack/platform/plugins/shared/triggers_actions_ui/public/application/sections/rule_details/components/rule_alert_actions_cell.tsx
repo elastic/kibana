@@ -23,11 +23,6 @@ const VIEW_DETAILS = i18n.translate(
   { defaultMessage: 'Alert details' }
 );
 
-const VIEW_IN_APP = i18n.translate(
-  'xpack.triggersActionsUI.ruleDetails.alertsTable.viewInAppLabel',
-  { defaultMessage: 'View in app' }
-);
-
 const MORE_ACTIONS = i18n.translate(
   'xpack.triggersActionsUI.ruleDetails.alertsTable.moreActionsLabel',
   { defaultMessage: 'More actions' }
@@ -70,20 +65,6 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
 
   return (
     <>
-      {/* TODO: implement view in app */}
-      <EuiFlexItem>
-        <EuiToolTip content={VIEW_IN_APP} disableScreenReaderOutput>
-          <EuiButtonIcon
-            data-test-subj="rule-alerts-table-view-in-app"
-            aria-label={VIEW_IN_APP}
-            color="text"
-            iconType="eye"
-            size="s"
-            isDisabled
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-
       <EuiFlexItem>
         <EuiToolTip content={VIEW_DETAILS} disableScreenReaderOutput>
           <EuiButtonIcon

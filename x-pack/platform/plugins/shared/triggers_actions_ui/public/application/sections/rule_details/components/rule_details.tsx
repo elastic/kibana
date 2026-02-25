@@ -17,7 +17,6 @@ import {
   EuiPageSection,
   EuiCallOut,
   EuiSpacer,
-  EuiButtonEmpty,
   EuiButton,
   EuiIcon,
   EuiLink,
@@ -267,29 +266,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     }
   };
 
-  const editButton = hasEditButton ? (
-    <>
-      <EuiButtonEmpty
-        aria-label={i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel',
-          {
-            defaultMessage: 'Edit',
-          }
-        )}
-        data-test-subj="openEditRuleFlyoutButton"
-        iconType="pencil"
-        onClick={onEditRuleClick}
-        name="edit"
-        disabled={!ruleType.enabledInLicense}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-          defaultMessage="Edit"
-        />
-      </EuiButtonEmpty>
-    </>
-  ) : null;
-
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
   const { showToast } = useBulkOperationToast({});
 
@@ -458,28 +434,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               }}
               onEnableDisable={onEnableDisable}
               onRunRule={onRunRule}
+              onEdit={() => {
+                onEditRuleClick();
+              }}
+              canEdit={hasEditButton}
+              isEditDisabled={!ruleType.enabledInLicense}
               isInternallyManaged={ruleType.isInternallyManaged}
             />
           ),
-          editButton,
-          <EuiButtonEmpty
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.ruleDetails.refreshRulesButtonLabel',
-              {
-                defaultMessage: 'Refresh',
-              }
-            )}
-            data-test-subj="refreshRulesButton"
-            iconType="refresh"
-            onClick={requestRefresh}
-            name="refresh"
-            color="primary"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
-              defaultMessage="Refresh"
-            />
-          </EuiButtonEmpty>,
           useUnifiedRulesPage ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
         ]}
       />

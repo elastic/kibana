@@ -7,6 +7,7 @@
 
 import React, { lazy, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { BoolQuery } from '@kbn/es-query';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
@@ -33,6 +34,7 @@ import {
   rulesStatusesTranslationsMapping,
 } from '../../rules_list/translations';
 import { RuleAlertActionsCell } from './rule_alert_actions_cell';
+import { RuleAlertSearchBar } from './rule_alert_search_bar';
 import { AlertSummaryWidget } from '../../alert_summary_widget';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
@@ -86,6 +88,21 @@ export function RuleComponent({
   // The lastReloadRequestTime should be updated when the refreshToken changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
+  const [alertsSearchEsQuery, setAlertsSearchEsQuery] = useState<{ bool: BoolQuery }>();
+
+  const alertsTableQuery = useMemo(() => {
+    const baseRuleFilter = {
+      term: {
+        [ALERT_RULE_UUID]: rule.id,
+      },
+    };
+
+    return {
+      bool: {
+        filter: [baseRuleFilter, ...(alertsSearchEsQuery ? [alertsSearchEsQuery] : [])],
+      },
+    };
+  }, [alertsSearchEsQuery, rule.id]);
 
   const getDefaultAlertSummaryTimeRange = (): AlertSummaryTimeRange => {
     const now = new Date();
@@ -116,7 +133,7 @@ export function RuleComponent({
         <AlertsTable
           id="rule-detail-alerts-table"
           ruleTypeIds={[ruleType.id]}
-          query={{ bool: { filter: { term: { [ALERT_RULE_UUID]: rule.id } } } }}
+          query={alertsTableQuery}
           showAlertStatusWithFlapping
           columns={alertsTableColumns}
           renderActionsCell={RuleAlertActionsCell}
@@ -139,14 +156,28 @@ export function RuleComponent({
     data,
     fieldFormats,
     http,
+    alertsTableQuery,
     lastReloadRequestTime,
     licensing,
     notifications,
-    rule.id,
     ruleType.hasAlertsMappings,
     ruleType.id,
     settings,
   ]);
+
+  const renderRuleAlertsContent = useCallback(
+    () => (
+      <>
+        <EuiSpacer size="m" />
+        <RuleAlertSearchBar ruleTypeId={ruleType.id} onEsQueryChange={setAlertsSearchEsQuery} />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup css={{ minHeight: 450 }} direction="column">
+          <EuiFlexItem>{renderRuleAlertList()}</EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    ),
+    [renderRuleAlertList, ruleType.id]
+  );
 
   const tabs = [
     {
@@ -155,12 +186,7 @@ export function RuleComponent({
         defaultMessage: 'Alerts',
       }),
       'data-test-subj': 'ruleAlertListTab',
-      content: (
-        <>
-          <EuiSpacer />
-          {renderRuleAlertList()}
-        </>
-      ),
+      content: renderRuleAlertsContent(),
     },
     {
       id: EVENT_LOG_LIST_TAB,
@@ -190,7 +216,7 @@ export function RuleComponent({
     if (isEnabled) {
       return <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />;
     }
-    return renderRuleAlertList();
+    return renderRuleAlertsContent();
   };
 
   return (

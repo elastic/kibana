@@ -17,6 +17,9 @@ export interface RuleActionsPopoverProps {
   onApiKeyUpdate: (ruleId: string) => void;
   onEnableDisable: (enable: boolean) => void;
   onRunRule: (ruleId: string) => void;
+  onEdit: (ruleId: string) => void;
+  canEdit: boolean;
+  isEditDisabled: boolean;
   isInternallyManaged: boolean;
 }
 
@@ -26,6 +29,9 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
   onApiKeyUpdate,
   onEnableDisable,
   onRunRule,
+  onEdit,
+  canEdit,
+  isEditDisabled,
   isInternallyManaged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -61,6 +67,21 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
       name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.updateAPIKeyButtonLabel', {
         defaultMessage: 'Update API key',
       }),
+    };
+  };
+
+  const getEditPanelItem = (testId: string) => {
+    return {
+      'data-test-subj': testId,
+      onClick: () => {
+        setIsPopoverOpen(false);
+        onEdit(rule.id);
+      },
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel', {
+        defaultMessage: 'Edit',
+      }),
+      icon: 'pencil',
+      disabled: isEditDisabled,
     };
   };
 
@@ -108,6 +129,9 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                       { defaultMessage: 'Run rule' }
                     ),
                   },
+                  ...(canEdit
+                    ? [{ isSeparator: true as const }, getEditPanelItem('openEditRuleFlyoutButton')]
+                    : []),
                   {
                     className: 'ruleActionsPopover__deleteButton',
                     'data-test-subj': 'deleteRuleButton',
