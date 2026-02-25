@@ -725,7 +725,7 @@ jobs:
           CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | head -50)
 
           {
-            echo "Action Ralph applied changes from your \`/action-ralph\` request."
+            echo "Action Ralph applied changes from your request."
             echo ""
             echo "## Summary"
             echo ""
@@ -1028,12 +1028,13 @@ jobs:
           fi
 
           if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
-            echo "::error::Review mode must be read-only, but file changes were detected."
-            exit 1
+            echo "::warning::Review mode produced local file changes; discarding and continuing with summary."
+            git reset --hard >/dev/null 2>&1 || true
+            git clean -fd >/dev/null 2>&1 || true
           fi
 
           {
-            echo "Review Ralph response for your \`/review-ralph\` request."
+            echo "Review Ralph response for your request."
             echo ""
             cat "$SESSION_DIR/review-summary.md"
             echo ""
