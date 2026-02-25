@@ -25,6 +25,7 @@
     "optionalPlugins": [
       "cloud",
       "console",
+      "management",
       "serverless",
       "searchNavigation",
     ],
