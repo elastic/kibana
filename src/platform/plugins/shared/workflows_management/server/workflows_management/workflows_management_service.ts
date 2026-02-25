@@ -49,6 +49,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
@@ -70,6 +71,7 @@ import {
 } from '../../common/lib/errors';
 
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
+import { validateTriggers } from '../../common/lib/validate_triggers';
 import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -96,7 +98,7 @@ export class WorkflowsService {
   private taskScheduler: WorkflowTaskScheduler | null = null;
   private readonly logger: Logger;
   private security?: SecurityServiceStart;
-  private readonly getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>;
+  private workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   private getActionsClient: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest: (
     request: KibanaRequest
@@ -108,7 +110,6 @@ export class WorkflowsService {
     getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
   ) {
     this.logger = logger;
-    this.getPluginsStart = getPluginsStart;
     this.getActionsClient = () =>
       getPluginsStart().then((plugins) => plugins.actions.getUnsecuredActionsClient());
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
@@ -142,6 +143,7 @@ export class WorkflowsService {
 
     this.workflowEventLoggerService =
       pluginsStart.workflowsExecutionEngine.workflowEventLoggerService;
+    this.workflowsExtensions = pluginsStart.workflowsExtensions;
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -177,13 +179,16 @@ export class WorkflowsService {
   /**
    * Parses and validates a workflow YAML, returning the prepared document and metadata.
    * Shared by createWorkflow and bulkCreateWorkflows.
+   * When triggerDefinitions is provided, custom trigger with.condition values are validated
+   * (valid KQL and only event schema properties).
    */
   private prepareWorkflowDocument(
     workflow: CreateWorkflowCommand,
     zodSchema: z.ZodType,
     authenticatedUser: string,
     now: Date,
-    spaceId: string
+    spaceId: string,
+    triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>
   ): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } {
     let workflowToCreate: EsWorkflowCreate = {
       name: 'Untitled workflow',
@@ -204,6 +209,17 @@ export class WorkflowsService {
       if (!stepValidation.isValid) {
         workflowToCreate.valid = false;
         workflowToCreate.definition = undefined;
+      }
+
+      if (workflowToCreate.definition) {
+        const triggerValidation = validateTriggers(
+          workflowToCreate.definition,
+          triggerDefinitions ?? []
+        );
+        if (!triggerValidation.valid) {
+          workflowToCreate.valid = false;
+          workflowToCreate.definition = undefined;
+        }
       }
     }
 
@@ -274,13 +290,15 @@ export class WorkflowsService {
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
+    const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
     const { id, workflowData, definition } = this.prepareWorkflowDocument(
       workflow,
       zodSchema,
       authenticatedUser,
       now,
-      spaceId
+      spaceId,
+      triggerDefinitions
     );
 
     if (workflow.id) {
@@ -319,6 +337,7 @@ export class WorkflowsService {
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
+    const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
     const created: WorkflowDetailDto[] = [];
     const failed: Array<{ index: number; error: string }> = [];
@@ -340,7 +359,8 @@ export class WorkflowsService {
           zodSchema,
           authenticatedUser,
           now,
-          spaceId
+          spaceId,
+          triggerDefinitions
         );
 
         bulkOperations.push({
@@ -404,6 +424,189 @@ export class WorkflowsService {
     return { created, failed };
   }
 
+  /**
+   * Fetches the workflow document by id and spaceId, or throws if not found.
+   */
+  private async getExistingWorkflowDocument(
+    id: string,
+    spaceId: string
+  ): Promise<{ source: WorkflowProperties }> {
+    const searchResponse = await this.workflowStorage.getClient().search({
+      query: {
+        bool: {
+          must: [{ ids: { values: [id] } }, { term: { spaceId } }],
+        },
+      },
+      size: 1,
+      track_total_hits: false,
+    });
+
+    if (searchResponse.hits.hits.length === 0) {
+      throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
+    }
+
+    const hit = searchResponse.hits.hits[0];
+    if (!hit._source) {
+      throw new Error(`Workflow with id ${id} not found`);
+    }
+    return { source: hit._source as WorkflowProperties };
+  }
+
+  /**
+   * Validates workflow YAML and produces the update patch and validation errors.
+   * Used by updateWorkflow when workflow.yaml is provided.
+   */
+  private async applyYamlUpdate(
+    workflowYaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{
+    updatedDataPatch: Partial<WorkflowProperties>;
+    validationErrors: string[];
+    shouldUpdateScheduler: boolean;
+  }> {
+    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, zodSchema);
+
+    if (!parsedYaml.success) {
+      const validationErrors =
+        parsedYaml.error instanceof InvalidYamlSchemaError && parsedYaml.error.formattedZodError
+          ? parsedYaml.error.formattedZodError.issues.map((e) => e.message)
+          : [parsedYaml.error.message];
+      return {
+        updatedDataPatch: { definition: undefined, enabled: false, valid: false },
+        validationErrors,
+        shouldUpdateScheduler: true,
+      };
+    }
+
+    const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
+    if (!stepValidation.isValid) {
+      return {
+        updatedDataPatch: { definition: undefined, enabled: false, valid: false },
+        validationErrors: stepValidation.errors.map((e) => e.message),
+        shouldUpdateScheduler: true,
+      };
+    }
+
+    const triggerValidation = validateTriggers(
+      parsedYaml.data as unknown as WorkflowYaml,
+      triggerDefinitions
+    );
+    if (!triggerValidation.valid) {
+      return {
+        updatedDataPatch: { definition: undefined, enabled: false, valid: false },
+        validationErrors: triggerValidation.errors.map((e) => e.message),
+        shouldUpdateScheduler: true,
+      };
+    }
+
+    const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
+      parsedYaml.data as unknown as WorkflowYaml
+    );
+    return {
+      updatedDataPatch: {
+        definition: workflowDef.definition,
+        name: workflowDef.name,
+        enabled: workflowDef.enabled,
+        description: workflowDef.description,
+        tags: workflowDef.tags,
+        valid: true,
+        yaml: workflowYaml,
+      },
+      validationErrors: [],
+      shouldUpdateScheduler: true,
+    };
+  }
+
+  /**
+   * Builds the update patch when only individual fields (name, enabled, description, tags) are updated.
+   * Used by updateWorkflow when workflow.yaml is not provided.
+   */
+  private applyFieldUpdates(
+    workflow: Partial<EsWorkflow>,
+    existingSource: WorkflowProperties
+  ): Partial<WorkflowProperties> {
+    const patch: Partial<WorkflowProperties> = {};
+    let yamlUpdated = false;
+
+    if (workflow.name !== undefined) {
+      patch.name = workflow.name;
+      yamlUpdated = true;
+    }
+    if (workflow.enabled !== undefined) {
+      if (workflow.enabled && existingSource?.definition) {
+        patch.enabled = true;
+      } else if (!workflow.enabled) {
+        patch.enabled = false;
+      }
+      yamlUpdated = true;
+    }
+    if (workflow.description !== undefined) {
+      patch.description = workflow.description;
+      yamlUpdated = true;
+    }
+    if (workflow.tags !== undefined) {
+      patch.tags = workflow.tags;
+      yamlUpdated = true;
+    }
+
+    if (yamlUpdated && existingSource?.yaml) {
+      patch.yaml = updateWorkflowYamlFields(
+        existingSource.yaml,
+        workflow,
+        patch.enabled ?? existingSource.enabled
+      );
+    }
+
+    return patch;
+  }
+
+  /**
+   * Updates or removes scheduled tasks after a workflow document is saved.
+   * Call only when shouldUpdateScheduler is true and taskScheduler is set.
+   */
+  private async updateSchedulerAfterWorkflowSave(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest,
+    finalData: WorkflowProperties
+  ): Promise<void> {
+    if (!this.taskScheduler) return;
+
+    const workflowIsSchedulable = finalData.definition && finalData.valid && finalData.enabled;
+    if (!workflowIsSchedulable) {
+      await this.taskScheduler.unscheduleWorkflowTasks(id);
+      this.logger.debug(
+        `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
+      );
+      return;
+    }
+
+    const triggers = finalData.definition?.triggers ?? [];
+    const workflowHasScheduledTriggers = hasScheduledTriggers(triggers);
+    if (!workflowHasScheduledTriggers) {
+      await this.taskScheduler.unscheduleWorkflowTasks(id);
+      this.logger.debug(`Removed scheduled tasks for workflow ${id} (no scheduled triggers)`);
+      return;
+    }
+
+    const updatedWorkflow = await this.getWorkflow(id, spaceId);
+    if (!updatedWorkflow?.definition) return;
+
+    const workflowForScheduler: EsWorkflow = {
+      ...updatedWorkflow,
+      definition: updatedWorkflow.definition,
+      tags: [],
+      deleted_at: null,
+      createdAt: new Date(updatedWorkflow.createdAt),
+      lastUpdatedAt: new Date(updatedWorkflow.lastUpdatedAt),
+    };
+    await this.taskScheduler.updateWorkflowTasks(workflowForScheduler, spaceId, request);
+    this.logger.debug(`Updated scheduled tasks for workflow ${id}`);
+  }
+
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
@@ -415,136 +618,29 @@ export class WorkflowsService {
     }
 
     try {
-      // First check if the workflow exists and belongs to the correct space
-      const searchResponse = await this.workflowStorage.getClient().search({
-        query: {
-          bool: {
-            must: [{ ids: { values: [id] } }, { term: { spaceId } }],
-          },
-        },
-        size: 1,
-        track_total_hits: false,
-      });
-
-      if (searchResponse.hits.hits.length === 0) {
-        throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
-      }
-
-      const existingDocument = searchResponse.hits.hits[0];
-      if (!existingDocument._source) {
-        throw new Error(`Workflow with id ${id} not found`);
-      }
-
+      const { source: existingSource } = await this.getExistingWorkflowDocument(id, spaceId);
       const authenticatedUser = getAuthenticatedUser(request, this.security);
       const now = new Date();
       const validationErrors: string[] = [];
-
-      const updatedData: Partial<WorkflowProperties> = {
+      let updatedData: Partial<WorkflowProperties> = {
         lastUpdatedBy: authenticatedUser,
         updated_at: now.toISOString(),
       };
 
-      // If yaml is being updated, validate and update definition
-      let shouldUpdateScheduler = false;
+      let shouldUpdateScheduler =
+        workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
 
-      // Check if enabled state is being changed
-      if (workflow.enabled !== undefined && workflow.enabled !== existingDocument._source.enabled) {
-        shouldUpdateScheduler = true;
-      }
-
-      // Handle yaml updates - this will also update definition and validation
       if (workflow.yaml) {
-        // we always update the yaml, even if it's not valid, to allow users to save draft
-        updatedData.yaml = workflow.yaml;
-        const parsedYaml = parseWorkflowYamlToJSON(
-          workflow.yaml,
-          await this.getWorkflowZodSchema({ loose: false }, spaceId, request)
-        );
-        if (!parsedYaml.success) {
-          updatedData.definition = undefined;
-          updatedData.enabled = false;
-          updatedData.valid = false;
-          if (
-            parsedYaml.error instanceof InvalidYamlSchemaError &&
-            parsedYaml.error.formattedZodError
-          ) {
-            validationErrors.push(
-              ...parsedYaml.error.formattedZodError.issues.map((error) => error.message)
-            );
-          } else {
-            validationErrors.push(parsedYaml.error.message);
-          }
-          shouldUpdateScheduler = true;
-        } else {
-          // Validate step name uniqueness
-          const stepValidation = validateStepNameUniqueness(
-            parsedYaml.data as unknown as WorkflowYaml
-          );
-          if (!stepValidation.isValid) {
-            updatedData.definition = undefined;
-            updatedData.enabled = false;
-            updatedData.valid = false;
-            validationErrors.push(...stepValidation.errors.map((error) => error.message));
-            shouldUpdateScheduler = true;
-          } else {
-            const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
-              parsedYaml.data as unknown as WorkflowYaml
-            );
-            // Update all fields from the transformed YAML, not just definition
-            updatedData.definition = workflowDef.definition;
-            updatedData.name = workflowDef.name;
-            updatedData.enabled = workflowDef.enabled;
-            updatedData.description = workflowDef.description;
-            updatedData.tags = workflowDef.tags;
-            updatedData.valid = true;
-            updatedData.yaml = workflow.yaml;
-            shouldUpdateScheduler = true;
-          }
-        }
+        const yamlResult = await this.applyYamlUpdate(workflow.yaml, spaceId, request);
+        // Always persist the submitted yaml (draft) even when validation fails
+        updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
+        validationErrors.push(...yamlResult.validationErrors);
+        shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+      } else {
+        updatedData = { ...updatedData, ...this.applyFieldUpdates(workflow, existingSource) };
       }
 
-      // Handle individual field updates only when YAML is not being updated
-      if (!workflow.yaml) {
-        let yamlUpdated = false;
-
-        if (workflow.name !== undefined) {
-          updatedData.name = workflow.name;
-          yamlUpdated = true;
-        }
-        if (workflow.enabled !== undefined) {
-          // If enabling a workflow, ensure it has a valid definition
-          if (workflow.enabled && existingDocument._source?.definition) {
-            updatedData.enabled = true;
-          } else if (!workflow.enabled) {
-            updatedData.enabled = false;
-          }
-          yamlUpdated = true;
-        }
-        if (workflow.description !== undefined) {
-          updatedData.description = workflow.description;
-          yamlUpdated = true;
-        }
-        if (workflow.tags !== undefined) {
-          updatedData.tags = workflow.tags;
-          yamlUpdated = true;
-        }
-
-        if (yamlUpdated && existingDocument._source?.yaml) {
-          // Use in-place YAML field updates to preserve formatting, comments,
-          // and template expressions that would be corrupted by a parse-to-JSON then re-stringify cycle.
-          // `enabledValue` is passed separately because the server may override
-          // the requested value (e.g. force `false` when the workflow has no valid
-          // definition). Other fields (name, description, tags) are read directly
-          // from the `workflow` object inside `updateWorkflowYamlFields`.
-          updatedData.yaml = updateWorkflowYamlFields(
-            existingDocument._source.yaml,
-            workflow,
-            updatedData.enabled
-          );
-        }
-      }
-
-      const finalData = { ...existingDocument._source, ...updatedData };
+      const finalData: WorkflowProperties = { ...existingSource, ...updatedData };
 
       await this.workflowStorage.getClient().index({
         id,
@@ -552,44 +648,8 @@ export class WorkflowsService {
         refresh: true,
       });
 
-      // Update task scheduler if needed — let errors propagate so the save fails
-      // if scheduling cannot be updated. With idempotent scheduling, a retry will succeed.
       if (shouldUpdateScheduler && this.taskScheduler) {
-        if (finalData.definition && finalData.valid && finalData.enabled) {
-          // Check if workflow has scheduled triggers before updating scheduler
-          const workflowHasScheduledTriggers = hasScheduledTriggers(
-            finalData.definition.triggers || []
-          );
-
-          if (workflowHasScheduledTriggers) {
-            // Get the updated workflow from storage
-            const updatedWorkflow = await this.getWorkflow(id, spaceId);
-            if (updatedWorkflow && updatedWorkflow.definition) {
-              // Convert WorkflowDetailDto to EsWorkflow for scheduler
-              const workflowForScheduler: EsWorkflow = {
-                ...updatedWorkflow,
-                definition: updatedWorkflow.definition, // We already checked it's not null
-                tags: [], // TODO: Add tags support to WorkflowDetailDto
-                deleted_at: null,
-                createdAt: new Date(updatedWorkflow.createdAt),
-                lastUpdatedAt: new Date(updatedWorkflow.lastUpdatedAt),
-              };
-
-              await this.taskScheduler.updateWorkflowTasks(workflowForScheduler, spaceId, request);
-              this.logger.debug(`Updated scheduled tasks for workflow ${id}`);
-            }
-          } else {
-            // No scheduled triggers, remove any existing scheduled tasks
-            await this.taskScheduler.unscheduleWorkflowTasks(id);
-            this.logger.debug(`Removed scheduled tasks for workflow ${id} (no scheduled triggers)`);
-          }
-        } else {
-          // If workflow is invalid or disabled, remove all scheduled tasks
-          await this.taskScheduler.unscheduleWorkflowTasks(id);
-          this.logger.debug(
-            `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
-          );
-        }
+        await this.updateSchedulerAfterWorkflowSave(id, spaceId, request, finalData);
       }
 
       return {
@@ -1391,13 +1451,9 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<z.ZodType> {
-    const [plugins, { connectorsByType }] = await Promise.all([
-      this.getPluginsStart(),
-      this.getAvailableConnectors(spaceId, request),
-    ]);
-    const registeredTriggerIds = plugins.workflowsExtensions
-      .getAllTriggerDefinitions()
-      .map((trigger: { id: string }) => trigger.id);
+    const { connectorsByType } = await this.getAvailableConnectors(spaceId, request);
+    const registeredTriggerIds =
+      this.workflowsExtensions?.getAllTriggerDefinitions().map((t) => t.id) ?? [];
     return getWorkflowZodSchema(connectorsByType, registeredTriggerIds);
   }
 }
