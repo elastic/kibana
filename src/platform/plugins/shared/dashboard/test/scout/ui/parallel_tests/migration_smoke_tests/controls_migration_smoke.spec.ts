@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
 import {
   findImportedSavedObjectId,
@@ -53,7 +54,7 @@ const getSelectionsString = async (page: ScoutPage, controlId: string) => {
   return (selectionText || buttonText).trim();
 };
 
-spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('Controls migration smoke (8.0.0)', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

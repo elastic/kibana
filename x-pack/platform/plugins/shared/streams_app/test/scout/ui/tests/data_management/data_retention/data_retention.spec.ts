@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
@@ -19,29 +20,29 @@ import {
 
 test.describe(
   'Stream data retention - custom retention periods',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
 
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
     });
 
     test.afterEach(async ({ apiServices, page }) => {
       await closeToastsIfPresent(page);
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     // Smoke test: Verifies the complete retention UI workflow
@@ -71,7 +72,7 @@ test.describe(
       await verifyRetentionDisplay(page, '30 days');
 
       // Refresh the page
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Verify the value persists
       await verifyRetentionDisplay(page, '30 days');

@@ -102,6 +102,12 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       }
       break;
 
+    case 'redact':
+      if (processor.from) {
+        fields.push(processor.from);
+      }
+      break;
+
     case 'math':
       if (processor.to) {
         fields.push(processor.to);
@@ -117,6 +123,12 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
     case 'concat':
       if (processor.to) {
         fields.push(processor.to);
+      }
+      break;
+
+    case 'network_direction':
+      if (processor.target_field) {
+        fields.push(processor.target_field);
       }
       break;
 
@@ -204,6 +216,7 @@ export function getProcessorOutputType(
 
     case 'dissect':
     case 'replace':
+    case 'redact':
     case 'uppercase':
     case 'lowercase':
     case 'trim':
@@ -237,6 +250,9 @@ export function getProcessorOutputType(
     case 'join':
       return 'string';
 
+    case 'network_direction':
+      return 'string';
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -267,6 +283,12 @@ export function getExpectedInputType(
       return null;
 
     case 'replace':
+      if (processor.from === fieldName) {
+        return ['string'];
+      }
+      return null;
+
+    case 'redact':
       if (processor.from === fieldName) {
         return ['string'];
       }
@@ -316,6 +338,7 @@ export function getExpectedInputType(
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
+    case 'network_direction':
     case 'manual_ingest_pipeline':
       return null;
     default: {
@@ -351,6 +374,7 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
       case 'date':
       case 'convert':
       case 'replace':
+      case 'redact':
       case 'remove':
       case 'grok':
       case 'dissect':
@@ -375,6 +399,12 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         fieldsUsed.push(
           ...step.from.filter((from) => from.type === 'field').map((from) => from.value)
         );
+        break;
+      case 'network_direction':
+        fieldsUsed.push(step.source_ip, step.destination_ip);
+        if ('internal_networks_field' in step && step.internal_networks_field) {
+          fieldsUsed.push(step.internal_networks_field);
+        }
         break;
       case 'append':
       case 'drop_document':

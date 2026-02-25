@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiTextColor,
   EuiSkeletonText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -24,18 +25,28 @@ import { useHistory } from 'react-router-dom';
 import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
-import type { SearchHit } from '../../common/search_strategy';
+import { useBulkGetUserProfiles } from './use_user_profiles';
+import type { ActionDetails, SearchHit } from '../../common/search_strategy';
+import type { PackResultCounts } from '../../common/search_strategy/osquery/actions';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
+import { RunByColumn } from './components/run_by_column';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
 interface ActionTableResultsButtonProps {
   actionId: string;
+  isHistoryEnabled: boolean;
 }
 
-const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
-  const navProps = useRouterNavigate(`live_queries/${actionId}`);
+const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({
+  actionId,
+  isHistoryEnabled,
+}) => {
+  const navProps = useRouterNavigate(
+    isHistoryEnabled ? `history/${actionId}` : `live_queries/${actionId}`
+  );
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -55,6 +66,7 @@ ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -69,7 +81,17 @@ const ActionsTableComponent = () => {
     activePage: pageIndex,
     limit: pageSize,
     kuery: 'user_id: *',
+    withResultCounts: isHistoryEnabled,
   });
+
+  const actionItems = useMemo(
+    () => actionsData?.data?.items ?? EMPTY_ARRAY,
+    [actionsData?.data?.items]
+  );
+
+  const { profilesMap, isLoading: isLoadingProfiles } = useBulkGetUserProfiles(
+    isHistoryEnabled ? actionItems : EMPTY_ARRAY
+  );
 
   const onTableChange = useCallback(({ page = {} }: any) => {
     const { index, size } = page;
@@ -106,9 +128,52 @@ const ActionsTableComponent = () => {
     []
   );
 
+  const renderHistoryAgentsColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails | undefined;
+    const counts = action?.result_counts;
+
+    if (!counts || counts.successful_agents == null) {
+      return <>{item.fields?.agents?.length ?? action?.agents?.length ?? 0}</>;
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="check" color="success" size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="success">{counts.successful_agents}</EuiTextColor>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="cross" color="danger" size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="danger">{counts.error_agents ?? 0}</EuiTextColor>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
+
   const renderCreatedByColumn = useCallback(
     (userId: any) => (isArray(userId) ? userId[0] : '-'),
     []
+  );
+
+  const renderRunByColumn = useCallback(
+    (_: unknown, item: SearchHit) => {
+      const userId = (item.fields?.user_id as string[] | undefined)?.[0];
+      const userProfileUid = (item.fields?.user_profile_uid as string[] | undefined)?.[0];
+
+      return (
+        <RunByColumn
+          userId={userId}
+          userProfileUid={userProfileUid}
+          profilesMap={profilesMap}
+          isLoadingProfiles={isLoadingProfiles}
+        />
+      );
+    },
+    [profilesMap, isLoadingProfiles]
   );
 
   const renderTimestampColumn = useCallback(
@@ -116,17 +181,42 @@ const ActionsTableComponent = () => {
     []
   );
 
+  const renderResultsColumn = useCallback((_: unknown, item: SearchHit) => {
+    const action = item._source as ActionDetails | undefined;
+    const counts = action?.result_counts;
+    if (!counts) return <>{'\u2014'}</>;
+
+    if (action?.pack_id && 'queries_total' in counts) {
+      const packCounts = counts as PackResultCounts;
+
+      return (
+        <>
+          {packCounts.queries_with_results} of {packCounts.queries_total}
+        </>
+      );
+    }
+
+    return <>{counts.total_rows}</>;
+  }, []);
+
   const renderActionsColumn = useCallback(
-    (item: any) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
-    []
+    (item: any) => (
+      <ActionTableResultsButton
+        actionId={item.fields.action_id[0]}
+        isHistoryEnabled={isHistoryEnabled}
+      />
+    ),
+    [isHistoryEnabled]
   );
+
+  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
 
   const handlePlayClick = useCallback(
     (item: any) => () => {
       const packId = item._source.pack_id;
 
       if (packId) {
-        return push('/live_queries/new', {
+        return push(newQueryPath, {
           form: pickBy(
             {
               packId: item._source.pack_id,
@@ -142,7 +232,7 @@ const ActionsTableComponent = () => {
         });
       }
 
-      push('/live_queries/new', {
+      push(newQueryPath, {
         form: pickBy(
           {
             query: item._source.queries[0].query,
@@ -160,7 +250,7 @@ const ActionsTableComponent = () => {
         ),
       });
     },
-    [push]
+    [push, newQueryPath]
   );
   const renderPlayButton = useCallback(
     (item: any, enabled: any) => {
@@ -199,6 +289,23 @@ const ActionsTableComponent = () => {
     [permissions, existingPackIds]
   );
 
+  const resultsColumn = useMemo(
+    () =>
+      isHistoryEnabled
+        ? [
+            {
+              field: 'results',
+              name: i18n.translate('xpack.osquery.liveQueryActions.table.resultsColumnTitle', {
+                defaultMessage: 'Results',
+              }),
+              width: '120px',
+              render: renderResultsColumn,
+            },
+          ]
+        : [],
+    [isHistoryEnabled, renderResultsColumn]
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -210,13 +317,14 @@ const ActionsTableComponent = () => {
         width: '60%',
         render: renderQueryColumn,
       },
+      ...resultsColumn,
       {
         field: 'agents',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
-        width: '100px',
-        render: renderAgentsColumn,
+        width: isHistoryEnabled ? '120px' : '100px',
+        render: isHistoryEnabled ? renderHistoryAgentsColumn : renderAgentsColumn,
       },
       {
         field: 'created_at',
@@ -232,12 +340,13 @@ const ActionsTableComponent = () => {
           defaultMessage: 'Run by',
         }),
         width: '200px',
-        render: renderCreatedByColumn,
+        render: isHistoryEnabled ? renderRunByColumn : renderCreatedByColumn,
       },
       {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
           defaultMessage: 'View details',
         }),
+        ...(isHistoryEnabled ? { width: '120px' } : {}),
         actions: [
           {
             available: isPlayButtonAvailable,
@@ -250,13 +359,17 @@ const ActionsTableComponent = () => {
       },
     ],
     [
+      isHistoryEnabled,
       isPlayButtonAvailable,
       renderActionsColumn,
       renderAgentsColumn,
       renderCreatedByColumn,
+      renderHistoryAgentsColumn,
       renderPlayButton,
       renderQueryColumn,
+      renderRunByColumn,
       renderTimestampColumn,
+      resultsColumn,
     ]
   );
 
@@ -283,7 +396,7 @@ const ActionsTableComponent = () => {
 
   return (
     <EuiBasicTable
-      items={actionsData?.data?.items ?? EMPTY_ARRAY}
+      items={actionItems}
       loading={isFetching && !isLoading}
       // @ts-expect-error update types
       columns={columns}

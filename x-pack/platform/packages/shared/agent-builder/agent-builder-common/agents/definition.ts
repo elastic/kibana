@@ -6,7 +6,6 @@
  */
 
 import type { ToolSelection } from '../tools';
-import type { SkillSelection } from '../skills';
 
 /**
  * The type of an agent.
@@ -89,11 +88,9 @@ export interface AgentConfiguration {
   tools: ToolSelection[];
 
   /**
-   * List of skills exposed to the agent.
-   * When undefined or empty, the agent has no skills assigned.
-   * Use `[{ skill_ids: ['*'] }]` to assign all built-in skills.
+   * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
-  skills?: SkillSelection[];
+  workflow_ids?: string[];
 
   /**
    * Custom configuration for the research step of the agent.

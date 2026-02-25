@@ -8,6 +8,7 @@
  */
 
 export type { MarkdownEditorState, MarkdownEmbeddableState } from './schemas';
+export { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
 export const plugin = async () => {
   const { MarkdownPlugin } = await import('./plugin');

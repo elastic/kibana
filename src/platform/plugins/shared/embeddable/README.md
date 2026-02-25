@@ -63,7 +63,7 @@ The table below lists optional publishing package interfaces. Embeddables may im
 
 | Interface | Description | Used by |
 | --------- | ----------- | --------- |
-| HasDynamicActions | Interface for accessing dynamic actions. Dynamics actions are actions that manage their own state. Dynamic action state is stored in embeddable state but managed by the dynamic action. | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
+| HasDrilldowns | Interface for accessing drilldowns. Drilldowns manage their own state. Drilldown state is stored in embeddable state but managed by drilldown manager. | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
 | HasEditCapabilities | Interface for editing embeddable state | ACTION_EDIT_PANEL | 
 | HasInspectorAdapters | Interface for accessing embeddable inspector adaptors | ACTION_INSPECT_PANEL, ACTION_EXPORT_CSV |
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
@@ -101,7 +101,7 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 
 | Trigger | Description |
 | ------- | ----------- |
-| CONTEXT_MENU_TRIGGER | trigger to add an action to a panel's context menu or hover action menu. Only actions listed in QUICK_ACTION_IDS are displayed in hover action menu. |
+| ON_OPEN_PANEL_MENU | trigger to add an action to a panel's context menu or hover action menu. Only actions listed in QUICK_ACTION_IDS are displayed in hover action menu. |
 | PANEL_BADGE_TRIGGER | trigger to add a badge to a panel's title bar |
 | PANEL_NOTIFICATION_TRIGGER | trigger to add a notification to the top-right corner of a panel |
 
@@ -111,37 +111,37 @@ The table below lists the UiActions registered to embeddable panel triggers.
 
 | UiAction | Description | Trigger | Optional interfaces required by action |
 | ---------| ----------- | ---------- | ---------- |
-| saveToLibrary | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
-| clonePanel | Clones panel in page | CONTEXT_MENU_TRIGGER | |
-| copyToDashboard | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
-| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesDescription, PublishesWritableDescription, PublishesTitle, PublishesWritableTitle, PublishesTimeRange, PublishesWritableTimeRange |
+| saveToLibrary | Converts by-value panel to by-reference panel and stores panel configuration to library | ON_OPEN_PANEL_MENU | HasLibraryTransforms |
+| clonePanel | Clones panel in page | ON_OPEN_PANEL_MENU | |
+| copyToDashboard | Opens "copy to dashboard" modal | ON_OPEN_PANEL_MENU | |
+| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | ON_OPEN_PANEL_MENU | PublishesDataViews, PublishesDescription, PublishesWritableDescription, PublishesTitle, PublishesWritableTitle, PublishesTimeRange, PublishesWritableTimeRange |
 | ACTION_INPUT_CONTROL_DEPRECATION_BADGE | Displays deprecation badge for Visualize embeddable input controls | PANEL_BADGE_TRIGGER | HasVisualizeConfig |
-| ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
-| editPanel | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
-| togglePanel | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
-| ACTION_EXPLORE_DATA | Explore underlying data | CONTEXT_MENU_TRIGGER | PublishesDataViews |
-| ACTION_EXPORT_CSV | Exports raw data table to CSV | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
-| openInspector | Opens inspector flyout | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
-| ACTION_OPEN_IN_DISCOVER | Opens Discover application with  Lens embeddable data request context | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
-| deletePanel | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
-| ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | CONTEXT_MENU_TRIGGER | HasReadOnlyCapabilities |
-| unlinkFromLibrary | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
-| ACTION_VIEW_SAVED_SEARCH | Open in Discover session in Discover application | CONTEXT_MENU_TRIGGER | |
-| embeddable_addToExistingCase | Add to case | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
-| alertRule | Create an alert rule from panel | CONTEXT_MENU_TRIGGER | |
+| ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | ON_OPEN_PANEL_MENU | HasVisualizeConfig |
+| editPanel | Opens embeddable editor | ON_OPEN_PANEL_MENU | HasEditCapabilities |
+| togglePanel | Expands panel so page only displays single panel | ON_OPEN_PANEL_MENU | |
+| ACTION_EXPLORE_DATA | Explore underlying data | ON_OPEN_PANEL_MENU | PublishesDataViews |
+| ACTION_EXPORT_CSV | Exports raw data table to CSV | ON_OPEN_PANEL_MENU | HasInspectorAdapters |
+| openInspector | Opens inspector flyout | ON_OPEN_PANEL_MENU | HasInspectorAdapters |
+| ACTION_OPEN_IN_DISCOVER | Opens Discover application with  Lens embeddable data request context | ON_OPEN_PANEL_MENU | LensApiCallbacks |
+| deletePanel | Removes embeddable from page | ON_OPEN_PANEL_MENU | |
+| ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | ON_OPEN_PANEL_MENU | HasReadOnlyCapabilities |
+| unlinkFromLibrary | Converts by-reference panel to by-value panel | ON_OPEN_PANEL_MENU | HasLibraryTransforms |
+| ACTION_VIEW_SAVED_SEARCH | Open in Discover session in Discover application | ON_OPEN_PANEL_MENU | |
+| embeddable_addToExistingCase | Add to case | ON_OPEN_PANEL_MENU | LensApiCallbacks |
+| alertRule | Create an alert rule from panel | ON_OPEN_PANEL_MENU | |
 | ACTION_FILTERS_NOTIFICATION | Displays filters notification badge | PANEL_NOTIFICATION_TRIGGER | Partial<PublishesUnifiedSearch> |
-| CONVERT_LEGACY_MARKDOWN | Converts markdown visualize panel to markdown panel | CONTEXT_MENU_TRIGGER | HasVisualizeConfig | 
-| create-ml-ad-job-action | Detect anomalies | CONTEXT_MENU_TRIGGER |  |
-| FILTER_BY_MAP_EXTENT | Filters page by map bounds | CONTEXT_MENU_TRIGGER | |
-| generateCsvReport | Starts CSV reporting job for Discover session | CONTEXT_MENU_TRIGGER | PublishesSavedSearch, PublishesTitle |
-| open-change-point-in-ml-app | Open change point chart embeddable in AIOps Labs | CONTEXT_MENU_TRIGGER | |
-| open-in-anomaly-explorer | Open in Anomaly Explorer | CONTEXT_MENU_TRIGGER | |
-| open-in-single-metric-viewer | Open in Single Metric Viewer | CONTEXT_MENU_TRIGGER | |
+| CONVERT_LEGACY_MARKDOWN | Converts markdown visualize panel to markdown panel | ON_OPEN_PANEL_MENU | HasVisualizeConfig | 
+| create-ml-ad-job-action | Detect anomalies | ON_OPEN_PANEL_MENU |  |
+| FILTER_BY_MAP_EXTENT | Filters page by map bounds | ON_OPEN_PANEL_MENU | |
+| generateCsvReport | Starts CSV reporting job for Discover session | ON_OPEN_PANEL_MENU | PublishesSavedSearch, PublishesTitle |
+| open-change-point-in-ml-app | Open change point chart embeddable in AIOps Labs | ON_OPEN_PANEL_MENU | |
+| open-in-anomaly-explorer | Open in Anomaly Explorer | ON_OPEN_PANEL_MENU | |
+| open-in-single-metric-viewer | Open in Single Metric Viewer | ON_OPEN_PANEL_MENU | |
 | CUSTOM_TIME_RANGE_BADGE | Displays custom time range badge | PANEL_BADGE_TRIGGER | PublishesTimeRange |
-| OPEN_FLYOUT_ADD_DRILLDOWN | Create drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
-| OPEN_FLYOUT_EDIT_DRILLDOWN | Edit drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
-| SYNCHRONIZE_MOVEMENT_ACTION | Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps | CONTEXT_MENU_TRIGGER | |
-| URL_DRILLDOWN | Go to URL | CONTEXT_MENU_TRIGGER | |
+| OPEN_FLYOUT_ADD_DRILLDOWN | Create drilldown | ON_OPEN_PANEL_MENU | HasDrilldowns, HasSupportedTriggers |
+| OPEN_FLYOUT_EDIT_DRILLDOWN | Edit drilldown | ON_OPEN_PANEL_MENU | HasDrilldowns, HasSupportedTriggers |
+| SYNCHRONIZE_MOVEMENT_ACTION | Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps | ON_OPEN_PANEL_MENU | |
+| URL_DRILLDOWN | Go to URL | ON_OPEN_PANEL_MENU | |
 
 ### Best practices
 

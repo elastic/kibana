@@ -294,7 +294,7 @@
             "label": "runTask",
             "description": [],
             "signature": [
-              "({ jobId, payload: job, taskInstanceFields, request, cancellationToken, stream, }: ",
+              "({ jobId, payload: job, taskInstanceFields, request, cancellationToken, stream, useInternalUser, }: ",
               {
                 "pluginId": "@kbn/reporting-server",
                 "scope": "server",
@@ -325,7 +325,7 @@
                 "id": "def-server.CsvSearchSourceExportType.runTask.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    jobId,\n    payload: job,\n    taskInstanceFields,\n    request,\n    cancellationToken,\n    stream,\n  }",
+                "label": "{\n    jobId,\n    payload: job,\n    taskInstanceFields,\n    request,\n    cancellationToken,\n    stream,\n    useInternalUser = false,\n  }",
                 "description": [],
                 "signature": [
                   {

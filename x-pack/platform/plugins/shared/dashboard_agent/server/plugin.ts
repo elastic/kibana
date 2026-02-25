@@ -7,17 +7,15 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   DashboardAgentSetupDependencies,
   DashboardAgentStartDependencies,
   DashboardAgentPluginSetup,
   DashboardAgentPluginStart,
 } from './types';
-import { registerDashboardAgent } from './register_agent';
-import { createDashboardTool, updateDashboardTool } from './tools';
-import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
-import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
+import { registerSkills } from './skills';
+import { createDashboardAttachmentType } from './attachment_types';
 
 export class DashboardAgentPlugin
   implements
@@ -38,57 +36,38 @@ export class DashboardAgentPlugin
     coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
-    this.logger.debug('Setting up Dashboard Agent plugin');
-
-    getIsDashboardAgentEnabled(coreSetup)
-      .then((isDashboardAgentEnabled) => {
-        if (!isDashboardAgentEnabled) {
-          this.logger.debug(
-            `Skipping dashboard agent registration because feature flag "${DASHBOARD_AGENT_FEATURE_FLAG}" is set to false`
-          );
-          return;
-        }
-
-        this.registerToolsAndAgent(coreSetup, setupDeps).catch((error) => {
-          this.logger.error(`Error registering dashboard agent and tools: ${error}`);
-        });
-      })
-      .catch((error) => {
-        this.logger.error(`Error checking whether the dashboard agent is enabled: ${error}`);
-      });
+    this.logger.debug('Setting up Dashboard skills and tools');
+    this.registerToolsAndSkills(coreSetup, setupDeps).catch((error) => {
+      this.logger.error(`Error registering dashboard skill and tools: ${error}`);
+    });
 
     return {};
   }
 
-  private async registerToolsAndAgent(
+  private async registerToolsAndSkills(
     coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ) {
-    const [coreStart, startDeps] = await coreSetup.getStartServices();
+    const [coreStart] = await coreSetup.getStartServices();
+    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+      coreStart.savedObjects.getUnsafeInternalClient()
+    );
+    const experimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
+      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
 
-    const dashboardLocator =
-      startDeps.share?.url?.locators?.get<DashboardLocatorParams>('DASHBOARD_APP_LOCATOR');
-
-    if (!dashboardLocator) {
-      this.logger.warn('Dashboard locator is unavailable; skipping dashboard tool registration.');
+    if (!experimentalFeaturesEnabled) {
+      this.logger.debug(
+        `Skipping dashboard skill and tools registration because ui setting "${AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID}" is set to false`
+      );
       return;
     }
 
-    setupDeps.agentBuilder.tools.register(
-      createDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
-        dashboardLocator,
-        spaces: startDeps.spaces,
-      })
-    );
-    setupDeps.agentBuilder.tools.register(
-      updateDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
-        dashboardLocator,
-        spaces: startDeps.spaces,
-      })
-    );
+    // Register the dashboard attachment type
+    setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
 
-    // Register the dashboard agent
-    registerDashboardAgent(setupDeps.agentBuilder);
+    // Register dashboard skills for the default agent.
+    await registerSkills(setupDeps.agentBuilder);
   }
 
   start(

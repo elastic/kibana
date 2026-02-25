@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { Dimension, MetricField } from '../../../types';
-import { DIMENSIONS_COLUMN } from './constants';
+import type { MetricField } from '../../../types';
 import { createESQLQuery } from './create_esql_query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
@@ -41,6 +40,13 @@ const mockExponentialHistogramMetric: MetricField = {
   ...mockMetric,
   name: 'http.request.duration',
   type: ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+  instrument: 'histogram',
+};
+
+const mockLegacyHistogramMetric: MetricField = {
+  ...mockMetric,
+  name: 'histogram.legacy',
+  type: ES_FIELD_TYPES.HISTOGRAM,
   instrument: 'histogram',
 };
 
@@ -91,10 +97,35 @@ TS metrics-*
     );
   });
 
+  it('should generate a PERCENTILE query for legacy histogram', () => {
+    const query = createESQLQuery({
+      metric: mockLegacyHistogramMetric,
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
+`.trim()
+    );
+  });
+
+  it('should generate a PERCENTILE query for legacy histogram with multiple dimensions', () => {
+    const query = createESQLQuery({
+      metric: mockLegacyHistogramMetric,
+      splitAccessors: ['service.name', 'host.name'],
+    });
+    expect(query).toBe(
+      `
+TS metrics-*
+  | STATS PERCENTILE(TO_TDIGEST(histogram.legacy), 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
+`.trim()
+    );
+  });
+
   it('should generate exponential histogram query with single dimension', () => {
     const query = createESQLQuery({
       metric: mockExponentialHistogramMetric,
-      dimensions: [{ name: 'service.name', type: ES_FIELD_TYPES.KEYWORD }],
+      splitAccessors: ['service.name'],
     });
     expect(query).toBe(
       `
@@ -107,17 +138,12 @@ TS metrics-*
   it('should generate exponential histogram query with multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockExponentialHistogramMetric,
-      dimensions: [
-        { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-      ],
+      splitAccessors: ['service.name', 'host.name'],
     });
     expect(query).toBe(
       `
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`service.name\`, " › ", \`host.name\`)
-  | DROP \`service.name\`, \`host.name\`
 `.trim()
     );
   });
@@ -125,7 +151,7 @@ TS metrics-*
   it('should generate tdigest histogram query with single dimension', () => {
     const query = createESQLQuery({
       metric: mockTdigestMetric,
-      dimensions: [{ name: 'service.name', type: ES_FIELD_TYPES.KEYWORD }],
+      splitAccessors: ['service.name'],
     });
     expect(query).toBe(
       `
@@ -138,17 +164,12 @@ TS metrics-*
   it('should generate tdigest histogram query with multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockTdigestMetric,
-      dimensions: [
-        { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-      ],
+      splitAccessors: ['service.name', 'host.name'],
     });
     expect(query).toBe(
       `
 TS metrics-*
   | STATS PERCENTILE(http.request.duration, 95) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service.name\`, \`host.name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`service.name\`, " › ", \`host.name\`)
-  | DROP \`service.name\`, \`host.name\`
 `.trim()
     );
   });
@@ -156,7 +177,7 @@ TS metrics-*
   it('should handle single dimension', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
+      splitAccessors: ['host.name'],
     });
     expect(query).toBe(
       `
@@ -166,75 +187,54 @@ TS metrics-*
     );
   });
 
-  it('should handle multiple keyword dimensions without casting', () => {
+  it('should handle multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: [
-        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
-      ],
+      splitAccessors: ['host.name', 'container.id'],
     });
     expect(query).toBe(
       `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`, \`container.id\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.name\`, " › ", \`container.id\`)
-  | DROP \`host.name\`, \`container.id\`
 `.trim()
     );
   });
 
-  it('should cast non-keyword fields in multiple dimensions', () => {
+  it('should handle multiple dimensions with IP field', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: [
-        { name: 'host.ip', type: ES_FIELD_TYPES.IP },
-        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-      ],
+      splitAccessors: ['host.ip', 'host.name'],
     });
     expect(query).toBe(
       `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`::STRING, " › ", \`host.name\`)
-  | DROP \`host.ip\`, \`host.name\`
 `.trim()
     );
   });
 
-  it('should cast numeric fields in multiple dimensions', () => {
+  it('should handle multiple dimensions with numeric field', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: [
-        { name: 'cpu.cores', type: ES_FIELD_TYPES.LONG },
-        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-      ],
+      splitAccessors: ['cpu.cores', 'host.name'],
     });
     expect(query).toBe(
       `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`cpu.cores\`, \`host.name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`cpu.cores\`::STRING, " › ", \`host.name\`)
-  | DROP \`cpu.cores\`, \`host.name\`
 `.trim()
     );
   });
 
-  it('should handle a mix of cast and non-cast fields', () => {
+  it('should handle multiple dimensions with mixed field types', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: [
-        { name: 'host.ip', type: ES_FIELD_TYPES.IP },
-        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'cpu.cores', type: ES_FIELD_TYPES.LONG },
-      ],
+      splitAccessors: ['host.ip', 'host.name', 'cpu.cores'],
     });
     expect(query).toBe(
       `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.ip\`, \`host.name\`, \`cpu.cores\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host.ip\`::STRING, " › ", \`host.name\`, " › ", \`cpu.cores\`::STRING)
-  | DROP \`host.ip\`, \`host.name\`, \`cpu.cores\`
 `.trim()
     );
   });
@@ -251,10 +251,10 @@ TS custom-metrics-*
     );
   });
 
-  it('should handle undefined dimensions without throwing error', () => {
+  it('should handle undefined splitAccessors without throwing error', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: undefined,
+      splitAccessors: undefined,
     });
 
     expect(query).toBe(
@@ -293,10 +293,10 @@ TS metrics-*
 `.trim()
     );
   });
-  it('should handle undefined both dimensions and metrics dimensions without throwing error', () => {
+  it('should handle empty splitAccessors array', () => {
     const query = createESQLQuery({
-      metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
-      dimensions: undefined,
+      metric: mockMetric,
+      splitAccessors: [],
     });
 
     expect(query).toBe(
@@ -322,7 +322,7 @@ TS metrics-*
     it('should escape field names with hyphens in single dimension', () => {
       const query = createESQLQuery({
         metric: mockMetricWithSpecialChars,
-        dimensions: [{ name: 'service-name', type: ES_FIELD_TYPES.KEYWORD }],
+        splitAccessors: ['service-name'],
       });
       expect(query).toBe(
         `
@@ -334,36 +334,26 @@ TS metrics-*
 
     it('should escape field names with hyphens in multiple dimensions', () => {
       const query = createESQLQuery({
-        metric: mockMetricWithSpecialChars,
-        dimensions: [
-          { name: 'service-name', type: ES_FIELD_TYPES.KEYWORD },
-          { name: 'container-id', type: ES_FIELD_TYPES.KEYWORD },
-        ],
+        metric: mockMetric,
+        splitAccessors: ['service-name', 'container-id'],
       });
       expect(query).toBe(
         `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`service-name\`, \`container-id\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`service-name\`, " › ", \`container-id\`)
-  | DROP \`service-name\`, \`container-id\`
 `.trim()
       );
     });
 
-    it('should escape field names with hyphens and cast non-keyword fields', () => {
+    it('should escape field names with hyphens in multiple dimensions with IP field', () => {
       const query = createESQLQuery({
-        metric: mockMetricWithSpecialChars,
-        dimensions: [
-          { name: 'host-ip', type: ES_FIELD_TYPES.IP },
-          { name: 'service-name', type: ES_FIELD_TYPES.KEYWORD },
-        ],
+        metric: mockMetric,
+        splitAccessors: ['host-ip', 'service-name'],
       });
       expect(query).toBe(
         `
 TS metrics-*
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host-ip\`, \`service-name\`
-  | EVAL ${DIMENSIONS_COLUMN} = CONCAT(\`host-ip\`::STRING, " › ", \`service-name\`)
-  | DROP \`host-ip\`, \`service-name\`
 `.trim()
       );
     });
@@ -378,7 +368,7 @@ TS metrics-*
 
       const query = createESQLQuery({
         metric: mockMetricWithBackticks,
-        dimensions: [{ name: 'field`with`ticks', type: ES_FIELD_TYPES.KEYWORD }],
+        splitAccessors: ['field`with`ticks'],
       });
       expect(query).toBe(
         `

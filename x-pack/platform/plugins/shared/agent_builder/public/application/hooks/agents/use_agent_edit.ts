@@ -10,15 +10,12 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   type AgentDefinition,
   type ToolSelection,
-  type SkillSelection,
   defaultAgentToolIds,
-  allBuiltInSkillsSelection,
 } from '@kbn/agent-builder-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';
 import { useToolsService } from '../tools/use_tools';
-import { useSkillsService } from '../skills/use_skills';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
 import { searchParamNames } from '../../search_param_names';
@@ -32,8 +29,6 @@ const defaultToolSelection: ToolSelection[] = [
   },
 ];
 
-const defaultSkillSelection: SkillSelection[] = allBuiltInSkillsSelection;
-
 const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
@@ -44,7 +39,7 @@ const emptyState = (): AgentEditState => ({
   configuration: {
     instructions: '',
     tools: defaultToolSelection,
-    skills: defaultSkillSelection,
+    workflow_ids: [],
   },
 });
 
@@ -63,7 +58,6 @@ export function useAgentEdit({
   const [state, setState] = useState<AgentEditState>(emptyState());
 
   const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
-  const { skills, isLoading: skillsLoading, error: skillsError } = useSkillsService();
   const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
@@ -125,7 +119,7 @@ export function useAgentEdit({
     [editingAgentId, createMutation, updateMutation, tools]
   );
 
-  const isLoading = agentId ? agentLoading || toolsLoading || skillsLoading : false;
+  const isLoading = agentId ? agentLoading || toolsLoading : false;
 
   return {
     state,
@@ -133,7 +127,6 @@ export function useAgentEdit({
     isSubmitting: createMutation.isLoading || updateMutation.isLoading,
     submit,
     tools,
-    skills,
-    error: toolsError || agentError || skillsError,
+    error: toolsError || agentError,
   };
 }

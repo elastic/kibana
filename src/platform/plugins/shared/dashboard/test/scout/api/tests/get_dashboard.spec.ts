@@ -18,7 +18,7 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - get', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('dashboards - get', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {

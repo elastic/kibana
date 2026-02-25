@@ -155,7 +155,7 @@ export async function scheduleExtractEntityTask({
   logger: Logger;
   taskManager: TaskManagerStartContract;
   type: EntityType;
-  frequency?: string;
+  frequency: string;
   namespace: string;
   request: KibanaRequest;
 }): Promise<void> {

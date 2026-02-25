@@ -27,7 +27,8 @@ import {
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
+import debounce from 'lodash/debounce';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -42,16 +43,25 @@ import { AutocompleteSelector } from './autocomplete_selector';
 import { OperatorSelector } from './operator_selector';
 import { RangeInput } from './range_input';
 
+const SYNTAX_EDITOR_CONDITION_CHANGE_DEBOUNCE_MS = 300;
+
 export interface ConditionEditorProps {
   condition: Condition;
   status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
+  onValidityChange: (isValid: boolean) => void;
   fieldSuggestions?: Suggestion[];
   valueSuggestions?: Suggestion[];
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = [] } = props;
+  const {
+    status,
+    onConditionChange,
+    onValidityChange,
+    fieldSuggestions = [],
+    valueSuggestions = [],
+  } = props;
   const { core } = useKibana();
 
   const isInvalidCondition = !isCondition(props.condition);
@@ -61,6 +71,58 @@ export function ConditionEditor(props: ConditionEditorProps) {
   const conditionEditableInUi = useMemo(() => isConditionEditableInUi(condition), [condition]);
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
+
+  const serializedCondition = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
+  const [syntaxEditorValue, setSyntaxEditorValue] = useState(serializedCondition);
+  const syntaxEditorValueRef = useRef(syntaxEditorValue);
+  const lastSyncedSerializedConditionRef = useRef(serializedCondition);
+  const prevUsingSyntaxEditorRef = useRef(usingSyntaxEditor);
+  const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
+  const onValidityChangeRef = useRef(onValidityChange ?? (() => {}));
+
+  const reportValidityChange = useCallback((isValid: boolean) => {
+    if (lastReportedValidityRef.current === isValid) {
+      return;
+    }
+    lastReportedValidityRef.current = isValid;
+    onValidityChangeRef.current(isValid);
+  }, []);
+
+  useEffect(() => {
+    onValidityChangeRef.current = onValidityChange ?? (() => {});
+  }, [onValidityChange]);
+
+  useEffect(() => {
+    // Ensure consumers start in a valid state.
+    reportValidityChange(true);
+  }, [reportValidityChange]);
+
+  useEffect(() => {
+    // When switching modes, reset validity and ensure the editor starts from the canonical condition.
+    if (prevUsingSyntaxEditorRef.current !== usingSyntaxEditor) {
+      reportValidityChange(true);
+      prevUsingSyntaxEditorRef.current = usingSyntaxEditor;
+    }
+  }, [reportValidityChange, usingSyntaxEditor]);
+
+  useEffect(() => {
+    if (!usingSyntaxEditor) {
+      // Keep syntax editor text in sync while in UI mode so switching to syntax starts
+      // from the current canonical condition.
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
+      lastSyncedSerializedConditionRef.current = serializedCondition;
+      return;
+    }
+
+    // If the parent updates the condition while the user hasn't edited the syntax editor,
+    // sync the text. If the user has edited locally, keep their text to avoid clobbering.
+    if (syntaxEditorValueRef.current === lastSyncedSerializedConditionRef.current) {
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
+    }
+    lastSyncedSerializedConditionRef.current = serializedCondition;
+  }, [serializedCondition, usingSyntaxEditor]);
 
   // Check if the selected field is a date type AND the operator is "in range"
   const isDateFieldWithRange = useMemo(() => {
@@ -79,9 +141,45 @@ export function ConditionEditor(props: ConditionEditorProps) {
     return fieldSuggestion?.type === 'date';
   }, [condition, conditionEditableInUi, fieldSuggestions]);
 
-  const handleConditionChange = (updatedCondition: Condition) => {
-    onConditionChange(emptyEqualsToAlways(updatedCondition));
-  };
+  const handleConditionChange = useCallback(
+    (updatedCondition: Condition) => {
+      onConditionChange(emptyEqualsToAlways(updatedCondition));
+    },
+    [onConditionChange]
+  );
+
+  const debouncedEmitConditionChange = useMemo(() => {
+    return debounce(
+      (nextCondition: Condition) => {
+        handleConditionChange(nextCondition);
+      },
+      SYNTAX_EDITOR_CONDITION_CHANGE_DEBOUNCE_MS,
+      { trailing: true }
+    );
+  }, [handleConditionChange]);
+
+  useEffect(() => {
+    return () => {
+      // Make sure the last valid condition is not lost on unmount.
+      debouncedEmitConditionChange.flush();
+      debouncedEmitConditionChange.cancel();
+    };
+  }, [debouncedEmitConditionChange]);
+
+  const flushSyntaxEditorCondition = useCallback(() => {
+    const currentValue = syntaxEditorValueRef.current;
+    if (currentValue === lastSyncedSerializedConditionRef.current) {
+      debouncedEmitConditionChange.cancel();
+      return;
+    }
+    try {
+      const parsed = JSON.parse(currentValue) as Condition;
+      debouncedEmitConditionChange.cancel();
+      handleConditionChange(parsed);
+    } catch (error: unknown) {
+      // do nothing
+    }
+  }, [debouncedEmitConditionChange, handleConditionChange]);
 
   return (
     <EuiFormRow
@@ -145,14 +243,20 @@ export function ConditionEditor(props: ConditionEditorProps) {
           dataTestSubj="streamsAppConditionEditorCodeEditor"
           height={200}
           languageId="json"
-          value={JSON.stringify(condition, null, 2)}
+          value={syntaxEditorValue}
           onChange={(value) => {
+            syntaxEditorValueRef.current = value;
+            setSyntaxEditorValue(value);
             try {
-              handleConditionChange(JSON.parse(value));
+              const parsed = JSON.parse(value) as Condition;
+              reportValidityChange(true);
+              debouncedEmitConditionChange(parsed);
             } catch (error: unknown) {
-              // do nothing
+              reportValidityChange(false);
+              debouncedEmitConditionChange.cancel();
             }
           }}
+          onBlur={flushSyntaxEditorCondition}
           options={{
             readOnly: status === 'disabled',
             automaticLayout: true,

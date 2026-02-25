@@ -47,6 +47,7 @@ sourceCommand
     | promqlCommand
     // in development
     | {this.isDevVersion()}? explainCommand
+    | {this.isDevVersion()}? externalCommand
     ;
 
 processingCommand
@@ -70,6 +71,8 @@ processingCommand
     | rerankCommand
     | inlineStatsCommand
     | fuseCommand
+    | uriPartsCommand
+    | metricsInfoCommand
     // in development
     | {this.isDevVersion()}? lookupCommand
     | {this.isDevVersion()}? insistCommand
@@ -104,6 +107,10 @@ timeSeriesCommand
     : TS indexPatternAndMetadataFields
     ;
 
+externalCommand
+    : EXTERNAL stringOrParameter commandNamedParameters
+    ;
+
 indexPatternAndMetadataFields
     : indexPatternOrSubquery (COMMA indexPatternOrSubquery)* metadata?
     ;
@@ -118,8 +125,7 @@ subquery
     ;
 
 indexPattern
-    : clusterString COLON unquotedIndexString
-    | unquotedIndexString CAST_OP selectorString
+    : (clusterString COLON)? unquotedIndexString (CAST_OP selectorString)?
     | indexString
     ;
 
@@ -351,6 +357,10 @@ fuseKeyByFields
    : qualifiedName (COMMA qualifiedName)*
    ;
 
+metricsInfoCommand
+    : METRICS_INFO
+    ;
+
 //
 // In development
 //
@@ -360,6 +370,10 @@ lookupCommand
 
 insistCommand
     : DEV_INSIST qualifiedNamePatterns
+    ;
+
+uriPartsCommand
+    : URI_PARTS qualifiedName ASSIGN primaryExpression
     ;
 
 setCommand

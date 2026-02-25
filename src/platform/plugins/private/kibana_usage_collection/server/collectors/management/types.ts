@@ -50,7 +50,6 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'ai:anonymizationSettings': string;
-  'agentBuilder:dashboardTools': boolean;
   'agentBuilder:navEnabled': boolean;
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
@@ -188,5 +187,6 @@ export interface UsageStats {
   'genAiSettings:defaultAIConnectorOnly': boolean;
   'observability:streamsEnableAttachments': boolean;
   'observability:streamsEnableContentPacks': boolean;
+  'observability:streamsEnableQueryStreams': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
 }

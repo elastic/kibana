@@ -8,7 +8,7 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AgentType } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
-import type { AgentProperties, AgentConfigurationProperties } from './storage';
+import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
 
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
@@ -35,7 +35,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
-      skills: configuration.skills,
+      workflow_ids: configuration.workflow_ids,
     },
   };
 };
@@ -61,7 +61,7 @@ export const createRequestToEs = ({
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
-      skills: profile.configuration.skills,
+      workflow_ids: profile.configuration.workflow_ids,
     },
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
