@@ -74,7 +74,7 @@ const MockedAliasTable = AliasTable as unknown as jest.MockedFunction<typeof Ali
 const MockedRelativesFooter = RelativesFooter as unknown as jest.MockedFunction<
   typeof RelativesFooter
 >;
-const MockedEuiSelectable = EuiSelectable as unknown as jest.MockedFunction<typeof EuiSelectable>;
+const MockedEuiSelectable = EuiSelectable as unknown as jest.Mock;
 
 interface SetupOpts {
   mockSpaces?: Space[];

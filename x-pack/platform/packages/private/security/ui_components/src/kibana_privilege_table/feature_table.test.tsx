@@ -885,7 +885,7 @@ describe('FeatureTable', () => {
       `"this is my reserved feature description"`
     );
 
-    expect(screen.queryByTestId('primaryFeaturePrivilegeControl')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('primaryFeaturePrivilegeControl')).toBeNull();
   });
 
   it('renders subtext for features that define an optional description', () => {
@@ -912,7 +912,7 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(screen.queryByTestId('featurePrivilegeDescriptionText')).toBeInTheDocument();
+    expect(screen.queryByTestId('featurePrivilegeDescriptionText')).not.toBeNull();
 
     expect(screen.getByTestId('featurePrivilegeDescriptionText').textContent).toMatchInlineSnapshot(
       `"a description of my feature"`
@@ -942,7 +942,7 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(screen.queryByTestId('featurePrivilegeDescriptionText')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('featurePrivilegeDescriptionText')).toBeNull();
   });
 
   it('renders renders the primary feature controls when both primary and reserved privileges are specified', () => {
@@ -979,7 +979,7 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(screen.queryByTestId('reservedFeatureDescription')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('reservedFeatureDescription')).toBeNull();
     expect(displayedPrivileges).toEqual({
       reserved_feature: {
         primaryFeaturePrivilege: 'none',
@@ -1086,8 +1086,8 @@ describe('FeatureTable', () => {
     const fooCategory = screen.getByTestId('featureCategory_foo');
     const barCategory = screen.getByTestId('featureCategory_bar');
 
-    expect(fooCategory).toBeInTheDocument();
-    expect(barCategory).toBeInTheDocument();
+    expect(fooCategory).not.toBeNull();
+    expect(barCategory).not.toBeNull();
 
     expect(within(fooCategory).getByTestId('categoryLabel').textContent).toMatchInlineSnapshot(
       `"1 / 2 features granted"`
@@ -1459,7 +1459,7 @@ describe('FeatureTable', () => {
       fireEvent.click(screen.getByTestId('featureCategoryButton_foo'));
       fireEvent.click(screen.getByTestId('featureTableCell'));
 
-      expect(screen.getByTestId('subFeatureDescription')).toBeInTheDocument();
+      expect(screen.queryByTestId('subFeatureDescription')).not.toBeNull();
       expect(screen.getByTestId('subFeatureDescription').textContent).toMatchInlineSnapshot(
         `"some sub feature description"`
       );
@@ -1499,7 +1499,7 @@ describe('FeatureTable', () => {
       fireEvent.click(screen.getByTestId('featureCategoryButton_foo'));
       fireEvent.click(screen.getByTestId('featureTableCell'));
 
-      expect(screen.queryByTestId('subFeatureDescription')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('subFeatureDescription')).toBeNull();
     });
   });
 });
