@@ -7,17 +7,15 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import {
-  OnboardingStep,
-  TaskStatus,
-  type GeneratedSignificantEventQuery,
-  type IdentifyFeaturesResult,
-  type OnboardingResult,
-  type SignificantEventsQueriesGenerationResult,
-  type TaskResult,
+import type {
+  GeneratedSignificantEventQuery,
+  SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
+import { TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { v4 } from 'uuid';
+import type { IdentifyFeaturesResult, OnboardingResult, TaskResult } from '@kbn/streams-schema';
+import { OnboardingStep } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import type { StreamsTaskType, TaskContext } from '.';
@@ -29,12 +27,15 @@ import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
 import type { FeaturesIdentificationTaskParams } from './features_identification';
+import {
+  FEATURES_IDENTIFICATION_TASK_TYPE,
+  getFeaturesIdentificationTaskId,
+} from './features_identification';
 import type { SignificantEventsQueriesGenerationTaskParams } from './significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
 } from './significant_events_queries_generation';
-import { waitForSubtask, scheduleFeaturesIdentificationTask } from './subtask_helpers';
 
 export interface OnboardingTaskParams {
   connectorId: string;
@@ -183,6 +184,57 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
       },
     },
   } satisfies TaskDefinitionRegistry;
+}
+
+async function waitForSubtask<TParams extends {} = {}, TPayload extends {} = {}>(
+  subtaskId: string,
+  parentTaskId: string,
+  taskClient: TaskClient<StreamsTaskType>
+): Promise<TaskResult<TPayload>> {
+  const sleepInterval = 2000;
+  let intervalId: NodeJS.Timeout;
+
+  return await new Promise<TaskResult<TPayload>>((resolve, reject) => {
+    intervalId = setInterval(async () => {
+      const parentTask = await taskClient.get(parentTaskId);
+
+      if (parentTask.status === TaskStatus.BeingCanceled) {
+        await taskClient.cancel(subtaskId);
+      }
+
+      const result = await taskClient.getStatus<TParams, TPayload>(subtaskId);
+
+      if (result.status === TaskStatus.Failed) {
+        reject(new Error(`Subtask with ID ${subtaskId} has failed. Error: ${result.error}.`));
+      }
+
+      if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status)) {
+        resolve(result);
+      }
+    }, sleepInterval);
+  }).finally(() => {
+    clearInterval(intervalId);
+  });
+}
+
+async function scheduleFeaturesIdentificationTask(
+  params: FeaturesIdentificationTaskParams,
+  taskClient: TaskClient<StreamsTaskType>,
+  request: KibanaRequest
+): Promise<string> {
+  const id = getFeaturesIdentificationTaskId(params.streamName);
+
+  await taskClient.schedule<FeaturesIdentificationTaskParams>({
+    task: {
+      type: FEATURES_IDENTIFICATION_TASK_TYPE,
+      id,
+      space: '*',
+    },
+    params,
+    request,
+  });
+
+  return id;
 }
 
 async function scheduleQueriesGenerationTask(
