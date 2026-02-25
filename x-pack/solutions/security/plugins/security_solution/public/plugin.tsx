@@ -121,7 +121,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Register workflow steps
     if (workflowsExtensions) {
       import('./workflows/step_types')
-        .then(({ registerWorkflowSteps }) => registerWorkflowSteps(workflowsExtensions))
+        .then(async ({ registerWorkflowSteps }) => {
+          const [coreStart] = await core.getStartServices();
+          return registerWorkflowSteps(workflowsExtensions, coreStart);
+        })
         .catch((error) => {
           this.logger.error(
             `Error registering security workflow steps: ${
