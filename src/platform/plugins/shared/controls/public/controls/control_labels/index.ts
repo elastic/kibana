@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublishesFocusedPanelId, PublishesLabel } from './types';
-
-export const apiPublishesFocusedPanelId = (api: unknown): api is PublishesFocusedPanelId =>
-  Boolean((api as PublishesFocusedPanelId).focusedPanelId$);
-
-export const apiPublishesLabel = (api: unknown): api is PublishesLabel =>
-  Boolean((api as PublishesLabel).label$);
+export { ConditionalLabelWrapper } from './conditional_label_wrapper';
+export { initializeLabelManager, defaultControlLabelComparators } from './label_state_manager';
