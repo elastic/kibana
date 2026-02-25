@@ -10,7 +10,6 @@ import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
 import type { Insight } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
-import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
 import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
@@ -66,7 +65,7 @@ export async function collectQueryData({
   query: Query;
   esClient: ElasticsearchClient;
 }): Promise<QueryData | undefined> {
-  const ruleId = getRuleIdFromQueryLink(query);
+  const { rule_id: ruleId } = query;
 
   const currentResponse = await esClient
     .search<{ original_source: Record<string, unknown> }>({

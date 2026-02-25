@@ -515,6 +515,38 @@ describe('getInitialAppState', () => {
               );
             });
 
+            it('should prefer the root profile default esql query when provided', () => {
+              // Given
+              const services = createDiscoverServicesMock();
+              services.storage.get = jest.fn().mockReturnValue(undefined);
+              services.uiSettings.get = jest.fn().mockReturnValue(true);
+              services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+              const defaultProfileEsqlQuery = {
+                query: 'FROM test | WHERE 1 == 1',
+              };
+
+              // When
+              const appState = getInitialAppState({
+                hasGlobalState: false,
+                initialUrlState: undefined,
+                persistedTab: undefined,
+                dataView: new DataView({
+                  spec: dataViewMock.toSpec(),
+                  fieldFormats: {} as DataView['fieldFormats'],
+                }),
+                services,
+                defaultProfileEsqlQuery,
+              });
+
+              // Then
+              expect(appState).toEqual(
+                expect.objectContaining({
+                  query: { esql: defaultProfileEsqlQuery.query },
+                })
+              );
+            });
+
             describe('when esql uiSetting is disabled', () => {
               it('should return the default query', () => {
                 // Given
