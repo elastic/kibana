@@ -57,5 +57,7 @@ export const renderInferenceEndpointsMgmtApp = async (
     element
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
 };
