@@ -32,7 +32,7 @@ describe('interpreter/functions#metricVis', () => {
     iconAlign: 'left',
     valueFontSize: 'default',
     primaryPosition: 'bottom',
-    titleWeight: 'bold',
+    titleWeight: 'normal',
     secondaryLabelPosition: 'before',
     applyColorTo: 'background',
   };

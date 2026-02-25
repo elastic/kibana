@@ -91,7 +91,7 @@ const defaultMetricParams: MetricVisParam = {
     palette: undefined,
   },
   primaryPosition: 'bottom',
-  titleWeight: 'bold',
+  titleWeight: 'normal',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
 };
@@ -1217,7 +1217,7 @@ describe('MetricVisComponent', function () {
             primaryAlign: 'right',
             secondaryAlign: 'right',
             primaryPosition: 'bottom',
-            titleWeight: 'bold',
+            titleWeight: 'normal',
             secondaryTrend: {
               visuals: undefined,
               baseline: undefined,

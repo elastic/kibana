@@ -91,7 +91,6 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'iconAlign'
   | 'valueFontMode'
   | 'primaryPosition'
-  | 'titleWeight'
   | 'secondaryLabelPosition'
   | 'applyColorTo'
 >;
@@ -99,13 +98,11 @@ export type MetricStateOptinalsWithDefault = Pick<
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
 
 export type MetricLayoutWithDefault = Required<
-  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'titleWeight' | 'primaryAlign'>
+  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign'>
 > & {
   iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
   secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
 };
-
-export type TitleFontWeight = MetricStyle['titleWeight'];
 
 export type IconPosition = MetricStyle['iconAlign'];
 

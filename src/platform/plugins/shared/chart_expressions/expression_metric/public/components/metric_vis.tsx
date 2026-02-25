@@ -99,9 +99,10 @@ export const MetricVis = ({
 }: MetricVisComponentProps) => {
   const grid = useRef<MetricSpec['data']>([[]]);
   const {
-    euiTheme: { colors },
+    euiTheme,
     highContrastMode,
   } = useEuiTheme();
+  const { colors } = euiTheme;
   const defaultColor = colors.emptyShade;
 
   const onRenderChange = useCallback<RenderChangeListener>(
@@ -313,6 +314,23 @@ export const MetricVis = ({
       ref={scrollContainerRef}
       css={[
         styles.layout,
+        css`
+          .echMetricText__title span {
+            font-weight: ${euiTheme.font.weight.medium} !important;
+          }
+
+          .echMetricText__subtitle,
+          .echMetricText__extra,
+          .echMetricText__value,
+          .echMetricText__part,
+          .echSecondaryMetric,
+          .echSecondaryMetric__label,
+          .echSecondaryMetric__value,
+          .echBadge__content,
+          .echBadge__text {
+            font-weight: ${euiTheme.font.weight.medium} !important;
+          }
+        `,
         css`
           height: 100%;
           width: 100%;
