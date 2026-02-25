@@ -518,6 +518,8 @@ export class SecurityPlugin
   }
 
   private decodeElasticsearchUrlFromCloudId(cloudId: string): string | undefined {
+    this.logger.info('CloudId: ' + cloudId);
+
     const id = cloudId.split(':').pop();
     if (!id) {
       return undefined;
