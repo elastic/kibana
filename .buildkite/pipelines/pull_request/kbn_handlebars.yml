@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/test/kbn_handlebars.sh
+    cancel_on_build_failing: true
     label: 'Check @kbn/handlebars for upstream differences'
     agents:
       machineType: n2-standard-2
@@ -7,11 +8,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 5
     retry:
       automatic:

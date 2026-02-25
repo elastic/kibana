@@ -2753,6 +2753,43 @@
         "columnNumber": 3,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.css.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "first",
+            "description": [],
+            "signature": [
+              "TemplateStringsArray | ",
+              "CSSObject"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "lineNumber": 285,
+            "columnNumber": 9,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.css.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "interpolations",
+            "description": [],
+            "signature": [
+              "SimpleInterpolation",
+              "[]"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "lineNumber": 286,
+            "columnNumber": 9,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2781,6 +2818,45 @@
         "columnNumber": 3,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaReact",
+            "id": "def-common.euiStyled.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "C"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "lineNumber": 265,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaReact",
+                "id": "def-common.euiStyled.$1.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "StyledComponentProps",
+                  "<C, T, O, A> & { as?: undefined; forwardedAs?: undefined; }"
+                ],
+                "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+                "lineNumber": 161,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {

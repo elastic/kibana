@@ -446,7 +446,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
             "lineNumber": 24,
@@ -1169,7 +1169,7 @@
         "signature": [
           "Omit<",
           "OverlayFlyoutOpenOptions",
-          ", \"session\"> & { session?: \"start\" | \"never\" | \"inherit\" | undefined; title?: string | undefined; flyoutMenuProps?: ",
+          ", \"session\"> & { session?: \"start\" | \"inherit\" | \"never\" | undefined; title?: string | undefined; flyoutMenuProps?: ",
           "EuiFlyoutMenuProps",
           " | undefined; }"
         ],
