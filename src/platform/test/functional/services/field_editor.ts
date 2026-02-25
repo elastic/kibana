@@ -15,6 +15,7 @@ export class FieldEditorService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly comboBox = this.ctx.getService('comboBox');
+  private readonly flyout = this.ctx.getService('flyout');
 
   public async setName(name: string, clearFirst = false, typeCharByChar = false) {
     await this.testSubjects.setValue('nameField > input', name, {
@@ -159,7 +160,7 @@ export class FieldEditorService extends FtrService {
   }
 
   public async closeFlyoutAndDiscardChanges() {
-    await this.testSubjects.click('fieldEditor > closeFlyoutButton');
+    await this.flyout.closeFlyout('fieldEditor > ');
     await this.confirmDiscardChanges();
     await this.waitUntilClosed();
   }

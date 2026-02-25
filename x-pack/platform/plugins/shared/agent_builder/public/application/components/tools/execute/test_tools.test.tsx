@@ -9,7 +9,7 @@ import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import moment from 'moment';
-import { parseFormData, ToolTestFlyout } from './test_tools';
+import { parseArrayEntry, parseFormData, ToolTestFlyout } from './test_tools';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 
 const mockUseTool = jest.fn();
@@ -134,6 +134,27 @@ describe('parseFormData', () => {
   });
 });
 
+describe('parseArrayEntry', () => {
+  it('returns undefined for empty or whitespace values', () => {
+    expect(parseArrayEntry('')).toBeUndefined();
+    expect(parseArrayEntry('   ')).toBeUndefined();
+  });
+
+  it('returns unquoted numeric values as numbers', () => {
+    expect(parseArrayEntry('123')).toBe(123);
+    expect(parseArrayEntry('  45.6  ')).toBe(45.6);
+  });
+
+  it('returns quoted values as strings', () => {
+    expect(parseArrayEntry('"123"')).toBe('123');
+    expect(parseArrayEntry("'alpha'")).toBe('alpha');
+  });
+
+  it('returns non-numeric values as strings', () => {
+    expect(parseArrayEntry('alpha')).toBe('alpha');
+  });
+});
+
 describe('ToolTestFlyout date-time picker', () => {
   const mockTool: ToolDefinitionWithSchema = {
     ...mockToolDefinition,
@@ -186,18 +207,17 @@ describe('ToolTestFlyout date-time picker', () => {
       return datePicker;
     });
 
-  it('renders date-time picker with default ISO string value', async () => {
+  it('renders date-time picker without a default value', async () => {
     const { container } = renderComponent();
     const datePicker = await waitForDatePicker(container);
 
     const input = datePicker?.querySelector('input');
-    // Displays local time using the browser/Intl locale format (not an ISO string).
-    expect(input?.value).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4} \d{1,2}:\d{2} [AP]M$/);
+    expect(input?.value).toBe('');
   });
 
   it('converts date picker onChange to ISO string format', async () => {
     const newDate = '01/15/2024 10:30 AM';
-    const expectedIso = moment(newDate, 'MM/DD/YYYY hh:mm A').toISOString(); // Covert local date-time to ISO string
+    const expectedIso = moment(newDate, 'MM/DD/YYYY hh:mm A').toISOString(); // Convert local date-time to ISO string
 
     const { container } = renderComponent();
     const datePicker = await waitForDatePicker(container);
@@ -228,5 +248,153 @@ describe('ToolTestFlyout date-time picker', () => {
 
     const callArgs = mockExecuteTool.mock.calls[0][0];
     expect(callArgs.toolParams.testField).toBe(expectedIso);
+  });
+});
+
+describe('ToolTestFlyout array combo box', () => {
+  const mockTool: ToolDefinitionWithSchema = {
+    ...mockToolDefinition,
+    schema: {
+      ...mockToolDefinition.schema,
+      properties: {
+        tags: {
+          title: 'Tags',
+          type: 'array',
+        },
+      },
+    },
+  };
+
+  const mockOnClose = jest.fn();
+  const mockExecuteTool = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseAgentBuilderServices.mockReturnValue({
+      docLinksService: {
+        tools: 'https://example.com/docs',
+      },
+    });
+    mockUseTool.mockReturnValue({
+      tool: mockTool,
+      isLoading: false,
+    });
+    mockUseExecuteTool.mockReturnValue({
+      executeTool: mockExecuteTool,
+      isLoading: false,
+    });
+  });
+
+  const renderComponent = () => {
+    return render(
+      <IntlProvider locale="en">
+        <ToolTestFlyout toolId="test-tool" onClose={mockOnClose} />
+      </IntlProvider>
+    );
+  };
+
+  it('creates options and submits mixed numeric/string values', async () => {
+    const { container } = renderComponent();
+    const comboBox = await waitFor(() =>
+      container.querySelector('[data-test-subj="agentBuilderToolTestInput-tags"]')
+    );
+    const input = comboBox?.querySelector('input');
+
+    expect(input).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.change(input as Element, { target: { value: '123' } });
+      fireEvent.keyDown(input as Element, { key: 'Enter' });
+    });
+
+    act(() => {
+      fireEvent.change(input as Element, { target: { value: 'alpha' } });
+      fireEvent.keyDown(input as Element, { key: 'Enter' });
+    });
+
+    await act(async () => {
+      fireEvent.click(
+        container.querySelector('[data-test-subj="agentBuilderToolTestSubmitButton"]') as Element
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockExecuteTool).toHaveBeenCalled();
+    });
+
+    const callArgs = mockExecuteTool.mock.calls[0][0];
+    expect(callArgs.toolParams.tags).toEqual([123, 'alpha']);
+  });
+});
+
+describe('ToolTestFlyout numeric field', () => {
+  const mockTool: ToolDefinitionWithSchema = {
+    ...mockToolDefinition,
+    schema: {
+      ...mockToolDefinition.schema,
+      properties: {
+        count: {
+          title: 'Count',
+          type: 'number',
+        },
+      },
+    },
+  };
+
+  const mockOnClose = jest.fn();
+  const mockExecuteTool = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseAgentBuilderServices.mockReturnValue({
+      docLinksService: {
+        tools: 'https://example.com/docs',
+      },
+    });
+    mockUseTool.mockReturnValue({
+      tool: mockTool,
+      isLoading: false,
+    });
+    mockUseExecuteTool.mockReturnValue({
+      executeTool: mockExecuteTool,
+      isLoading: false,
+    });
+  });
+
+  const renderComponent = () => {
+    return render(
+      <IntlProvider locale="en">
+        <ToolTestFlyout toolId="test-tool" onClose={mockOnClose} />
+      </IntlProvider>
+    );
+  };
+
+  it('submits 0 as a number, not a string (valueAsNumber must be used, not fallback to value)', async () => {
+    const { container } = renderComponent();
+    const numericInput = await waitFor(() =>
+      container.querySelector('[data-test-subj="agentBuilderToolTestInput-count"]')
+    );
+
+    expect(numericInput).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.change(numericInput as Element, {
+        target: { value: '0', valueAsNumber: 0 },
+      });
+    });
+
+    await act(async () => {
+      fireEvent.click(
+        container.querySelector('[data-test-subj="agentBuilderToolTestSubmitButton"]') as Element
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockExecuteTool).toHaveBeenCalled();
+    });
+
+    const callArgs = mockExecuteTool.mock.calls[0][0];
+    expect(callArgs.toolParams.count).toBe(0);
+    expect(typeof callArgs.toolParams.count).toBe('number');
   });
 });

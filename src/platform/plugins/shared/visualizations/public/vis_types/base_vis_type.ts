@@ -47,6 +47,7 @@ export class BaseVisType<TVisParams extends VisParams = VisParams> {
   public readonly hierarchicalData;
   public readonly setup;
   public readonly getUsedIndexPattern;
+  public readonly getProjectRoutingOverrides;
   public readonly inspectorAdapters;
   public readonly fetchDatatable: boolean;
   public readonly toExpressionAst;
@@ -83,6 +84,7 @@ export class BaseVisType<TVisParams extends VisParams = VisParams> {
     this.hasPartialRows = opts.hasPartialRows ?? false;
     this.hierarchicalData = opts.hierarchicalData ?? false;
     this.getUsedIndexPattern = opts.getUsedIndexPattern;
+    this.getProjectRoutingOverrides = opts.getProjectRoutingOverrides;
     this.inspectorAdapters = opts.inspectorAdapters;
     this.fetchDatatable = opts.fetchDatatable ?? false;
     this.toExpressionAst = opts.toExpressionAst;

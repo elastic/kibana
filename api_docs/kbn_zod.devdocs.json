@@ -3456,7 +3456,44 @@
             "lineNumber": 771,
             "columnNumber": 5,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodEnum.create.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "values",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/zod/v3/types.d.cts",
+                "lineNumber": 760,
+                "columnNumber": 83,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodEnum.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ errorMap?: ",
+                  "ZodErrorMap",
+                  " | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
+                ],
+                "path": "node_modules/zod/v3/types.d.cts",
+                "lineNumber": 760,
+                "columnNumber": 94,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -17285,7 +17322,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fatal",
-            "description": [],
+            "description": [
+              "/**\n * @deprecated\n *\n * Pass `fatal` into the params object instead:\n *\n * ```ts\n * z.string().custom((val) => val.length > 5, { fatal: false })\n * ```\n *\n */"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -17735,6 +17774,43 @@
         "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.enumType.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "node_modules/zod/v3/types.d.cts",
+            "lineNumber": 760,
+            "columnNumber": 83,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.enumType.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ errorMap?: ",
+              "ZodErrorMap",
+              " | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
+            ],
+            "path": "node_modules/zod/v3/types.d.cts",
+            "lineNumber": 760,
+            "columnNumber": 94,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -17876,6 +17952,8 @@
         "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -19352,6 +19430,43 @@
         "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.recordType.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "valueType",
+            "description": [],
+            "signature": [
+              "Value"
+            ],
+            "path": "node_modules/zod/v3/types.d.cts",
+            "lineNumber": 672,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.recordType.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ errorMap?: ",
+              "ZodErrorMap",
+              " | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
+            ],
+            "path": "node_modules/zod/v3/types.d.cts",
+            "lineNumber": 672,
+            "columnNumber": 63,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -21502,7 +21617,7 @@
             "label": "validation",
             "description": [],
             "signature": [
-              "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"time\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+              "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"uuid\" | \"duration\" | \"time\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 83,
@@ -24743,7 +24858,7 @@
         "label": "StringValidation",
         "description": [],
         "signature": [
-          "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"time\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+          "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"uuid\" | \"duration\" | \"time\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
         "lineNumber": 73,
@@ -24922,7 +25037,7 @@
         "label": "UnknownKeysParam",
         "description": [],
         "signature": [
-          "\"passthrough\" | \"strict\" | \"strip\""
+          "\"strict\" | \"passthrough\" | \"strip\""
         ],
         "path": "node_modules/zod/v3/types.d.cts",
         "lineNumber": 497,
@@ -25155,17 +25270,17 @@
           " | ",
           "ZodBoolean",
           " | ",
-          "ZodUnion",
-          "<any> | ",
           "ZodAny",
           " | ",
+          "ZodUnion",
+          "<any> | ",
           "ZodUndefined",
           " | ",
           "ZodNull",
           " | ",
-          "ZodDate",
-          " | ",
           "ZodBigInt",
+          " | ",
+          "ZodDate",
           " | ",
           "ZodSymbol",
           " | ",

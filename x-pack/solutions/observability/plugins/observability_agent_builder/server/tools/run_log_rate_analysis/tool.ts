@@ -21,10 +21,8 @@ const logRateAnalysisSchema = z.object({
   index: z.string().describe(indexDescription),
   timeFieldName: z
     .string()
-    .describe(
-      'Timestamp field used to build the baseline/deviation windows. Defaults to `@timestamp`.'
-    )
-    .optional(),
+    .default('@timestamp')
+    .describe('Timestamp field used to build the baseline/deviation windows.'),
   baseline: z
     .object(timeRangeSchemaRequired)
     .describe(
@@ -63,8 +61,8 @@ How it works:
 Compares a baseline time window to a deviation window and performs statistical correlation analysis to find fields/patterns associated with the change.
 
 Do NOT use for:
-- Understanding the sequence of events for a specific error (use get_correlated_logs)
-- Getting a general overview of log types (use get_log_categories)
+- Understanding the sequence of events for a specific error (use get_traces)
+- Getting a general overview of log types (use get_log_groups)
 - Investigating individual log entries or transactions`,
     schema: logRateAnalysisSchema,
     tags: ['observability', 'logs'],
@@ -75,7 +73,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, context) => {
-      const { index, timeFieldName = '@timestamp', baseline, deviation, searchQuery } = toolParams;
+      const { index, timeFieldName, baseline, deviation, searchQuery } = toolParams;
 
       try {
         const esClient = context.esClient.asCurrentUser;

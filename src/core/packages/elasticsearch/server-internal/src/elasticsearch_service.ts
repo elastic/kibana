@@ -24,8 +24,13 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  ClusterClient,
+  AgentManager,
+  type OnRequestHandlerFactory,
+} from '@kbn/core-elasticsearch-client-server-internal';
 
+import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -42,11 +47,13 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
+import { getRequestHandlerFactory } from './cps_request_handler_factory';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
+  security: InternalSecurityServiceSetup;
 }
 
 /** @internal */
@@ -55,6 +62,8 @@ export class ElasticsearchService
 {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
+  private readonly isServerless: boolean;
+  private onRequestHandlerFactory: OnRequestHandlerFactory;
   private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
@@ -64,15 +73,17 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
-  // @ts-expect-error - CPS is not yet implemented
-  private cpsEnabled = false;
+  private security?: InternalSecurityServiceSetup;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
     this.log = coreContext.logger.get('elasticsearch-service');
+    this.isServerless = coreContext.env.packageInfo.buildFlavor === 'serverless';
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
+    // cli / preboot / interactive startup => non-CPS mode (strip project_routing params)
+    this.onRequestHandlerFactory = getRequestHandlerFactory(false);
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -96,16 +107,28 @@ export class ElasticsearchService
 
     const config = await firstValueFrom(this.config$);
 
+    // TODO we should find a better method to determine whether the underlying ES is CPS-capable.
+    const cpsEnabled = this.isServerless
+      ? (
+          await firstValueFrom(
+            this.coreContext.configService.atPath<{ cpsEnabled?: boolean }>('cps')
+          ).catch(() => ({ cpsEnabled: false }))
+        ).cpsEnabled ?? false
+      : false;
+    this.onRequestHandlerFactory = getRequestHandlerFactory(cpsEnabled);
+
     const agentManager = this.getAgentManager(config);
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
+    this.security = deps.security;
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
       kibanaVersion: this.kibanaVersion,
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
+      healthCheckFailureInterval: config.healthCheckFailureInterval?.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
       healthCheckRetry: config.healthCheckRetry,
       log: this.log,
@@ -141,10 +164,6 @@ export class ElasticsearchService
         getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
       publicBaseUrl: config.publicBaseUrl,
-      setCpsFeatureFlag: (enabled) => {
-        this.cpsEnabled = enabled;
-        this.log.info(`CPS feature flag set to ${enabled}`);
-      },
     };
   }
 
@@ -234,10 +253,12 @@ export class ElasticsearchService
       logger: this.coreContext.logger.get('elasticsearch'),
       type,
       authHeaders: this.authHeaders,
+      security: this.security,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
       kibanaVersion: this.kibanaVersion,
+      onRequestHandlerFactory: this.onRequestHandlerFactory,
     });
   }
 

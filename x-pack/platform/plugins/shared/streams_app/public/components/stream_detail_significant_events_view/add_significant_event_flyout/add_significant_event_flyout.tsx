@@ -21,12 +21,14 @@ import {
 } from '@elastic/eui';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { type StreamQueryKql, type Streams, type System } from '@kbn/streams-schema';
+import type { SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
+import { TaskStatus, type StreamQuery, type Streams, type System } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
 import { v4 } from 'uuid';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
@@ -40,15 +42,18 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 
+const defaultTask: SignificantEventsQueriesGenerationTaskResult = {
+  status: TaskStatus.NotStarted,
+};
 interface Props {
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
-  features: System[];
-  query?: StreamQueryKql;
+  systems: System[];
+  query?: StreamQuery;
   initialFlow?: Flow;
-  initialSelectedFeatures: System[];
-  refreshFeatures: () => void;
+  initialSelectedSystems: System[];
+  refreshSystems: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }
@@ -60,9 +65,9 @@ export function AddSignificantEventFlyout({
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedFeatures,
-  features,
-  refreshFeatures,
+  initialSelectedSystems,
+  systems,
+  refreshSystems,
   aiFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -86,46 +91,66 @@ export function AddSignificantEventFlyout({
     isEditMode ? 'manual' : initialFlow
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
-  const [queries, setQueries] = useState<StreamQueryKql[]>([{ ...defaultQuery(), ...query }]);
+  const [queries, setQueries] = useState<StreamQuery[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedFeatures, setSelectedFeatures] = useState<System[]>(initialSelectedFeatures);
+  const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
 
-  const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
-  const [{ loading: isGettingTask, value: task }, getTask] = useAsyncFn(getGenerationTask);
+  const [generatedQueries, setGeneratedQueries] = useState<StreamQuery[]>([]);
+
+  const [task, setTask] = useState<SignificantEventsQueriesGenerationTaskResult>(defaultTask);
+  const [isGettingTaskStatus, { on: gettingTaskStatus, off: stoppedGettingTaskStatus }] =
+    useBoolean(false);
+
   const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] =
     useAsyncFn(scheduleGenerationTask);
 
+  const scheduleTask = (connectorId: string, effectiveSystems: System[]) => {
+    setTask(defaultTask);
+    doScheduleGenerationTask(connectorId, effectiveSystems).then(setTask);
+  };
+
+  const getTaskStatus = useCallback(() => {
+    gettingTaskStatus();
+    getGenerationTask().then(setTask).finally(stoppedGettingTaskStatus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stoppedGettingTaskStatus, gettingTaskStatus]);
+
   useEffect(() => {
-    getTask();
-  }, [getTask]);
+    // Skip initial status fetch when we are about to schedule a new generation on mount,
+    // to avoid a race where the previous completed task resolves after the reset and
+    // surfaces stale queries alongside the new loading indicator.
+    if (generateOnMount && initialFlow === 'ai') {
+      return;
+    }
 
-  useTaskPolling(task, getGenerationTask, getTask);
+    getTaskStatus();
+  }, [generateOnMount, getTaskStatus, initialFlow]);
 
-  const isBeingCanceled = task?.status === 'being_canceled';
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getGenerationTask,
+    onRefresh: getTaskStatus,
+    onCancel: cancelGenerationTask,
+  });
+
   const isGenerating =
     task?.status === 'in_progress' ||
-    isBeingCanceled ||
-    isGettingTask ||
+    task?.status === 'being_canceled' ||
+    isGettingTaskStatus ||
     isSchedulingGenerationTask;
 
-  const prevTaskStatusRef = useRef<string | undefined>(undefined);
+  const prevTaskStatusRef = useRef<TaskStatus | undefined>(undefined);
 
   useEffect(() => {
     const prevStatus = prevTaskStatusRef.current;
-    prevTaskStatusRef.current = task?.status;
 
     // Process completed when:
-    // - First time getting the task (prevStatus is undefined)
-    // - Transitioning from in_progress to completed
-    const isFirstLoad = prevStatus === undefined;
-    const isTransitionFromInProgress = prevStatus === 'in_progress';
-    if (
-      task?.status === 'completed' &&
-      (isFirstLoad || isTransitionFromInProgress) &&
-      !isGenerating
-    ) {
+    // - Transitioning from any non-completed state to completed
+    const isNewlyCompleted =
+      task?.status === TaskStatus.Completed && prevStatus !== TaskStatus.Completed;
+    if (isNewlyCompleted) {
       setGeneratedQueries(
         task.queries
           .filter((nextQuery) => {
@@ -138,6 +163,7 @@ export function AddSignificantEventFlyout({
           .map((nextQuery) => ({
             id: v4(),
             kql: { query: nextQuery.kql },
+            esql: nextQuery.esql,
             title: nextQuery.title,
             feature: nextQuery.feature,
             severity_score: nextQuery.severity_score,
@@ -145,15 +171,9 @@ export function AddSignificantEventFlyout({
           }))
       );
     }
-  }, [isGenerating, task]);
 
-  const stopGeneration = useCallback(() => {
-    if (task?.status === 'in_progress') {
-      cancelGenerationTask().then(() => {
-        getTask();
-      });
-    }
-  }, [cancelGenerationTask, getTask, task?.status]);
+    prevTaskStatusRef.current = task?.status;
+  }, [task]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -168,30 +188,19 @@ export function AddSignificantEventFlyout({
     }
   }, [selectedFlow]);
 
-  const generateQueries = useCallback(
-    (featuresOverride?: System[]) => {
-      const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
-      if (!connectorId) {
-        return;
-      }
+  const generateQueries = (systemsOverride?: System[]) => {
+    const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
+    if (!connectorId) {
+      return;
+    }
 
-      setSelectedFlow('ai');
-      setGeneratedQueries([]);
+    setSelectedFlow('ai');
+    setGeneratedQueries([]);
 
-      const effectiveFeatures = featuresOverride ?? selectedFeatures;
+    const effectiveSystems = systemsOverride ?? selectedSystems;
 
-      (async () => {
-        await doScheduleGenerationTask(connectorId, effectiveFeatures);
-        getTask();
-      })();
-    },
-    [
-      aiFeatures?.genAiConnectors.selectedConnector,
-      selectedFeatures,
-      doScheduleGenerationTask,
-      getTask,
-    ]
-  );
+    scheduleTask(connectorId, effectiveSystems);
+  };
 
   useEffect(() => {
     if (initialFlow === 'ai' && generateOnMount) {
@@ -245,12 +254,12 @@ export function AddSignificantEventFlyout({
               <EuiPanel hasShadow={false} paddingSize="l">
                 <SignificantEventsGenerationPanel
                   onManualEntryClick={() => setSelectedFlow('manual')}
-                  features={features}
-                  selectedFeatures={selectedFeatures}
-                  onFeaturesChange={setSelectedFeatures}
+                  systems={systems}
+                  selectedSystems={selectedSystems}
+                  onSystemsChange={setSelectedSystems}
                   onGenerateSuggestionsClick={generateQueries}
                   definition={definition.stream}
-                  refreshFeatures={refreshFeatures}
+                  refreshSystems={refreshSystems}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
@@ -288,21 +297,23 @@ export function AddSignificantEventFlyout({
                       <EuiSpacer size="m" />
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
-                        setQuery={(next: StreamQueryKql) => setQueries([next])}
+                        isEditMode={isEditMode}
+                        setQuery={(next: StreamQuery) => setQueries([next])}
                         query={queries[0]}
                         setCanSave={(next: boolean) => {
                           setCanSave(next);
                         }}
                         definition={definition.stream}
                         dataViews={dataViewsFetch.value ?? []}
-                        features={features}
+                        systems={systems}
                       />
                     </>
                   )}
 
                   {flowRef.current === 'ai' && (
                     <GeneratedFlowForm
-                      isBeingCanceled={isBeingCanceled}
+                      isBeingCanceled={isCancellingTask}
+                      isSchedulingGenerationTask={isSchedulingGenerationTask}
                       isSubmitting={isSubmitting}
                       isGenerating={isGenerating}
                       generatedQueries={generatedQueries}
@@ -311,15 +322,15 @@ export function AddSignificantEventFlyout({
                           prev.map((q) => (q.id === editedQuery.id ? editedQuery : q))
                         );
                       }}
-                      stopGeneration={stopGeneration}
+                      stopGeneration={cancelTask}
                       definition={definition.stream}
-                      setQueries={(next: StreamQueryKql[]) => {
+                      setQueries={(next: StreamQuery[]) => {
                         setQueries(next);
                       }}
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
-                      features={features}
+                      systems={systems}
                       dataViews={dataViewsFetch.value ?? []}
                       taskStatus={task?.status}
                       taskError={task?.status === 'failed' ? task.error : undefined}

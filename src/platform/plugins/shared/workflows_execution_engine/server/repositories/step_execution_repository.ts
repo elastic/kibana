@@ -31,6 +31,7 @@ export class StepExecutionRepository {
         match: { workflowRunId: executionId },
       },
       sort: 'startedAt:desc',
+      size: 10000, // TODO: without it, it returns up to 10 results by default. We should improve this.
     });
 
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);

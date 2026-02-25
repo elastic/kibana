@@ -52,6 +52,7 @@ import {
   useAuthz,
   useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
+import { useIncompatibleAgentVersionStatus } from '../../../../hooks/use_incompatible_agent_version_status';
 import {
   DevtoolsRequestFlyoutButton,
   Error as ErrorComponent,
@@ -59,8 +60,12 @@ import {
   Loading,
 } from '../../../../components';
 
-import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import {
+  agentPolicyFormValidation,
+  ConfirmDeployAgentPolicyModal,
+  IncompatibleAgentVersionCallout,
+} from '../../components';
+import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../../services';
 
 import type { CreatePackagePolicyParams } from '../types';
 
@@ -71,6 +76,11 @@ import {
   StepDefinePackagePolicy,
   StepSelectHosts,
 } from '../components';
+
+import {
+  computeDefaultVarGroupSelections,
+  type VarGroupSelection,
+} from '../services/var_group_helpers';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
@@ -115,6 +125,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   integration,
   pkgLabel,
   addIntegrationFlyoutProps,
+  defaultPolicyData,
+  noBreadcrumb,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -144,7 +156,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   });
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
-    queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
+    queryParamsPolicyId || (defaultPolicyData?.policy_ids?.length ?? 0) > 0
+      ? SelectedPolicyTab.EXISTING
+      : SelectedPolicyTab.NEW
   );
 
   const {
@@ -217,6 +231,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setNewAgentPolicy,
     setSelectedPolicyTab,
     isAddIntegrationFlyout,
+    defaultPolicyData,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -240,6 +255,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
     [setHasAgentPolicyError]
   );
+
+  // Derive var_group_selections from policy for StepConfigurePackagePolicy
+  // Note: StepDefinePackagePolicy handles its own initialization and state management
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroupSelections = useMemo((): VarGroupSelection => {
+    if (packagePolicy.var_group_selections) {
+      return packagePolicy.var_group_selections;
+    }
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected);
+  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected]);
 
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {
@@ -298,6 +325,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
     return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
   }, [agentPolicyData?.items]);
+
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
+    packageInfo,
+    agentPolicyData?.items
+  );
 
   useEffect(() => {
     if (
@@ -361,8 +393,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       agentPolicies,
       packageInfo,
       integrationInfo,
+      defaultPolicyData,
     }),
-    [agentPolicies, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+    [
+      agentPolicies,
+      cancelClickHandler,
+      cancelUrl,
+      from,
+      integrationInfo,
+      packageInfo,
+      defaultPolicyData,
+    ]
   );
 
   const stepSelectAgentPolicy = useMemo(
@@ -378,7 +419,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
-        selectedAgentPolicyIds={queryParamsPolicyId ? [queryParamsPolicyId] : []}
+        selectedAgentPolicyIds={
+          queryParamsPolicyId
+            ? [queryParamsPolicyId]
+            : defaultPolicyData?.policy_ids
+            ? defaultPolicyData?.policy_ids
+            : []
+        }
       />
     ),
     [
@@ -392,6 +439,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateSelectedPolicyTab,
       queryParamsPolicyId,
       setHasAgentPolicyError,
+      defaultPolicyData,
     ]
   );
 
@@ -425,7 +473,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage, isAgentlessDefault } = useAgentless();
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -441,7 +489,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessIntegration(packageInfo) && !addIntegrationFlyoutProps}
+            isAgentlessEnabled={
+              getAgentlessStatusForPackage(packageInfo).isAgentless && !addIntegrationFlyoutProps
+            }
             defaultSetupTechnology={defaultSetupTechnology}
             integrationToEnable={integrationToEnable}
             setIntegrationToEnable={setIntegrationToEnable}
@@ -466,10 +516,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
+            isAgentlessSelected={isAgentlessSelected}
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
-          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
+          {!isAddIntegrationFlyout && getAgentlessStatusForPackage(packageInfo).isAgentless && (
             <SetupTechnologySelector
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
@@ -494,6 +545,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isAgentlessSelected={isAgentlessSelected}
+              varGroupSelections={varGroupSelections}
             />
           )}
 
@@ -521,7 +573,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
-      isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       isAgentlessDefault,
       selectedSetupTechnology,
       integrationToEnable,
@@ -530,6 +582,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
       isAddIntegrationFlyout,
+      varGroupSelections,
     ]
   );
 
@@ -635,6 +688,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="m" />
         </>
       )}
+
+      {incompatibleAgentVersion.status !== 'NONE' && (
+        <IncompatibleAgentVersionCallout
+          incompatibility={incompatibleAgentVersion.status}
+          versionCondition={incompatibleAgentVersion.versionCondition}
+        />
+      )}
+
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
@@ -725,7 +786,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
-            {packageInfo && !addIntegrationFlyoutProps && (
+            {packageInfo && !addIntegrationFlyoutProps && !noBreadcrumb && (
               <IntegrationBreadcrumb
                 pkgTitle={integrationInfo?.title || packageInfo.title}
                 pkgkey={pkgKeyFromPackageInfo(packageInfo)}

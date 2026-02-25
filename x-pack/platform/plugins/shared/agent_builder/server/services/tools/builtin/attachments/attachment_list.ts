@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -26,7 +26,7 @@ const attachmentListSchema = z.object({
 export const createAttachmentListTool = ({
   attachmentManager,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentListSchema> => ({
-  id: platformCoreTools.attachmentList,
+  id: attachmentTools.list,
   type: ToolType.builtin,
   description:
     'List all attachments in the conversation with their metadata. Use this to see what data is available.',
@@ -41,6 +41,7 @@ export const createAttachmentListTool = ({
         type: attachment.type,
         description: attachment.description,
         current_version: attachment.current_version,
+        readonly: attachment.readonly ?? true,
       };
     });
 

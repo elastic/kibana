@@ -6,9 +6,13 @@
  */
 
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  isQueryResult,
+  isEsqlResultsResult,
+  isErrorResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import React from 'react';
-import { TabularDataResultStep } from './tabular_data_result_step';
+import { EsqlResultsStep } from './esql_results_step';
 import { OtherResultStep } from './other_result_step';
 import { QueryResultStep } from './query_result_step';
 import { ErrorResultStep } from './error_result_step';
@@ -18,16 +22,15 @@ interface ToolResultDisplayProps {
 }
 
 export const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => {
-  switch (toolResult.type) {
-    case ToolResultType.query:
-      return <QueryResultStep result={toolResult} />;
-    case ToolResultType.tabularData:
-      return <TabularDataResultStep result={toolResult} />;
-    case ToolResultType.error:
-      return <ErrorResultStep result={toolResult} />;
-    default:
-      // Other results
-      // Also showing Resource results as Other results for now as JSON blobs
-      return <OtherResultStep result={toolResult} />;
+  if (isQueryResult(toolResult)) {
+    return <QueryResultStep result={toolResult} />;
   }
+  if (isEsqlResultsResult(toolResult)) {
+    return <EsqlResultsStep result={toolResult} />;
+  }
+  if (isErrorResult(toolResult)) {
+    return <ErrorResultStep result={toolResult} />;
+  }
+  // Other results (`other` type and any type not specifically handled before)
+  return <OtherResultStep result={toolResult} />;
 };

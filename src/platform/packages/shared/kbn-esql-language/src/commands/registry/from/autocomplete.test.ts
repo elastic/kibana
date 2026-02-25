@@ -70,6 +70,29 @@ describe('FROM Autocomplete', () => {
     );
   });
   describe('... <sources> ...', () => {
+    test('suggests Browse data sources in empty source slots when enabled', async () => {
+      mockCallbacks = {
+        ...mockCallbacks,
+        canSuggestResourceBrowser: jest.fn().mockResolvedValue(true),
+      };
+
+      const suggest = async (query: string) => {
+        const correctedQuery = correctQuerySyntax(query);
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+
+        const cursorPosition = query.length;
+        const { command } = findAstPosition(root, cursorPosition);
+
+        return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
+      };
+
+      const initialSlotLabels = (await suggest('FROM /')).map((s) => s.label);
+      expect(initialSlotLabels).toContain('Browse data sources');
+
+      const afterCommaLabels = (await suggest('FROM index, /')).map((s) => s.label);
+      expect(afterCommaLabels).toContain('Browse data sources');
+    });
+
     test('suggests visible indices on space', async () => {
       await fromExpectSuggestions('from /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
       await fromExpectSuggestions('FROM /', [...visibleIndices, '(FROM $0)'], mockCallbacks);
@@ -130,6 +153,35 @@ describe('FROM Autocomplete', () => {
         mockCallbacks
       );
       await fromExpectSuggestions('from *,/', expectedSuggestions, mockCallbacks);
+    });
+
+    test('suggests views from context.views alongside sources', async () => {
+      const contextWithViews = {
+        ...mockContext,
+        views: [
+          { name: 'my_saved_view', query: 'FROM logs | LIMIT 10' },
+          { name: 'my-view', query: 'FROM metrics' },
+        ],
+      };
+      const expectedFromSources = visibleIndices;
+      const expectedFromViews = ['my_saved_view', 'my-view'];
+      await fromExpectSuggestions(
+        'from ',
+        [...expectedFromSources, ...expectedFromViews, '(FROM $0)'],
+        mockCallbacks,
+        contextWithViews
+      );
+      // View names appear when typing (fragment "my_")
+      const getSuggestions = async (query: string) => {
+        const correctedQuery = correctQuerySyntax(query);
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+        const cursorPosition = query.length;
+        const { command } = findAstPosition(root, cursorPosition);
+        return autocomplete(query, command!, mockCallbacks, contextWithViews, cursorPosition);
+      };
+      const suggestions = (await getSuggestions('FROM my_')).map((s) => s.text);
+      expect(suggestions).toContain('my_saved_view');
+      expect(suggestions).toContain('my-view');
     });
   });
 

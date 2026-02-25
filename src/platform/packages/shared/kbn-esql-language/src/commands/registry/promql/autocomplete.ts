@@ -18,21 +18,20 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getPromqlParamKeySuggestions,
-  pipeCompleteItem,
   valuePlaceholderConstant,
 } from '../complete_items';
 import {
-  areRequiredPromqlParamsPresent,
-  getPromqlParam,
-  getUsedPromqlParamNames,
-  PromqlParamValueType,
-} from './utils';
-import {
-  getPosition,
   getIndexAssignmentContext,
-  isParamValueComplete,
+  getPosition,
+  getPromqlParam,
+  PromqlParamName,
+  PromqlParamValueType,
+  getUsedPromqlParamNames,
   isAtValidColumnSuggestionPosition,
+  isParamValueComplete,
 } from './utils';
+import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
+import { suggestForPromqlQuery } from '../../definitions/utils/autocomplete';
 
 export async function autocomplete(
   query: string,
@@ -44,62 +43,70 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const commandStart = command.location.min; // Don't assume 0; PROMQL can start in a subquery in the future.
   const innerCommandText = innerText.substring(commandStart);
+  const cursorRelativeToCommand = cursorPosition - commandStart;
   // We can't rely on command.location.max: it can stop at a mis-parsed last param, so we'd either
   // truncate or include the wrong text. The first pipe is the only stable delimiter here for now.
-  const pipeIndex = query.indexOf('|', commandStart);
+  const pipeIndex = findPipeOutsideQuotes(query, commandStart);
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
-  const position = getPosition(innerText, command);
+  const position = getPosition(innerText, command, commandText);
 
-  switch (position.type) {
+  if (position.type === 'query') {
+    return suggestForPromqlQuery({
+      queryText: position.queryText,
+      cursorRelative: position.cursorRelative,
+      columns: context?.columns,
+      shouldWrap: position.shouldWrap,
+    });
+  }
+
+  const { kind, shouldWrap } = position;
+
+  switch (kind) {
     case 'after_command': {
-      // Scan full PROMQL command for used params.
       const usedParams = getUsedPromqlParamNames(commandText);
       const availableParamSuggestions = getPromqlParamKeySuggestions().filter(
-        (suggestion) => !usedParams.has(suggestion.label)
+        ({ label }) =>
+          !usedParams.has(label) &&
+          !(label === PromqlParamName.Step && usedParams.has(PromqlParamName.Buckets)) &&
+          !(label === PromqlParamName.Buckets && usedParams.has(PromqlParamName.Step))
       );
 
-      const canSuggestColumn =
-        areRequiredPromqlParamsPresent(usedParams) &&
-        isAtValidColumnSuggestionPosition(commandText, cursorPosition - commandStart);
-      const columnSuggestion = canSuggestColumn
-        ? getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
-        : undefined;
+      const canSuggestQuery = isAtValidColumnSuggestionPosition(
+        commandText,
+        cursorRelativeToCommand
+      );
 
-      const onComplete = [
-        commaCompleteItem,
-        ...availableParamSuggestions,
-        ...(columnSuggestion ? [columnSuggestion] : []),
-      ];
+      const baseSuggestions: ISuggestionItem[] = [...availableParamSuggestions];
+
+      if (canSuggestQuery) {
+        baseSuggestions.push(
+          getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+          ...suggestForPromqlQuery({
+            columns: context?.columns,
+            shouldWrap,
+          })
+        );
+      }
 
       const indexSuggestions = suggestForIndexAssignment(
         innerCommandText,
         commandStart,
         context?.timeSeriesSources,
-        onComplete
+        [commaCompleteItem, ...baseSuggestions]
       );
 
-      if (indexSuggestions) {
-        return indexSuggestions;
-      }
-
-      return [...availableParamSuggestions, ...(columnSuggestion ? [columnSuggestion] : [])];
+      return indexSuggestions ?? baseSuggestions;
     }
 
     case 'after_param_keyword':
       return [assignCompletionItem];
 
     case 'after_param_equals':
-      if (isParamValueComplete(commandText, cursorPosition - commandStart, position.currentParam)) {
+      if (isParamValueComplete(commandText, cursorRelativeToCommand, position.currentParam)) {
         return [];
       }
+
       return suggestParamValues(position.currentParam, context);
-
-    case 'inside_query':
-      // TODO: Add PromQL autocomplete suggestions (functions, metrics, labels)
-      return [];
-
-    case 'after_query':
-      return [pipeCompleteItem];
 
     default:
       return [];
@@ -118,7 +125,7 @@ function suggestForIndexAssignment(
   sources: IndexAutocompleteItem[] | undefined,
   onComplete: ISuggestionItem[]
 ): ISuggestionItem[] | undefined {
-  const indexContext = getIndexAssignmentContext(commandText, 'index');
+  const indexContext = getIndexAssignmentContext(commandText);
   if (!indexContext) {
     return undefined;
   }
@@ -210,6 +217,7 @@ function suggestParamValues(
 
   if (valueType === PromqlParamValueType.TimeseriesSources) {
     const sources = context?.timeSeriesSources;
+
     return sources ? specialIndicesToSuggestions(sources) : [];
   }
 
@@ -217,13 +225,33 @@ function suggestParamValues(
     return getDateLiterals();
   }
 
-  if (param === 'step') {
+  const durationPlaceholder = {
+    ...valuePlaceholderConstant,
+    label: 'Insert duration',
+    text: '"${0:5m}"',
+    detail: 'Use units like s, m, h, d',
+  };
+
+  if (param === PromqlParamName.Step) {
+    return [durationPlaceholder];
+  }
+
+  if (param === PromqlParamName.ScrapeInterval) {
+    return [
+      {
+        ...durationPlaceholder,
+        text: '"${0:1m}"',
+      },
+    ];
+  }
+
+  if (param === PromqlParamName.Buckets) {
     return [
       {
         ...valuePlaceholderConstant,
-        label: 'Insert duration',
-        text: '"${0:5m}"',
-        detail: 'Use units like s, m, h, d',
+        label: 'Insert number of buckets',
+        text: '${0:100}',
+        detail: 'Positive integer (default: 100)',
       },
     ];
   }

@@ -15,7 +15,10 @@ import {
   shouldBeQuotedSource,
   sourceExists,
   buildSourcesDefinitions,
+  getLookupJoinSource,
 } from './sources';
+import { EsqlQuery, synth } from '../../../composer';
+import { Walker, type ESQLAstJoinCommand } from '../../../..';
 
 describe('specialIndicesToSuggestions()', () => {
   test('converts join indices to suggestions', () => {
@@ -172,5 +175,31 @@ describe('buildSourcesDefinitions with timeseries', () => {
     // Regular suggestion should not have TS prefix or range replacement
     expect(regularSuggestion?.text).toBe('regular_index');
     expect(regularSuggestion?.rangeToReplace).toBeUndefined();
+  });
+});
+
+describe('getSourceOfJoinTarget', () => {
+  it('returns target index fields', () => {
+    const joinCommand = synth.cmd`LOOKUP JOIN join_index1 ON join_field1`;
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
+
+    expect(joinTarget).toBe('join_index1');
+  });
+
+  it('returns target index with alias', () => {
+    const joinCommand = synth.cmd`LOOKUP JOIN join_index2 AS j ON join_field2`;
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
+    expect(joinTarget).toBe('join_index2');
+  });
+
+  it('returns target index of an incomplete command', () => {
+    const query = EsqlQuery.fromSrc('FROM index | LOOKUP JOIN lookup_index ON');
+    const joinCommand = Walker.match(query.ast, {
+      type: 'command',
+      name: 'join',
+    });
+    const joinTarget = getLookupJoinSource(joinCommand as ESQLAstJoinCommand);
+
+    expect(joinTarget).toBe('lookup_index');
   });
 });

@@ -84,4 +84,119 @@ describe('TestQueryRow', () => {
     expect(localOnCopyQuery).toHaveBeenCalled();
     expect(copyToClipboard).toHaveBeenCalledWith(COPIED_QUERY);
   });
+
+  it('should display an error when copyQuery throws an error', async () => {
+    const errorMessage = 'Expected AND, OR, end of input but ":" found.';
+    const localOnCopyQuery = jest.fn(() => {
+      throw new Error(errorMessage);
+    });
+    const component = mountWithIntl(
+      <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
+    );
+    await act(async () => {
+      findTestSubject(component, 'copyQuery').simulate('click');
+    });
+    component.update();
+    expect(localOnCopyQuery).toHaveBeenCalled();
+    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(true);
+    expect(findTestSubject(component, 'copyQueryError').text()).toContain(errorMessage);
+  });
+
+  it('should clear copyQuery error when clicking copy query again', async () => {
+    const errorMessage = 'Expected AND, OR, end of input but ":" found.';
+    let shouldThrow = true;
+    const localOnCopyQuery = jest.fn(() => {
+      if (shouldThrow) {
+        throw new Error(errorMessage);
+      }
+      return COPIED_QUERY;
+    });
+    const component = mountWithIntl(
+      <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
+    );
+
+    await act(async () => {
+      findTestSubject(component, 'copyQuery').simulate('click');
+    });
+    component.update();
+    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(true);
+
+    shouldThrow = false;
+    await act(async () => {
+      findTestSubject(component, 'copyQuery').simulate('click');
+    });
+    component.update();
+    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(false);
+  });
+
+  it('should clear copyQuery error when clicking test query', async () => {
+    const errorMessage = 'Expected AND, OR, end of input but ":" found.';
+    const localOnCopyQuery = jest.fn(() => {
+      throw new Error(errorMessage);
+    });
+    const component = mountWithIntl(
+      <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
+    );
+
+    await act(async () => {
+      findTestSubject(component, 'copyQuery').simulate('click');
+    });
+    component.update();
+    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(true);
+
+    await act(async () => {
+      findTestSubject(component, 'testQuery').simulate('click');
+    });
+    component.update();
+    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(false);
+  });
+
+  it('should clear testQuery error when clicking copy query', async () => {
+    const localOnFetch = jest.fn(() => Promise.reject(new Error('Test query failed')));
+    const component = mountWithIntl(
+      <TestQueryRow fetch={localOnFetch} copyQuery={onCopyQuery} hasValidationErrors={false} />
+    );
+
+    await act(async () => {
+      findTestSubject(component, 'testQuery').simulate('click');
+    });
+    component.update();
+    expect(findTestSubject(component, 'testQueryError').exists()).toBe(true);
+
+    await act(async () => {
+      findTestSubject(component, 'copyQuery').simulate('click');
+    });
+    component.update();
+    expect(findTestSubject(component, 'testQueryError').exists()).toBe(false);
+  });
+
+  it('should clear copyQuery error when fetch prop changes', async () => {
+    const errorMessage = 'Expected AND, OR, end of input but ":" found.';
+    const localOnCopyQuery = jest.fn(() => {
+      throw new Error(errorMessage);
+    });
+    const component = mountWithIntl(
+      <TestQueryRow fetch={onFetch} copyQuery={localOnCopyQuery} hasValidationErrors={false} />
+    );
+
+    await act(async () => {
+      findTestSubject(component, 'copyQuery').simulate('click');
+    });
+    component.update();
+    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(true);
+
+    const newFetch = () =>
+      Promise.resolve({
+        testResults: {
+          results: [{ group: 'all documents', hits: [], count: 10, sourceFields: [] }],
+          truncated: false,
+        },
+        isGrouped: false,
+        timeWindow: '10m',
+      });
+
+    component.setProps({ fetch: newFetch });
+    component.update();
+    expect(findTestSubject(component, 'copyQueryError').exists()).toBe(false);
+  });
 });
