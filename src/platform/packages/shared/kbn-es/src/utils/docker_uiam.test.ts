@@ -174,6 +174,10 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt",
             "--env",
+            "quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt",
+            "--env",
+            "quarkus.tls.esclient.key-store.pem.0.key=/tmp/server.key",
+            "--env",
             "quarkus.http.ssl.certificate.key-store-provider=JKS",
             "--env",
             "quarkus.http.ssl.certificate.trust-store-provider=SUN",
@@ -346,7 +350,7 @@ describe(`#runUiamContainer()`, () => {
     await expect(
       runUiamContainer(new ToolingLog(), cosmosDbContainer)
     ).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
+      `[Error: The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running. Check the logs with docker logs -f uiam-cosmosdb]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
@@ -360,7 +364,7 @@ describe(`#runUiamContainer()`, () => {
       .mockResolvedValue({ stdout: ` running ` });
 
     await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
+      `[Error: The "uiam" container failed to start within the expected time. Last known status: running. Check the logs with docker logs -f uiam]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.

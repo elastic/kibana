@@ -137,6 +137,11 @@ export const UIAM_CONTAINERS = [
       'quarkus.tls.https.trust-store.pem.certs=/tmp/ca.crt',
 
       '--env',
+      'quarkus.tls.esclient.key-store.pem.0.cert=/tmp/server.crt',
+      '--env',
+      'quarkus.tls.esclient.key-store.pem.0.key=/tmp/server.key',
+
+      '--env',
       'quarkus.http.ssl.certificate.key-store-provider=JKS',
       '--env',
       'quarkus.http.ssl.certificate.trust-store-provider=SUN',
