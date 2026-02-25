@@ -154,6 +154,7 @@ function getContainerStyle(euiTheme: UseEuiTheme['euiTheme'], defaultRowHeight?:
     WebkitLineClamp: rowHeight,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    height: 'stretch',
     transform: `translateY(calc(${euiTheme.size.m} / 4))`, // we apply this transform so that the component appears vertically centered
   };
 }
