@@ -80,6 +80,37 @@ describe('getAlertMutedStatus', () => {
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(false);
   });
 
+  test('should return false when snoozedInstances is undefined (treated as empty)', () => {
+    const ruleData = createMockRuleData({ snoozedInstances: undefined });
+    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(false);
+  });
+
+  test('should return false when snoozedInstances is empty array', () => {
+    const ruleData = createMockRuleData({ snoozedInstances: [] });
+    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(false);
+  });
+
+  test('should return true when snoozedInstances has multiple entries and one matches alertInstanceId', () => {
+    const ruleData = createMockRuleData({
+      snoozedInstances: [
+        { instanceId: 'alert-2', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+        { instanceId: 'alert-1', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+        { instanceId: 'alert-3', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+      ],
+    });
+    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
+  });
+
+  test('should return false when snoozedInstances has multiple entries and none match alertInstanceId', () => {
+    const ruleData = createMockRuleData({
+      snoozedInstances: [
+        { instanceId: 'alert-2', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+        { instanceId: 'alert-3', expiresAt: new Date(Date.now() + 60_000).toISOString() },
+      ],
+    });
+    expect(getAlertMutedStatus('alert-1', ruleData)).toBe(false);
+  });
+
   test('should return true when both muteAll is true and alertInstanceId is in mutedInstanceIds', () => {
     const ruleData = createMockRuleData({
       muteAll: true,
