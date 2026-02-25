@@ -579,7 +579,7 @@ describe('ServicenowSearch', () => {
         {
           params: {
             sysparm_query:
-              'element_id=inc-123^name=incident^element=comments^ORname=incident^element=work_notes^ORDERBYsys_created_on',
+              'element_id=inc-123^name=incident^element=comments^NQelement_id=inc-123^name=incident^element=work_notes^ORDERBYsys_created_on',
             sysparm_limit: 20,
             sysparm_fields: 'sys_id,element,value,sys_created_on,sys_created_by',
             sysparm_display_value: 'true',
@@ -605,7 +605,7 @@ describe('ServicenowSearch', () => {
         {
           params: {
             sysparm_query:
-              'element_id=chg-456^name=change_request^element=comments^ORname=change_request^element=work_notes^ORDERBYsys_created_on',
+              'element_id=chg-456^name=change_request^element=comments^NQelement_id=chg-456^name=change_request^element=work_notes^ORDERBYsys_created_on',
             sysparm_limit: 5,
             sysparm_fields: 'sys_id,element,value,sys_created_on,sys_created_by',
             sysparm_display_value: 'true',
