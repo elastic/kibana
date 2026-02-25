@@ -216,9 +216,7 @@ describe('Endpoint exceptions form', () => {
       await userEvent.type(descriptionInput, 'Exception description');
       rerenderWithLatestProps();
 
-      await waitFor(() => {
-        expect(latestUpdatedItem.description).toBe('Exception description');
-      });
+      expect(formProps.item.description).toBe('Exception description');
     });
 
     it('should change comments', async () => {
