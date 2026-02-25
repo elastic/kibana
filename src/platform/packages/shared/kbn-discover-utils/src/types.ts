@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
@@ -71,6 +72,17 @@ type FormattedHitPair = readonly [
  * Pairs array for each field in the hit
  */
 export type FormattedHit = FormattedHitPair[];
+
+type FormattedHitReactPair = readonly [
+  fieldDisplayName: string,
+  formattedValue: ReactNode,
+  fieldName: string | null
+];
+
+/**
+ * Pairs array for each field in the hit, with ReactNode values for safe rendering
+ */
+export type FormattedHitReact = FormattedHitReactPair[];
 
 export interface LogDocumentOverview
   extends LogResourceFields,

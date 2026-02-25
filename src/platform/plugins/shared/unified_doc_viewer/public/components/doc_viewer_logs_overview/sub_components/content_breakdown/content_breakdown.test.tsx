@@ -15,10 +15,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  EuiCodeBlock: ({ dangerouslySetInnerHTML }: { dangerouslySetInnerHTML?: { __html: string } }) => (
+  EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
     <pre>
-      {/* eslint-disable-next-line react/no-danger */}
-      <code data-test-subj="codeBlock" dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
+      <code data-test-subj="codeBlock">{children}</code>
     </pre>
   ),
 }));

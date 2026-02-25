@@ -12,22 +12,8 @@ import { css } from '@emotion/react';
 import { EuiModal, EuiModalBody, type UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-/**
- * By default the image formatter sets the max-width to "none" on the <img /> tag
- * To render nicely the image in the modal we want max_width: 100%
- */
-const setMaxWidthImage = (imgHTML: string): string => {
-  const regex = new RegExp('max-width:[^;]+;', 'gm');
-
-  if (regex.test(imgHTML)) {
-    return imgHTML.replace(regex, 'max-width: 100%;');
-  }
-
-  return imgHTML;
-};
-
 interface Props {
-  imgHTML: string;
+  imgHTML: React.ReactNode;
   closeModal: () => void;
 }
 
@@ -37,11 +23,7 @@ export const ImagePreviewModal = ({ imgHTML, closeModal }: Props) => {
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalBody>
-        <div
-          css={styles.previewImageModal}
-          // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-          dangerouslySetInnerHTML={{ __html: setMaxWidthImage(imgHTML) }} // eslint-disable-line react/no-danger
-        />
+        <div css={styles.previewImageModal}>{imgHTML}</div>
       </EuiModalBody>
     </EuiModal>
   );

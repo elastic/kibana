@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
-  FieldFormatsContentType,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
+  ReactContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
 import type { EsHitRecord } from '../types';
 
@@ -36,7 +37,7 @@ export function formatFieldValue(
   fieldFormats: FieldFormatsStart,
   dataView?: DataView,
   field?: DataViewField,
-  contentType?: FieldFormatsContentType,
+  contentType?: 'html' | 'text',
   options?: HtmlContextTypeOptions | TextContextTypeOptions
 ): string {
   const usedContentType = contentType ?? 'html';
@@ -56,4 +57,39 @@ export function formatFieldValue(
 
   // If we have a data view and field we use that fields field formatter
   return dataView.getFormatterForField(field).convert(value, usedContentType, converterOptions);
+}
+
+/**
+ * Formats the value of a specific field using the 'react' content type,
+ * returning a ReactNode for safe client-side rendering (no dangerouslySetInnerHTML).
+ *
+ * @param value The value to format
+ * @param hit The actual search hit (required to get highlight information from)
+ * @param fieldFormats Field formatters
+ * @param dataView The data view if available
+ * @param field The field that value was from if available
+ * @param options Options for the converter
+ * @returns A ReactNode safe for direct use in JSX
+ */
+export function formatFieldValueReact(
+  value: unknown,
+  hit: EsHitRecord,
+  fieldFormats: FieldFormatsStart,
+  dataView?: DataView,
+  field?: DataViewField,
+  options?: ReactContextTypeOptions
+): ReactNode {
+  const converterOptions: ReactContextTypeOptions = {
+    hit,
+    field,
+    ...options,
+  };
+
+  if (!dataView || !field) {
+    return fieldFormats
+      .getDefaultInstance(KBN_FIELD_TYPES.STRING)
+      .convert(value, 'react', converterOptions);
+  }
+
+  return dataView.getFormatterForField(field).convert(value, 'react', converterOptions);
 }
