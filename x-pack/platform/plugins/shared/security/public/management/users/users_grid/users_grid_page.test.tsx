@@ -213,7 +213,7 @@ describe('UsersGridPage', () => {
       },
     ]);
 
-    renderWithIntl(
+    const { container } = renderWithIntl(
       <UsersGridPage
         userAPIClient={apiClientMock}
         rolesAPIClient={roleAPIClientMock}
@@ -223,8 +223,11 @@ describe('UsersGridPage', () => {
       />
     );
 
+    // EuiToolTip renders data-test-subj on the portal tooltip, not the anchor element,
+    // so check for the warning icon rendered inside the tooltip anchor instead.
     await waitFor(() => {
-      expect(screen.getByTestId('roleDeprecationTooltip')).toBeInTheDocument();
+      expect(screen.getByText('kibana_user')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="warning"]')).toBeInTheDocument();
     });
   });
 

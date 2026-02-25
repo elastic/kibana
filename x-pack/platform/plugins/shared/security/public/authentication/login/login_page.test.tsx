@@ -20,24 +20,24 @@ import type { LoginState } from '../../../common/login_state';
 
 jest.mock('./components', () => ({
   DisabledLoginForm: ({ title, message }: { title: React.ReactNode; message: React.ReactNode }) => (
-    <div data-testid="disabledLoginForm">
-      <span data-testid="disabledLoginForm-title">{title}</span>
-      <span data-testid="disabledLoginForm-message">{message}</span>
+    <div data-test-subj="disabledLoginForm">
+      <span data-test-subj="disabledLoginForm-title">{title}</span>
+      <span data-test-subj="disabledLoginForm-message">{message}</span>
     </div>
   ),
-  LoginForm: (props: any) => (
+  LoginForm: jest.fn((props: any) => (
     <div
-      data-testid="loginForm"
+      data-test-subj="loginFormComponent"
       data-auth-provider-hint={props.authProviderHint || ''}
       data-message-type={props.message?.type || ''}
     >
-      <span data-testid="loginForm-message">{props.message?.content || ''}</span>
+      <span data-test-subj="loginFormComponent-message">{props.message?.content || ''}</span>
       {props.loginAssistanceMessage && (
-        <span data-testid="loginForm-assistance">{props.loginAssistanceMessage}</span>
+        <span data-test-subj="loginFormComponent-assistance">{props.loginAssistanceMessage}</span>
       )}
-      {props.loginHelp && <span data-testid="loginForm-help">{props.loginHelp}</span>}
+      {props.loginHelp && <span data-test-subj="loginFormComponent-help">{props.loginHelp}</span>}
     </div>
-  ),
+  )),
 }));
 
 const createLoginState = (options?: Partial<LoginState>) => {
@@ -98,7 +98,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginForm')).toBeInTheDocument();
+        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
       });
     });
 
@@ -118,7 +118,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginForm')).toBeInTheDocument();
+        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
       });
     });
   });
@@ -278,7 +278,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginForm')).toBeInTheDocument();
+        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
       });
     });
 
@@ -298,9 +298,9 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        const loginForm = screen.getByTestId('loginForm');
+        const loginForm = screen.getByTestId('loginFormComponent');
         expect(loginForm).toHaveAttribute('data-auth-provider-hint', 'basic1');
-        expect(screen.getByTestId('loginForm-message')).toHaveTextContent(
+        expect(screen.getByTestId('loginFormComponent-message')).toHaveTextContent(
           'Your session has timed out. Please log in again.'
         );
       });
@@ -321,8 +321,8 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginForm')).toBeInTheDocument();
-        expect(screen.getByTestId('loginForm-assistance')).toHaveTextContent(
+        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
+        expect(screen.getByTestId('loginFormComponent-assistance')).toHaveTextContent(
           'This is an *important* message'
         );
       });
@@ -343,8 +343,8 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('loginForm')).toBeInTheDocument();
-        expect(screen.getByTestId('loginForm-help')).toHaveTextContent('**some-help**');
+        expect(screen.getByTestId('loginFormComponent')).toBeInTheDocument();
+        expect(screen.getByTestId('loginFormComponent-help')).toHaveTextContent('**some-help**');
       });
     });
   });

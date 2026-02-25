@@ -140,8 +140,8 @@ describe('FieldRuleEditor', () => {
 
     const { rerender } = renderWithIntl(<FieldRuleEditor {...props} />);
 
-    expect(screen.getAllByTestId(/^fieldRuleEditorDeleteValue-\d+$/)).toHaveLength(3);
-    fireEvent.click(screen.getByTestId('fieldRuleEditorDeleteValue-0'));
+    expect(screen.getAllByTestId(/fieldRuleEditorDeleteValue-\d+/)).toHaveLength(3);
+    fireEvent.click(screen.getByTestId(/fieldRuleEditorDeleteValue-0$/));
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [updatedRule1] = props.onChange.mock.calls[0];
@@ -159,8 +159,8 @@ describe('FieldRuleEditor', () => {
       </I18nProvider>
     );
 
-    expect(screen.getAllByTestId(/^fieldRuleEditorDeleteValue-\d+$/)).toHaveLength(2);
-    fireEvent.click(screen.getByTestId('fieldRuleEditorDeleteValue-1'));
+    expect(screen.getAllByTestId(/fieldRuleEditorDeleteValue-\d+/)).toHaveLength(2);
+    fireEvent.click(screen.getByTestId(/fieldRuleEditorDeleteValue-1$/));
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [updatedRule2] = props.onChange.mock.calls[0];
@@ -178,8 +178,8 @@ describe('FieldRuleEditor', () => {
       </I18nProvider>
     );
 
-    expect(screen.getAllByTestId(/^fieldRuleEditorDeleteValue-\d+$/)).toHaveLength(1);
-    fireEvent.click(screen.getByTestId('fieldRuleEditorDeleteValue-0'));
+    expect(screen.getAllByTestId(/fieldRuleEditorDeleteValue-\d+/)).toHaveLength(1);
+    fireEvent.click(screen.getByTestId(/fieldRuleEditorDeleteValue-0$/));
 
     expect(props.onChange).toHaveBeenCalledTimes(0);
     expect(props.onDelete).toHaveBeenCalledTimes(1);
@@ -219,7 +219,7 @@ describe('FieldRuleEditor', () => {
       renderWithIntl(<FieldRuleEditor {...props} />);
 
       expect(screen.queryByTestId('addAlternateValueButton')).not.toBeInTheDocument();
-      expect(screen.queryAllByTestId(/^fieldRuleEditorDeleteValue/)).toHaveLength(0);
+      expect(screen.queryAllByTestId(/fieldRuleEditorDeleteValue/)).toHaveLength(0);
 
       expect(screen.getByTestId('fieldRuleEditorValueType-0')).toBeDisabled();
       expect(screen.getByTestId('fieldRuleEditorValue-0')).toBeDisabled();

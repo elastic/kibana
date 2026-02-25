@@ -184,7 +184,7 @@ describe('<RolesGridPage />', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('edit-role-action-test-role-1')).toBeInTheDocument();
+      expect(screen.getByText('test-role-1')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('createRoleButton')).not.toBeInTheDocument();
   });

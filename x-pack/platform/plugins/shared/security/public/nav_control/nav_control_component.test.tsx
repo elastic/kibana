@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiContextMenu } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { ReactElement } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
@@ -20,6 +20,18 @@ import * as UseCurrentUserImports from '../components/use_current_user';
 
 jest.mock('../components/use_current_user');
 jest.mock('react-use/lib/useObservable');
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiContextMenu: jest.fn((props: any) => <actual.EuiContextMenu {...props} />),
+  };
+});
+
+const MockedEuiContextMenu = EuiContextMenu as unknown as jest.MockedFunction<
+  typeof EuiContextMenu
+>;
 
 const useObservableMock = useObservable as jest.Mock;
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
@@ -56,6 +68,8 @@ describe('SecurityNavControl', () => {
     useObservableMock.mockImplementation(
       (observable: BehaviorSubject<any>, initialValue = {}) => observable.value ?? initialValue
     );
+
+    MockedEuiContextMenu.mockClear();
   });
 
   it('should render an avatar when user profile has loaded', async () => {
@@ -139,14 +153,19 @@ describe('SecurityNavControl', () => {
     );
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
-    await waitFor(() => {
-      expect(screen.getByTestId('profileLink')).toBeInTheDocument();
-      expect(screen.getByTestId('userMenuLink__link1')).toBeInTheDocument();
-      expect(screen.getByTestId('userMenuLink__link2')).toBeInTheDocument();
-      expect(screen.getByTestId('userMenuLink__link3')).toBeInTheDocument();
-      expect(screen.getByTestId('userMenuLink__dummyComponent')).toBeInTheDocument();
-      expect(screen.getByTestId('logoutLink')).toBeInTheDocument();
-    });
+
+    const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
+    const panels = lastCall[0].panels;
+    const items = panels[0].content.props.items;
+    const testSubjs = items.map((item: any) => item['data-test-subj']);
+    expect(testSubjs).toEqual([
+      'profileLink',
+      'userMenuLink__link1',
+      'userMenuLink__link2',
+      'userMenuLink__link3',
+      'userMenuLink__dummyComponent',
+      'logoutLink',
+    ]);
   });
 
   it('should render custom profile link registered by other plugins and not render default Edit Profile link', async () => {
@@ -171,13 +190,18 @@ describe('SecurityNavControl', () => {
     );
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
-    await waitFor(() => {
-      expect(screen.queryByTestId('profileLink')).not.toBeInTheDocument();
-      expect(screen.getByTestId('userMenuLink__link1')).toBeInTheDocument();
-      expect(screen.getByTestId('userMenuLink__link2')).toBeInTheDocument();
-      expect(screen.getByTestId('userMenuLink__link3')).toBeInTheDocument();
-      expect(screen.getByTestId('logoutLink')).toBeInTheDocument();
-    });
+
+    const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
+    const panels = lastCall[0].panels;
+    const items = panels[0].content.props.items;
+    const testSubjs = items.map((item: any) => item['data-test-subj']);
+    expect(testSubjs).not.toContain('profileLink');
+    expect(testSubjs).toEqual([
+      'userMenuLink__link1',
+      'userMenuLink__link2',
+      'userMenuLink__link3',
+      'logoutLink',
+    ]);
   });
 
   it('should render anonymous user', async () => {
@@ -199,9 +223,12 @@ describe('SecurityNavControl', () => {
     );
 
     fireEvent.click(screen.getByTestId('userMenuButton'));
-    await waitFor(() => {
-      expect(screen.getByTestId('logoutLink')).toBeInTheDocument();
-      expect(screen.queryByTestId('profileLink')).not.toBeInTheDocument();
-    });
+
+    const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
+    const panels = lastCall[0].panels;
+    const items = panels[0].content.props.items;
+    const testSubjs = items.map((item: any) => item['data-test-subj']);
+    expect(testSubjs).toContain('logoutLink');
+    expect(testSubjs).not.toContain('profileLink');
   });
 });
