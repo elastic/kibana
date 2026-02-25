@@ -100,10 +100,10 @@ describe('getSkillsInstructions', () => {
 
       expect(result).toContain('## SKILLS');
       expect(result).toContain(
-        'Load a skill using filestore tools to get detailed instructions for a specific task'
+        'Before using any general-purpose tool or model knowledge, you MUST first check the available skills below.'
       );
       expect(result).toContain(
-        'Skills provide specialized knowledge and best practices for specific tasks'
+        'Skills provide specialized knowledge, domain-specific instructions, and access to inline tools that produce more accurate results than general-purpose alternatives.'
       );
       expect(result).toContain('<available_skills>');
       expect(result).toContain('</available_skills>');

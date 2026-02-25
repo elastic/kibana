@@ -183,6 +183,12 @@ const datatableStateSharedOptionsSchema = {
    * Sorting configuration
    */
   sort_by: schema.maybe(sortingSchema),
+  /**
+   * Whether to show row numbers
+   */
+  show_row_numbers: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to show row numbers' } })
+  ),
 };
 
 const datatableStateCommonOptionsSchema = {

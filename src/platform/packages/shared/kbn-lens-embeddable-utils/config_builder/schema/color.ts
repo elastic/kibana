@@ -13,6 +13,25 @@ import { serializedValueSchema } from './serializedValue';
 
 const colorByValueBase = schema.object({
   type: schema.literal('dynamic'), // Specifies that the color assignment is dynamic (by value). Possible value: 'dynamic'
+  /**
+   * Controls the open/closed nature of the first and last color ranges.
+   * Possible values:
+   * - 'above': Last range extends to infinity
+   * - 'below': First range extends to negative infinity
+   * - 'all': Both first and last ranges are open-ended
+   * - 'none': All ranges are closed
+   */
+  continuity: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal('above'),
+        schema.literal('below'),
+        schema.literal('all'),
+        schema.literal('none'),
+      ],
+      { meta: { description: 'Controls the open/closed nature of the color ranges' } }
+    )
+  ),
 
   /**
    * Array of color steps defining the mapping from values to colors.

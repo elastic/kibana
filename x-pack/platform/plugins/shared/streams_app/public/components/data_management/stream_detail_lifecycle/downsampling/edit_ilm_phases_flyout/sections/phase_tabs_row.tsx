@@ -19,10 +19,10 @@ import {
   EuiToolTip,
   useEuiOverflowScroll,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import { IlmPhaseSelect } from '../../ilm_phase_select/ilm_phase_select';
 import { PHASE_LABELS } from '../constants';
+import { useStyles } from '../use_styles';
 
 export interface PhaseTabsRowProps {
   enabledPhases: PhaseName[];
@@ -43,6 +43,9 @@ export const PhaseTabsRow = ({
   tabHasErrors,
   dataTestSubj,
 }: PhaseTabsRowProps) => {
+  const tabsScrollCss = useEuiOverflowScroll('x', true);
+  const { tabsErrorSelectedUnderlineStyles } = useStyles();
+
   const canSelectFrozen = canCreateRepository || searchableSnapshotRepositories.length > 0;
   const excludedPhases = useMemo(
     () => (canSelectFrozen ? [] : (['frozen'] as PhaseName[])),
@@ -55,9 +58,23 @@ export const PhaseTabsRow = ({
         key={phaseName}
         onClick={() => setSelectedPhase(phaseName)}
         isSelected={phaseName === selectedPhase}
+        className={tabHasErrors(phaseName) ? 'streamsIlmPhasesTab--hasErrors' : undefined}
         data-test-subj={`${dataTestSubj}Tab-${phaseName}`}
         prepend={
-          tabHasErrors(phaseName) ? <EuiIcon type="warning" color="danger" size="m" /> : undefined
+          tabHasErrors(phaseName) ? (
+            <EuiIcon
+              type="warning"
+              color="danger"
+              size="m"
+              aria-label={i18n.translate(
+                'xpack.streams.editIlmPhasesFlyout.phaseTabHasErrorsIconAriaLabel',
+                {
+                  defaultMessage: '{phase} phase has errors',
+                  values: { phase: PHASE_LABELS[phaseName] },
+                }
+              )}
+            />
+          ) : undefined
         }
       >
         {tabHasErrors(phaseName) ? (
@@ -71,12 +88,7 @@ export const PhaseTabsRow = ({
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          ${useEuiOverflowScroll('x', true)}
-        `}
-      >
+      <EuiFlexItem grow={false} css={[tabsScrollCss, tabsErrorSelectedUnderlineStyles]}>
         <EuiTabs bottomBorder={false}>{tabs}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -94,7 +106,7 @@ export const PhaseTabsRow = ({
                   defaultMessage: 'Add data phase',
                 })}
                 size="xs"
-                color="primary"
+                color="text"
                 data-test-subj={`${dataTestSubj}AddTabButton`}
               />
             );
