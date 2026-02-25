@@ -138,7 +138,7 @@ function createMockServices() {
   return mockServices;
 }
 
-const mockfieldCounts: Record<string, number> = {};
+let mockfieldCounts: Record<string, number> = {};
 const mockCalcFieldCounts = jest.fn(() => {
   return mockfieldCounts;
 });
@@ -255,9 +255,12 @@ async function renderComponent(
   };
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/225126
-describe.skip('discover responsive sidebar', function () {
+describe.each(new Array(10).fill('test'))('discover responsive sidebar', function () {
   let props: TestWrapperProps;
+
+  beforeAll(() => {
+    mockfieldCounts = {};
+  });
 
   beforeEach(async () => {
     (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => ({
@@ -656,8 +659,7 @@ describe.skip('discover responsive sidebar', function () {
     expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/217005
-  it.skip('should render buttons in data view picker correctly', async () => {
+  it('should render buttons in data view picker correctly', async () => {
     const services = createMockServices();
     const propsWithPicker: TestWrapperProps = {
       ...props,
@@ -683,8 +685,7 @@ describe.skip('discover responsive sidebar', function () {
     expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
   }, 5000);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/254625
-  it.skip('should not render buttons in data view picker when in viewer mode', async () => {
+  it('should not render buttons in data view picker when in viewer mode', async () => {
     const services = createMockServices();
     services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
     services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
