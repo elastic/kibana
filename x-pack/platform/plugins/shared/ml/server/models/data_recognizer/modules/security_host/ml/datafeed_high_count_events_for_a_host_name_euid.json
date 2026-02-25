@@ -1,5 +1,5 @@
 {
-  "job_id": "JOB_ID",
+  "job_id": "high_count_events_for_a_host_name_euid",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -30,8 +30,26 @@
       ],
       "must_not": {
         "terms": {
-          "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"]
+          "process.name": [
+            "elastic-agent.exe",
+            "elastic-agent",
+            "metricbeat.exe",
+            "metricbeat",
+            "filebeat.exe",
+            "filebeat",
+            "packetbeat.exe",
+            "packetbeat",
+            "winlogbeat.exe",
+            "winlogbeat"
+          ]
         }
+      }
+    }
+  },
+  "script_fields": {
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
       }
     }
   }

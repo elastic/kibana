@@ -1,17 +1,26 @@
 {
-  "description": "Security: Host - Looks for a sudden drop in host based traffic. This can be due to a range of security issues, such as a compromised system, a failed service, or a network misconfiguration.",
-  "groups": ["security", "host"],
+  "description": "Security: Host - Looks for a sudden drop in a unique host identifier based traffic. This can be due to a range of security issues, such as a compromised system, a failed service, or a network misconfiguration.",
+  "groups": [
+    "security",
+    "host"
+  ],
   "analysis_config": {
     "bucket_span": "5m",
     "detectors": [
       {
         "detector_description": "low count of host based events",
         "function": "low_count",
-        "partition_field_name": "host.name",
+        "partition_field_name": "host.entity.id_computed",
         "detector_index": 0
       }
     ],
-    "influencers": ["host.name", "host.ip", "event.dataset", "event.action", "event.category"]
+    "influencers": [
+      "host.entity.id_computed",
+      "host.ip",
+      "event.dataset",
+      "event.action",
+      "event.category"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

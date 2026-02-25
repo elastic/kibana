@@ -1,17 +1,26 @@
 {
-  "description": "Security: Host - Looks for a sudden spike in host based traffic. This can be due to a range of security issues, such as a compromised system, DDoS attacks, malware infections, privilege escalation, or data exfiltration.",
-  "groups": ["security", "host"],
+  "description": "Security: Host - Looks for a sudden spike in a unique host identifier based traffic. This can be due to a range of security issues, such as a compromised system, DDoS attacks, malware infections, privilege escalation, or data exfiltration.",
+  "groups": [
+    "security",
+    "host"
+  ],
   "analysis_config": {
     "bucket_span": "1h",
     "detectors": [
       {
         "detector_description": "high count of host based events",
         "function": "high_count",
-        "partition_field_name": "host.name",
+        "partition_field_name": "host.entity.id_computed",
         "detector_index": 0
       }
     ],
-    "influencers": ["host.name", "host.ip", "event.dataset", "event.action", "event.category"]
+    "influencers": [
+      "host.entity.id_computed",
+      "host.ip",
+      "event.dataset",
+      "event.action",
+      "event.category"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

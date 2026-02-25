@@ -34,24 +34,24 @@
   },
   "jobs": [
     {
-      "id": "high_count_events_for_a_host_name",
-      "file": "high_count_events_for_a_host_name.json"
+      "id": "high_count_events_for_a_host_name_euid",
+      "file": "high_count_events_for_a_host_name_euid.json"
     },
     {
-      "id": "low_count_events_for_a_host_name",
-      "file": "low_count_events_for_a_host_name.json"
+      "id": "low_count_events_for_a_host_name_euid",
+      "file": "low_count_events_for_a_host_name_euid.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-high_count_events_for_a_host_name",
-      "file": "datafeed_high_count_events_for_a_host_name.json",
-      "job_id": "high_count_events_for_a_host_name"
+      "id": "datafeed-high_count_events_for_a_host_name_euid",
+      "file": "datafeed_high_count_events_for_a_host_name_euid.json",
+      "job_id": "high_count_events_for_a_host_name_euid"
     },
     {
-      "id": "datafeed-low_count_events_for_a_host_name",
-      "file": "datafeed_low_count_events_for_a_host_name.json",
-      "job_id": "low_count_events_for_a_host_name"
+      "id": "datafeed-low_count_events_for_a_host_name_euid",
+      "file": "datafeed_low_count_events_for_a_host_name_euid.json",
+      "job_id": "low_count_events_for_a_host_name_euid"
     }
   ],
   "tags": [
