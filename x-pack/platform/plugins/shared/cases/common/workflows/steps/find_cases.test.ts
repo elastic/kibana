@@ -11,7 +11,7 @@ import {
   OutputSchema,
   findCasesStepCommonDefinition,
 } from './find_cases';
-import { createCaseResponseFixture } from '../../fixtures/create_case';
+import { findCasesInputFixture, findCasesOutputFixture } from './test_fixtures';
 
 describe('find_cases common step definition', () => {
   it('exposes the expected step id', () => {
@@ -19,20 +19,7 @@ describe('find_cases common step definition', () => {
   });
 
   it('accepts valid find cases input', () => {
-    expect(
-      InputSchema.safeParse({
-        owner: 'securitySolution',
-        status: ['open', 'in-progress'],
-        severity: 'high',
-        search: 'incident',
-        searchFields: ['title', 'description'],
-        sortField: 'updatedAt',
-        sortOrder: 'desc',
-        tags: ['tag-1', 'tag-2'],
-        page: 1,
-        perPage: 20,
-      }).success
-    ).toBe(true);
+    expect(InputSchema.safeParse(findCasesInputFixture).success).toBe(true);
   });
 
   it('accepts incremental_id.text in searchFields', () => {
@@ -52,16 +39,6 @@ describe('find_cases common step definition', () => {
   });
 
   it('accepts valid output payload', () => {
-    expect(
-      OutputSchema.safeParse({
-        cases: [createCaseResponseFixture],
-        count_closed_cases: 0,
-        count_in_progress_cases: 0,
-        count_open_cases: 1,
-        page: 1,
-        per_page: 20,
-        total: 1,
-      }).success
-    ).toBe(true);
+    expect(OutputSchema.safeParse(findCasesOutputFixture).success).toBe(true);
   });
 });

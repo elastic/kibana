@@ -5,30 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { updateCasesStepDefinition } from './update_cases';
 import type { CasesClient } from '../../client';
+import { createStepHandlerContext } from './test_utils';
 
-const createContext = (input: unknown, config: Record<string, unknown> = {}): StepHandlerContext =>
-  ({
-    input,
-    rawInput: input,
-    config,
-    contextManager: {
-      getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
-    },
-    logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    },
-    abortSignal: new AbortController().signal,
-    stepId: 'test-step-id',
-    stepType: 'cases.updateCases',
-  } as unknown as StepHandlerContext);
+const createContext = (input: unknown, config: Record<string, unknown> = {}) =>
+  createStepHandlerContext({ input, config, stepType: 'cases.updateCases' });
 
 describe('updateCasesStepDefinition', () => {
   const input = {
@@ -105,7 +88,7 @@ describe('updateCasesStepDefinition', () => {
     expect(result.error).toBeInstanceOf(Error);
     expect(result.error).toEqual(
       expect.objectContaining({
-        message: 'Some cases could not be updated: case-1. Reason: bulk update failed.',
+        message: 'Some cases could not be updated: case-1. Reason: bulk update failed',
       })
     );
   });
@@ -139,7 +122,7 @@ describe('updateCasesStepDefinition', () => {
     expect(bulkUpdate).not.toHaveBeenCalled();
     expect(result.error).toEqual(
       expect.objectContaining({
-        message: 'Some cases could not be updated: case-2. Reason: get failed.',
+        message: 'Some cases could not be updated: case-2. Reason: get failed',
       })
     );
   });
@@ -185,7 +168,7 @@ describe('updateCasesStepDefinition', () => {
     expect(result.error).toBeInstanceOf(Error);
     expect(result.error).toEqual(
       expect.objectContaining({
-        message: 'Some cases could not be updated: case-2. Reason: push failed.',
+        message: 'Some cases could not be updated: case-2. Reason: push failed',
       })
     );
   });

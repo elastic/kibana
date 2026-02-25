@@ -11,7 +11,14 @@ import {
   OutputSchema,
   setCustomFieldStepCommonDefinition,
 } from './set_custom_field';
-import { createCaseResponseFixture } from '../../fixtures/create_case';
+import {
+  createCaseResponseFixture,
+  setCustomFieldTextInputFixture,
+  setCustomFieldToggleInputFixture,
+  setCustomFieldNumberInputFixture,
+  setCustomFieldNullInputFixture,
+  caseIdFixture,
+} from './test_fixtures';
 
 describe('set_custom_field common step definition', () => {
   it('exposes the expected step id', () => {
@@ -19,49 +26,25 @@ describe('set_custom_field common step definition', () => {
   });
 
   it('accepts valid text custom field update input', () => {
-    expect(
-      InputSchema.safeParse({
-        case_id: 'case-1',
-        field_name: 'cf_text',
-        value: 'new value',
-      }).success
-    ).toBe(true);
+    expect(InputSchema.safeParse(setCustomFieldTextInputFixture).success).toBe(true);
   });
 
   it('accepts valid toggle custom field update input', () => {
-    expect(
-      InputSchema.safeParse({
-        case_id: 'case-1',
-        field_name: 'cf_toggle',
-        value: true,
-      }).success
-    ).toBe(true);
+    expect(InputSchema.safeParse(setCustomFieldToggleInputFixture).success).toBe(true);
   });
 
   it('accepts valid number custom field update input', () => {
-    expect(
-      InputSchema.safeParse({
-        case_id: 'case-1',
-        field_name: 'cf_number',
-        value: 42,
-      }).success
-    ).toBe(true);
+    expect(InputSchema.safeParse(setCustomFieldNumberInputFixture).success).toBe(true);
   });
 
   it('accepts valid null custom field update input', () => {
-    expect(
-      InputSchema.safeParse({
-        case_id: 'case-1',
-        field_name: 'cf_optional',
-        value: null,
-      }).success
-    ).toBe(true);
+    expect(InputSchema.safeParse(setCustomFieldNullInputFixture).success).toBe(true);
   });
 
   it('rejects invalid input with missing field_name', () => {
     expect(
       InputSchema.safeParse({
-        case_id: 'case-1',
+        case_id: caseIdFixture,
         value: 'new value',
       }).success
     ).toBe(false);

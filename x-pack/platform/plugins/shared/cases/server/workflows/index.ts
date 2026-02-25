@@ -17,6 +17,19 @@ import { updateCasesStepDefinition } from './steps/update_cases';
 import { setCustomFieldStepDefinition } from './steps/set_custom_field';
 import { addCommentStepDefinition } from './steps/add_comment';
 import { findCasesStepDefinition } from './steps/find_cases';
+import { setSeverityStepDefinition } from './steps/set_severity';
+import { setStatusStepDefinition } from './steps/set_status';
+import { closeCaseStepDefinition } from './steps/close_case';
+import { assignCaseStepDefinition } from './steps/assign_case';
+import { unassignCaseStepDefinition } from './steps/unassign_case';
+import { addAlertsStepDefinition } from './steps/add_alerts';
+import { addEventsStepDefinition } from './steps/add_events';
+import { findSimilarCasesStepDefinition } from './steps/find_similar_cases';
+import { setDescriptionStepDefinition } from './steps/set_description';
+import { setTitleStepDefinition } from './steps/set_title';
+import { addObservablesStepDefinition } from './steps/add_observables';
+import { addTagStepDefinition } from './steps/add_tag';
+import { addCategoryStepDefinition } from './steps/add_category';
 
 export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
@@ -35,4 +48,17 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(setCustomFieldStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addCommentStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(findCasesStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(setSeverityStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(setStatusStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(closeCaseStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(assignCaseStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(unassignCaseStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(addAlertsStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(addEventsStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(findSimilarCasesStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(setDescriptionStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(setTitleStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(addObservablesStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(addTagStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(addCategoryStepDefinition(getCasesClient));
 }

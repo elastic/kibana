@@ -105,6 +105,34 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
   },
   {
+    id: 'cases.addAlerts',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.addCategory',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.addEvents',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.addObservables',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.addTag',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.assignCase',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.closeCase',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
     id: 'cases.createCaseFromTemplate',
     handlerHash: 'efb5c5a442f9e8cda4ae04f5fb6c2ae075008caac1b34f58c4da30cc36b28cc6',
   },
@@ -113,7 +141,31 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: 'cabe45a548e2c4eaaa23759314f496a3077a59638c23afee8391a8bf318aade7',
   },
   {
+    id: 'cases.findSimilarCases',
+    handlerHash: 'ee7596c931426bf53f2f5f3f46e916b11ff1612154190416a474ffdf92dff573',
+  },
+  {
     id: 'cases.setCustomField',
     handlerHash: '431ba5f5bfa3dbc3d799234d4c466f53d44b36793e5d951a976cd76d2dfd1b05',
+  },
+  {
+    id: 'cases.unassignCase',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.setDescription',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.setSeverity',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.setStatus',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
+  },
+  {
+    id: 'cases.setTitle',
+    handlerHash: 'c6a298b0ee066cefc9c025da8b529cc3614fc0e9e4074a08a92c6b7cd3001ca1',
   },
 ];

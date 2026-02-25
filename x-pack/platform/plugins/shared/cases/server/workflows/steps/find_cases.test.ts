@@ -5,30 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { findCasesStepDefinition } from './find_cases';
 import type { CasesClient } from '../../client';
+import { createStepHandlerContext } from './test_utils';
 
-const createContext = (input: unknown): StepHandlerContext =>
-  ({
-    input,
-    rawInput: input,
-    config: {},
-    contextManager: {
-      getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
-    },
-    logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    },
-    abortSignal: new AbortController().signal,
-    stepId: 'test-step-id',
-    stepType: 'cases.findCases',
-  } as unknown as StepHandlerContext);
+const createContext = (input: unknown) =>
+  createStepHandlerContext({ input, stepType: 'cases.findCases' });
 
 const findCasesResponseFixture = {
   cases: [createCaseResponseFixture],

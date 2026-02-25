@@ -168,6 +168,270 @@ export const FIND_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const SET_SEVERITY_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.setSeverity.label',
+  {
+    defaultMessage: 'Set case severity',
+  }
+);
+
+export const SET_SEVERITY_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.setSeverity.description',
+  {
+    defaultMessage: 'Sets severity for an existing case',
+  }
+);
+
+export const SET_SEVERITY_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.setSeverity.documentation.details',
+  {
+    defaultMessage:
+      'This step sets only the severity field of an existing case. If version is not provided, the latest case version is resolved automatically.',
+  }
+);
+
+export const SET_STATUS_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.setStatus.label', {
+  defaultMessage: 'Set case status',
+});
+
+export const SET_STATUS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.setStatus.description',
+  {
+    defaultMessage: 'Sets status for an existing case',
+  }
+);
+
+export const SET_STATUS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.setStatus.documentation.details',
+  {
+    defaultMessage:
+      'This step sets only the status field of an existing case. If version is not provided, the latest case version is resolved automatically.',
+  }
+);
+
+export const CLOSE_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.closeCase.label', {
+  defaultMessage: 'Close case',
+});
+
+export const CLOSE_CASE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.closeCase.description',
+  {
+    defaultMessage: 'Closes an existing case',
+  }
+);
+
+export const CLOSE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.closeCase.documentation.details',
+  {
+    defaultMessage:
+      'This step closes an existing case by setting its status to `closed`. If version is not provided, the latest case version is resolved automatically.',
+  }
+);
+
+export const ASSIGN_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.assignCase.label', {
+  defaultMessage: 'Assign case',
+});
+
+export const ASSIGN_CASE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.assignCase.description',
+  {
+    defaultMessage: 'Sets assignees for an existing case',
+  }
+);
+
+export const ASSIGN_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.assignCase.documentation.details',
+  {
+    defaultMessage:
+      'This step sets the assignees array on an existing case. The provided assignees become the full source of truth for assignment.',
+  }
+);
+
+export const UNASSIGN_CASE_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.unassignCase.label',
+  {
+    defaultMessage: 'Unassign case',
+  }
+);
+
+export const UNASSIGN_CASE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.unassignCase.description',
+  {
+    defaultMessage: 'Sets assignees after unassignment for an existing case',
+  }
+);
+
+export const UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.unassignCase.documentation.details',
+  {
+    defaultMessage:
+      'This step sets the assignees array on an existing case after unassignment logic in your workflow. Provide an empty array to clear all assignees.',
+  }
+);
+
+export const ADD_ALERTS_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addAlerts.label', {
+  defaultMessage: 'Add alerts to case',
+});
+
+export const ADD_ALERTS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.addAlerts.description',
+  {
+    defaultMessage: 'Adds one or more alerts as case attachments',
+  }
+);
+
+export const ADD_ALERTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.addAlerts.documentation.details',
+  {
+    defaultMessage:
+      'This step adds alert attachments to an existing case. Each alert requires an `alertId` and source `index`; rule metadata is optional.',
+  }
+);
+
+export const ADD_EVENTS_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addEvents.label', {
+  defaultMessage: 'Add events to case',
+});
+
+export const ADD_EVENTS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.addEvents.description',
+  {
+    defaultMessage: 'Adds one or more events as case attachments',
+  }
+);
+
+export const ADD_EVENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.addEvents.documentation.details',
+  {
+    defaultMessage:
+      'This step adds event attachments to an existing case. Each event requires an `eventId` and source `index`.',
+  }
+);
+
+export const FIND_SIMILAR_CASES_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.findSimilarCases.label',
+  {
+    defaultMessage: 'Find similar cases',
+  }
+);
+
+export const FIND_SIMILAR_CASES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.findSimilarCases.description',
+  {
+    defaultMessage: 'Finds cases similar to the provided case ID',
+  }
+);
+
+export const FIND_SIMILAR_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.findSimilarCases.documentation.details',
+  {
+    defaultMessage:
+      'This step returns cases similar to the given case, based on shared observables, with pagination metadata.',
+  }
+);
+
+export const SET_DESCRIPTION_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.setDescription.label',
+  {
+    defaultMessage: 'Set case description',
+  }
+);
+
+export const SET_DESCRIPTION_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.setDescription.description',
+  {
+    defaultMessage: 'Sets description for an existing case',
+  }
+);
+
+export const SET_DESCRIPTION_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.setDescription.documentation.details',
+  {
+    defaultMessage:
+      'This step sets only the description field of an existing case. If version is not provided, the latest case version is resolved automatically.',
+  }
+);
+
+export const SET_TITLE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.setTitle.label', {
+  defaultMessage: 'Set case title',
+});
+
+export const SET_TITLE_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.setTitle.description',
+  {
+    defaultMessage: 'Sets title for an existing case',
+  }
+);
+
+export const SET_TITLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.setTitle.documentation.details',
+  {
+    defaultMessage:
+      'This step sets only the title field of an existing case. If version is not provided, the latest case version is resolved automatically.',
+  }
+);
+
+export const ADD_OBSERVABLES_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.addObservables.label',
+  {
+    defaultMessage: 'Add observables to case',
+  }
+);
+
+export const ADD_OBSERVABLES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.addObservables.description',
+  {
+    defaultMessage: 'Adds one or more observables to a case',
+  }
+);
+
+export const ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.addObservables.documentation.details',
+  {
+    defaultMessage:
+      'This step adds observables to an existing case using `typeKey`, `value`, and optional description fields.',
+  }
+);
+
+export const ADD_TAG_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addTag.label', {
+  defaultMessage: 'Add case tag',
+});
+
+export const ADD_TAG_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.addTag.description',
+  {
+    defaultMessage: 'Sets tags for an existing case',
+  }
+);
+
+export const ADD_TAG_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.addTag.documentation.details',
+  {
+    defaultMessage:
+      'This step sets the full tags array on an existing case. Provide all tags that should remain on the case.',
+  }
+);
+
+export const ADD_CATEGORY_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.addCategory.label',
+  {
+    defaultMessage: 'Add case category',
+  }
+);
+
+export const ADD_CATEGORY_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.addCategory.description',
+  {
+    defaultMessage: 'Sets category for an existing case',
+  }
+);
+
+export const ADD_CATEGORY_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.addCategory.documentation.details',
+  {
+    defaultMessage: 'This step sets the category field on an existing case.',
+  }
+);
+
 export const TEMPLATE_CAN_BE_USED_MESSAGE = (template: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.templateCanBeUsedMessage', {
     defaultMessage: 'Template "{template}" can be used to prefill case attributes.',

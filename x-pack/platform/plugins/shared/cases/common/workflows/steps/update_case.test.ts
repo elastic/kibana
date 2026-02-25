@@ -11,7 +11,12 @@ import {
   OutputSchema,
   updateCaseStepCommonDefinition,
 } from './update_case';
-import { createCaseResponseFixture } from '../../fixtures/create_case';
+import {
+  createCaseResponseFixture,
+  updateCaseInputFixture,
+  updateCaseInputWithVersionFixture,
+  caseIdFixture,
+} from './test_fixtures';
 
 describe('update_case common step definition', () => {
   it('exposes the expected step id', () => {
@@ -19,28 +24,17 @@ describe('update_case common step definition', () => {
   });
 
   it('accepts valid update case input', () => {
-    expect(
-      InputSchema.safeParse({
-        case_id: 'case-1',
-        updates: { title: 'Updated title' },
-      }).success
-    ).toBe(true);
+    expect(InputSchema.safeParse(updateCaseInputFixture).success).toBe(true);
   });
 
   it('accepts valid update case input with version', () => {
-    expect(
-      InputSchema.safeParse({
-        case_id: 'case-1',
-        version: 'WzQ3LDFd',
-        updates: { title: 'Updated title' },
-      }).success
-    ).toBe(true);
+    expect(InputSchema.safeParse(updateCaseInputWithVersionFixture).success).toBe(true);
   });
 
   it('rejects update case input without updates', () => {
     expect(
       InputSchema.safeParse({
-        case_id: 'case-1',
+        case_id: caseIdFixture,
         updates: {},
       }).success
     ).toBe(false);

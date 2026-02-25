@@ -11,7 +11,7 @@ import {
   OutputSchema,
   addCommentStepCommonDefinition,
 } from './add_comment';
-import { createCaseResponseFixture } from '../../fixtures/create_case';
+import { addCommentInputFixture, createCaseResponseFixture, caseIdFixture } from './test_fixtures';
 
 describe('add_comment common step definition', () => {
   it('exposes the expected step id', () => {
@@ -19,18 +19,13 @@ describe('add_comment common step definition', () => {
   });
 
   it('accepts valid add comment input', () => {
-    expect(
-      InputSchema.safeParse({
-        case_id: 'case-1',
-        comment: 'Investigating now',
-      }).success
-    ).toBe(true);
+    expect(InputSchema.safeParse(addCommentInputFixture).success).toBe(true);
   });
 
   it('rejects empty comment', () => {
     expect(
       InputSchema.safeParse({
-        case_id: 'case-1',
+        case_id: caseIdFixture,
         comment: '',
       }).success
     ).toBe(false);

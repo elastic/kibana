@@ -5,30 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import { setCustomFieldStepDefinition } from './set_custom_field';
 import type { CasesClient } from '../../client';
+import { createStepHandlerContext } from './test_utils';
 
-const createContext = (input: unknown, config: Record<string, unknown> = {}): StepHandlerContext =>
-  ({
-    input,
-    rawInput: input,
-    config,
-    contextManager: {
-      getFakeRequest: jest.fn().mockReturnValue({} as KibanaRequest),
-    },
-    logger: {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    },
-    abortSignal: new AbortController().signal,
-    stepId: 'test-step-id',
-    stepType: 'cases.setCustomField',
-  } as unknown as StepHandlerContext);
+const createContext = (input: unknown, config: Record<string, unknown> = {}) =>
+  createStepHandlerContext({ input, config, stepType: 'cases.setCustomField' });
 
 describe('setCustomFieldStepDefinition', () => {
   const input = {
