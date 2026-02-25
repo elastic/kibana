@@ -11,6 +11,7 @@ import type {
   RuleExecutionStatus,
   RuleExecutionStatusEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { ExecutionOutcomeStats } from '../../../../../../../common/api/detection_engine/rule_monitoring/model/execution_outcome';
 
 /**
  * Used from rule executors to log various information about the rule execution:
@@ -65,6 +66,24 @@ export interface IRuleExecutionLogForExecutors {
    * @param args Information about the status change event.
    */
   logStatusChange(args: StatusChangeArgs): Promise<void>;
+
+  /**
+   * Accumulates execution outcome statistics in memory. Call this throughout execution
+   * to incrementally build up the diagnostic data that will be flushed as a single
+   * execution-outcome document at the end of the run.
+   *
+   * Stats are shallow-merged: top-level fields overwrite, arrays and nested objects replace.
+   * Call multiple times to add different facets of data (e.g. first call sets alert counts,
+   * a later call sets rule-type-specific diagnostics).
+   */
+  stats(data: ExecutionOutcomeStats): void;
+
+  /**
+   * Writes a single `execution-outcome` event log document containing all accumulated
+   * errors, warnings, metrics, and diagnostic stats collected during this execution.
+   * Must be called exactly once, at the very end of the rule execution.
+   */
+  flush(): void;
 }
 
 /**

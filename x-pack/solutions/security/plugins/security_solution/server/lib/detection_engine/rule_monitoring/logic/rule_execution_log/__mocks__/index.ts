@@ -52,6 +52,8 @@ const ruleExecutionLogForExecutorsMock = {
     error: jest.fn(),
 
     logStatusChange: jest.fn(),
+    stats: jest.fn(),
+    flush: jest.fn(),
   }),
 };
 

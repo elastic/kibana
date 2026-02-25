@@ -104,6 +104,13 @@ export const eqlExecutor = async ({
     });
 
     ruleExecutionLogger.trace(`EQL query to execute\n${JSON.stringify(request)}`);
+
+    ruleExecutionLogger.stats({
+      eql: {
+        is_sequence_query: isSequenceQuery,
+      },
+    });
+
     const exceptionsWarning = getUnprocessedExceptionsWarnings(sharedParams.unprocessedExceptions);
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
@@ -140,6 +147,12 @@ export const eqlExecutor = async ({
           result,
           ruleExecutionLogger
         );
+        ruleExecutionLogger.stats({
+          eql: {
+            is_sequence_query: isSequenceQuery,
+            shard_failures_count: (shardFailures as ShardFailure[]).length,
+          },
+        });
       }
 
       const { events, sequences } = response.hits;

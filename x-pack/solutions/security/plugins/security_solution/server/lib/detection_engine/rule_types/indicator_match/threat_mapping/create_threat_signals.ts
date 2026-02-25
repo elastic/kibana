@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { uniq, chunk } from 'lodash/fp';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 
 import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
@@ -143,6 +144,15 @@ export const createThreatSignals = async ({
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
   results.totalEventsFound = eventCount;
 
+  const usesCrossClusterSearch = threatIndex.some((idx) => isCCSRemoteIndexName(idx));
+
+  ruleExecutionLogger.stats({
+    indicator_match: {
+      threat_index_patterns: threatIndex,
+      uses_cross_cluster_search: usesCrossClusterSearch,
+    },
+  });
+
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
       index: threatIndex,
@@ -172,6 +182,29 @@ export const createThreatSignals = async ({
   });
 
   ruleExecutionLogger.info(`Found threat indicators: ${threatListCount}`);
+
+  ruleExecutionLogger.stats({
+    indicator_match: {
+      threat_indicators_count: threatListCount,
+      threat_index_patterns: threatIndex,
+      threat_query_zero_hits: threatListCount === 0,
+      uses_cross_cluster_search: usesCrossClusterSearch,
+    },
+  });
+
+  if (threatListCount === 0 && usesCrossClusterSearch) {
+    ruleExecutionLogger.warn(
+      `Indicator match rule returned 0 threat indicators from remote cluster indices ${threatIndex.join(
+        ', '
+      )}. This may be caused by missing \`read_cross_cluster\` privileges on the remote indices. Verify that the rule's API key has the required cross-cluster search permissions.`
+    );
+  } else if (threatListCount === 0) {
+    ruleExecutionLogger.warn(
+      `Indicator match rule returned 0 threat indicators from ${threatIndex.join(
+        ', '
+      )}. No alerts can be generated without matching threat indicators.`
+    );
+  }
 
   const threatListConfig = {
     fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),

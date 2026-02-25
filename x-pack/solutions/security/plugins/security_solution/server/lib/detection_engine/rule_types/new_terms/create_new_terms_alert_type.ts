@@ -115,8 +115,13 @@ export const createNewTermsAlertType = (): SecurityAlertType<
       const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
       const loggedRequests: RulePreviewLoggedRequest[] = [];
 
-      // Validate the history window size compared to `from` at runtime as well as in the `validate`
-      // function because rule preview does not use the `validate` function defined on the rule type
+      ruleExecutionLogger.stats({
+        new_terms: {
+          new_terms_fields: params.newTermsFields,
+          pages_searched: 0,
+        },
+      });
+
       validateHistoryWindowStart({
         historyWindowStart: params.historyWindowStart,
         from: params.from,
@@ -429,6 +434,13 @@ export const createNewTermsAlertType = (): SecurityAlertType<
         signals: result.createdSignals,
         signalsCount: result.createdSignalsCount,
         responseActions: completeRule.ruleParams.responseActions,
+      });
+
+      ruleExecutionLogger.stats({
+        new_terms: {
+          new_terms_fields: params.newTermsFields,
+          pages_searched: pageNumber,
+        },
       });
 
       return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };

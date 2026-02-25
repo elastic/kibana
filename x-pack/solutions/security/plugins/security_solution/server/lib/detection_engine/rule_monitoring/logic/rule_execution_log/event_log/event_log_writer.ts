@@ -22,6 +22,7 @@ import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import type { ExecutionOutcomeDocument } from '../../../../../../../common/api/detection_engine/rule_monitoring/model/execution_outcome';
 import {
   RULE_SAVED_OBJECT_TYPE,
   RULE_EXECUTION_LOG_PROVIDER,
@@ -31,6 +32,7 @@ export interface IEventLogWriter {
   logMessage(args: MessageArgs): void;
   logStatusChange(args: StatusChangeArgs): void;
   logExecutionMetrics(args: ExecutionMetricsArgs): void;
+  logExecutionOutcome(args: ExecutionOutcomeArgs): void;
 }
 
 export interface BaseArgs {
@@ -55,6 +57,10 @@ export interface StatusChangeArgs extends BaseArgs {
 
 export interface ExecutionMetricsArgs extends BaseArgs {
   metrics: RuleExecutionMetrics;
+}
+
+export interface ExecutionOutcomeArgs extends BaseArgs {
+  outcome: ExecutionOutcomeDocument;
 }
 
 export const createEventLogWriter = (eventLogService: IEventLogService): IEventLogWriter => {
@@ -175,6 +181,48 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
               execution: {
                 uuid: args.executionId,
                 metrics: args.metrics,
+              },
+              revision: args.ruleRevision,
+            },
+          },
+          space_ids: [args.spaceId],
+          saved_objects: [
+            {
+              rel: SAVED_OBJECT_REL_PRIMARY,
+              type: RULE_SAVED_OBJECT_TYPE,
+              id: args.ruleId,
+              namespace: spaceIdToNamespace(args.spaceId),
+            },
+          ],
+        },
+      });
+    },
+
+    logExecutionOutcome: (args: ExecutionOutcomeArgs): void => {
+      const logLevel = LogLevelEnum.info;
+      eventLogger.logEvent({
+        '@timestamp': nowISO(),
+        message: JSON.stringify(args.outcome),
+        rule: {
+          id: args.ruleId,
+          uuid: args.ruleUuid,
+          name: args.ruleName,
+          category: args.ruleType,
+        },
+        event: {
+          kind: 'metric',
+          action: 'execution-outcome',
+          sequence: sequence++,
+          severity: logLevelToNumber(logLevel),
+        },
+        log: {
+          level: logLevel,
+        },
+        kibana: {
+          alert: {
+            rule: {
+              execution: {
+                uuid: args.executionId,
               },
               revision: args.ruleRevision,
             },
