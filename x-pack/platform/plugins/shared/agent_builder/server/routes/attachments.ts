@@ -9,6 +9,7 @@ import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RouteDependencies } from './types';
@@ -20,7 +21,6 @@ import type {
   DeleteAttachmentResponse,
   RestoreAttachmentResponse,
   RenameAttachmentResponse,
-  UpdateOriginResponse,
 } from '../../common/http_api/attachments';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
@@ -713,10 +713,10 @@ export function registerAttachmentRoutes({
               }),
             }),
             body: schema.object({
-              originId: schema.string({
+              origin: schema.any({
                 meta: {
                   description:
-                    'The origin identifier (e.g., saved object ID) to link the attachment to.',
+                    'The origin reference object. Shape depends on attachment type (e.g., { saved_object_id: "..." } for visualizations).',
                 },
               }),
             }),
@@ -727,7 +727,7 @@ export function registerAttachmentRoutes({
         const { conversations: conversationsService, attachments: attachmentsService } =
           getInternalServices();
         const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
-        const { originId } = request.body;
+        const { origin } = request.body;
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
@@ -751,11 +751,18 @@ export function registerAttachmentRoutes({
           });
         }
 
-        const success = stateManager.updateOrigin(
-          attachmentId,
-          { saved_object_id: originId },
-          ATTACHMENT_REF_ACTOR.user
-        );
+        let success: boolean;
+        try {
+          success = await stateManager.updateOrigin(
+            attachmentId,
+            origin,
+            ATTACHMENT_REF_ACTOR.user
+          );
+        } catch (e) {
+          return response.badRequest({
+            body: { message: e.message },
+          });
+        }
 
         if (!success) {
           return response.customError({
