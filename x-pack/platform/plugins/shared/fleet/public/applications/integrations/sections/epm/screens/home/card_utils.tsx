@@ -27,6 +27,7 @@ import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import type {
+  DeprecationInfo,
   EpmPackageInstallStatus,
   InstallFailedAttempt,
   IntegrationCardReleaseLabel,
@@ -55,6 +56,8 @@ export interface IntegrationCardItem {
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
+  isDeprecated?: boolean;
+  deprecationInfo?: DeprecationInfo;
   maxCardHeight?: number;
   minCardHeight?: number;
   name: string;
@@ -98,6 +101,9 @@ export const mapToCard = ({
 
   let isUpdateAvailable = false;
   let isReauthorizationRequired = false;
+  let isDeprecated = false;
+  let deprecationInfo: DeprecationInfo | undefined;
+
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
@@ -109,6 +115,12 @@ export const mapToCard = ({
       isUpdateAvailable = isPackageUpdatable(item);
 
       isReauthorizationRequired = hasDeferredInstallations(item);
+    }
+
+    // Extract deprecation information
+    if ('deprecated' in item && item.deprecated) {
+      isDeprecated = true;
+      deprecationInfo = item.deprecated;
     }
 
     const url = getHref('integration_details_overview', {
@@ -142,6 +154,8 @@ export const mapToCard = ({
     isReauthorizationRequired,
     isUnverified,
     isUpdateAvailable,
+    isDeprecated,
+    deprecationInfo,
     extraLabelsBadges,
   };
 

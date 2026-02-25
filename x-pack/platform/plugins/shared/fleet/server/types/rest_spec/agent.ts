@@ -217,6 +217,7 @@ export const AgentResponseSchema = schema.object({
     schema.literal('PERMANENT'),
     schema.literal('EPHEMERAL'),
     schema.literal('TEMPORARY'),
+    schema.literal('OPAMP'),
   ]),
   active: schema.boolean(),
   enrolled_at: schema.string(),
@@ -241,6 +242,7 @@ export const AgentResponseSchema = schema.object({
             error_msg: schema.maybe(schema.string()),
             retry_error_msg: schema.maybe(schema.string()),
             retry_until: schema.maybe(schema.string()),
+            reason: schema.maybe(schema.string()),
           })
         ),
       }),
@@ -300,6 +302,7 @@ export const AgentResponseSchema = schema.object({
       .object({
         id: schema.string(),
         version: schema.string(),
+        type: schema.maybe(schema.string()),
       })
       .extendsDeep({
         unknowns: 'allow',
@@ -330,6 +333,12 @@ export const AgentResponseSchema = schema.object({
       ),
     })
   ),
+  identifying_attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  non_identifying_attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  sequence_num: schema.maybe(schema.number()),
+  capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  health: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  effective_config: schema.maybe(schema.any()),
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
@@ -350,6 +359,18 @@ export const GetOneAgentRequestSchema = {
     withMetrics: schema.boolean({ defaultValue: false }),
   }),
 };
+
+export const GetAgentEffectiveConfigRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      meta: { description: 'The agent ID to get effective config of' },
+    }),
+  }),
+};
+
+export const GetAgentEffectiveConfigResponseSchema = schema.object({
+  effective_config: schema.maybe(schema.any()),
+});
 
 export const PostNewAgentActionRequestSchema = {
   body: schema.object({
@@ -763,6 +784,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('INPUT_ACTION'),
         schema.literal('MIGRATE'),
         schema.literal('PRIVILEGE_LEVEL_CHANGE'),
+        schema.literal('ROLLBACK'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -891,4 +913,32 @@ export const PostBulkAgentRollbackRequestSchema = {
 
 export const PostBulkAgentRollbackResponseSchema = schema.object({
   actionIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+});
+
+export const PostGenerateAgentsReportRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([
+      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.string({
+        validate: (value: string) => {
+          const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+          if (validationObj?.error) {
+            return validationObj?.error;
+          }
+        },
+      }),
+    ]),
+    fields: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    timezone: schema.maybe(schema.string()),
+    sort: schema.maybe(
+      schema.object({
+        field: schema.maybe(schema.string()),
+        direction: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+      })
+    ),
+  }),
+};
+
+export const PostGenerateAgentsReportResponseSchema = schema.object({
+  url: schema.string(),
 });

@@ -49,10 +49,10 @@ export const FindListItemsRequestQuery = z.object({
    */
   sort_order: z.enum(['desc', 'asc']).optional(),
   cursor: FindListItemsCursor.optional(),
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
- 
+
       */
   filter: FindListItemsFilter.optional(),
 });

@@ -103,14 +103,16 @@ export async function getServicesItems({
       return [];
     });
 
+    const items =
+      mergeServiceStats({
+        serviceStats,
+        healthStatuses,
+        alertCounts,
+        sloStats,
+      }) ?? [];
+
     return {
-      items:
-        mergeServiceStats({
-          serviceStats,
-          healthStatuses,
-          alertCounts,
-          sloStats,
-        }) ?? [],
+      items,
       maxCountExceeded,
       serviceOverflowCount,
     };

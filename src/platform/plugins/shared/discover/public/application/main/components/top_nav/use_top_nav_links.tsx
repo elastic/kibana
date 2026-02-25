@@ -273,7 +273,7 @@ export const useTopNavLinks = ({
             ? {
                 items: [
                   {
-                    run: services.embeddableEditor.transferBackToEditor,
+                    run: () => services.embeddableEditor.transferBackToEditor(),
                     id: 'cancel',
                     order: 100,
                     label: i18n.translate('discover.localMenu.cancelTitle', {
@@ -307,6 +307,7 @@ export const useTopNavLinks = ({
                     }),
                     iconType: 'save',
                     testId: 'interactiveSaveMenuItem',
+                    disableButton: !persistedDiscoverSession,
                   },
                   {
                     run: async () => {
@@ -352,6 +353,7 @@ export const useTopNavLinks = ({
     state,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
+    persistedDiscoverSession,
   ]);
 
   return useMemo((): AppMenuConfig => {

@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: 'af7364aa959fe541e304241fbaddcc21d22382f6421686f666fd67641d3fac2b',
+    handlerHash: '800765ba855e1e4a93d5bb7a6fce558ec5e369ed416bfb763047305c5d7f40ca',
   },
   {
     id: 'ai.classify',
@@ -34,7 +34,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'ai.prompt',
-    handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
+    handlerHash: 'a9315bd19fcf4c2ac4d05f652a52bc1c8073b9a7d2dd289a69bedabb827f3249',
   },
   {
     id: 'ai.summarize',
@@ -46,7 +46,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.map',
-    handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
+    handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
   },
   {
     id: 'data.regex_extract',

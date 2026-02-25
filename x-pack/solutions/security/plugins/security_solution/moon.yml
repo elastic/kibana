@@ -194,7 +194,6 @@ dependsOn:
   - '@kbn/core-i18n-browser'
   - '@kbn/core-theme-browser'
   - '@kbn/automatic-import-plugin'
-  - '@kbn/avc-banner'
   - '@kbn/config'
   - '@kbn/openapi-common'
   - '@kbn/securitysolution-lists-common'
@@ -270,7 +269,12 @@ dependsOn:
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
+  - '@kbn/sse-utils-client'
   - '@kbn/kql'
+  - '@kbn/babel-register'
+  - '@kbn/core-security-common'
+  - '@kbn/entity-store'
+  - '@kbn/as-code-filters-transforms'
 tags:
   - plugin
   - prod
@@ -287,7 +291,6 @@ fileGroups:
     - server/**/*.json
     - scripts/**/*.json
     - public/**/*.json
-    - emotion.d.ts
     - '!target/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'

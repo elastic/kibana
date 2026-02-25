@@ -114,8 +114,16 @@ async function updateWithOCC<Params extends RuleParams = never>(
     systemActions: genSystemActions,
   };
 
-  const { alertTypeId, consumer, enabled, schedule, name, apiKey, apiKeyCreatedByUser } =
-    originalRuleSavedObject.attributes;
+  const {
+    alertTypeId,
+    consumer,
+    enabled,
+    schedule,
+    name,
+    apiKey,
+    uiamApiKey,
+    apiKeyCreatedByUser,
+  } = originalRuleSavedObject.attributes;
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {
@@ -209,10 +217,20 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
+  const apiKeysToInvalidate = [];
+  if (apiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(apiKey);
+  }
+  if (uiamApiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(uiamApiKey);
+  }
+
   await Promise.all([
-    apiKey && !apiKeyCreatedByUser
+    apiKeysToInvalidate.length > 0
       ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKey] },
+          {
+            apiKeys: apiKeysToInvalidate,
+          },
           context.logger,
           context.unsecuredSavedObjectsClient
         )
@@ -316,6 +334,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updatedBy: username,
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
+    ...(originalRule.lastRun
+      ? { lastRun: migrateLegacyLastRunOutcomeMsg(originalRule.lastRun) }
+      : {}),
   });
 
   const mappedParams = getMappedParams(updatedParams);
@@ -327,6 +348,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRuleSavedObject: SavedObject<RawRule>;
 
   const { id, version } = originalRuleSavedObject;
+
   try {
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -339,14 +361,19 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       },
     });
   } catch (e) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
+
+    const apiKeysToInvalidate = [];
+    if (apiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(apiKey);
+    }
+    if (uiamApiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(uiamApiKey);
+    }
+
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys:
-          updatedRuleAttributes.apiKey && !updatedRuleAttributes.apiKeyCreatedByUser
-            ? [updatedRuleAttributes.apiKey]
-            : [],
-      },
+      { apiKeys: apiKeysToInvalidate },
       context.logger,
       context.unsecuredSavedObjectsClient
     );
@@ -378,4 +405,26 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   return rule as SanitizedRule<Params>;
+}
+
+/**
+ * Migrates legacy lastRun.outcomeMsg from string to string[]
+ *
+ * Rule SO schema forces lastRun.outcomeMsg to be string[].
+ * However, some rules may have lastRun.outcomeMsg as string after upgrading from 7.x due to
+ * lack of migration. lastRun.outcomeMsg schema change from string to string[] happened after
+ * classical migrations were deprecated due to Serverless. And quite often it's not an issue
+ * as lastRun is absent.
+ */
+function migrateLegacyLastRunOutcomeMsg<LastRun extends { outcomeMsg?: unknown }>(
+  lastRun: LastRun
+): LastRun {
+  if (typeof lastRun.outcomeMsg === 'string') {
+    return {
+      ...lastRun,
+      outcomeMsg: [lastRun.outcomeMsg],
+    };
+  }
+
+  return lastRun;
 }

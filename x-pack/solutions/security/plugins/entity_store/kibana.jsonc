@@ -11,8 +11,12 @@
     "browser": true,
     "requiredPlugins": [
       "spaces",
-      "taskManager"
-    ],
-    "optionalPlugins": []
+      "taskManager",
+      "dataViews",
+      "security"
+  ],
+    "optionalPlugins": [
+      "encryptedSavedObjects"
+    ]
   }
 }

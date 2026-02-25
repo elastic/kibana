@@ -39,8 +39,6 @@ import apm from 'elastic-apm-node';
 
 import { catchAndSetErrorStackTrace, rethrowIfInstanceOrWrap } from '../errors/utils';
 
-import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
-
 import {
   packageToPackagePolicy,
   isPackageLimited,
@@ -264,6 +262,37 @@ export async function getPackagePolicySavedObjectType() {
     : LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 }
 
+/**
+ * Returns the union of all agent version keys stored in inputs_for_versions across every
+ * package policy that belongs to the given agent policy. Used by deployPolicies to ensure
+ * non-default agent versions (e.g. 9.1 from an enrolled agent) get updated .fleet-policies
+ * documents when the agent policy changes, not just the common default versions.
+ */
+export async function getCompiledVersionsForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  agentPolicyId: string
+): Promise<string[]> {
+  if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+    return [];
+  }
+  const savedObjectType = await getPackagePolicySavedObjectType();
+  const packagePolicySOs = await soClient.find<PackagePolicySOAttributes>({
+    type: savedObjectType,
+    filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(
+      agentPolicyId
+    )} AND ${savedObjectType}.attributes.latest_revision:true`,
+    perPage: SO_SEARCH_LIMIT,
+  });
+
+  const versionKeys = new Set<string>();
+  for (const so of packagePolicySOs.saved_objects) {
+    for (const version of Object.keys(so.attributes.inputs_for_versions ?? {})) {
+      versionKeys.add(version);
+    }
+  }
+  return [...versionKeys];
+}
+
 export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
     return normalizeKuery(
@@ -380,7 +409,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options: {
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -407,12 +435,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const packagePolicyId = options?.id || uuidv4();
-
-    let authorizationHeader = options.authorizationHeader;
-
-    if (!authorizationHeader && request) {
-      authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-    }
 
     const savedObjectType = await getPackagePolicySavedObjectType();
     const basePkgInfo =
@@ -512,7 +534,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgName: enrichedPackagePolicy.package.name,
         pkgVersion: enrichedPackagePolicy.package.version,
         force: options?.force,
-        authorizationHeader,
+        request,
       });
     }
 
@@ -566,7 +588,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         const cloudConnector = await this.createCloudConnectorForPackagePolicy(
           soClient,
           enrichedPackagePolicy,
-          agentPolicies[0]
+          agentPolicies[0],
+          pkgInfo
         );
         if (cloudConnector) {
           enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
@@ -699,8 +722,36 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
     const t = apm.startTransaction('compile-package-policy-versions', 'fleet');
 
+    const savedObjectType = await getPackagePolicySavedObjectType();
+
+    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+      savedObjectType,
+      packagePolicy.id
+    );
+
+    const existingInputsForVersions = packagePolicySO.attributes.inputs_for_versions ?? {};
+
+    let versionsToCompile: string[];
+    if (agentVersions) {
+      // Async task path: skip versions already compiled to avoid unnecessary recompilation and
+      // deployment. The stored inputs are guaranteed to be current because the create/update
+      // path (below) recompiles all previously stored versions whenever the package policy changes.
+      versionsToCompile = agentVersions.filter((v) => !existingInputsForVersions[v]);
+      if (versionsToCompile.length === 0) {
+        t.end();
+        return;
+      }
+    } else {
+      // Create/update path: compile default common agent versions plus any extra versions already
+      // stored in inputs_for_versions (e.g. from agents that enrolled on older versions), so
+      // that all stored inputs stay current after a package policy configuration change.
+      const defaultVersions = await getAgentVersionsForVersionSpecificPolicies();
+      const existingVersionKeys = Object.keys(existingInputsForVersions);
+      versionsToCompile = [...new Set([...defaultVersions, ...existingVersionKeys])];
+    }
+
     const inputsForVersions: Record<string, PackagePolicyInput[]> = {};
-    for (const version of agentVersions ?? (await getAgentVersionsForVersionSpecificPolicies())) {
+    for (const version of versionsToCompile) {
       const inputs = await recompileInputsWithAgentVersion(
         packageInfo!,
         packagePolicy,
@@ -710,17 +761,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       inputsForVersions[version] = inputs;
     }
 
-    const savedObjectType = await getPackagePolicySavedObjectType();
-
-    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
-      savedObjectType,
-      packagePolicy.id
-    );
-
     await soClient
       .update<PackagePolicySOAttributes>(savedObjectType, packagePolicy.id, {
         inputs_for_versions: {
-          ...packagePolicySO.attributes.inputs_for_versions,
+          ...existingInputsForVersions,
           ...inputsForVersions,
         },
       })
@@ -785,7 +829,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
@@ -2520,6 +2565,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           output_id: newPolicy.output_id,
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
+          var_group_selections: newPolicy.var_group_selections,
           supports_agentless: newPolicy.supports_agentless,
           supports_cloud_connector: newPolicy.supports_cloud_connector,
           cloud_connector_id: newPolicy.cloud_connector_id,
@@ -3011,7 +3057,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult> {
     const savedObjectType = await getPackagePolicySavedObjectType();
 
@@ -3033,7 +3080,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicies.forEach((policy) => {
       const namespace = getSpaceForPackagePolicySO(policy);
 
-      if (!policy.id.endsWith(':prev')) {
+      if (
+        !policy.id.endsWith(':prev') &&
+        policy.attributes.package?.version &&
+        semverGt(policy.attributes.package.version, previousVersion)
+      ) {
         const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
         if (previousRevision?.attributes) {
           if (!policiesToCreate[namespace]) {
@@ -3056,7 +3107,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             },
           });
         }
-      } else {
+      } else if (policy.id.endsWith(':prev')) {
         if (!previousVersionPolicies[namespace]) {
           previousVersionPolicies[namespace] = [];
         }
@@ -3190,7 +3241,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async createCloudConnectorForPackagePolicy(
     soClient: SavedObjectsClientContract,
     enrichedPackagePolicy: NewPackagePolicy,
-    agentPolicy: AgentPolicy
+    agentPolicy: AgentPolicy,
+    packageInfo: PackageInfo
   ): Promise<CloudConnector | undefined> {
     const logger = this.getLogger('createCloudConnectorForPackagePolicy');
 
@@ -3229,7 +3281,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       } else {
         logger.info(`Creating cloud connector: ${enrichedPackagePolicy.cloud_connector_id}`);
         // Extract account type from package policy vars
-        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy);
+        const accountType = extractAccountType(cloudProvider, enrichedPackagePolicy, packageInfo);
         try {
           // Extract cloud connector name from package policy
           const cloudConnectorName = enrichedPackagePolicy.cloud_connector_name;
@@ -3349,7 +3401,6 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;

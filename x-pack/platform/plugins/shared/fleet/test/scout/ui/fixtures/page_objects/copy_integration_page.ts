@@ -15,7 +15,14 @@ export class CopyIntegrationPage {
   }
 
   async waitForPageToLoad() {
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.waitForSelector('fleetSetupLoading', {
+      state: 'hidden',
+      timeout: 30_000,
+    });
+    await this.page.testSubj.waitForSelector('createPackagePolicy_page', {
+      state: 'visible',
+      timeout: 20_000,
+    });
   }
 
   getPackagePolicyNameInput() {

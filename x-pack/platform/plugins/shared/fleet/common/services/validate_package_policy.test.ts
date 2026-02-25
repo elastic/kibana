@@ -2213,3 +2213,227 @@ describe('Fleet - parseDuration()', () => {
     expect(result.errors[0]).toContain('Invalid duration format');
   });
 });
+
+describe('Fleet - validatePackagePolicy with var_groups', () => {
+  const packageInfoWithVarGroups: PackageInfo = {
+    name: 'test_package',
+    version: '1.0.0',
+    title: 'Test Package',
+    description: 'Test package with var_groups',
+    type: 'integration',
+    format_version: '3.0.0',
+    owner: { github: 'elastic/integrations', type: 'elastic' },
+    categories: ['custom'],
+    status: installationStatuses.NotInstalled,
+    assets: { kibana: {} },
+    data_streams: [],
+    policy_templates: [],
+    vars: [
+      { name: 'api_key', type: 'password', title: 'API Key' },
+      { name: 'api_url', type: 'text', title: 'API URL' },
+      { name: 'client_id', type: 'text', title: 'Client ID' },
+      { name: 'client_secret', type: 'password', title: 'Client Secret' },
+      { name: 'proxy_url', type: 'text', title: 'Proxy URL' },
+    ],
+    var_groups: [
+      {
+        name: 'auth_method',
+        title: 'Authentication',
+        selector_title: 'Select method',
+        required: true,
+        options: [
+          {
+            name: 'api_key',
+            title: 'API Key',
+            vars: ['api_key', 'api_url'],
+          },
+          {
+            name: 'oauth',
+            title: 'OAuth',
+            vars: ['client_id', 'client_secret'],
+          },
+        ],
+      },
+    ],
+  } as unknown as PackageInfo;
+
+  const basePackagePolicy: NewPackagePolicy = {
+    name: 'test-policy',
+    namespace: 'default',
+    description: '',
+    policy_ids: ['policy-1'],
+    enabled: true,
+    inputs: [],
+    vars: {
+      api_key: { type: 'password', value: '' },
+      api_url: { type: 'text', value: '' },
+      client_id: { type: 'text', value: '' },
+      client_secret: { type: 'password', value: '' },
+      proxy_url: { type: 'text', value: '' },
+    },
+    var_group_selections: { auth_method: 'api_key' },
+  };
+
+  it('should validate vars in selected var_group option as required when var_group.required is true', () => {
+    const policyWithUndefinedApiKey = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: undefined }, // Undefined - should be invalid
+        api_url: { type: 'text', value: undefined }, // Undefined - should be invalid
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(policyWithUndefinedApiKey, packageInfoWithVarGroups, load);
+
+    // api_key and api_url should have validation errors because they're required by var_group
+    expect(result.vars?.api_key).toEqual([expect.stringContaining('is required')]);
+    expect(result.vars?.api_url).toEqual([expect.stringContaining('is required')]);
+  });
+
+  it('should allow empty strings for var_group required vars (same as regular required vars)', () => {
+    const policyWithEmptyApiKey = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: '' }, // Empty string is allowed
+        api_url: { type: 'text', value: '' }, // Empty string is allowed
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(policyWithEmptyApiKey, packageInfoWithVarGroups, load);
+
+    // Empty strings are allowed for var_group required vars (same as regular required vars)
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+  });
+
+  it('should not validate vars outside selected var_group option', () => {
+    const policyWithApiKeySelected = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: 'my-api-key' },
+        api_url: { type: 'text', value: 'https://api.example.com' },
+        client_id: { type: 'text', value: '' }, // Empty but not in selected option
+        client_secret: { type: 'password', value: '' }, // Empty but not in selected option
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(policyWithApiKeySelected, packageInfoWithVarGroups, load);
+
+    // api_key and api_url have values, should be valid (null)
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    // client_id and client_secret are not in selected option, should be skipped (null)
+    expect(result.vars?.client_id).toBeNull();
+    expect(result.vars?.client_secret).toBeNull();
+  });
+
+  it('should validate oauth vars when oauth option is selected', () => {
+    const policyWithOAuthSelected = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: '' }, // Not in selected option
+        api_url: { type: 'text', value: '' }, // Not in selected option
+        client_id: { type: 'text', value: undefined }, // In selected option - should be required
+        client_secret: { type: 'password', value: undefined }, // In selected option - should be required
+      },
+      var_group_selections: { auth_method: 'oauth' },
+    };
+
+    const result = validatePackagePolicy(policyWithOAuthSelected, packageInfoWithVarGroups, load);
+
+    // api_key and api_url are not in selected option, should be skipped
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    // client_id and client_secret are in selected option and undefined, should be invalid
+    expect(result.vars?.client_id).toEqual([expect.stringContaining('is required')]);
+    expect(result.vars?.client_secret).toEqual([expect.stringContaining('is required')]);
+  });
+
+  it('should always validate vars not controlled by any var_group', () => {
+    const packageInfoWithRequiredNonGroupVar: PackageInfo = {
+      ...packageInfoWithVarGroups,
+      vars: [
+        ...packageInfoWithVarGroups.vars!,
+        { name: 'required_var', type: 'text', title: 'Required Var', required: true },
+      ],
+    } as unknown as PackageInfo;
+
+    // Test with undefined value - should fail required validation
+    const policyWithMissingRequiredVar = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: 'my-key' },
+        api_url: { type: 'text', value: 'https://api.example.com' },
+        required_var: { type: 'text', value: undefined }, // Required by varDef, value is undefined
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(
+      policyWithMissingRequiredVar,
+      packageInfoWithRequiredNonGroupVar,
+      load
+    );
+
+    // required_var is not controlled by var_group but has required: true and undefined value
+    expect(result.vars?.required_var).toEqual([expect.stringContaining('is required')]);
+  });
+
+  it('should allow empty strings for regular required vars (not required by var_group)', () => {
+    const packageInfoWithRequiredNonGroupVar: PackageInfo = {
+      ...packageInfoWithVarGroups,
+      vars: [
+        ...packageInfoWithVarGroups.vars!,
+        { name: 'required_var', type: 'text', title: 'Required Var', required: true },
+      ],
+    } as unknown as PackageInfo;
+
+    // Note: Empty strings are allowed for regular required vars in Fleet
+    // Only undefined values trigger required validation error
+    const policyWithEmptyRequiredVar = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: 'my-key' },
+        api_url: { type: 'text', value: 'https://api.example.com' },
+        required_var: { type: 'text', value: '' }, // Required by varDef but empty string is OK
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(
+      policyWithEmptyRequiredVar,
+      packageInfoWithRequiredNonGroupVar,
+      load
+    );
+
+    // Empty strings are allowed for regular required vars
+    expect(result.vars?.required_var).toBeNull();
+  });
+
+  it('should pass validation when all required var_group vars have values', () => {
+    const validPolicy = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: 'my-api-key' },
+        api_url: { type: 'text', value: 'https://api.example.com' },
+      },
+      var_group_selections: { auth_method: 'api_key' },
+    };
+
+    const result = validatePackagePolicy(validPolicy, packageInfoWithVarGroups, load);
+
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
+});

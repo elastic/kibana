@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import type { ChangeEvent } from 'react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface EventMessageFilterProps {
-  value: string;
-  onChange: (value: string) => void;
+  onSearch: (value: string) => void;
 }
 
-export function EventMessageFilter({ value, onChange }: EventMessageFilterProps): JSX.Element {
-  const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
-    [onChange]
-  );
-
+export function EventMessageFilter({ onSearch }: EventMessageFilterProps): JSX.Element {
   return (
     <EuiFieldSearch
       aria-label={i18n.SEARCH_BY_EVENT_MESSAGE_ARIA_LABEL}
       fullWidth
       incremental={false}
       placeholder={i18n.SEARCH_BY_EVENT_MESSAGE_PLACEHOLDER}
-      value={value}
-      onChange={handleChange}
+      onSearch={onSearch}
       data-test-subj="ruleEventLogMessageSearchField"
     />
   );

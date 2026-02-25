@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { isInternalURL } from '@kbn/std';
 
 import type { AuthenticationProviderOptions } from './base';
@@ -24,7 +25,6 @@ import type { UiamServicePublic } from '../../uiam';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 
@@ -511,7 +511,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       {
         user: this.authenticationInfoToAuthenticatedUser(result.authentication),
         userProfileGrant: this.isUiamToken(result.access_token)
-          ? this.options.uiam.getUserProfileGrant(result.access_token)
+          ? {
+              type: 'uiamAccessToken',
+              accessToken: result.access_token,
+              clientAuthentication: this.options.uiam.getClientAuthentication(),
+            }
           : { type: 'accessToken', accessToken: result.access_token },
         state: {
           accessToken: result.access_token,
@@ -708,7 +712,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
         },
         ...(this.isUiamToken(accessToken) && {
-          userProfileGrant: this.options.uiam.getUserProfileGrant(accessToken),
+          userProfileGrant: {
+            type: 'uiamAccessToken',
+            accessToken,
+            clientAuthentication: this.options.uiam.getClientAuthentication(),
+          },
         }),
         state: { accessToken, refreshToken, realm: this.realm || state.realm },
       }
@@ -756,6 +764,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           requestIdMap: this.updateRequestIdMap(requestId, redirectURL, state?.requestIdMap),
           realm,
         },
+        stateCookieOptions: { sameSite: 'None', isSecure: true },
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
@@ -897,7 +906,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param token ES native or UIAM access or refresh token.
    */
   private isUiamToken(token?: string): this is { options: { uiam: UiamServicePublic } } {
-    const isUiamToken = !!token?.startsWith('essu_');
+    const isUiamToken = !!token && isUiamCredential(token);
     if (isUiamToken && !this.useUiam) {
       this.logger.error('Detected UIAM token, but the provider is not configured to use UIAM.');
     } else if (!isUiamToken && this.useUiam) {

@@ -55,7 +55,21 @@ export interface EndpointScriptListApiResponse {
 
 export type SortableScriptLibraryFields = keyof Pick<
   EndpointScript,
-  'name' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'
+  'name' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy' | 'fileSize'
 >;
 
 export type SortDirection = EndpointScriptListApiResponse['sortDirection'];
+
+export type EditableScriptFields = Partial<
+  Pick<
+    EndpointScript,
+    | 'name'
+    | 'platform'
+    | 'tags'
+    | 'description'
+    | 'instructions'
+    | 'example'
+    | 'pathToExecutable'
+    | 'requiresInput'
+  >
+>;

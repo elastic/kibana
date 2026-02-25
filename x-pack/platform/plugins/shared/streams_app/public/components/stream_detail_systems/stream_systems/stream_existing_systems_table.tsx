@@ -20,12 +20,9 @@ import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import type { Streams, System } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
-import {
-  OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
-  SELECTED_SYSTEMS_URL_PARAM,
-} from '../../../constants';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useStreamSystemsApi } from '../../../hooks/use_stream_systems_api';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { StreamSystemDetailsFlyout } from './stream_system_details_flyout';
 import { TableTitle } from './table_title';
 import { useStreamSystemsTable } from './hooks/use_stream_systems_table';
@@ -44,6 +41,7 @@ export function StreamExistingSystemsTable({
   aiFeatures: AIFeatures | null;
 }) {
   const router = useStreamsAppRouter();
+  const { rangeFrom, rangeTo } = useTimeRange();
 
   const [selectedSystem, setSelectedSystem] = useState<System>();
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
@@ -59,8 +57,10 @@ export function StreamExistingSystemsTable({
     router.push('/{key}/management/{tab}', {
       path: { key: definition.name, tab: 'significantEvents' },
       query: {
-        [OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM]: 'true',
-        [SELECTED_SYSTEMS_URL_PARAM]: significantEventsSystems.map((s) => s.name).join(','),
+        rangeFrom,
+        rangeTo,
+        openFlyout: 'true',
+        selectedSystems: significantEventsSystems.map((s) => s.name).join(','),
       },
     });
   };
