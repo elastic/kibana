@@ -134,11 +134,17 @@ jobs:
       - name: Resolve prompt and model
         id: prompt
         env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
           EVENT_NAME: ${{ github.event_name }}
           INPUT_PROMPT: ${{ inputs.prompt }}
           INPUT_MODEL: ${{ inputs.model }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           ISSUE_BODY: ${{ github.event.issue.body }}
+          COMMENT_PATH: ${{ github.event.comment.path }}
+          COMMENT_LINE: ${{ github.event.comment.line }}
+          COMMENT_START_LINE: ${{ github.event.comment.start_line }}
+          COMMENT_DIFF_HUNK: ${{ github.event.comment.diff_hunk }}
           LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
           IS_PR: ${{ needs.prepare.outputs.is_pr }}
           PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
@@ -161,6 +167,29 @@ jobs:
             PROMPT_TEXT=$(printf '%s' "$COMMENT_BODY" | sed -n 's|.*/action-ralph\s*||p' | head -1)
 
             if [ "$IS_PR" = "true" ]; then
+              # Collect recent PR conversation context.
+              ISSUE_COMMENTS_JSON=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
+              REVIEW_COMMENTS_JSON=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/comments?per_page=20" 2>/dev/null || echo "[]")
+
+              ISSUE_COMMENTS_SUMMARY=$(printf '%s' "$ISSUE_COMMENTS_JSON" | jq -r '
+                if length == 0 then
+                  "(none)"
+                else
+                  .[] | "- @" + .user.login + " (" + (.created_at // "unknown") + "): " +
+                  ((.body // "") | gsub("\\r?\\n"; " ") | .[0:500])
+                end
+              ' 2>/dev/null || echo "(unavailable)")
+
+              REVIEW_COMMENTS_SUMMARY=$(printf '%s' "$REVIEW_COMMENTS_JSON" | jq -r '
+                if length == 0 then
+                  "(none)"
+                else
+                  .[] | "- @" + .user.login + " (" + (.created_at // "unknown") + ")" +
+                  " [" + (.path // "unknown") + ":" + ((.line // .original_line // 0) | tostring) + "] " +
+                  ((.body // "") | gsub("\\r?\\n"; " ") | .[0:500])
+                end
+              ' 2>/dev/null || echo "(unavailable)")
+
               {
                 echo 'task<<RALPH_EOF'
                 echo "You are modifying an existing PR #${PR_NUMBER}."
@@ -168,6 +197,23 @@ jobs:
                 echo "PR context (from issue/PR body):"
                 printf '%s\n' "$ISSUE_BODY"
                 echo ""
+                echo "Recent issue/PR comments:"
+                printf '%s\n' "$ISSUE_COMMENTS_SUMMARY" | head -c 15000
+                echo ""
+                echo ""
+                echo "Recent inline review comments:"
+                printf '%s\n' "$REVIEW_COMMENTS_SUMMARY" | head -c 15000
+                echo ""
+                echo ""
+                if [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
+                  echo "Current inline review comment context:"
+                  echo "- Path: ${COMMENT_PATH:-unknown}"
+                  echo "- Line: ${COMMENT_LINE:-unknown}"
+                  echo "- Start line: ${COMMENT_START_LINE:-unknown}"
+                  echo "- Diff hunk:"
+                  printf '%s\n' "${COMMENT_DIFF_HUNK:-}"
+                  echo ""
+                fi
                 echo "Task from comment:"
                 printf '%s\n' "$PROMPT_TEXT"
                 echo 'RALPH_EOF'
