@@ -655,7 +655,7 @@ steps:
           - name: onechat_runAgent_step
             type: ai.agent
             agent-id: "elastic-ai-agent"
-            connector-id: gpt41Azure
+            connector-id: openai-gpt-4.1
             create-conversation: true
             on-failure:
               retry:
