@@ -31,6 +31,8 @@ disabled:
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.ts
+  - x-pack/solutions/security/test/serverless/api_integration/configs/config.graph.ts
+  - x-pack/solutions/security/test/serverless/api_integration/configs/config.graph_essentials.ts
   - x-pack/platform/test/serverless/api_integration/configs/security/config.group1.ts
   - x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.screenshots.ts

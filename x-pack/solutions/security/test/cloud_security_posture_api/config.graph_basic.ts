@@ -15,9 +15,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...xPackAPITestsConfig.getAll(),
-    testFiles: [resolve(__dirname, './routes'), resolve(__dirname, './telemetry')],
+    testFiles: [resolve(__dirname, './routes/graph_basic')],
     junit: {
-      reportName: 'X-Pack Cloud Security Posture API Tests',
+      reportName: 'X-Pack Cloud Security Posture API Tests - Graph Basic License',
+    },
+    esTestCluster: {
+      ...xPackAPITestsConfig.get('esTestCluster'),
+      license: 'basic',
+      serverArgs: [
+        ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
+        'xpack.license.self_generated.type=basic',
+      ],
     },
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
@@ -31,22 +39,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             appenders: ['default'],
           },
         ])}`,
-        /**
-         * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
-         *
-         * test a new package:
-         * 1. build the package and start the registry with elastic-package and uncomment the 'registryUrl' flag below
-         * 2. locally checkout the kibana version that matches the new package
-         * 3. update the package version below to use the new package version
-         * 4. run tests with NODE_EXTRA_CA_CERTS pointing to the elastic-package certificate. example:
-         *  NODE_EXTRA_CA_CERTS=HOME/.elastic-package/profiles/default/certs/kibana/ca-cert.pem  yarn start
-         * 5. when test pass:
-         *   1. release a new package to EPR
-         *   2. merge the updated version number change to kibana
-         */
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
         `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
-        // `--xpack.fleet.registryUrl=https://localhost:8080`,
       ],
     },
   };
