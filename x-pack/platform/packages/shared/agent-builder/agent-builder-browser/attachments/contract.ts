@@ -39,7 +39,7 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
   isCanvas: boolean;
   /** Function to update the attachment's origin reference */
-  updateOrigin: (originId: string) => Promise<UpdateOriginResponse | undefined>;
+  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
 }

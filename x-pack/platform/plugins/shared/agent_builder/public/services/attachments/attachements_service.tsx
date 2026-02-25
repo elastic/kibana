@@ -71,17 +71,17 @@ export class AttachmentsService {
    *
    * @param conversationId - The conversation containing the attachment
    * @param attachmentId - The ID of the attachment to update
-   * @param originId - The origin identifier (e.g., saved object ID)
+   * @param origin - The origin reference object (shape depends on attachment type)
    */
   async updateOrigin(
     conversationId: string,
     attachmentId: string,
-    originId: string
+    origin: unknown
   ): Promise<UpdateOriginResponse> {
     return await this.http.put<UpdateOriginResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/origin`,
       {
-        body: JSON.stringify({ originId }),
+        body: JSON.stringify({ origin }),
       }
     );
   }

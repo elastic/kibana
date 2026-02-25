@@ -35,8 +35,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }, [openCanvasContext, attachment, isSidebar]);
 
   const updateOrigin = useCallback(
-    async (originId: string) => {
-      return attachmentsService.updateOrigin(conversationId, attachment.id, originId);
+    async (origin: unknown) => {
+      return attachmentsService.updateOrigin(conversationId, attachment.id, origin);
     },
     [attachmentsService, conversationId, attachment.id]
   );
