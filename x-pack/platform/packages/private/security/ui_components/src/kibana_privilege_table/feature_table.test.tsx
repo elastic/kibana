@@ -6,7 +6,7 @@
  */
 
 import { EuiThemeProvider } from '@elastic/eui';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
@@ -387,7 +387,9 @@ describe('FeatureTable', () => {
       );
       if (!accordionChildren) return;
 
-      const accordionRoot = accordionChildren.closest('[data-test-subj~="featurePrivilegeControls"]');
+      const accordionRoot = accordionChildren.closest(
+        '[data-test-subj~="featurePrivilegeControls"]'
+      );
       const arrowButton = accordionRoot?.querySelector('.euiAccordion__arrow');
 
       if (!feature.subFeatures || feature.subFeatures.length === 0) {
@@ -912,9 +914,9 @@ describe('FeatureTable', () => {
 
     expect(screen.queryByTestId('featurePrivilegeDescriptionText')).toBeInTheDocument();
 
-    expect(
-      screen.getByTestId('featurePrivilegeDescriptionText').textContent
-    ).toMatchInlineSnapshot(`"a description of my feature"`);
+    expect(screen.getByTestId('featurePrivilegeDescriptionText').textContent).toMatchInlineSnapshot(
+      `"a description of my feature"`
+    );
   });
 
   it('does not render subtext for features without a description', () => {
@@ -1087,13 +1089,13 @@ describe('FeatureTable', () => {
     expect(fooCategory).toBeInTheDocument();
     expect(barCategory).toBeInTheDocument();
 
-    expect(
-      within(fooCategory).getByTestId('categoryLabel').textContent
-    ).toMatchInlineSnapshot(`"1 / 2 features granted"`);
+    expect(within(fooCategory).getByTestId('categoryLabel').textContent).toMatchInlineSnapshot(
+      `"1 / 2 features granted"`
+    );
 
-    expect(
-      within(barCategory).getByTestId('categoryLabel').textContent
-    ).toMatchInlineSnapshot(`"2 / 2 features granted"`);
+    expect(within(barCategory).getByTestId('categoryLabel').textContent).toMatchInlineSnapshot(
+      `"2 / 2 features granted"`
+    );
   });
 
   describe('Info Icon Tooltip for Customized Subfeature privileges', () => {

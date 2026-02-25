@@ -35,9 +35,7 @@ jest.mock('@elastic/eui', () => {
 jest.mock('./selectable_spaces_control', () => {
   const actual = jest.requireActual('./selectable_spaces_control');
   return {
-    SelectableSpacesControl: jest.fn((props: any) => (
-      <actual.SelectableSpacesControl {...props} />
-    )),
+    SelectableSpacesControl: jest.fn((props: any) => <actual.SelectableSpacesControl {...props} />),
   };
 });
 
@@ -204,7 +202,13 @@ const setup = async (opts: SetupOpts = {}) => {
     });
   }
 
-  return { onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare, resolveSpacesData };
+  return {
+    onClose,
+    mockSpacesManager,
+    mockToastNotifications,
+    savedObjectToShare,
+    resolveSpacesData,
+  };
 };
 
 function changeSpaceSelection(selectedSpaces: string[]) {
