@@ -11,11 +11,11 @@ inputs:
     required: true
     description: |
       Zendesk query syntax (keyword, type:ticket|user|organization|group, status:open, created<YYYY-MM-DD, "exact phrase").
-      E.g. type:ticket status:open, crawler, "output_sink: console"'. Filter syntax: field:value. Combine with spaces.
+      E.g. type:ticket status:open, crawler, "output_sink: console". Filter syntax: field:value. Combine with spaces.
   - name: sort_by
     type: string
     required: false
-    description: 'Sort field (e.g. updated_at, created_at, priority, status, ticket_type, relevance).  Default is relevance.'
+    description: 'Sort field. Valid values: updated_at, created_at, priority, status, ticket_type. Omit for relevance (default).'
   - name: sort_order
     type: choice
     options:
@@ -30,7 +30,7 @@ inputs:
   - name: per_page
     type: number
     required: false
-    description: 'Results per page'
+    description: 'Results per page (max 100; Search returns up to 1000 results total)'
   - name: include
     type: string
     required: false

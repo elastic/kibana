@@ -15,7 +15,7 @@ inputs:
     type: number
     required: false
     default: 25
-    description: 'Number of tickets per page'
+    description: 'Number of tickets per page (max 100)'
   - name: include
     type: string
     required: false
