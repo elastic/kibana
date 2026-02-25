@@ -332,4 +332,10 @@ export const getTagcloudVisualization = ({
   getTelemetryEventsOnSave(state, prevState) {
     return getColorMappingTelemetryEvents(state?.colorMapping, prevState?.colorMapping);
   },
+
+  getDisplayOptions() {
+    return {
+      noPadding: true,
+    };
+  },
 });
