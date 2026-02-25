@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
+import { buildModelTelemetryMetadata } from '../../../telemetry';
 import type { ConversationService } from '../../conversation';
 import type { AgentsServiceStart } from '../../agents';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
@@ -25,6 +25,7 @@ export const resolveServices = async ({
   agentService,
   uiSettings,
   savedObjects,
+  telemetryUseCase,
 }: {
   agentId: string;
   connectorId?: string;
@@ -35,6 +36,7 @@ export const resolveServices = async ({
   agentService: AgentsServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  telemetryUseCase?: string;
 }) => {
   const selectedConnectorId = await resolveSelectedConnectorId({
     request,
@@ -62,7 +64,7 @@ export const resolveServices = async ({
       request,
       connectorId: selectedConnectorId,
       chatModelOptions: {
-        telemetryMetadata: MODEL_TELEMETRY_METADATA,
+        telemetryMetadata: buildModelTelemetryMetadata(telemetryUseCase),
       },
     }),
   ]);

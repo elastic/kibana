@@ -41,7 +41,6 @@ export class AgentBuilderPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
   private serviceManager = new ServiceManager();
   private usageCounter?: UsageCounter;
@@ -167,6 +166,7 @@ export class AgentBuilderPlugin
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      telemetryUseCase: this.config.telemetryUseCase,
     });
 
     const { tools, agents, skills, runnerFactory, execution } = startServices;

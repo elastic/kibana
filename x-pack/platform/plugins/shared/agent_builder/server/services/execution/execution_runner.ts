@@ -58,6 +58,7 @@ export interface AgentExecutionDeps {
   spaces?: SpacesPluginStart;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
+  telemetryUseCase?: string;
 }
 
 /**

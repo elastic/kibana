@@ -18,7 +18,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import type { TrackingService } from '../../telemetry';
-import { MODEL_TELEMETRY_METADATA } from '../../telemetry';
+import { buildModelTelemetryMetadata } from '../../telemetry';
 import { resolveSelectedConnectorId } from '../../utils/resolve_selected_connector_id';
 
 export interface CreateModelProviderOpts {
@@ -28,6 +28,7 @@ export interface CreateModelProviderOpts {
   trackingService?: TrackingService;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  telemetryUseCase?: string;
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -58,6 +59,7 @@ export const createModelProvider = ({
   trackingService,
   uiSettings,
   savedObjects,
+  telemetryUseCase,
 }: CreateModelProviderOpts): ModelProvider => {
   const getDefaultConnectorId = async () => {
     const resolvedConnectorId = await resolveSelectedConnectorId({
@@ -116,7 +118,7 @@ export const createModelProvider = ({
         complete: [completionCallback],
       },
       chatModelOptions: {
-        telemetryMetadata: MODEL_TELEMETRY_METADATA,
+        telemetryMetadata: buildModelTelemetryMetadata(telemetryUseCase),
       },
     });
 
