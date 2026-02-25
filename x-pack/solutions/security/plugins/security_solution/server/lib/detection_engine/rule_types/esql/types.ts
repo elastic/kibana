@@ -16,4 +16,5 @@ export interface EsqlState extends RuleTypeState {
   isLoggedRequestsEnabled?: boolean;
   excludedDocuments?: Record<string, ExcludedDocument[]>;
   lastQuery?: string;
+  transformedQuery?: string;
 }

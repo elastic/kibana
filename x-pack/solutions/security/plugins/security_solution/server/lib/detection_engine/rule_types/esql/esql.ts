@@ -27,6 +27,7 @@ import {
   updateExcludedDocuments,
   initiateExcludedDocuments,
   getSourceDocument,
+  getTransformedQueryFromState,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
@@ -94,6 +95,14 @@ export const esqlExecutor = async ({
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
 
+    const transformedQuery = isRuleAggregating
+      ? ruleParams.query
+      : await getTransformedQueryFromState({
+          originalQuery: ruleParams.query,
+          state,
+          ruleExecutionLogger,
+        });
+
     const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
       state,
       isRuleAggregating,
@@ -127,7 +136,7 @@ export const esqlExecutor = async ({
         }
 
         const esqlRequest = buildEsqlSearchRequest({
-          query: ruleParams.query,
+          query: transformedQuery,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
@@ -320,7 +329,10 @@ export const esqlExecutor = async ({
       state: {
         ...state,
         excludedDocuments,
-        lastQuery: hasMvExpand ? ruleParams.query : undefined, // lastQuery is only relevant for mv_expand queries
+        ...(!isRuleAggregating && {
+          lastQuery: ruleParams.query,
+          transformedQuery,
+        }),
       },
       ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
     };

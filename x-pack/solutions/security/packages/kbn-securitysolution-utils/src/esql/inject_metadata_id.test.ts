@@ -167,6 +167,58 @@ describe('injectMetadataId', () => {
     });
   });
 
+  describe('RENAME _id (stops KEEP injection)', () => {
+    it('does not inject _id into KEEP after RENAME _id AS', () => {
+      expect(injectMetadataId('FROM logs* | RENAME _id AS doc_id | KEEP agent.name')).toBe(
+        'FROM logs* METADATA _id | RENAME _id AS doc_id | KEEP agent.name'
+      );
+    });
+
+    it('injects _id into KEEP before RENAME _id AS', () => {
+      expect(injectMetadataId('FROM logs* | KEEP agent.name | RENAME _id AS doc_id')).toBe(
+        'FROM logs* METADATA _id | KEEP agent.name, _id | RENAME _id AS doc_id'
+      );
+    });
+
+    it('RENAME of a different column does not affect KEEP injection', () => {
+      expect(injectMetadataId('FROM logs* | RENAME host AS hostname | KEEP hostname')).toBe(
+        'FROM logs* METADATA _id | RENAME host AS hostname | KEEP hostname, _id'
+      );
+    });
+
+    it('RENAME _id mid-pipeline stops injection for downstream KEEP', () => {
+      expect(
+        injectMetadataId('FROM logs* | KEEP a, _id | RENAME _id AS my_id | KEEP a, my_id')
+      ).toBe('FROM logs* METADATA _id | KEEP a, _id | RENAME _id AS my_id | KEEP a, my_id');
+    });
+  });
+
+  describe('EVAL _id (stops KEEP injection)', () => {
+    it('does not inject _id into KEEP after EVAL _id = expr', () => {
+      expect(injectMetadataId('FROM logs* | EVAL _id = "overwritten" | KEEP agent.name')).toBe(
+        'FROM logs* METADATA _id | EVAL _id = "overwritten" | KEEP agent.name'
+      );
+    });
+
+    it('injects _id into KEEP before EVAL _id = expr', () => {
+      expect(injectMetadataId('FROM logs* | KEEP agent.name | EVAL _id = "overwritten"')).toBe(
+        'FROM logs* METADATA _id | KEEP agent.name, _id | EVAL _id = "overwritten"'
+      );
+    });
+
+    it('EVAL of a different column does not affect KEEP injection', () => {
+      expect(injectMetadataId('FROM logs* | EVAL x = 1 | KEEP x')).toBe(
+        'FROM logs* METADATA _id | EVAL x = 1 | KEEP x, _id'
+      );
+    });
+
+    it('EVAL _id mid-pipeline stops injection for downstream KEEP', () => {
+      expect(injectMetadataId('FROM logs* | KEEP a, _id | EVAL _id = "test" | KEEP a, _id')).toBe(
+        'FROM logs* METADATA _id | KEEP a, _id | EVAL _id = "test" | KEEP a, _id'
+      );
+    });
+  });
+
   describe('complex queries', () => {
     it('handles realistic rule query with KEEP and EVAL', () => {
       expect(injectMetadataId('FROM auditbeat-* | KEEP agent.*, _id | EVAL test_id = _id')).toBe(
