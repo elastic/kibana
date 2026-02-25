@@ -220,7 +220,7 @@ describe(`#runUiamContainer()`, () => {
             "--env",
             "uiam.tokens.refresh.grace_period=PT3S",
             "--health-cmd",
-            "timeout 1 bash -c \\"</dev/tcp/localhost/8080\\"",
+            "timeout 1 bash -c \\"</dev/tcp/localhost/8443\\"",
             "--name",
             "uiam",
             "docker.elastic.co/kibana-ci/uiam:latest-verified",
