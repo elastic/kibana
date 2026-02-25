@@ -42,10 +42,11 @@ export const Firecrawl: ConnectorSpec = {
         waitFor: z.number().int().min(0).optional().default(0),
       }),
       handler: async (ctx, input) => {
-        const body: Record<string, unknown> = { url: input.url };
-        if (input.onlyMainContent !== undefined) body.onlyMainContent = input.onlyMainContent;
-        if (input.waitFor !== undefined && input.waitFor > 0) body.waitFor = input.waitFor;
-        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, body);
+        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/scrape`, {
+          url: input.url,
+          onlyMainContent: input.onlyMainContent,
+          waitFor: input.waitFor,
+        });
         return response.data;
       },
     },
@@ -80,13 +81,12 @@ export const Firecrawl: ConnectorSpec = {
         includeSubdomains: z.boolean().optional().default(true),
       }),
       handler: async (ctx, input) => {
-        const body: Record<string, unknown> = {
+        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/map`, {
           url: input.url,
+          search: input.search,
           limit: input.limit,
           includeSubdomains: input.includeSubdomains,
-        };
-        if (input.search !== undefined && input.search !== '') body.search = input.search;
-        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/map`, body);
+        });
         return response.data;
       },
     },
@@ -103,13 +103,12 @@ export const Firecrawl: ConnectorSpec = {
         allowExternalLinks: z.boolean().optional().default(false),
       }),
       handler: async (ctx, input) => {
-        const body: Record<string, unknown> = {
+        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/crawl`, {
           url: input.url,
           limit: input.limit,
+          maxDiscoveryDepth: input.maxDiscoveryDepth,
           allowExternalLinks: input.allowExternalLinks,
-        };
-        if (input.maxDiscoveryDepth !== undefined) body.maxDiscoveryDepth = input.maxDiscoveryDepth;
-        const response = await ctx.client.post(`${FIRECRAWL_API_BASE}/v2/crawl`, body);
+        });
         return response.data;
       },
     },
