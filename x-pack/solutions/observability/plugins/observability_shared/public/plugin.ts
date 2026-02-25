@@ -46,11 +46,7 @@ import {
 import { updateGlobalNavigation } from './services/update_global_navigation';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
-import {
-  OBSERVABILITY_APP_IDS,
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_SESSION_TAG,
-} from '../common/observability_apps';
+import { OBSERVABILITY_AGENT_ID, OBSERVABILITY_SESSION_TAG } from '../common/observability_apps';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -117,7 +113,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     const { agentBuilder } = plugins;
 
     if (agentBuilder?.setConversationFlyoutActiveConfig) {
-            this.appChangeSubscription = combineLatest([currentAppId$, applications$]).subscribe(
+      this.appChangeSubscription = combineLatest([currentAppId$, applications$]).subscribe(
         ([appId, applications]) => {
           if (appId === undefined) {
             return;
