@@ -42,7 +42,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
   spaceTest(
     'should display ES|QL conversion modal for inline visualizations',
-    async ({ pageObjects }) => {
+    async ({ pageObjects, page }) => {
       const { dashboard, lens } = pageObjects;
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
@@ -58,8 +58,13 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await lens.getApplyFlyoutButton().click();
 
+      // Check the inline editor is not visible
+      const editor = page.getByTestId('customizeLens');
+      await expect(editor).toBeHidden();
+
       // The button is disabled after clicking on "Apply and close" button
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(editor).toBeVisible();
       await expect(lens.getApplyFlyoutButton()).toBeDisabled();
 
       // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
