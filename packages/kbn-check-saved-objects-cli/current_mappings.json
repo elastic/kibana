@@ -3172,20 +3172,6 @@
       }
     }
   },
-  "oauth_state": {
-    "dynamic": false,
-    "properties": {
-      "connectorId": {
-        "type": "keyword"
-      },
-      "expiresAt": {
-        "type": "date"
-      },
-      "state": {
-        "type": "keyword"
-      }
-    }
-  },
   "observability-onboarding-state": {
     "properties": {
       "progress": {
@@ -4550,20 +4536,6 @@
     "dynamic": false,
     "properties": {
       "domainId": {
-        "type": "keyword"
-      }
-    }
-  },
-  "user_connector_token": {
-    "dynamic": false,
-    "properties": {
-      "connectorId": {
-        "type": "keyword"
-      },
-      "credentialType": {
-        "type": "keyword"
-      },
-      "profileUid": {
         "type": "keyword"
       }
     }
