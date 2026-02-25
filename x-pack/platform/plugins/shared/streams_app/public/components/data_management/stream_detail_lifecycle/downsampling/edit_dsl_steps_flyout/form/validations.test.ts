@@ -196,11 +196,11 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must be less than the data retention period (30d).',
+        message: 'Must be smaller than the data retention period (30d).',
       });
     });
 
-    it('returns undefined when after is equal or smaller than data retention', () => {
+    it('fails when after is equal to data retention', () => {
       const validate = afterSmallerThanDataRetention({
         retentionMs: 30 * dayMs,
         retentionEsFormat: '30d',
@@ -216,6 +216,31 @@ describe('streams DSL steps flyout validations', () => {
         createArg({
           path: '_meta.downsampleSteps[0].afterValue',
           value: '30',
+          formData,
+        })
+      );
+
+      expect(result).toEqual({
+        message: 'Must be smaller than the data retention period (30d).',
+      });
+    });
+
+    it('returns undefined when after is smaller than data retention', () => {
+      const validate = afterSmallerThanDataRetention({
+        retentionMs: 30 * dayMs,
+        retentionEsFormat: '30d',
+      });
+
+      const formData: FlatFormData = {
+        '_meta.downsampleSteps[0].afterValue': '20',
+        '_meta.downsampleSteps[0].afterUnit': 'd',
+        '_meta.downsampleSteps[0].afterToMilliSeconds': 20 * dayMs,
+      };
+
+      const result = validate(
+        createArg({
+          path: '_meta.downsampleSteps[0].afterValue',
+          value: '20',
           formData,
         })
       );

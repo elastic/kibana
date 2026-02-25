@@ -146,7 +146,7 @@ export const afterSmallerThanDataRetention = ({
       Number.isFinite(computed) ? computed : -1
     );
 
-    // If a downsampling step happens after data retention, it will never execute before deletion.
+    // If a downsampling step happens at or after data retention, it will never execute before deletion.
     if (ms >= 0 && ms >= retentionMs) {
       return {
         message: i18n.translate('xpack.streams.editDslStepsFlyout.afterGreaterThanRetentionError', {

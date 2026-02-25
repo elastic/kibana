@@ -19,7 +19,7 @@ describe('OverrideSettingsModal', () => {
     );
     expect(
       screen.getByText(
-        'This stream is currently configured to inherit retention and downsampling from an index template. By making this change, you will no longer be inheriting those settings and your changes will be applied to this stream alone. Are you sure you wish to proceed?'
+        'This stream currently inherits its retention and downsampling settings from an index template. Saving these changes will override these inherited settings and apply only to this stream alone.'
       )
     ).toBeInTheDocument();
   });
