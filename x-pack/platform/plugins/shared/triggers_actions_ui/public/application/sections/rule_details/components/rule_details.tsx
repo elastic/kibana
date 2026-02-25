@@ -51,6 +51,7 @@ import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { ViewLinkedObject } from './view_linked_object';
 import { routeToHome } from '../../../constants';
+import { RuleSnoozeModal } from '../../rules_list/components/rule_snooze_modal';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
@@ -111,6 +112,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
+  const [isSnoozeModalOpen, setIsSnoozeModalOpen] = useState<boolean>(false);
 
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
     useState<boolean>(false);
@@ -433,6 +435,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 setRulesToUpdateAPIKey([ruleId]);
               }}
               onEnableDisable={onEnableDisable}
+              onSnooze={() => {
+                setIsSnoozeModalOpen(true);
+              }}
               onRunRule={onRunRule}
               onEdit={() => {
                 onEditRuleClick();
@@ -541,6 +546,14 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {isSnoozeModalOpen ? (
+          <RuleSnoozeModal
+            rule={rule}
+            onClose={() => setIsSnoozeModalOpen(false)}
+            onRuleChanged={requestRefresh}
+            onLoading={() => {}}
+          />
+        ) : null}
       </EuiPageSection>
     </>
   );

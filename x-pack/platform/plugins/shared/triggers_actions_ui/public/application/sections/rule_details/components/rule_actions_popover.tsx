@@ -16,6 +16,7 @@ export interface RuleActionsPopoverProps {
   onDelete: (ruleId: string) => void;
   onApiKeyUpdate: (ruleId: string) => void;
   onEnableDisable: (enable: boolean) => void;
+  onSnooze: () => void;
   onRunRule: (ruleId: string) => void;
   onEdit: (ruleId: string) => void;
   canEdit: boolean;
@@ -28,6 +29,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
   onDelete,
   onApiKeyUpdate,
   onEnableDisable,
+  onSnooze,
   onRunRule,
   onEdit,
   canEdit,
@@ -78,10 +80,22 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
         onEdit(rule.id);
       },
       name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel', {
-        defaultMessage: 'Edit',
+        defaultMessage: 'Edit rule',
       }),
-      icon: 'pencil',
       disabled: isEditDisabled,
+    };
+  };
+
+  const getSnoozePanelItem = (testId: string) => {
+    return {
+      'data-test-subj': testId,
+      onClick: () => {
+        setIsPopoverOpen(false);
+        onSnooze();
+      },
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.manageSnoozeButtonLabel', {
+        defaultMessage: 'Manage snooze notifications',
+      }),
     };
   };
 
@@ -113,10 +127,12 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
             items: isInternallyManaged
               ? [
                   getDisableEnablePanelItem('disableButtonInternallyManaged'),
+                  getSnoozePanelItem('snoozeRuleButtonInternallyManaged'),
                   getUpdateApiKeyPanelItem('updateAPIKeyButtonInternallyManaged'),
                 ]
               : [
                   getDisableEnablePanelItem('disableButton'),
+                  getSnoozePanelItem('snoozeRuleButton'),
                   getUpdateApiKeyPanelItem('updateAPIKeyButton'),
                   {
                     'data-test-subj': 'runRuleButton',
