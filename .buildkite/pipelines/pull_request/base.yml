@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
+    cancel_on_build_failing: true
     label: Build Kibana Distribution
     agents:
       machineType: c4d-standard-16
@@ -16,6 +17,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/quick_checks.sh
+    cancel_on_build_failing: true
     label: 'Quick Checks'
     agents:
       machineType: c4d-standard-8
@@ -31,6 +33,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/checks.sh
+    cancel_on_build_failing: true
     label: 'Checks'
     agents:
       machineType: c4d-standard-2
@@ -46,6 +49,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/lint.sh
+    cancel_on_build_failing: true
     label: 'Linting'
     agents:
       machineType: c4d-standard-16
@@ -61,6 +65,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/lint_with_types.sh
+    cancel_on_build_failing: true
     label: 'Linting (with types)'
     agents:
       machineType: c4d-standard-32
@@ -76,6 +81,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
+    cancel_on_build_failing: true
     label: 'Check OAS Snapshot'
     agents:
       machineType: c4d-standard-2
@@ -90,6 +96,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
+    cancel_on_build_failing: true
     label: 'Check Types'
     agents:
       machineType: c4d-highmem-4
@@ -105,6 +112,7 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    cancel_on_build_failing: true
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
@@ -113,15 +121,15 @@ steps:
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-      JEST_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FTR_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_types'
+      FTR_CONFIGS_DEPS: 'build'
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
+    cancel_on_build_failing: true
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2d-standard-8
@@ -130,7 +138,7 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests,quick_checks,checks,linting,linting_with_types,check_types'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -138,6 +146,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
+    cancel_on_build_failing: true
     label: Mark CI Stats as ready
     agents:
       machineType: n2-standard-2
@@ -151,6 +160,7 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
+    cancel_on_build_failing: true
     label: 'Build API Docs'
     agents:
       machineType: n2-highmem-4
@@ -160,11 +170,6 @@ steps:
     key: build_api_docs
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
     retry:
       automatic:
