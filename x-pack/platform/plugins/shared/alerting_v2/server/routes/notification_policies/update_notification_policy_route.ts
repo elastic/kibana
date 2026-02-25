@@ -12,7 +12,6 @@ import { z } from '@kbn/zod';
 import { inject, injectable } from 'inversify';
 import {
   updateNotificationPolicyBodySchema,
-  updateNotificationPolicyDataSchema,
   type UpdateNotificationPolicyBody,
 } from '@kbn/alerting-v2-schemas';
 import { NotificationPolicyClient } from '../../lib/notification_policy_client';
@@ -55,10 +54,10 @@ export class UpdateNotificationPolicyRoute {
 
   async handle() {
     try {
-      const data = updateNotificationPolicyDataSchema.strip().parse(this.request.body);
+      const { version, ...data } = this.request.body;
       const updated = await this.notificationPolicyClient.updateNotificationPolicy({
         data,
-        options: { id: this.request.params.id, version: this.request.body.version },
+        options: { id: this.request.params.id, version },
       });
 
       return this.response.ok({ body: updated });

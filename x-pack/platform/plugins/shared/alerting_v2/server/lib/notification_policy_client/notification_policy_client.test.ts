@@ -178,6 +178,22 @@ describe('NotificationPolicyClient', () => {
       expect(res).not.toHaveProperty('uiamApiKey');
     });
 
+    it('throws 400 when data is invalid', async () => {
+      await expect(
+        client.createNotificationPolicy({
+          data: {
+            name: 'my-policy',
+            description: 'my-policy description',
+            destinations: [],
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
     it('throws 409 conflict when id already exists', async () => {
       mockSavedObjectsClient.create.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createConflictError(
@@ -509,6 +525,20 @@ describe('NotificationPolicyClient', () => {
 
       expect(res).not.toHaveProperty('apiKey');
       expect(res).not.toHaveProperty('uiamApiKey');
+    });
+
+    it('throws 400 when data is invalid', async () => {
+      await expect(
+        client.updateNotificationPolicy({
+          data: { destinations: [] },
+          options: { id: 'policy-id-update-invalid', version: 'WzEsMV0=' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('throws 404 when notification policy is not found', async () => {
