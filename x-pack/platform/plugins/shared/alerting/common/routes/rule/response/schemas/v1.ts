@@ -15,6 +15,7 @@ import {
   ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
+  snoozeConditionOperator as snoozeConditionOperatorV1,
 } from '../../common/constants/v1';
 import { validateNotifyWhenV1 } from '../../validation';
 import { flappingSchemaV2 } from '../../common';
@@ -622,7 +623,10 @@ export const ruleResponseSchema = schema.object({
           )
         ),
         condition_operator: schema.maybe(
-          schema.oneOf([schema.literal('any'), schema.literal('all')])
+          schema.oneOf([
+            schema.literal(snoozeConditionOperatorV1.ANY),
+            schema.literal(snoozeConditionOperatorV1.ALL),
+          ])
         ),
       })
     )

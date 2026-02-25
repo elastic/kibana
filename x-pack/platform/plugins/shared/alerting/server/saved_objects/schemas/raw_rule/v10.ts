@@ -10,6 +10,7 @@ import {
   MAX_SNOOZED_INSTANCES,
   MAX_SNOOZE_CONDITIONS_PER_ENTRY,
 } from '../../../../common/constants';
+import { snoozeConditionOperator } from '../../../../common/routes/rule/common/constants/v1';
 import { rawRuleSchema as rawRuleSchemaV9 } from './v9';
 
 const snoozeConditionSchema = schema.object({
@@ -25,7 +26,12 @@ const snoozedInstanceEntrySchema = schema.object({
   conditions: schema.maybe(
     schema.arrayOf(snoozeConditionSchema, { maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY })
   ),
-  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
+  conditionOperator: schema.maybe(
+    schema.oneOf([
+      schema.literal(snoozeConditionOperator.ANY),
+      schema.literal(snoozeConditionOperator.ALL),
+    ])
+  ),
 });
 
 export const rawRuleSchema = rawRuleSchemaV9.extends({

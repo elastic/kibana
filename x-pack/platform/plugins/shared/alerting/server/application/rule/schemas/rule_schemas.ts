@@ -17,6 +17,7 @@ import {
   MAX_SNOOZED_INSTANCES,
   MAX_SNOOZE_CONDITIONS_PER_ENTRY,
 } from '../../../../common/constants';
+import { snoozeConditionOperator } from '../../../../common/routes/rule/common/constants/v1';
 import { rRuleSchema } from '../../r_rule/schemas';
 import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
@@ -155,7 +156,12 @@ export const snoozedInstanceConfigSchema = schema.object({
   conditions: schema.maybe(
     schema.arrayOf(perAlertSnoozeConditionSchema, { maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY })
   ),
-  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
+  conditionOperator: schema.maybe(
+    schema.oneOf([
+      schema.literal(snoozeConditionOperator.ANY),
+      schema.literal(snoozeConditionOperator.ALL),
+    ])
+  ),
 });
 
 export const snoozedInstanceEntrySchema = schema.object({
@@ -164,7 +170,12 @@ export const snoozedInstanceEntrySchema = schema.object({
   conditions: schema.maybe(
     schema.arrayOf(perAlertSnoozeConditionSchema, { maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY })
   ),
-  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
+  conditionOperator: schema.maybe(
+    schema.oneOf([
+      schema.literal(snoozeConditionOperator.ANY),
+      schema.literal(snoozeConditionOperator.ALL),
+    ])
+  ),
 });
 
 export const snoozeScheduleSchema = schema.object({

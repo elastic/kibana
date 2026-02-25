@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { MAX_SNOOZE_CONDITIONS_PER_ENTRY } from '../../../../../constants';
+import { snoozeConditionOperator } from '../../../common/constants/v1';
 
 export const muteAlertParamsSchema = schema.object({
   rule_id: schema.string({
@@ -80,9 +81,15 @@ export const muteAlertBodySchema = schema.maybe(
         })
       ),
       condition_operator: schema.maybe(
-        schema.oneOf([schema.literal('any'), schema.literal('all')], {
-          meta: { description: 'How conditions combine: any (OR, default), all (AND).' },
-        })
+        schema.oneOf(
+          [
+            schema.literal(snoozeConditionOperator.ANY),
+            schema.literal(snoozeConditionOperator.ALL),
+          ],
+          {
+            meta: { description: 'How conditions combine: any (OR, default), all (AND).' },
+          }
+        )
       ),
     })
   )

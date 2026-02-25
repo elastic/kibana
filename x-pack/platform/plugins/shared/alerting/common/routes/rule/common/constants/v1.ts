@@ -44,6 +44,12 @@ export const ruleExecutionStatusWarningReason = {
   EXECUTION: 'ruleExecution',
 } as const;
 
+/** How per-alert snooze conditions combine: any (OR) or all (AND). */
+export const snoozeConditionOperator = {
+  ANY: 'any',
+  ALL: 'all',
+} as const;
+
 export type RuleNotifyWhen = (typeof ruleNotifyWhen)[keyof typeof ruleNotifyWhen];
 export type RuleLastRunOutcomeValues =
   (typeof ruleLastRunOutcomeValues)[keyof typeof ruleLastRunOutcomeValues];
@@ -53,3 +59,5 @@ export type RuleExecutionStatusErrorReason =
   (typeof ruleExecutionStatusErrorReason)[keyof typeof ruleExecutionStatusErrorReason];
 export type RuleExecutionStatusWarningReason =
   (typeof ruleExecutionStatusWarningReason)[keyof typeof ruleExecutionStatusWarningReason];
+export type SnoozeConditionOperator =
+  (typeof snoozeConditionOperator)[keyof typeof snoozeConditionOperator];
