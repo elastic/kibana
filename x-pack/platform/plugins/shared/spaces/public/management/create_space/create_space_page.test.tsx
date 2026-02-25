@@ -13,9 +13,9 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { I18nProvider } from '@kbn/i18n-react';
 
 import { CreateSpacePage } from './create_space_page';
 import type { SolutionView, Space } from '../../../common/types/latest';
