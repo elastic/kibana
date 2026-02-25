@@ -7,10 +7,9 @@
 
 import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
-import type { VersionedAttachment } from '@kbn/agent-builder-common';
+import type { VersionedAttachment, UpdateOriginResponse } from '@kbn/agent-builder-common';
 import type {
   CreateAttachmentResponse,
-  UpdateOriginResponse,
   ListAttachmentsResponse,
 } from '@kbn/agent-builder-plugin/common/http_api/attachments';
 import { createLlmProxy, type LlmProxy } from '../utils/llm_proxy';
@@ -99,7 +98,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ originId: 'saved-object-123' })
+          .send({ origin: { saved_object_id: 'saved-object-123' } })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;
@@ -118,7 +117,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ originId: 'persisted-saved-object-456' })
+          .send({ origin: { saved_object_id: 'persisted-saved-object-456' } })
           .expect(200);
 
         const listResponse = await supertest
@@ -139,7 +138,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/non-existent-conversation/attachments/some-attachment/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ originId: 'saved-object-123' })
+          .send({ origin: { saved_object_id: 'saved-object-123' } })
           .expect(404);
 
         const body: Payload = response.body;
@@ -155,7 +154,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/non-existent-attachment/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ originId: 'saved-object-123' })
+          .send({ origin: { saved_object_id: 'saved-object-123' } })
           .expect(404);
 
         const body: Payload = response.body;
@@ -177,7 +176,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ originId: 'saved-object-123' })
+          .send({ origin: { saved_object_id: 'saved-object-123' } })
           .expect(400);
 
         const body: Payload = response.body;
@@ -194,7 +193,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ originId: 'first-saved-object' })
+          .send({ origin: { saved_object_id: 'first-saved-object' } })
           .expect(200);
 
         const response = await supertest
@@ -202,7 +201,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ originId: 'second-saved-object' })
+          .send({ origin: { saved_object_id: 'second-saved-object' } })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;
@@ -219,7 +218,7 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
             `/api/agent_builder/conversations/${conversationId}/attachments/${attachment.id}/origin`
           )
           .set('kbn-xsrf', 'kibana')
-          .send({ originId: 'saved-object-123' })
+          .send({ origin: { saved_object_id: 'saved-object-123' } })
           .expect(200);
 
         const body: UpdateOriginResponse = response.body;
