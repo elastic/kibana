@@ -234,6 +234,11 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
     return (
       <EuiCallOut title="No spans found" color="warning" iconType="help">
         <p>No spans were found for trace ID: {traceId}</p>
+        <p>
+          This usually means the trace was created before OTEL tracing was enabled, or the spans
+          have not been exported yet. Ensure <strong>telemetry.tracing.enabled: true</strong> is set
+          in <code>kibana.yml</code> and the EDOT collector is running.
+        </p>
       </EuiCallOut>
     );
   }

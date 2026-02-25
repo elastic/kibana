@@ -9,6 +9,7 @@ import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { TraceWaterfall } from './components/trace_waterfall';
 import type {
   EvalsPublicSetup,
   EvalsPublicStart,
@@ -41,7 +42,7 @@ export class EvalsPublicPlugin
   }
 
   start(_core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
-    return {};
+    return { TraceWaterfall };
   }
 
   stop() {}

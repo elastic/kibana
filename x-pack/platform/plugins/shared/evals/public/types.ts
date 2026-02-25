@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
-export type EvalsPublicStart = Record<string, never>;
+
+export interface EvalsPublicStart {
+  TraceWaterfall: ComponentType<{ traceId: string }>;
+}
 
 export interface EvalsSetupDependencies {
   data: DataPublicPluginSetup;
