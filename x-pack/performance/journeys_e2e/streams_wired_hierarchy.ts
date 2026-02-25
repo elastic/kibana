@@ -12,8 +12,8 @@ import { setupLargeWiredHierarchy } from '../synthtrace_data/streams_data';
 const STREAMS_SEARCH_SELECTOR = 'input[aria-label="Search streams by name"]';
 const STREAMS_EXPAND_ALL_BUTTON = subj('streamsExpandAllButton');
 const STREAMS_COLLAPSE_ALL_BUTTON = subj('streamsCollapseAllButton');
-const WIRED_CHILD_FIRST = subj('streamsNameLink-logs.perf_child_0001');
-const WIRED_CHILD_MIDDLE = subj('streamsNameLink-logs.perf_child_0050');
+const WIRED_CHILD_FIRST = subj('streamsNameLink-logs.otel.perf_child_0001');
+const WIRED_CHILD_MIDDLE = subj('streamsNameLink-logs.otel.perf_child_0050');
 const WIRED_HIERARCHY_COUNT = 1000;
 const WIRED_HIERARCHY_STRATEGY = 'import' as const;
 
@@ -49,7 +49,7 @@ export const journey = new Journey({
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
-    await searchBox.type('logs.perf_child_0050', { delay: inputDelays.TYPING });
+    await searchBox.type('logs.otel.perf_child_0050', { delay: inputDelays.TYPING });
     await page.waitForSelector(WIRED_CHILD_MIDDLE, { timeout: 60000 });
   })
   .step('Clear search', async ({ page }) => {
@@ -72,11 +72,11 @@ export const journey = new Journey({
     await page.waitForSelector(subj('streamsTable'));
   })
   .step('Navigate to a wired child detail page', async ({ page }) => {
-    const logsExpandButton = page.locator(subj('expandButton-logs'));
+    const logsExpandButton = page.locator(subj('expandButton-logs.otel'));
     if (await logsExpandButton.isVisible().catch(() => false)) {
       await logsExpandButton.click();
     }
-    const streamLink = page.locator(subj('streamsNameLink-logs.perf_child_0001'));
+    const streamLink = page.locator(subj('streamsNameLink-logs.otel.perf_child_0001'));
     await streamLink.waitFor({ state: 'visible', timeout: 60000 });
     await streamLink.click();
     await page.waitForSelector(subj('wiredStreamBadge'), { timeout: 60000 });

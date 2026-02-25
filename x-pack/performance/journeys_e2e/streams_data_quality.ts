@@ -15,11 +15,11 @@ export const journey = new Journey({
   },
 })
   .step('Go to stream detail page', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/app/streams/logs.child1'));
+    await page.goto(kbnUrl.get('/app/streams/logs.otel.child1'));
     await page.waitForSelector(subj('wiredStreamBadge'), { timeout: 60000 });
   })
   .step('Navigate to Data Quality tab', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/app/streams/logs.child1/management/dataQuality'));
+    await page.goto(kbnUrl.get('/app/streams/logs.otel.child1/management/dataQuality'));
     await page.waitForSelector(subj('datasetQualityDetailsSummaryKpiCard-Degraded documents'), {
       timeout: 60000,
     });

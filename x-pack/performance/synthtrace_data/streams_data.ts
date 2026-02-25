@@ -18,6 +18,14 @@ const PUBLIC_API_HEADERS = {
   'elastic-api-version': '2023-10-31',
 };
 
+/**
+ * The root wired stream to fork children from.
+ * After the logs → logs.otel / logs.ecs split, `enableStreams()` no longer
+ * creates a plain `logs` root on fresh installs. Use `logs.otel` which is
+ * guaranteed to exist after enablement.
+ */
+const WIRED_ROOT_STREAM = 'logs.otel';
+
 const INTERNAL_API_HEADERS = {
   'kbn-xsrf': 'streams-perf-test',
   'x-elastic-internal-origin': 'kibana',
@@ -257,30 +265,30 @@ async function forkStream(
 }
 
 /**
- * Create a wired stream hierarchy: the root 'logs' stream with child streams forked from it.
+ * Create a wired stream hierarchy: children forked from the root wired stream.
  * Requires wired streams to be enabled first (call enableStreams).
  *
  * Creates:
- *   logs
- *   ├── logs.child1  (routes on resource.attributes.service.name == 'service-1')
- *   ├── logs.child2  (routes on resource.attributes.service.name == 'service-2')
- *   └── logs.child3  (routes on resource.attributes.service.name == 'service-3')
+ *   logs.otel
+ *   ├── logs.otel.child1  (routes on resource.attributes.service.name == 'service-1')
+ *   ├── logs.otel.child2  (routes on resource.attributes.service.name == 'service-2')
+ *   └── logs.otel.child3  (routes on resource.attributes.service.name == 'service-3')
  */
 export async function createWiredStreamHierarchy(kibanaServer: KibanaServer, log: ToolingLog) {
   log.info('Creating wired stream hierarchy...');
 
   const children = [
-    { name: 'logs.child1', conditionValue: 'service-1' },
-    { name: 'logs.child2', conditionValue: 'service-2' },
-    { name: 'logs.child3', conditionValue: 'service-3' },
+    { name: `${WIRED_ROOT_STREAM}.child1`, conditionValue: 'service-1' },
+    { name: `${WIRED_ROOT_STREAM}.child2`, conditionValue: 'service-2' },
+    { name: `${WIRED_ROOT_STREAM}.child3`, conditionValue: 'service-3' },
   ];
 
   // Fork children sequentially — each fork modifies the parent's routing
   for (const child of children) {
-    log.info(`  Forking ${child.name} from logs...`);
+    log.info(`  Forking ${child.name} from ${WIRED_ROOT_STREAM}...`);
     await forkStream(
       kibanaServer,
-      'logs',
+      WIRED_ROOT_STREAM,
       child.name,
       'resource.attributes.service.name',
       child.conditionValue
@@ -332,7 +340,7 @@ type WiredHierarchyStrategy = 'fork' | 'import';
 const DEFAULT_WIRED_HIERARCHY_COUNT = 100;
 
 /**
- * Phase 5A — Create a large wired hierarchy by serially forking children from `logs`.
+ * Phase 5A — Create a large wired hierarchy by serially forking children from the root stream.
  * Each fork acquires the global lock, so this is O(N) in lock acquisitions.
  * Practical for up to ~100 children; for 1000+ use the 'import' strategy.
  */
@@ -344,14 +352,14 @@ async function createLargeWiredHierarchyViaFork(
   log.info(`Creating ${count} wired child streams via serial fork...`);
 
   for (let i = 1; i <= count; i++) {
-    const childName = `logs.perf_child_${String(i).padStart(4, '0')}`;
+    const childName = `${WIRED_ROOT_STREAM}.perf_child_${String(i).padStart(4, '0')}`;
     const conditionValue = `perf-service-${i}`;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
         await forkStream(
           kibanaServer,
-          'logs',
+          WIRED_ROOT_STREAM,
           childName,
           'resource.attributes.service.name',
           conditionValue
@@ -492,7 +500,7 @@ async function uploadContentPack(
  *
  * After batched content imports, each batch overwrites the root's routing with
  * only that batch's children. This final call sets the complete routing table
- * via `PUT /api/streams/logs/_ingest` so all children are routable.
+ * via `PUT /api/streams/${WIRED_ROOT_STREAM}/_ingest` so all children are routable.
  */
 async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, count: number) {
   log.info(`Updating root stream routing to include all ${count} children...`);
@@ -500,14 +508,14 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
   const allRouting = [];
   for (let i = 1; i <= count; i++) {
     allRouting.push({
-      destination: `logs.perf_child_${String(i).padStart(4, '0')}`,
+      destination: `${WIRED_ROOT_STREAM}.perf_child_${String(i).padStart(4, '0')}`,
       where: { field: 'resource.attributes.service.name', eq: `perf-service-${i}` },
       status: 'enabled' as const,
     });
   }
 
   await kibanaServer.request({
-    path: '/api/streams/logs/_ingest',
+    path: `/api/streams/${WIRED_ROOT_STREAM}/_ingest`,
     method: 'PUT',
     headers: PUBLIC_API_HEADERS,
     body: {
@@ -578,7 +586,9 @@ async function createLargeWiredHierarchyViaImport(
         `archive ${Math.round(archiveBuffer.length / 1024)} KB, importing...`
     );
 
-    await uploadContentPack(kibanaServer, 'logs', archiveBuffer, { objects: { all: {} } });
+    await uploadContentPack(kibanaServer, WIRED_ROOT_STREAM, archiveBuffer, {
+      objects: { all: {} },
+    });
     log.info(`  Batch ${batchIndex + 1}/${totalBatches}: imported successfully`);
 
     if (batchIndex < totalBatches - 1) {
@@ -593,11 +603,11 @@ async function createLargeWiredHierarchyViaImport(
 }
 
 /**
- * Create a large wired stream hierarchy under 'logs'.
+ * Create a large wired stream hierarchy under the root wired stream.
  *
  * @param strategy - 'fork' for serial fork (Phase 5A, safe for ~100 children)
  *                   'import' for content pack bulk import (Phase 5B, scales to 1000+)
- * @param count - Number of child streams to create under 'logs'
+ * @param count - Number of child streams to create
  */
 export async function createLargeWiredHierarchy(
   kibanaServer: KibanaServer,

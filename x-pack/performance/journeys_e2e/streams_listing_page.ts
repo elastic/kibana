@@ -57,13 +57,13 @@ export const journey = new Journey({
     await page.waitForSelector(subj('streamsTable'));
   })
   .step('Navigate to a stream detail page', async ({ page }) => {
-    // After collapse-all, logs.child1 is hidden under the collapsed 'logs' parent.
-    // Expand the 'logs' node first so the child link becomes visible.
-    const logsExpandButton = page.locator(subj('expandButton-logs'));
+    // After collapse-all, logs.otel.child1 is hidden under the collapsed 'logs.otel' parent.
+    // Expand the 'logs.otel' node first so the child link becomes visible.
+    const logsExpandButton = page.locator(subj('expandButton-logs.otel'));
     if (await logsExpandButton.isVisible().catch(() => false)) {
       await logsExpandButton.click();
     }
-    const streamLink = page.locator(subj('streamsNameLink-logs.child1'));
+    const streamLink = page.locator(subj('streamsNameLink-logs.otel.child1'));
     await streamLink.waitFor({ state: 'visible', timeout: 60000 });
     await streamLink.click();
     await page.waitForSelector(subj('wiredStreamBadge'), { timeout: 60000 });

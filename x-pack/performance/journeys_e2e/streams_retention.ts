@@ -15,7 +15,7 @@ export const journey = new Journey({
   },
 })
   .step('Go to stream retention page', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/app/streams/logs.child1/management/retention'));
+    await page.goto(kbnUrl.get('/app/streams/logs.otel.child1/management/retention'));
     await page.waitForSelector(subj('streamsAppRetentionMetadataEditDataRetentionButton'), {
       timeout: 60000,
     });

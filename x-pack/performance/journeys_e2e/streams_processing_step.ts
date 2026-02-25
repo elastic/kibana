@@ -15,7 +15,7 @@ export const journey = new Journey({
   },
 })
   .step('Go to stream processing page', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/app/streams/logs.child1/management/processing'));
+    await page.goto(kbnUrl.get('/app/streams/logs.otel.child1/management/processing'));
     await page.waitForSelector(subj('streamsAppStreamDetailEnrichmentCreateProcessorButton'), {
       timeout: 60000,
     });

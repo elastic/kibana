@@ -15,7 +15,7 @@ export const journey = new Journey({
   },
 })
   .step('Go to stream schema page', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/app/streams/logs.child1/management/schema'));
+    await page.goto(kbnUrl.get('/app/streams/logs.otel.child1/management/schema'));
     await page.waitForSelector(subj('streamsAppContentAddFieldButton'), { timeout: 60000 });
   })
   .step('Open add field flyout', async ({ page }) => {
