@@ -118,7 +118,6 @@ describe('Dynamic Connectors', () => {
       },
     ]);
     expect(logger.info).not.toHaveBeenCalled();
-    expect(logger.warn).not.toHaveBeenCalled();
   });
   it('should not add dynamic connectors that already exist', () => {
     const existingConnectors: InMemoryConnector[] = [
@@ -215,7 +214,7 @@ describe('Dynamic Connectors', () => {
     ]);
     expect(logger.info).not.toHaveBeenCalled();
   });
-  it('should handle removing dynamic connectors for missing endpoints', () => {
+  it('should not remove dynamic connectors', () => {
     const existingConnectors: InMemoryConnector[] = [
       createMockInMemoryConnector({
         id: 'Anthropic-Claude-Opus-4-5',
@@ -285,7 +284,7 @@ describe('Dynamic Connectors', () => {
       },
     ];
 
-    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(true);
+    expect(updateDynamicInMemoryConnectors(existingConnectors, endpoints, logger)).toEqual(false);
     expect(existingConnectors).toContainConnectors([
       {
         id: 'Anthropic-Claude-Opus-4-5',
@@ -326,13 +325,30 @@ describe('Dynamic Connectors', () => {
         isDeprecated: false,
         isDynamic: true,
       },
+      {
+        id: '.anthropic-claude-3.7-sonnet-chat_completion',
+        name: 'Anthropic Claude 3.7 Sonnet',
+        actionTypeId: '.inference',
+        exposeConfig: true,
+        config: {
+          provider: 'elastic',
+          taskType: 'chat_completion',
+          inferenceId: '.anthropic-claude-3.7-sonnet-chat_completion',
+          providerConfig: {
+            model_id: 'anthropic-claude-3.7-sonnet',
+          },
+        },
+        secrets: {},
+        isPreconfigured: true,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        isDeprecated: false,
+        isDynamic: true,
+      },
     ]);
     expect(logger.info).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Removed dynamic connector ".anthropic-claude-3.7-sonnet-chat_completion" for inference endpoint ".anthropic-claude-3.7-sonnet-chat_completion"'
-    );
   });
-  it('should handle ignoring, adding and removing dynamic connectors', () => {
+  it('should handle ignoring & adding dynamic connectors', () => {
     const existingConnectors: InMemoryConnector[] = [
       // Preconfigured connectors
       createMockInMemoryConnector({
@@ -488,6 +504,26 @@ describe('Dynamic Connectors', () => {
         isDeprecated: false,
       },
       {
+        id: '.anthropic-claude-3.7-sonnet-chat_completion',
+        name: 'Anthropic Claude 3.7 Sonnet',
+        actionTypeId: '.inference',
+        exposeConfig: true,
+        config: {
+          provider: 'elastic',
+          taskType: 'chat_completion',
+          inferenceId: '.anthropic-claude-3.7-sonnet-chat_completion',
+          providerConfig: {
+            model_id: 'anthropic-claude-3.7-sonnet',
+          },
+        },
+        secrets: {},
+        isPreconfigured: true,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        isDeprecated: false,
+        isDynamic: true,
+      },
+      {
         id: '.openai-gpt-4.1-chat_completion',
         name: 'OpenAI GPT 4.1',
         actionTypeId: '.inference',
@@ -530,9 +566,6 @@ describe('Dynamic Connectors', () => {
     ]);
     expect(logger.info).toHaveBeenCalledWith(
       'Added dynamic connector for inference endpoint .anthropic-claude-4.6-opus-chat_completion'
-    );
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Removed dynamic connector ".anthropic-claude-3.7-sonnet-chat_completion" for inference endpoint ".anthropic-claude-3.7-sonnet-chat_completion"'
     );
   });
   it('should not update inMemoryConnectors if called with empty endpoints list', () => {
@@ -659,7 +692,6 @@ describe('Dynamic Connectors', () => {
       },
     ]);
     expect(logger.info).not.toHaveBeenCalled();
-    expect(logger.warn).not.toHaveBeenCalled();
   });
   it('ignore non-eis & non-chat_completion endpoints', () => {
     const existingConnectors: InMemoryConnector[] = [
@@ -749,6 +781,5 @@ describe('Dynamic Connectors', () => {
       },
     ]);
     expect(logger.info).not.toHaveBeenCalled();
-    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

@@ -14,13 +14,7 @@ export function updateDynamicInMemoryConnectors(
   preconfiguredInferenceEndpoints: InferenceInferenceEndpointInfo[],
   logger: Logger
 ): boolean {
-  let handledChanges = false;
-  if (preconfiguredInferenceEndpoints.length === 0) {
-    // If there are no preconfigured inference endpoints, leave everything as-is
-    // Once connected to EIS there should always be at least one endpoint, so this likely means there was an error fetching endpoints.
-    // In that case we should not remove any existing connectors since they may still be valid.
-    return handledChanges;
-  }
+  let addedConnectors = false;
 
   const inferenceEndpointsWithoutConnectors = preconfiguredInferenceEndpoints.filter((endpoint) => {
     if (endpoint.task_type !== 'chat_completion' || endpoint.service !== 'elastic') {
@@ -62,40 +56,15 @@ export function updateDynamicInMemoryConnectors(
       isDeprecated: false,
     })
   );
-  const connectorsToRemove = inMemoryConnectors.filter((connector) => {
-    if (
-      connector.isDynamic &&
-      connector.actionTypeId === '.inference' &&
-      connector.config?.inferenceId
-    ) {
-      const foundEndpoint = preconfiguredInferenceEndpoints.find(
-        (endpoint) => endpoint.inference_id === connector.config?.inferenceId
-      );
-      return foundEndpoint === undefined;
-    }
-    return false;
-  });
 
   if (newConnectors.length > 0) {
     inMemoryConnectors.push(...newConnectors);
     newConnectors.forEach((connector) => {
       logger.info(`Added dynamic connector for inference endpoint ${connector.config.inferenceId}`);
     });
-    handledChanges = true;
+    addedConnectors = true;
   }
-  if (connectorsToRemove.length > 0) {
-    connectorsToRemove.forEach((connector) => {
-      const index = inMemoryConnectors.findIndex((c) => c.id === connector.id);
-      if (index !== -1) {
-        inMemoryConnectors.splice(index, 1);
-        logger.warn(
-          `Removed dynamic connector "${connector.id}" for inference endpoint "${connector.config.inferenceId}"`
-        );
-      }
-      handledChanges = true;
-    });
-  }
-  return handledChanges;
+  return addedConnectors;
 }
 
 function getConnectorIdFromEndpoint(endpoint: InferenceInferenceEndpointInfo) {
