@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFieldText } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { EuiFieldNumber } from '@elastic/eui';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Formik } from 'formik';
 import React from 'react';
 
 import { createFieldValidator, FormField } from './form_field';
-
-jest.mock('@elastic/eui', () => {
-  const actual = jest.requireActual('@elastic/eui');
-  return {
-    ...actual,
-    EuiFieldText: jest.fn((props: any) => <actual.EuiFieldText {...props} />),
-  };
-});
-
-const MockedEuiFieldText = EuiFieldText as unknown as jest.MockedFunction<typeof EuiFieldText>;
 
 const onSubmit = jest.fn();
 
@@ -45,23 +35,24 @@ describe('FormField', () => {
     expect(screen.getByRole('spinbutton')).toBeInTheDocument();
   });
 
-  it('should render component with correct field props and event handlers', () => {
-    MockedEuiFieldText.mockClear();
+  it('should render component with correct field props and event handlers', async () => {
     render(
       <Formik onSubmit={onSubmit} initialValues={{ email: 'mail@example.com' }}>
         <FormField name="email" />
       </Formik>
     );
 
-    expect(MockedEuiFieldText).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'email',
-        value: 'mail@example.com',
-        onChange: expect.any(Function),
-        onBlur: expect.any(Function),
-      }),
-      expect.anything()
-    );
+    const input = screen.getByRole('textbox');
+    expect(input).toHaveAttribute('name', 'email');
+    expect(input).toHaveValue('mail@example.com');
+
+    fireEvent.change(input, { target: { value: 'new@example.com' } });
+    expect(input).toHaveValue('new@example.com');
+
+    await act(async () => {
+      fireEvent.blur(input);
+    });
+    expect(input).toHaveAttribute('name', 'email');
   });
 
   it('should mark as invalid if field has errors and has been touched', () => {
@@ -71,7 +62,6 @@ describe('FormField', () => {
       { error: undefined, touched: true, isInvalid: false },
     ];
     assertions.forEach(({ error, touched, isInvalid }) => {
-      MockedEuiFieldText.mockClear();
       const { unmount } = render(
         <Formik
           onSubmit={onSubmit}
@@ -82,10 +72,10 @@ describe('FormField', () => {
           <FormField name="email" />
         </Formik>
       );
-      expect(MockedEuiFieldText).toHaveBeenCalledWith(
-        expect.objectContaining({ isInvalid }),
-        expect.anything()
-      );
+      const input = screen.getByRole('textbox');
+      expect(input).toHaveAttribute('name', 'email');
+      expect(input).toHaveValue('');
+      expect(input)[isInvalid ? 'toBeInvalid' : 'toBeValid']();
       unmount();
     });
   });
