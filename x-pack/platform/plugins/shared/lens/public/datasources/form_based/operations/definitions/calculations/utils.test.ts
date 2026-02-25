@@ -15,7 +15,12 @@ import { operationDefinitionMap } from '..';
 import { createMockedFullReference } from '../../mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
+import type {
+  DateHistogramIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  FormBasedLayer,
+  ReferenceBasedIndexPatternColumn,
+} from '@kbn/lens-common';
 import {
   CALCULATIONS_MISSING_COLUMN_REFERENCE,
   CALCULATIONS_WRONG_DIMENSION_CONFIG,
@@ -106,9 +111,10 @@ describe('utils', () => {
     });
 
     it('should return the column label when it is set', () => {
-      const columns = {
+      const columns: Record<string, FieldBasedIndexPatternColumn> = {
         col1: {
           label: 'My custom label',
+          customLabel: true,
           operationType: 'average',
           isBucketed: false,
           dataType: 'number' as const,
@@ -120,7 +126,7 @@ describe('utils', () => {
 
     it('should fall back to getDefaultLabel when the column has no label', () => {
       const indexPattern = createMockedIndexPattern();
-      const columns = {
+      const columns: Record<string, ReferenceBasedIndexPatternColumn> = {
         col1: {
           label: '',
           operationType: 'testReference',
