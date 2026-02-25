@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.amazon_s3.download'
-description: 'Download a file from an Amazon S3 bucket. Actions and inputs: downloadFile'
+description: 'Download a file from an Amazon S3 bucket.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -9,9 +9,11 @@ inputs:
   - name: bucket
     type: string
     required: true
+    description: "The name of the S3 bucket containing the file to download."
   - name: key
     type: string
     required: true
+    description: "The key of the file to download from the S3 bucket."
 steps:
   - name: downloadFile
     type: amazon_s3.downloadFile

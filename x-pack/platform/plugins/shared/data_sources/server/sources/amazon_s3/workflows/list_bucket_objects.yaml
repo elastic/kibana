@@ -9,9 +9,11 @@ inputs:
   - name: bucket
     type: string
     required: true
+    description: "The name of the S3 bucket to list objects from."
   - name: prefix
     type: string
     required: false
+    description: "The optional prefix to filter object names in the S3 bucket."
 steps:
   - name: listBucketObjects
     type: amazon_s3.listBucketObjects
