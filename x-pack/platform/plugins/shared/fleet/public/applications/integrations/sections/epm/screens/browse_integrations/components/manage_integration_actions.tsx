@@ -33,6 +33,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -127,6 +128,8 @@ const DataCollectionMethodsCell: React.FC<{
 export const ManageIntegrationActions: React.FC<{
   integration: CreatedIntegrationRow;
   canReviewApprove: boolean;
+  inlineActionType?: 'reviewApprove' | 'editIntegration';
+  showMenuButton?: boolean;
   onEdit: (integrationId: string) => void;
   onDelete: (integrationId: string) => Promise<void>;
   DataStreamResultsFlyoutComponent?: React.ComponentType<{
@@ -139,12 +142,15 @@ export const ManageIntegrationActions: React.FC<{
 }> = ({
   integration,
   canReviewApprove,
+  inlineActionType,
+  showMenuButton = true,
   onEdit,
   onDelete,
   DataStreamResultsFlyoutComponent,
   onFetchReviewDetails,
   onApproveAndDeploy,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -347,83 +353,112 @@ export const ManageIntegrationActions: React.FC<{
 
   return (
     <>
-      <EuiPopover
-        anchorPosition="downRight"
-        panelPaddingSize="none"
-        button={
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            aria-label={i18n.translate(
-              'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
-              { defaultMessage: 'Open actions menu' }
-            )}
-            onClick={togglePopover}
-            data-test-subj="manageIntegrationActionsBtn"
+      {inlineActionType === 'reviewApprove' && (
+        <EuiButtonEmpty
+          size="xs"
+          iconType="checkInCircleFilled"
+          iconSide="left"
+          onClick={openReviewModal}
+          style={{
+            backgroundColor: euiTheme.colors.backgroundLightPrimary,
+            paddingLeft: euiTheme.size.xs,
+            paddingRight: euiTheme.size.xs,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.actions.reviewApproveInline"
+            defaultMessage="Review and Approve"
           />
-        }
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-      >
-        <EuiContextMenuPanel
-          size="s"
-          items={[
-            <EuiContextMenuItem
-              key="review"
-              icon="checkInCircleFilled"
-              disabled={!canReviewApprove}
-              toolTipContent={
-                canReviewApprove
-                  ? undefined
-                  : i18n.translate(
-                      'xpack.fleet.epmList.manageIntegrations.actions.reviewApproveDisabledHelp',
-                      {
-                        defaultMessage:
-                          'Review & Approve is available only when all data streams are successful.',
-                      }
-                    )
-              }
-              onClick={openReviewModal}
-            >
-              <FormattedMessage
-                id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
-                defaultMessage="Review & Approve"
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem key="download" icon="download" onClick={closePopover}>
-              <FormattedMessage
-                id="xpack.fleet.epmList.manageIntegrations.actions.downloadZip"
-                defaultMessage="Download .zip package"
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              key="edit"
-              icon="pencil"
-              onClick={() => {
-                closePopover();
-                onEdit(integration.integrationId);
-              }}
-            >
-              <FormattedMessage
-                id="xpack.fleet.epmList.manageIntegrations.actions.edit"
-                defaultMessage="Edit"
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              key="delete"
-              icon="trash"
-              color="danger"
-              onClick={openDeleteConfirm}
-            >
-              <EuiTextColor color="danger">
+        </EuiButtonEmpty>
+      )}
+      {inlineActionType === 'editIntegration' && (
+        <EuiButtonEmpty size="s" onClick={() => onEdit(integration.integrationId)}>
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.actions.editInline"
+            defaultMessage="Edit Integration"
+          />
+        </EuiButtonEmpty>
+      )}
+      {showMenuButton && (
+        <EuiPopover
+          anchorPosition="downRight"
+          panelPaddingSize="none"
+          button={
+            <EuiButtonIcon
+              iconType="boxesVertical"
+              aria-label={i18n.translate(
+                'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
+                { defaultMessage: 'Open actions menu' }
+              )}
+              onClick={togglePopover}
+              data-test-subj="manageIntegrationActionsBtn"
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+        >
+          <EuiContextMenuPanel
+            size="s"
+            items={[
+              <EuiContextMenuItem
+                key="review"
+                icon="grid"
+                disabled={!canReviewApprove}
+                toolTipContent={
+                  canReviewApprove
+                    ? undefined
+                    : i18n.translate(
+                        'xpack.fleet.epmList.manageIntegrations.actions.reviewApproveDisabledHelp',
+                        {
+                          defaultMessage:
+                            'Review & Approve is available only when all data streams are successful.',
+                        }
+                      )
+                }
+                onClick={openReviewModal}
+              >
                 <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.actions.delete"
-                  defaultMessage="Delete"
+                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
+                  defaultMessage="Review & Approve"
                 />
-              </EuiTextColor>
-            </EuiContextMenuItem>,
-          ]}
-        />
-      </EuiPopover>
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem key="download" icon="download" onClick={closePopover}>
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.downloadZip"
+                  defaultMessage="Download .zip package"
+                />
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="edit"
+                icon="pencil"
+                onClick={() => {
+                  closePopover();
+                  onEdit(integration.integrationId);
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.edit"
+                  defaultMessage="Edit"
+                />
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="delete"
+                icon="trash"
+                color="danger"
+                onClick={openDeleteConfirm}
+              >
+                <EuiTextColor color="danger">
+                  <FormattedMessage
+                    id="xpack.fleet.epmList.manageIntegrations.actions.delete"
+                    defaultMessage="Delete"
+                  />
+                </EuiTextColor>
+              </EuiContextMenuItem>,
+            ]}
+          />
+        </EuiPopover>
+      )}
       {showDeleteConfirm && (
         <EuiConfirmModal
           aria-label={i18n.translate(

@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
-import type { DataStreamResponse } from '@kbn/automatic-import-v2-plugin/common';
+import type { DataStreamResponse, TaskStatus } from '@kbn/automatic-import-v2-plugin/common';
 
 import { PackageIcon } from '../../../../../../../components/package_icon';
 
@@ -43,10 +43,15 @@ export interface CreatedIntegrationRow {
   version?: string;
   createdBy: string;
   createdByProfileUid?: string;
-  status: string;
+  status: TaskStatus;
 }
 
-function getStatusDisplay(status: string): {
+const canReviewApproveIntegration = (item: CreatedIntegrationRow): boolean =>
+  item.totalDataStreamCount > 0 &&
+  item.successfulDataStreamCount === item.totalDataStreamCount &&
+  (item.status === 'completed' || item.status === 'approved');
+
+function getStatusDisplay(status: TaskStatus): {
   color: 'success' | 'danger' | 'default' | 'hollow';
   iconType?: string;
   label: string;
@@ -294,7 +299,7 @@ export const ManageIntegrationsTable: React.FC<{
             defaultMessage="Status"
           />
         ),
-        render: (status: string) => {
+        render: (status: TaskStatus) => {
           const { color, iconType, label, isInProgress } = getStatusDisplay(status);
           if (isInProgress) {
             return (
@@ -319,6 +324,48 @@ export const ManageIntegrationsTable: React.FC<{
         },
       },
       {
+        name: '',
+        render: (item: CreatedIntegrationRow) => {
+          if (canReviewApproveIntegration(item)) {
+            return (
+              <ManageIntegrationActions
+                integration={item}
+                canReviewApprove={true}
+                inlineActionType="reviewApprove"
+                showMenuButton={false}
+                onEdit={goToEditIntegration}
+                onDelete={deleteIntegration}
+                DataStreamResultsFlyoutComponent={
+                  automaticImportVTwo?.components.DataStreamResultsFlyout
+                }
+                onFetchReviewDetails={fetchIntegrationReviewDetails}
+                onApproveAndDeploy={approveAndDeployIntegration}
+              />
+            );
+          }
+
+          if (item.status === 'failed' || item.status === 'cancelled') {
+            return (
+              <ManageIntegrationActions
+                integration={item}
+                canReviewApprove={false}
+                inlineActionType="editIntegration"
+                showMenuButton={false}
+                onEdit={goToEditIntegration}
+                onDelete={deleteIntegration}
+                DataStreamResultsFlyoutComponent={
+                  automaticImportVTwo?.components.DataStreamResultsFlyout
+                }
+                onFetchReviewDetails={fetchIntegrationReviewDetails}
+                onApproveAndDeploy={approveAndDeployIntegration}
+              />
+            );
+          }
+
+          return null;
+        },
+      },
+      {
         name: (
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.table.actions"
@@ -329,11 +376,7 @@ export const ManageIntegrationsTable: React.FC<{
         render: (item: CreatedIntegrationRow) => (
           <ManageIntegrationActions
             integration={item}
-            canReviewApprove={
-              item.totalDataStreamCount > 0 &&
-              item.successfulDataStreamCount === item.totalDataStreamCount &&
-              (item.status === 'completed' || item.status === 'approved')
-            }
+            canReviewApprove={canReviewApproveIntegration(item)}
             onEdit={goToEditIntegration}
             onDelete={deleteIntegration}
             DataStreamResultsFlyoutComponent={
