@@ -633,7 +633,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
         evaluate(
           `${idx + 1}. ${example.input.system}`,
           async ({
-            phoenixClient,
+            executorClient,
             kbnClient,
             esClient,
             connector,
@@ -667,7 +667,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
             }
             // Both modes: stream now exists, documents ready (inline in example, indexed for system)
 
-            await phoenixClient.runExperiment(
+            await executorClient.runExperiment(
               {
                 dataset: {
                   name: `Pipeline Suggestion - ${example.input.system}`,
