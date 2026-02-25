@@ -203,9 +203,7 @@ describe('EditPipelineFlyout', () => {
       render(<EditPipelineFlyout {...defaultProps} />);
 
       expect(screen.getByText('Error loading data')).toBeInTheDocument();
-      expect(
-        screen.getByText('Failed to load pipeline results. Please try again.')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Test error')).toBeInTheDocument();
     });
   });
 
