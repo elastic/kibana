@@ -69,11 +69,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'date' },
     }),
     newestValue({
-      source: `${prefix}.lifecycle.last_seen`,
-      destination: 'entity.lifecycle.last_seen',
-      mapping: { type: 'date' },
-    }),
-    newestValue({
       source: `${prefix}.lifecycle.last_activity`,
       destination: 'entity.lifecycle.last_activity',
       mapping: { type: 'date' },
