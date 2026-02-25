@@ -16,6 +16,8 @@ import type { ScoutServerConfig } from '../../../../../types';
 
 // Indicates whether the config is used on CI or locally.
 const isRunOnCI = process.env.CI;
+const elasticsearchServer = defaultConfig.servers.elasticsearch;
+const esPublicBaseUrl = `${elasticsearchServer.protocol}://${elasticsearchServer.hostname}:${elasticsearchServer.port}`;
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -38,9 +40,7 @@ export const servers: ScoutServerConfig = {
       `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
       `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
       '--xpack.security.uiam.ssl.verificationMode=none',
-      `--elasticsearch.publicBaseUrl=${
-        isRunOnCI ? 'https://localhost:9220' : 'https://host.docker.internal:9220'
-      }`,
+      ...(isRunOnCI ? [] : ['--elasticsearch.publicBaseUrl=https://host.docker.internal:9220']),
     ],
   },
 };
