@@ -16,3 +16,4 @@ export { OBSERVABILITY_GET_TRACES_TOOL_ID } from './get_traces/tool';
 export { OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID } from './get_runtime_metrics/tool';
 export { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from './get_index_info';
 export { OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID } from './get_service_topology/tool';
+export { OBSERVABILITY_LOGS_SEARCH_TOOL_ID } from './logs_search/tool';
