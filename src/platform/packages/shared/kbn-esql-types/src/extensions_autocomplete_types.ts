@@ -16,7 +16,7 @@ export interface RecommendedQuery {
   description?: string;
   // When true, the query is shown in the recommended queries menu regardless of the active editor query.
   // The query string is treated as a complete query (not prepended with the current dataview).
-  isStatic?: boolean;
+  isStandalone?: boolean;
 }
 
 export interface RecommendedField {

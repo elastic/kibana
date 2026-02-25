@@ -561,8 +561,8 @@ describe('ESQLExtensionsRegistry', () => {
     });
   });
 
-  describe('isStatic flag', () => {
-    it('should return static queries regardless of the current query index pattern', () => {
+  describe('isStandalone flag', () => {
+    it('should return standalone queries regardless of the current query index pattern', () => {
       availableDatasources = {
         indices: [{ name: 'logs-2023' }, { name: 'metrics-*' }],
         data_streams: [],
@@ -572,7 +572,7 @@ describe('ESQLExtensionsRegistry', () => {
       const staticQuery: RecommendedQuery = {
         name: 'Search all metrics',
         query: 'TS metrics-*',
-        isStatic: true,
+        isStandalone: true,
       };
       const dynamicQuery: RecommendedQuery = {
         name: 'Logs Query',
@@ -589,7 +589,7 @@ describe('ESQLExtensionsRegistry', () => {
       expect(logsResult).toEqual([dynamicQuery, staticQuery]);
     });
 
-    it('should not return static queries for a different solution ID', () => {
+    it('should not return standalone queries for a different solution ID', () => {
       availableDatasources = {
         indices: [{ name: 'logs-2023' }],
         data_streams: [],
@@ -599,7 +599,7 @@ describe('ESQLExtensionsRegistry', () => {
       const staticQuery: RecommendedQuery = {
         name: 'Search all metrics',
         query: 'TS metrics-*',
-        isStatic: true,
+        isStandalone: true,
       };
 
       registry.setRecommendedQueries([staticQuery], 'oblt');

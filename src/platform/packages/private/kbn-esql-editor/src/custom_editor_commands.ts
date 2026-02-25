@@ -167,7 +167,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
         const model = editor?.getModel();
         if (editor && model) {
           const fullRange = model.getFullModelRange();
-          editor.executeEdits('staticQuery', [{ range: fullRange, text: queryText }]);
+          editor.executeEdits('standaloneQuery', [{ range: fullRange, text: queryText }]);
           const lastLine = model.getLineCount();
           const lastColumn = model.getLineMaxColumn(lastLine);
           editor.setPosition({ lineNumber: lastLine, column: lastColumn });

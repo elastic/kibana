@@ -142,7 +142,7 @@ export class ESQLExtensionsRegistry {
     for (const [key, queries] of this.recommendedQueries) {
       if (key.startsWith(solutionPrefix)) {
         for (const q of queries) {
-          if (q.isStatic) {
+          if (q.isStandalone) {
             matchedQueries.push(q);
           }
         }

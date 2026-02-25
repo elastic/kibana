@@ -258,7 +258,7 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
   // the templates are the recommended queries without the source command (FROM)
   const recommendedQueriesTemplates: ISuggestionItem[] = recommendedQueriesExtensions.map(
     (recommendedQuery) => {
-      if (recommendedQuery.isStatic) {
+      if (recommendedQuery.isStandalone) {
         const queryText = prettifyQuery(recommendedQuery.query);
         return {
           label: recommendedQuery.name,
