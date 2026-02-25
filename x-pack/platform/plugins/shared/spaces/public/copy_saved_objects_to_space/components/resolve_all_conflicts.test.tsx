@@ -16,8 +16,7 @@ import { ResolveAllConflicts } from './resolve_all_conflicts';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
 
-const renderWithIntl = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('ResolveAllConflicts', () => {
   const summarizedCopyResult = {
@@ -77,8 +76,21 @@ describe('ResolveAllConflicts', () => {
   };
 
   it('should render as expected', async () => {
-    renderWithIntl(<ResolveAllConflicts {...props} />);
+    const { container } = renderWithIntl(<ResolveAllConflicts {...props} />);
     expect(screen.getByText('(resolve all)')).toBeInTheDocument();
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="resolveAllConflictsVisibilityPopover"
+      >
+        <button
+          class="euiLink emotion-euiLink-primary-ResolveAllButton"
+          type="button"
+        >
+          (resolve all)
+        </button>
+      </div>
+    `);
   });
 
   it('should add overwrite retries when "Overwrite all" is selected', async () => {
