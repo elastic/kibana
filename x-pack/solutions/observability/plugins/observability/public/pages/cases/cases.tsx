@@ -12,6 +12,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { Cases } from './components/cases';
 import { CaseFeatureNoPermissions } from './components/feature_no_permissions';
 import { useKibana } from '../../utils/kibana_react';
+import { getObservabilityCasesHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 
 /** Clear the App Menu (optional) slot for Cases so it does not show "Add data" as the only item. */
 function useClearAppMenu() {
@@ -25,8 +26,20 @@ function useClearAppMenu() {
   }, [appMountParameters?.setHeaderActionMenu]);
 }
 
+/** Set global header app actions (e.g. New) when Cases page is active. */
+function useHeaderAppActions() {
+  const { chrome } = useKibana().services;
+  useEffect(() => {
+    if (chrome?.setHeaderAppActionsConfig) {
+      chrome.setHeaderAppActionsConfig(getObservabilityCasesHeaderAppActionsConfig());
+      return () => chrome.setHeaderAppActionsConfig(undefined);
+    }
+  }, [chrome]);
+}
+
 export function CasesPage() {
   useClearAppMenu();
+  useHeaderAppActions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const canUseCases = useKibana().services.cases?.helpers.canUseCases;
   const userCasesPermissions = canUseCases?.([observabilityFeatureId]);

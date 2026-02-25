@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
+
+const noop = () => {};
 
 const primaryActionButtonCss = css`
   background-color: transparent !important;
@@ -53,3 +55,25 @@ export const getObservabilityAlertsHeaderAppActionsConfig = (
     />,
   ],
 });
+
+/**
+ * Header app actions config for Observability > Cases.
+ * Single icon-only "New" (plusInCircle) secondary action (dumb button, no-op).
+ * Set when the Cases page is active; cleared when navigating away (handled by platform on app change).
+ */
+export const getObservabilityCasesHeaderAppActionsConfig =
+  (): ChromeHeaderAppActionsConfig => ({
+    secondaryActions: [
+      <EuiButtonIcon
+        key="observability-cases-new"
+        size="xs"
+        color="text"
+        iconType="plusInCircle"
+        onClick={noop}
+        data-test-subj="headerGlobalNav-appActionsNewButton"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
+          defaultMessage: 'New',
+        })}
+      />,
+    ],
+  });
