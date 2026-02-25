@@ -399,7 +399,54 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "esql",
+        "id": "def-server.buildServerESQLCallbacks",
+        "type": "Function",
+        "tags": [],
+        "label": "buildServerESQLCallbacks",
+        "description": [
+          "\nBuilds the ESQLCallbacks required by the ES|QL validation API\n({@link validateQuery} from @kbn/esql-language) for server-side usage.\n\nUses the Elasticsearch client directly instead of going through\nKibana HTTP routes, unlike the client-side callbacks in @kbn/esql-utils."
+        ],
+        "signature": [
+          "({ client, }: BuildServerESQLCallbacksOptions) => ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLCallbacks",
+            "text": "ESQLCallbacks"
+          }
+        ],
+        "path": "src/platform/plugins/shared/esql/server/services/build_server_esql_callbacks.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "esql",
+            "id": "def-server.buildServerESQLCallbacks.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  client,\n}",
+            "description": [],
+            "signature": [
+              "BuildServerESQLCallbacksOptions"
+            ],
+            "path": "src/platform/plugins/shared/esql/server/services/build_server_esql_callbacks.ts",
+            "lineNumber": 25,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],

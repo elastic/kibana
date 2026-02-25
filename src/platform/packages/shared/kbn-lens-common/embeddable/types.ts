@@ -432,6 +432,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  paddingTop?: boolean;
   abortController?: AbortController;
 }
 

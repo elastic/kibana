@@ -6,7 +6,7 @@
  */
 
 import type { EntityType, EntityField } from './entity_schema';
-import { oldestValue, newestValue } from './field_retention_operations';
+import { collectValues, newestValue } from './field_retention_operations';
 
 export const ENTITY_ID_FIELD = 'entity.id';
 
@@ -15,7 +15,7 @@ export const ENTITY_ID_FIELD = 'entity.id';
 export const getCommonFieldDescriptions = (
   ecsField: Omit<EntityType, 'generic'> | 'entity'
 ): EntityField[] => [
-  oldestValue({
+  newestValue({
     source: '_index',
     destination: 'entity.source',
   }),
@@ -28,21 +28,6 @@ export const getCommonFieldDescriptions = (
   newestValue({ source: 'asset.environment' }),
   newestValue({ source: 'asset.criticality' }),
   newestValue({ source: 'asset.business_unit' }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_level`,
-  }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_score`,
-    mapping: {
-      type: 'float',
-    },
-  }),
-  newestValue({
-    source: `${ecsField}.risk.calculated_score_norm`,
-    mapping: {
-      type: 'float',
-    },
-  }),
 ];
 
 export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
@@ -54,10 +39,10 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
 
-    newestValue({
-      source: `${prefix}.attributes.privileged`,
-      destination: 'entity.attributes.privileged',
-      mapping: { type: 'boolean' },
+    collectValues({
+      source: `${prefix}.attributes.watchlists`,
+      destination: 'entity.attributes.watchlists',
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     newestValue({
@@ -78,8 +63,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'boolean' },
       allowAPIUpdate: true,
     }),
-
-    /* Lifecycle fields should not allow update via the API */
     newestValue({
       source: `${prefix}.lifecycle.first_seen`,
       destination: 'entity.lifecycle.first_seen',
@@ -90,43 +73,84 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       destination: 'entity.lifecycle.last_activity',
       mapping: { type: 'date' },
     }),
-
-    newestValue({
-      source: `${prefix}.behaviors.brute_force_victim`,
-      destination: 'entity.behaviors.brute_force_victim',
-      mapping: { type: 'boolean' },
+    collectValues({
+      source: `${prefix}.behaviors.rule_names`,
+      destination: 'entity.behaviors.rule_names',
+      mapping: { type: 'keyword' },
+      fieldHistoryLength: 100,
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.behaviors.anomaly_job_ids`,
+      destination: 'entity.behaviors.anomaly_job_ids',
+      mapping: { type: 'keyword' },
+      fieldHistoryLength: 100,
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.communicates_with`,
+      destination: 'entity.relationships.communicates_with',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.depends_on`,
+      destination: 'entity.relationships.depends_on',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.owns_inferred`,
+      destination: 'entity.relationships.owns_inferred',
+      mapping: { type: 'keyword' },
+    }),
+    collectValues({
+      source: `${prefix}.relationships.accesses_infrequently`,
+      destination: 'entity.relationships.accesses_infrequently',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.accesses_frequently`,
+      destination: 'entity.relationships.accesses_frequently',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.owns`,
+      destination: 'entity.relationships.owns',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    collectValues({
+      source: `${prefix}.relationships.supervises`,
+      destination: 'entity.relationships.supervises',
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.behaviors.new_country_login`,
-      destination: 'entity.behaviors.new_country_login',
-      mapping: { type: 'boolean' },
+      source: `${prefix}.relationships.resolution.resolved_to`,
+      destination: 'entity.relationships.resolution.resolved_to',
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.behaviors.used_usb_device`,
-      destination: 'entity.behaviors.used_usb_device',
-      mapping: { type: 'boolean' },
+      source: `${prefix}.relationships.resolution.risk.calculated_level`,
+      destination: 'entity.relationships.resolution.risk.calculated_level',
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
-
     newestValue({
-      source: `${prefix}.risk.calculated_level`,
-      destination: 'entity.risk.calculated_level',
+      source: `${prefix}.relationships.resolution.risk.calculated_score`,
+      destination: 'entity.relationships.resolution.risk.calculated_score',
+      mapping: { type: 'float' },
+      allowAPIUpdate: true,
     }),
     newestValue({
-      source: `${prefix}.risk.calculated_score`,
-      destination: 'entity.risk.calculated_score',
-      mapping: {
-        type: 'float',
-      },
-    }),
-    newestValue({
-      source: `${prefix}.risk.calculated_score_norm`,
-      destination: 'entity.risk.calculated_score_norm',
-      mapping: {
-        type: 'float',
-      },
+      source: `${prefix}.relationships.resolution.risk.calculated_score_norm`,
+      destination: 'entity.relationships.resolution.risk.calculated_score_norm',
+      mapping: { type: 'float' },
+      allowAPIUpdate: true,
     }),
   ];
 };
