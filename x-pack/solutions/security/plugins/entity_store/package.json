@@ -1,0 +1,12 @@
+{
+  "name": "@kbn/entity-store",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "main": "common/index.ts",
+  "types": "common/index.ts",
+  "exports": {
+    ".": "./common/index.ts",
+    "./public": "./public/index.ts"
+  }
+}

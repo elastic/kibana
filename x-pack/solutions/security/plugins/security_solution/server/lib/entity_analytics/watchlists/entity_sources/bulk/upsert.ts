@@ -7,18 +7,9 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
-import type { WatchlistBulkUser } from '../types';
+import type { WatchlistBulkEntity } from '../types';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
 
-/**
- * Upserts a user into the watchlist entity index.
- *
- * - Adds the source to the `labels.sources` and `labels.source_ids` arrays if not already present
- * - Updates `@timestamp` and `event.ingested` when the document is modified
- *
- * This allows multiple sources to independently contribute users,
- * with each source tracked via the labels arrays.
- */
 export const UPDATE_SCRIPT_SOURCE = `
 def src = ctx._source;
 boolean modified = false;
@@ -37,46 +28,58 @@ if (!src.labels.sources.contains(params.source_type)) {
 
 if (modified) {
   src['@timestamp'] = params.now;
+  if (src.event == null) { src.event = new HashMap(); }
   src.event.ingested = params.now;
 }
 `;
 
-const buildCreateDoc = (user: WatchlistBulkUser, sourceLabel: string) => ({
-  '@timestamp': new Date().toISOString(),
-  user: { name: user.username },
-  labels: { sources: [sourceLabel], source_ids: [user.sourceId] },
-});
+const buildCreateDoc = (entity: WatchlistBulkEntity, sourceLabel: string) => {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    event: { ingested: now },
+    entity: {
+      id: entity.euid,
+      name: entity.name,
+      type: entity.type,
+    },
+    labels: { sources: [sourceLabel], source_ids: [entity.sourceId] },
+  };
+};
 
 export const bulkUpsertOperationsFactory =
   (logger: Logger) =>
-  <T extends WatchlistBulkUser>({
-    users,
+  ({
+    entities,
     sourceLabel,
     targetIndex,
   }: {
-    users: T[];
+    entities: WatchlistBulkEntity[];
     sourceLabel: string;
     targetIndex: string;
   }): object[] => {
     const ops: object[] = [];
-    logger.debug(`[WatchlistSync] Building bulk operations for ${users.length} users`);
-    for (const user of users) {
-      if (user.existingUserId) {
+    logger.debug(`[WatchlistSync] Building bulk operations for ${entities.length} entities`);
+    for (const entity of entities) {
+      if (entity.existingEntityId) {
         ops.push(
-          { update: { _index: targetIndex, _id: user.existingUserId } },
+          { update: { _index: targetIndex, _id: entity.existingEntityId } },
           {
             script: {
               source: UPDATE_SCRIPT_SOURCE,
               params: {
                 now: new Date().toISOString(),
-                source_id: user.sourceId,
+                source_id: entity.sourceId,
                 source_type: 'index',
               },
             },
           }
         );
       } else {
-        ops.push({ index: { _index: targetIndex } }, buildCreateDoc(user, sourceLabel));
+        ops.push(
+          { index: { _index: targetIndex, _id: entity.euid } },
+          buildCreateDoc(entity, sourceLabel)
+        );
       }
     }
     return ops;
@@ -85,27 +88,27 @@ export const bulkUpsertOperationsFactory =
 export const applyBulkUpsert = async ({
   esClient,
   logger,
-  users,
+  entities,
   source,
   targetIndex,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  users: WatchlistBulkUser[];
+  entities: WatchlistBulkEntity[];
   source: MonitoringEntitySource;
   targetIndex: string;
 }) => {
-  if (users.length === 0) {
+  if (entities.length === 0) {
     return;
   }
 
   const chunkSize = 500;
   const buildOps = bulkUpsertOperationsFactory(logger);
 
-  for (let start = 0; start < users.length; start += chunkSize) {
-    const chunk = users.slice(start, start + chunkSize);
+  for (let start = 0; start < entities.length; start += chunkSize) {
+    const chunk = entities.slice(start, start + chunkSize);
     const operations = buildOps({
-      users: chunk,
+      entities: chunk,
       sourceLabel: source.type ?? 'index',
       targetIndex,
     });

@@ -6,10 +6,9 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-// TODO: Replace MonitoredUserDoc with a watchlist-specific entity doc type
-import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import { getIndexForWatchlist } from './utils';
+import type { WatchlistEntityDoc } from './types';
 
 export type WatchlistEntitiesService = ReturnType<typeof createWatchlistEntitiesService>;
 
@@ -25,19 +24,22 @@ export const createWatchlistEntitiesService = ({
   const list = async (
     watchlist: WatchlistObject,
     _rangeClauseKQL?: string
-  ): Promise<MonitoredUserDoc[]> => {
+  ): Promise<WatchlistEntityDoc[]> => {
     const index = getIndexForWatchlist(watchlist.name, namespace);
 
-    const response = await esClient.search<MonitoredUserDoc>({
+    const response = await esClient.search<WatchlistEntityDoc>({
       index,
       size: 10_000,
       query: { match_all: {} },
-      _source: true,
+      // _source: ['@timestamp', 'entity', 'labels'],
     });
 
     return response.hits.hits
       .map((hit) => hit._source)
-      .filter((source): source is MonitoredUserDoc => source !== undefined);
+      .filter(
+        (source): source is WatchlistEntityDoc =>
+          source != null && source.entity != null && typeof source.entity.id === 'string'
+      );
   };
 
   return { list };

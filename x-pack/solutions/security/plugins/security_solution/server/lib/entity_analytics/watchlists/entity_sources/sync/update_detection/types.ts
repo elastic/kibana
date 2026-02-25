@@ -7,14 +7,14 @@
 
 export type AfterKey = Record<string, string> | undefined;
 
-export interface UserBucket {
-  key: { username: string };
+export interface EntityBucket {
+  key: { euid: string };
   doc_count: number;
 }
 
-export interface UsersAggregation {
-  users?: {
+export interface EntitiesAggregation {
+  entities?: {
     after_key?: AfterKey;
-    buckets: UserBucket[];
+    buckets: EntityBucket[];
   };
 }

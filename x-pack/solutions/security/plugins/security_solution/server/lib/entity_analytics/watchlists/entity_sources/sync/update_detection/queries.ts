@@ -6,28 +6,31 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { euid } from '@kbn/entity-store';
+import type { EntityType } from '@kbn/entity-store';
 import type { AfterKey } from './types';
 
-/**
- * Builds an ES search body that uses a composite aggregation to enumerate
- * all unique `user.name` values from a source index.
- *
- * No matchers or privileged-status scripts — watchlists simply discover
- * every user present in the source.
- *
- * TODO: Add back matchers
- */
-export const buildUsersSearchBody = (
+const EUID_RUNTIME_FIELD = 'euid';
+
+export const buildEntitiesSearchBody = (
+  entityType: EntityType,
   afterKey?: AfterKey,
   pageSize: number = 100
 ): Omit<estypes.SearchRequest, 'index'> => ({
   size: 0,
-  query: { match_all: {} },
+  query: {
+    bool: {
+      must: [euid.getEuidDslDocumentsContainsIdFilter(entityType)],
+    },
+  },
+  runtime_mappings: {
+    [EUID_RUNTIME_FIELD]: euid.getEuidPainlessRuntimeMapping(entityType),
+  },
   aggs: {
-    users: {
+    entities: {
       composite: {
         size: pageSize,
-        sources: [{ username: { terms: { field: 'user.name' } } }],
+        sources: [{ euid: { terms: { field: EUID_RUNTIME_FIELD } } }],
         ...(afterKey ? { after: afterKey } : {}),
       },
     },

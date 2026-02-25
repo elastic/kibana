@@ -7,10 +7,15 @@
 
 import type { EntityType } from '@kbn/entity-store';
 
-export interface WatchlistBulkEntity {
-  euid: string;
-  type: EntityType;
-  name?: string;
-  sourceId: string;
-  existingEntityId?: string;
+export interface WatchlistEntityDoc {
+  '@timestamp'?: string;
+  entity: {
+    id: string;
+    name?: string;
+    type: EntityType;
+  };
+  labels?: {
+    sources?: string[];
+    source_ids?: string[];
+  };
 }
