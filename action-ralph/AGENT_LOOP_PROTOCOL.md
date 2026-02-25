@@ -56,9 +56,11 @@ yarn test:type_check --project <touched-tsconfig-path>
 - Some bootstrap/type-check flows create untracked `*.d.ts` artifacts — don't include them in your changes.
 - If a scoped type-check may run for a long time, do not skip it. Use the timeout-safe pattern from `action-ralph/test_execution.md` (start once, poll in separate short commands). Example:
 ```bash
-LOG_FILE="/tmp/ralph-typecheck.log"
-PID_FILE="/tmp/ralph-typecheck.pid"
-STATUS_FILE="/tmp/ralph-typecheck.exit"
+RUN_DIR=".action-ralph-runtime/session"
+mkdir -p "$RUN_DIR"
+LOG_FILE="$RUN_DIR/ralph-typecheck.log"
+PID_FILE="$RUN_DIR/ralph-typecheck.pid"
+STATUS_FILE="$RUN_DIR/ralph-typecheck.exit"
 rm -f "$PID_FILE" "$STATUS_FILE"
 
 ( yarn test:type_check --project <touched-tsconfig-path> > "$LOG_FILE" 2>&1; echo $? > "$STATUS_FILE" ) &
@@ -74,6 +76,7 @@ echo "[type-check completed] $TYPECHECK_PID"
 tail -n 80 "$LOG_FILE" || true
 cat "$STATUS_FILE"
 ```
+- Use realistic validation time budgets: allow scoped type-check / functional tests to run up to ~15 minutes before timing out, unless logs show a clear fatal failure earlier.
 
 ## Kibana-specific gotchas
 

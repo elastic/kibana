@@ -6,13 +6,16 @@ Use this file when running validations that may take a long time (type-check, Sc
 
 Do not skip long-running checks. Start them once in the background, then poll with short commands.
 Avoid a single long `while` loop command, because command runners often enforce a per-command timeout (~5 minutes).
+Use workspace-local log files (for example `.action-ralph-runtime/session/`) and avoid `/tmp` paths, which may require extra permissions.
 
 ### 1) Start command once
 
 ```bash
-LOG_FILE="/tmp/ralph-check.log"
-PID_FILE="/tmp/ralph-check.pid"
-STATUS_FILE="/tmp/ralph-check.exit"
+RUN_DIR=".action-ralph-runtime/session"
+mkdir -p "$RUN_DIR"
+LOG_FILE="$RUN_DIR/ralph-check.log"
+PID_FILE="$RUN_DIR/ralph-check.pid"
+STATUS_FILE="$RUN_DIR/ralph-check.exit"
 rm -f "$PID_FILE" "$STATUS_FILE"
 
 ( <your-command> > "$LOG_FILE" 2>&1; echo $? > "$STATUS_FILE" ) &
@@ -22,9 +25,10 @@ echo $! > "$PID_FILE"
 ### 2) Poll command (run repeatedly in separate calls)
 
 ```bash
-LOG_FILE="/tmp/ralph-check.log"
-PID_FILE="/tmp/ralph-check.pid"
-STATUS_FILE="/tmp/ralph-check.exit"
+RUN_DIR=".action-ralph-runtime/session"
+LOG_FILE="$RUN_DIR/ralph-check.log"
+PID_FILE="$RUN_DIR/ralph-check.pid"
+STATUS_FILE="$RUN_DIR/ralph-check.exit"
 CHECK_PID="$(cat "$PID_FILE")"
 
 if kill -0 "$CHECK_PID" 2>/dev/null; then
@@ -39,6 +43,7 @@ test -f "$STATUS_FILE" && cat "$STATUS_FILE"
 ```
 
 Repeat the poll command until it reports completion. Treat `exit 10` as "still running" (not a failure).
+For scoped type-check and functional tests in Kibana, allow up to ~15 minutes before treating as timeout unless logs show a hard failure.
 
 ## Scoped commands to prefer
 

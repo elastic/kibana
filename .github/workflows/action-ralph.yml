@@ -124,7 +124,7 @@ jobs:
     name: "Phase B: Agent Loop"
     needs: prepare
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
-    timeout-minutes: 45
+    timeout-minutes: 120
     permissions: {}
 
     steps:

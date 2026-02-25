@@ -47,9 +47,11 @@ node scripts/i18n_check.js --fix
 Example:
 
 ```bash
-LOG_FILE="/tmp/ralph-typecheck.log"
-PID_FILE="/tmp/ralph-typecheck.pid"
-STATUS_FILE="/tmp/ralph-typecheck.exit"
+RUN_DIR=".action-ralph-runtime/session"
+mkdir -p "$RUN_DIR"
+LOG_FILE="$RUN_DIR/ralph-typecheck.log"
+PID_FILE="$RUN_DIR/ralph-typecheck.pid"
+STATUS_FILE="$RUN_DIR/ralph-typecheck.exit"
 rm -f "$PID_FILE" "$STATUS_FILE"
 
 ( yarn test:type_check --project <touched-tsconfig-path> > "$LOG_FILE" 2>&1; echo $? > "$STATUS_FILE" ) &
