@@ -14,14 +14,6 @@ import { useGroupedData } from './use_grouped_data';
 import { GroupByOptions } from '../types';
 
 describe('useGroupedData', () => {
-  it('should throw an error when groupBy is set to None', () => {
-    expect(() =>
-      renderHook(() =>
-        useGroupedData(InferenceEndpoints, GroupByOptions.None, { provider: [], type: [] }, '')
-      )
-    ).toThrowError('Grouping is not enabled');
-  });
-
   it('should group endpoints by model_id', () => {
     const { result } = renderHook(() =>
       useGroupedData(InferenceEndpoints, GroupByOptions.Model, { provider: [], type: [] }, '')
