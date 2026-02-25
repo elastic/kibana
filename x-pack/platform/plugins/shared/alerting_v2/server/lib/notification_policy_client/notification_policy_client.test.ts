@@ -17,16 +17,8 @@ import { createNotificationPolicySavedObjectService } from '../services/notifica
 import type { UserService } from '../services/user_service/user_service';
 import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
+import { createMockApiKeyService } from '../services/api_key_service/api_key_service.mock';
 import { NotificationPolicyClient } from './notification_policy_client';
-
-const createMockApiKeyService = (): jest.Mocked<ApiKeyServiceContract> => ({
-  create: jest.fn().mockResolvedValue({
-    apiKey: 'encoded-es-api-key',
-    uiamApiKey: null,
-    apiKeyOwner: 'test-user',
-    apiKeyCreatedByUser: false,
-  }),
-});
 
 describe('NotificationPolicyClient', () => {
   let client: NotificationPolicyClient;
