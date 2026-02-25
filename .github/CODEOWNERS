@@ -1901,6 +1901,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /src/platform/test/functional/page_objects/dashboard_page* @elastic/kibana-presentation
 /src/platform/test/functional/firefox/dashboard.config.ts @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
 /src/platform/test/functional/fixtures/es_archiver/dashboard @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
+/src/platform/test/functional/fixtures/es_archiver/dashboard_elements @elastic/kibana-presentation
 /src/platform/test/accessibility/apps/dashboard.ts @elastic/kibana-presentation
 /src/platform/test/accessibility/apps/filter_panel.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/dashboard @elastic/kibana-presentation
@@ -2343,6 +2344,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
 /.github/instructions/security.instructions.md @elastic/kibana-security
 /.github/instructions/codeql.instructions.md @elastic/kibana-security
+/.github/instructions/encrypted-saved-objects.instructions.md @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
