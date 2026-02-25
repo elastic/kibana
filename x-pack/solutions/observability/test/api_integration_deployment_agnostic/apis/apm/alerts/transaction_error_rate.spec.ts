@@ -8,7 +8,7 @@
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionErrorRateActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '../../../services';
