@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +72,7 @@ export const ManageIntegrationsTable: React.FC<{
   isError: boolean;
   onRefetch: () => void;
 }> = ({ integrations, isLoading, isError, onRefetch }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     application,
     automaticImportVTwo,
@@ -238,7 +240,7 @@ export const ManageIntegrationsTable: React.FC<{
         name: (
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.table.dataStreams"
-            defaultMessage="Data streams"
+            defaultMessage="Data Streams"
           />
         ),
         render: (item: CreatedIntegrationRow) => (
@@ -296,7 +298,10 @@ export const ManageIntegrationsTable: React.FC<{
           const { color, iconType, label, isInProgress } = getStatusDisplay(status);
           if (isInProgress) {
             return (
-              <EuiBadge color={color}>
+              <EuiBadge
+                color={color}
+                style={{ backgroundColor: euiTheme.colors.backgroundLightText }}
+              >
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiLoadingSpinner size="s" />
@@ -347,6 +352,7 @@ export const ManageIntegrationsTable: React.FC<{
       fetchIntegrationReviewDetails,
       approveAndDeployIntegration,
       automaticImportVTwo?.components.DataStreamResultsFlyout,
+      euiTheme.colors.backgroundLightText,
       userProfiles,
     ]
   );
