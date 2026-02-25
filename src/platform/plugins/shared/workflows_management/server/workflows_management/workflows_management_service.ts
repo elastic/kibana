@@ -71,11 +71,7 @@ import {
 } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { validateTriggers } from '../../common/lib/validate_triggers';
-import type {
-  ValidateWorkflowResponse,
-  WorkflowDiagnostic,
-  WorkflowDiagnosticSeverity,
-} from '../../common/lib/validate_workflow_yaml';
+import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
@@ -87,8 +83,6 @@ import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 const DEFAULT_PAGE_SIZE = 100;
-
-export type { ValidateWorkflowResponse, WorkflowDiagnostic, WorkflowDiagnosticSeverity };
 
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;

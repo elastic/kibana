@@ -36,16 +36,12 @@ import type {
 import type { z } from '@kbn/zod/v4';
 import type {
   SearchWorkflowExecutionsParams,
-  ValidateWorkflowResponse,
-  WorkflowDiagnostic,
-  WorkflowDiagnosticSeverity,
   WorkflowsService,
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
+import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
-
-export type { ValidateWorkflowResponse, WorkflowDiagnostic, WorkflowDiagnosticSeverity };
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';

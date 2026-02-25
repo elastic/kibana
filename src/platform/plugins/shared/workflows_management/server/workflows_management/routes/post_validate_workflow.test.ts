@@ -16,11 +16,12 @@ import {
   createSpacesMock,
   mockLogger,
 } from './test_utils';
-import type { ValidateWorkflowResponse, WorkflowsManagementApi } from '../workflows_management_api';
+import type { ValidateWorkflowResponse } from '../../../common/lib/validate_workflow_yaml';
+import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 jest.mock('../lib/with_license_check');
 
-describe('POST /api/workflows/_validate', () => {
+describe('POST /internal/workflows/_validate', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -45,15 +46,15 @@ describe('POST /api/workflows/_validate', () => {
         spaces: mockSpaces,
       });
       const postCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/_validate'
+        (call) => call[0].path === '/internal/workflows/_validate'
       );
       routeHandler = postCall?.[1];
     });
 
-    it('should register a POST route at /api/workflows/_validate', () => {
+    it('should register a POST route at /internal/workflows/_validate', () => {
       expect(mockRouter.post).toHaveBeenCalledTimes(1);
       const [config] = (mockRouter.post as jest.Mock).mock.calls[0];
-      expect(config.path).toBe('/api/workflows/_validate');
+      expect(config.path).toBe('/internal/workflows/_validate');
     });
 
     it('should return validation result on success', async () => {
