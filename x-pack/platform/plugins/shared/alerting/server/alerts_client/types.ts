@@ -49,17 +49,7 @@ export interface SnoozedInstanceConfig {
   conditionOperator?: 'any' | 'all';
 }
 
-export interface SnoozedInstanceEntry {
-  instanceId: string;
-  expiresAt?: string;
-  conditions?: Array<{
-    type: string;
-    field: string;
-    value?: string;
-    snapshotValue?: string;
-  }>;
-  conditionOperator?: 'any' | 'all';
-}
+export type SnoozedInstanceEntry = { instanceId: string } & SnoozedInstanceConfig;
 
 export interface AlertRuleData {
   consumer: string;
