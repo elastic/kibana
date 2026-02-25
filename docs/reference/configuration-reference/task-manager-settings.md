@@ -25,7 +25,7 @@ Task Manager runs background tasks by polling for work on an interval. You can c
 `xpack.task_manager.request_capacity`
 : How many requests can Task Manager buffer before it rejects new requests. Defaults to 1000.
 
-`xpack.task_manager.max_workers`
+`xpack.task_manager.max_workers` {applies_to}`stack: deprecated 8.16`
 : :::{admonition} Deprecated in 8.16.0
 This setting was deprecated in 8.16.0.
 :::
