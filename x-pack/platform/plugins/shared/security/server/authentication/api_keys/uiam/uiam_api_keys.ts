@@ -164,7 +164,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     if (!this.elasticsearchUrl) {
-      throw new Error('Cannot convert API keys: cloud.elasticsearchUrl is not configured');
+      throw new Error('Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id');
     }
 
     this.logger.debug(`Trying to convert ${params.keys.length} API key(s)`);

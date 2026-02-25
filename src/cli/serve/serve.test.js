@@ -117,7 +117,6 @@ describe('applyConfigOverrides', () => {
     expect(applyConfigOverrides({}, { dev: true, serverless: true, uiam: true }, {}, {})).toEqual({
       elasticsearch: {
         hosts: ['https://localhost:9200'],
-        publicBaseUrl: 'https://host.docker.internal:9200',
         serviceAccountToken: kibanaDevServiceAccount.token,
         ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
       },
@@ -125,6 +124,7 @@ describe('applyConfigOverrides', () => {
       plugins: { paths: [] },
       xpack: {
         cloud: {
+          id: 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMDAkaG9zdDo5MjAwJGtpYmFuYTo5MjAw',
           organization_id: 'org1234567890',
           projects_url: '',
           serverless: { project_id: 'abcdef12345678901234567890123456' },

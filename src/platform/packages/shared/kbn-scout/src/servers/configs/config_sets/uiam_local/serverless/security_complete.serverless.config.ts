@@ -38,7 +38,11 @@ export const servers: ScoutServerConfig = {
       `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
       `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
       '--xpack.security.uiam.ssl.verificationMode=none',
-      ...(isRunOnCI ? [] : ['--elasticsearch.publicBaseUrl=https://host.docker.internal:9220']),
+      // Decodes to ES URL: https://host.docker.internal:9220
+      // The UIAM container uses this to reach the host-network ES instance.
+      ...(isRunOnCI
+        ? []
+        : ['--xpack.cloud.id=local-dev:ZG9ja2VyLmludGVybmFsOjkyMjAkaG9zdDo5MjIwJGtpYmFuYTo5MjIw']),
     ],
   },
 };

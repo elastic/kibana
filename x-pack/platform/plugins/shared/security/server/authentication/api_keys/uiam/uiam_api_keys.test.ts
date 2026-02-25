@@ -318,7 +318,7 @@ describe('UiamAPIKeys', () => {
       });
 
       await expect(uiamApiKeysNoUrl.convert({ keys: [{ key: 'es-api-key' }] })).rejects.toThrow(
-        'Cannot convert API keys: cloud.elasticsearchUrl is not configured'
+        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
       );
 
       expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();

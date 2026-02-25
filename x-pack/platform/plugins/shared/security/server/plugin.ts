@@ -246,7 +246,9 @@ export class SecurityPlugin
       features.registerElasticsearchFeature(securityFeature)
     );
 
-    this.elasticsearchUrl = cloud?.elasticsearchUrl;
+    if (cloud?.cloudId) {
+      this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
+    }
 
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
@@ -513,5 +515,29 @@ export class SecurityPlugin
       packageInfo: this.initializerContext.env.packageInfo,
       docLinks: core.docLinks,
     });
+  }
+
+  private decodeElasticsearchUrlFromCloudId(cloudId: string): string | undefined {
+    const id = cloudId.split(':').pop();
+    if (!id) {
+      return undefined;
+    }
+
+    try {
+      const decoded = Buffer.from(id, 'base64').toString('utf8');
+      const parts = decoded.split('$');
+      if (parts.length < 2) {
+        return undefined;
+      }
+
+      const [hostWithPort, esIdWithPort] = parts;
+      const [host, defaultPort = '443'] = hostWithPort.split(':');
+      const [esId, esPort = defaultPort] = esIdWithPort.split(':');
+
+      return `https://${esId}.${host}:${esPort}`;
+    } catch {
+      this.logger.debug(`Failed to decode cloud.id: ${cloudId}`);
+      return undefined;
+    }
   }
 }
