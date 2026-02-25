@@ -1296,6 +1296,8 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
+packages/kbn-generate/src/commands/user_activity_actions_docs_command.ts @elastic/kibana-core
+
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
 /src/platform/test/functional/apps/management @elastic/kibana-management
@@ -2344,6 +2346,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
 /.github/instructions/security.instructions.md @elastic/kibana-security
 /.github/instructions/codeql.instructions.md @elastic/kibana-security
+/.github/instructions/encrypted-saved-objects.instructions.md @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
