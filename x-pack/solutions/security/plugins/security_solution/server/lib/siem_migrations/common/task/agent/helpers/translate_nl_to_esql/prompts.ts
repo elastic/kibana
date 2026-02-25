@@ -22,6 +22,7 @@ Try to translate to ESQL as much as possible. Keep in mind below when translatin
   - Provide a summary of the reasons why it cannot be translated.
   - NOT provide any dummy/example or simple ESQL query.
 - Use LOOKUP JOIN to enrich data with lookup indices.
+- Never add quotes or backticks to index names. This also applied to lookup index names
 
 See the example output below for formatting.
 
