@@ -146,7 +146,7 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"top\" | \"bottom\""
+              "\"right\" | \"top\" | \"bottom\" | \"left\""
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
             "lineNumber": 44,

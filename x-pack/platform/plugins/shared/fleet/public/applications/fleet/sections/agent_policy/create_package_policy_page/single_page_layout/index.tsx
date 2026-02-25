@@ -65,7 +65,7 @@ import {
   ConfirmDeployAgentPolicyModal,
   IncompatibleAgentVersionCallout,
 } from '../../components';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../../services';
 
 import type { CreatePackagePolicyParams } from '../types';
 
@@ -258,12 +258,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Derive var_group_selections from policy for StepConfigurePackagePolicy
   // Note: StepDefinePackagePolicy handles its own initialization and state management
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(packageInfo?.var_groups, isAgentlessSelected);
-  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, isAgentlessSelected]);
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected);
+  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected]);
 
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {
@@ -470,7 +473,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage, isAgentlessDefault } = useAgentless();
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -486,7 +489,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessIntegration(packageInfo) && !addIntegrationFlyoutProps}
+            isAgentlessEnabled={
+              getAgentlessStatusForPackage(packageInfo).isAgentless && !addIntegrationFlyoutProps
+            }
             defaultSetupTechnology={defaultSetupTechnology}
             integrationToEnable={integrationToEnable}
             setIntegrationToEnable={setIntegrationToEnable}
@@ -515,7 +520,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
-          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
+          {!isAddIntegrationFlyout && getAgentlessStatusForPackage(packageInfo).isAgentless && (
             <SetupTechnologySelector
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
@@ -568,7 +573,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
-      isAgentlessIntegration,
+      getAgentlessStatusForPackage,
       isAgentlessDefault,
       selectedSetupTechnology,
       integrationToEnable,
