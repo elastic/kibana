@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+import { EuiFieldNumber, EuiFieldText } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { Formik } from 'formik';
 import React from 'react';
-
-import { EuiFieldNumber, EuiFieldText } from '@elastic/eui';
 
 import { createFieldValidator, FormField } from './form_field';
 
