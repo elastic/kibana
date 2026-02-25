@@ -120,6 +120,10 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'List all available skills (built-in and user-created).',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -151,6 +155,10 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'Get a specific skill by ID.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -186,6 +194,10 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'Create a new user-defined skill.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -220,6 +232,10 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'Update an existing user-created skill.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -256,6 +272,10 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'Delete a user-created skill by ID. This action cannot be undone.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
