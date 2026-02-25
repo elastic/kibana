@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import type { WorkflowTriggerTab } from '../../features/run_workflow/ui/types';
+import type { WorkflowTriggerTab } from '@kbn/workflows-ui';
 import type { YamlValidationResult } from '../../features/validate_workflow_yaml/model/types';
 import {
   workflowEventNames,

@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ENABLED_TRIGGER_TABS } from './constants';
+export const ENABLED_TRIGGER_TABS = ['alert', 'index', 'manual', 'historical'] as const;
 
 export type WorkflowTriggerTab = (typeof ENABLED_TRIGGER_TABS)[number];

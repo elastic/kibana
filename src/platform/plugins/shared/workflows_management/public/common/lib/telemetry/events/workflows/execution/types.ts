@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowTriggerTab } from '../../../../../../features/run_workflow/ui/types';
+import type { WorkflowTriggerTab } from '@kbn/workflows-ui';
 import type { BaseResultActionParams, WorkflowEditorType } from '../types';
 
 export enum WorkflowExecutionEventTypes {

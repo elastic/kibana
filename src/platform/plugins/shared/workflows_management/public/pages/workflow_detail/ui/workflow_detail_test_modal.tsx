@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowTriggerTab } from '@kbn/workflows-ui';
 import {
   selectEditorYaml,
   selectIsTestModalOpen,
@@ -22,7 +23,6 @@ import {
   setReplayExecutionId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
-import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
 import { useCapabilities } from '../../../hooks/use_capabilities';

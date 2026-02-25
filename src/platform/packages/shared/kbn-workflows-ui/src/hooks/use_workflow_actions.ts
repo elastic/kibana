@@ -14,6 +14,7 @@ import { useDeleteWorkflowsAction } from './use_delete_workflows_action';
 import { useRunWorkflowAction } from './use_run_workflow_action';
 import { useRunWorkflowStepAction } from './use_run_workflow_step_action';
 import { useUpdateWorkflowAction } from './use_update_workflow_action';
+import type { WorkflowTriggerTab } from '../types';
 
 export interface WorkflowActionsTelemetry {
   reportWorkflowUpdated: (params: {
@@ -38,7 +39,7 @@ export interface WorkflowActionsTelemetry {
     inputCount: number;
     origin: 'workflow_list';
     error?: Error;
-    triggerTab?: 'manual' | 'alert' | 'index';
+    triggerTab?: WorkflowTriggerTab;
   }) => void;
   reportWorkflowStepTestRunInitiated: (params: {
     workflowYaml?: string | null;

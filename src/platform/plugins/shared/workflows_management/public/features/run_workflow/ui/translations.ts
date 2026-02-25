@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { WorkflowTriggerTab } from './types';
+import type { WorkflowTriggerTab } from '@kbn/workflows-ui';
 
 export const TRIGGER_TABS_LABELS: Record<WorkflowTriggerTab, string> = {
   alert: i18n.translate('plugins.workflowsManagement.workflowsExecution.alertTriggerLabel', {
