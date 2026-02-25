@@ -82,7 +82,6 @@ dependsOn:
   - '@kbn/search-navigation'
   - '@kbn/cell-actions'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/ui-actions-enhanced-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/search-shared-ui'
   - '@kbn/search-indices'
