@@ -45,7 +45,7 @@ export const lensFeatureFlags = {
   apiFormat: {
     id: 'lens.apiFormat',
     type: 'boolean',
-    fallback: false as boolean,
+    fallback: true as boolean,
   },
   /**
    * Enables ES|QL mode for form-based datasources, allowing Lens to generate
