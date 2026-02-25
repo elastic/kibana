@@ -120,14 +120,8 @@ steps:
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-<<<<<<< HEAD
-      JEST_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
-      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FTR_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
-=======
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
->>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621))
     retry:
       automatic:
         - exit_status: '*'
@@ -143,11 +137,7 @@ steps:
     depends_on:
       - build
     env:
-<<<<<<< HEAD
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
-=======
       SCOUT_CONFIGS_DEPS: 'build_scout_tests'
->>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621))
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -179,17 +169,7 @@ steps:
     key: build_api_docs
     depends_on:
       - build
-<<<<<<< HEAD
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_oas_snapshot
-      - check_types
-    timeout_in_minutes: 90
-=======
     timeout_in_minutes: 60
->>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621))
     retry:
       automatic:
         - exit_status: '-1'

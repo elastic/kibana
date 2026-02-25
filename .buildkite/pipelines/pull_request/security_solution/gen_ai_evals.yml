@@ -3,15 +3,6 @@ steps:
     key: security-solution-gen-ai
     depends_on:
       - build
-<<<<<<< HEAD
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
-=======
->>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621))
     steps:
       - command: .buildkite/scripts/steps/test/ftr_configs.sh
         cancel_on_build_failing: true
