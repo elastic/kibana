@@ -28,8 +28,12 @@ import {
 } from '@kbn/controls-constants';
 import type { OptionsListControlState, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiHasSections, initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiHasPinnedPanels,
+  apiHasSections,
+  initializeUnsavedChanges,
+  type PublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import type { OptionsListSuccessResponse } from '../../../../common/options_list';
 import { isOptionsListESQLControlState, isValidSearch } from '../../../../common/options_list';
@@ -344,6 +348,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         allowExpensiveQueries$,
       };
 
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+
       return {
         api,
         Component: () => {
@@ -359,6 +365,8 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
               errorsSubscription.unsubscribe();
+
+              dataControlManager.cleanup();
             };
           }, []);
 
@@ -369,7 +377,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
                 displaySettings: state.display_settings ?? {},
               }}
             >
-              <OptionsListControl />
+              <OptionsListControl isPinned={isPinned} />
             </OptionsListControlContext.Provider>
           );
         },
