@@ -8,7 +8,10 @@
 import type {
   IFileStore,
   FsEntry,
+  FilestoreVersionedEntry,
   FileEntry,
+  FilestoreVersionedEntryMetadata,
+  FilestoreEntry,
   LsEntry,
   GrepMatch,
   DirEntryWithChildren,
@@ -24,13 +27,31 @@ export class FileSystemStore implements IFileStore {
   }
 
   /**
+   * Get a raw file entry from the store.
+   * Returns undefined if the path doesn't exist or is a directory.
+   */
+  async getEntry(path: string): Promise<FilestoreVersionedEntry | undefined> {
+    const entry = await this.filesystem.get(path);
+    if (entry?.type === 'file') {
+      return {
+        ...entry,
+        metadata: this.buildMetadata(entry),
+      };
+    }
+    return undefined;
+  }
+
+  /**
    * Read a file entry from the store.
    * Returns undefined if the path doesn't exist or is a directory.
    */
-  async read(path: string): Promise<FileEntry | undefined> {
+  async read(
+    path: string,
+    options: { version?: number } = {}
+  ): Promise<FilestoreEntry | undefined> {
     const entry = await this.filesystem.get(path);
     if (entry?.type === 'file') {
-      return entry;
+      return this.toVersionedEntry(entry, options.version);
     }
     return undefined;
   }
@@ -45,7 +66,8 @@ export class FileSystemStore implements IFileStore {
 
     if (depth <= 1) {
       // Simple case: just list immediate children
-      return this.filesystem.list(normalizedPath);
+      const entries = await this.filesystem.list(normalizedPath);
+      return entries.map((entry) => this.toLatestEntry(entry));
     }
 
     // Get flat list with recursion
@@ -54,15 +76,20 @@ export class FileSystemStore implements IFileStore {
       maxDepth: depth - 1,
     });
 
-    return this.buildTree(normalizedPath, flatEntries);
+    return this.buildTree(
+      normalizedPath,
+      flatEntries.map((entry) => this.toLatestEntry(entry))
+    );
   }
 
   /**
    * List files matching the given glob pattern.
    */
-  async glob(pattern: string): Promise<FileEntry[]> {
+  async glob(pattern: string): Promise<FilestoreEntry[]> {
     const entries = await this.filesystem.glob(pattern, { onlyFiles: true });
-    return entries as FileEntry[];
+    return entries
+      .map((entry) => this.toVersionedEntry(entry as FileEntry))
+      .filter((entry): entry is FilestoreEntry => entry !== undefined);
   }
 
   /**
@@ -122,7 +149,7 @@ export class FileSystemStore implements IFileStore {
   /**
    * Build a nested tree structure from a flat list of entries.
    */
-  private buildTree(basePath: string, flatEntries: FsEntry[]): LsEntry[] {
+  private buildTree(basePath: string, flatEntries: LsEntry[]): LsEntry[] {
     // Map to store directory entries by path (so we can attach children)
     const dirMap = new Map<string, DirEntryWithChildren>();
 
@@ -180,8 +207,77 @@ export class FileSystemStore implements IFileStore {
    * Get the searchable text content of a file.
    * Uses plain_text if available, otherwise stringifies raw content.
    */
-  private getSearchableText(file: FileEntry): string {
+  private getSearchableText(file: FilestoreEntry): string {
     return file.content.plain_text ?? JSON.stringify(file.content.raw, null, 2);
+  }
+
+  private toLatestEntry(entry: FsEntry): LsEntry {
+    if (entry.type === 'file') {
+      const versioned = this.toVersionedEntry(entry);
+      if (!versioned) {
+        throw new Error(`File entry at ${entry.path} has no versions`);
+      }
+      return versioned;
+    }
+    return entry;
+  }
+
+  private toVersionedEntry(entry: FileEntry, version?: number): FilestoreEntry | undefined {
+    const selectedVersion = this.getVersion(entry, version);
+    if (!selectedVersion) {
+      return undefined;
+    }
+    const latestVersion = this.getLatestVersion(entry);
+    return {
+      path: entry.path,
+      type: 'file',
+      metadata: {
+        ...entry.metadata,
+        ...selectedVersion.metadata,
+        version: selectedVersion.version,
+        last_version: latestVersion.version,
+      },
+      content: selectedVersion.content,
+    };
+  }
+
+  private getLatestVersion<TVersion extends { version: number }>(entry: {
+    path?: string;
+    versions: TVersion[];
+  }): TVersion {
+    if (entry.versions.length === 0) {
+      const label = entry.path ?? 'unknown';
+      throw new Error(`File entry at ${label} has no versions`);
+    }
+    let latest = entry.versions[0];
+    for (const version of entry.versions) {
+      if (!latest || version.version > latest.version) {
+        latest = version;
+      }
+    }
+    return latest;
+  }
+
+  private getVersion<TVersion extends { version: number }>(
+    entry: { versions: TVersion[] },
+    version?: number
+  ): TVersion | undefined {
+    if (version === undefined) {
+      return this.getLatestVersion(entry);
+    }
+    return entry.versions.find((entryVersion) => entryVersion.version === version);
+  }
+
+  private buildMetadata(entry: FileEntry): FilestoreVersionedEntryMetadata {
+    const versions = entry.versions.map((version) => version.version);
+    const versioned = versions.length > 1;
+    const lastVersion = versions.length > 0 ? Math.max(...versions) : undefined;
+
+    return {
+      ...entry.metadata,
+      versioned,
+      ...(versioned ? { last_version: lastVersion } : {}),
+    };
   }
 
   /**

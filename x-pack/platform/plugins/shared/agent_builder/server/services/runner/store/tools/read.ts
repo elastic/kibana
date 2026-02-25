@@ -15,11 +15,12 @@ import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import { isSkillFileEntry } from '../volumes/skills/utils';
+import { isSkillFilestoreEntry } from '../volumes/skills/utils';
 import { loadSkillTools } from '../utils/load_skill';
 
 const schema = z.object({
   path: z.string().describe('Path of the file to read'),
+  version: z.number().optional().describe('Optional version to read (defaults to latest)'),
   raw: z
     .boolean()
     .optional()
@@ -43,35 +44,35 @@ export const readTool = ({
     schema,
     tags: ['filestore'],
     handler: async (
-      { path, raw },
+      { path, version, raw },
       { skills: skillsService, toolManager, logger, toolProvider, request }
     ) => {
-      const entry = await filestore.read(path);
+      const entry = await filestore.read(path, { version });
       if (!entry) {
         return {
           results: [createErrorResult(`Entry '${path}' not found`)],
         };
       }
 
-      if (isSkillFileEntry(entry)) {
+      if (isSkillFilestoreEntry(entry)) {
         await loadSkillTools({ skillsService, entry, toolProvider, request, toolManager, logger });
       }
 
       let content: string | object;
-      let truncated = false;
       if (raw) {
         content = entry.content.raw;
       } else {
         content = entry.content.plain_text ?? JSON.stringify(entry.content.raw, undefined, 2);
         const tokenCount = estimateTokens(content);
         if (tokenCount > SAFEGUARD_TOKEN_COUNT) {
-          content = truncateTokens(content as string, SAFEGUARD_TOKEN_COUNT);
-          truncated = true;
+          content =
+            truncateTokens(content as string, SAFEGUARD_TOKEN_COUNT) +
+            '[content was too long and got truncated by our system]';
         }
       }
 
       return {
-        results: [createOtherResult({ path, content, truncated })],
+        results: [createOtherResult({ path, content, meta: entry.metadata })],
       };
     },
   };

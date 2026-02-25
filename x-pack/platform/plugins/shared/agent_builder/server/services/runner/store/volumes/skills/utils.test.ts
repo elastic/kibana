@@ -10,12 +10,12 @@ import {
   getSkillReferencedContentEntryPath,
   getSkillPlainText,
   createSkillEntries,
-  isSkillFileEntry,
+  isSkillFilestoreEntry,
 } from './utils';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
-import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
-import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
+import type { FilestoreEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { SkillFilestoreEntry } from './types';
 
 describe('skills utils', () => {
   const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
@@ -146,9 +146,15 @@ This is the skill body.`);
       expect(entries[0]).toMatchObject({
         type: 'file',
         path: 'skills/platform/test-skill/SKILL.md',
-        content: {
-          plain_text: expect.stringContaining('name: test-skill'),
-        },
+        versions: [
+          {
+            version: 1,
+            content: {
+              plain_text: expect.stringContaining('name: test-skill'),
+            },
+            metadata: {},
+          },
+        ],
         metadata: {
           type: FileEntryType.skill,
           id: 'skill-1',
@@ -184,12 +190,12 @@ This is the skill body.`);
       const refContent1 = entries[1];
       expect(refContent1.metadata.type).toBe(FileEntryType.skillReferenceContent);
       expect(refContent1.path).toBe('skills/platform/test-skill/./content-1.md');
-      expect(refContent1.content.plain_text).toBe('Content 1 body');
+      expect(refContent1.versions[0].content.plain_text).toBe('Content 1 body');
 
       const refContent2 = entries[2];
       expect(refContent2.metadata.type).toBe(FileEntryType.skillReferenceContent);
       expect(refContent2.path).toBe('skills/platform/test-skill/./queries/content-2.md');
-      expect(refContent2.content.plain_text).toBe('Content 2 body');
+      expect(refContent2.versions[0].content.plain_text).toBe('Content 2 body');
     });
 
     it('calculates token count for skill entry', () => {
@@ -197,7 +203,7 @@ This is the skill body.`);
         content: 'a'.repeat(100), // 100 characters = ~25 tokens
       });
       const entries = createSkillEntries(skill);
-      expect(entries[0].metadata.token_count).toBeGreaterThan(0);
+      expect(entries[0].versions[0].metadata.token_count).toBeGreaterThan(0);
     });
 
     it('calculates token count for referenced content', () => {
@@ -211,7 +217,7 @@ This is the skill body.`);
         ],
       });
       const entries = createSkillEntries(skill);
-      expect(entries[1].metadata.token_count).toBeGreaterThan(0);
+      expect(entries[1].versions[0].metadata.token_count).toBeGreaterThan(0);
     });
 
     it('handles skill without referenced content', () => {
@@ -265,7 +271,7 @@ This is the skill body.`);
 
   describe('isSkillFileEntry', () => {
     it('returns true for skill file entry', () => {
-      const entry: SkillFileEntry = {
+      const entry: SkillFilestoreEntry = {
         type: 'file',
         path: '/path/to/skill.md',
         content: {
@@ -276,16 +282,18 @@ This is the skill body.`);
           id: 'skill-1',
           token_count: 100,
           readonly: true,
+          version: 1,
+          last_version: 1,
           skill_name: 'test-skill',
           skill_description: 'Test',
           skill_id: 'skill-1',
         },
       };
-      expect(isSkillFileEntry(entry)).toBe(true);
+      expect(isSkillFilestoreEntry(entry)).toBe(true);
     });
 
     it('returns false for tool result entry', () => {
-      const entry: FileEntry = {
+      const entry: FilestoreEntry = {
         type: 'file',
         path: '/path/to/result.json',
         content: {
@@ -296,13 +304,15 @@ This is the skill body.`);
           id: 'result-1',
           token_count: 100,
           readonly: false,
+          version: 1,
+          last_version: 1,
         },
       };
-      expect(isSkillFileEntry(entry)).toBe(false);
+      expect(isSkillFilestoreEntry(entry)).toBe(false);
     });
 
     it('returns false for attachment entry', () => {
-      const entry: FileEntry = {
+      const entry: FilestoreEntry = {
         type: 'file',
         path: '/path/to/attachment.pdf',
         content: {
@@ -313,27 +323,11 @@ This is the skill body.`);
           id: 'attachment-1',
           token_count: 100,
           readonly: false,
+          version: 1,
+          last_version: 1,
         },
       };
-      expect(isSkillFileEntry(entry)).toBe(false);
-    });
-
-    it('returns false for skill reference content entry', () => {
-      const entry: SkillReferencedContentFileEntry = {
-        type: 'file',
-        path: '/path/to/reference.md',
-        content: {
-          raw: {},
-        },
-        metadata: {
-          type: FileEntryType.skillReferenceContent,
-          id: 'skill-1',
-          token_count: 100,
-          readonly: true,
-          skill_id: 'skill-1',
-        },
-      };
-      expect(isSkillFileEntry(entry)).toBe(false);
+      expect(isSkillFilestoreEntry(entry)).toBe(false);
     });
   });
 });

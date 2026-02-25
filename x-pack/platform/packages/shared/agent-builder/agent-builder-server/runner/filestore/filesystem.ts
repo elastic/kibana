@@ -25,14 +25,22 @@ export type FileEntryMetadata<TExtraMeta extends object = {}> = {
    */
   id: string;
   /**
-   * Estimated length, in tokens, of the content of the raw content.
-   */
-  token_count: number;
-  /**
    * Defines if the entry can be modified or not.
    */
   readonly: boolean;
 } /** extra per-type metadata */ & TExtraMeta;
+
+export type FilestoreVersionedEntryMetadata<TExtraMeta extends object = {}> =
+  FileEntryMetadata<TExtraMeta> & {
+    /**
+     * True when the entry has more than one version.
+     */
+    versioned: boolean;
+    /**
+     * Latest version number (only when versioned is true).
+     */
+    last_version?: number;
+  };
 
 export interface FileEntryContent<TData extends object = object> {
   /**
@@ -45,6 +53,23 @@ export interface FileEntryContent<TData extends object = object> {
   plain_text?: string;
 }
 
+export interface FileEntryVersionMetadata {
+  /**
+   * Estimated length, in tokens, of the content of the raw content.
+   */
+  token_count: number;
+  /**
+   * Optional textual summary of the change introduced by this version.
+   */
+  version_change?: string;
+}
+
+export interface FileEntryVersion<TContent extends object = object> {
+  version: number;
+  content: FileEntryContent<TContent>;
+  metadata: FileEntryVersionMetadata;
+}
+
 /**
  * A file entry in the virtual filesystem.
  */
@@ -52,7 +77,30 @@ export interface FileEntry<TContent extends object = object, TMeta extends objec
   path: string;
   type: 'file';
   metadata: FileEntryMetadata<TMeta>;
+  versions: FileEntryVersion<TContent>[];
+}
+
+export interface FilestoreEntry<TContent extends object = object, TMeta extends object = object> {
+  path: string;
+  type: 'file';
+  metadata: FilestoreEntryMetadata<TMeta>;
   content: FileEntryContent<TContent>;
+}
+
+export type FilestoreEntryMetadata<TMeta extends object = object> = FileEntryMetadata<TMeta> &
+  FileEntryVersionMetadata & {
+    version: number;
+    last_version: number;
+  };
+
+export interface FilestoreVersionedEntry<
+  TContent extends object = object,
+  TMeta extends object = object
+> {
+  path: string;
+  type: 'file';
+  metadata: FilestoreVersionedEntryMetadata<TMeta>;
+  versions: FileEntryVersion<TContent>[];
 }
 
 /**

@@ -60,7 +60,7 @@ export type {
   DirEntry,
   DirEntryWithChildren,
   GrepMatch,
-  FileEntry,
-  FileEntryMetadata,
+  FilestoreVersionedEntry,
+  FilestoreVersionedEntryMetadata,
   FileEntryContent,
 } from './filestore';

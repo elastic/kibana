@@ -8,8 +8,8 @@
 import { getSkillsInstructions } from './prompts';
 import type { IFileStore } from '@kbn/agent-builder-server/runner';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
-import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
-import type { SkillFileEntry } from '../runner/store/volumes/skills/types';
+import type { FilestoreEntry } from '@kbn/agent-builder-server/runner/filestore';
+import type { SkillFilestoreEntry } from '../runner/store/volumes/skills/types';
 
 describe('getSkillsInstructions', () => {
   const createMockFileStore = (): jest.Mocked<IFileStore> => ({
@@ -17,13 +17,14 @@ describe('getSkillsInstructions', () => {
     ls: jest.fn(),
     glob: jest.fn(),
     grep: jest.fn(),
+    getEntry: jest.fn(),
   });
 
   const createSkillFileEntry = (
     path: string,
     skillName: string,
     skillDescription: string
-  ): SkillFileEntry => ({
+  ): SkillFilestoreEntry => ({
     type: 'file',
     path,
     content: {
@@ -35,13 +36,15 @@ describe('getSkillsInstructions', () => {
       id: skillName,
       token_count: 10,
       readonly: true,
+      version: 1,
+      last_version: 1,
       skill_name: skillName,
       skill_description: skillDescription,
       skill_id: skillName,
     },
   });
 
-  const createNonSkillFileEntry = (path: string): FileEntry => ({
+  const createNonSkillFileEntry = (path: string): FilestoreEntry => ({
     type: 'file',
     path,
     content: {
@@ -52,6 +55,8 @@ describe('getSkillsInstructions', () => {
       id: path,
       token_count: 10,
       readonly: false,
+      version: 1,
+      last_version: 1,
     },
   });
 
@@ -120,10 +125,9 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('<skill path="skills/platform/core/test-skill/SKILL.md">');
-      expect(result).toContain('<name>test-skill</name>');
-      expect(result).toContain('<description>A test skill description</description>');
-      expect(result).toContain('</skill>');
+      expect(result).toContain(
+        '<skill path="skills/platform/core/test-skill/SKILL.md" name="test-skill" description="A test skill description" />'
+      );
     });
 
     it('sorts skills by path', async () => {
@@ -208,12 +212,10 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      const skillBlock = result.match(/<skill[^>]*>[\s\S]*?<\/skill>/)?.[0];
-      expect(skillBlock).toBeDefined();
-      expect(skillBlock).toContain('path="skills/platform/core/complex-skill/SKILL.md"');
-      expect(skillBlock).toContain('<name>complex-skill</name>');
-      expect(skillBlock).toContain(
-        '<description>A complex skill with a longer description that explains what it does</description>'
+      expect(result).toContain('path="skills/platform/core/complex-skill/SKILL.md"');
+      expect(result).toContain('name="complex-skill"');
+      expect(result).toContain(
+        'description="A complex skill with a longer description that explains what it does"'
       );
     });
   });
@@ -230,7 +232,7 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('<description></description>');
+      expect(result).toContain('description=""');
     });
 
     it('handles skills with special characters in description', async () => {
