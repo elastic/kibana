@@ -48,18 +48,27 @@ export const getIndicesViaResolve = async ({
   pattern,
   showAllIndices,
   isRollupIndex,
+  projectRouting,
 }: {
   http: HttpStart;
   pattern: string;
   showAllIndices: boolean;
   isRollupIndex: (indexName: string) => boolean;
+  projectRouting?: string;
 }) => {
   const encodedPattern = encodeURIComponent(pattern);
+  const query: Record<string, string> = {};
+  if (showAllIndices) {
+    query.expand_wildcards = 'all';
+  }
+  if (projectRouting) {
+    query.project_routing = projectRouting;
+  }
   return http
     .get<ResolveIndexResponse>(
       `/internal/index-pattern-management/resolve_index/${encodedPattern}`,
       {
-        query: showAllIndices ? { expand_wildcards: 'all' } : undefined,
+        query: Object.keys(query).length > 0 ? query : undefined,
       }
     )
     .then((response) => {
@@ -76,11 +85,13 @@ export async function getIndices({
   pattern: rawPattern = '',
   showAllIndices = false,
   isRollupIndex,
+  projectRouting,
 }: {
   http: HttpStart;
   pattern: string;
   showAllIndices?: boolean;
   isRollupIndex: (indexName: string) => boolean;
+  projectRouting?: string;
 }): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
 
@@ -107,6 +118,7 @@ export async function getIndices({
     pattern,
     showAllIndices,
     isRollupIndex,
+    projectRouting,
   }).catch(() => []);
 }
 

@@ -12,3 +12,13 @@ export const doTheFooFnThing = () => {};
 export type FooType = () => 'foo';
 
 export type ImNotExportedFromIndex = () => { bar: string };
+
+// Expected issues:
+//   missing comments (2):
+//     line 10 - doTheFooFnThing
+//     line 12 - FooType
+//   missing returns (1):
+//     line 12 - FooType
+//   no references (2):
+//     line 10 - doTheFooFnThing
+//     line 12 - FooType

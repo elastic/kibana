@@ -15,6 +15,8 @@
       "label": "DataSourcesRegistryPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/data_sources_registry/public/types.ts",
+      "lineNumber": 9,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "DataSourcesRegistryPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/data_sources_registry/public/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -48,6 +52,8 @@
         "label": "DataCatalog",
         "description": [],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+        "lineNumber": 9,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,6 +76,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -84,6 +92,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+                "lineNumber": 10,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -110,6 +120,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -134,6 +146,8 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -154,6 +168,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/data_sources_registry/server/data_catalog/data_catalog.ts",
+                "lineNumber": 12,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -176,6 +192,8 @@
       "label": "DataSourcesRegistryPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -198,6 +216,8 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+          "lineNumber": 12,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -218,6 +238,8 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+              "lineNumber": 12,
+              "columnNumber": 14,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -237,6 +259,8 @@
       "label": "DataSourcesRegistryPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -258,6 +282,8 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/data_sources_registry/server/types.ts",
+          "lineNumber": 16,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -280,6 +306,8 @@
         "label": "CustomOAuthConfiguration",
         "description": [],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,6 +319,8 @@
             "label": "initiatePath",
             "description": [],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -302,6 +332,8 @@
             "label": "fetchSecretsPath",
             "description": [],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -318,6 +350,8 @@
           "\nAbstraction defining a federated data source (\"fetcher\").\nThis defines:\n- Connectivity (OAuth) configuration\n- What workflows should be created\n- How to interact with data stored in third-party systems\n"
         ],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,6 +365,8 @@
               "Unique identifier for the data type"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -344,6 +380,8 @@
               "Display name for the data type"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -360,6 +398,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -384,6 +424,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -398,6 +440,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+                "lineNumber": 72,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -424,6 +468,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -455,6 +501,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -471,6 +519,8 @@
           "\nConfiguration for OAuth authentication using EARS (Elastic-owned OAuth apps)"
         ],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -491,6 +541,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -505,6 +557,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -516,6 +570,8 @@
             "label": "initiatePath",
             "description": [],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -527,6 +583,8 @@
             "label": "fetchSecretsPath",
             "description": [],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -538,6 +596,8 @@
             "label": "oauthBaseUrl",
             "description": [],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -554,6 +614,8 @@
           "\nConfiguration for a stack connector associated with a data source type"
         ],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -565,6 +627,8 @@
             "label": "type",
             "description": [],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,6 +643,8 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -595,6 +661,8 @@
           "\nRepresents a workflow that can be generated for a data source type"
         ],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -608,6 +676,8 @@
               "Complete workflow content including references to any required stack connector IDs"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -621,6 +691,8 @@
               "Whether an Agent Builder tool should be generated for this workflow"
             ],
             "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -639,6 +711,8 @@
           "\nOAuth providers supported by EARS"
         ],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/data_types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -656,6 +730,8 @@
           "\"/api/data_sources_registry\""
         ],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -671,6 +747,8 @@
           "\"dataSourcesRegistry\""
         ],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -686,6 +764,8 @@
           "\"dataSourcesRegistry\""
         ],
         "path": "x-pack/platform/plugins/shared/data_sources_registry/common/constants.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

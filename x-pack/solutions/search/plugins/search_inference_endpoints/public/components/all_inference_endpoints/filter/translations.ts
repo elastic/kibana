@@ -7,14 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export { SERVICE_PROVIDER, TASK_TYPE } from '../../../../common/translations';
+export { SERVICE_PROVIDER, TASK_TYPE, EMPTY_FILTER_MESSAGE } from '../../../../common/translations';
 
-export const EMPTY_FILTER_MESSAGE = i18n.translate(
-  'xpack.searchInferenceEndpoints.filter.emptyMessage',
-  {
-    defaultMessage: 'No options',
-  }
-);
 export const OPTIONS = (totalCount: number) =>
   i18n.translate('xpack.searchInferenceEndpoints.filter.options', {
     defaultMessage: '{totalCount, plural, one {# option} other {# options}}',

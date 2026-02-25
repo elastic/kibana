@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiLink, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import {
   isIlmLifecycle,
   isErrorLifecycle,
   isDslLifecycle,
-  Streams,
-  getIndexPatternsForStream,
+  getDiscoverEsqlQuery,
 } from '@kbn/streams-schema';
 import React from 'react';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
+import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
 
 import { truncateText } from '../../util/truncate_text';
@@ -88,6 +89,56 @@ export function WiredStreamBadge() {
         defaultMessage: 'Wired',
       })}
     </EuiBadge>
+  );
+}
+
+export function QueryStreamBadge() {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiBadge color={euiTheme.colors.backgroundLightAccent}>
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.queryBadgeLabel', {
+        defaultMessage: 'Query stream',
+      })}
+    </EuiBadge>
+  );
+}
+
+export function DeprecatedLogsBadge({
+  openFlyout,
+  hasNewStreams,
+}: {
+  openFlyout?: () => void;
+  hasNewStreams: boolean;
+}) {
+  const badge =
+    openFlyout && !hasNewStreams ? (
+      <EuiBadge
+        color="warning"
+        onClick={openFlyout}
+        onClickAriaLabel={i18n.translate('xpack.streams.badges.deprecatedLogs.ariaLabel', {
+          defaultMessage: 'The logs root stream is deprecated.',
+        })}
+      >
+        {i18n.translate('xpack.streams.badges.deprecatedLogs.label', {
+          defaultMessage: 'Deprecated',
+        })}
+      </EuiBadge>
+    ) : (
+      <EuiBadge color="warning">
+        {i18n.translate('xpack.streams.badges.deprecatedLogs.label', {
+          defaultMessage: 'Deprecated',
+        })}
+      </EuiBadge>
+    );
+
+  return (
+    <EuiToolTip
+      content={i18n.translate('xpack.streams.badges.deprecatedLogs.tooltip', {
+        defaultMessage: 'The logs root stream is deprecated.',
+      })}
+    >
+      {badge}
+    </EuiToolTip>
   );
 }
 
@@ -165,23 +216,26 @@ export function LifecycleBadge({
 }
 
 export function DiscoverBadgeButton({
-  definition,
-  isWiredStream,
+  stream,
+  hasDataStream = false,
+  spellOut = false,
+  indexMode,
 }: {
-  definition: Streams.ingest.all.GetResponse;
-  isWiredStream: boolean;
+  stream: Streams.all.Definition;
+  hasDataStream?: boolean;
+  spellOut?: boolean;
+  indexMode?: IndicesIndexMode;
 }) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
-  const dataStreamExists =
-    Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
-  const indexPatterns = getIndexPatternsForStream(definition.stream);
-  const esqlQuery = indexPatterns
-    ? `FROM ${indexPatterns.join(', ')}${isWiredStream ? ' METADATA _source' : ''}`
-    : undefined;
+  const esqlQuery = getDiscoverEsqlQuery({
+    definition: stream,
+    indexMode: Streams.ingest.all.Definition.is(stream) ? indexMode : undefined,
+    includeMetadata: Streams.WiredStream.Definition.is(stream),
+  });
   const useUrl = share.url.locators.useUrl;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
@@ -194,20 +248,62 @@ export function DiscoverBadgeButton({
     [esqlQuery]
   );
 
-  if (!discoverLink || !dataStreamExists || !esqlQuery) {
+  if (!discoverLink || !hasDataStream || !esqlQuery) {
     return null;
   }
 
-  return (
+  const ariaLabel = i18n.translate(
+    'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
+    { defaultMessage: 'Open in Discover' }
+  );
+
+  return spellOut ? (
+    <EuiButton
+      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
+      href={discoverLink}
+      size="s"
+      aria-label={ariaLabel}
+    >
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel', {
+        defaultMessage: 'View in Discover',
+      })}
+    </EuiButton>
+  ) : (
     <EuiButtonIcon
-      data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
+      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
       href={discoverLink}
       iconType="discoverApp"
       size="xs"
-      aria-label={i18n.translate(
-        'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
-        { defaultMessage: 'Open in Discover' }
-      )}
+      aria-label={ariaLabel}
     />
+  );
+}
+
+export function TimeSeriesBadge() {
+  return (
+    <EuiToolTip
+      position="top"
+      content={i18n.translate('xpack.streams.badges.timeSeries.description', {
+        defaultMessage:
+          'Time series streams are optimized for indexing metrics data and help you analyze a sequence of data points as a whole.',
+      })}
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+        `,
+      }}
+    >
+      <EuiBadge
+        color="hollow"
+        iconType="chartLine"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="timeSeriesBadge"
+      >
+        {i18n.translate('xpack.streams.badges.timeSeries.label', {
+          defaultMessage: 'Time series',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
   );
 }

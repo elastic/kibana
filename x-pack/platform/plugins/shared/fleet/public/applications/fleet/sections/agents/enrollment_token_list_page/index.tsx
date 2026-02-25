@@ -275,6 +275,12 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       <EuiBasicTable<EnrollmentAPIKey>
         data-test-subj="enrollmentTokenListTable"
+        tableCaption={i18n.translate(
+          'xpack.fleet.enrollmentTokensList.enrollmentTokens.tableCaption',
+          {
+            defaultMessage: 'List of enrollment tokens',
+          }
+        )}
         loading={isLoading}
         noItemsMessage={
           isLoading ? (

@@ -18,6 +18,7 @@ import type {
   DeleteAgentResponse,
   ListAgentResponse,
 } from '../../common/http_api/agents';
+import { asError } from '../utils/as_error';
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object(
@@ -55,11 +56,10 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'List agents',
       description:
-        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.',
+        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -90,11 +90,10 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Get an agent by ID',
       description:
-        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.',
+        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -134,11 +133,10 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Create an agent',
       description:
-        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.",
+        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -190,6 +188,17 @@ export function registerAgentRoutes({
                     })
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
+                  workflow_ids: schema.maybe(
+                    schema.arrayOf(
+                      schema.string({
+                        meta: {
+                          description:
+                            'Optional list of workflow IDs. When set, these workflows run before every agent execution, in order.',
+                        },
+                      }),
+                      { maxSize: 100 }
+                    )
+                  ),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -203,14 +212,28 @@ export function registerAgentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const profile = await service.create(request.body);
-        analyticsService?.reportAgentCreated({
-          agentId: request.body.id,
-          toolSelection: request.body.configuration.tools,
-        });
-        return response.ok<CreateAgentResponse>({ body: profile });
+
+        try {
+          const profile = await service.create(request.body);
+          analyticsService?.reportAgentCreated({
+            agentId: request.body.id,
+            toolSelection: request.body.configuration.tools,
+          });
+          auditLogService.logAgentCreated(request, {
+            agentId: profile.id,
+            agentName: profile.name,
+          });
+          return response.ok<CreateAgentResponse>({ body: profile });
+        } catch (error) {
+          auditLogService.logAgentCreated(request, {
+            agentId: request.body.id,
+            agentName: request.body.name,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -224,11 +247,10 @@ export function registerAgentRoutes({
       access: 'public',
       summary: 'Update an agent',
       description:
-        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.",
+        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -286,6 +308,17 @@ export function registerAgentRoutes({
                       })
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                    workflow_ids: schema.maybe(
+                      schema.arrayOf(
+                        schema.string({
+                          meta: {
+                            description:
+                              'Updated list of workflow IDs. When set, these workflows run every agent execution, in order.',
+                          },
+                        }),
+                        { maxSize: 100 }
+                      )
+                    ),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -300,14 +333,27 @@ export function registerAgentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const profile = await service.update(request.params.id, request.body);
-        analyticsService?.reportAgentUpdated({
-          agentId: profile.id,
-          toolSelection: profile.configuration.tools,
-        });
-        return response.ok<UpdateAgentResponse>({ body: profile });
+
+        try {
+          const profile = await service.update(request.params.id, request.body);
+          analyticsService?.reportAgentUpdated({
+            agentId: profile.id,
+            toolSelection: profile.configuration.tools,
+          });
+          auditLogService.logAgentUpdated(request, {
+            agentId: profile.id,
+            agentName: profile.name,
+          });
+          return response.ok<UpdateAgentResponse>({ body: profile });
+        } catch (error) {
+          auditLogService.logAgentUpdated(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -320,11 +366,11 @@ export function registerAgentRoutes({
       },
       access: 'public',
       summary: 'Delete an agent',
-      description: 'Delete an agent by ID. This action cannot be undone.',
+      description:
+        'Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -346,15 +392,31 @@ export function registerAgentRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
-        const result = await service.delete({ id: request.params.id });
-        return response.ok<DeleteAgentResponse>({
-          body: {
-            success: result,
-          },
-        });
+        try {
+          const result = await service.delete({ id: request.params.id });
+          if (result) {
+            auditLogService.logAgentDeleted(request, { agentId: request.params.id });
+          } else {
+            auditLogService.logAgentDeleted(request, {
+              agentId: request.params.id,
+              error: new Error('Agent delete returned false'),
+            });
+          }
+          return response.ok<DeleteAgentResponse>({
+            body: {
+              success: result,
+            },
+          });
+        } catch (error) {
+          auditLogService.logAgentDeleted(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 }

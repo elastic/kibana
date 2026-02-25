@@ -26,6 +26,13 @@ const imageSets = {
       defaultMessage: 'No results image for the streams app',
     }),
   },
+  noDocuments: {
+    light: () => import('./no_documents_light.svg'),
+    dark: () => import('./no_documents_dark.svg'),
+    alt: i18n.translate('xpack.streams.streamDetailView.noDocumentsImage', {
+      defaultMessage: 'No documents image for the streams app',
+    }),
+  },
   significantEventsEmptyState: {
     light: () => import('./sig_events_empty_state_light.svg'),
     dark: () => import('./sig_events_empty_state_dark.svg'),
@@ -38,13 +45,6 @@ const imageSets = {
     dark: () => import('./add_streams_dark.svg'),
     alt: i18n.translate('xpack.streams.streamDetailView.addStreamsImage', {
       defaultMessage: 'Add streams image for the streams app',
-    }),
-  },
-  quickLinksEmpty: {
-    light: () => import('./quick_links_empty_light.svg'),
-    dark: () => import('./quick_links_empty_dark.svg'),
-    alt: i18n.translate('xpack.streams.streamDetailView.quickLinksEmptyImage', {
-      defaultMessage: 'Quick links empty image for the streams app',
     }),
   },
   unableToGeneratePreview: {

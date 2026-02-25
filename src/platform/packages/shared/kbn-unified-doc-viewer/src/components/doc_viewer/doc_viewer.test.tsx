@@ -280,4 +280,120 @@ describe('<DocViewer />', () => {
     await userEvent.click(screen.getByTestId('docViewerTab-test2'));
     expect(onUpdateSelectedTabId).toHaveBeenCalledWith('test2');
   });
+
+  test('should call onInitialDocViewerStateChange when tab state changes', () => {
+    const onInitialDocViewerStateChange = jest.fn();
+    const renderFn = jest.fn(({ onInitialStateChange }) => {
+      onInitialStateChange({ someState: 'value1' });
+      return <div>Tab 1 Content</div>;
+    });
+
+    const registry = new DocViewsRegistry();
+    registry.add({
+      id: 'test1',
+      order: 10,
+      title: 'Tab 1',
+      render: renderFn,
+    });
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+      />
+    );
+
+    expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
+      docViewerTabsState: {
+        test1: { someState: 'value1' },
+      },
+    });
+  });
+
+  test('should handle state for multiple tabs independently', async () => {
+    const onInitialDocViewerStateChange = jest.fn();
+
+    const renderTab1 = jest.fn(({ onInitialStateChange }) => {
+      onInitialStateChange({ tab1State: 'value1' });
+      return <div>Tab 1 Content</div>;
+    });
+
+    const renderTab2 = jest.fn(({ onInitialStateChange }) => {
+      onInitialStateChange({ tab2State: 'value2' });
+      return <div>Tab 2 Content</div>;
+    });
+
+    const registry = new DocViewsRegistry();
+    registry.add({
+      id: 'test1',
+      order: 10,
+      title: 'Tab 1',
+      render: renderTab1,
+    });
+    registry.add({
+      id: 'test2',
+      order: 20,
+      title: 'Tab 2',
+      render: renderTab2,
+    });
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+      />
+    );
+
+    expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
+      docViewerTabsState: {
+        test1: { tab1State: 'value1' },
+      },
+    });
+
+    await userEvent.click(screen.getByTestId('docViewerTab-test2'));
+
+    expect(onInitialDocViewerStateChange).toHaveBeenCalledWith({
+      docViewerTabsState: {
+        test2: { tab2State: 'value2' },
+      },
+    });
+  });
+
+  test('should set initial state to initialTabState if both initialTabState and initialTabId provided', () => {
+    const initialStateContent = 'Initial state content';
+
+    const renderTab = jest.fn(({ initialState }) => {
+      return <div>{initialState.initialStateContent}</div>;
+    });
+
+    const registry = new DocViewsRegistry();
+    registry.add({
+      id: 'testTab',
+      order: 10,
+      title: 'Tab 1',
+      render: renderTab,
+    });
+
+    const initialDocViewerState = {
+      docViewerTabsState: {
+        testTab: { initialStateContent },
+      },
+    };
+
+    render(
+      <WrappedDocViewer
+        docViews={registry.getAll()}
+        hit={records[0]}
+        dataView={dataViewMock}
+        initialTabId="testTab"
+        initialDocViewerState={initialDocViewerState}
+      />
+    );
+
+    expect(screen.getByText(initialStateContent)).toBeInTheDocument();
+  });
 });

@@ -33,6 +33,8 @@
           "\"data_connectors\""
         ],
         "path": "src/platform/packages/shared/deeplinks/data_connectors/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "\"data_connectors\""
         ],
         "path": "src/platform/packages/shared/deeplinks/data_connectors/deep_links.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

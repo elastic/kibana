@@ -9,7 +9,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { stripUnmappedKeys, throwOnUnmappedKeys } from './scope_tooling';
-import type { DashboardState } from './types';
 
 const mockGetTransforms = jest.fn();
 
@@ -248,24 +247,6 @@ describe('stripUnmappedKeys', () => {
       }
     `);
   });
-
-  it('should drop controlGroupInput', () => {
-    const dashboardState = {
-      controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
-      title: 'my dashboard',
-    };
-    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
-      Object {
-        "data": Object {
-          "panels": Array [],
-          "title": "my dashboard",
-        },
-        "warnings": Array [
-          "Dropped unmapped key 'controlGroupInput' from dashboard",
-        ],
-      }
-    `);
-  });
 });
 
 describe('throwOnUnmappedKeys', () => {
@@ -340,14 +321,6 @@ describe('throwOnUnmappedKeys', () => {
           type: 'typeWithSchema',
         },
       ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains controlGroupInput', () => {
-    const dashboardState = {
-      controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
-      title: 'my dashboard',
     };
     expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });

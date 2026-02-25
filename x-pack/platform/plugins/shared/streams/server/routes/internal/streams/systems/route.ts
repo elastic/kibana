@@ -7,35 +7,26 @@
 
 import { z } from '@kbn/zod';
 import type { System } from '@kbn/streams-schema';
-import { streamObjectNameSchema, systemSchema, TaskStatus } from '@kbn/streams-schema';
+import { streamObjectNameSchema, systemSchema } from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import type { Observable } from 'rxjs';
-import { catchError, from, map } from 'rxjs';
-import { conflict } from '@hapi/boom';
-import { generateStreamDescription, type IdentifySystemsResult, sumTokens } from '@kbn/streams-ai';
-import { AcknowledgingIncompleteError } from '../../../../lib/tasks/acknowledging_incomplete_error';
-import { CancellationInProgressError } from '../../../../lib/tasks/cancellation_in_progress_error';
-import { isStale } from '../../../../lib/tasks/is_stale';
-import { PromptsConfigService } from '../../../../lib/saved_objects/significant_events/prompts_config_service';
+import { type IdentifySystemsResult } from '@kbn/streams-ai';
+import type { TaskResult } from '@kbn/streams-schema';
+import { handleTaskAction } from '../../../utils/task_helpers';
 import {
   SYSTEMS_IDENTIFICATION_TASK_TYPE,
   getSystemsIdentificationTaskId,
   type SystemIdentificationTaskParams,
 } from '../../../../lib/tasks/task_definitions/system_identification';
+import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import type { StreamDescriptionEvent } from './types';
-import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -58,19 +49,14 @@ export const getSystemRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ system: System }> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name, systemName } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     const system = await systemClient.getSystem(name, systemName);
     return { system };
@@ -102,19 +88,14 @@ export const deleteSystemRoute = createServerRoute({
     server,
     logger,
   }): Promise<StorageClientDeleteResponse> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name, systemName } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot delete system for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     logger.get('system_identification').debug(`Deleting system ${systemName} for stream ${name}`);
     return await systemClient.deleteSystem(name, systemName);
@@ -143,10 +124,9 @@ export const upsertSystemRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<StorageClientIndexResponse> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -159,10 +139,7 @@ export const upsertSystemRoute = createServerRoute({
       throw new StatusError(`Cannot update system name`, 400);
     }
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot update system for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     return await systemClient.updateSystem(name, body);
   },
@@ -189,18 +166,14 @@ export const listSystemsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<{ systems: System[] }> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     const { systems } = await systemClient.getSystems(name);
     return { systems };
@@ -247,10 +220,9 @@ export const bulkSystemsRoute = createServerRoute({
     server,
     logger,
   }): Promise<StorageClientBulkResponse> => {
-    const { systemClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const { systemClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -259,11 +231,7 @@ export const bulkSystemsRoute = createServerRoute({
       body: { operations },
     } = params;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
-
-    if (!read) {
-      throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
-    }
+    await streamsClient.ensureStream(name);
 
     logger
       .get('system_identification')
@@ -274,22 +242,7 @@ export const bulkSystemsRoute = createServerRoute({
   },
 });
 
-export type SystemIdentificationTaskResult =
-  | {
-      status:
-        | TaskStatus.NotStarted
-        | TaskStatus.InProgress
-        | TaskStatus.Stale
-        | TaskStatus.BeingCanceled
-        | TaskStatus.Canceled;
-    }
-  | {
-      status: TaskStatus.Failed;
-      error: string;
-    }
-  | ({
-      status: TaskStatus.Completed | TaskStatus.Acknowledged;
-    } & IdentifySystemsResult);
+export type SystemIdentificationTaskResult = TaskResult<Pick<IdentifySystemsResult, 'systems'>>;
 
 export const systemsStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/systems/_status',
@@ -313,11 +266,9 @@ export const systemsStatusRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SystemIdentificationTaskResult> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
-      {
-        request,
-      }
-    );
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
+      request,
+    });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
@@ -325,35 +276,12 @@ export const systemsStatusRoute = createServerRoute({
       path: { name },
     } = params;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
+    await streamsClient.ensureStream(name);
 
-    if (!read) {
-      throw new SecurityError(`Cannot read systems for stream ${name}, insufficient privileges`);
-    }
-
-    const task = await taskClient.get<SystemIdentificationTaskParams, IdentifySystemsResult>(
-      getSystemsIdentificationTaskId(name)
-    );
-
-    if (task.status === TaskStatus.InProgress && isStale(task.created_at)) {
-      return {
-        status: TaskStatus.Stale,
-      };
-    } else if (task.status === TaskStatus.Failed) {
-      return {
-        status: TaskStatus.Failed,
-        error: task.task.error,
-      };
-    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
-      return {
-        status: task.status,
-        ...task.task.payload,
-      };
-    }
-
-    return {
-      status: task.status,
-    };
+    return taskClient.getStatus<
+      SystemIdentificationTaskParams,
+      Pick<IdentifySystemsResult, 'systems'>
+    >(getSystemsIdentificationTaskId(name));
   },
 });
 
@@ -372,140 +300,15 @@ export const systemsTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule'),
-        from: dateFromString,
-        to: dateFromString,
-        connectorId: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel'),
-      }),
-      z.object({
-        action: z.literal('acknowledge'),
-      }),
-    ]),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-  }): Promise<SystemIdentificationTaskResult> => {
-    const { scopedClusterClient, licensing, uiSettingsClient, taskClient } = await getScopedClients(
-      {
-        request,
-      }
-    );
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { name },
-      body,
-    } = params;
-
-    const { read } = await checkAccess({ name, scopedClusterClient });
-    if (!read) {
-      throw new SecurityError(`Cannot update systems for stream ${name}, insufficient privileges`);
-    }
-
-    const { action } = body;
-    const taskId = getSystemsIdentificationTaskId(name);
-
-    if (action === 'schedule') {
-      const { from: start, to: end, connectorId: connectorIdParam } = body;
-
-      const connectorId = await resolveConnectorId({
-        connectorId: connectorIdParam,
-        uiSettingsClient,
-        logger,
-      });
-
-      try {
-        await taskClient.schedule<SystemIdentificationTaskParams>({
-          task: {
-            type: SYSTEMS_IDENTIFICATION_TASK_TYPE,
-            id: taskId,
-            space: '*',
-            stream: name,
-          },
-          params: {
-            connectorId,
-            start: start.getTime(),
-            end: end.getTime(),
-          },
-          request,
-        });
-
-        return {
-          status: TaskStatus.InProgress,
-        };
-      } catch (error) {
-        if (error instanceof CancellationInProgressError) {
-          throw conflict(error.message);
-        }
-
-        throw error;
-      }
-    } else if (action === 'cancel') {
-      await taskClient.cancel(taskId);
-
-      return {
-        status: TaskStatus.BeingCanceled,
-      };
-    }
-
-    try {
-      const task = await taskClient.acknowledge<
-        SystemIdentificationTaskParams,
-        IdentifySystemsResult
-      >(taskId);
-
-      return {
-        status: TaskStatus.Acknowledged,
-        ...task.task.payload,
-      };
-    } catch (error) {
-      if (error instanceof AcknowledgingIncompleteError) {
-        throw conflict(error.message);
-      }
-
-      throw error;
-    }
-  },
-});
-
-export const describeStreamRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/_describe_stream',
-  options: {
-    access: 'internal',
-    summary: 'Generate a stream description',
-    description: 'Generate a stream description based on data in the stream',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({
+    body: taskActionSchema({
+      from: dateFromString,
+      to: dateFromString,
       connectorId: z
         .string()
         .optional()
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      from: dateFromString,
-      to: dateFromString,
     }),
   }),
   handler: async ({
@@ -514,15 +317,8 @@ export const describeStreamRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<Observable<StreamDescriptionEvent>> => {
-    const {
-      scopedClusterClient,
-      licensing,
-      uiSettingsClient,
-      streamsClient,
-      inferenceClient,
-      soClient,
-    } = await getScopedClients({
+  }): Promise<SystemIdentificationTaskResult> => {
+    const { streamsClient, licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
 
@@ -530,63 +326,44 @@ export const describeStreamRoute = createServerRoute({
 
     const {
       path: { name },
-      query: { connectorId: connectorIdParam, from: start, to: end },
+      body,
     } = params;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
+    await streamsClient.ensureStream(name);
 
-    if (!read) {
-      throw new SecurityError(
-        `Cannot generate stream description for ${name}, insufficient privileges`
-      );
-    }
+    const taskId = getSystemsIdentificationTaskId(name);
 
-    const connectorId = await resolveConnectorId({
-      connectorId: connectorIdParam,
-      uiSettingsClient,
-      logger,
-    });
-
-    // Get connector info for error enrichment
-    const connector = await inferenceClient.getConnectorById(connectorId);
-
-    const stream = await streamsClient.getStream(name);
-
-    const { descriptionPromptOverride } = await new PromptsConfigService({
-      soClient,
-      logger,
-    }).getPrompt();
-
-    return from(
-      generateStreamDescription({
-        stream,
-        esClient: scopedClusterClient.asCurrentUser,
-        inferenceClient: inferenceClient.bindTo({ connectorId }),
-        start: start.valueOf(),
-        end: end.valueOf(),
-        signal: getRequestAbortSignal(request),
-        logger: logger.get('stream_description'),
-        systemPrompt: descriptionPromptOverride,
-      })
-    ).pipe(
-      map((result) => {
-        return {
-          type: 'stream_description' as const,
-          description: result.description,
-          tokensUsed: sumTokens(
-            {
-              prompt: 0,
-              completion: 0,
-              total: 0,
-              cached: 0,
+    const actionParams =
+      body.action === 'schedule'
+        ? ({
+            action: body.action,
+            scheduleConfig: {
+              taskType: SYSTEMS_IDENTIFICATION_TASK_TYPE,
+              taskId,
+              params: await (async (): Promise<SystemIdentificationTaskParams> => {
+                const connectorId = await resolveConnectorId({
+                  connectorId: body.connectorId,
+                  uiSettingsClient,
+                  logger,
+                });
+                return {
+                  connectorId,
+                  start: body.from.getTime(),
+                  end: body.to.getTime(),
+                  streamName: name,
+                };
+              })(),
+              request,
             },
-            result.tokensUsed
-          ),
-        };
-      }),
-      catchError((error: Error) => {
-        throw createConnectorSSEError(error, connector);
-      })
+          } as const)
+        : ({ action: body.action } as const);
+
+    return handleTaskAction<SystemIdentificationTaskParams, Pick<IdentifySystemsResult, 'systems'>>(
+      {
+        taskClient,
+        taskId,
+        ...actionParams,
+      }
     );
   },
 });
@@ -599,5 +376,4 @@ export const systemRoutes = {
   ...bulkSystemsRoute,
   ...systemsStatusRoute,
   ...systemsTaskRoute,
-  ...describeStreamRoute,
 };

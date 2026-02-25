@@ -90,7 +90,7 @@ export const simple: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -207,7 +207,7 @@ export const withXAndYAxes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   visualizationType: 'lnsHeatmap',
   references: [
     {
@@ -230,6 +230,7 @@ export const withDynamicColors: LensAttributes = {
         isVisible: true,
         position: 'right',
         type: 'heatmap_legend',
+        shouldTruncate: false,
       },
       gridConfig: {
         type: 'heatmap_grid',
@@ -382,7 +383,7 @@ export const withDynamicColors: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 1,
+  version: 2,
   visualizationType: 'lnsHeatmap',
   references: [
     {

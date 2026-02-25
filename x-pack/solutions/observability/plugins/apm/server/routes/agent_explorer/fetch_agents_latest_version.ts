@@ -8,7 +8,6 @@ import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import fetch from 'node-fetch';
 import type {
   ElasticApmAgentLatestVersion,
   OtelAgentLatestVersion,

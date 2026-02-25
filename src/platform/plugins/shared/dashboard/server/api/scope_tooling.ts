@@ -9,16 +9,24 @@
 
 import { isDashboardSection } from '../../common';
 import { embeddableService } from '../kibana_services';
-import type { DashboardPanel, DashboardState } from './types';
+import type {
+  DashboardPanel,
+  DashboardState,
+  DashboardPinnedPanel,
+  DashboardSection,
+} from './types';
+
+function isPinnedPanel(
+  panel: DashboardPanel | DashboardPinnedPanel | DashboardSection
+): panel is DashboardPinnedPanel {
+  return !('grid' in panel);
+}
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
-  const { controlGroupInput, panels, ...rest } = dashboardState;
-  if (controlGroupInput) {
-    warnings.push(`Dropped unmapped key 'controlGroupInput' from dashboard`);
-  }
+  const { pinned_panels, panels, ...rest } = dashboardState;
 
-  function isMappedPanelType(panel: DashboardPanel) {
+  function isMappedPanelType(panel: DashboardPanel | DashboardPinnedPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
     if (transforms?.throwOnUnmappedPanel) {
       try {
@@ -31,12 +39,14 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
       }
     }
 
-    if (!transforms?.schema) {
+    const panelSchema = transforms?.schema;
+
+    if (!panelSchema) {
       warnings.push(
         `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
     }
-    return Boolean(transforms?.schema);
+    return Boolean(panelSchema);
   }
 
   function removeEnhancements(panel: DashboardPanel) {
@@ -56,9 +66,10 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     };
   }
 
-  const mappedPanels = (panels ?? [])
+  const mappedPanels = [...(panels ?? []), ...(pinned_panels ?? [])]
     .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
+      if (isPinnedPanel(panel)) return panel;
       if (!isDashboardSection(panel)) return removeEnhancements(panel);
       const { panels: sectionPanels, ...restOfSection } = panel;
       return {
@@ -77,13 +88,11 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
 }
 
 export function throwOnUnmappedKeys(dashboardState: DashboardState) {
-  if (dashboardState.controlGroupInput) {
-    throw new Error('controlGroupInput key is not supported by dashboard REST endpoints.');
-  }
-
-  function throwOnUnmappedPanelKeys(panel: DashboardPanel) {
+  function throwOnUnmappedPanelKeys(panel: DashboardPanel | DashboardPinnedPanel) {
     const transforms = embeddableService?.getTransforms(panel.type);
-    if (!transforms?.schema) {
+    const panelSchema = transforms?.schema;
+
+    if (!panelSchema) {
       throw new Error(
         `Panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
       );
@@ -96,7 +105,7 @@ export function throwOnUnmappedKeys(dashboardState: DashboardState) {
     }
   }
 
-  dashboardState.panels?.forEach((panel) => {
+  [...(dashboardState.panels ?? []), ...(dashboardState.pinned_panels ?? [])].forEach((panel) => {
     if (isDashboardSection(panel)) {
       panel.panels.forEach(throwOnUnmappedPanelKeys);
     } else {

@@ -33,6 +33,7 @@ import {
   INTEGRATION_LIST,
   getIntegrationCategories,
   ADD_INTEGRATION_FLYOUT,
+  BREAKING_CHANGE_CHECKBOX_SEL,
 } from '../screens/integrations';
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
@@ -184,6 +185,7 @@ describe('Add Integration - Real API', () => {
 
   it('should upgrade policies with integration update', () => {
     const oldVersion = '0.3.3';
+    cy.intercept('GET', '**/api/fleet/epm/packages/apache/*/changelog.yml').as('getChangelog');
     installPackageWithVersion('apache', oldVersion);
     navigateTo(`app/integrations/detail/apache-${oldVersion}/policies`);
 
@@ -196,6 +198,7 @@ describe('Add Integration - Real API', () => {
 
     cy.getBySel(SETTINGS_TAB).click();
     cy.getBySel(INTEGRATION_POLICIES_UPGRADE_CHECKBOX);
+    clickIfVisible(BREAKING_CHANGE_CHECKBOX_SEL);
     cy.getBySel(UPDATE_PACKAGE_BTN).click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 

@@ -7,15 +7,17 @@
 
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
+import type { OnboardingResult, Streams, TaskResult } from '@kbn/streams-schema';
 import React from 'react';
-import { useStreamFeatures } from '../../../stream_detail_features/stream_features/hooks/use_stream_features';
+import { useStreamFeatures } from '../../../../hooks/use_stream_features';
 
 interface FeaturesColumnProps {
-  streamName: string;
+  stream: Streams.all.Definition;
+  streamOnboardingResult?: TaskResult<OnboardingResult>;
 }
 
-export function FeaturesColumn({ streamName }: FeaturesColumnProps) {
-  const { features } = useStreamFeatures(streamName);
+export function FeaturesColumn({ stream, streamOnboardingResult }: FeaturesColumnProps) {
+  const { features } = useStreamFeatures(stream, [streamOnboardingResult]);
 
   return (
     <EuiText

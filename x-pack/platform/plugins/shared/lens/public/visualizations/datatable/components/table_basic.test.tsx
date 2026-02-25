@@ -817,4 +817,59 @@ describe('DatatableComponent', () => {
       expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
     });
   });
+
+  describe('row numbers', () => {
+    it('should show row numbers when enabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+      });
+
+      const rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells).toHaveLength(1);
+      expect(rowNumberCells[0]).toHaveTextContent('1');
+    });
+
+    it('should not show row numbers when disabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: false,
+        },
+      });
+
+      expect(screen.queryByRole('gridcell', { name: '' })).not.toBeInTheDocument();
+    });
+
+    it('should show correct row numbers with pagination', async () => {
+      const rowNumbers = 13;
+      const pageSize = 4;
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+        data,
+      });
+
+      // Page 1
+      let rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
+
+      // Page 2
+      await userEvent.click(screen.getByRole('link', { name: `Page 2 of 4` }));
+      rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
+    });
+  });
 });

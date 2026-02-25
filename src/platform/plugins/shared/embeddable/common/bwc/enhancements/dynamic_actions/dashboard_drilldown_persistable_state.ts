@@ -10,21 +10,14 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializedAction, SerializedEvent } from './types';
 
-export type EnhancementsDashboardDrilldownConfig = {
-  dashboardId?: string;
-  useCurrentFilters: boolean;
-  useCurrentDateRange: boolean;
-  openInNewTab: boolean;
-};
-
 export const EMBEDDABLE_TO_DASHBOARD_DRILLDOWN = 'DASHBOARD_TO_DASHBOARD_DRILLDOWN';
 
-const generateRefName = (eventId: string) =>
+export const generateRefName = (eventId: string) =>
   `drilldown:${EMBEDDABLE_TO_DASHBOARD_DRILLDOWN}:${eventId}:dashboardId`;
 
 export const dashboardDrilldownPersistableState = {
   extract: (state: SerializedEvent) => {
-    const action = state.action as SerializedAction<EnhancementsDashboardDrilldownConfig>;
+    const action = state.action as SerializedAction<{ dashboardId?: string }>;
     const references: Reference[] = action.config.dashboardId
       ? [
           {

@@ -57,8 +57,8 @@ export const AppMenuPopoverActionButtons = ({
         <EuiFlexItem grow={false}>
           <AppMenuActionButton
             {...secondaryActionItem}
-            run={() => {
-              secondaryActionItem?.run?.();
+            run={(params) => {
+              secondaryActionItem?.run?.(params);
               onCloseOverflowButton?.();
             }}
             isPopoverOpen={openPopoverId === secondaryActionItem.id}
@@ -67,7 +67,6 @@ export const AppMenuPopoverActionButtons = ({
             }}
             onPopoverClose={handleOnPopoverClose}
             onCloseOverflowButton={onCloseOverflowButton}
-            popoverAnchorPosition="downLeft"
           />
         </EuiFlexItem>
       )}
@@ -75,8 +74,8 @@ export const AppMenuPopoverActionButtons = ({
         <EuiFlexItem grow={false}>
           <AppMenuActionButton
             {...primaryActionItem}
-            run={() => {
-              primaryActionItem?.run?.();
+            run={(params) => {
+              primaryActionItem?.run?.(params);
               onCloseOverflowButton?.();
             }}
             isPopoverOpen={openPopoverId === primaryActionItem.id}
@@ -85,7 +84,6 @@ export const AppMenuPopoverActionButtons = ({
             }}
             onPopoverClose={handleOnPopoverClose}
             onCloseOverflowButton={onCloseOverflowButton}
-            popoverAnchorPosition="downLeft"
           />
         </EuiFlexItem>
       )}

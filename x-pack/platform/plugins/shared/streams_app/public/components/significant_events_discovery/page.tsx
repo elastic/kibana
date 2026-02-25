@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -13,13 +13,16 @@ import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumb
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { useUnbackedQueriesCount } from '../../hooks/use_unbacked_queries_count';
 import { FeedbackButton } from '../feedback_button';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { QueriesTable } from './components/queries_table';
+import { FeaturesTable } from './components/features_table/features_table';
+import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
+import { InsightsTab } from './components/insights/tab';
 
-const discoveryTabs = ['streams', 'queries'] as const;
+const discoveryTabs = ['streams', 'features', 'queries', 'insights'] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
 
 function isValidDiscoveryTab(value: string): value is DiscoveryTab {
@@ -37,6 +40,7 @@ export function SignificantEventsDiscoveryPage() {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
+  const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -72,12 +76,39 @@ export function SignificantEventsDiscoveryPage() {
       isSelected: tab === 'streams',
     },
     {
-      id: 'queries',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
-        defaultMessage: 'Queries',
+      id: 'features',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTab', {
+        defaultMessage: 'Features',
       }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'features' } }),
+      isSelected: tab === 'features',
+    },
+    {
+      id: 'queries',
+      label: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
+              defaultMessage: 'Queries',
+            })}
+          </EuiFlexItem>
+          {unbackedQueriesCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="accent">{unbackedQueriesCount}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ),
       href: router.link('/_discovery/{tab}', { path: { tab: 'queries' } }),
       isSelected: tab === 'queries',
+    },
+    {
+      id: 'insights',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.insightsTab', {
+        defaultMessage: 'Insights',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'insights' } }),
+      isSelected: tab === 'insights',
     },
   ];
 
@@ -108,8 +139,10 @@ export function SignificantEventsDiscoveryPage() {
         tabs={tabs}
       />
       <StreamsAppPageTemplate.Body grow>
-        {tab === 'streams' && <StreamsView />}
+        {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
+        {tab === 'features' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
+        {tab === 'insights' && <InsightsTab />}
       </StreamsAppPageTemplate.Body>
     </>
   );

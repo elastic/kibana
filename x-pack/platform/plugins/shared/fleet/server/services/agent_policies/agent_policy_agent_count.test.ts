@@ -31,6 +31,10 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
 
     esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
     esClientMock.search.mockImplementation(async () => {
+      const bucketsRecord: Record<string, { doc_count: number }> = {};
+      for (const { key, doc_count } of aggrBuckets) {
+        bucketsRecord[key] = { doc_count };
+      }
       return {
         took: 3,
         timed_out: false,
@@ -47,9 +51,7 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
         },
         aggregations: {
           agent_counts: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: aggrBuckets,
+            buckets: bucketsRecord,
           },
         },
       };
@@ -64,11 +66,44 @@ describe('When using `getAgentCountForAgentPolicies()`', () => {
   });
 
   it('should always return the policy id count, even if agent counts are not found for it', async () => {
-    aggrBuckets.pop();
+    aggrBuckets = [{ key: 'agent-policy-id-a', doc_count: 100 }];
+    esClientMock.search.mockImplementation(async () => ({
+      took: 3,
+      timed_out: false,
+      _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
+      hits: { total: 100, max_score: 0, hits: [] },
+      aggregations: {
+        agent_counts: {
+          buckets: {
+            'agent-policy-id-a': { doc_count: 100 },
+          },
+        },
+      },
+    }));
 
     await expect(getAgentCountForAgentPolicies(esClientMock, agentPolicyIds)).resolves.toEqual({
       'agent-policy-id-a': 100,
       'agent-policy-id-b': 0,
+    });
+  });
+
+  it('should count agents on version-specific policies (e.g. policy#9.3) under the parent policy', async () => {
+    esClientMock.search.mockImplementation(async () => ({
+      took: 3,
+      timed_out: false,
+      _shards: { total: 2, successful: 2, skipped: 0, failed: 0 },
+      hits: { total: 150, max_score: 0, hits: [] },
+      aggregations: {
+        agent_counts: {
+          buckets: {
+            policy1: { doc_count: 150 },
+          },
+        },
+      },
+    }));
+
+    await expect(getAgentCountForAgentPolicies(esClientMock, ['policy1'])).resolves.toEqual({
+      policy1: 150,
     });
   });
 });

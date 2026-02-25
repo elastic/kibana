@@ -8,7 +8,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type {
   MaintenanceWindowStatus,
-  MaintenanceWindow,
+  MaintenanceWindowUI,
   FindMaintenanceWindowsResponse,
 } from '../../common';
 import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';
@@ -26,7 +26,7 @@ export async function findMaintenanceWindows({
   perPage: number;
   search: string;
   selectedStatus: MaintenanceWindowStatus[];
-}): Promise<{ maintenanceWindows: MaintenanceWindow[]; total: number }> {
+}): Promise<{ maintenanceWindows: MaintenanceWindowUI[]; total: number }> {
   const res = await http.get<FindMaintenanceWindowsResponse>(
     `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_find`,
     {

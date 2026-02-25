@@ -251,12 +251,17 @@ function generateContractMetasFromPath(
     const summary = operation.summary ?? null;
     const description = operation.description ?? null;
     const parameterTypes = generateParameterTypes([operation], openApiDocument);
-    const contractName = generateContractName(operationId);
+    const contractName = generateContractName(typeBaseName);
     const schemaImports = [getRequestSchemaName(operationId), getResponseSchemaName(operationId)];
-    const paramsSchemaString = generateParamsSchemaString([operationId], {
-      // Adding fetcher to all kibana contracts at build time
-      fetcher: 'FetcherConfigSchema',
-    });
+    const paramsSchemaString = generateParamsSchemaString(
+      [operationId],
+      {
+        // Adding fetcher to all kibana contracts at build time
+        fetcher: 'FetcherConfigSchema',
+      },
+      // Spread routing/debug meta options into all kibana connector schemas
+      ['KibanaStepMetaSchema']
+    );
     const outputSchemaString = generateOutputSchemaString([operation], openApiDocument);
 
     contractMetas.push({
@@ -268,7 +273,7 @@ function generateContractMetasFromPath(
       documentation: getDocumentationUrl(operation),
       parameterTypes,
 
-      fileName: `kibana.${toSnakeCase(camelToSnake(operationId))}.gen.ts`,
+      fileName: `kibana.${toSnakeCase(camelToSnake(typeBaseName))}.gen.ts`,
       contractName,
       operations: [
         {
@@ -280,7 +285,9 @@ function generateContractMetasFromPath(
       paramsSchemaString,
       outputSchemaString,
       schemaImports,
-      additionalImports: ["import { FetcherConfigSchema } from '../../schema';"],
+      additionalImports: [
+        "import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';",
+      ],
     });
   }
   return contractMetas;

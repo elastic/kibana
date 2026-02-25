@@ -15,6 +15,8 @@
       "label": "SearchIndicesPluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_indices/public/types.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -26,6 +28,8 @@
           "label": "enabled",
           "description": [],
           "path": "x-pack/solutions/search/plugins/search_indices/public/types.ts",
+          "lineNumber": 29,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -41,6 +45,8 @@
       "label": "SearchIndicesPluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_indices/public/types.ts",
+      "lineNumber": 32,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -52,6 +58,8 @@
           "label": "enabled",
           "description": [],
           "path": "x-pack/solutions/search/plugins/search_indices/public/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -75,6 +83,8 @@
       "label": "SearchIndicesPluginSetup",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_indices/server/types.ts",
+      "lineNumber": 9,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -89,6 +99,8 @@
       "label": "SearchIndicesPluginStart",
       "description": [],
       "path": "x-pack/solutions/search/plugins/search_indices/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -108,6 +120,8 @@
         "label": "IndicesStatusResponse",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_indices/common/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -122,6 +136,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/search/plugins/search_indices/common/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -136,6 +152,8 @@
         "label": "UserStartPrivilegesResponse",
         "description": [],
         "path": "x-pack/solutions/search/plugins/search_indices/common/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,6 +168,8 @@
               "{ canCreateApiKeys: boolean; canManageIndex: boolean; canDeleteDocuments: boolean; }"
             ],
             "path": "x-pack/solutions/search/plugins/search_indices/common/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -170,6 +190,8 @@
           "\"elasticsearchIndices\""
         ],
         "path": "x-pack/solutions/search/plugins/search_indices/common/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -185,6 +207,8 @@
           "\"searchIndices\""
         ],
         "path": "x-pack/solutions/search/plugins/search_indices/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -200,6 +224,8 @@
           "\"searchIndices\""
         ],
         "path": "x-pack/solutions/search/plugins/search_indices/common/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -215,6 +241,8 @@
           "\"elasticsearchIndexManagement\""
         ],
         "path": "x-pack/solutions/search/plugins/search_indices/common/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

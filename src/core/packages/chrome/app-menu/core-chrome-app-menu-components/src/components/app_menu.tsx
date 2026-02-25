@@ -18,12 +18,22 @@ import type { AppMenuConfig } from '../types';
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
   visible?: boolean;
+  /**
+   * Whether to render the app menu in a collapsed state (showing only the overflow button).
+   * Only available for the standalone app menu component.
+   * TODO: Remove this in favour of container queries once EUI supports them https://github.com/elastic/eui/issues/8822
+   */
+  isCollapsed?: boolean;
 }
 
 const hasNoItems = (config: AppMenuConfig) =>
   !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
 
-export const AppMenuComponent = ({ config, visible = true }: AppMenuItemsProps) => {
+export const AppMenuComponent = ({
+  config,
+  visible = true,
+  isCollapsed = false,
+}: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
@@ -77,6 +87,21 @@ export const AppMenuComponent = ({ config, visible = true }: AppMenuItemsProps) 
     />
   ) : undefined;
 
+  const collapsedComponent = (
+    <AppMenuOverflowButton
+      items={[...displayedItems, ...overflowItems]}
+      isPopoverOpen={openPopoverId === showMoreButtonId}
+      secondaryActionItem={secondaryActionItem}
+      primaryActionItem={primaryActionItem}
+      onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+      onPopoverClose={handleOnPopoverClose}
+    />
+  );
+
+  if (isCollapsed) {
+    return <EuiHeaderLinks {...headerLinksProps}>{collapsedComponent}</EuiHeaderLinks>;
+  }
+
   if (isBetweenMandXlBreakpoint) {
     return (
       <EuiHeaderLinks {...headerLinksProps}>
@@ -119,16 +144,5 @@ export const AppMenuComponent = ({ config, visible = true }: AppMenuItemsProps) 
     );
   }
 
-  return (
-    <EuiHeaderLinks {...headerLinksProps}>
-      <AppMenuOverflowButton
-        items={[...displayedItems, ...overflowItems]}
-        isPopoverOpen={openPopoverId === showMoreButtonId}
-        secondaryActionItem={secondaryActionItem}
-        primaryActionItem={primaryActionItem}
-        onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-        onPopoverClose={handleOnPopoverClose}
-      />
-    </EuiHeaderLinks>
-  );
+  return <EuiHeaderLinks {...headerLinksProps}>{collapsedComponent}</EuiHeaderLinks>;
 };

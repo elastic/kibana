@@ -21,7 +21,6 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { Query } from '@kbn/es-query';
@@ -33,9 +32,11 @@ import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/publ
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
-import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { UI_SETTINGS } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
+import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
@@ -46,18 +47,17 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app/types';
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
-import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
   dataService,
-  unifiedSearchService,
   serverlessService,
+  unifiedSearchService,
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
-import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
+import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -305,8 +305,6 @@ export function InternalDashboardTopNav({
         ...getManagedContentBadge(dashboardManagedBadge.getBadgeAriaLabel()),
         onClick: () => setIsPopoverOpen(!isPopoverOpen),
         onClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
-        iconOnClick: () => setIsPopoverOpen(!isPopoverOpen),
-        iconOnClickAriaLabel: dashboardManagedBadge.getBadgeAriaLabel(),
       } as TopNavMenuBadgeProps;
 
       allBadges.push({
@@ -417,13 +415,7 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
 
-      {viewMode !== 'print' ? (
-        <ControlsRenderer
-          parentApi={
-            dashboardApi as unknown as ControlsRendererParentApi // casting allows `DashboardLayout` to satisfy the expected `ControlsLayout`
-          }
-        />
-      ) : null}
+      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>

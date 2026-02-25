@@ -6,22 +6,15 @@
  */
 
 import type TestAgent from 'supertest/lib/agent';
-import type { IEsSearchResponse } from '@kbn/search-types';
 
-import type { SearchService, SendOptions } from '@kbn/ftr-common-functional-services';
-import type { SearchSecureService } from './search_secure';
-
-export interface SecuritySolutionServerlessSearch extends Omit<SearchSecureService, 'send'> {
-  send: <T extends IEsSearchResponse>(options: SendOptions) => Promise<T>;
-}
+import type { SearchService } from '@kbn/ftr-common-functional-services';
 
 export interface SecuritySolutionUtilsInterface {
   getUsername: (role?: string) => Promise<string>;
-  createSuperTest: (role?: string) => Promise<TestAgent<any>>;
-  createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
-  createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
-  createSearch: (role?: string) => Promise<SecuritySolutionServerlessSearch>;
-  cleanUpCustomRole: () => Promise<void>;
+  createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
+  cleanUpCustomRoles: () => Promise<void>;
+  createSuperTestWithCustomRole: (role: CustomRole) => Promise<TestAgent<any>>;
+  createSearch: (role?: string) => Promise<SearchService>;
 }
 
 interface FeaturesPrivileges {
@@ -33,7 +26,7 @@ interface ElasticsearchIndices {
   privileges: string[];
 }
 
-export interface Role {
+export interface CustomRole {
   name: string;
   privileges: {
     elasticsearch: ElasticSearchPrivilege;
@@ -56,16 +49,4 @@ export interface User {
   password: string;
   description?: string;
   roles: string[];
-}
-
-export interface SecuritySolutionESSUtilsInterface {
-  getUsername: (role?: string) => Promise<string>;
-  createSearch: (role?: string) => Promise<SearchService>;
-  createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
-  createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
-  cleanUpCustomRole: () => Promise<void>;
-  createUser: (user: User) => Promise<any>;
-  deleteUsers: (userNames: string[]) => Promise<any>;
-  createRole: (name: string, role: Role) => Promise<any>;
-  deleteRoles: (roleNames: string[]) => Promise<any>;
 }

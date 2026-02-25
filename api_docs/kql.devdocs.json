@@ -14,6 +14,8 @@
           "({ items, attached, size, ...rest }: Props) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/kql/public/components/query_string_input/filter_button_group.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "Props"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/filter_button_group.tsx",
+            "lineNumber": 30,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -49,6 +53,8 @@
           "(userInput: string | object) => any"
         ],
         "path": "src/platform/plugins/shared/kql/public/components/query_string_input/from_user.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,6 +69,8 @@
               "string | object"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/from_user.ts",
+            "lineNumber": 18,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -84,6 +92,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/kql/public/components/query_string_input/language_switcher.tsx",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -99,6 +109,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -124,6 +136,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/kql/public/components/query_string_input/index.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -144,6 +158,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/index.tsx",
+            "lineNumber": 19,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -162,6 +178,8 @@
         "label": "KqlPluginSetup",
         "description": [],
         "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -184,6 +202,8 @@
               "; getAutocompleteSettings: () => { terminateAfter: number; timeout: number; }; }"
             ],
             "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -198,6 +218,8 @@
         "label": "QueryStringInputProps",
         "description": [],
         "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+        "lineNumber": 104,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,6 +244,8 @@
               ")[]"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -236,6 +260,8 @@
               "{ query: string | { [key: string]: any; }; language: string; }"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -250,6 +276,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -264,6 +292,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,6 +308,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -299,6 +331,8 @@
               "<any> | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -313,6 +347,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -327,6 +363,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -341,6 +379,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -355,6 +395,8 @@
               "\"upCenter\" | \"upLeft\" | \"upRight\" | \"downCenter\" | \"downLeft\" | \"downRight\" | \"leftCenter\" | \"leftUp\" | \"leftDown\" | \"rightCenter\" | \"rightUp\" | \"rightDown\" | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -369,6 +411,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -393,6 +437,8 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -413,6 +459,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+                "lineNumber": 116,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -431,6 +479,8 @@
               "((isFocused: boolean) => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -445,6 +495,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+                "lineNumber": 117,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -471,6 +523,8 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -491,6 +545,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+                "lineNumber": 118,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -509,6 +565,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -523,6 +581,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -544,6 +604,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,6 +627,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,6 +643,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -593,6 +659,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -607,6 +675,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -622,6 +692,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -636,6 +708,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -647,6 +721,8 @@
             "label": "appName",
             "description": [],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -661,6 +737,8 @@
               "QueryStringInputDependencies"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -675,6 +753,8 @@
               "\"text\" | \"lucene\" | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -689,6 +769,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -703,6 +785,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -719,6 +803,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -742,6 +828,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/query_string_input/query_string_input.tsx",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -756,6 +844,8 @@
         "label": "QuerySuggestionGetFnArgs",
         "description": [],
         "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -767,6 +857,8 @@
             "label": "language",
             "description": [],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -788,6 +880,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -799,6 +893,8 @@
             "label": "query",
             "description": [],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -810,6 +906,8 @@
             "label": "selectionStart",
             "description": [],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -821,6 +919,8 @@
             "label": "selectionEnd",
             "description": [],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -835,6 +935,8 @@
               "AbortSignal | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -849,6 +951,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -863,6 +967,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -884,6 +990,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -905,6 +1013,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -919,6 +1029,8 @@
         "label": "SuggestionsAbstraction",
         "description": [],
         "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -933,6 +1045,8 @@
               "\"cases\" | \"rules\" | \"alerts\" | \"endpoints\""
             ],
             "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -947,6 +1061,8 @@
               "{ [x: string]: { field: string; fieldToQuery: string; displayField: string | undefined; nestedDisplayField?: string | undefined; nestedField?: string | undefined; nestedPath?: string | undefined; }; }"
             ],
             "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -963,6 +1079,8 @@
         "label": "QuerySuggestionTypes",
         "description": [],
         "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -990,6 +1108,8 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/kql/public/autocomplete/autocomplete_service.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1007,6 +1127,8 @@
           "QuerySuggestionField"
         ],
         "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1038,6 +1160,8 @@
           "[]> | undefined"
         ],
         "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1059,6 +1183,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/kql/public/autocomplete/providers/query_suggestion_provider.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1076,6 +1202,8 @@
           "\"s\" | \"l\""
         ],
         "path": "src/platform/plugins/shared/kql/public/components/typeahead/suggestions_component.tsx",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1090,6 +1218,8 @@
       "label": "KqlPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+      "lineNumber": 39,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1116,6 +1246,8 @@
             "; }"
           ],
           "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+          "lineNumber": 40,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1146,6 +1278,8 @@
             ", \"deps\">>"
           ],
           "path": "src/platform/plugins/shared/kql/public/plugin.ts",
+          "lineNumber": 45,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1196,6 +1330,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1210,6 +1346,8 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1225,6 +1363,8 @@
                   "<Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>"
                 ],
                 "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 39,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1313,6 +1453,8 @@
               "<T>; get: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => T; }; }; }"
             ],
             "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1338,6 +1480,8 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1353,6 +1497,8 @@
                   "KQLServerPluginSetupDependencies"
                 ],
                 "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1375,6 +1521,8 @@
               ") => {}"
             ],
             "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1389,6 +1537,8 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 52,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1404,6 +1554,8 @@
                   "KQLServerPluginStartDependencies"
                 ],
                 "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+                "lineNumber": 52,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1422,6 +1574,8 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1444,6 +1598,8 @@
       "label": "KQLServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+      "lineNumber": 15,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1514,6 +1670,8 @@
             "<T>; get: <T = Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { enabled: boolean; timeout: moment.Duration; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>() => T; }; }"
           ],
           "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+          "lineNumber": 16,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1529,6 +1687,8 @@
       "label": "KQLServerPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/kql/server/plugin.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

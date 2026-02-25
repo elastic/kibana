@@ -21,6 +21,7 @@ export const TelemetryMetadataSchema = z
 export const ConfigSchema = z
   .object({
     apiUrl: z.string(),
+    region: z.string().optional(),
     defaultModel: z.string().default(DEFAULT_MODEL),
     contextWindowLength: z.coerce.number().optional(),
     temperature: z.coerce.number().optional(),
@@ -155,6 +156,22 @@ export const InvokeAIRawActionParamsSchema = z
   .strict();
 
 export const InvokeAIRawActionResponseSchema = z.object({}).passthrough();
+
+export const ConverseResponseSchema = z
+  .object({
+    output: z.object({
+      message: z.object({}).passthrough().optional(),
+    }),
+    stopReason: z.string().optional(),
+    usage: z
+      .object({
+        inputToken: z.number().optional(),
+        outputTokens: z.number().optional(),
+        totalTokens: z.number().optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough();
 
 export const RunApiLatestResponseSchema = z
   .object({

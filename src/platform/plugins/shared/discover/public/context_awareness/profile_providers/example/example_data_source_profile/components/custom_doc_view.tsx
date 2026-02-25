@@ -16,12 +16,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import type { DiscoverStateContainer } from '../../../../../application/main/state_management/discover_state';
-import type { OpenInNewTabParams } from '../../../../types';
+import type { OpenInNewTabParams, UpdateESQLQueryFn } from '../../../../types';
 
 export const CustomDocView: React.FC<{
   openInNewTab?: (params: OpenInNewTabParams) => void;
-  updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+  updateESQLQuery?: UpdateESQLQueryFn;
   formattedRecord: string;
 }> = ({ openInNewTab, updateESQLQuery, formattedRecord }) => (
   <>

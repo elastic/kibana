@@ -14,6 +14,8 @@
           "({ logViewKey, sourceIdKey, toastsService, urlStateStorage, }: LogViewUrlStateDependencies) => { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | null"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "LogViewUrlStateDependencies"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+            "lineNumber": 63,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -45,8 +49,10 @@
         "description": [],
         "signature": [
           "({ logViewKey, sourceIdKey, toastsService, urlStateStorage, }: LogViewUrlStateDependencies) => ",
-          "InvokeCreator",
+          "CallbackActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -101,12 +107,12 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
+          "EventObject",
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,12 +121,14 @@
             "id": "def-public.initializeFromUrl.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logViewKey = defaultLogViewKey,\n    sourceIdKey = defaultLegacySourceIdKey,\n    toastsService,\n    urlStateStorage,\n  }",
+            "label": "{\n  logViewKey = defaultLogViewKey,\n  sourceIdKey = defaultLegacySourceIdKey,\n  toastsService,\n  urlStateStorage,\n}",
             "description": [],
             "signature": [
               "LogViewUrlStateDependencies"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+            "lineNumber": 43,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -146,8 +154,10 @@
             "text": "IKbnUrlStateStorage"
           },
           "; logViewKey?: string | undefined; }) => ",
-          "InvokeCreator",
+          "ObservableActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -202,12 +212,12 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
+          "EventObject",
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+        "lineNumber": 99,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -216,9 +226,11 @@
             "id": "def-public.listenForUrlChanges.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    urlStateStorage,\n    logViewKey = defaultLogViewKey,\n  }",
+            "label": "{\n  urlStateStorage,\n  logViewKey = defaultLogViewKey,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+            "lineNumber": 102,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -239,6 +251,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+                "lineNumber": 103,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -253,6 +267,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+                "lineNumber": 104,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -281,6 +297,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -296,6 +314,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -315,6 +335,8 @@
           " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -330,6 +352,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -346,9 +370,11 @@
         "signature": [
           "React.FunctionComponent<React.PropsWithChildren<{ initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
           "ILogViewsClient",
-          "; useDevTools?: boolean | undefined; initializeFromUrl?: ",
-          "InvokeCreator",
+          "; initializeFromUrl?: ",
+          "CallbackActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -403,10 +429,8 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
-          "> | undefined; updateContextInUrl?: ((context: ",
+          "EventObject",
+          "> | undefined; updateContextInUrl?: (({ context }: { context: ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -460,11 +484,13 @@
             "section": "def-public.LogViewContextWithError",
             "text": "LogViewContextWithError"
           },
-          "), _event: ",
+          "); event: ",
           "LogViewEvent",
-          ") => void) | undefined; listenForUrlChanges?: ",
-          "InvokeCreator",
+          "; }) => void) | undefined; listenForUrlChanges?: ",
+          "ObservableActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -519,12 +545,12 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
+          "EventObject",
           "> | undefined; }>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+        "lineNumber": 218,
+        "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -540,6 +566,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -554,6 +582,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -584,9 +614,11 @@
           "EuiButtonEmptyPropsForAnchor",
           "> & ",
           "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"size\" | \"href\" | \"flush\"> & { testSubject: string; } & React.RefAttributes<{}>>"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"size\" | \"flush\" | \"href\"> & { testSubject: string; } & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -602,6 +634,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -616,7 +650,7 @@
         "label": "updateContextInUrl",
         "description": [],
         "signature": [
-          "({ urlStateStorage, logViewKey }: LogViewUrlStateDependencies) => (context: ",
+          "({ urlStateStorage, logViewKey }: LogViewUrlStateDependencies) => ({ context }: { context: ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -670,11 +704,13 @@
             "section": "def-public.LogViewContextWithError",
             "text": "LogViewContextWithError"
           },
-          "), _event: ",
+          "); event: ",
           "LogViewEvent",
-          ") => void"
+          "; }) => void"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -689,6 +725,8 @@
               "LogViewUrlStateDependencies"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
+            "lineNumber": 32,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -705,11 +743,13 @@
         "label": "useLogView",
         "description": [],
         "signature": [
-          "({ initialLogViewReference, logViews, useDevTools, initializeFromUrl, updateContextInUrl, listenForUrlChanges, }: { initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
+          "({ initialLogViewReference, logViews, initializeFromUrl, updateContextInUrl, listenForUrlChanges, }: { initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
           "ILogViewsClient",
-          "; useDevTools?: boolean | undefined; initializeFromUrl?: ",
-          "InvokeCreator",
+          "; initializeFromUrl?: ",
+          "CallbackActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -764,10 +804,8 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
-          "> | undefined; updateContextInUrl?: ((context: ",
+          "EventObject",
+          "> | undefined; updateContextInUrl?: (({ context }: { context: ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -821,11 +859,13 @@
             "section": "def-public.LogViewContextWithError",
             "text": "LogViewContextWithError"
           },
-          "), _event: ",
+          "); event: ",
           "LogViewEvent",
-          ") => void) | undefined; listenForUrlChanges?: ",
-          "InvokeCreator",
+          "; }) => void) | undefined; listenForUrlChanges?: ",
+          "ObservableActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -880,80 +920,10 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
+          "EventObject",
           "> | undefined; }) => { logViewStateService: ",
-          "Interpreter",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), any, ",
-          "LogViewEvent",
-          ", ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; logViewStateNotifications: ",
+          "Actor",
+          "<any>; logViewStateNotifications: ",
           {
             "pluginId": "@kbn/xstate-utils",
             "scope": "public",
@@ -1025,173 +995,11 @@
             "section": "def-public.LogViewNotificationEvent",
             "text": "LogViewNotificationEvent"
           },
-          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"inline\" | \"internal\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.ResolvedLogView",
-            "text": "ResolvedLogView"
-          },
-          "<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "> | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          " | undefined; isInlineLogView: boolean; isPersistedLogView: boolean; load: () => ",
-          "State",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), ",
-          "LogViewEvent",
-          ", any, ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; retry: () => ",
-          "State",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), ",
-          "LogViewEvent",
-          ", any, ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
+          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: any; hasFailedLoadingLogViewStatus: any; hasFailedResolvingLogView: any; latestLoadLogViewFailures: any[]; isUninitialized: any; isLoading: any; isLoadingLogView: any; isLoadingLogViewStatus: any; isResolvingLogView: any; logViewReference: any; logView: any; resolvedLogView: any; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: any; isInlineLogView: boolean; isPersistedLogView: boolean; load: () => void; retry: () => void; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1200,9 +1008,11 @@
             "id": "def-public.useLogView.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialLogViewReference,\n  logViews,\n  useDevTools = isDevMode(),\n  initializeFromUrl,\n  updateContextInUrl,\n  listenForUrlChanges,\n}",
+            "label": "{\n  initialLogViewReference,\n  logViews,\n  initializeFromUrl,\n  updateContextInUrl,\n  listenForUrlChanges,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+            "lineNumber": 33,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1217,6 +1027,8 @@
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+                "lineNumber": 34,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1231,33 +1043,23 @@
                   "ILogViewsClient"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "logsShared",
-                "id": "def-public.useLogView.$1.useDevTools",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "useDevTools",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+                "lineNumber": 35,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "logsShared",
                 "id": "def-public.useLogView.$1.initializeFromUrl",
-                "type": "Function",
+                "type": "Object",
                 "tags": [],
                 "label": "initializeFromUrl",
                 "description": [],
                 "signature": [
-                  "InvokeCreator",
+                  "CallbackActorLogic",
                   "<",
+                  "LogViewEvent",
+                  ", ",
                   "LogViewContextWithReference",
                   " | (",
                   "LogViewContextWithReference",
@@ -1312,12 +1114,12 @@
                     "text": "LogViewContextWithError"
                   },
                   "), ",
-                  "LogViewEvent",
-                  ", any, any, ",
-                  "LogViewEvent",
+                  "EventObject",
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+                "lineNumber": 36,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1329,7 +1131,7 @@
                 "label": "updateContextInUrl",
                 "description": [],
                 "signature": [
-                  "((context: ",
+                  "(({ context }: { context: ",
                   "LogViewContextWithReference",
                   " | (",
                   "LogViewContextWithReference",
@@ -1383,24 +1185,28 @@
                     "section": "def-public.LogViewContextWithError",
                     "text": "LogViewContextWithError"
                   },
-                  "), _event: ",
+                  "); event: ",
                   "LogViewEvent",
-                  ") => void) | undefined"
+                  "; }) => void) | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+                "lineNumber": 37,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "logsShared",
                 "id": "def-public.useLogView.$1.listenForUrlChanges",
-                "type": "Function",
+                "type": "Object",
                 "tags": [],
                 "label": "listenForUrlChanges",
                 "description": [],
                 "signature": [
-                  "InvokeCreator",
+                  "ObservableActorLogic",
                   "<",
+                  "LogViewEvent",
+                  ", ",
                   "LogViewContextWithReference",
                   " | (",
                   "LogViewContextWithReference",
@@ -1455,12 +1261,12 @@
                     "text": "LogViewContextWithError"
                   },
                   "), ",
-                  "LogViewEvent",
-                  ", any, any, ",
-                  "LogViewEvent",
+                  "EventObject",
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1479,76 +1285,8 @@
         "description": [],
         "signature": [
           "() => { logViewStateService: ",
-          "Interpreter",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), any, ",
-          "LogViewEvent",
-          ", ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; logViewStateNotifications: ",
+          "Actor",
+          "<any>; logViewStateNotifications: ",
           {
             "pluginId": "@kbn/xstate-utils",
             "scope": "public",
@@ -1620,173 +1358,11 @@
             "section": "def-public.LogViewNotificationEvent",
             "text": "LogViewNotificationEvent"
           },
-          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"inline\" | \"internal\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.ResolvedLogView",
-            "text": "ResolvedLogView"
-          },
-          "<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "> | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          " | undefined; isInlineLogView: boolean; isPersistedLogView: boolean; load: () => ",
-          "State",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), ",
-          "LogViewEvent",
-          ", any, ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; retry: () => ",
-          "State",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), ",
-          "LogViewEvent",
-          ", any, ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
+          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: any; hasFailedLoadingLogViewStatus: any; hasFailedResolvingLogView: any; latestLoadLogViewFailures: any[]; isUninitialized: any; isLoading: any; isLoadingLogView: any; isLoadingLogViewStatus: any; isResolvingLogView: any; logViewReference: any; logView: any; resolvedLogView: any; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: any; isInlineLogView: boolean; isPersistedLogView: boolean; load: () => void; retry: () => void; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
+        "lineNumber": 218,
+        "columnNumber": 32,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1803,6 +1379,8 @@
         "label": "LogAIAssistantDocument",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1825,6 +1403,8 @@
               "; }[]"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1839,6 +1419,8 @@
         "label": "LogAIAssistantProps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1859,6 +1441,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1880,6 +1464,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1894,6 +1480,8 @@
         "label": "LogsSharedClientSetupDeps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1914,6 +1502,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1934,6 +1524,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1948,6 +1540,8 @@
               "void"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1962,6 +1556,8 @@
         "label": "LogsSharedClientStartDeps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1985,6 +1581,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2005,6 +1603,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2025,6 +1625,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2045,6 +1647,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2063,6 +1667,8 @@
               "; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2084,6 +1690,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2144,6 +1752,8 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2155,17 +1765,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2237,11 +1845,13 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2272,6 +1882,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2292,6 +1904,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2312,6 +1926,8 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2543,7 +2159,7 @@
               "Filter",
               ">; updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]): Promise<",
               "Filter",
-              ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+              ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
                 "scope": "common",
@@ -2609,7 +2225,7 @@
               "GetStoppedPartitionResult",
               ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
               "GetDatafeedResultsChartDataResult",
-              ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+              ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
                 "scope": "common",
@@ -2619,7 +2235,7 @@
               },
               " | undefined; } & { fieldName: string; }>[], threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
               "QueryDslQueryContainer",
-              " | undefined): ",
+              "): ",
               "Observable",
               "<",
               "ExplorerChartsData",
@@ -2880,6 +2496,8 @@
               " & React.RefAttributes<{}>>; }; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2894,6 +2512,8 @@
         "label": "LogViewContextWithError",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2908,6 +2528,8 @@
               "Error"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2922,6 +2544,8 @@
         "label": "LogViewContextWithResolvedLogView",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2951,6 +2575,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2968,11 +2594,11 @@
         "label": "LogsOverviewProps",
         "description": [],
         "signature": [
-          "{ height?: ",
-          "Property",
-          ".Height<string | number> | undefined; timeRange: { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; }; nonHighlightingFilters?: ",
+          "{ timeRange: { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; }; nonHighlightingFilters?: ",
           "QueryDslQueryContainer",
-          "[] | undefined; logsSource?: ",
+          "[] | undefined; height?: ",
+          "Property",
+          ".Height<string | number> | undefined; logsSource?: ",
           {
             "pluginId": "@kbn/logs-overview",
             "scope": "public",
@@ -2985,6 +2611,8 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logs_overview/logs_overview.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3071,6 +2699,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
+        "lineNumber": 159,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3102,6 +2732,8 @@
           ">; status: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }; } | { type: \"LOADING_LOG_VIEW_FAILED\"; error: Error; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/notifications.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3116,6 +2748,8 @@
       "label": "LogsSharedClientSetupExports",
       "description": [],
       "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+      "lineNumber": 33,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3130,6 +2764,8 @@
             "LogViewsServiceSetup"
           ],
           "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+          "lineNumber": 34,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3144,6 +2780,8 @@
             "LogsSharedLocators"
           ],
           "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+          "lineNumber": 35,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3159,6 +2797,8 @@
       "label": "LogsSharedClientStartExports",
       "description": [],
       "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+      "lineNumber": 38,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3173,6 +2813,8 @@
             "LogViewsServiceStart"
           ],
           "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3195,6 +2837,8 @@
             ", \"observabilityAIAssistant\">) => JSX.Element) | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+          "lineNumber": 40,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3217,6 +2861,8 @@
                 ", \"observabilityAIAssistant\">"
               ],
               "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+              "lineNumber": 40,
+              "columnNumber": 21,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3237,6 +2883,8 @@
             "SelfContainedLogsOverviewHelpers"
           ],
           "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
+          "lineNumber": 41,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3272,6 +2920,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3286,6 +2936,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3300,6 +2952,8 @@
                   "LogEntriesAdapter"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 67,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3317,6 +2971,8 @@
                   ", \"framework\" | \"getStartServices\">"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 68,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3355,6 +3011,8 @@
               "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; hasMoreBefore?: boolean | undefined; hasMoreAfter?: boolean | undefined; }>"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3369,6 +3027,8 @@
                   "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 72,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3384,6 +3044,8 @@
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 73,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3399,6 +3061,8 @@
                   "LogEntriesParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 74,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3414,6 +3078,8 @@
                   "({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 75,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3436,6 +3102,8 @@
               ") => Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3450,6 +3118,8 @@
                   "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 133,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3465,6 +3135,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 134,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3480,6 +3152,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 135,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3495,6 +3169,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 136,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3510,6 +3186,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 137,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3525,6 +3203,8 @@
                   "MappingRuntimeFields"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 138,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3546,6 +3226,8 @@
         "label": "ILogsSharedLogEntriesDomain",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3580,6 +3262,8 @@
               "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; hasMoreBefore?: boolean | undefined; hasMoreAfter?: boolean | undefined; }>"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3594,6 +3278,8 @@
                   "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3609,6 +3295,8 @@
                   "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3624,6 +3312,8 @@
                   "LogEntriesParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3639,6 +3329,8 @@
                   "({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 53,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3661,6 +3353,8 @@
               ") => Promise<string[]>"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3675,6 +3369,8 @@
                   "RequestHandlerContext"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 56,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3690,6 +3386,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 57,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3705,6 +3403,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 58,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3720,6 +3420,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 59,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3735,6 +3437,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 60,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3750,6 +3454,8 @@
                   "MappingRuntimeFields"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
+                "lineNumber": 61,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3774,6 +3480,8 @@
           "\"infrastructure-monitoring-log-view\""
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3799,6 +3507,8 @@
         "LogsSharedDomainLibs"
       ],
       "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
+      "lineNumber": 26,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3813,6 +3523,8 @@
             "LogViewsServiceSetup"
           ],
           "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -3829,6 +3541,8 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
+          "lineNumber": 28,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -3843,6 +3557,8 @@
                 "UsageCollector"
               ],
               "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
+              "lineNumber": 28,
+              "columnNumber": 35,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -3862,6 +3578,8 @@
       "label": "LogsSharedPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
+      "lineNumber": 31,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -3876,6 +3594,8 @@
             "LogViewsServiceStart"
           ],
           "path": "x-pack/platform/plugins/shared/logs_shared/server/types.ts",
+          "lineNumber": 32,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -3904,6 +3624,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3918,6 +3640,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3932,6 +3656,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+                "lineNumber": 19,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3947,6 +3673,8 @@
                   "Error | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+                "lineNumber": 19,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3975,6 +3703,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3989,6 +3719,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4003,6 +3735,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+                "lineNumber": 27,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4018,6 +3752,8 @@
                   "Error | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+                "lineNumber": 27,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4046,6 +3782,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4060,6 +3798,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4074,6 +3814,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+                "lineNumber": 11,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4089,6 +3831,8 @@
                   "Error | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/errors.ts",
+                "lineNumber": 11,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -4112,6 +3856,8 @@
           "(date: string) => string"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/utils/date_helpers.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4126,6 +3872,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/utils/date_helpers.ts",
+            "lineNumber": 10,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4145,6 +3893,8 @@
           "(hit: { sort: [string, number]; }) => { time: string; tiebreaker: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4156,6 +3906,8 @@
             "label": "hit",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+            "lineNumber": 32,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4170,6 +3922,8 @@
                   "[string, number]"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+                "lineNumber": 32,
+                "columnNumber": 49,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4210,6 +3964,8 @@
           "> | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/get_logs_locators.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4227,6 +3983,8 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/get_logs_locators.ts",
+            "lineNumber": 11,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4264,6 +4022,8 @@
           " | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4278,6 +4038,8 @@
               "NodeLogsParams"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "lineNumber": 18,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4305,6 +4067,8 @@
           " | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4319,6 +4083,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "lineNumber": 43,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -4338,6 +4104,8 @@
           "(time: number) => string"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4352,6 +4120,8 @@
               "number"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "lineNumber": 56,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4371,6 +4141,8 @@
           "(time: number) => string"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4385,6 +4157,8 @@
               "number"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "lineNumber": 53,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4422,6 +4196,8 @@
           " | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4436,6 +4212,8 @@
               "TraceLogsParams"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/helpers.ts",
+            "lineNumber": 32,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4464,6 +4242,8 @@
           "<DataViewReference>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4475,6 +4255,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4486,6 +4268,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4497,6 +4281,8 @@
             "label": "indices",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4508,6 +4294,8 @@
             "label": "timestampField",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4519,6 +4307,8 @@
             "label": "tiebreakerField",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4533,6 +4323,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4549,6 +4341,8 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4563,6 +4357,8 @@
               "({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4577,6 +4373,8 @@
               "DataViewReference"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4597,6 +4395,8 @@
           "\"logFilter\""
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4612,6 +4412,8 @@
           "\"logPosition\""
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4643,6 +4445,8 @@
           "; highlights: string[]; })[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4658,6 +4462,8 @@
           "{ type: \"data_view\"; dataViewId: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4689,6 +4495,8 @@
           "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4704,6 +4512,8 @@
           "{ after: { time: string; tiebreaker: number; } | \"first\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4719,6 +4529,8 @@
           "{ center: { time: string; tiebreaker: number; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4734,6 +4546,8 @@
           "{ before: { time: string; tiebreaker: number; } | \"last\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4749,6 +4563,8 @@
           "{} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4764,6 +4580,8 @@
           "{ time: string; tiebreaker: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4787,6 +4605,8 @@
           "; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4802,6 +4622,8 @@
           "{ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4825,6 +4647,8 @@
           "; highlights: string[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4840,6 +4664,8 @@
           "{ type: \"index_name\"; indexName: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4855,6 +4681,8 @@
           "{ type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4878,6 +4706,8 @@
           "; highlights: string[]; })[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4893,6 +4723,8 @@
           "{ constant: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4916,6 +4748,8 @@
           "; highlights: string[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4939,6 +4773,8 @@
           "; highlights: string[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4956,6 +4792,8 @@
           "\"LOGS_LOCATOR\""
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/logs_locator.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4979,6 +4817,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/locators/logs_locator.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4994,6 +4834,8 @@
           "{ type: \"kibana_advanced_setting\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5009,6 +4851,8 @@
           "{ columnId: string; time: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5024,6 +4868,8 @@
           "{ id: string; origin: \"inline\" | \"internal\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5039,6 +4885,8 @@
           "{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5054,6 +4902,8 @@
           "{ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5069,6 +4919,8 @@
           "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 137,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5084,6 +4936,8 @@
           "{ index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5099,6 +4953,8 @@
           "{ logViewId: string; type: \"log-view-reference\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 127,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5134,7 +4990,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; isComputedColumn?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -5147,6 +5003,8 @@
           " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; metadata_field?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/resolved_log_view.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5161,6 +5019,8 @@
         "label": "DEFAULT_LOG_VIEW",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5175,6 +5035,8 @@
               "\"log-view-reference\""
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5186,6 +5048,8 @@
             "label": "logViewId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5200,6 +5064,8 @@
         "label": "DEFAULT_REFRESH_INTERVAL",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5211,6 +5077,8 @@
             "label": "pause",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+            "lineNumber": 14,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5222,6 +5090,8 @@
             "label": "value",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+            "lineNumber": 14,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5236,6 +5106,8 @@
         "label": "defaultLogViewAttributes",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5247,6 +5119,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5258,6 +5132,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5269,6 +5145,8 @@
             "label": "logIndices",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5283,6 +5161,8 @@
                   "\"kibana_advanced_setting\""
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+                "lineNumber": 20,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -5299,6 +5179,8 @@
               "({ timestampColumn: { id: string; }; } | { fieldColumn: { id: string; field: string; }; } | { messageColumn: { id: string; }; })[]"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5389,6 +5271,8 @@
           ">; }>]>>; }>]>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5409,6 +5293,8 @@
           "; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5435,6 +5321,8 @@
           "<\"first\">]>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5457,6 +5345,8 @@
           "; }>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5483,6 +5373,8 @@
           "<\"last\">]>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5513,6 +5405,8 @@
           "; }>]>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5533,6 +5427,8 @@
           "; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry_cursor.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5569,6 +5465,8 @@
           ", unknown>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5687,6 +5585,8 @@
           "; }>]>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5729,6 +5629,8 @@
           ">; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5749,6 +5651,8 @@
           "; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5801,6 +5705,8 @@
           ">; }>]>>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5821,6 +5727,8 @@
           "; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5861,6 +5769,8 @@
           ">; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5907,6 +5817,8 @@
           ">; }>]>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5925,6 +5837,8 @@
           "<\"kibana_advanced_setting\">; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5947,6 +5861,8 @@
           "; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_entry/log_entry.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6001,6 +5917,8 @@
           "; }>>]>; }>>]>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6097,6 +6015,8 @@
           "; }>>]>; }>>]>>; }>>; }>]>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 135,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6117,6 +6037,8 @@
           "<\"log-view-reference\">; }>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/types.ts",
+        "lineNumber": 122,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

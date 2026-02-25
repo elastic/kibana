@@ -8,15 +8,14 @@
  */
 
 import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
   initializeUnsavedChanges,
-} from '@kbn/presentation-containers';
-import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
-import {
   getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
@@ -36,6 +35,11 @@ import { MarkdownRenderer } from './components/markdown_renderer';
 const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
   content: '',
 };
+
+const flexCss = css({
+  display: 'flex',
+  flex: '1 1 100%',
+});
 
 const markdownComparators: StateComparators<MarkdownEditorState> = { content: 'referenceEquality' };
 
@@ -116,10 +120,12 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     return {
       api,
       Component: function MarkdownEmbeddableComponent() {
-        const [content, isEditing, viewMode] = useBatchedPublishingSubjects(
+        const [content, isEditing, viewMode, title, hideTitle] = useBatchedPublishingSubjects(
           markdownStateManager.api.content$,
           isEditing$,
-          getViewModeSubject(api) ?? new BehaviorSubject('view')
+          getViewModeSubject(api) ?? new BehaviorSubject('view'),
+          titleManager.api.title$,
+          titleManager.api.hideTitle$
         );
 
         const { processingPlugins: processingPluginList, uiPlugins } =
@@ -132,30 +138,43 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           );
         }
 
-        if (viewMode === 'view' || !isEditing) {
-          return <MarkdownRenderer processingPluginList={processingPluginList} content={content} />;
-        }
+        const editorContent =
+          viewMode === 'view' || !isEditing ? (
+            <MarkdownRenderer
+              processingPluginList={processingPluginList}
+              content={content}
+              title={hideTitle ? undefined : title} // we will reduce the upper padding when the panel has a title
+            />
+          ) : (
+            <MarkdownEditor
+              uiPlugins={uiPlugins}
+              processingPluginList={processingPluginList}
+              content={content}
+              onCancel={() => {
+                if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
+                  parentApi.removePanel(api.uuid);
+                }
+                resetEditingState();
+              }}
+              onSave={(value: string) => {
+                resetEditingState();
+                markdownStateManager.api.setContent(value);
+                if (isNewPanel$.getValue()) {
+                  isNewPanel$.next(false);
+                }
+              }}
+              isPreview$={isPreview$}
+            />
+          );
 
         return (
-          <MarkdownEditor
-            uiPlugins={uiPlugins}
-            processingPluginList={processingPluginList}
-            content={content}
-            onCancel={() => {
-              if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
-                parentApi.removePanel(api.uuid);
-              }
-              resetEditingState();
-            }}
-            onSave={(value: string) => {
-              resetEditingState();
-              markdownStateManager.api.setContent(value);
-              if (isNewPanel$.getValue()) {
-                isNewPanel$.next(false);
-              }
-            }}
-            isPreview$={isPreview$}
-          />
+          <div
+            css={flexCss}
+            data-shared-item
+            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
+          >
+            {editorContent}
+          </div>
         );
       },
     };
