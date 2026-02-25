@@ -11,14 +11,30 @@ import { within } from '../../../ast/location';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
 import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
 import { getPreGroupedAggregationName } from '../../definitions/utils/promql';
-import {
-  PromqlParamName,
-  PromqlParamValueType,
-  type PromqlParamDefinition,
-} from '../../definitions/utils/promql/types';
 import { getTrailingIdentifier } from '../../definitions/utils/shared';
 
-export { PromqlParamName, PromqlParamValueType };
+export enum PromqlParamValueType {
+  TimeseriesSources = 'timeseries_sources',
+  DateLiterals = 'date_literals',
+  Static = 'static',
+}
+
+export enum PromqlParamName {
+  Index = 'index',
+  Step = 'step',
+  Start = 'start',
+  End = 'end',
+  Buckets = 'buckets',
+  ScrapeInterval = 'scrape_interval',
+}
+
+export interface PromqlParamDefinition {
+  name: string;
+  description: string;
+  valueType: PromqlParamValueType;
+  required?: boolean;
+  suggestedValues?: string[];
+}
 
 // ============================================================================
 // Types

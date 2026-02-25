@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PromQLParser } from '../../../../embedded_languages/promql';
-import type { ICommandContext, ISuggestionItem } from '../../../registry/types';
+import { PromQLParser } from '../../../../../embedded_languages/promql';
+import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getQueryPosition } from './query_position';
-import { getPreGroupedAggregationName } from '../promql';
+import { getPreGroupedAggregationName } from '../../promql';
 import {
   buildNextActionsSuggestion,
   buildVectorSuggestions,

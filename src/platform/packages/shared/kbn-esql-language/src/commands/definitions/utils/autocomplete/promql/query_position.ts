@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { within } from '../../../../ast/location';
+import { within } from '../../../../../ast/location';
 import type {
   PromQLAstQueryExpression,
   PromQLBinaryExpression,
   PromQLFunction,
   PromQLLabel,
   PromQLSelector,
-} from '../../../../embedded_languages/promql/types';
-import type { PromQLFunctionParamType } from '../../types';
+} from '../../../../../embedded_languages/promql/types';
+import type { PromQLFunctionParamType } from '../../../types';
 import type { CursorMatch, PromqlDetailedPosition } from './types';
 import {
   findCursorContext,
@@ -38,8 +38,8 @@ import {
   getPromqlBinaryOperatorParamTypes,
   getPromqlFunctionDefinition,
   getPromqlFunctionParamTypes,
-} from '../promql';
-import { promqlOperatorDefinitions } from '../../generated/promql_operators';
+} from '../../promql';
+import { promqlOperatorDefinitions } from '../../../generated/promql_operators';
 
 const TRAILING_COMMA_WITH_SPACES_REGEX = /,\s*$/;
 const SELECTOR_DURATION_START_REGEX = /^\s*\[$/;

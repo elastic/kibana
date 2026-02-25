@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_STRING_TYPES } from '../../../types';
+import { ESQL_STRING_TYPES } from '../../../../types';
 import type { PromqlDetailedPosition, PromqlDetailedPositionType } from '../types';
 import { suggestOperators } from './operators';
 import { suggestGrouping } from './grouping';
@@ -17,8 +17,8 @@ import {
   suggestLabelValues,
   suggestMetrics,
 } from './selectors';
-import { buildAddValuePlaceholder } from '../../../../registry/complete_items';
-import type { ISuggestionItem, ICommandContext } from '../../../../registry/types';
+import { buildAddValuePlaceholder } from '../../../../../registry/complete_items';
+import type { ISuggestionItem, ICommandContext } from '../../../../../registry/types';
 import {
   buildFieldSuggestions,
   buildVectorSuggestions,

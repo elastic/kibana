@@ -6,17 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ISuggestionItem } from '../../../../registry/types';
+import type { ISuggestionItem } from '../../../../../registry/types';
 import {
   PromQLFunctionDefinitionTypes,
   type PromQLFunctionDefinition,
   type PromQLFunctionParamType,
-} from '../../../types';
-import { promqlFunctionDefinitions } from '../../../generated/promql_functions';
-import { buildFunctionDocumentation } from '../../documentation';
-import { withAutoSuggest } from '../../autocomplete/helpers';
-import { SuggestionCategory } from '../../../../../language/autocomplete/utils/sorting';
-import { techPreviewLabel } from '../../shared';
+} from '../../../../types';
+import { promqlFunctionDefinitions } from '../../../../generated/promql_functions';
+import { buildFunctionDocumentation } from '../../../documentation';
+import { withAutoSuggest } from '../../helpers';
+import { SuggestionCategory } from '../../../../../../language/autocomplete/utils/sorting';
+import { techPreviewLabel } from '../../../shared';
 
 /** Returns function suggestions, optionally filtered by expected return types. */
 export const suggestFunctions = (

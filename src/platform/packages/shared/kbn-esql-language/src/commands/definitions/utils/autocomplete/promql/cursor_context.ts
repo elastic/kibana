@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { within } from '../../../../ast/location';
+import { within } from '../../../../../ast/location';
 import type {
   PromQLAstNode,
   PromQLAstQueryExpression,
   PromQLBinaryExpression,
   PromQLFunction,
-} from '../../../../embedded_languages/promql/types';
-import { PromqlWalker } from '../../../../embedded_languages/promql/ast/walker';
+} from '../../../../../embedded_languages/promql/types';
+import { PromqlWalker } from '../../../../../embedded_languages/promql/ast/walker';
 import type { CursorContext, CursorMatch } from './types';
 
 /** Single walker pass: finds narrowest node at cursor AND innermost function containing cursor. */

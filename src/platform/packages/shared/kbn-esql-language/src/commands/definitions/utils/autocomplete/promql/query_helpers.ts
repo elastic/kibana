@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { within } from '../../../../ast/location';
-import { PromqlWalker } from '../../../../embedded_languages/promql/ast/walker';
+import { within } from '../../../../../ast/location';
+import { PromqlWalker } from '../../../../../embedded_languages/promql/ast/walker';
 import type {
   PromQLAstNode,
   PromQLAstQueryExpression,
   PromQLBinaryExpression,
   PromQLFunction,
   PromQLSelector,
-} from '../../../../embedded_languages/promql/types';
-import type { PromQLFunctionParamType } from '../../types';
+} from '../../../../../embedded_languages/promql/types';
+import type { PromQLFunctionParamType } from '../../../types';
 import type { CursorMatch, PromqlDetailedPosition } from './types';
 import {
   getPromqlFunctionDefinition,
   getPromqlFunctionParamTypes,
   isPromqlAcrossSeriesFunction,
-} from '../promql';
-import { countTopLevelCommas, getTrailingIdentifier } from '../shared';
+} from '../../promql';
+import { countTopLevelCommas, getTrailingIdentifier } from '../../shared';
 
 // ============================================================================
 // AST Helpers

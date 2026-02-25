@@ -31,7 +31,7 @@ import {
   isParamValueComplete,
 } from './utils';
 import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
-import { suggestForPromqlQuery } from '../../definitions/utils/promql/suggestion_query_engine';
+import { suggestForPromqlQuery } from '../../definitions/utils/autocomplete';
 
 export async function autocomplete(
   query: string,

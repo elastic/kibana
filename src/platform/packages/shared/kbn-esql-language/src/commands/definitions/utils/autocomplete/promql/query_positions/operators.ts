@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ISuggestionItem } from '../../../../registry/types';
-import { type PromQLFunctionDefinition } from '../../../types';
-import { promqlOperatorDefinitions } from '../../../generated/promql_operators';
-import { buildFunctionDocumentation } from '../../documentation';
-import { techPreviewLabel } from '../../shared';
-import { arithmeticOperators } from '../../../all_operators';
+import type { ISuggestionItem } from '../../../../../registry/types';
+import { type PromQLFunctionDefinition } from '../../../../types';
+import { promqlOperatorDefinitions } from '../../../../generated/promql_operators';
+import { buildFunctionDocumentation } from '../../../documentation';
+import { techPreviewLabel } from '../../../shared';
+import { arithmeticOperators } from '../../../../all_operators';
 
 /** Returns operator suggestions available in query continuation contexts. */
 export const suggestOperators = (): ISuggestionItem[] => {

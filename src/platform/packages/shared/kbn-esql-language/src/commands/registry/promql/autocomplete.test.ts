@@ -18,8 +18,8 @@ import {
   promqlLabelSelectorItem,
   promqlRangeSelectorItem,
 } from '../complete_items';
-import { suggestFunctions } from '../../definitions/utils/promql/query_positions/functions';
-import { suggestOperators } from '../../definitions/utils/promql/query_positions/operators';
+import { suggestFunctions } from '../../definitions/utils/autocomplete/promql/query_positions/functions';
+import { suggestOperators } from '../../definitions/utils/autocomplete/promql/query_positions/operators';
 import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
 import { getPromqlParam, PROMQL_PARAM_NAMES } from './utils';
 import { TIME_SYSTEM_PARAMS } from '../../definitions/utils/literals';

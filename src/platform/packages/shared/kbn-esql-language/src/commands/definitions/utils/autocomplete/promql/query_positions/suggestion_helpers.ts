@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES, type PromQLFunctionParamType } from '../../../types';
-import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
-import { commaCompleteItem } from '../../../../registry/complete_items';
-import { withAutoSuggest } from '../../autocomplete/helpers';
-import { SuggestionCategory } from '../../../../../language/autocomplete/utils';
+import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES, type PromQLFunctionParamType } from '../../../../types';
+import type { ICommandContext, ISuggestionItem } from '../../../../../registry/types';
+import { commaCompleteItem } from '../../../../../registry/complete_items';
+import { withAutoSuggest } from '../../helpers';
+import { SuggestionCategory } from '../../../../../../language/autocomplete/utils';
 import { suggestFunctions } from './functions';
 import { suggestGrouping } from './grouping';
 

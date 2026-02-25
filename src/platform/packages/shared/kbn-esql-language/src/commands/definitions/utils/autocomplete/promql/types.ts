@@ -12,35 +12,8 @@ import type {
   PromQLBinaryExpression,
   PromQLFunction,
   PromQLSelector,
-} from '../../../../embedded_languages/promql/types';
-import type { PromQLFunctionParamType } from '../../types';
-
-// ============================================================================
-// Param types
-// ============================================================================
-
-export enum PromqlParamValueType {
-  TimeseriesSources = 'timeseries_sources',
-  DateLiterals = 'date_literals',
-  Static = 'static',
-}
-
-export enum PromqlParamName {
-  Index = 'index',
-  Step = 'step',
-  Start = 'start',
-  End = 'end',
-  Buckets = 'buckets',
-  ScrapeInterval = 'scrape_interval',
-}
-
-export interface PromqlParamDefinition {
-  name: string;
-  description: string;
-  valueType: PromqlParamValueType;
-  required?: boolean;
-  suggestedValues?: string[];
-}
+} from '../../../../../embedded_languages/promql/types';
+import type { PromQLFunctionParamType } from '../../../types';
 
 // ============================================================================
 // Cursor context

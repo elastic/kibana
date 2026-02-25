@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
-import { pipeCompleteItem, promqlByCompleteItem } from '../../../../registry/complete_items';
-import type { PromQLFunctionParamType } from '../../../types';
-import { getPromqlFunctionParamTypes } from '../../promql';
+import type { ICommandContext, ISuggestionItem } from '../../../../../registry/types';
+import { pipeCompleteItem, promqlByCompleteItem } from '../../../../../registry/complete_items';
+import type { PromQLFunctionParamType } from '../../../../types';
+import { getPromqlFunctionParamTypes } from '../../../promql';
 import { suggestOperators } from './operators';
 
 export interface SuggestGroupingInput {

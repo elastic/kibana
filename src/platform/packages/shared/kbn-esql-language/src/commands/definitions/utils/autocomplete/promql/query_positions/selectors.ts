@@ -6,18 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ISuggestionItem } from '../../../../registry/types';
-import type { PromQLFunctionDefinition } from '../../../types';
-import { promqlLabelMatcherDefinitions } from '../../../generated/promql_label_matchers';
-import { buildFunctionDocumentation } from '../../documentation';
-import { techPreviewLabel } from '../../shared';
+import type { ISuggestionItem } from '../../../../../registry/types';
+import type { PromQLFunctionDefinition } from '../../../../types';
+import { promqlLabelMatcherDefinitions } from '../../../../generated/promql_label_matchers';
+import { buildFunctionDocumentation } from '../../../documentation';
+import { techPreviewLabel } from '../../../shared';
 import { suggestOperators } from './operators';
 import type { PromqlDetailedPosition } from '../types';
 import {
   promqlLabelSelectorItem,
   promqlRangeSelectorItem,
   valuePlaceholderConstant,
-} from '../../../../registry/complete_items';
+} from '../../../../../registry/complete_items';
 
 /** Suggests selector/range/operator tokens after a metric name. */
 export const suggestMetrics = (position: PromqlDetailedPosition): ISuggestionItem[] => {
