@@ -16,6 +16,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { ManagementApp } from '@kbn/management-plugin/public';
 import { PLUGIN_ID, PLUGIN_TITLE } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import type {
@@ -34,6 +35,7 @@ export class SearchInferenceEndpointsPlugin
   private config: SearchInferenceEndpointsConfigType;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private licenseSubscription: Subscription | undefined;
+  private managementApp: ManagementApp | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfigType>();
@@ -76,24 +78,23 @@ export class SearchInferenceEndpointsPlugin
     });
 
     if (plugins.management) {
-      plugins.management.sections.section.machineLearning
-        .registerApp({
-          id: 'inference_endpoints',
-          title: PLUGIN_TITLE,
-          order: 2,
-          async mount(params) {
-            const { renderManagementApp } = await import('./application');
-            const [coreStart, depsStart] = await core.getStartServices();
-            const startDeps: AppPluginStartDependencies = {
-              ...depsStart,
-              history: params.history,
-              searchNavigation: undefined,
-            };
+      this.managementApp = plugins.management.sections.section.machineLearning.registerApp({
+        id: 'inference_endpoints',
+        title: PLUGIN_TITLE,
+        order: 2,
+        async mount(params) {
+          const { renderManagementApp } = await import('./application');
+          const [coreStart, depsStart] = await core.getStartServices();
+          const startDeps: AppPluginStartDependencies = {
+            ...depsStart,
+            history: params.history,
+            searchNavigation: undefined,
+          };
 
-            return renderManagementApp(coreStart, startDeps, params.element);
-          },
-        })
-        .enable();
+          return renderManagementApp(coreStart, startDeps, params.element);
+        },
+      });
+      this.managementApp.disable();
     }
 
     registerLocators(plugins.share);
@@ -109,14 +110,20 @@ export class SearchInferenceEndpointsPlugin
     docLinks.setDocLinks(core.docLinks.links);
 
     this.licenseSubscription = licensing.license$.subscribe((license) => {
-      const status: AppStatus =
-        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise')
-          ? AppStatus.accessible
-          : AppStatus.inaccessible;
+      const hasEnterpriseLicense =
+        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise');
 
       this.appUpdater$.next(() => ({
-        status,
+        status: hasEnterpriseLicense ? AppStatus.accessible : AppStatus.inaccessible,
       }));
+
+      if (this.managementApp) {
+        if (hasEnterpriseLicense) {
+          this.managementApp.enable();
+        } else {
+          this.managementApp.disable();
+        }
+      }
     });
 
     return {};
