@@ -41,23 +41,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID",
-        "description": [],
-        "signature": [
-          "\"agentBuilder:dashboardTools\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 63,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID",
         "type": "string",
         "tags": [],
@@ -67,7 +50,7 @@
           "\"agentBuilder:experimentalFeatures\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 65,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -84,7 +67,7 @@
           "\"agentBuilder:navEnabled\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 64,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -101,7 +84,7 @@
           "\"ai:anonymizationSettings\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 143,
+        "lineNumber": 142,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -118,7 +101,7 @@
           "\"aiAssistant:preferredAIAssistantType\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 141,
+        "lineNumber": 140,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -135,7 +118,7 @@
           "\"aiAssistant:preferredChatExperience\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 142,
+        "lineNumber": 141,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -152,7 +135,7 @@
           "\"autocomplete:useTimeRange\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 68,
+        "lineNumber": 67,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -169,7 +152,7 @@
           "\"autocomplete:valueSuggestionMethod\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 69,
+        "lineNumber": 68,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -186,7 +169,7 @@
           "\"banners:backgroundColor\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 76,
+        "lineNumber": 75,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -203,7 +186,7 @@
           "\"banners:linkColor\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 75,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -220,7 +203,7 @@
           "\"banners:placement\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 72,
+        "lineNumber": 71,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -237,7 +220,7 @@
           "\"banners:textColor\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 74,
+        "lineNumber": 73,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -254,7 +237,7 @@
           "\"banners:textContent\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 73,
+        "lineNumber": 72,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -271,7 +254,7 @@
           "\"context:defaultSize\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 82,
+        "lineNumber": 81,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -288,7 +271,7 @@
           "\"context:step\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 83,
+        "lineNumber": 82,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -305,7 +288,7 @@
           "\"context:tieBreakerFields\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 84,
+        "lineNumber": 83,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -322,7 +305,7 @@
           "\"courier:customRequestPreference\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 162,
+        "lineNumber": 161,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -339,7 +322,7 @@
           "\"courier:ignoreFilterIfFieldNotInIndex\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 163,
+        "lineNumber": 162,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -356,7 +339,7 @@
           "\"courier:maxConcurrentShardRequests\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 165,
+        "lineNumber": 164,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -373,7 +356,7 @@
           "\"courier:setRequestPreference\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 166,
+        "lineNumber": 165,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -424,7 +407,7 @@
           "\"dataSources:enabled\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 79,
+        "lineNumber": 78,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -526,7 +509,7 @@
           "\"defaultColumns\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 85,
+        "lineNumber": 84,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -611,7 +594,7 @@
           "\"discover:maxDocFieldsDisplayed\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 87,
+        "lineNumber": 86,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -628,7 +611,7 @@
           "\"discover:modifyColumnsOnSwitch\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 88,
+        "lineNumber": 87,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -645,7 +628,7 @@
           "\"discover:rowHeightOption\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 89,
+        "lineNumber": 88,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -662,7 +645,7 @@
           "\"discover:sampleRowsPerPage\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 90,
+        "lineNumber": 89,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -679,7 +662,7 @@
           "\"discover:sampleSize\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 91,
+        "lineNumber": 90,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -696,7 +679,7 @@
           "\"discover:searchOnPageLoad\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 92,
+        "lineNumber": 91,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -713,7 +696,7 @@
           "\"discover:showFieldStatistics\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 93,
+        "lineNumber": 92,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -730,7 +713,7 @@
           "\"discover:showMultiFields\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 94,
+        "lineNumber": 93,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -747,7 +730,7 @@
           "\"discover:sort:defaultOrder\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 95,
+        "lineNumber": 94,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -764,7 +747,7 @@
           "\"doc_table:hideTimeColumn\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 96,
+        "lineNumber": 95,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -781,7 +764,7 @@
           "\"doc_table:highlight\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 97,
+        "lineNumber": 96,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -798,7 +781,7 @@
           "\"enableESQL\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 86,
+        "lineNumber": 85,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -985,7 +968,7 @@
           "\"genAiSettings:defaultAIConnector\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 138,
+        "lineNumber": 137,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1002,7 +985,7 @@
           "\"genAiSettings:defaultAIConnectorOnly\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 139,
+        "lineNumber": 138,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1206,7 +1189,7 @@
           "\"ml:anomalyDetection:results:enableTimeDefaults\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 100,
+        "lineNumber": 99,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1223,7 +1206,7 @@
           "\"ml:anomalyDetection:results:timeDefaults\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 102,
+        "lineNumber": 101,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1240,7 +1223,7 @@
           "\"notifications:banner\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 106,
+        "lineNumber": 105,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1257,7 +1240,7 @@
           "\"notifications:lifetime:banner\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 107,
+        "lineNumber": 106,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1274,7 +1257,7 @@
           "\"notifications:lifetime:error\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 108,
+        "lineNumber": 107,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1291,7 +1274,7 @@
           "\"notifications:lifetime:info\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 109,
+        "lineNumber": 108,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1308,7 +1291,7 @@
           "\"notifications:lifetime:warning\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 110,
+        "lineNumber": 109,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1325,7 +1308,7 @@
           "\"observability:aiAssistantSearchConnectorIndexPattern\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 134,
+        "lineNumber": 133,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1342,7 +1325,7 @@
           "\"observability:aiAssistantSimulatedFunctionCalling\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 132,
+        "lineNumber": 131,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1359,7 +1342,7 @@
           "\"observability:apmAWSLambdaPriceFactor\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 113,
+        "lineNumber": 112,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1376,7 +1359,7 @@
           "\"observability:apmAWSLambdaRequestCostPerMillion\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 114,
+        "lineNumber": 113,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1393,7 +1376,7 @@
           "\"observability:apmDefaultServiceEnvironment\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 116,
+        "lineNumber": 115,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1410,7 +1393,7 @@
           "\"observability:apmEnableServiceInventoryTableSearchBar\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 128,
+        "lineNumber": 127,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1427,7 +1410,7 @@
           "\"observability:apmEnableTableSearchBar\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 127,
+        "lineNumber": 126,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1444,7 +1427,7 @@
           "\"observability:apmProgressiveLoading\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 118,
+        "lineNumber": 117,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1461,7 +1444,7 @@
           "\"observability:apmServiceGroupMaxNumberOfServices\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 119,
+        "lineNumber": 118,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1478,7 +1461,7 @@
           "\"observability:enableComparisonByDefault\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 121,
+        "lineNumber": 120,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1495,7 +1478,7 @@
           "\"observability:enableDiagnosticMode\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 153,
+        "lineNumber": 152,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1512,7 +1495,7 @@
           "\"observability:enableInfrastructureAssetCustomDashboards\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 123,
+        "lineNumber": 122,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1529,7 +1512,7 @@
           "\"observability:enableInspectEsQueries\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 125,
+        "lineNumber": 124,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1546,7 +1529,7 @@
           "\"observability:logSources\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 131,
+        "lineNumber": 130,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1563,7 +1546,7 @@
           "\"observability:newLogsOverview\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 130,
+        "lineNumber": 129,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1580,7 +1563,7 @@
           "\"observability:maxSuggestions\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 126,
+        "lineNumber": 125,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1597,7 +1580,7 @@
           "\"observability:registerObservabilityAgent\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 136,
+        "lineNumber": 135,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1614,7 +1597,7 @@
           "\"observability:searchExcludedDataTiers\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 144,
+        "lineNumber": 143,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1631,7 +1614,7 @@
           "\"observability:streamsEnableAttachments\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 152,
+        "lineNumber": 151,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1648,7 +1631,7 @@
           "\"observability:streamsEnableContentPacks\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 151,
+        "lineNumber": 150,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1665,7 +1648,7 @@
           "\"observability:streamsEnableGroupStreams\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 149,
+        "lineNumber": 148,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1682,7 +1665,7 @@
           "\"observability:streamsEnableQueryStreams\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 150,
+        "lineNumber": 149,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1699,7 +1682,7 @@
           "\"observability:streamsEnableSignificantEvents\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 145,
+        "lineNumber": 144,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1716,7 +1699,7 @@
           "\"observability:streamsEnableSignificantEventsDiscovery\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 147,
+        "lineNumber": 146,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1767,7 +1750,7 @@
           "\"rollups.enableIndexPatterns\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 159,
+        "lineNumber": 158,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1818,7 +1801,7 @@
           "\"search:includeFrozen\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 167,
+        "lineNumber": 166,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1852,7 +1835,7 @@
           "\"search:timeout\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 168,
+        "lineNumber": 167,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1869,7 +1852,7 @@
           "\"securitySolution:alertTags\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 186,
+        "lineNumber": 185,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1886,7 +1869,7 @@
           "\"securitySolution:defaultAnomalyScore\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 176,
+        "lineNumber": 175,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1903,7 +1886,7 @@
           "\"securitySolution:defaultIndex\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 174,
+        "lineNumber": 173,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1920,7 +1903,7 @@
           "\"securitySolution:defaultThreatIndex\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 175,
+        "lineNumber": 174,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1937,7 +1920,7 @@
           "\"securitySolution:defaultValueReportMinutes\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 198,
+        "lineNumber": 197,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1954,7 +1937,7 @@
           "\"securitySolution:defaultValueReportRate\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 200,
+        "lineNumber": 199,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1971,7 +1954,7 @@
           "\"securitySolution:defaultValueReportTitle\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 202,
+        "lineNumber": 201,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1990,7 +1973,7 @@
           "\"securitySolution:enableAssetCriticality\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 188,
+        "lineNumber": 187,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2007,7 +1990,7 @@
           "\"securitySolution:enableAssetInventory\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 194,
+        "lineNumber": 193,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2024,7 +2007,7 @@
           "\"securitySolution:enableCloudConnector\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 196,
+        "lineNumber": 195,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2041,7 +2024,7 @@
           "\"securitySolution:enableGraphVisualization\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 192,
+        "lineNumber": 191,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2058,7 +2041,7 @@
           "\"securitySolution:enableGroupedNav\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 177,
+        "lineNumber": 176,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2075,7 +2058,7 @@
           "\"securitySolution:enableNewsFeed\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 179,
+        "lineNumber": 178,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2092,7 +2075,7 @@
           "\"securitySolution:enableVisualizationsInFlyout\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 190,
+        "lineNumber": 189,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2109,7 +2092,7 @@
           "\"securitySolution:ipReputationLinks\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 181,
+        "lineNumber": 180,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2126,7 +2109,7 @@
           "\"securitySolution:newsFeedUrl\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 180,
+        "lineNumber": 179,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2143,7 +2126,7 @@
           "\"securitySolution:refreshIntervalDefaults\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 171,
+        "lineNumber": 170,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2160,7 +2143,7 @@
           "\"securitySolution:rulesTableRefresh\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 178,
+        "lineNumber": 177,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2177,7 +2160,7 @@
           "\"securitySolution:showRelatedIntegrations\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 182,
+        "lineNumber": 181,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2194,7 +2177,7 @@
           "\"securitySolution:suppressionBehaviorOnAlertClosure\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 184,
+        "lineNumber": 183,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2211,7 +2194,7 @@
           "\"securitySolution:timeDefaults\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 173,
+        "lineNumber": 172,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2313,7 +2296,7 @@
           "\"timelion:es.default_index\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 205,
+        "lineNumber": 204,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2330,7 +2313,7 @@
           "\"timelion:es.timefield\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 206,
+        "lineNumber": 205,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2347,7 +2330,7 @@
           "\"timelion:max_buckets\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 207,
+        "lineNumber": 206,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2364,7 +2347,7 @@
           "\"timelion:min_interval\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 208,
+        "lineNumber": 207,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2381,7 +2364,7 @@
           "\"timelion:target_buckets\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 209,
+        "lineNumber": 208,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2449,7 +2432,7 @@
           "\"visualize:enableLabs\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 217,
+        "lineNumber": 216,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2466,7 +2449,7 @@
           "\"visualization:heatmap:maxBuckets\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 212,
+        "lineNumber": 211,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2483,7 +2466,7 @@
           "\"visualization:visualize:legacyGaugeChartsLibrary\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 213,
+        "lineNumber": 212,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2500,7 +2483,7 @@
           "\"visualization:visualize:legacyHeatmapChartsLibrary\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 215,
+        "lineNumber": 214,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2517,7 +2500,7 @@
           "\"xpackReporting:customPdfLogo\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 156,
+        "lineNumber": 155,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

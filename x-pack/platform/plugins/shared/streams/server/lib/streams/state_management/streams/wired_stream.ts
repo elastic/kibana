@@ -21,10 +21,12 @@ import {
   getAncestors,
   getAncestorsAndSelf,
   getParentId,
+  getRoot,
   isChildOf,
   isDescendantOf,
   isRootStreamDefinition,
   isIlmLifecycle,
+  LOGS_ECS_STREAM_NAME,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -540,6 +542,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     validateAncestorFields({
       ancestors,
       fields: this._definition.ingest.wired.fields,
+      streamName: this._definition.name,
     });
 
     validateDescendantFields({
@@ -571,9 +574,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         .map(([name]) => name);
 
       // Validate the Streamlang DSL
+      const rootStream = getRoot(this._definition.name);
       const validationResult = validateStreamlang(this._definition.ingest.processing, {
         reservedFields,
         streamType: 'wired',
+        skipNamespaceValidation: rootStream === LOGS_ECS_STREAM_NAME,
       });
 
       if (!validationResult.isValid) {
