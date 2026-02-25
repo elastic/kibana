@@ -52,7 +52,7 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_bulk_delete`,
       validate: {
         body: schema.object({
-          ids: schema.arrayOf(schema.string()),
+          ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 1000 }),
           force: schema.boolean({ defaultValue: true }),
         }),
       },

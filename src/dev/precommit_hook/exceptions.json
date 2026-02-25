@@ -86,7 +86,8 @@
     "x-pack/solutions/security/plugins/entity_store/public/hooks/useInstallEntityStoreV2.tsx": "'useInstallEntityStoreV2.tsx' should be snake_case"
   },
   "@elastic/experience-docs": {
-    "docs/reference/connectors-kibana/_snippets": "'_snippets' should be kebab-case"
+    "docs/reference/connectors-kibana/_snippets": "'_snippets' should be kebab-case",
+    "docs/reference/user-activity/_snippets": "'_snippets' should be kebab-case"
   },
   "@elastic/fleet": {
     "x-pack/platform/plugins/shared/fleet/cypress/packages/input_package-1.0.0.zip": "'input_package-1.0.0.zip' should be snake_case",
