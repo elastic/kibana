@@ -120,13 +120,14 @@ export const SchemaEditorFlyout = ({
     (nextField.description ?? undefined) !== (field.description ?? undefined);
   const isInheritedDescriptionOnlyEditing =
     isDescriptionOnlyEditing && field.status === 'inherited';
-  // For wired streams, unmapped fields can have description-only changes without selecting a type
+  // For wired streams, unmapped fields can have description-only changes without selecting a type.
+  // This also applies when user explicitly selects "Unmapped" from the type dropdown.
   const isUnmappedDescriptionOnlyChange =
     isEditing &&
     streamType === 'wired' &&
     field.status === 'unmapped' &&
     !field.type &&
-    !nextField.type &&
+    (!nextField.type || nextField.type === 'unmapped') &&
     hasDescriptionChanged;
 
   const onValidate = ({
@@ -300,10 +301,16 @@ export const SchemaEditorFlyout = ({
                     } as SchemaField;
                   }
 
+                  // If user selected 'unmapped' type, exclude it from the staged field.
+                  // 'unmapped' is a UI-only pseudo-type representing "no mapping".
+                  const { type: rawType, ...fieldWithoutType } = nextField;
+                  const effectiveType = rawType === 'unmapped' ? undefined : rawType;
+
                   return {
-                    ...nextField,
+                    ...fieldWithoutType,
+                    ...(effectiveType !== undefined ? { type: effectiveType } : {}),
                     parent: stagedParent,
-                    status: 'mapped',
+                    status: effectiveType !== undefined ? 'mapped' : 'unmapped',
                   } as SchemaField;
                 })();
 

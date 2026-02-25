@@ -52,6 +52,12 @@ export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldD
     throw new Error('Cannot convert system-managed field type to FieldDefinitionConfig');
   }
 
+  if (field.type === 'unmapped') {
+    // `unmapped` is a UI-only pseudo-type representing "no mapping".
+    // This should not reach here - the flyout should have filtered it out.
+    throw new Error('Cannot convert unmapped field type to FieldDefinitionConfig');
+  }
+
   return {
     type: field.type,
     ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
@@ -96,6 +102,19 @@ export const buildSchemaSavePayload = (
   definition: Streams.ingest.all.GetResponse,
   fields: SchemaField[]
 ): { ingest: IngestUpsertRequest } => {
+  const isWired = Streams.WiredStream.GetResponse.is(definition);
+
+  // For wired streams, get inherited field descriptions to detect doc-only overrides
+  const inheritedDescriptions = new Map<string, string | undefined>();
+  if (isWired) {
+    for (const [name, inheritedField] of Object.entries(definition.inherited_fields)) {
+      inheritedDescriptions.set(
+        name,
+        'description' in inheritedField ? inheritedField.description : undefined
+      );
+    }
+  }
+
   const persistedFields = fields.reduce((acc, field) => {
     const hasNonEmptyDescription = Boolean(
       field.description && field.description.trim().length > 0
@@ -104,6 +123,7 @@ export const buildSchemaSavePayload = (
     // Persist:
     // - mapped fields (real overrides)
     // - doc-only overrides (description-only), even if status is 'unmapped'
+    // - inherited fields with description overrides defined on THIS stream
     if (field.status === 'mapped') {
       // UI-only pseudo-type; never persist.
       if (field.type === 'system') {
@@ -112,6 +132,13 @@ export const buildSchemaSavePayload = (
       acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
     } else if (field.status === 'unmapped' && hasNonEmptyDescription) {
       acc[field.name] = { description: field.description!.trim() };
+    } else if (field.status === 'inherited' && hasNonEmptyDescription && isWired) {
+      // For inherited fields, check if the description differs from the inherited one.
+      // If so, it's a doc-only override defined on this stream that needs to be preserved.
+      const inheritedDescription = inheritedDescriptions.get(field.name);
+      if (field.description !== inheritedDescription) {
+        acc[field.name] = { description: field.description!.trim() };
+      }
     }
 
     return acc;
@@ -121,7 +148,7 @@ export const buildSchemaSavePayload = (
     ingest: {
       ...definition.stream.ingest,
       processing: omit(definition.stream.ingest.processing, 'updated_at'),
-      ...(Streams.WiredStream.GetResponse.is(definition)
+      ...(isWired
         ? {
             wired: {
               ...definition.stream.ingest.wired,

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { getGeoPointSuggestion, buildSchemaSavePayload } from './utils';
-import type { SchemaEditorField, SchemaField } from './types';
+import {
+  getGeoPointSuggestion,
+  buildSchemaSavePayload,
+  convertToFieldDefinitionConfig,
+} from './utils';
+import type { MappedSchemaField, SchemaEditorField, SchemaField } from './types';
 import type { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 
@@ -193,6 +197,112 @@ describe('buildSchemaSavePayload', () => {
       },
     });
   });
+
+  it('preserves description overrides on inherited fields', () => {
+    const mockDefinition = buildWiredDefinition({
+      inherited_fields: {
+        trace_id: {
+          type: 'keyword',
+          from: 'logs',
+          // No description in the inherited field
+        },
+      },
+    });
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'trace_id',
+        parent: 'logs',
+        status: 'inherited',
+        type: 'keyword',
+        description: 'Description override on child stream',
+      },
+      {
+        name: 'new_field',
+        parent: 'logs.child',
+        status: 'mapped',
+        type: 'keyword',
+        description: 'A newly mapped field',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect(payload.ingest.wired!.fields).toEqual({
+      trace_id: { description: 'Description override on child stream' },
+      new_field: { type: 'keyword', description: 'A newly mapped field' },
+    });
+  });
+
+  it('does not persist inherited field description if it matches inherited description', () => {
+    const mockDefinition = buildWiredDefinition({
+      inherited_fields: {
+        trace_id: {
+          type: 'keyword',
+          from: 'logs',
+          description: 'Same description',
+        },
+      },
+    });
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'trace_id',
+        parent: 'logs',
+        status: 'inherited',
+        type: 'keyword',
+        description: 'Same description',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    // Should not include trace_id since description matches inherited
+    expect(payload.ingest.wired!.fields).toEqual({});
+  });
+});
+
+describe('convertToFieldDefinitionConfig', () => {
+  it('throws for system-managed field type', () => {
+    const field = {
+      name: '@timestamp',
+      parent: 'logs',
+      status: 'mapped',
+      type: 'system',
+    } as MappedSchemaField;
+
+    expect(() => convertToFieldDefinitionConfig(field)).toThrow(
+      'Cannot convert system-managed field type to FieldDefinitionConfig'
+    );
+  });
+
+  it('throws for unmapped field type', () => {
+    const field = {
+      name: 'some_field',
+      parent: 'logs',
+      status: 'mapped',
+      type: 'unmapped',
+    } as MappedSchemaField;
+
+    expect(() => convertToFieldDefinitionConfig(field)).toThrow(
+      'Cannot convert unmapped field type to FieldDefinitionConfig'
+    );
+  });
+
+  it('converts a valid mapped field', () => {
+    const field = {
+      name: 'message',
+      parent: 'logs',
+      status: 'mapped',
+      type: 'keyword',
+      description: 'The log message',
+    } as MappedSchemaField;
+
+    const config = convertToFieldDefinitionConfig(field);
+
+    expect(config).toEqual({
+      type: 'keyword',
+      description: 'The log message',
+    });
+  });
 });
 
 const privileges = {
@@ -207,7 +317,9 @@ const privileges = {
   create_snapshot_repository: true,
 };
 
-const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({
+const buildWiredDefinition = (
+  overrides?: Partial<Streams.WiredStream.GetResponse>
+): Streams.WiredStream.GetResponse => ({
   stream: {
     name: 'logs',
     description: 'Wired stream',
@@ -231,6 +343,7 @@ const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({
   effective_settings: {},
   privileges: { ...privileges },
   effective_failure_store: { disabled: {}, from: 'parent' },
+  ...overrides,
 });
 
 const buildClassicDefinition = (): Streams.ClassicStream.GetResponse => ({
