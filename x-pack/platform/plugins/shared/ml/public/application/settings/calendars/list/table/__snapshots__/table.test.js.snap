@@ -410,7 +410,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Rows per page
                     : 
@@ -472,7 +472,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                       >
                         1
                       </span>
