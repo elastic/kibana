@@ -10,49 +10,45 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 
-test.describe(
-  'Query streams - feature flag gating',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoStreamMainPage();
+test.describe('Query streams - feature flag gating', { tag: tags.stateful.classic }, () => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.streams.gotoStreamMainPage();
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
     });
+  });
 
-    test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-      });
+  test('should properly hide query streams UI when feature flag is off', async ({
+    page,
+    pageObjects,
+    kbnClient,
+  }) => {
+    await kbnClient.uiSettings.update({
+      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
     });
+    await page.reload();
+    await expect(pageObjects.streams.createQueryStreamButton).toBeHidden();
 
-    test('should properly hide query streams UI when feature flag is off', async ({
-      page,
-      pageObjects,
-      kbnClient,
-    }) => {
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-      });
-      await page.reload();
-      await expect(pageObjects.streams.createQueryStreamButton).toBeHidden();
+    await pageObjects.streams.gotoPartitioningTab('logs');
+    await expect(pageObjects.streams.childStreamTypeSelector).toBeHidden();
+  });
 
-      await pageObjects.streams.gotoPartitioningTab('logs');
-      await expect(pageObjects.streams.childStreamTypeSelector).toBeHidden();
+  test('should properly show query streams UI when feature flag is on', async ({
+    page,
+    pageObjects,
+    kbnClient,
+  }) => {
+    await kbnClient.uiSettings.update({
+      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
     });
+    await page.reload();
+    await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
 
-    test('should properly show query streams UI when feature flag is on', async ({
-      page,
-      pageObjects,
-      kbnClient,
-    }) => {
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
-      });
-      await page.reload();
-      await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
-
-      await pageObjects.streams.gotoPartitioningTab('logs');
-      await expect(pageObjects.streams.childStreamTypeSelector).toBeVisible();
-    });
-  }
-);
+    await pageObjects.streams.gotoPartitioningTab('logs');
+    await expect(pageObjects.streams.childStreamTypeSelector).toBeVisible();
+  });
+});

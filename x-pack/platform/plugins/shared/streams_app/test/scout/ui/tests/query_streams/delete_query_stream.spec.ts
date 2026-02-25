@@ -15,47 +15,43 @@ const QUERY_STREAM_NAME = 'logs.test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
 const INITIAL_ESQL_QUERY = 'FROM logs | WHERE host.name == "host-1"';
 
-test.describe(
-  'Query streams - Delete query stream',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
-      await browserAuth.loginAsAdmin();
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
-      });
-      await createQueryStream(
-        esClient,
-        kbnClient,
-        QUERY_STREAM_NAME,
-        ESQL_VIEW_NAME,
-        INITIAL_ESQL_QUERY
-      );
-      await pageObjects.streams.gotoStreamMainPage();
+test.describe('Query streams - Delete query stream', { tag: tags.stateful.classic }, () => {
+  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
+    await browserAuth.loginAsAdmin();
+    await kbnClient.uiSettings.update({
+      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
     });
+    await createQueryStream(
+      esClient,
+      kbnClient,
+      QUERY_STREAM_NAME,
+      ESQL_VIEW_NAME,
+      INITIAL_ESQL_QUERY
+    );
+    await pageObjects.streams.gotoStreamMainPage();
+  });
 
-    test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
-      await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-      });
+  test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
+    await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
+    await kbnClient.uiSettings.update({
+      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
     });
+  });
 
-    test('should support deleting an existing query stream', async ({ pageObjects, esClient }) => {
-      await pageObjects.streams.clickStreamNameLink(QUERY_STREAM_NAME);
-      await pageObjects.streams.clickQueryStreamDetailsTab('advanced');
-      await pageObjects.streams.clickDeleteQueryStreamButton();
-      await pageObjects.streams.fillDeleteQueryStreamModalInput(QUERY_STREAM_NAME);
-      await pageObjects.streams.clickDeleteQueryStreamModalDeleteButton();
-      await expect(pageObjects.streams.queryStreamDeletedSuccessToast).toBeVisible();
+  test('should support deleting an existing query stream', async ({ pageObjects, esClient }) => {
+    await pageObjects.streams.clickStreamNameLink(QUERY_STREAM_NAME);
+    await pageObjects.streams.clickQueryStreamDetailsTab('advanced');
+    await pageObjects.streams.clickDeleteQueryStreamButton();
+    await pageObjects.streams.fillDeleteQueryStreamModalInput(QUERY_STREAM_NAME);
+    await pageObjects.streams.clickDeleteQueryStreamModalDeleteButton();
+    await expect(pageObjects.streams.queryStreamDeletedSuccessToast).toBeVisible();
 
-      // Verify the ES|QL view was deleted
-      await expect(
-        esClient.transport.request({
-          method: 'GET',
-          path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
-        })
-      ).rejects.toThrow(/resource_not_found_exception/);
-    });
-  }
-);
+    // Verify the ES|QL view was deleted
+    await expect(
+      esClient.transport.request({
+        method: 'GET',
+        path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
+      })
+    ).rejects.toThrow(/resource_not_found_exception/);
+  });
+});
