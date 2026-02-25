@@ -22,7 +22,7 @@ import { DashboardNavigationOptionsEditor } from '../dashboard_navigation/option
 export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDrilldownState>) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
-  const [initialDashboardOption, setInitialDashboardOption] = useState<
+  const [selectedDashboardOption, setSelectedDashboardOption] = useState<
     EuiComboBoxOptionOption<string> | undefined
   >();
   const [isLoadingInitialDashboard, setIsLoadingInitialDashboard] = useState(false);
@@ -96,7 +96,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
         return;
       }
 
-      setInitialDashboardOption({
+      setSelectedDashboardOption({
         value: initialDashboardId,
         label: result.attributes.title,
       });
@@ -110,14 +110,16 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // options contains dashboard search results (which may not include the selected dashboard)
+  // mergedOptions = options + selectedDashboardOption
   const mergedOptions = useMemo(() => {
-    if (!initialDashboardOption || initialDashboardOption.value !== props.state.dashboard_id) {
+    if (!selectedDashboardOption) {
       return options;
     }
 
-    const hasInitialDashboard = options.some(({ value }) => value === initialDashboardOption.value);
-    return hasInitialDashboard ? options : [initialDashboardOption, ...options];
-  }, [initialDashboardOption, options, props.state]);
+    const hasSelectedDashboard = options.some(({ value }) => value === selectedDashboardOption.value);
+    return hasSelectedDashboard ? options : [selectedDashboardOption, ...options];
+  }, [selectedDashboardOption, options, props.state]);
 
   const selectedOptions = useMemo(() => {
     if (!props.state.dashboard_id) {
@@ -152,6 +154,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
           selectedOptions={selectedOptions}
           options={mergedOptions}
           onChange={(nextSelectedOptions) => {
+            setSelectedDashboardOption(nextSelectedOptions?.[0]);
             props.onChange({ ...props.state, dashboard_id: nextSelectedOptions?.[0]?.value });
             if (error) {
               setError(undefined);
