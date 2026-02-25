@@ -22,18 +22,6 @@ export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) => ({
         { term: { 'event.category': 'authentication' } },
         { term: { 'event.action': 'logged-in' } },
         { term: { 'event.outcome': 'success' } },
-        {
-          terms: {
-            'winlog.logon.type': [
-              'Interactive',
-              'Network',
-              'Unlock',
-              'RemoteInteractive',
-              'CachedInteractive',
-            ],
-          },
-        },
-        { exists: { field: 'user.name' } },
         euid.getEuidDslDocumentsContainsIdFilter('user'),
       ],
       must_not: [

@@ -17,3 +17,4 @@ export type {
   RegisterEntityMaintainerConfig,
   EntityMaintainerState,
 } from './tasks/entity_maintainer/types';
+export { CRUDClient } from './domain/crud_client';

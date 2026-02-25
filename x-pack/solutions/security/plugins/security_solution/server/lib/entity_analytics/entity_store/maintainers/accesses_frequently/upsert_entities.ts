@@ -7,30 +7,26 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { CRUDClient } from '@kbn/entity-store/server';
+import type { EntityType } from '@kbn/entity-store/common';
+import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 
-import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
-import { getEntityUpdatesDataStreamName } from '../../elasticsearch_assets/updates_entity_data_stream';
 import type { ProcessedEntityRecord } from './types';
 
-function buildEntityUpdateDoc(entityType: EntityType, record: ProcessedEntityRecord) {
-  const now = new Date().toISOString();
+function buildEntityDoc(record: ProcessedEntityRecord): Entity {
   return {
-    '@timestamp': now,
-    [entityType]: {
-      name: record.entityId,
-      entity: {
-        id: record.entityId,
-        relationships: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          Accesses_frequently:
-            record.Accesses_frequently.length > 0 ? record.Accesses_frequently : undefined,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          Accesses_infrequently:
-            record.Accesses_infrequently.length > 0 ? record.Accesses_infrequently : undefined,
-        },
+    entity: {
+      id: record.entityId,
+      relationships: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Accesses_frequently:
+          record.Accesses_frequently.length > 0 ? record.Accesses_frequently : undefined,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Accesses_infrequently:
+          record.Accesses_infrequently.length > 0 ? record.Accesses_infrequently : undefined,
       },
     },
-  };
+  } as Entity;
 }
 
 export async function upsertEntityRelationships(
@@ -42,21 +38,18 @@ export async function upsertEntityRelationships(
   if (records.length === 0) return 0;
 
   const entityType: EntityType = 'user';
-  const index = getEntityUpdatesDataStreamName(entityType, namespace);
 
-  const operations = records.flatMap((r) => [{ create: {} }, buildEntityUpdateDoc(entityType, r)]);
+  const crudClient = new CRUDClient({ esClient, logger, namespace });
+  const entities = records.map((r) => ({ type: entityType, doc: buildEntityDoc(r) }));
 
-  const result = await esClient.bulk({ index, operations });
-  const failedCount = result.errors ? result.items.filter((i) => i.create?.error).length : 0;
-  const upserted = records.length - failedCount;
+  logger.info(`Upserting ${entities.length} entity relationship records via CRUD bulk API`);
+  const errors = await crudClient.upsertEntitiesBulk(entities, true);
 
-  if (failedCount > 0) {
-    const errors = result.items
-      .filter((i) => i.create?.error)
-      .map((i) => JSON.stringify(i.create?.error));
-    logger.error(`Failed to upsert ${failedCount} entity records: ${errors.join(', ')}`);
+  const upserted = records.length - errors.length;
+  if (errors.length > 0) {
+    logger.error(`Failed to upsert ${errors.length} entity records: ${JSON.stringify(errors)}`);
   }
 
-  logger.info(`Upserted ${upserted} entity relationship records to ${index}`);
+  logger.info(`Upserted ${upserted} entity relationship records`);
   return upserted;
 }
