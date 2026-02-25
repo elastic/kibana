@@ -78,7 +78,7 @@ describe('Legacy Metric Schema', () => {
             range: 'absolute',
             steps: [
               { lt: 0, color: 'blue' },
-              { gte: 100, color: 'red' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
@@ -144,7 +144,7 @@ describe('Legacy Metric Schema', () => {
             range: 'absolute',
             steps: [
               { lt: 0, color: 'blue' },
-              { gte: 100, color: 'red' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
@@ -159,17 +159,14 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'sum',
           field: 'sales',
-          // @ts-expect-error
-          apply_color_to: 'invalid',
+          apply_color_to: 'background',
           color: {
             type: 'dynamic',
             // @ts-expect-error
             range: 'percentage',
-            min: 0,
-            max: 100,
             steps: [
               { lt: 0, color: 'blue' },
-              { gte: 100, color: 'red' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
@@ -200,7 +197,7 @@ describe('Legacy Metric Schema', () => {
             range: 'absolute',
             steps: [
               { lt: 0, color: 'blue' },
-              { gte: 100, color: 'red' },
+              { gte: 0, lte: 100, color: 'red' },
             ],
           },
         },
