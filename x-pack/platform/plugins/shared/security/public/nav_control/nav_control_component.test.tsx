@@ -154,18 +154,88 @@ describe('SecurityNavControl', () => {
     fireEvent.click(screen.getByTestId('userMenuButton'));
 
     const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
-    const panels = lastCall[0].panels;
-    const content = panels![0].content as React.ReactElement;
-    const items = content.props.items;
-    const testSubjs = items.map((item: any) => item['data-test-subj']);
-    expect(testSubjs).toEqual([
-      'profileLink',
-      'userMenuLink__link1',
-      'userMenuLink__link2',
-      'userMenuLink__link3',
-      'userMenuLink__dummyComponent',
-      'logoutLink',
-    ]);
+    expect(lastCall[0].panels).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "content": <ContextMenuContent
+            closePopover={[Function]}
+            items={
+              Array [
+                Object {
+                  "data-test-subj": "profileLink",
+                  "href": "edit-profile-link",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="user"
+                  />,
+                  "name": <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Edit profile"
+                    id="xpack.security.navControlComponent.editProfileLinkText"
+                  />,
+                  "onClick": [Function],
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link1",
+                  "href": "path-to-link-1",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link1",
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link2",
+                  "href": "path-to-link-2",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link2",
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link3",
+                  "href": "path-to-link-3",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link3",
+                },
+                Object {
+                  "content": <div>
+                    Dummy Component
+                  </div>,
+                  "data-test-subj": "userMenuLink__dummyComponent",
+                  "href": "",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "dummyComponent",
+                },
+                Object {
+                  "data-test-subj": "logoutLink",
+                  "href": "",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="exit"
+                  />,
+                  "name": <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Log out"
+                    id="xpack.security.navControlComponent.logoutLinkText"
+                  />,
+                },
+              ]
+            }
+          />,
+          "id": 0,
+          "title": "full name",
+        },
+      ]
+    `);
   });
 
   it('should render custom profile link registered by other plugins and not render default Edit Profile link', async () => {
@@ -192,17 +262,63 @@ describe('SecurityNavControl', () => {
     fireEvent.click(screen.getByTestId('userMenuButton'));
 
     const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
-    const panels = lastCall[0].panels;
-    const content = panels![0].content as React.ReactElement;
-    const items = content.props.items;
-    const testSubjs = items.map((item: any) => item['data-test-subj']);
-    expect(testSubjs).not.toContain('profileLink');
-    expect(testSubjs).toEqual([
-      'userMenuLink__link1',
-      'userMenuLink__link2',
-      'userMenuLink__link3',
-      'logoutLink',
-    ]);
+    expect(lastCall[0].panels).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "content": <ContextMenuContent
+            closePopover={[Function]}
+            items={
+              Array [
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link1",
+                  "href": "path-to-link-1",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link1",
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link2",
+                  "href": "path-to-link-2",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link2",
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link3",
+                  "href": "path-to-link-3",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link3",
+                },
+                Object {
+                  "data-test-subj": "logoutLink",
+                  "href": "",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="exit"
+                  />,
+                  "name": <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Log out"
+                    id="xpack.security.navControlComponent.logoutLinkText"
+                  />,
+                },
+              ]
+            }
+          />,
+          "id": 0,
+          "title": "full name",
+        },
+      ]
+    `);
   });
 
   it('should render anonymous user', async () => {
@@ -226,11 +342,32 @@ describe('SecurityNavControl', () => {
     fireEvent.click(screen.getByTestId('userMenuButton'));
 
     const lastCall = MockedEuiContextMenu.mock.calls.at(-1)!;
-    const panels = lastCall[0].panels;
-    const content = panels![0].content as React.ReactElement;
-    const items = content.props.items;
-    const testSubjs = items.map((item: any) => item['data-test-subj']);
-    expect(testSubjs).toContain('logoutLink');
-    expect(testSubjs).not.toContain('profileLink');
+    expect(lastCall[0].panels).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "content": <ContextMenuContent
+            closePopover={[Function]}
+            items={
+              Array [
+                Object {
+                  "data-test-subj": "logoutLink",
+                  "href": "",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="exit"
+                  />,
+                  "name": <Memo(MemoizedFormattedMessage)
+                    defaultMessage="Log in"
+                    id="xpack.security.navControlComponent.loginLinkText"
+                  />,
+                },
+              ]
+            }
+          />,
+          "id": 0,
+          "title": "full name",
+        },
+      ]
+    `);
   });
 });
