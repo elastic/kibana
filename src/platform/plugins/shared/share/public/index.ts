@@ -41,6 +41,12 @@ import { SharePlugin } from './plugin';
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
 
+export {
+  createAsCodeExportShareIntegration,
+  type AsCodeExportFormat,
+  type CreateAsCodeExportShareIntegrationParams,
+} from './lib/as_code_export_integration';
+
 export function plugin(ctx: PluginInitializerContext) {
   return new SharePlugin(ctx);
 }

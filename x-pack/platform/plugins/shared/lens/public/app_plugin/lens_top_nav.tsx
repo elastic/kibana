@@ -694,6 +694,8 @@ export const LensTopNavMenu = ({
                 csvDownloadLens: {
                   draftModeCallOut: true,
                 },
+                // Note: additional “as-code” export formats can be added as separate export integrations,
+                // e.g. `exportSourceLensHcl`, and should be included here to get draft-mode callouts.
                 exportSourceLens: {
                   draftModeCallOut: true,
                 },

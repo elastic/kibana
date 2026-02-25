@@ -99,6 +99,8 @@ export function getExportObjectTypeMeta() {
     config: {
       integration: {
         export: {
+          // Note: additional “as-code” export formats can be added as separate export integrations,
+          // e.g. `exportSourceDashboardHcl`, and should be included here to get draft-mode callouts.
           exportSourceDashboard: { draftModeCallOut: true },
           pdfReports: { draftModeCallOut: true },
           imageReports: { draftModeCallOut: true },
@@ -142,10 +144,8 @@ export const mapExportIntegrationToMetaData = (intgrationId: string) => {
   switch (intgrationId) {
     case 'exportSourceDashboard':
       return {
-        label: i18n.translate('dashboard.topNav.exportSourceLabel', {
-          defaultMessage: 'Export source',
-        }),
-        testId: 'exportMenuItem-ExportSource',
+        label: topNavStrings.export.jsonLabel,
+        testId: 'exportMenuItem-JSON',
         iconType: 'code',
         order: 0,
       };

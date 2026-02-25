@@ -8,14 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import {
+  createAsCodeExportShareIntegration,
+  downloadMultipleAs,
+  type AsCodeExportFormat,
+  type ExportShare,
+  type RegisterShareIntegrationArgs,
+} from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public/types';
 import type { JsonValue } from '@kbn/utility-types';
-import { ExportSourcePanel } from '@kbn/as-code-export-source';
 import type { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
@@ -28,6 +32,13 @@ export interface ExportSourceSharingData {
   title: string;
   exportSource: JsonValue;
 }
+
+const jsonFormat: AsCodeExportFormat = {
+  label: 'JSON',
+  fileExtension: '.json',
+  mimeType: 'application/json',
+  codeLanguage: 'json',
+};
 
 declare global {
   interface Window {
@@ -173,33 +184,28 @@ export const downloadCsvLensShareProvider = ({
 };
 
 export const exportSourceLensShareProvider = (): RegisterShareIntegrationArgs<ExportShare> => {
-  return {
+  return createAsCodeExportShareIntegration<ExportSourceSharingData>({
     id: 'exportSourceLens',
-    groupId: 'export',
-    getShareIntegrationConfig: async ({ sharingData }) => {
-      const { exportSource } = sharingData as unknown as ExportSourceSharingData;
-
-      return {
-        id: 'exportSourceLens',
-        name: 'exportSourceLens',
-        icon: 'code',
-        label: i18n.translate('xpack.lens.exportSource.label', {
-          defaultMessage: 'Export source',
-        }),
-        exportType: 'lens_export_source',
-        generateAssetExport: () => Promise.resolve(),
-        generateAssetComponent: (
-          <ExportSourcePanel
-            title={i18n.translate('xpack.lens.exportSource.panelTitle', {
-              defaultMessage: 'Lens export source',
-            })}
-            description={i18n.translate('xpack.lens.exportSource.panelDescription', {
-              defaultMessage: 'Use this JSON as the source for automated exports.',
-            })}
-            source={exportSource}
-          />
-        ),
-      };
+    exportType: 'lens_export_source',
+    icon: 'code',
+    label: i18n.translate('xpack.lens.exportSource.label', {
+      defaultMessage: 'Export source (JSON)',
+    }),
+    format: jsonFormat,
+    getFilenameBase: ({ title }) => title,
+    getContent: ({ exportSource }) => JSON.stringify(exportSource, null, 2),
+    copyAsset: {
+      headingText: i18n.translate('xpack.lens.exportSource.panelTitle', {
+        defaultMessage: 'Lens export source',
+      }),
+      helpText: i18n.translate('xpack.lens.exportSource.panelDescription', {
+        defaultMessage: 'Use this JSON as the source for automated exports.',
+      }),
     },
-  };
+    download: {
+      buttonLabel: i18n.translate('xpack.lens.exportSource.downloadButtonLabel', {
+        defaultMessage: 'Download JSON',
+      }),
+    },
+  });
 };
