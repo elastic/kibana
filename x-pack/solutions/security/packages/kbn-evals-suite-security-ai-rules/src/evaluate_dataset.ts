@@ -230,7 +230,23 @@ function createEsqlFunctionalEquivalenceEvaluator(
     name: 'ESQL Functional Equivalence',
     kind: 'LLM',
     evaluate: async ({ input, output, expected, metadata }) => {
-      const generatedQuery = output?.generatedRule?.query ?? '(no query generated)';
+      if (expected?.category === 'negative') {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'Skipped: negative case — no reference query to compare against',
+        };
+      }
+
+      if (!output?.generatedRule) {
+        return {
+          score: 0,
+          label: 'FAIL',
+          explanation: 'No rule was generated',
+        };
+      }
+
+      const generatedQuery = output.generatedRule.query ?? '(no query generated)';
       const expectedQuery = expected?.query ?? '(no expected query)';
 
       const criteriaEval = evaluators.criteria([
@@ -242,7 +258,7 @@ function createEsqlFunctionalEquivalenceEvaluator(
           `Generated query: ${generatedQuery}`,
       ]);
 
-      return criteriaEval.evaluate({ input, output: output?.generatedRule, expected, metadata });
+      return criteriaEval.evaluate({ input, output: output.generatedRule, expected, metadata });
     },
   };
 }
