@@ -244,7 +244,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
     | LIMIT 10000"
 `;
 
-exports[`buildCcsLogsExtractionEsqlQuery generates query without LOOKUP JOIN and with @timestamp = nowISO 1`] = `
+exports[`buildCcsLogsExtractionEsqlQuery generates query without LOOKUP JOIN 1`] = `
 "SET unmapped_fields=\\"nullify\\";
     FROM remote_cluster:logs-*
     METADATA _index

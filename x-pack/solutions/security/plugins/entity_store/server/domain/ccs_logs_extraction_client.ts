@@ -36,6 +36,7 @@ export interface CcsExtractToUpdatesParams {
 export interface CcsExtractToUpdatesResult {
   count: number;
   pages: number;
+  error?: Error;
 }
 
 /**
@@ -71,7 +72,19 @@ export class CcsLogsExtractionClient {
     private readonly crudClient: CRUDClient
   ) {}
 
-  public async extractToUpdates({
+  public async extractToUpdates(params: CcsExtractToUpdatesParams) {
+    try {
+      return await this.doExtractToUpdates(params);
+    } catch (error) {
+      const wrappedError = new Error(
+        `Failed to extract to updates from CCS indices: ${error.message}`
+      );
+      this.logger.error(wrappedError);
+      return { error: wrappedError };
+    }
+  }
+
+  private async doExtractToUpdates({
     type,
     remoteIndexPatterns,
     fromDateISO,

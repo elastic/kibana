@@ -163,7 +163,7 @@ describe('CcsLogsExtractionClient', () => {
     );
   });
 
-  it('should propagate error when second page ESQL call is aborted', async () => {
+  it('should return error when second page ESQL call is aborted', async () => {
     const docsLimit = 2;
     const firstPage: ESQLSearchResponse = {
       columns: [
@@ -182,17 +182,17 @@ describe('CcsLogsExtractionClient', () => {
     const abortError = new DOMException('aborted', 'AbortError');
     mockExecuteEsqlQuery.mockResolvedValueOnce(firstPage).mockRejectedValueOnce(abortError);
 
-    await expect(
-      client.extractToUpdates({
-        type: 'host',
-        remoteIndexPatterns: ['remote:logs-*'],
-        fromDateISO: '2024-01-01T00:00:00.000Z',
-        toDateISO: '2024-06-15T23:59:59.999Z',
-        docsLimit,
-        entityDefinition: getEntityDefinition('host', 'default'),
-        abortController: new AbortController(),
-      })
-    ).rejects.toThrow(abortError);
+    const result = await client.extractToUpdates({
+      type: 'host',
+      remoteIndexPatterns: ['remote:logs-*'],
+      fromDateISO: '2024-01-01T00:00:00.000Z',
+      toDateISO: '2024-06-15T23:59:59.999Z',
+      docsLimit,
+      entityDefinition: getEntityDefinition('host', 'default'),
+      abortController: new AbortController(),
+    });
+
+    await expect(result.error).toBeDefined();
 
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
     expect(mockCrudClient.upsertEntitiesBulk).toHaveBeenCalledTimes(1);

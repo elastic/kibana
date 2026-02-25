@@ -537,6 +537,60 @@ describe('LogsExtractionClient', () => {
       );
     });
 
+    it('should store CCS errors in the saved object while main execution remains unchanged', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+          { name: 'entity.id', type: 'keyword' },
+        ],
+        values: [['2024-01-02T10:00:00.000Z', 'hash1', 'user:u1']],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
+      };
+
+      const ccsError = new Error('CCS connection failed');
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+      mockCcsLogsExtractionClient.extractToUpdates.mockResolvedValue({
+        count: 0,
+        pages: 0,
+        error: ccsError,
+      });
+
+      const result = await client.extractLogs('user');
+
+      // Main execution is unchanged: success, count from main query, ESQL and ingest called once
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(1);
+      expect(result.success && result.scannedIndices).toContain('logs-*');
+      expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+
+      // CCS error is stored in the saved object
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({
+          logExtractionState: expect.objectContaining({
+            paginationTimestamp: undefined,
+            paginationId: undefined,
+            lastExecutionTimestamp: expect.any(String),
+          }),
+          error: { message: ccsError.message, action: 'extractLogs' },
+        }),
+        { mergeAttributes: false }
+      );
+    });
+
     it('should fallback to logs-* when data view is not found', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [

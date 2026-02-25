@@ -63,9 +63,7 @@ describe('buildLogsExtractionEsqlQuery', () => {
 });
 
 describe('buildCcsLogsExtractionEsqlQuery', () => {
-  const nowISO = '2024-06-15T12:00:00.000Z';
-
-  it('generates query without LOOKUP JOIN and with @timestamp = nowISO', () => {
+  it('generates query without LOOKUP JOIN', () => {
     const query = buildCcsLogsExtractionEsqlQuery({
       indexPatterns: ['remote_cluster:logs-*'],
       entityDefinition: getEntityDefinition('host', 'default'),

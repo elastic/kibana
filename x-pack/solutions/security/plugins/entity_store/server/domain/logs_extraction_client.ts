@@ -113,14 +113,13 @@ export class LogsExtractionClient {
 
       const delayMs = parseDurationToMs(engineDescriptor.logExtractionState.delay);
       const entityDefinition = getEntityDefinition(type, this.namespace);
-      const { count, pages, indexPatterns, lastSearchTimestamp } = await this.runQueryAndIngestDocs(
-        {
+      const { count, pages, indexPatterns, lastSearchTimestamp, ccsError } =
+        await this.runQueryAndIngestDocs({
           engineDescriptor,
           opts,
           delayMs,
           entityDefinition,
-        }
-      );
+        });
 
       const operationResult = {
         success: true as const,
@@ -149,6 +148,7 @@ export class LogsExtractionClient {
             // Store last searched timestamp to start window from here
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
           },
+          error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : undefined,
 
           // we need to do a full write to overwrite pagination
           // id and timestamp cursors with undefined
@@ -210,7 +210,13 @@ export class LogsExtractionClient {
     opts?: LogsExtractionOptions;
     delayMs: number;
     entityDefinition: ManagedEntityDefinition;
-  }) {
+  }): Promise<{
+    count: number;
+    pages: number;
+    indexPatterns: string[];
+    lastSearchTimestamp: string;
+    ccsError?: Error;
+  }> {
     const { docsLimit } = engineDescriptor.logExtractionState;
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       engineDescriptor.logExtractionState.additionalIndexPatterns
@@ -245,11 +251,12 @@ export class LogsExtractionClient {
         abortController: opts?.abortController,
       });
 
-      const [mainResult] = await Promise.all([mainPromise, ccsPromise]);
+      const [mainResult, ccsResult] = await Promise.all([mainPromise, ccsPromise]);
 
       return {
         ...mainResult,
         indexPatterns: [...localIndexPatterns, ...remoteIndexPatterns],
+        ccsError: ccsResult.error,
       };
     }
 
