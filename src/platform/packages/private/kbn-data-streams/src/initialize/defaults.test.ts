@@ -191,7 +191,6 @@ describe('applyDefaults', () => {
       expect(result.template?.mappings?.dynamic).toBe(false);
       expect(result.template?.settings?.hidden).toBe(true);
     });
-
   });
 
   describe('edge cases', () => {
@@ -228,6 +227,5 @@ describe('applyDefaults', () => {
       // Should preserve user-provided priority
       expect(result.template?.priority).toBe(200);
     });
-
   });
 });
