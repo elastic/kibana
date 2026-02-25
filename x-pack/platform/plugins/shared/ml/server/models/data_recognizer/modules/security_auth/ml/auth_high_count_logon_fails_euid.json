@@ -1,6 +1,9 @@
 {
   "description": "Security: Authentication - Looks for an unusually large spike in authentication failure events. This can be due to password spraying, user enumeration, or brute force activity and may be a precursor to account takeover or credentialed access.",
-  "groups": ["security", "authentication"],
+  "groups": [
+    "security",
+    "authentication"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -10,7 +13,11 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["source.ip", "user.name", "host.name"]
+    "influencers": [
+      "source.ip",
+      "user.entity.id_computed",
+      "host.entity.id_computed"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

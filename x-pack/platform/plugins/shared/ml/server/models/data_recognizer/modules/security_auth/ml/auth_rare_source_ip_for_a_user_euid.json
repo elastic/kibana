@@ -1,6 +1,9 @@
 {
   "description": "Security: Authentication - Looks for a user logging in from an IP address that is unusual for the user. This can be due to credentialed access via a compromised account when the user and the threat actor are in different locations. An unusual source IP address for a username could also be due to lateral movement when a compromised account is used to pivot between hosts.",
-  "groups": ["security", "authentication"],
+  "groups": [
+    "security",
+    "authentication"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
@@ -12,7 +15,12 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["source.ip", "user.name", "host.name"]
+    "influencers": [
+      "source.ip",
+      "user.entity.id_computed",
+      "host.entity.id_computed",
+      "user.name"
+    ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {

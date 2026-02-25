@@ -1,17 +1,24 @@
 {
-  "description": "Security: Authentication - Detects unusually high number of authentication attempts for a host.",
-  "groups": ["security", "authentication"],
+  "description": "Security: Authentication - Detects unusually high number of authentication attempts for a unique host identifier.",
+  "groups": [
+    "security",
+    "authentication"
+  ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
         "detector_description": "Detects high number of authentication attempts for a host.",
         "function": "high_non_zero_count",
-        "partition_field_name": "host.name",
+        "partition_field_name": "host.entity.id_computed",
         "detector_index": 0
       }
     ],
-    "influencers": ["host.name", "user.name", "source.ip"],
+    "influencers": [
+      "host.entity.id_computed",
+      "user.entity.id_computed",
+      "source.ip"
+    ],
     "model_prune_window": "30d"
   },
   "allow_lazy_open": true,

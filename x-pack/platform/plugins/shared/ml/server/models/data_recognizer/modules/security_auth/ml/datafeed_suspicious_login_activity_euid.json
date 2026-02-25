@@ -1,0 +1,46 @@
+{
+  "job_id": "suspicious_login_activity_euid",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "authentication"
+          }
+        }
+      ],
+      "must_not": {
+        "terms": {
+          "process.name": [
+            "elastic-agent.exe",
+            "elastic-agent",
+            "metricbeat.exe",
+            "metricbeat",
+            "filebeat.exe",
+            "filebeat",
+            "packetbeat.exe",
+            "packetbeat",
+            "winlogbeat.exe",
+            "winlogbeat"
+          ]
+        }
+      }
+    }
+  },
+  "script_fields": {
+    "user.entity.id_computed": {
+      "script": {
+        "id": "euid_user_entity"
+      }
+    },
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
+      }
+    }
+  }
+}

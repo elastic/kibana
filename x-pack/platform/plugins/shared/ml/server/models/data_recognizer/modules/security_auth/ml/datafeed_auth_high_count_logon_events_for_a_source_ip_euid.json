@@ -1,0 +1,56 @@
+{
+  "job_id": "auth_high_count_logon_events_for_a_source_ip_euid",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "source.ip"
+          }
+        },
+        {
+          "term": {
+            "event.category": "authentication"
+          }
+        },
+        {
+          "term": {
+            "event.outcome": "success"
+          }
+        }
+      ],
+      "must_not": {
+        "terms": {
+          "process.name": [
+            "elastic-agent.exe",
+            "elastic-agent",
+            "metricbeat.exe",
+            "metricbeat",
+            "filebeat.exe",
+            "filebeat",
+            "packetbeat.exe",
+            "packetbeat",
+            "winlogbeat.exe",
+            "winlogbeat"
+          ]
+        }
+      }
+    }
+  },
+  "script_fields": {
+    "user.entity.id_computed": {
+      "script": {
+        "id": "euid_user_entity"
+      }
+    },
+    "host.entity.id_computed": {
+      "script": {
+        "id": "euid_host_entity"
+      }
+    }
+  }
+}
