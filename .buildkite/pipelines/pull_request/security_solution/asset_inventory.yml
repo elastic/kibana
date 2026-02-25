@@ -8,31 +8,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-<<<<<<< HEAD
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
-=======
-    timeout_in_minutes: 60
-    parallelism: 1
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/asset_inventory.sh
-    cancel_on_build_failing: true
-    label: 'Asset Inventory Cypress Tests on Serverless'
-    agents:
-      machineType: n2-standard-4
-      preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
-    depends_on:
-      - build
->>>>>>> b0447fb21e84 ([CI] Add optimistic cancellation for PR pipeline gate failures (#254621))
     timeout_in_minutes: 60
     parallelism: 1
     retry:
