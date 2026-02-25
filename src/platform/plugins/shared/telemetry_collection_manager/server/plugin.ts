@@ -284,10 +284,8 @@ export class TelemetryCollectionManagerPlugin
         });
         if (!this.usageCollection) {
           retrieveSnapshotTelemetryTransaction.end('skipped');
-          retrieveSnapshotTelemetryOTelSpan?.setStatus({
-            code: SpanStatusCode.UNSET,
-            message: 'Skipped because no usage collection is registered.',
-          });
+          retrieveSnapshotTelemetryOTelSpan?.setStatus({ code: SpanStatusCode.UNSET });
+          retrieveSnapshotTelemetryOTelSpan?.setAttribute('skipped', true);
           retrieveSnapshotTelemetryOTelSpan?.end();
           return [];
         }
@@ -353,10 +351,8 @@ export class TelemetryCollectionManagerPlugin
         }
 
         retrieveSnapshotTelemetryTransaction.end('skipped');
-        retrieveSnapshotTelemetryOTelSpan?.setStatus({
-          code: SpanStatusCode.UNSET,
-          message: 'Skipped because no collection strategy is registered.',
-        });
+        retrieveSnapshotTelemetryOTelSpan?.setStatus({ code: SpanStatusCode.UNSET });
+        retrieveSnapshotTelemetryOTelSpan?.setAttribute('skipped', true);
         retrieveSnapshotTelemetryOTelSpan?.end();
 
         return [];
