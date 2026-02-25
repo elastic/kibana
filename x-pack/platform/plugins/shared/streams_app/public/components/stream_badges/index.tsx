@@ -244,9 +244,6 @@ export function TimeSeriesBadge() {
   return (
     <EuiToolTip
       position="top"
-      title={i18n.translate('xpack.streams.badges.timeSeries.title', {
-        defaultMessage: 'Time series stream',
-      })}
       content={i18n.translate('xpack.streams.badges.timeSeries.description', {
         defaultMessage:
           'Time series streams are optimized for indexing metrics data and help you analyze a sequence of data points as a whole.',
@@ -259,7 +256,7 @@ export function TimeSeriesBadge() {
     >
       <EuiBadge
         color="hollow"
-        iconType="number"
+        iconType="chartLine"
         iconSide="left"
         tabIndex={0}
         data-test-subj="timeSeriesBadge"
