@@ -657,6 +657,10 @@ export function SloOverviewFlyout({ serviceName, agentName, location, onClose }:
               i18n.translate('xpack.apm.sloOverviewFlyout.loading', {
                 defaultMessage: 'Loading SLOs...',
               })
+            ) : selectedStatuses.length || kqlQuery ? (
+              i18n.translate('xpack.apm.sloOverviewFlyout.noSlos', {
+                defaultMessage: 'No SLOs found for this service with the current filters',
+              })
             ) : (
               <EuiEmptyPrompt
                 title={

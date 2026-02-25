@@ -90,7 +90,7 @@ export class SLOPlugin
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
         sloClient,
-        telemetry: this.telemetryClient,
+        telemetry: this.telemetryService.start(core.analytics),
       });
     };
     const appUpdater$ = this.appUpdater$;
@@ -205,7 +205,6 @@ export class SLOPlugin
 
   public start(core: CoreStart, plugins: SLOPublicPluginsStart) {
     const kibanaVersion = this.initContext.env.packageInfo.version;
-    const telemetryClient = this.telemetryService.start(core.analytics);
 
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
