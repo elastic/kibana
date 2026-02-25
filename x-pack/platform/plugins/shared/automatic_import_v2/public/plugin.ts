@@ -22,6 +22,7 @@ import type {
 import { useGetAllIntegrations, useGetIntegrationById } from './common';
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationSideCardButtonLazy } from './components/create_integration_card_button';
+import { getDataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout';
 
 export class AutomaticImportV2Plugin
   implements Plugin<AutomaticImportV2PluginSetup, AutomaticImportV2PluginStart>
@@ -62,6 +63,7 @@ export class AutomaticImportV2Plugin
       components: {
         CreateIntegration: getCreateIntegrationLazy(services),
         CreateIntegrationSideCardButton: getCreateIntegrationSideCardButtonLazy(),
+        DataStreamResultsFlyout: getDataStreamResultsFlyoutComponent(),
       },
     };
   }

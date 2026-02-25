@@ -156,7 +156,7 @@ export class AutomaticImportService {
         const existing = await this.savedObjectService.getIntegration(
           integrationParams.integrationId
         );
-        const expectedVersion = existing.metadata?.version || '0.0.0';
+        const newVersion = existing.metadata?.version || '0.0.0';
 
         const updateData: IntegrationAttributes = {
           ...existing,
@@ -172,7 +172,7 @@ export class AutomaticImportService {
           },
         };
 
-        await this.savedObjectService.updateIntegration(updateData, expectedVersion);
+        await this.savedObjectService.updateIntegration(updateData, newVersion);
         this.logger.debug(`Integration ${integrationParams.integrationId} updated successfully`);
       } else {
         throw error;

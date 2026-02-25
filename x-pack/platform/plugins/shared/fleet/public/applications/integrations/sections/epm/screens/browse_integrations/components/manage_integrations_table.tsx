@@ -24,11 +24,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
+import type { DataStreamResponse } from '@kbn/automatic-import-v2-plugin/common';
 
 import { PackageIcon } from '../../../../../../../components/package_icon';
 
 import { useStartServices } from '../../../../../hooks';
+
 import { ManageIntegrationActions } from './manage_integration_actions';
+import type { ReviewIntegrationDetails } from './manage_integration_actions';
 
 export interface CreatedIntegrationRow {
   integrationId: string;
@@ -68,7 +71,13 @@ export const ManageIntegrationsTable: React.FC<{
   isError: boolean;
   onRefetch: () => void;
 }> = ({ integrations, isLoading, isError, onRefetch }) => {
-  const { application, http, notifications, userProfile: userProfileService } = useStartServices();
+  const {
+    application,
+    automaticImportVTwo,
+    http,
+    notifications,
+    userProfile: userProfileService,
+  } = useStartServices();
 
   const uniqueProfileUids = useMemo(() => {
     const uids = integrations
@@ -134,6 +143,63 @@ export const ManageIntegrationsTable: React.FC<{
           title: i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.deleteErrorTitle', {
             defaultMessage: 'Failed to delete integration',
           }),
+        });
+        throw error;
+      }
+    },
+    [http, notifications, onRefetch]
+  );
+
+  const fetchIntegrationReviewDetails = useCallback(
+    async (integrationId: string): Promise<ReviewIntegrationDetails> => {
+      const response = await http.get<{
+        integrationResponse: {
+          title: string;
+          version?: string;
+          dataStreams: DataStreamResponse[];
+        };
+      }>(`/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}`, {
+        version: '1',
+      });
+
+      const integrationResponse = response.integrationResponse;
+      return {
+        title: integrationResponse.title,
+        version: integrationResponse.version,
+        dataStreams: integrationResponse.dataStreams ?? [],
+      };
+    },
+    [http]
+  );
+
+  const approveAndDeployIntegration = useCallback(
+    async (integrationId: string, version: string) => {
+      try {
+        await http.post(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/approve`,
+          {
+            version: '1',
+            body: JSON.stringify({ version }),
+          }
+        );
+
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.approveSuccessTitle',
+            {
+              defaultMessage: 'Integration approved and ready to deploy',
+            }
+          ),
+        });
+        onRefetch();
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.approveErrorTitle',
+            {
+              defaultMessage: 'Failed to approve integration',
+            }
+          ),
         });
         throw error;
       }
@@ -258,13 +324,31 @@ export const ManageIntegrationsTable: React.FC<{
         render: (item: CreatedIntegrationRow) => (
           <ManageIntegrationActions
             integration={item}
+            canReviewApprove={
+              item.totalDataStreamCount > 0 &&
+              item.successfulDataStreamCount === item.totalDataStreamCount &&
+              (item.status === 'completed' || item.status === 'approved')
+            }
             onEdit={goToEditIntegration}
             onDelete={deleteIntegration}
+            DataStreamResultsFlyoutComponent={
+              automaticImportVTwo?.components.DataStreamResultsFlyout
+            }
+            onFetchReviewDetails={fetchIntegrationReviewDetails}
+            onApproveAndDeploy={approveAndDeployIntegration}
           />
         ),
       },
     ],
-    [getEditIntegrationHref, goToEditIntegration, deleteIntegration, userProfiles]
+    [
+      getEditIntegrationHref,
+      goToEditIntegration,
+      deleteIntegration,
+      fetchIntegrationReviewDetails,
+      approveAndDeployIntegration,
+      automaticImportVTwo?.components.DataStreamResultsFlyout,
+      userProfiles,
+    ]
   );
 
   if (isLoading) {
