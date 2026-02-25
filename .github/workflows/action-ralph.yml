@@ -1105,4 +1105,4 @@ jobs:
             echo "**Workflow run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           } > /tmp/review-comment.md
 
-          gh pr comment "$PR_NUMBER" --body-file /tmp/review-comment.md
+          gh pr comment "$PR_NUMBER" --repo "${{ github.repository }}" --body-file /tmp/review-comment.md
