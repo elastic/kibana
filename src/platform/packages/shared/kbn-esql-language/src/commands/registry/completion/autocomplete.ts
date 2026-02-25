@@ -9,8 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { isFunctionExpression, isLiteral } from '@elastic/esql';
-import type * as ast from '@elastic/esql/types';
-import type { ESQLAstCompletionCommand, ESQLAstAllCommands } from '@elastic/esql/types';
+import type {
+  ESQLAstCompletionCommand,
+  ESQLAstAllCommands,
+  ESQLMap,
+  ESQLCommandOption,
+  ESQLSingleAstItem,
+} from '@elastic/esql/types';
 import { suggestForExpression } from '../../definitions/utils';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
@@ -59,14 +64,14 @@ function getPosition(
   query: string,
   command: ESQLAstAllCommands,
   isExistingColumn: boolean
-): { position: CompletionPosition | undefined; expressionRoot?: ast.ESQLSingleAstItem } {
+): { position: CompletionPosition | undefined; expressionRoot?: ESQLSingleAstItem } {
   const { prompt, targetField } = command as ESQLAstCompletionCommand;
 
   const arg1 = command.args[1];
-  let paramsMap: ast.ESQLMap | undefined;
+  let paramsMap: ESQLMap | undefined;
 
   if (arg1 && 'type' in arg1 && arg1.type === 'option') {
-    paramsMap = (arg1 as ast.ESQLCommandOption).args[0] as ast.ESQLMap;
+    paramsMap = (arg1 as ESQLCommandOption).args[0] as ESQLMap;
 
     if (paramsMap && paramsMap.incomplete && !paramsMap.text) {
       return { position: CompletionPosition.AFTER_WITH_KEYWORD };
