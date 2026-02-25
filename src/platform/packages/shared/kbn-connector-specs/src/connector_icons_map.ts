@@ -90,4 +90,9 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+
+  [
+    '.firecrawl',
+    lazy(() => import(/* webpackChunkName: "connectorIconfirecrawl" */ './specs/firecrawl/icon')),
+  ],
 ]);
