@@ -10,4 +10,7 @@ export { registerStop } from './stop';
 export { registerStatus } from './status';
 export { registerForceLogExtraction } from './force_log_extraction';
 export { registerUninstall } from './uninstall';
+export { registerCRUDUpsert } from './crud/upsert';
+export { registerCRUDUpsertBulk } from './crud/upsert_bulk';
+export { registerCRUDDelete } from './crud/delete';
 export { registerStart } from './start';
