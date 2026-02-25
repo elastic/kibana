@@ -9,7 +9,7 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useLocation, matchPath } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
@@ -17,14 +17,19 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   ALERTS_PATH,
   ATTACK_DISCOVERY_PATH,
+  DASHBOARDS_PATH,
   RULES_PATH,
+  SecurityPageName,
 } from '../../../../common/constants';
 
 const RULES_MANAGEMENT_PATH = `${RULES_PATH}/management`;
 import { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
+import { useNavigateTo } from '../../../common/lib/kibana';
+import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 import { isDashboardViewPath } from '../../../helpers';
+import { getSecurityDashboardsHeaderAppActionsConfig } from '../header_app_actions/header_app_actions_config';
 import { Sourcerer } from '../../../sourcerer/components';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -65,6 +70,20 @@ export const GlobalHeader = React.memo(() => {
   const isOnRulesManagementPage = Boolean(
     matchPath(pathname, { path: RULES_MANAGEMENT_PATH, exact: true })
   );
+  const dashboardViewPath = isDashboardViewPath(pathname);
+  const isOnSecurityDashboardsLandingPage =
+    (pathname === DASHBOARDS_PATH || pathname === `${DASHBOARDS_PATH}/`) && !dashboardViewPath;
+
+  const { navigateTo } = useNavigateTo();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const onCreateSecurityDashboard = useCallback(() => {
+    navigateTo({
+      url: getSecuritySolutionUrl({
+        deepLinkId: SecurityPageName.dashboards,
+        path: 'create',
+      }),
+    });
+  }, [navigateTo, getSecuritySolutionUrl]);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const showTimeline = useShallowEqualSelector(
@@ -73,7 +92,6 @@ export const GlobalHeader = React.memo(() => {
 
   const sourcererScope = getScopeFromPath(pathname, newDataViewPickerEnabled);
   const showSourcerer = showSourcererByPath(pathname);
-  const dashboardViewPath = isDashboardViewPath(pathname);
 
   const hasHeaderContent = showSourcerer && !showTimeline;
   // On Alerts with the new data view picker, the picker lives in the Unified Search bar; don't show it in the app menu.
@@ -89,6 +107,10 @@ export const GlobalHeader = React.memo(() => {
       } else if (isOnRulesManagementPage) {
         // Rules management page sets and clears its own config in RulesPage
         return;
+      } else if (isOnSecurityDashboardsLandingPage) {
+        chrome.setHeaderAppActionsConfig(
+          getSecurityDashboardsHeaderAppActionsConfig(onCreateSecurityDashboard)
+        );
       } else {
         chrome.setHeaderAppActionsConfig(undefined);
       }
@@ -96,7 +118,14 @@ export const GlobalHeader = React.memo(() => {
         chrome.setHeaderAppActionsConfig(undefined);
       };
     }
-  }, [chrome, isOnAlertsPage, isOnAttackDiscoveryPage, isOnRulesManagementPage]);
+  }, [
+    chrome,
+    isOnAlertsPage,
+    isOnAttackDiscoveryPage,
+    isOnRulesManagementPage,
+    isOnSecurityDashboardsLandingPage,
+    onCreateSecurityDashboard,
+  ]);
 
   useEffect(() => {
     if (!setHeaderActionMenu) return;

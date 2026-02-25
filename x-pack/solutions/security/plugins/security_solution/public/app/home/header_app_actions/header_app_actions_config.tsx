@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
@@ -49,5 +49,30 @@ const AlertsManageRulesButton: React.FC = () => {
 export function getAlertsHeaderAppActionsConfig(): ChromeHeaderAppActionsConfig {
   return {
     primaryActions: [<AlertsManageRulesButton key="alerts-manage-rules" />],
+  };
+}
+
+/**
+ * Header app actions config for the Security > Dashboards landing page.
+ * Single icon-only "New" (plusInCircle) primary action that navigates to create dashboard.
+ * Set when the Security Dashboards landing page is active; cleared when navigating away (handled by GlobalHeader).
+ */
+export function getSecurityDashboardsHeaderAppActionsConfig(
+  onCreateDashboard: () => void
+): ChromeHeaderAppActionsConfig {
+  return {
+    primaryActions: [
+      <EuiButtonIcon
+        key="security-dashboards-new"
+        size="xs"
+        color="text"
+        iconType="plusInCircle"
+        onClick={onCreateDashboard}
+        data-test-subj="headerGlobalNav-appActionsNewButton"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
+          defaultMessage: 'New',
+        })}
+      />,
+    ],
   };
 }
