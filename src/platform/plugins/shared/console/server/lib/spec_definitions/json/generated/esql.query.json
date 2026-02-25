@@ -28,6 +28,7 @@
       "_query"
     ],
     "documentation": "https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql-rest",
+    "documentation_serverless": "https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql-rest",
     "availability": {
       "stack": true,
       "serverless": true
