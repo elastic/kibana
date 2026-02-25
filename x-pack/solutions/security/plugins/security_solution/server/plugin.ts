@@ -132,6 +132,7 @@ import {
   registerEntityStoreSnapshotTask,
   registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
+import { accessesFrequentlyMaintainer } from './lib/entity_analytics/entity_store/maintainers/accesses_frequently';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -320,6 +321,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     if (!experimentalFeatures.entityStoreDisabled) {
+      plugins.entityStore.registerEntityMaintainer(accessesFrequentlyMaintainer);
+
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
@@ -525,6 +528,44 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.endpointContext,
       trialCompanionDeps,
       enableDataGeneratorRoutes
+    );
+
+    // POC: Trigger endpoint to run the accesses_frequently maintainer with calling user's credentials
+    router.post(
+      {
+        path: '/internal/security_solution/poc/run_maintainer',
+        security: { authz: { enabled: false, reason: 'POC endpoint' } },
+        validate: false,
+      },
+      async (context, _request, response) => {
+        const coreContext = await context.core;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const pocLogger = this.logger.get('accesses_frequently_poc');
+        try {
+          const state = await accessesFrequentlyMaintainer.run({
+            status: {
+              metadata: {
+                namespace: 'default',
+                runs: 0,
+                lastSuccessTimestamp: null,
+                lastErrorTimestamp: null,
+              },
+              state: accessesFrequentlyMaintainer.initialState,
+            },
+            abortController: new AbortController(),
+            logger: pocLogger,
+            fakeRequest: _request,
+            esClient,
+          });
+          return response.ok({ body: state });
+        } catch (err) {
+          pocLogger.error(`POC run failed: ${err?.message}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: err?.message ?? 'Unknown error' },
+          });
+        }
+      }
     );
 
     registerEndpointRoutes(router, this.endpointContext);
