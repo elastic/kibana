@@ -86,10 +86,6 @@ export function initTracing({
       case 'http':
         LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'http'));
         break;
-
-      case 'proto':
-        LateBindingSpanProcessor.get().register(new OTLPSpanProcessor(variant.value, 'proto'));
-        break;
     }
   });
 
