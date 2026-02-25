@@ -572,6 +572,7 @@ export class ActionsPlugin
         spaces: this.spaces?.spacesService,
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
+        getCurrentUserProfileIdFromAPIKey,
         authorizationCodeEnabled,
       });
     };
@@ -653,6 +654,31 @@ export class ActionsPlugin
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
+    const getCurrentUserProfileIdFromAPIKey = async (
+      request: KibanaRequest
+    ): Promise<string | undefined> => {
+      try {
+        const response = await core.elasticsearch.client
+          .asScoped(request)
+          .asCurrentUser.security.getApiKey({
+            with_profile_uid: true,
+          });
+        if (response.api_keys && response.api_keys.length > 0) {
+          return response.api_keys[0].profile_uid;
+        }
+        logger.debug(
+          `No API keys were returned from query, cannot retrieve associated profile id.`
+        );
+      } catch (error) {
+        logger.debug(
+          `Failed to retrieve API key for user profile retrieval: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+      return undefined;
+    };
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
@@ -677,6 +703,7 @@ export class ActionsPlugin
         return instantiateAuthorization(request);
       },
       analyticsService: core.analytics,
+      getCurrentUserProfileIdFromAPIKey,
     });
 
     taskRunnerFactory!.initialize({
