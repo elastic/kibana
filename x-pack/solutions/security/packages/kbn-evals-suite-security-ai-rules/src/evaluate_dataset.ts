@@ -34,6 +34,31 @@ export interface RuleGenerationTaskOutput {
 
 type RuleExample = Example<{ prompt: string }, ReferenceRule, Record<string, unknown> | null>;
 
+const NEGATIVE_CASE_NA = {
+  score: null as null,
+  label: 'N/A' as const,
+  explanation: 'Not applicable: negative case — model should reject this request',
+};
+
+/**
+ * Wraps an evaluator so it returns N/A for negative-case examples (category === 'negative').
+ * These are prompts where the model should refuse to generate a rule, so production-quality
+ * metrics (field coverage, syntax validity, etc.) are meaningless and should not skew averages.
+ */
+function skipNegativeCases(
+  evaluator: Evaluator<RuleExample, RuleGenerationTaskOutput>
+): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      if (args.expected?.category === 'negative') {
+        return NEGATIVE_CASE_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
+
 
 // ---------------------------------------------------------------------------
 // CODE evaluators — deterministic, no LLM required
@@ -215,6 +240,34 @@ function createRiskScoreMatchEvaluator(): Evaluator<RuleExample, RuleGenerationT
 }
 
 // ---------------------------------------------------------------------------
+// Rejection evaluator — negative cases only
+// ---------------------------------------------------------------------------
+
+/**
+ * Scores whether the model correctly refused to generate a rule for a negative case.
+ * Returns N/A for positive cases since rule generation is expected there.
+ */
+function createRejectionEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    name: 'Rejection',
+    kind: 'CODE',
+    evaluate: async ({ output, expected }) => {
+      if (expected?.category !== 'negative') {
+        return { score: null, label: 'N/A', explanation: 'Not applicable: not a negative case' };
+      }
+      const refused = !output?.generatedRule;
+      return {
+        score: refused ? 1 : 0,
+        label: refused ? 'PASS' : 'FAIL',
+        explanation: refused
+          ? 'Model correctly refused to generate a rule'
+          : 'Model incorrectly generated a rule for an impossible request',
+      };
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
 // LLM evaluators — use built-in @kbn/evals criteria evaluator
 // ---------------------------------------------------------------------------
 
@@ -230,14 +283,6 @@ function createEsqlFunctionalEquivalenceEvaluator(
     name: 'ESQL Functional Equivalence',
     kind: 'LLM',
     evaluate: async ({ input, output, expected, metadata }) => {
-      if (expected?.category === 'negative') {
-        return {
-          score: null,
-          label: 'N/A',
-          explanation: 'Skipped: negative case — no reference query to compare against',
-        };
-      }
-
       if (!output?.generatedRule) {
         return {
           score: 0,
@@ -334,22 +379,24 @@ export function createEvaluateDataset({
 }): ({ dataset }: { dataset: EvaluationDataset<RuleExample> }) => Promise<void> {
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
-    createQuerySyntaxValidityEvaluator(),      // syntax + FROM wildcard check (G)
-    createFieldCoverageEvaluator(),            // required fields incl. riskScore (B partial)
-    createRuleTypeLanguageEvaluator(),
-    createMitreAccuracyEvaluator(),            // F1 score + invalidFormat metadata (H-A)
-    createSeverityValidityEvaluator(),         // enum check (A)
-    createRiskScoreValidityEvaluator(),        // 0–100 range check (B)
-    createIntervalFormatEvaluator(),           // duration string format (C)
-    createLookbackGapEvaluator(),              // from >= interval coverage (D)
-    createSeverityMatchEvaluator(),            // vs expected severity (E)
-    createRiskScoreMatchEvaluator(),           // vs expected riskScore with tolerance (F)
+    skipNegativeCases(createQuerySyntaxValidityEvaluator()),      // syntax + FROM wildcard check (G)
+    skipNegativeCases(createFieldCoverageEvaluator()),            // required fields incl. riskScore (B partial)
+    skipNegativeCases(createRuleTypeLanguageEvaluator()),
+    skipNegativeCases(createMitreAccuracyEvaluator()),            // F1 score + invalidFormat metadata (H-A)
+    skipNegativeCases(createSeverityValidityEvaluator()),         // enum check (A)
+    skipNegativeCases(createRiskScoreValidityEvaluator()),        // 0–100 range check (B)
+    skipNegativeCases(createIntervalFormatEvaluator()),           // duration string format (C)
+    skipNegativeCases(createLookbackGapEvaluator()),              // from >= interval coverage (D)
+    skipNegativeCases(createSeverityMatchEvaluator()),            // vs expected severity (E)
+    skipNegativeCases(createRiskScoreMatchEvaluator()),           // vs expected riskScore with tolerance (F)
     // LLM — functional/semantic equivalence via built-in @kbn/evals criteria evaluator
-    createEsqlFunctionalEquivalenceEvaluator(evaluators),
+    skipNegativeCases(createEsqlFunctionalEquivalenceEvaluator(evaluators)),
     // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
     // Re-enable when running thorough multi-model comparisons.
-    // createRuleNameEvaluator(evaluators),
-    // createRuleDescriptionEvaluator(evaluators),
+    // skipNegativeCases(createRuleNameEvaluator(evaluators)),
+    // skipNegativeCases(createRuleDescriptionEvaluator(evaluators)),
+    // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
+    createRejectionEvaluator(),
   ];
 
   return async function evaluateDataset({
