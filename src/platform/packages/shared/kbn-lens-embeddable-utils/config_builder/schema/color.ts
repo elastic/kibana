@@ -162,17 +162,6 @@ export const colorByValueAbsoluteSchema = colorByValueBaseSchema.extends(
   }
 );
 
-export const legacyColorByValueAbsoluteSchema = legacyColorByValueSchema.extends(
-  {
-    range: schema.literal('absolute'),
-  },
-  {
-    meta: {
-      id: 'legacyColorByValueAbsolute',
-    },
-  }
-);
-
 export const colorByValuePercentageSchema = colorByValueBaseSchema.extends(
   {
     range: schema.literal('percentage'),
