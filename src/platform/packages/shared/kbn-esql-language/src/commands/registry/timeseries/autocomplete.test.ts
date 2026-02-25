@@ -102,7 +102,7 @@ describe('TS Autocomplete', () => {
     test('discriminates between indices and aliases', async () => {
       const suggestions = await suggest('TS ');
       const indices: string[] = suggestions
-        .filter((s) => s.detail === 'Index')
+        .filter((s) => s.detail === 'Timeseries')
         .map((s) => s.label)
         .sort();
       const aliases: string[] = suggestions

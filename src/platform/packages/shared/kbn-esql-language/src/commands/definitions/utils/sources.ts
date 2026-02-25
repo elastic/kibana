@@ -255,12 +255,12 @@ export const specialIndicesToSuggestions = (
         label: index.name,
         text: index.name + ' ',
         kind: 'Issue',
-        detail: i18n.translate(
-          'kbn-esql-language.esql.autocomplete.specialIndexes.indexType.index',
-          {
-            defaultMessage: 'Index',
-          }
-        ),
+        detail: i18n.translate('kbn-esql-language.esql.autocomplete.sourceDefinition', {
+          defaultMessage: '{type}',
+          values: {
+            type: index.mode ?? SOURCES_TYPES.INDEX,
+          },
+        }),
         sortText: '0-INDEX-' + index.name,
       })
     );

@@ -19,11 +19,11 @@ import {
 test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await apiServices.streams.clearStreamChildren('logs');
+    await apiServices.streams.clearStreamChildren('logs.otel');
 
-    // Reset parent 'logs' stream to default indefinite retention (DSL with no data_retention)
-    const logsDefinition = await apiServices.streams.getStreamDefinition('logs');
-    await apiServices.streams.updateStream('logs', {
+    // Reset parent 'logs.otel' stream to default indefinite retention (DSL with no data_retention)
+    const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
+    await apiServices.streams.updateStream('logs.otel', {
       ingest: {
         ...logsDefinition.stream.ingest,
         processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
@@ -31,21 +31,21 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
       },
     });
 
-    await apiServices.streams.forkStream('logs', 'logs.nginx', {
+    await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
       field: 'service.name',
       eq: 'nginx',
     });
-    await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+    await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
   });
 
   test.afterEach(async ({ apiServices, page }) => {
     await closeToastsIfPresent(page);
-    await apiServices.streams.clearStreamChildren('logs');
+    await apiServices.streams.clearStreamChildren('logs.otel');
   });
 
   test.afterAll(async ({ apiServices }) => {
     // Clear existing rules
-    await apiServices.streams.clearStreamChildren('logs');
+    await apiServices.streams.clearStreamChildren('logs.otel');
   });
 
   test('should show ILM policy button', async ({ page }) => {
@@ -85,7 +85,9 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await saveRetentionChanges(page);
 
     // Verify the policy name is displayed using the badge test ID
-    await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText('.alerts-ilm-policy');
+    await expect(page.getByTestId('lifecycleBadge-logs.otel.nginx')).toContainText(
+      '.alerts-ilm-policy'
+    );
   });
 
   test('should persist ILM policy selection across page reload', async ({ page, pageObjects }) => {
@@ -99,11 +101,13 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await saveRetentionChanges(page);
 
     // Reload page
-    await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+    await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
     // Verify ILM policy persists
     await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
-    await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText('.alerts-ilm-policy');
+    await expect(page.getByTestId('lifecycleBadge-logs.otel.nginx')).toContainText(
+      '.alerts-ilm-policy'
+    );
   });
 
   test('should open ILM lifecycle phase popup and display phase details', async ({ page }) => {
