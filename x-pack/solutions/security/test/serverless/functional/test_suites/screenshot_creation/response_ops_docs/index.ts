@@ -16,13 +16,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await ml.testResources.disableKibanaAnnouncements();
       await browser.setWindowSize(1920, 1080);
     });
 
     after(async () => {
       await ml.testResources.resetKibanaTimeZone();
-      await ml.testResources.resetKibanaAnnouncements();
     });
 
     loadTestFile(require.resolve('./cases'));

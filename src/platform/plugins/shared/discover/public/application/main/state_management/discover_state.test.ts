@@ -8,13 +8,14 @@
  */
 
 import type { DiscoverStateContainer } from './discover_state';
-import { createSearchSessionRestorationDataProvider } from './discover_state';
+import { createSearchSessionRestorationDataProvider } from './utils/create_search_session_restoration_data_provider';
 import {
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
   internalStateActions,
   selectHasUnsavedChanges,
   selectTabRuntimeState,
+  createRuntimeStateManager,
 } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
@@ -38,7 +39,6 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
-import { createRuntimeStateManager } from './redux';
 import type { DiscoverServices, HistoryLocationState } from '../../../build_services';
 import {
   getDiscoverInternalStateMock,
@@ -118,11 +118,13 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );
-      state.actions.initializeAndSync();
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
     });
 
     afterEach(() => {
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('setting app state and syncing to URL', async () => {
@@ -216,11 +218,13 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );
-      state.actions.initializeAndSync();
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
     });
 
     afterEach(() => {
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
       jest.useRealTimers();
     });
 
@@ -264,9 +268,11 @@ describe('Discover state', () => {
       } as SavedSearch;
 
       const { state } = await getState('/#?_a=(sort:!(!(timestamp,desc)))', { savedSearch });
-      state.actions.initializeAndSync();
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
       expect(state.getCurrentTab().appState.sort).toEqual([['timestamp', 'desc']]);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('Empty URL should use saved search sort for state', async () => {
@@ -287,7 +293,7 @@ describe('Discover state', () => {
         })
       );
       expect(state.getCurrentTab().appState.sort).toEqual([['bytes', 'desc']]);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
   });
 
@@ -380,14 +386,18 @@ describe('Discover state', () => {
 
       test('restoreState has absoluteTimeRange', async () => {
         const services = createDiscoverServicesMock();
-        const relativeTime = 'relativeTime';
-        const absoluteTime = 'absoluteTime';
+        const relativeTime: TimeRange = { from: 'now-42m', to: 'now', mode: 'relative' };
+        const absoluteTime: TimeRange = {
+          from: '2025-12-01T00:00:00.000Z',
+          to: '2025-12-31T00:00:00.000Z',
+          mode: 'absolute',
+        };
         jest
           .mocked(services.data.query.timefilter.timefilter.getTime)
-          .mockReturnValue(relativeTime as unknown as TimeRange);
+          .mockReturnValue(relativeTime);
         jest
           .mocked(services.data.query.timefilter.timefilter.getAbsoluteTime)
-          .mockReturnValue(absoluteTime as unknown as TimeRange);
+          .mockReturnValue(absoluteTime);
         const searchSessionInfoProvider = await setupSearchSessionInfoProvider({ services });
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
         expect(initialState.timeRange).toBe(relativeTime);
@@ -416,7 +426,6 @@ describe('Discover state', () => {
                   serializedSearchSource: { index: dataViewMock.id },
                 },
               }),
-              timeRestore: false,
               services,
             }),
           ],
@@ -444,7 +453,6 @@ describe('Discover state', () => {
                   serializedSearchSource: { index: dataViewAdHoc.toSpec() },
                 },
               }),
-              timeRestore: false,
               services,
             }),
           ],
@@ -465,7 +473,9 @@ describe('Discover state', () => {
       const { state } = await getState();
       const nextId = 'id';
       mockServices.data.search.session.start = jest.fn(() => nextId);
-      state.actions.initializeAndSync();
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
       expect(state.searchSessionManager.getNextSearchSessionId()).toEqual({
         searchSessionId: nextId,
         isSearchSessionRestored: false,
@@ -506,7 +516,7 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(dataState.data$.documents$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
 
       expect(dataState.data$.totalHits$.value.result).toBe(0);
       expect(dataState.data$.documents$.value.result).toEqual([]);
@@ -545,29 +555,29 @@ describe('Discover state', () => {
       expect(hasUnsavedChanges).toBe(false);
       const { searchSource, ...savedSearch } = state.savedSearchState.getState();
       expect(savedSearch).toMatchInlineSnapshot(`
-              Object {
-                "chartInterval": "auto",
-                "columns": Array [
-                  "default_column",
-                ],
-                "density": undefined,
-                "headerRowHeight": undefined,
-                "hideAggregatedPreview": undefined,
-                "hideChart": undefined,
-                "refreshInterval": undefined,
-                "rowHeight": undefined,
-                "rowsPerPage": undefined,
-                "sampleSize": undefined,
-                "sort": Array [],
-                "timeRange": undefined,
-              }
-          `);
+        Object {
+          "chartInterval": "auto",
+          "columns": Array [
+            "default_column",
+          ],
+          "density": undefined,
+          "headerRowHeight": undefined,
+          "hideAggregatedPreview": undefined,
+          "hideChart": undefined,
+          "refreshInterval": undefined,
+          "rowHeight": undefined,
+          "rowsPerPage": undefined,
+          "sampleSize": undefined,
+          "sort": Array [],
+          "timeRange": undefined,
+        }
+      `);
       const { currentDataView$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
       expect(currentDataView$.getValue()?.id).toEqual('the-data-view-id');
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadNewSavedSearch given an empty URL using loadSavedSearch', async () => {
@@ -594,7 +604,7 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(false);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadNewSavedSearch with URL changing interval state', async () => {
@@ -623,7 +633,7 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(false);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadSavedSearch with no id, given URL changes state', async () => {
@@ -652,7 +662,7 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(false);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadSavedSearch given an empty URL, no state changes', async () => {
@@ -660,7 +670,6 @@ describe('Discover state', () => {
       const savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
         dataView: undefined,
-        initialInternalState: undefined,
         appState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab: fromSavedSearchToSavedObjectTab({
@@ -699,7 +708,7 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(false);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadSavedSearch given a URL with different interval and columns modifying the state', async () => {
@@ -727,7 +736,7 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(true);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadSavedSearch given a URL with different time range than the stored one showing as changed', async () => {
@@ -758,7 +767,7 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(true);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadSavedSearch given a URL with different refresh interval than the stored one showing as changed', async () => {
@@ -793,7 +802,7 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(true);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadSavedSearch given a URL with matching time range and refresh interval not showing as changed', async () => {
@@ -828,7 +837,7 @@ describe('Discover state', () => {
         services: mockServices,
       });
       expect(hasUnsavedChanges).toBe(false);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('loadSavedSearch ignoring hideChart in URL', async () => {
@@ -932,7 +941,6 @@ describe('Discover state', () => {
       let savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
         dataView: undefined,
-        initialInternalState: undefined,
         appState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab: fromSavedSearchToSavedObjectTab({
@@ -974,7 +982,6 @@ describe('Discover state', () => {
       savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
         dataView: undefined,
-        initialInternalState: undefined,
         appState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab: fromSavedSearchToSavedObjectTab({
@@ -1036,7 +1043,6 @@ describe('Discover state', () => {
       savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
         dataView: undefined,
-        initialInternalState: undefined,
         appState: getInitialAppState({
           initialUrlState: undefined,
           persistedTab: fromSavedSearchToSavedObjectTab({
@@ -1271,7 +1277,7 @@ describe('Discover state', () => {
       expect(currentDataView$.getValue()?.id).toBe(dataViewComplexMock.id);
       // check if the changed data view is reflected in the URL
       expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('onOpenSavedSearch - same target id', async () => {
@@ -1294,7 +1300,7 @@ describe('Discover state', () => {
         internalStateActions.openDiscoverSession({ discoverSessionId: savedSearchMock.id! })
       );
       expect(state.savedSearchState.getState().hideChart).toBe(false);
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('onOpenSavedSearch - cleanup of previous filter', async () => {
@@ -1389,7 +1395,7 @@ describe('Discover state', () => {
         ).currentDataView$.getValue()?.id
       ).toBe(dataViewMock.id);
 
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('resetDiscoverSession with timeRestore', async () => {
@@ -1444,11 +1450,13 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({ appState: {} })
       );
-      state.actions.initializeAndSync();
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.initializeAndSync)()
+      );
     });
 
     afterEach(() => {
-      state.actions.stopSyncing();
+      state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 
     test('setting app state and syncing to URL', async () => {

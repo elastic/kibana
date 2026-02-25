@@ -185,6 +185,9 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
   loginAssistanceMessage=""
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -195,6 +198,9 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -224,6 +230,9 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
   loginAssistanceMessage="This is an *important* message"
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -234,6 +243,9 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -264,6 +276,9 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
   loginHelp="**some-help**"
   notifications={
     Object {
+      "feedback": Object {
+        "isEnabled": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -274,6 +289,9 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
         "addWarning": [MockFunction],
         "get$": [MockFunction],
         "remove": [MockFunction],
+      },
+      "tours": Object {
+        "isEnabled": [MockFunction],
       },
     }
   }
@@ -395,7 +413,7 @@ exports[`LoginPage page renders as expected 1`] = `
                     class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
                   >
                     <div
-                      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
                       style="--euiFormControlLeftIconsCount: 1;"
                     >
                       <div
@@ -423,7 +441,7 @@ exports[`LoginPage page renders as expected 1`] = `
                       />
                     </div>
                     <div
-                      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                      class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
                     >
                       <button
                         aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
@@ -584,7 +602,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                     class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
                   >
                     <div
-                      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
                       style="--euiFormControlLeftIconsCount: 1;"
                     >
                       <div
@@ -612,7 +630,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                       />
                     </div>
                     <div
-                      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                      class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
                     >
                       <button
                         aria-label="Show password as plain text. Note: this will visually expose your password on the screen."

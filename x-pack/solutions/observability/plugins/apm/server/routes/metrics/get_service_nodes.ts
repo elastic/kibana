@@ -15,8 +15,8 @@ import {
   METRIC_OTEL_JVM_PROCESS_CPU_PERCENT,
   METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
   METRIC_OTEL_JVM_PROCESS_THREADS_COUNT,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP,
   LABEL_TYPE,
   HOST_NAME,
 } from '../../../common/es_fields/apm';
@@ -222,7 +222,7 @@ async function getOTelServiceNodes({
           },
           heapMemory: {
             filter: {
-              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP },
+              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP },
             },
             aggs: {
               usage: {
@@ -234,7 +234,7 @@ async function getOTelServiceNodes({
           },
           nonHeapMemory: {
             filter: {
-              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP },
+              term: { [LABEL_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP },
             },
             aggs: {
               usage: {

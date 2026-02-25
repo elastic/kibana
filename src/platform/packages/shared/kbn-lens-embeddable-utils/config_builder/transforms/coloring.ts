@@ -16,7 +16,9 @@ import type {
 } from '../schema/color';
 import type { SerializableValueType } from '../schema/serializedValue';
 
-const LENS_COLOR_BY_VALUE_RANGE_TYPE = 'absolute';
+const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
+const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_MIN = 0;
+const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_MAX = 100;
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE = 'default';
 
 const LEGACY_TO_API_RANGE_NAMES: Record<'percent' | 'number', 'percentage' | 'absolute'> = {
@@ -58,6 +60,7 @@ export function fromColorByValueAPIToLensState(
         : API_TO_LEGACY_RANGE_NAMES.absolute,
       stops,
       colorStops: stops,
+      ...(color.continuity ? { continuity: color.continuity } : {}),
     },
   };
 }
@@ -70,11 +73,14 @@ export function fromColorByValueLensStateToAPI(
   }
   const rangeType = color.params.rangeType
     ? LEGACY_TO_API_RANGE_NAMES[color.params.rangeType]
-    : LENS_COLOR_BY_VALUE_RANGE_TYPE;
+    : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
+  const continuity = color.params.continuity;
+
   if (rangeType === 'absolute') {
     return {
       type: 'dynamic',
       range: rangeType,
+      ...(continuity ? { continuity } : {}),
       steps:
         color.params.stops?.map((step, index) => {
           const isFirst = index === 0;
@@ -91,9 +97,10 @@ export function fromColorByValueLensStateToAPI(
   }
   return {
     type: 'dynamic',
-    min: color.params.rangeMin!,
-    max: color.params.rangeMax!,
+    min: color.params.rangeMin ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_MIN,
+    max: color.params.rangeMax ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_MAX,
     range: rangeType,
+    ...(continuity ? { continuity } : {}),
     steps:
       color.params.stops?.map((step, index) => {
         const isFirst = index === 0;

@@ -47,6 +47,7 @@ export interface StreamEnrichmentServiceDependencies {
 
 export interface StreamEnrichmentInput {
   definition: Streams.ingest.all.GetResponse;
+  grokCollection: GrokCollection;
 }
 
 export interface StreamEnrichmentContextType {
@@ -75,6 +76,12 @@ export interface StreamEnrichmentContextType {
   // Validation errors for processors (namespace, reserved fields, type mismatches)
   validationErrors: Map<string, StreamlangValidationError[]>;
   fieldTypesByProcessor: Map<string, Map<string, FieldType>>;
+  /**
+   * Tracks whether the current condition filter was applied automatically by the UI
+   * (e.g. right after creating a condition block). If set, some user actions (save/cancel
+   * processor edits) will clear the filter for convenience.
+   */
+  autoSelectedConditionId?: string;
 }
 
 export type StreamEnrichmentEvent =
@@ -105,8 +112,10 @@ export type StreamEnrichmentEvent =
   | { type: 'mode.resetSimulator' }
   | { type: 'simulation.reset' }
   | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.filterByConditionAuto'; conditionId: string }
   | { type: 'simulation.filterByCondition'; conditionId: string }
   | { type: 'simulation.clearConditionFilter' }
+  | { type: 'simulation.clearAutoConditionFilter' }
   // Step events forwarded to interactive mode machine
   | {
       type: 'step.addProcessor';
@@ -123,6 +132,12 @@ export type StreamEnrichmentEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
+  | {
+      type: 'step.reorderByDragDrop';
+      sourceStepId: string;
+      targetStepId: string;
+      operation: 'before' | 'after' | 'inside';
+    }
   // YAML events forwarded to YAML mode machine
   | { type: 'yaml.contentChanged'; streamlangDSL: StreamlangDSL; yaml: string }
   | { type: 'yaml.runSimulation'; stepIdBreakpoint?: string }

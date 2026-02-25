@@ -9,6 +9,7 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition } from '@kbn/streams-schema';
 import type { IdentifySystemsResult } from '@kbn/streams-ai';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -20,6 +21,7 @@ export interface SystemIdentificationTaskParams {
   connectorId: string;
   start: number;
   end: number;
+  streamName: string;
 }
 
 export const SYSTEMS_IDENTIFICATION_TASK_TYPE = 'streams_systems_identification';
@@ -39,9 +41,8 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, _task } = runContext.taskInstance
+              const { connectorId, start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<SystemIdentificationTaskParams>;
-              const { stream: name } = _task;
 
               const {
                 taskClient,
@@ -56,8 +57,8 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
 
               try {
                 const [{ systems: currentSystems }, stream] = await Promise.all([
-                  systemClient.getSystems(name),
-                  streamsClient.getStream(name),
+                  systemClient.getSystems(streamName),
+                  streamsClient.getStream(streamName),
                 ]);
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
@@ -96,14 +97,14 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
                 await taskClient.complete<
                   SystemIdentificationTaskParams,
                   Pick<IdentifySystemsResult, 'systems'>
-                >(_task, { connectorId, start, end }, { systems });
+                >(_task, { connectorId, start, end, streamName }, { systems });
               } catch (error) {
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -118,7 +119,7 @@ export function createStreamsSystemIdentificationTask(taskContext: TaskContext) 
 
                 await taskClient.fail<SystemIdentificationTaskParams>(
                   _task,
-                  { connectorId, start, end },
+                  { connectorId, start, end, streamName },
                   errorMessage
                 );
               }

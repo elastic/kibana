@@ -85,6 +85,14 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   INDEX_PATTERN_INPUT: 'indexPattern-switcher--input',
   EXPLORE_MATCHING_INDICES_BUTTON: 'explore-matching-indices-button',
 
+  // Metric Row / Custom Equation
+  AGGREGATION_NAME_A: 'aggregationNameA',
+  AGGREGATION_TYPE_SELECT: 'aggregationTypeSelect',
+
+  // KQL Filter
+  KQL_SEARCH_FIELD: 'o11ySearchField',
+  KQL_SUGGESTIONS_PANEL: 'o11ySuggestionsPanel',
+
   // Rule Save
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
   CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',

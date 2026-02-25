@@ -10,8 +10,10 @@
 import {
   filterDataErrors,
   filterOutWarningsOverlappingWithErrors,
+  getToggleCommentLines,
   parseErrors,
   parseWarning,
+  filterDuplicatedWarnings,
 } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
@@ -319,6 +321,66 @@ describe('helpers', function () {
 
       const result = filterOutWarningsOverlappingWithErrors(errors, warnings);
       expect(result).toHaveLength(shouldFilter ? 0 : 1);
+    });
+  });
+
+  describe('filterDuplicatedUnmappedColumnWarnings', function () {
+    const createMessage = (code: string, message: string): MonacoMessage & { code: string } => ({
+      message,
+      code,
+      severity: 1,
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: 1,
+      endColumn: 1,
+    });
+
+    it('should filter duplicated warning messages', function () {
+      const warnings = [
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field b is unmapped'),
+      ];
+      expect(filterDuplicatedWarnings(warnings)).toEqual([
+        createMessage('unmappedColumnWarning', 'Field a is unmapped'),
+        createMessage('unmappedColumnWarning', 'Field b is unmapped'),
+      ]);
+    });
+  });
+
+  describe('getToggleCommentLines', function () {
+    it('should comment all lines when none are commented', function () {
+      const lines = ['FROM logs-*', '| WHERE host.name == "server1"', '| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        '//FROM logs-*',
+        '//| WHERE host.name == "server1"',
+        '//| LIMIT 10',
+      ]);
+    });
+
+    it('should uncomment all lines when all are commented', function () {
+      const lines = ['//FROM logs-*', '//| WHERE host.name == "server1"', '//| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        'FROM logs-*',
+        '| WHERE host.name == "server1"',
+        '| LIMIT 10',
+      ]);
+    });
+
+    it('should comment all lines when selection has a mix of commented and uncommented', function () {
+      const lines = ['//| WHERE host.name == "server1"', '| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        '//| WHERE host.name == "server1"',
+        '//| LIMIT 10',
+      ]);
+    });
+
+    it('should comment the single uncommented line', function () {
+      expect(getToggleCommentLines(['| LIMIT 10'])).toEqual(['//| LIMIT 10']);
+    });
+
+    it('should uncomment the single commented line', function () {
+      expect(getToggleCommentLines(['//| LIMIT 10'])).toEqual(['| LIMIT 10']);
     });
   });
 });

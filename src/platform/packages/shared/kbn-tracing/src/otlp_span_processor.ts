@@ -10,27 +10,40 @@
 import type { OTLPExportConfig } from '@kbn/tracing-config';
 import { OTLPTraceExporter as OTLPTraceExporterHTTP } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPTraceExporter as OTLPTraceExporterGRPC } from '@opentelemetry/exporter-trace-otlp-grpc';
-import { OTLPTraceExporter as OTLPTraceExporterProto } from '@opentelemetry/exporter-trace-otlp-proto';
+import { OTLPTraceExporter as OTLPTraceExporterPROTO } from '@opentelemetry/exporter-trace-otlp-proto';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { diag } from '@opentelemetry/api';
+import { Metadata } from '@grpc/grpc-js';
 
 export class OTLPSpanProcessor extends tracing.BatchSpanProcessor {
   constructor(config: OTLPExportConfig, protocol: 'grpc' | 'http' | 'proto') {
     diag.info(`Initializing OTLP exporter with protocol: ${protocol}, url: ${config.url}`);
 
-    const exporterConfig = { url: config.url, headers: config.headers };
+    let exporter: OTLPTraceExporterHTTP | OTLPTraceExporterGRPC | OTLPTraceExporterPROTO;
 
-    let exporter;
     switch (protocol) {
       case 'grpc':
-        exporter = new OTLPTraceExporterGRPC(exporterConfig);
-        break;
-      case 'proto':
-        exporter = new OTLPTraceExporterProto(exporterConfig);
+        const metadata = new Metadata();
+        Object.entries(config.headers || {}).forEach(([key, value]) => {
+          metadata.add(key, value);
+        });
+
+        exporter = new OTLPTraceExporterGRPC({
+          url: config.url,
+          metadata,
+        });
         break;
       case 'http':
-      default:
-        exporter = new OTLPTraceExporterHTTP(exporterConfig);
+        exporter = new OTLPTraceExporterHTTP({
+          url: config.url,
+          headers: config.headers,
+        });
+        break;
+      case 'proto':
+        exporter = new OTLPTraceExporterPROTO({
+          url: config.url,
+          headers: config.headers,
+        });
         break;
     }
 

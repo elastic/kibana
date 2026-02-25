@@ -1,3 +1,4 @@
+safe-stable-stringify
 ajv-draft-04
 ajv-formats
 @moonrepo/cli
@@ -25,3 +26,9 @@ ink
 @hey-api/openapi-ts
 vscode-languageserver-textdocument
 yaml-language-server
+@atlaskit/pragmatic-drag-and-drop
+@atlaskit/pragmatic-drag-and-drop-hitbox
+@opentelemetry/exporter-metrics-otlp-proto
+@opentelemetry/instrumentation-hapi
+simple-statistics
+monaco-promql

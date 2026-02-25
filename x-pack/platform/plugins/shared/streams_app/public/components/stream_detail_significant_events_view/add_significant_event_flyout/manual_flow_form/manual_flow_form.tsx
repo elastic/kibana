@@ -17,23 +17,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
-import { ALL_DATA_OPTION } from '../../feature_selector';
+import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface Props {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
+  query: StreamQuery;
   isSubmitting: boolean;
   isEditMode: boolean;
-  setQuery: (query: StreamQueryKql) => void;
+  setQuery: (query: StreamQuery) => void;
   setCanSave: (canSave: boolean) => void;
-  features: System[];
+  systems: System[];
   dataViews: DataView[];
 }
 
@@ -47,7 +47,7 @@ export function ManualFlowForm({
   setCanSave,
   isSubmitting,
   isEditMode,
-  features,
+  systems,
   dataViews,
 }: Props) {
   const [touched, setTouched] = useState({
@@ -67,7 +67,7 @@ export function ManualFlowForm({
 
   // Create a query object with debounced KQL for the preview chart
   const debouncedQuery = useMemo(
-    (): StreamQueryKql => ({
+    (): StreamQuery => ({
       ...query,
       kql: { query: debouncedKqlQuery },
     }),
@@ -84,9 +84,9 @@ export function ManualFlowForm({
 
   const options = [
     { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...features.map((feature) => ({
-      value: feature,
-      inputDisplay: feature.name,
+    ...systems.map((system) => ({
+      value: system,
+      inputDisplay: system.name,
     })),
   ];
 
@@ -146,8 +146,8 @@ export function ManualFlowForm({
             label={
               <EuiFormLabel>
                 {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldFeatureLabel',
-                  { defaultMessage: 'Feature' }
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
+                  { defaultMessage: 'System' }
                 )}
               </EuiFormLabel>
             }
@@ -164,10 +164,10 @@ export function ManualFlowForm({
                   : ALL_DATA_OPTION.value
               }
               placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.featurePlaceholder',
-                { defaultMessage: 'Select feature' }
+                'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
+                { defaultMessage: 'Select system' }
               )}
-              disabled={isSubmitting || features.length === 0 || isEditMode}
+              disabled={isSubmitting || systems.length === 0 || isEditMode}
               onBlur={() => {
                 setTouched((prev) => ({ ...prev, feature: true }));
               }}

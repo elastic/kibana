@@ -9,23 +9,21 @@
 
 import { getKibanaConnectors } from '../spec/kibana';
 import { KIBANA_TYPE_ALIASES } from '../spec/kibana/aliases';
+import type { RequestOptions } from '../types/latest';
+
+// Meta params that control step behavior but should never be forwarded as HTTP params
+const KIBANA_STEP_META_KEYS = new Set(['use_server_info', 'use_localhost', 'debug']);
 
 /**
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
 // eslint-disable-next-line complexity
-export function buildKibanaRequestFromAction(
+export function buildKibanaRequest(
   actionType: string,
   params: Record<string, unknown>,
   spaceId?: string
-): {
-  method: string;
-  path: string;
-  body?: Record<string, unknown>;
-  query?: Record<string, unknown>;
-  headers?: Record<string, string>;
-} {
+): RequestOptions {
   // Support raw API format first - this always works
   if (params.request) {
     const {
@@ -39,7 +37,7 @@ export function buildKibanaRequestFromAction(
       method: method as string,
       path: path as string,
       body: body as Record<string, unknown>,
-      query: query as Record<string, unknown>,
+      query: query as Record<string, string>,
       headers: headers as Record<string, string>,
     };
   }
@@ -51,7 +49,7 @@ export function buildKibanaRequestFromAction(
       method: method as string,
       path: path as string,
       body: body as Record<string, unknown>,
-      query: query as Record<string, unknown>,
+      query: query as Record<string, string>,
       headers: headers as Record<string, string>,
     };
   }
@@ -96,12 +94,12 @@ export function buildKibanaRequestFromAction(
 
     // Build body, query parameters, and headers
     const body: Record<string, unknown> = {};
-    const queryParams: Record<string, unknown> = {};
+    const queryParams: Record<string, string> = {};
     const headers: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(params)) {
-      // Skip path parameters (they're used in the URL) and meta parameters
-      if (pathParams.has(key) || key === 'method') {
+      // Skip path parameters (they're used in the URL), meta parameters, and step-level options
+      if (pathParams.has(key) || key === 'method' || KIBANA_STEP_META_KEYS.has(key)) {
         // eslint-disable-next-line no-continue
         continue;
       }
@@ -117,7 +115,7 @@ export function buildKibanaRequestFromAction(
       } else if (urlParamKeys.has(key)) {
         // This parameter should go in URL query parameters
         const queryValue = Array.isArray(value) ? value.join(',') : value;
-        queryParams[key] = queryValue;
+        queryParams[key] = String(queryValue);
       } else if (key === 'body') {
         // Handle explicit body parameter
         if (typeof value === 'object' && value !== null) {
