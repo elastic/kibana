@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
+    cancel_on_build_failing: true
     label: 'Build Storybooks'
     agents:
       machineType: n2-standard-8
@@ -7,3 +8,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     key: storybooks
     timeout_in_minutes: 80
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

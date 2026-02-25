@@ -28,6 +28,7 @@ import type { EntityMaintainersClient } from './domain/entity_maintainers_client
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction/logs_extraction_client';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import type { CRUDClient } from './domain/crud_client';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
@@ -48,6 +49,7 @@ export interface EntityStoreApiRequestHandlerContext {
   logger: Logger;
   assetManager: AssetManager;
   entityMaintainersClient: EntityMaintainersClient;
+  crudClient: CRUDClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
   security: SecurityPluginStart;
