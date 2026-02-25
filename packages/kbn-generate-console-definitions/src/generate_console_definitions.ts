@@ -48,7 +48,8 @@ const generateDocumentation = (endpoint: SpecificationTypes.Endpoint): string =>
 const generateServerlessDocumentation = (
   endpoint: SpecificationTypes.Endpoint
 ): string | undefined => {
-  return endpoint.docUrlServerless;
+  const url = endpoint.docUrlServerless?.trim();
+  return url ? url : undefined;
 };
 
 interface GeneratedParameters {
