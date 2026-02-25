@@ -93,7 +93,7 @@ export function getSystemPrompt({
         )}` +
         `${
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
-            ? ' first attempt to retrieve it using the `context` tool response. If the context does not provide it,'
+            ? ' first check the `context` tool response (which is provided automatically and cannot be called directly). If the context does not provide it,'
             : ''
         } **ALWAYS** assume a default time range of **start='now-15m'** and **end='now'**. **DO NOT** ask the user for a time range. When you use a default time range, *always inform the user* which range was used in your response (e.g., "Based on the last 15 minutes...").`;
     }
@@ -191,7 +191,7 @@ export function getSystemPrompt({
           ', '
         )}), ${
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
-            ? `first try \`${CONTEXT_FUNCTION_NAME}\` to find time range. If no time range is found in context,`
+            ? `first check the \`${CONTEXT_FUNCTION_NAME}\` response (provided automatically) to find time range. If no time range is found in context,`
             : ''
         } use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user. ${
           isFunctionAvailable(ALERTS_FUNCTION_NAME)
@@ -272,8 +272,8 @@ export function getSystemPrompt({
 
     if (isFunctionAvailable(CONTEXT_FUNCTION_NAME) && isKnowledgeBaseReady) {
       usage.push(
-        `**Context Retrieval:** You can use the \`${CONTEXT_FUNCTION_NAME}\` tool to retrieve relevant information from the knowledge database. The response will include a "learnings" field containing information
-          from the knowledge base that is most relevant to the user's current query. You should incorporate these learnings into your responses when answering the user's questions.
+        `**Context Retrieval:** The \`${CONTEXT_FUNCTION_NAME}\` tool is called automatically by the system and cannot be called directly. Its response contains relevant information from the knowledge database.
+          The response will include a "learnings" field containing information from the knowledge base that is most relevant to the user's current query. You should incorporate these learnings into your responses when answering the user's questions.
           The information in the "learnings" field contains up-to-date information that you should consider when formulating your responses. DO NOT add disclaimers about the currency or certainty of this information.
           Present this information directly without qualifiers like "I don't have specific, up-to-date information" or "I can't be completely certain".
           
