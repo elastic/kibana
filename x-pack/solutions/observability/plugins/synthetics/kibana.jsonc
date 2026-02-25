@@ -41,7 +41,6 @@
       "fieldsMetadata"
     ],
     "optionalPlugins": [
-      "agentBuilder",
       "cases",
       "cloud",
       "data",

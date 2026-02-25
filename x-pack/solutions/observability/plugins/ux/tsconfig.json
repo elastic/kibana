@@ -51,8 +51,7 @@
     "@kbn/search-types",
     "@kbn/server-route-repository-utils",
     "@kbn/react-kibana-mount",
-    "@kbn/core-rendering-browser",
-    "@kbn/agent-builder-plugin",
+    "@kbn/core-rendering-browser"
   ],
   "exclude": ["target/**/*"]
 }

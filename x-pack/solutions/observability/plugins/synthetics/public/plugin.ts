@@ -68,7 +68,6 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -95,7 +94,6 @@ export interface ClientPluginsSetup {
 }
 
 export interface ClientPluginsStart {
-  agentBuilder?: AgentBuilderPluginStart;
   fleet: FleetStart;
   data: DataPublicPluginStart;
   kql: KqlPluginStart;

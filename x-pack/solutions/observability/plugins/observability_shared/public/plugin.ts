@@ -14,11 +14,17 @@ import type {
 } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { BehaviorSubject, type Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, type Subscription } from 'rxjs';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import {
+  OBSERVABILITY_AGENT_ID,
+  OBSERVABILITY_SESSION_TAG,
+} from '@kbn/observability-agent-builder-plugin/common';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
-export { updateGlobalNavigation } from './services/update_global_navigation';
+import { updateGlobalNavigation } from './services/update_global_navigation';
+export { updateGlobalNavigation };
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
@@ -43,10 +49,8 @@ import {
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
-import { updateGlobalNavigation } from './services/update_global_navigation';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
-import { OBSERVABILITY_AGENT_ID, OBSERVABILITY_SESSION_TAG } from '../common/observability_apps';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -112,31 +116,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     const { application } = core;
     const { agentBuilder } = plugins;
 
-    if (agentBuilder?.setConversationFlyoutActiveConfig) {
-      this.appChangeSubscription = combineLatest([currentAppId$, applications$]).subscribe(
-        ([appId, applications]) => {
-          if (appId === undefined) {
-            return;
-          }
-
-          const categoryId = appId && applications.get(appId)?.category?.id;
-
-          if (categoryId === undefined) {
-            return;
-          }
-
-          if (DEFAULT_APP_CATEGORIES.observability.id === categoryId) {
-            agentBuilder.setConversationFlyoutActiveConfig({
-              agentId: OBSERVABILITY_AGENT_ID,
-              sessionTag: OBSERVABILITY_SESSION_TAG,
-              newConversation: true,
-            });
-          } else {
-            agentBuilder.clearConversationFlyoutActiveConfig?.();
-          }
-        }
-      );
-    }
+    this.setupObservabilityAgentDefault(application, agentBuilder);
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,
@@ -159,6 +139,42 @@ export class ObservabilitySharedPlugin implements Plugin {
 
   public stop() {
     this.appChangeSubscription?.unsubscribe();
+  }
+
+  /**
+   * Sets up the Observability Agent as the default AI agent when navigating to Observability apps.
+   * Subscribes to app changes and configures the AI flyout accordingly.
+   */
+  private setupObservabilityAgentDefault(
+    application: CoreStart['application'],
+    agentBuilder: AgentBuilderPluginStart | undefined
+  ) {
+    if (!agentBuilder?.setConversationFlyoutActiveConfig) {
+      return;
+    }
+
+    this.appChangeSubscription = combineLatest([
+      application.currentAppId$,
+      application.applications$,
+    ]).subscribe(([currentAppId, registeredApps]) => {
+      if (!currentAppId) {
+        return;
+      }
+
+      const currentApp = registeredApps.get(currentAppId);
+      const isObservabilityApp =
+        currentApp?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
+
+      if (isObservabilityApp) {
+        agentBuilder.setConversationFlyoutActiveConfig({
+          agentId: OBSERVABILITY_AGENT_ID,
+          sessionTag: OBSERVABILITY_SESSION_TAG,
+          newConversation: false,
+        });
+      } else {
+        agentBuilder.clearConversationFlyoutActiveConfig?.();
+      }
+    });
   }
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {

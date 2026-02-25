@@ -129,7 +129,6 @@ dependsOn:
   - '@kbn/content-management-utils'
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
-  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod

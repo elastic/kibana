@@ -8,6 +8,9 @@
 // Agent ID
 export const OBSERVABILITY_AGENT_ID = 'observability.agent';
 
+// Session tag for grouping Observability Agent conversations
+export const OBSERVABILITY_SESSION_TAG = 'observability';
+
 // Attachment type IDs
 export const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = 'observability.ai_insight';
 export const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = 'observability.error';

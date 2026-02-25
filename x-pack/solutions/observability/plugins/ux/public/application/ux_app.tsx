@@ -84,7 +84,6 @@ export function UXAppRoot({
   core,
   deps,
   corePlugins: {
-    agentBuilder,
     embeddable,
     inspector,
     maps,
@@ -123,7 +122,6 @@ export function UXAppRoot({
             services={{
               ...core,
               ...plugins,
-              agentBuilder,
               inspector,
               observability,
               observabilityShared,
