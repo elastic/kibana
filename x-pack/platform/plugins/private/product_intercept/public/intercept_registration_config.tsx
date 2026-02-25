@@ -110,7 +110,12 @@ export const productInterceptRegistrationConfig = ({
         title: i18n.translate('productIntercept.prompter.step.completion.title', {
           defaultMessage: 'Thanks for the feedback!',
         }),
-        content: () => {
+        content: ({ responseMap }) => {
+          // pass along user response as params on the survey url
+          Object.entries(responseMap).forEach(([key, value]) => {
+            surveyUrl.searchParams.set(key, String(value));
+          });
+
           return (
             <EuiText size="s" key="productInterceptPrompterCompletionContent">
               <FormattedMessage
