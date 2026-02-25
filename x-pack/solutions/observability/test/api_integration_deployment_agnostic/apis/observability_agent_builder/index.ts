@@ -24,6 +24,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_index_info.spec.ts'));
     loadTestFile(require.resolve('./tools/get_service_topology.spec.ts'));
     loadTestFile(require.resolve('./tools/get_traces.spec.ts'));
+    loadTestFile(require.resolve('./tools/logs_search.spec.ts'));
 
     // ai insights
     loadTestFile(require.resolve('./ai_insights/error.spec.ts'));
