@@ -39,6 +39,9 @@ export const onboardingTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ streamName: z.string() }),
+    query: z.object({
+      saveQueries: z.coerce.boolean().optional().default(true),
+    }),
     body: taskActionSchema({
       from: timestampFromString,
       to: timestampFromString,
@@ -55,6 +58,11 @@ export const onboardingTaskRoute = createServerRoute({
         .describe(
           'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
         ),
+      saveQueries: z
+        .boolean()
+        .optional()
+        .default(true)
+        .describe('When true, persist generated queries. When false, only store in task state.'),
     }),
   }),
   handler: async ({
@@ -72,9 +80,13 @@ export const onboardingTaskRoute = createServerRoute({
 
     const {
       path: { streamName },
+      query,
       body,
     } = params;
-    const onboardingTaskId = getOnboardingTaskId(streamName);
+
+    const saveQueries = body.action === 'schedule' ? body.saveQueries : query.saveQueries;
+
+    const onboardingTaskId = getOnboardingTaskId(streamName, saveQueries);
 
     const actionParams =
       body.action === 'schedule'
@@ -96,6 +108,7 @@ export const onboardingTaskRoute = createServerRoute({
                   from: body.from,
                   to: body.to,
                   steps: body.steps,
+                  saveQueries,
                 };
               })(),
               request,
@@ -125,6 +138,9 @@ export const onboardingStatusRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ streamName: z.string() }),
+    query: z.object({
+      saveQueries: z.coerce.boolean().optional().default(true),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
     const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
@@ -134,8 +150,9 @@ export const onboardingStatusRoute = createServerRoute({
 
     const {
       path: { streamName },
+      query: { saveQueries },
     } = params;
-    const taskId = getOnboardingTaskId(streamName);
+    const taskId = getOnboardingTaskId(streamName, saveQueries);
 
     return taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
   },

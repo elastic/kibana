@@ -42,12 +42,14 @@ export interface OnboardingTaskParams {
   from: number;
   to: number;
   steps: OnboardingStep[];
+  saveQueries: boolean;
 }
 
 export const STREAMS_ONBOARDING_TASK_TYPE = 'streams_onboarding';
 
-export function getOnboardingTaskId(streamName: string) {
-  return `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
+export function getOnboardingTaskId(streamName: string, saveQueries: boolean = true) {
+  const base = `${STREAMS_ONBOARDING_TASK_TYPE}_${streamName}`;
+  return saveQueries ? base : `${base}_no_save_queries`;
 }
 
 export function createStreamsOnboardingTask(taskContext: TaskContext) {
@@ -62,8 +64,8 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, streamName, from, to, steps, _task } = runContext.taskInstance
-                .params as TaskParams<OnboardingTaskParams>;
+              const { connectorId, streamName, from, to, steps, saveQueries, _task } = runContext
+                .taskInstance.params as TaskParams<OnboardingTaskParams>;
 
               const { taskClient, inferenceClient, queryClient, streamsClient } =
                 await taskContext.getScopedClients({
@@ -121,10 +123,12 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
 
-                      await saveQueries(streamName, queriesTaskResult.queries, {
-                        queryClient,
-                        streamsClient,
-                      });
+                      if (saveQueries) {
+                        await persistQueries(streamName, queriesTaskResult.queries, {
+                          queryClient,
+                          streamsClient,
+                        });
+                      }
                       break;
 
                     default:
@@ -134,7 +138,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 await taskClient.complete<OnboardingTaskParams, OnboardingResult>(
                   _task,
-                  { connectorId, streamName, from, to, steps },
+                  { connectorId, streamName, from, to, steps, saveQueries },
                   { featuresTaskResult, queriesTaskResult }
                 );
               } catch (error) {
@@ -165,6 +169,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                     from,
                     to,
                     steps,
+                    saveQueries,
                   },
                   errorMessage
                 );
@@ -200,7 +205,7 @@ async function scheduleQueriesGenerationTask(
   return id;
 }
 
-export async function saveQueries(
+export async function persistQueries(
   streamName: string,
   queries: GeneratedSignificantEventQuery[],
   deps: {

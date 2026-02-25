@@ -10,7 +10,12 @@ import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
-export function useOnboardingApi(connectorId?: string) {
+export interface UseOnboardingApiOptions {
+  connectorId?: string;
+  saveQueries?: boolean;
+}
+
+export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboardingApiOptions) {
   const {
     dependencies: {
       start: {
@@ -32,11 +37,13 @@ export function useOnboardingApi(connectorId?: string) {
             signal,
             params: {
               path: { streamName },
+              query: { saveQueries },
               body: {
-                action: 'schedule',
+                action: 'schedule' as const,
                 from,
                 to,
                 connectorId,
+                saveQueries,
               },
             },
           }
@@ -49,6 +56,7 @@ export function useOnboardingApi(connectorId?: string) {
             signal,
             params: {
               path: { streamName },
+              query: { saveQueries },
             },
           }
         );
@@ -60,14 +68,15 @@ export function useOnboardingApi(connectorId?: string) {
             signal,
             params: {
               path: { streamName },
+              query: { saveQueries },
               body: {
-                action: 'cancel',
+                action: 'cancel' as const,
               },
             },
           }
         );
       },
     }),
-    [connectorId, signal, streamsRepositoryClient]
+    [connectorId, saveQueries, signal, streamsRepositoryClient]
   );
 }
