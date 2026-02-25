@@ -83,6 +83,7 @@ export const selectHasUnsavedChanges = (
             state.savedDataViews
           ),
           services,
+          defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
         }),
       }),
       overridenTimeRestore: Boolean(persistedTab.timeRestore),

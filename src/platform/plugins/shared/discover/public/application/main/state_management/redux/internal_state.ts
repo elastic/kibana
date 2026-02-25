@@ -62,6 +62,7 @@ const initialState: DiscoverInternalState = {
   persistedDiscoverSession: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
+  defaultProfileEsqlQuery: undefined,
   savedDataViews: [],
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
@@ -153,6 +154,13 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
+    },
+
+    setDefaultProfileEsqlQuery: (
+      state,
+      action: PayloadAction<DiscoverInternalState['defaultProfileEsqlQuery']>
+    ) => {
+      state.defaultProfileEsqlQuery = action.payload;
     },
 
     setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
