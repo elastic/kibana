@@ -77,26 +77,24 @@ export class SearchInferenceEndpointsPlugin
       visibleIn: ['sideNav'],
     });
 
-    if (plugins.management) {
-      this.inferenceEndpointsMgmtApp =
-        plugins.management.sections.section.machineLearning.registerApp({
-          id: 'inference_endpoints',
-          title: PLUGIN_TITLE,
-          order: 2,
-          async mount(params) {
-            const { renderInferenceEndpointsMgmtApp } = await import('./application');
-            const [coreStart, depsStart] = await core.getStartServices();
-            const startDeps: AppPluginStartDependencies = {
-              ...depsStart,
-              history: params.history,
-              searchNavigation: undefined,
-            };
+    this.inferenceEndpointsMgmtApp =
+      plugins.management.sections.section.machineLearning.registerApp({
+        id: 'inference_endpoints',
+        title: PLUGIN_TITLE,
+        order: 2,
+        async mount(params) {
+          const { renderInferenceEndpointsMgmtApp } = await import('./application');
+          const [coreStart, depsStart] = await core.getStartServices();
+          const startDeps: AppPluginStartDependencies = {
+            ...depsStart,
+            history: params.history,
+            searchNavigation: undefined,
+          };
 
-            return renderInferenceEndpointsMgmtApp(coreStart, startDeps, params.element);
-          },
-        });
-      this.inferenceEndpointsMgmtApp.disable();
-    }
+          return renderInferenceEndpointsMgmtApp(coreStart, startDeps, params.element);
+        },
+      });
+    this.inferenceEndpointsMgmtApp.disable();
 
     registerLocators(plugins.share);
 

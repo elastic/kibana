@@ -40,7 +40,7 @@ export interface AppPluginSetupDependencies {
   history: AppMountParameters['history'];
   share: SharePluginSetup;
   console?: ConsolePluginSetup;
-  management?: ManagementSetup;
+  management: ManagementSetup;
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
