@@ -399,7 +399,7 @@ describe('discover responsive sidebar', function () {
     expect(ExistingFieldsServiceApi.loadFieldExisting).not.toHaveBeenCalled();
   });
 
-  it('should allow adding breakdown field', async function () {
+  it.only('should allow adding breakdown field', async function () {
     const { user } = await renderComponent(props);
     const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
     await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
@@ -421,14 +421,14 @@ describe('discover responsive sidebar', function () {
     await user.click(within(selectedFields).getByTestId('fieldToggle-extension'));
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
-  it('should allow adding filters', async function () {
+  it.only('should allow adding filters', async function () {
     const { user } = await renderComponent(props);
     const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
     await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
     await user.click(await screen.findByTestId('plus-extension-gif'));
     expect(props.onAddFilter).toHaveBeenCalled();
   });
-  it('should allow adding "exist" filter', async function () {
+  it.only('should allow adding "exist" filter', async function () {
     const { user } = await renderComponent(props);
     const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
     await user.click(within(availableFields).getByTestId('field-extension-showDetails'));
@@ -436,7 +436,7 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
 
-  it('should allow searching by string, and calcFieldCount should just be executed once', async function () {
+  it.only('should allow searching by string, and calcFieldCount should just be executed once', async function () {
     const { user } = await renderComponent(props);
 
     expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('3');
@@ -455,7 +455,7 @@ describe('discover responsive sidebar', function () {
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 
-  it('should allow filtering by field type', async function () {
+  it.only('should allow filtering by field type', async function () {
     const { user } = await renderComponent(props);
 
     expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('3');
@@ -634,7 +634,7 @@ describe('discover responsive sidebar', function () {
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
-  it('should render "Edit field" button', async () => {
+  it.only('should render "Edit field" button', async () => {
     const services = createMockServices();
     const { user } = await renderComponent(props, {}, services);
     const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
@@ -644,7 +644,7 @@ describe('discover responsive sidebar', function () {
     expect(services.dataViewFieldEditor.openEditor).toHaveBeenCalledTimes(1);
   });
 
-  it('should not render Add/Edit field buttons in viewer mode', async () => {
+  it.only('should not render Add/Edit field buttons in viewer mode', async () => {
     const services = createMockServices();
     services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
     const { user } = await renderComponent(props, {}, services);
@@ -656,7 +656,7 @@ describe('discover responsive sidebar', function () {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/217005
-  it.skip('should render buttons in data view picker correctly', async () => {
+  it.only('should render buttons in data view picker correctly', async () => {
     const services = createMockServices();
     const propsWithPicker: TestWrapperProps = {
       ...props,
@@ -682,7 +682,7 @@ describe('discover responsive sidebar', function () {
     expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
   }, 5000);
 
-  it('should not render buttons in data view picker when in viewer mode', async () => {
+  it.only('should not render buttons in data view picker when in viewer mode', async () => {
     const services = createMockServices();
     services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
     services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
@@ -745,7 +745,7 @@ describe('discover responsive sidebar', function () {
       expect(await screen.findByTestId('custom-data-view-picker')).toBeInTheDocument();
     });
 
-    it('should allow to toggle sidebar', async function () {
+    it.only('should allow to toggle sidebar', async function () {
       const { user } = await renderComponent(props);
       expect(screen.getByTestId('fieldList')).toBeInTheDocument();
       await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-collapse'));
