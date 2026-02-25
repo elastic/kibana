@@ -28,10 +28,20 @@ import { LoadingObservability } from '../../components/loading_observability';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+
+/** Clear the app menu bar so the Overview page does not show the optional header action menu. */
+function useClearAppMenu() {
+  const { appMountParameters } = usePluginContext();
+  useEffect(() => {
+    const setHeaderActionMenu = appMountParameters?.setHeaderActionMenu;
+    if (setHeaderActionMenu) {
+      setHeaderActionMenu(undefined);
+      return () => setHeaderActionMenu(undefined);
+    }
+  }, [appMountParameters?.setHeaderActionMenu]);
+}
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { DATA_SECTIONS, DataSections, type DataSectionsApps } from './components/data_sections';
-import { HeaderActions } from './components/header_actions/header_actions';
-import { HeaderMenu } from './components/header_menu/header_menu';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
 import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
@@ -56,6 +66,8 @@ export function OverviewPage() {
 
   const { ObservabilityPageTemplate } = usePluginContext();
   const { euiTheme } = useEuiTheme();
+
+  useClearAppMenu();
   useBreadcrumbs(
     [
       {
@@ -162,16 +174,6 @@ export function OverviewPage() {
   return (
     <ObservabilityPageTemplate
       isPageDataLoaded={isAllRequestsComplete}
-      pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
-          defaultMessage: 'Overview',
-        }),
-        rightSideItems: hasAnyData ? [<HeaderActions />] : [],
-        rightSideGroupProps: {
-          responsive: true,
-        },
-        'data-test-subj': 'obltOverviewPageHeader',
-      }}
       pageSectionProps={{
         contentProps: {
           style: {
@@ -182,8 +184,6 @@ export function OverviewPage() {
         },
       }}
     >
-      <HeaderMenu />
-
       {hasAnyData ? (
         <>
           <ObservabilityOnboardingCallout />
