@@ -1,0 +1,215 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { parse as parseCookie } from 'tough-cookie';
+
+import { createSAMLResponse, MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN } from '@kbn/mock-idp-utils';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { COMMON_HEADERS } from '../fixtures/constants';
+
+const INDEX_THRESHOLD_PARAMS = {
+  aggType: 'count',
+  termSize: 5,
+  thresholdComparator: '>' as const,
+  timeWindowSize: 5,
+  timeWindowUnit: 'm' as const,
+  groupBy: 'all' as const,
+  threshold: [10],
+  index: ['.kibana-event-log-*'],
+  timeField: '@timestamp',
+};
+
+export const extractAttributeValue = (xmlDocument: string, attributeName: string) => {
+  const [, attributeValue] =
+    xmlDocument.match(
+      new RegExp(
+        `Name="${attributeName}"[\\s\\S]*?<saml:AttributeValue[^>]*>([\\s\\S]*?)<\\/saml:AttributeValue>`
+      )
+    ) ?? [];
+  if (!attributeValue) {
+    throw new Error(`Attribute ${attributeName} isn't found in SAML response.`);
+  }
+  return attributeValue.trim();
+};
+
+const RULE_NAME = 'scout-create-rule';
+
+apiTest.describe('Alerting Rule', { tag: tags.deploymentAgnostic }, () => {
+  let createdRuleId: string;
+  let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
+
+  apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
+    userSessionCookieFactory = async () => {
+      const samlResponse = await createSAMLResponse({
+        kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
+        username: '1234567890',
+        email: 'elastic_admin@elastic.co',
+        roles: ['admin'],
+        serverless: {
+          uiamEnabled: true,
+          organizationId: organizationId!,
+          projectType: projectType!,
+        },
+      });
+
+      const decodedSamlResponse = Buffer.from(samlResponse, 'base64').toString('utf-8');
+      return [
+        parseCookie(
+          (
+            await apiClient.post('api/security/saml/callback', {
+              body: `SAMLResponse=${encodeURIComponent(samlResponse)}`,
+            })
+          ).headers['set-cookie'][0]
+        )!.cookieString(),
+        {
+          accessToken: extractAttributeValue(
+            decodedSamlResponse,
+            MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN
+          ),
+        },
+      ];
+    };
+
+    const [userSessionCookie] = await userSessionCookieFactory();
+    const createResponse = await apiClient.post('api/alerting/rule', {
+      headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+      body: {
+        name: RULE_NAME,
+        rule_type_id: '.index-threshold',
+        consumer: 'stackAlerts',
+        schedule: { interval: '1m' },
+        enabled: true,
+        actions: [],
+        params: INDEX_THRESHOLD_PARAMS,
+        tags: ['scout'],
+      },
+      responseType: 'json',
+    });
+    expect(createResponse).toHaveStatusCode(200);
+    const createBody = createResponse.body as { id: string; api_key_owner: string | null };
+    expect(createBody.id).toBeDefined();
+    expect(createBody.api_key_owner != null && createBody.api_key_owner !== '').toBe(true);
+    createdRuleId = createBody.id;
+  });
+
+  apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+    if (createdRuleId) {
+      const [userSessionCookie] = await userSessionCookieFactory();
+      const deleteResponse = await apiClient.delete(`api/alerting/rule/${createdRuleId}`, {
+        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+      });
+      // Rule may already be deleted by the "when rule is deleted..." test
+      expect(deleteResponse.statusCode === 204 || deleteResponse.statusCode === 404).toBe(true);
+    }
+    await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
+  });
+
+  apiTest('newly created rule has api_key_owner', async ({ apiClient }) => {
+    const [userSessionCookie] = await userSessionCookieFactory();
+    const getResponse = await apiClient.get(`api/alerting/rule/${createdRuleId}`, {
+      headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+      responseType: 'json',
+    });
+    expect(getResponse).toHaveStatusCode(200);
+    const getBody = getResponse.body as { api_key_owner: string | null };
+    expect(getBody.api_key_owner).toBe('1234567890');
+    // In scout_uiam_local (UIAM enabled), the backend creates both apiKey and uiamApiKey
+    // when creating a rule; they are not exposed by the API for security. api_key_owner
+    // being set confirms an API key was created; both keys are stored on the rule.
+  });
+
+  apiTest('The rule runs and event log shows success', async ({ apiClient }) => {
+    // rule is created with enabled: true, so it should run automatically
+
+    const [userSessionCookie] = await userSessionCookieFactory();
+
+    const dateStart = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const pollIntervalMs = 2000;
+    const timeoutMs = 30000;
+    const maxAttempts = Math.ceil(timeoutMs / pollIntervalMs);
+
+    interface ExecutionLogEntry {
+      status: string;
+    }
+    interface ExecutionLogResponse {
+      total: number;
+      data: ExecutionLogEntry[];
+    }
+
+    let lastResponse: ExecutionLogResponse | undefined;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const logUrl =
+        `internal/alerting/rule/${createdRuleId}/_execution_log?date_start=` +
+        `${encodeURIComponent(dateStart)}&per_page=10`;
+      const logResponse = await apiClient.get(logUrl, {
+        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        responseType: 'json',
+      });
+      expect(logResponse).toHaveStatusCode(200);
+      lastResponse = logResponse.body as ExecutionLogResponse;
+      await new Promise((r) => setTimeout(r, pollIntervalMs));
+    }
+
+    expect(lastResponse).toBeDefined();
+    expect(lastResponse!.data.some((entry) => entry.status === 'success')).toBe(true);
+  });
+
+  apiTest(
+    'when rule is updated, apiKey and uiamApiKey are queued for invalidation',
+    async ({ apiClient, kbnClient }) => {
+      const [userSessionCookie] = await userSessionCookieFactory();
+
+      const { saved_objects: pendingInvalidationsBefore } = await kbnClient.savedObjects.find({
+        type: 'api_key_pending_invalidation',
+      });
+
+      expect(pendingInvalidationsBefore).toHaveLength(0);
+
+      const updateResponse = await apiClient.put(`api/alerting/rule/${createdRuleId}`, {
+        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+        body: {
+          name: 'scout-updated-rule',
+          tags: ['scout'],
+          schedule: { interval: '1m' },
+          params: INDEX_THRESHOLD_PARAMS,
+          actions: [],
+        },
+        responseType: 'json',
+      });
+      expect(updateResponse).toHaveStatusCode(200);
+
+      // There is no encrypted saved objects client in scout, so we need to use the raw saved objects client
+      const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
+        type: 'api_key_pending_invalidation',
+      });
+
+      // apiKeyId and uiamApiKey fields are encrypted, therefore not returned in the response
+      // we can check the length of the response to confirm that both apiKey and uiamApiKey were created
+      expect(pendingInvalidations).toHaveLength(2);
+    }
+  );
+
+  apiTest(
+    'when rule is deleted, apiKey and uiamApiKey are queued for invalidation',
+    async ({ apiClient, kbnClient }) => {
+      const [userSessionCookie] = await userSessionCookieFactory();
+
+      const deleteResponse = await apiClient.delete(`api/alerting/rule/${createdRuleId}`, {
+        headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
+      });
+      expect(deleteResponse).toHaveStatusCode(204);
+
+      const { saved_objects: pendingInvalidations } = await kbnClient.savedObjects.find({
+        type: 'api_key_pending_invalidation',
+      });
+
+      // 2 from update test + 2 from this delete = 4 total (apiKey and uiamApiKey each time)
+      expect(pendingInvalidations).toHaveLength(4);
+    }
+  );
+});
