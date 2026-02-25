@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -20,8 +20,8 @@ interface GroupBySelectProps {
 }
 
 export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => {
-  const { control, setValue, getValues, watch } = useFormContext<FormValues>();
-  const query = watch('evaluation.query.base');
+  const { control, setValue, getValues } = useFormContext<FormValues>();
+  const query = useWatch({ name: 'evaluation.query.base', control });
   const groupByRowId = 'ruleV2FormGroupByField';
 
   // When columns change, filter out any invalid selections
