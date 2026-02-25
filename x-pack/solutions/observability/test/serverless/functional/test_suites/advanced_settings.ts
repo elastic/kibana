@@ -11,7 +11,6 @@ import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless
 import {
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -45,7 +44,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // This setting is read only for the time being
         if (
           settingId === OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS ||
-          settingId === OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY ||
           settingId === OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS
         ) {
           continue;

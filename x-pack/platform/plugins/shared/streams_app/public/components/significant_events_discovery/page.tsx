@@ -37,7 +37,7 @@ export function SignificantEventsDiscoveryPage() {
   const router = useStreamsAppRouter();
 
   const {
-    features: { significantEventsDiscovery },
+    features: { significantEvents },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
   const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
@@ -53,12 +53,12 @@ export function SignificantEventsDiscoveryPage() {
     ];
   }, []);
 
-  if (significantEventsDiscovery === undefined) {
+  if (significantEvents === undefined) {
     // Waiting to load license
     return <EuiLoadingElastic size="xxl" />;
   }
 
-  if (!significantEventsDiscovery.available || !significantEventsDiscovery.enabled) {
+  if (!significantEvents.available || !significantEvents.enabled) {
     return <RedirectTo path="/" />;
   }
 

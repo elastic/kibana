@@ -66,7 +66,7 @@ export function StreamListView() {
 
   const {
     ui: { manage: canManageStreamsKibana },
-    features: { significantEventsDiscovery, queryStreams },
+    features: { significantEvents, queryStreams },
   } = useStreamsPrivileges();
 
   const [canManageClassicElasticsearch, setCanManageClassicElasticsearch] =
@@ -168,7 +168,7 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
+            {significantEvents?.available && significantEvents.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   href={router.link('/_discovery')}
