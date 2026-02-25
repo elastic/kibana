@@ -234,7 +234,7 @@ describe('EditDslStepsFlyout', () => {
       const { onSave, initialSteps } = renderFlyout({
         initialSteps: {
           dsl: {
-            data_retention: '30d',
+            data_retention: '60d',
             enabled: true,
             downsampling_method: 'something',
             downsample: [
@@ -250,6 +250,25 @@ describe('EditDslStepsFlyout', () => {
 
       await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
       expect(onSave).toHaveBeenCalledWith(initialSteps);
+    });
+
+    it('prevents saving when a downsampling step is scheduled after data retention', async () => {
+      const { onSave } = renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '40d', fixed_interval: '1h' }],
+          },
+        },
+      });
+
+      await tick();
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      // Assert the tab-level error indicator which updates via onError().
+      expect(getTab(1).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
     });
 
     it('prevents saving when fixed_interval is not an integer', async () => {

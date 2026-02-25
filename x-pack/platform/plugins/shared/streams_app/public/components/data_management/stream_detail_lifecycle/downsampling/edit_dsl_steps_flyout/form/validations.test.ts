@@ -9,6 +9,7 @@ import type { ValidationFuncArg } from '@kbn/es-ui-shared-plugin/static/forms/ho
 
 import {
   afterGreaterThanPreviousStep,
+  createAfterLessThanDataRetention,
   fixedIntervalMultipleOfPreviousStep,
   fixedIntervalMustBeAtLeastFiveMinutes,
 } from './validations';
@@ -163,6 +164,58 @@ describe('streams DSL steps flyout validations', () => {
         createArg({
           path: '_meta.downsampleSteps[1].fixedIntervalValue',
           value: '10',
+          formData,
+        })
+      );
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('createAfterLessThanDataRetention', () => {
+    const dayMs = 86_400_000;
+
+    it('fails when after is larger than data retention', () => {
+      const validate = createAfterLessThanDataRetention({
+        retentionMs: 30 * dayMs,
+        retentionEsFormat: '30d',
+      });
+
+      const formData: FlatFormData = {
+        '_meta.downsampleSteps[0].afterValue': '40',
+        '_meta.downsampleSteps[0].afterUnit': 'd',
+        '_meta.downsampleSteps[0].afterToMilliSeconds': 40 * dayMs,
+      };
+
+      const result = validate(
+        createArg({
+          path: '_meta.downsampleSteps[0].afterValue',
+          value: '40',
+          formData,
+        })
+      );
+
+      expect(result).toEqual({
+        message: 'Must be less than the data retention period (30d).',
+      });
+    });
+
+    it('returns undefined when after is equal or smaller than data retention', () => {
+      const validate = createAfterLessThanDataRetention({
+        retentionMs: 30 * dayMs,
+        retentionEsFormat: '30d',
+      });
+
+      const formData: FlatFormData = {
+        '_meta.downsampleSteps[0].afterValue': '30',
+        '_meta.downsampleSteps[0].afterUnit': 'd',
+        '_meta.downsampleSteps[0].afterToMilliSeconds': 30 * dayMs,
+      };
+
+      const result = validate(
+        createArg({
+          path: '_meta.downsampleSteps[0].afterValue',
+          value: '30',
           formData,
         })
       );
