@@ -1,0 +1,577 @@
+{
+  "id": "@kbn/esql-resource-browser",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/esql-resource-browser",
+        "id": "def-public.BrowserPopoverWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "BrowserPopoverWrapper",
+        "description": [],
+        "signature": [
+          "({\n  items,\n  isOpen,\n  onClose,\n  onSelect,\n  isFilterOpen,\n  setIsFilterOpen,\n  position,\n  i18nKeys,\n  numTypes,\n  numActiveFilters,\n  filterPanel,\n  isLoading,\n  searchValue,\n  setSearchValue,\n  isMultiSelect = true,\n}: ",
+          {
+            "pluginId": "@kbn/esql-resource-browser",
+            "scope": "public",
+            "docId": "kibKbnEsqlResourceBrowserPluginApi",
+            "section": "def-public.BrowserPopoverWrapperProps",
+            "text": "BrowserPopoverWrapperProps"
+          },
+          "<TItem>) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+        "lineNumber": 86,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapper.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  items,\n  isOpen,\n  onClose,\n  onSelect,\n  isFilterOpen,\n  setIsFilterOpen,\n  position,\n  i18nKeys,\n  numTypes,\n  numActiveFilters,\n  filterPanel,\n  isLoading,\n  searchValue,\n  setSearchValue,\n  isMultiSelect = true,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-resource-browser",
+                "scope": "public",
+                "docId": "kibKbnEsqlResourceBrowserPluginApi",
+                "section": "def-public.BrowserPopoverWrapperProps",
+                "text": "BrowserPopoverWrapperProps"
+              },
+              "<TItem>"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 86,
+            "columnNumber": 71,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-resource-browser",
+        "id": "def-public.DataSourceBrowser",
+        "type": "Function",
+        "tags": [],
+        "label": "DataSourceBrowser",
+        "description": [],
+        "signature": [
+          "({ isOpen, isLoading, allSources, selectedSources, onClose, onSelect, position, }: DataSourceBrowserProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/data_source_browser/data_source_browser.tsx",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.DataSourceBrowser.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isOpen,\n  isLoading,\n  allSources,\n  selectedSources = [],\n  onClose,\n  onSelect,\n  position,\n}",
+            "description": [],
+            "signature": [
+              "DataSourceBrowserProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/data_source_browser/data_source_browser.tsx",
+            "lineNumber": 44,
+            "columnNumber": 69,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-resource-browser",
+        "id": "def-public.FieldsBrowser",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldsBrowser",
+        "description": [],
+        "signature": [
+          "({ isOpen, isLoading, onClose, onSelect, allFields, recommendedFields, position, }: FieldsBrowserProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/fields_browser/fields_browser.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.FieldsBrowser.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isOpen,\n  isLoading,\n  onClose,\n  onSelect,\n  allFields,\n  recommendedFields,\n  position,\n}",
+            "description": [],
+            "signature": [
+              "FieldsBrowserProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/fields_browser/fields_browser.tsx",
+            "lineNumber": 33,
+            "columnNumber": 61,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/esql-resource-browser",
+        "id": "def-public.BrowserPopoverWrapperProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "BrowserPopoverWrapperProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-resource-browser",
+            "scope": "public",
+            "docId": "kibKbnEsqlResourceBrowserPluginApi",
+            "section": "def-public.BrowserPopoverWrapperProps",
+            "text": "BrowserPopoverWrapperProps"
+          },
+          "<TItem>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.items",
+            "type": "Array",
+            "tags": [],
+            "label": "items",
+            "description": [],
+            "signature": [
+              "((",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{}>, ",
+              "EuiSelectableLIOption",
+              "<{}>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{}>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{}>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }))[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.isOpen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isOpen",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.onSelect",
+            "type": "Function",
+            "tags": [],
+            "label": "onSelect",
+            "description": [],
+            "signature": [
+              "(changedOption: (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableGroupLabelOption",
+              "<{}>, ",
+              "EuiSelectableLIOption",
+              "<{}>> & ",
+              "CommonProps",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              "EuiTextTruncateProps",
+              ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+              "EuiToolTipProps",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiSelectableLIOption",
+              "<{}>, ",
+              "EuiSelectableGroupLabelOption",
+              "<{}>> & Omit<",
+              "EuiSelectableOptionBase",
+              ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }) | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-resource-browser",
+                "id": "def-public.BrowserPopoverWrapperProps.onSelect.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "changedOption",
+                "description": [],
+                "signature": [
+                  "(",
+                  "DisambiguateSet",
+                  "<",
+                  "EuiSelectableGroupLabelOption",
+                  "<{}>, ",
+                  "EuiSelectableLIOption",
+                  "<{}>> & ",
+                  "CommonProps",
+                  " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+                  "EuiTextTruncateProps",
+                  ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
+                  "EuiToolTipProps",
+                  ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+                  "DisambiguateSet",
+                  "<",
+                  "EuiSelectableLIOption",
+                  "<{}>, ",
+                  "EuiSelectableGroupLabelOption",
+                  "<{}>> & Omit<",
+                  "EuiSelectableOptionBase",
+                  ", \"isGroupLabel\"> & React.HTMLAttributes<HTMLDivElement> & { isGroupLabel: true; }) | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+                "lineNumber": 63,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.isFilterOpen",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFilterOpen",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.setIsFilterOpen",
+            "type": "Function",
+            "tags": [],
+            "label": "setIsFilterOpen",
+            "description": [],
+            "signature": [
+              "(isOpen: boolean) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-resource-browser",
+                "id": "def-public.BrowserPopoverWrapperProps.setIsFilterOpen.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOpen",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+                "lineNumber": 65,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.position",
+            "type": "Object",
+            "tags": [],
+            "label": "position",
+            "description": [],
+            "signature": [
+              "{ top?: number | undefined; left?: number | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.i18nKeys",
+            "type": "Object",
+            "tags": [],
+            "label": "i18nKeys",
+            "description": [],
+            "signature": [
+              "{ title: string; searchPlaceholder: string; filterTitle: string; closeLabel: string; loading: string; empty: string; noMatches: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.numTypes",
+            "type": "number",
+            "tags": [],
+            "label": "numTypes",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.numActiveFilters",
+            "type": "number",
+            "tags": [],
+            "label": "numActiveFilters",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.filterPanel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filterPanel",
+            "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.searchValue",
+            "type": "string",
+            "tags": [],
+            "label": "searchValue",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.setSearchValue",
+            "type": "Function",
+            "tags": [],
+            "label": "setSearchValue",
+            "description": [],
+            "signature": [
+              "(value: string) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-resource-browser",
+                "id": "def-public.BrowserPopoverWrapperProps.setSearchValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+                "lineNumber": 82,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-resource-browser",
+            "id": "def-public.BrowserPopoverWrapperProps.isMultiSelect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isMultiSelect",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/esql-resource-browser",
+        "id": "def-public.DataSourceSelectionChange",
+        "type": "Enum",
+        "tags": [],
+        "label": "DataSourceSelectionChange",
+        "description": [
+          "\nSingle-toggle selection change emitted by the data source browser.\n\nThe UI behaves like a list of options: each click adds/removes one item and\nimmediately applies the corresponding change in the editor."
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/esql-resource-browser",
+        "id": "def-public.BROWSER_POPOVER_HEIGHT",
+        "type": "number",
+        "tags": [],
+        "label": "BROWSER_POPOVER_HEIGHT",
+        "description": [],
+        "signature": [
+          "500"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-resource-browser",
+        "id": "def-public.BROWSER_POPOVER_WIDTH",
+        "type": "number",
+        "tags": [],
+        "label": "BROWSER_POPOVER_WIDTH",
+        "description": [],
+        "signature": [
+          "400"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-resource-browser/src/browser_popover_wrapper.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

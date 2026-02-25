@@ -16,18 +16,41 @@ project:
   channel: ''
   owner: '@elastic/response-ops'
   metadata:
-    sourceRoot: src/platform/packages/shared/kbn-alerting-v2-rule-form
+    sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form
 dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
+  - '@kbn/core'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-notifications-browser-mocks'
   - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/esql-utils'
+  - '@kbn/react-query'
+  - '@kbn/search-types'
+  - '@kbn/alerting-v2-schemas'
 tags:
   - shared-browser
   - package
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
