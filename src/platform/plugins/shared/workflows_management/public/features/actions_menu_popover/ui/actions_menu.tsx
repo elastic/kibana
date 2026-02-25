@@ -21,7 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -54,6 +54,23 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
 
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<Array<string>>([]);
+
+  useEffect(() => {
+    if (currentPath.length === 0) {
+      setOptions(defaultOptions);
+    } else {
+      let nextOptions = defaultOptions;
+      for (const id of currentPath) {
+        const next = nextOptions.find((o) => o.id === id);
+        if (next && isActionGroup(next)) {
+          nextOptions = next.options;
+        } else {
+          nextOptions = [];
+        }
+      }
+      setOptions(nextOptions);
+    }
+  }, [defaultOptions, currentPath]);
   const renderActionOption = (option: ActionOptionData, searchValue: string) => {
     const shouldUseGroupStyle = isActionGroup(option);
     return (
@@ -72,7 +89,12 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 executionStatus={undefined}
               />
             ) : isActionGroup(option) || isActionOption(option) ? (
-              <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
+              <EuiIcon
+                type={option.iconType}
+                size="m"
+                color={option.iconColor}
+                aria-hidden={true}
+              />
             ) : null}
           </span>
         </EuiFlexItem>
