@@ -445,6 +445,33 @@ describe('Task Runner Factory', () => {
     );
   });
 
+  test('should pass abort signal to the action executor', async () => {
+    const abortController = new AbortController();
+    const taskRunner = taskRunnerFactory.create({
+      taskInstance: mockedTaskInstance,
+      abortController,
+    });
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.signal).toBe(abortController.signal);
+  });
+
   test('cleans up action_task_params object through the cleanup runner method', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
