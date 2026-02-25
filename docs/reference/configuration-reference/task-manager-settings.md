@@ -1,5 +1,5 @@
 ---
-navigation_title: 'Task Manager settings'
+navigation_title: Task Manager settings
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/task-manager-settings-kb.html
 applies_to:
