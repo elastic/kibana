@@ -193,7 +193,7 @@ describe('createChatCompleteApi', () => {
       expect(response.metadata?.anonymization?.replacementsId).toEqual(expect.any(String));
     });
 
-    it('creates then reuses one replacementsId across turns', async () => {
+    it('does not persist replacements when there is no anonymization and no carried id', async () => {
       inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
 
       const turn1 = await chatComplete({
@@ -202,27 +202,16 @@ describe('createChatCompleteApi', () => {
         maxRetries: 0,
       });
 
-      const replacementsId = turn1.metadata?.anonymization?.replacementsId;
-      expect(replacementsId).toEqual(expect.any(String));
-
       await chatComplete({
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'turn-2' }],
-        metadata: {
-          anonymization: {
-            replacementsId,
-          },
-        },
         maxRetries: 0,
       });
 
-      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
-      expect(mockEsClient.update).toHaveBeenCalledTimes(1);
-      expect(mockEsClient.get).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: replacementsId,
-        })
-      );
+      expect(turn1.metadata?.anonymization?.replacementsId).toBeUndefined();
+      expect(mockEsClient.get).toHaveBeenCalledTimes(0);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(0);
+      expect(mockEsClient.update).toHaveBeenCalledTimes(0);
     });
 
     it('returns a promise resolving with the response', async () => {
@@ -238,11 +227,7 @@ describe('createChatCompleteApi', () => {
 
       expect(response).toEqual({
         content: 'chunk-1chunk-2',
-        metadata: {
-          anonymization: {
-            replacementsId: expect.any(String),
-          },
-        },
+        metadata: undefined,
         toolCalls: [],
       });
     });
@@ -271,11 +256,7 @@ describe('createChatCompleteApi', () => {
 
       expect(response).toEqual({
         content: 'chunk-1chunk-2',
-        metadata: {
-          anonymization: {
-            replacementsId: expect.any(String),
-          },
-        },
+        metadata: undefined,
         toolCalls: [],
       });
     });
@@ -348,31 +329,19 @@ describe('createChatCompleteApi', () => {
       expect(events).toEqual([
         {
           content: 'chunk-1',
-          metadata: {
-            anonymization: {
-              replacementsId: expect.any(String),
-            },
-          },
+          metadata: undefined,
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-2',
-          metadata: {
-            anonymization: {
-              replacementsId: expect.any(String),
-            },
-          },
+          metadata: undefined,
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-1chunk-2',
-          metadata: {
-            anonymization: {
-              replacementsId: expect.any(String),
-            },
-          },
+          metadata: undefined,
           toolCalls: [],
           type: 'chatCompletionMessage',
         },
@@ -410,21 +379,13 @@ describe('createChatCompleteApi', () => {
       expect(events).toEqual([
         {
           content: 'chunk-1',
-          metadata: {
-            anonymization: {
-              replacementsId: expect.any(String),
-            },
-          },
+          metadata: undefined,
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-2',
-          metadata: {
-            anonymization: {
-              replacementsId: expect.any(String),
-            },
-          },
+          metadata: undefined,
           tool_calls: [],
           type: 'chatCompletionChunk',
         },

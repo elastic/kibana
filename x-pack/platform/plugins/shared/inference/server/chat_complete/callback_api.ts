@@ -151,7 +151,7 @@ export function createChatCompleteCallbackApi({
               const repo = new ReplacementsRepository(esClient, {
                 encryptionKey: replacementsEncryptionKey,
               });
-              let replacementsId = carriedReplacementsId ?? uuidv4();
+              let replacementsId = carriedReplacementsId;
               let existingReplacements = carriedReplacementsId
                 ? await repo.get(namespace, carriedReplacementsId)
                 : null;
@@ -175,6 +175,15 @@ export function createChatCompleteCallbackApi({
                 anonymized: entity.mask,
                 original: entity.value,
               }));
+              const shouldPersistReplacements = Boolean(
+                carriedReplacementsId || replacements.length
+              );
+
+              if (!shouldPersistReplacements) {
+                return { anonymization, replacementsId: undefined, effectivePolicy };
+              }
+
+              replacementsId ??= uuidv4();
 
               if (existingReplacements) {
                 const updated = await repo.update(namespace, replacementsId, { replacements });
