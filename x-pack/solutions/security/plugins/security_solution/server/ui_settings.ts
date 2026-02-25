@@ -41,7 +41,6 @@ import {
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
@@ -200,24 +199,27 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
-    ...getDefaultColdAndFrozenTiersSettings(),
-    [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
-        defaultMessage: 'Enable graph visualization',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
+    [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer',
         {
-          defaultMessage: `Enable the Graph Visualization feature within the Security Solution.`,
+          defaultMessage: 'Exclude cold and frozen tiers in Analyzer',
+        }
+      ),
+      value: false,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription',
+        {
+          defaultMessage:
+            '<p>When enabled, cold and frozen tiers will be skipped in analyzer queries</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
         }
       ),
       type: 'boolean',
-      value: false,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
-      technicalPreview: true,
     },
     ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
       [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
