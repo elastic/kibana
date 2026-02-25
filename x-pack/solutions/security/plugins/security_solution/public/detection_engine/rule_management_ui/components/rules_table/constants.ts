@@ -10,3 +10,5 @@ import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../common/constants';
 export const RULES_TABLE_INITIAL_PAGE_SIZE = 20;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 export const RULES_TABLE_STATE_STORAGE_KEY = 'securitySolution.rulesTable';
+export const RULES_TABLE_FILTERS_SIDEBAR_DEFAULT_WIDTH_PERCENT = 20;
+export const RULES_TABLE_FILTERS_SIDEBAR_MIN_WIDTH_PERCENT = 15;

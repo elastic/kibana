@@ -20,10 +20,12 @@ import React, { useCallback, useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import * as i18n from '../../../../common/translations';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { RulesTableFiltersLayout } from '../rules_table_filters/rules_table_filters_layout';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import type { UpgradePrebuiltRulesSortingOptions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
-import { UpgradePrebuiltRulesTableFilters } from './upgrade_prebuilt_rules_table_filters';
+import { UpgradePrebuiltRulesTableSearchBar } from './upgrade_prebuilt_rules_table_filters';
+import { UpgradePrebuiltRulesTableFiltersSidebarContent } from './upgrade_prebuilt_rules_table_filters';
 import { useUpgradePrebuiltRulesTableColumns } from './use_upgrade_prebuilt_rules_table_columns';
 
 const NO_ITEMS_MESSAGE = (
@@ -50,7 +52,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
       pagination,
       sortingOptions,
     },
-    actions: { setPagination, setSortingOptions },
+    actions: { setPagination, setSortingOptions, setFilterOptions },
   } = useUpgradePrebuiltRulesTableContext();
   const [selected, setSelected] = useState<RuleUpgradeState[]>([]);
 
@@ -94,32 +96,21 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
           !hasRulesToUpgrade ? (
             NO_ITEMS_MESSAGE
           ) : (
-            <>
-              <EuiFlexGroup direction="column">
-                {/*
-                TODO: The rules changelog link is not yet available for v9. Uncomment this when it is available.
-                Issue to uncomment: https://github.com/elastic/kibana/issues/213709
-                <EuiFlexItem grow={false} css={{ alignSelf: 'start' }}>
-                  <RulesChangelogLink />
-                </EuiFlexItem>
-                */}
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup
-                    alignItems="flexStart"
-                    gutterSize="s"
-                    responsive={false}
-                    wrap={true}
-                  >
-                    <EuiFlexItem grow={true}>
-                      <UpgradePrebuiltRulesTableFilters />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <UpgradePrebuiltRulesTableButtons selectedRules={selected} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+            <RulesTableFiltersLayout
+              searchBar={<UpgradePrebuiltRulesTableSearchBar />}
+              sidebarContent={<UpgradePrebuiltRulesTableFiltersSidebarContent />}
+              onClearFilters={() => setFilterOptions({})}
+            >
+              <EuiFlexGroup
+                alignItems="flexStart"
+                gutterSize="s"
+                responsive={false}
+                wrap={true}
+              >
+                <EuiFlexItem grow={true}>
+                  <UpgradePrebuiltRulesTableButtons selectedRules={selected} />
                 </EuiFlexItem>
               </EuiFlexGroup>
-
               <EuiBasicTable
                 loading={isFetching}
                 items={ruleUpgradeStates}
@@ -146,7 +137,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 columns={rulesColumns}
                 onChange={handleTableChange}
               />
-            </>
+            </RulesTableFiltersLayout>
           )
         }
       />

@@ -102,3 +102,10 @@ export const gapStatusTooltipFilled = (duration: string) =>
     defaultMessage: 'Filled: {duration}',
     values: { duration },
   });
+
+export const FILTER_SIDEBAR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.filtersSidebar.title',
+  {
+    defaultMessage: 'Filter',
+  }
+);

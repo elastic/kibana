@@ -11,8 +11,6 @@ import {
   EuiProgress,
   EuiSkeletonTitle,
   EuiSkeletonText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiBasicTable,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
@@ -21,9 +19,11 @@ import type { PrebuiltRuleAssetsSortField } from '../../../../../../common/api/d
 import * as i18n from '../../../pages/add_rules/translations';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { RulesTableFiltersLayout } from '../rules_table_filters/rules_table_filters_layout';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
-import { AddPrebuiltRulesTableFilters } from './add_prebuilt_rules_table_filters';
+import { AddPrebuiltRulesTableSearchBar } from './add_prebuilt_rules_table_filters';
+import { AddPrebuiltRulesTableFiltersSidebarContent } from './add_prebuilt_rules_table_filters';
 import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_columns';
 
 /**
@@ -42,7 +42,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
       pagination,
       sortingOptions,
     },
-    actions: { setPagination, setSortingOptions, selectRules },
+    actions: { setPagination, setSortingOptions, selectRules, setFilterOptions },
   } = useAddPrebuiltRulesTableContext();
 
   const rulesColumns = useAddPrebuiltRulesTableColumns();
@@ -99,20 +99,11 @@ export const AddPrebuiltRulesTable = React.memo(() => {
           !hasRulesToInstall ? (
             <AddPrebuiltRulesTableNoItemsMessage />
           ) : (
-            <>
-              <EuiFlexGroup direction="column">
-                {/*
-                TODO: The rules changelog link is not yet available for v9. Uncomment this when it is available.
-                Issue to uncomment: https://github.com/elastic/kibana/issues/213709
-                <EuiFlexItem grow={false} css={{ alignSelf: 'start' }}>
-                  <RulesChangelogLink />
-                </EuiFlexItem>
-                */}
-                <EuiFlexItem grow={false}>
-                  <AddPrebuiltRulesTableFilters />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
+            <RulesTableFiltersLayout
+              searchBar={<AddPrebuiltRulesTableSearchBar />}
+              sidebarContent={<AddPrebuiltRulesTableFiltersSidebarContent />}
+              onClearFilters={() => setFilterOptions({ name: '', tags: [] })}
+            >
               <EuiBasicTable
                 loading={isFetching}
                 items={rules}
@@ -134,7 +125,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                 onChange={handleTableChange}
                 tableCaption={i18n.PAGE_TITLE}
               />
-            </>
+            </RulesTableFiltersLayout>
           )
         }
       />

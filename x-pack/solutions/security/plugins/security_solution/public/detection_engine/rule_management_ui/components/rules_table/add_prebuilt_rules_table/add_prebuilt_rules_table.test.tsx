@@ -25,7 +25,8 @@ jest.mock('../rules_changelog_link', () => ({
   RulesChangelogLink: jest.fn(() => <></>),
 }));
 jest.mock('./add_prebuilt_rules_table_filters', () => ({
-  AddPrebuiltRulesTableFilters: jest.fn(() => <></>),
+  AddPrebuiltRulesTableSearchBar: jest.fn(() => <></>),
+  AddPrebuiltRulesTableFiltersSidebarContent: jest.fn(() => <></>),
 }));
 
 jest.mock('../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install', () => ({
@@ -44,6 +45,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       docLinks: { links: { siem: { ruleChangeLog: '' } } },
+      sessionStorage: { get: jest.fn(), set: jest.fn() },
     },
   }),
 }));
