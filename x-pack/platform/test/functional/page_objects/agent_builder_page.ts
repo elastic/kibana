@@ -774,4 +774,182 @@ export class AgentBuilderPageObject extends FtrService {
       },
     };
   }
+
+  /*
+   * ==========================
+   * Skills: navigation helpers
+   * ==========================
+   */
+  async navigateToSkills() {
+    await this.navigateToApp('skills');
+  }
+
+  async navigateToNewSkill() {
+    await this.navigateToApp('skills/new');
+  }
+
+  async navigateToSkill(skillId: string) {
+    await this.navigateToApp(`skills/${skillId}`);
+  }
+
+  /*
+   * ==========================
+   * Skills: list page helpers
+   * ==========================
+   */
+  async getSkillsPageContainer() {
+    return await this.testSubjects.find('agentBuilderSkillsPage');
+  }
+
+  async getSkillsTable() {
+    return await this.testSubjects.find('agentBuilderSkillsTable');
+  }
+
+  async getNewSkillButton() {
+    return await this.testSubjects.find('agentBuilderNewSkillButton');
+  }
+
+  async clickNewSkillButton() {
+    await this.testSubjects.click('agentBuilderNewSkillButton');
+  }
+
+  async getSkillsSearchInput() {
+    return await this.testSubjects.find('agentBuilderSkillsTableSearchInput');
+  }
+
+  async searchForSkill(searchTerm: string) {
+    await this.testSubjects.setValue('agentBuilderSkillsTableSearchInput', searchTerm);
+  }
+
+  async clearSkillsSearch() {
+    await this.testSubjects.setValue('agentBuilderSkillsTableSearchInput', '');
+  }
+
+  async isSkillInTable(skillId: string): Promise<boolean> {
+    try {
+      await this.testSubjects.find(`agentBuilderSkillsTableRow-${skillId}`);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async clickSkillLink(skillId: string) {
+    const skillLink = await this.testSubjects.find(`agentBuilderSkillLink-${skillId}`);
+    await skillLink.click();
+  }
+
+  /*
+   * ==========================
+   * Skills: form helpers
+   * ==========================
+   */
+  async getSkillFormPage() {
+    return await this.testSubjects.find('agentBuilderSkillFormPage');
+  }
+
+  async getSkillIdInput() {
+    return await this.testSubjects.find('agentBuilderSkillFormIdInput');
+  }
+
+  async getSkillNameInput() {
+    return await this.testSubjects.find('agentBuilderSkillFormNameInput');
+  }
+
+  async getSkillDescriptionInput() {
+    return await this.testSubjects.find('agentBuilderSkillFormDescriptionInput');
+  }
+
+  async getSkillContentInput() {
+    return await this.testSubjects.find('agentBuilderSkillFormContentInput');
+  }
+
+  async setSkillId(skillId: string) {
+    await this.testSubjects.setValue('agentBuilderSkillFormIdInput', skillId);
+  }
+
+  async setSkillName(name: string) {
+    await this.testSubjects.setValue('agentBuilderSkillFormNameInput', name);
+  }
+
+  async setSkillDescription(description: string) {
+    await this.testSubjects.setValue('agentBuilderSkillFormDescriptionInput', description);
+  }
+
+  async setSkillContent(content: string) {
+    await this.testSubjects.setValue('agentBuilderSkillFormContentInput', content);
+  }
+
+  async getSkillIdValue() {
+    return await this.testSubjects.getAttribute('agentBuilderSkillFormIdInput', 'value');
+  }
+
+  async getSkillNameValue() {
+    return await this.testSubjects.getAttribute('agentBuilderSkillFormNameInput', 'value');
+  }
+
+  async getSkillDescriptionValue() {
+    return await this.testSubjects.getAttribute('agentBuilderSkillFormDescriptionInput', 'value');
+  }
+
+  async getSkillContentValue() {
+    return await this.testSubjects.getAttribute('agentBuilderSkillFormContentInput', 'value');
+  }
+
+  async getSkillFormSaveButton() {
+    return await this.testSubjects.find('agentBuilderSkillFormSaveButton');
+  }
+
+  async getSkillFormCancelButton() {
+    return await this.testSubjects.find('agentBuilderSkillFormCancelButton');
+  }
+
+  async clickSkillFormSaveButton() {
+    await this.testSubjects.click('agentBuilderSkillFormSaveButton');
+  }
+
+  async clickSkillFormCancelButton() {
+    await this.testSubjects.click('agentBuilderSkillFormCancelButton');
+  }
+
+  async getSkillReadOnlyBadge() {
+    return await this.testSubjects.find('agentBuilderSkillReadOnlyBadge');
+  }
+
+  async isSkillReadOnlyBadgeVisible(): Promise<boolean> {
+    try {
+      const badge = await this.getSkillReadOnlyBadge();
+      return await badge.isDisplayed();
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /*
+   * ==========================
+   * Skills: agent form integration
+   * ==========================
+   */
+  async getSkillsTab() {
+    return await this.find.byRole('tab', { name: /skills/i });
+  }
+
+  async clickSkillsTab() {
+    const skillsTab = await this.getSkillsTab();
+    await skillsTab.click();
+  }
+
+  async getSkillToggle(skillId: string) {
+    return await this.testSubjects.find(`agentFormSkillToggle-${skillId}`);
+  }
+
+  async toggleSkill(skillId: string) {
+    const toggle = await this.getSkillToggle(skillId);
+    await toggle.click();
+  }
+
+  async isSkillToggleChecked(skillId: string): Promise<boolean> {
+    const toggle = await this.getSkillToggle(skillId);
+    return await toggle.isSelected();
+  }
 }
