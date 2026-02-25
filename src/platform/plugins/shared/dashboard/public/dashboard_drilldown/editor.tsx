@@ -117,17 +117,11 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
       return options;
     }
 
-    const hasSelectedDashboard = options.some(({ value }) => value === selectedDashboardOption.value);
+    const hasSelectedDashboard = options.some(
+      ({ value }) => value === selectedDashboardOption.value
+    );
     return hasSelectedDashboard ? options : [selectedDashboardOption, ...options];
-  }, [selectedDashboardOption, options, props.state]);
-
-  const selectedOptions = useMemo(() => {
-    if (!props.state.dashboard_id) {
-      return undefined;
-    }
-    const selectedOption = mergedOptions.find(({ value }) => value === props.state.dashboard_id);
-    return selectedOption ? [selectedOption] : undefined;
-  }, [mergedOptions, props.state.dashboard_id]);
+  }, [selectedDashboardOption, options]);
 
   const navigationOptions = useMemo(() => {
     return {
@@ -151,7 +145,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
       >
         <EuiComboBox<string>
           async
-          selectedOptions={selectedOptions}
+          selectedOptions={selectedDashboardOption ? [selectedDashboardOption] : undefined}
           options={mergedOptions}
           onChange={(nextSelectedOptions) => {
             setSelectedDashboardOption(nextSelectedOptions?.[0]);
