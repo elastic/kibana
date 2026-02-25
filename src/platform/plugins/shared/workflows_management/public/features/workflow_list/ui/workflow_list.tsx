@@ -83,21 +83,18 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     setSelectedItems([]);
   }, []);
 
-  const onRefresh = useCallback(
-    async (previousWorkflowsOverride?: WorkflowListDto) => {
-      const result = await refetch();
+  const onRefresh = useCallback(async () => {
+    const result = await refetch();
 
-      const currentSelectedItems = selectedItemsRef.current;
-      if (result.data?.results && currentSelectedItems.length > 0) {
-        const selectedIds = new Set(currentSelectedItems.map((item) => item.id));
-        const updatedSelectedItems = result.data.results.filter((workflow) =>
-          selectedIds.has(workflow.id)
-        );
-        setSelectedItems(updatedSelectedItems);
-      }
-    },
-    [refetch]
-  );
+    const currentSelectedItems = selectedItemsRef.current;
+    if (result.data?.results && currentSelectedItems.length > 0) {
+      const selectedIds = new Set(currentSelectedItems.map((item) => item.id));
+      const updatedSelectedItems = result.data.results.filter((workflow) =>
+        selectedIds.has(workflow.id)
+      );
+      setSelectedItems(updatedSelectedItems);
+    }
+  }, [refetch]);
 
   const handleRunWorkflow = useCallback(
     (id: string, event: Record<string, unknown>, triggerTab?: WorkflowTriggerTab) => {
