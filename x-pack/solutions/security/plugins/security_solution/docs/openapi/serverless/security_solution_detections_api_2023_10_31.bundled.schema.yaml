@@ -8358,6 +8358,7 @@ components:
       minimum: 1
       type: integer
     RunScriptOsConfigValues:
+      minProperties: 1
       type: object
       properties:
         scriptId:
