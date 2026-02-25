@@ -46,6 +46,7 @@
     "@kbn/actions-plugin",
     "@kbn/core-http-server",
     "@kbn/management-settings-ids",
+    "@kbn/es-types",
   ],
   "exclude": [
     "target/**/*",
