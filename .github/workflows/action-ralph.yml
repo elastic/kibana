@@ -399,16 +399,15 @@ jobs:
             fi
           done
 
-          # Copy the final spec and last agent output for the publish phase
+          # Copy the final spec for the publish phase
           cp "$SPEC_FILE" "$AGENT_OUTPUT_DIR/ralph-spec.md"
-          cat "${SESSION_DIR}"/run-*.md > "$AGENT_OUTPUT_DIR/agent-reasoning.md" 2>/dev/null || true
 
       - name: Redact agent reasoning output
         env:
           LITELLM_API_KEY: ${{ steps.short_lived_key.outputs.api_key }}
         run: |
           set -euo pipefail
-          if [ ! -f "$GITHUB_WORKSPACE/.action-ralph-runtime/agent-output/agent-reasoning.md" ]; then
+          if [ ! -f "$GITHUB_WORKSPACE/.action-ralph-runtime/agent-output/ralph-spec.md" ]; then
             exit 0
           fi
 
@@ -417,7 +416,7 @@ jobs:
           import re
           from pathlib import Path
 
-          path = Path(os.environ['GITHUB_WORKSPACE']) / '.action-ralph-runtime' / 'agent-output' / 'agent-reasoning.md'
+          path = Path(os.environ['GITHUB_WORKSPACE']) / '.action-ralph-runtime' / 'agent-output' / 'ralph-spec.md'
           text = path.read_text(encoding='utf-8', errors='ignore')
 
           key = os.getenv('LITELLM_API_KEY')
@@ -601,11 +600,11 @@ jobs:
             echo '```'
             echo ""
             echo "<details>"
-            echo "<summary>Agent reasoning</summary>"
+            echo "<summary>Final spec state</summary>"
             echo ""
             echo '```'
-            if [ -f /tmp/agent-output/agent-reasoning.md ]; then
-              head -c 60000 /tmp/agent-output/agent-reasoning.md
+            if [ -f /tmp/agent-output/ralph-spec.md ]; then
+              cat /tmp/agent-output/ralph-spec.md
             fi
             echo '```'
             echo "</details>"
@@ -660,14 +659,14 @@ jobs:
             echo "${CHANGED_FILES}"
             echo '```'
             echo ""
-            echo "### Agent reasoning"
+            echo "### Final spec state"
             echo ""
             echo "<details>"
-            echo "<summary>Expand agent output</summary>"
+            echo "<summary>Expand final spec</summary>"
             echo ""
             echo '```'
-            if [ -f /tmp/agent-output/agent-reasoning.md ]; then
-              head -c 60000 /tmp/agent-output/agent-reasoning.md
+            if [ -f /tmp/agent-output/ralph-spec.md ]; then
+              cat /tmp/agent-output/ralph-spec.md
             fi
             echo '```'
             echo "</details>"
