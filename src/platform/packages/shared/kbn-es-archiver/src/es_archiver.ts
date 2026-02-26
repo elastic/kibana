@@ -135,7 +135,6 @@ export class EsArchiver {
         inputDir: this.findArchive(path),
         client: this.client,
         log: this.log,
-        kbnClient: this.kbnClient,
       })
     );
   }
