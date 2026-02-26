@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TRACES } from './constants';
+export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from './constants';
 export { simpleTrace } from './synthtrace/simple_trace';
+export { richTrace, traceCorrelatedLogs } from './synthtrace/complete_traces_experience';

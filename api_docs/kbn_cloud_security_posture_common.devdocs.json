@@ -696,7 +696,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
+              "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/types/status.ts",
             "lineNumber": 35,
@@ -2510,7 +2510,7 @@
         "label": "CspStatusCode",
         "description": [],
         "signature": [
-          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
+          "\"indexed\" | \"unprivileged\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/types/status.ts",
         "lineNumber": 15,
