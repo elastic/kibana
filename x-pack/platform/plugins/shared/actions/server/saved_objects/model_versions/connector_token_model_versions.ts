@@ -6,7 +6,10 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectTypeRegistration,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import {
   rawConnectorTokenSchemaV1,
   rawConnectorTokenSchemaV2,
@@ -14,7 +17,7 @@ import {
 import { CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
 
 // ESO type registration for V1 (before refreshToken was added)
-const connectorTokenTypeRegistrationV1 = {
+const connectorTokenTypeRegistrationV1: EncryptedSavedObjectTypeRegistration = {
   type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   attributesToEncrypt: new Set(['token']),
   attributesToIncludeInAAD: new Set([
@@ -27,7 +30,7 @@ const connectorTokenTypeRegistrationV1 = {
 };
 
 // ESO type registration for V2 (with refreshToken and refreshTokenExpiresAt)
-const connectorTokenTypeRegistrationV2 = {
+const connectorTokenTypeRegistrationV2: EncryptedSavedObjectTypeRegistration = {
   type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   attributesToEncrypt: new Set(['token', 'refreshToken']),
   attributesToIncludeInAAD: new Set([
