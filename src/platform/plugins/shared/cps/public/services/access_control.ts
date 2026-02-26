@@ -56,6 +56,15 @@ export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
       },
     ],
   },
+  securitySolutionUI: {
+    defaultAccess: ProjectRoutingAccess.DISABLED,
+    routeRules: [
+      {
+        pattern: /dashboards\//,
+        access: ProjectRoutingAccess.EDITABLE,
+      },
+    ],
+  },
   discover: {
     defaultAccess: ProjectRoutingAccess.EDITABLE,
   },
