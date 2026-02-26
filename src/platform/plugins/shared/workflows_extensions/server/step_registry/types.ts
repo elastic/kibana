@@ -124,10 +124,10 @@ export type OnCancelHandler<
  * Context provided to the onCancel handler.
  * A subset of StepHandlerContext with just the services needed for cleanup.
  */
-export type OnCancelContext<
-  TInput = z.ZodType,
-  TConfig = z.ZodObject
-> = Pick<StepHandlerContext<TInput, TConfig>, 'logger' | 'abortSignal' | 'stepId' | 'stepType' | 'contextManager'>;
+export type OnCancelContext<TInput = z.ZodType, TConfig = z.ZodObject> = Pick<
+  StepHandlerContext<TInput, TConfig>,
+  'logger' | 'abortSignal' | 'stepId' | 'stepType' | 'contextManager'
+>;
 
 /**
  * Context provided to custom step handlers during execution.
