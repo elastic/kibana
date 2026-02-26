@@ -12,9 +12,9 @@ import {
   getTaskId,
   scheduleEntityMaintainerTask,
   stopEntityMaintainer,
-} from '../tasks/entity_maintainers';
-import { entityMaintainersRegistry } from '../tasks/entity_maintainers/entity_maintainers_registry';
-import { EntityMaintainerState, EntityMaintainerTaskStatus } from '../tasks/entity_maintainers/types';
+} from '../../tasks/entity_maintainers';
+import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
+import { EntityMaintainerState, EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 
 interface TaskSnapshot {
   runs: number;
@@ -123,7 +123,7 @@ export class EntityMaintainersClient {
 
         try {
           const task = await this.taskManager.get(taskId);
-          const { metadata, state } = task.state ?? {};
+          const { metadata, state } = task.state;
           const runs = metadata?.runs ?? 0;
           const lastSuccessTimestamp = metadata?.lastSuccessTimestamp ?? null;
           const lastErrorTimestamp = metadata?.lastErrorTimestamp ?? null;

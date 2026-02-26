@@ -15,10 +15,10 @@ export class EntityMaintainersRegistry {
     return this.tasks.has(id);
   }
 
-  get(id: string): EntityMaintainerTaskEntry | void {
+  get(id: string): EntityMaintainerTaskEntry | undefined {
     const config = this.tasks.get(id);
     if (!config) {
-      return;
+      return undefined;
     }
     return { id, ...config };
   }
@@ -37,7 +37,7 @@ export class EntityMaintainersRegistry {
 
   update(
     id: string,
-    overrides: Partial<Omit<EntityMaintainerRegistryData, 'id'>>
+    overrides: Partial<EntityMaintainerRegistryData>
   ): boolean {
     const existing = this.tasks.get(id);
     if (!existing) {

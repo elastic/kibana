@@ -9,7 +9,7 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import type { EntityMaintainerListEntry } from '../../../domain/entity_maintainers_client';
+import type { EntityMaintainerListEntry } from '../../../domain/entity_maintainers';
 import type { EntityMaintainerState, EntityMaintainerTaskStatus } from '../../../tasks/entity_maintainers/types';
 
 interface EntityMaintainerResponseItem {
