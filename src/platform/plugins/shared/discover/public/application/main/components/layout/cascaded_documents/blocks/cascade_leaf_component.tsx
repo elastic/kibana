@@ -43,7 +43,7 @@ interface ESQLDataCascadeLeafCellProps
     >,
     Pick<
       Parameters<DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']>[0],
-      'getScrollElement' | 'getScrollMargin' | 'getScrollOffset' | 'preventSizeChangePropagation'
+      'getScrollElement' | 'getScrollMargin' | 'getScrollOffset'
     > {
   cellData: DataTableRecord[];
   cellId: string;
@@ -147,7 +147,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   );
 
   virtualizerRef.current = useCascadeVirtualizer<DataTableRecord>({
-    // @ts-expect-error -- it's fine to do this as long as we're not using the sticky group header functionality
+    // @ts-expect-error -- it's fine to do this as long as we're not using the sticky group header functionality, see issue https://github.com/elastic/kibana/issues/255075
     rows: visibleRows,
     enableStickyGroupHeader: false,
     estimatedRowHeight: 60,
@@ -229,7 +229,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     getScrollElement,
     getScrollMargin,
     getScrollOffset,
-    preventSizeChangePropagation,
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
