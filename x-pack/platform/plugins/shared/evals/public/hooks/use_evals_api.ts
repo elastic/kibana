@@ -15,6 +15,7 @@ import {
   EVALS_DATASETS_URL,
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
+  EVALS_DATASET_EXAMPLE_URL,
   API_VERSIONS,
   type GetEvaluationDatasetsResponse,
   type GetEvaluationDatasetResponse,
@@ -75,7 +76,7 @@ const getDatasetExamplesUrl = (datasetId: string) =>
   EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId);
 
 const getDatasetExampleUrl = (datasetId: string, exampleId: string) =>
-  getDatasetExamplesUrl(datasetId).replace('{exampleId}', exampleId);
+  EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', datasetId).replace('{exampleId}', exampleId);
 
 export const useDatasets = (filters: DatasetsListFilters = {}) => {
   const { services } = useKibana();

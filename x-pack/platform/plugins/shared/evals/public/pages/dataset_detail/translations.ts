@@ -215,3 +215,65 @@ export const getPageTitle = (name: string) =>
     defaultMessage: 'Dataset: {name}',
     values: { name },
   });
+
+export const getFlyoutTitle = (id: string) =>
+  i18n.translate('xpack.evals.datasetDetail.flyoutTitle', {
+    defaultMessage: 'Example: {id}',
+    values: { id },
+  });
+
+export const EDIT_EXAMPLE_BUTTON = i18n.translate('xpack.evals.datasetDetail.editExampleButton', {
+  defaultMessage: 'Edit Example',
+});
+
+export const DELETE_EXAMPLE_BUTTON = i18n.translate(
+  'xpack.evals.datasetDetail.deleteExampleButton',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const FLYOUT_INPUT_SECTION = i18n.translate('xpack.evals.datasetDetail.flyoutInputSection', {
+  defaultMessage: 'Input',
+});
+
+export const FLYOUT_OUTPUT_SECTION = i18n.translate(
+  'xpack.evals.datasetDetail.flyoutOutputSection',
+  {
+    defaultMessage: 'Output',
+  }
+);
+
+export const FLYOUT_METADATA_SECTION = i18n.translate(
+  'xpack.evals.datasetDetail.flyoutMetadataSection',
+  {
+    defaultMessage: 'Metadata',
+  }
+);
+
+export const FLYOUT_EXPERIMENT_RUNS_SECTION = i18n.translate(
+  'xpack.evals.datasetDetail.flyoutExperimentRunsSection',
+  {
+    defaultMessage: 'Experiment Runs',
+  }
+);
+
+export const FLYOUT_NO_EXPERIMENT_RUNS = i18n.translate(
+  'xpack.evals.datasetDetail.flyoutNoExperimentRuns',
+  {
+    defaultMessage: 'No experiments have been run for this example.',
+  }
+);
+
+export const SEARCH_EXAMPLES_PLACEHOLDER = i18n.translate(
+  'xpack.evals.datasetDetail.searchExamplesPlaceholder',
+  {
+    defaultMessage: 'Search examples by input, output, or metadata',
+  }
+);
+
+export const getExamplesCountTitle = (count: number) =>
+  i18n.translate('xpack.evals.datasetDetail.examplesCountTitle', {
+    defaultMessage: 'Examples ({count})',
+    values: { count },
+  });

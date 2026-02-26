@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
+  EuiAccordion,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCodeBlock,
   EuiConfirmModal,
+  EuiDescriptionList,
+  EuiFieldSearch,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFlyoutResizable,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
@@ -26,13 +34,14 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiPageTemplate,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTextArea,
   EuiTitle,
+  EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useHistory, useParams } from 'react-router-dom';
 import type { DatasetExample, EvaluationRunSummary } from '@kbn/evals-common';
 import {
@@ -47,11 +56,12 @@ import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
 
-type ExampleEditorState =
-  | { mode: 'create'; input: string; output: string; metadata: string }
-  | { mode: 'edit'; example: DatasetExample; input: string; output: string; metadata: string };
-
 const prettyJson = (value: unknown) => JSON.stringify(value, null, 2);
+
+const compactJson = (value: unknown) => JSON.stringify(value);
+
+const truncate = (text: string, maxLen = 80): string =>
+  text.length > maxLen ? `${text.slice(0, maxLen)}...` : text;
 
 const parseJsonObject = (value: string, fieldLabel: string): JsonObject => {
   try {
@@ -67,6 +77,14 @@ const parseJsonObject = (value: string, fieldLabel: string): JsonObject => {
 };
 
 const formatDate = (value?: string) => (value ? new Date(value).toLocaleString() : '-');
+
+const truncatedCellStyles = css`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+  cursor: pointer;
+`;
 
 export const DatasetDetailPage: React.FC = () => {
   const { datasetId } = useParams<{ datasetId: string }>();
@@ -91,9 +109,18 @@ export const DatasetDetailPage: React.FC = () => {
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
   const [metadataName, setMetadataName] = useState('');
   const [metadataDescription, setMetadataDescription] = useState('');
-  const [exampleEditor, setExampleEditor] = useState<ExampleEditorState | null>(null);
+  const [selectedExample, setSelectedExample] = useState<DatasetExample | null>(null);
+  const [isEditingExample, setIsEditingExample] = useState(false);
+  const [editInput, setEditInput] = useState('');
+  const [editOutput, setEditOutput] = useState('');
+  const [editMetadata, setEditMetadata] = useState('');
+  const [isCreateExampleOpen, setIsCreateExampleOpen] = useState(false);
+  const [createInput, setCreateInput] = useState('{}');
+  const [createOutput, setCreateOutput] = useState('{}');
+  const [createMetadata, setCreateMetadata] = useState('{}');
   const [deletingExample, setDeletingExample] = useState<DatasetExample | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const openMetadataModal = () => {
     setMetadataName(dataset?.name ?? '');
@@ -102,46 +129,60 @@ export const DatasetDetailPage: React.FC = () => {
     setIsMetadataModalOpen(true);
   };
 
-  const openCreateExampleModal = () => {
+  const openExampleFlyout = useCallback((example: DatasetExample) => {
+    setSelectedExample(example);
+    setIsEditingExample(false);
     setFormError(null);
-    setExampleEditor({
-      mode: 'create',
-      input: '{}',
-      output: '{}',
-      metadata: '{}',
-    });
-  };
+  }, []);
 
-  const openEditExampleModal = (example: DatasetExample) => {
+  const closeFlyout = useCallback(() => {
+    setSelectedExample(null);
+    setIsEditingExample(false);
     setFormError(null);
-    setExampleEditor({
-      mode: 'edit',
-      example,
-      input: prettyJson(example.input),
-      output: prettyJson(example.output),
-      metadata: prettyJson(example.metadata),
-    });
-  };
+  }, []);
+
+  const enterEditMode = useCallback(() => {
+    if (!selectedExample) return;
+    setEditInput(prettyJson(selectedExample.input));
+    setEditOutput(prettyJson(selectedExample.output));
+    setEditMetadata(prettyJson(selectedExample.metadata));
+    setFormError(null);
+    setIsEditingExample(true);
+  }, [selectedExample]);
+
+  const cancelEdit = useCallback(() => {
+    setIsEditingExample(false);
+    setFormError(null);
+  }, []);
+
+  const openCreateExampleFlyout = useCallback(() => {
+    setSelectedExample(null);
+    setIsEditingExample(false);
+    setIsCreateExampleOpen(true);
+    setCreateInput('{}');
+    setCreateOutput('{}');
+    setCreateMetadata('{}');
+    setFormError(null);
+  }, []);
+
+  const closeCreateFlyout = useCallback(() => {
+    setIsCreateExampleOpen(false);
+    setFormError(null);
+  }, []);
 
   const closeModals = () => {
     setIsMetadataModalOpen(false);
-    setExampleEditor(null);
     setDeletingExample(null);
     setFormError(null);
   };
 
   const onSubmitMetadata = async () => {
-    if (!dataset) {
-      return;
-    }
+    if (!dataset) return;
     try {
       setFormError(null);
       await updateDataset.mutateAsync({
         datasetId: dataset.id,
-        updates: {
-          name: metadataName,
-          description: metadataDescription,
-        },
+        updates: { name: metadataName, description: metadataDescription },
       });
       setIsMetadataModalOpen(false);
     } catch (error) {
@@ -149,118 +190,124 @@ export const DatasetDetailPage: React.FC = () => {
     }
   };
 
-  const onSubmitExample = async () => {
-    if (!exampleEditor) {
-      return;
-    }
-
+  const onSaveEditExample = async () => {
+    if (!selectedExample) return;
     try {
       setFormError(null);
-      const input = parseJsonObject(exampleEditor.input, i18n.JSON_INPUT_LABEL);
-      const output = parseJsonObject(exampleEditor.output, i18n.JSON_OUTPUT_LABEL);
-      const metadata = parseJsonObject(exampleEditor.metadata, i18n.JSON_METADATA_LABEL);
+      const input = parseJsonObject(editInput, i18n.JSON_INPUT_LABEL);
+      const output = parseJsonObject(editOutput, i18n.JSON_OUTPUT_LABEL);
+      const metadata = parseJsonObject(editMetadata, i18n.JSON_METADATA_LABEL);
+      await updateExample.mutateAsync({
+        datasetId,
+        exampleId: selectedExample.id,
+        updates: { input, output, metadata },
+      });
+      setIsEditingExample(false);
+      setSelectedExample(null);
+    } catch (error) {
+      setFormError(String(error));
+    }
+  };
 
-      if (exampleEditor.mode === 'create') {
-        await addExamples.mutateAsync({
-          datasetId,
-          body: {
-            examples: [{ input, output, metadata }],
-          },
-        });
-      } else {
-        await updateExample.mutateAsync({
-          datasetId,
-          exampleId: exampleEditor.example.id,
-          updates: {
-            input,
-            output,
-            metadata,
-          },
-        });
-      }
-      setExampleEditor(null);
+  const onCreateExample = async () => {
+    try {
+      setFormError(null);
+      const input = parseJsonObject(createInput, i18n.JSON_INPUT_LABEL);
+      const output = parseJsonObject(createOutput, i18n.JSON_OUTPUT_LABEL);
+      const metadata = parseJsonObject(createMetadata, i18n.JSON_METADATA_LABEL);
+      await addExamples.mutateAsync({
+        datasetId,
+        body: { examples: [{ input, output, metadata }] },
+      });
+      setIsCreateExampleOpen(false);
     } catch (error) {
       setFormError(String(error));
     }
   };
 
   const onDeleteExample = async () => {
-    if (!deletingExample) {
-      return;
-    }
+    if (!deletingExample) return;
     try {
       setFormError(null);
       await deleteExample.mutateAsync({
         datasetId,
         exampleId: deletingExample.id,
       });
+      if (selectedExample?.id === deletingExample.id) {
+        setSelectedExample(null);
+        setIsEditingExample(false);
+      }
       setDeletingExample(null);
     } catch (error) {
       setFormError(String(error));
     }
   };
 
+  const filteredExamples = useMemo(() => {
+    if (!dataset?.examples) return [];
+    if (!searchQuery.trim()) return dataset.examples;
+    const query = searchQuery.toLowerCase();
+    return dataset.examples.filter((example) => {
+      const inputStr = compactJson(example.input).toLowerCase();
+      const outputStr = compactJson(example.output).toLowerCase();
+      const metadataStr = compactJson(example.metadata).toLowerCase();
+      return inputStr.includes(query) || outputStr.includes(query) || metadataStr.includes(query);
+    });
+  }, [dataset?.examples, searchQuery]);
+
   const examplesColumns: Array<EuiBasicTableColumn<DatasetExample>> = useMemo(
     () => [
       {
         field: 'id',
         name: i18n.COLUMN_EXAMPLE_ID,
-        width: '180px',
-        render: (value: string) => `${value.slice(0, 10)}...`,
+        width: '160px',
+        render: (value: string) => (
+          <EuiText size="xs" className={truncatedCellStyles}>
+            {value.slice(0, 16)}...
+          </EuiText>
+        ),
       },
       {
         field: 'input',
         name: i18n.COLUMN_INPUT,
-        render: (value: unknown) => (
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-            {prettyJson(value)}
-          </EuiCodeBlock>
-        ),
+        render: (value: unknown) => {
+          const text = compactJson(value);
+          return (
+            <EuiToolTip content={truncate(text, 300)} position="top">
+              <EuiText size="s" className={truncatedCellStyles}>
+                {truncate(text)}
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'output',
         name: i18n.COLUMN_OUTPUT,
-        render: (value: unknown) => (
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-            {prettyJson(value)}
-          </EuiCodeBlock>
-        ),
+        render: (value: unknown) => {
+          const text = compactJson(value);
+          return (
+            <EuiToolTip content={truncate(text, 300)} position="top">
+              <EuiText size="s" className={truncatedCellStyles}>
+                {truncate(text)}
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'metadata',
         name: i18n.COLUMN_METADATA,
-        render: (value: unknown) => (
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-            {prettyJson(value)}
-          </EuiCodeBlock>
-        ),
-      },
-      {
-        field: 'updated_at',
-        name: i18n.COLUMN_UPDATED_AT,
-        width: '180px',
-        render: (value: string) => formatDate(value),
-      },
-      {
-        name: i18n.COLUMN_ACTIONS,
-        width: '86px',
-        actions: [
-          {
-            name: i18n.EDIT_EXAMPLE_ACTION,
-            description: i18n.EDIT_EXAMPLE_ACTION,
-            icon: 'pencil',
-            type: 'icon',
-            onClick: (example: DatasetExample) => openEditExampleModal(example),
-          },
-          {
-            name: i18n.DELETE_EXAMPLE_ACTION,
-            description: i18n.DELETE_EXAMPLE_ACTION,
-            icon: 'trash',
-            type: 'icon',
-            color: 'danger',
-            onClick: (example: DatasetExample) => setDeletingExample(example),
-          },
-        ],
+        render: (value: unknown) => {
+          const text = compactJson(value);
+          return (
+            <EuiToolTip content={truncate(text, 300)} position="top">
+              <EuiText size="s" className={truncatedCellStyles}>
+                {truncate(text)}
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
     ],
     []
@@ -305,6 +352,15 @@ export const DatasetDetailPage: React.FC = () => {
     [datasetId, history]
   );
 
+  const metadataListItems = useMemo(() => {
+    if (!dataset) return [];
+    return [
+      { title: i18n.METADATA_DESCRIPTION_LABEL, description: dataset.description || '-' },
+      { title: i18n.METADATA_CREATED_AT_LABEL, description: formatDate(dataset.created_at) },
+      { title: i18n.METADATA_UPDATED_AT_LABEL, description: formatDate(dataset.updated_at) },
+    ];
+  }, [dataset]);
+
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Header
@@ -314,6 +370,23 @@ export const DatasetDetailPage: React.FC = () => {
           { text: i18n.BREADCRUMB_DATASETS, onClick: () => history.push('/datasets') },
           { text: dataset?.name ?? datasetId },
         ]}
+        rightSideItems={
+          dataset
+            ? [
+                <EuiButton
+                  key="add-example"
+                  iconType="plusInCircle"
+                  onClick={openCreateExampleFlyout}
+                  fill
+                >
+                  {i18n.ADD_EXAMPLE_BUTTON}
+                </EuiButton>,
+                <EuiButtonEmpty key="edit-metadata" iconType="pencil" onClick={openMetadataModal}>
+                  {i18n.EDIT_METADATA_BUTTON}
+                </EuiButtonEmpty>,
+              ]
+            : []
+        }
       />
       <EuiPageTemplate.Section>
         {datasetError ? (
@@ -329,9 +402,9 @@ export const DatasetDetailPage: React.FC = () => {
 
         {isDatasetLoading ? (
           <EuiLoadingSpinner size="xl" />
-        ) : (
+        ) : dataset ? (
           <>
-            {formError ? (
+            {formError && !selectedExample && !isCreateExampleOpen ? (
               <>
                 <EuiText color="danger" size="s">
                   <p>{formError}</p>
@@ -340,83 +413,271 @@ export const DatasetDetailPage: React.FC = () => {
               </>
             ) : null}
 
-            {dataset ? (
-              <>
-                <EuiTitle size="s">
-                  <h3>{i18n.METADATA_SECTION_TITLE}</h3>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiPanel hasBorder hasShadow={false}>
-                  <EuiFlexGroup alignItems="flexStart">
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <p>
-                          <strong>{i18n.METADATA_NAME_LABEL}</strong>: {dataset.name}
-                        </p>
-                        <p>
-                          <strong>{i18n.METADATA_DESCRIPTION_LABEL}</strong>:{' '}
-                          {dataset.description || '-'}
-                        </p>
-                        <p>
-                          <strong>{i18n.METADATA_CREATED_AT_LABEL}</strong>:{' '}
-                          {formatDate(dataset.created_at)}
-                        </p>
-                        <p>
-                          <strong>{i18n.METADATA_UPDATED_AT_LABEL}</strong>:{' '}
-                          {formatDate(dataset.updated_at)}
-                        </p>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton iconType="pencil" onClick={openMetadataModal}>
-                        {i18n.EDIT_METADATA_BUTTON}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
+            <EuiDescriptionList type="inline" listItems={metadataListItems} compressed />
 
-                <EuiSpacer size="l" />
-                <EuiTitle size="s">
-                  <h3>{i18n.EXAMPLES_SECTION_TITLE}</h3>
+            <EuiSpacer size="l" />
+
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h3>{i18n.getExamplesCountTitle(dataset.examples.length)} </h3>
                 </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton iconType="plusInCircle" onClick={openCreateExampleModal}>
-                      {i18n.ADD_EXAMPLE_BUTTON}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiBasicTable<DatasetExample>
-                  items={dataset.examples}
-                  columns={examplesColumns}
-                  loading={
-                    addExamples.isLoading || updateExample.isLoading || deleteExample.isLoading
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ minWidth: 300 }}>
+                <EuiFieldSearch
+                  placeholder={i18n.SEARCH_EXAMPLES_PLACEHOLDER}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  isClearable
+                  compressed
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiBasicTable<DatasetExample>
+              items={filteredExamples}
+              columns={examplesColumns}
+              loading={addExamples.isLoading || updateExample.isLoading || deleteExample.isLoading}
+              noItemsMessage={i18n.EXAMPLES_EMPTY_MESSAGE}
+              rowProps={(item) => ({
+                onClick: () => openExampleFlyout(item),
+                className: css`
+                  cursor: pointer;
+                  &:hover {
+                    background-color: var(--euiColorLightestShade);
                   }
-                  noItemsMessage={i18n.EXAMPLES_EMPTY_MESSAGE}
-                />
+                `,
+              })}
+            />
 
-                <EuiSpacer size="l" />
-                <EuiHorizontalRule />
-                <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
+            <EuiHorizontalRule />
+            <EuiSpacer size="l" />
 
-                <EuiTitle size="s">
-                  <h3>{i18n.RUNS_SECTION_TITLE}</h3>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiBasicTable<EvaluationRunSummary>
-                  items={runsData?.runs ?? []}
-                  columns={runsColumns}
-                  loading={isRunsLoading}
-                  noItemsMessage={i18n.RUNS_EMPTY_MESSAGE}
-                />
-              </>
-            ) : null}
+            <EuiTitle size="xs">
+              <h3>{i18n.RUNS_SECTION_TITLE}</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiBasicTable<EvaluationRunSummary>
+              items={runsData?.runs ?? []}
+              columns={runsColumns}
+              loading={isRunsLoading}
+              noItemsMessage={i18n.RUNS_EMPTY_MESSAGE}
+            />
           </>
-        )}
+        ) : null}
       </EuiPageTemplate.Section>
 
+      {/* Example detail flyout (read-only / edit mode) */}
+      {selectedExample ? (
+        <EuiFlyoutResizable
+          ownFocus
+          onClose={closeFlyout}
+          size="m"
+          minWidth={400}
+          maxWidth={800}
+          aria-labelledby="exampleFlyoutTitle"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h2 id="exampleFlyoutTitle">
+                    {i18n.getFlyoutTitle(selectedExample.id.slice(0, 16))}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  {!isEditingExample ? (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
+                          {i18n.EDIT_EXAMPLE_BUTTON}
+                        </EuiButton>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          aria-label={i18n.DELETE_EXAMPLE_BUTTON}
+                          iconType="trash"
+                          color="danger"
+                          onClick={() => setDeletingExample(selectedExample)}
+                        />
+                      </EuiFlexItem>
+                    </>
+                  ) : null}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            {formError && (selectedExample || isEditingExample) ? (
+              <>
+                <EuiText color="danger" size="s">
+                  <p>{formError}</p>
+                </EuiText>
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
+
+            {isEditingExample ? (
+              <EuiForm component="form">
+                <EuiFormRow label={i18n.FLYOUT_INPUT_SECTION} fullWidth>
+                  <EuiTextArea
+                    rows={6}
+                    value={editInput}
+                    onChange={(e) => setEditInput(e.target.value)}
+                    fullWidth
+                  />
+                </EuiFormRow>
+                <EuiFormRow label={i18n.FLYOUT_OUTPUT_SECTION} fullWidth>
+                  <EuiTextArea
+                    rows={8}
+                    value={editOutput}
+                    onChange={(e) => setEditOutput(e.target.value)}
+                    fullWidth
+                  />
+                </EuiFormRow>
+                <EuiFormRow label={i18n.FLYOUT_METADATA_SECTION} fullWidth>
+                  <EuiTextArea
+                    rows={4}
+                    value={editMetadata}
+                    onChange={(e) => setEditMetadata(e.target.value)}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiForm>
+            ) : (
+              <>
+                <EuiAccordion
+                  id="flyout-input"
+                  buttonContent={i18n.FLYOUT_INPUT_SECTION}
+                  initialIsOpen
+                  paddingSize="m"
+                >
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
+                    {prettyJson(selectedExample.input)}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+                <EuiSpacer size="m" />
+                <EuiAccordion
+                  id="flyout-output"
+                  buttonContent={i18n.FLYOUT_OUTPUT_SECTION}
+                  initialIsOpen
+                  paddingSize="m"
+                >
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
+                    {prettyJson(selectedExample.output)}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+                <EuiSpacer size="m" />
+                <EuiAccordion
+                  id="flyout-metadata"
+                  buttonContent={i18n.FLYOUT_METADATA_SECTION}
+                  initialIsOpen
+                  paddingSize="m"
+                >
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
+                    {prettyJson(selectedExample.metadata)}
+                  </EuiCodeBlock>
+                </EuiAccordion>
+                <EuiSpacer size="l" />
+                <EuiTitle size="xxs">
+                  <h4>{i18n.FLYOUT_EXPERIMENT_RUNS_SECTION}</h4>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText size="s" color="subdued">
+                  <p>{i18n.FLYOUT_NO_EXPERIMENT_RUNS}</p>
+                </EuiText>
+              </>
+            )}
+          </EuiFlyoutBody>
+          {isEditingExample ? (
+            <EuiFlyoutFooter>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={cancelEdit}>{i18n.MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={onSaveEditExample} fill isLoading={updateExample.isLoading}>
+                    {i18n.MODAL_SAVE_BUTTON}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutFooter>
+          ) : null}
+        </EuiFlyoutResizable>
+      ) : null}
+
+      {/* Create example flyout */}
+      {isCreateExampleOpen ? (
+        <EuiFlyoutResizable
+          ownFocus
+          onClose={closeCreateFlyout}
+          size="m"
+          minWidth={400}
+          maxWidth={800}
+          aria-labelledby="createExampleFlyoutTitle"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="s">
+              <h2 id="createExampleFlyoutTitle">{i18n.ADD_EXAMPLE_MODAL_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            {formError && isCreateExampleOpen ? (
+              <>
+                <EuiText color="danger" size="s">
+                  <p>{formError}</p>
+                </EuiText>
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
+            <EuiForm component="form">
+              <EuiFormRow label={i18n.FLYOUT_INPUT_SECTION} fullWidth>
+                <EuiTextArea
+                  rows={6}
+                  value={createInput}
+                  onChange={(e) => setCreateInput(e.target.value)}
+                  fullWidth
+                />
+              </EuiFormRow>
+              <EuiFormRow label={i18n.FLYOUT_OUTPUT_SECTION} fullWidth>
+                <EuiTextArea
+                  rows={8}
+                  value={createOutput}
+                  onChange={(e) => setCreateOutput(e.target.value)}
+                  fullWidth
+                />
+              </EuiFormRow>
+              <EuiFormRow label={i18n.FLYOUT_METADATA_SECTION} fullWidth>
+                <EuiTextArea
+                  rows={4}
+                  value={createMetadata}
+                  onChange={(e) => setCreateMetadata(e.target.value)}
+                  fullWidth
+                />
+              </EuiFormRow>
+            </EuiForm>
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={closeCreateFlyout}>
+                  {i18n.MODAL_CANCEL_BUTTON}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={onCreateExample} fill isLoading={addExamples.isLoading}>
+                  {i18n.MODAL_SAVE_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyoutResizable>
+      ) : null}
+
+      {/* Edit metadata modal */}
       {isMetadataModalOpen ? (
         <EuiModal onClose={closeModals}>
           <EuiModalHeader>
@@ -447,65 +708,7 @@ export const DatasetDetailPage: React.FC = () => {
         </EuiModal>
       ) : null}
 
-      {exampleEditor ? (
-        <EuiModal onClose={closeModals}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              {exampleEditor.mode === 'create'
-                ? i18n.ADD_EXAMPLE_MODAL_TITLE
-                : i18n.EDIT_EXAMPLE_MODAL_TITLE}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiForm component="form">
-              <EuiFormRow label={i18n.JSON_INPUT_LABEL}>
-                <EuiTextArea
-                  rows={5}
-                  value={exampleEditor.input}
-                  onChange={(event) =>
-                    setExampleEditor((prev) =>
-                      prev ? { ...prev, input: event.target.value } : prev
-                    )
-                  }
-                />
-              </EuiFormRow>
-              <EuiFormRow label={i18n.JSON_OUTPUT_LABEL}>
-                <EuiTextArea
-                  rows={5}
-                  value={exampleEditor.output}
-                  onChange={(event) =>
-                    setExampleEditor((prev) =>
-                      prev ? { ...prev, output: event.target.value } : prev
-                    )
-                  }
-                />
-              </EuiFormRow>
-              <EuiFormRow label={i18n.JSON_METADATA_LABEL}>
-                <EuiTextArea
-                  rows={5}
-                  value={exampleEditor.metadata}
-                  onChange={(event) =>
-                    setExampleEditor((prev) =>
-                      prev ? { ...prev, metadata: event.target.value } : prev
-                    )
-                  }
-                />
-              </EuiFormRow>
-            </EuiForm>
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModals}>{i18n.MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
-            <EuiButton
-              onClick={onSubmitExample}
-              fill
-              isLoading={addExamples.isLoading || updateExample.isLoading}
-            >
-              {i18n.MODAL_SAVE_BUTTON}
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      ) : null}
-
+      {/* Delete example confirmation */}
       {deletingExample ? (
         <EuiConfirmModal
           title={i18n.CONFIRM_DELETE_EXAMPLE_TITLE}
