@@ -9,37 +9,47 @@
 
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import {
-  COMMON_HEADERS,
-  DATA_VIEW_PATH_LEGACY,
-  ID_OVER_MAX_LENGTH,
-} from '../../fixtures/constants';
+import { COMMON_HEADERS, DATA_VIEW_PATH, SERVICE_KEY } from '../../fixtures/constants';
 
 apiTest.describe(
-  `DELETE ${DATA_VIEW_PATH_LEGACY}/{id} - errors (legacy index pattern api)`,
+  'GET api/data_views/data_view/{id} - main (data view api)',
   { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
+    let createdIds: string[] = [];
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
     });
 
-    apiTest('returns 404 error on non-existing index_pattern', async ({ apiClient }) => {
-      const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-      const response = await apiClient.delete(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-
-      expect(response.statusCode).toBe(404);
+    apiTest.afterEach(async ({ apiServices }) => {
+      for (const id of createdIds) {
+        await apiServices.dataViews.delete(id);
+      }
+      createdIds = [];
     });
 
-    apiTest('returns error when ID is too long', async ({ apiClient }) => {
-      const response = await apiClient.delete(`${DATA_VIEW_PATH_LEGACY}/${ID_OVER_MAX_LENGTH}`, {
+    apiTest('can retrieve a data view', async ({ apiClient }) => {
+      const title = `foo-${Date.now()}-${Math.random()}*`;
+
+      const createResponse = await apiClient.post(DATA_VIEW_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+        body: {
+          [SERVICE_KEY]: {
+            title,
+          },
+        },
+      });
+
+      expect(createResponse).toHaveStatusCode(200);
+      const createdId = createResponse.body[SERVICE_KEY].id;
+      createdIds.push(createdId);
+
+      const getResponse = await apiClient.get(`${DATA_VIEW_PATH}/${createdId}`, {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -47,10 +57,8 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(response.statusCode).toBe(400);
-      expect(response.body.message).toBe(
-        '[request params.id]: value has length [1759] but it must have a maximum length of [1000].'
-      );
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body[SERVICE_KEY].title).toBe(title);
     });
   }
 );
