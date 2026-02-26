@@ -1,0 +1,16 @@
+name: "Triage Issue with AI"
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  triage:
+    if: github.event.label.name == 'needs-team'
+    uses: elastic/kibana-automated-triage/.github/workflows/triage-issue-on-issue-update.yml@main
+    with:
+      issue-number: ${{ github.event.issue.number }}
+      issue-title: ${{ github.event.issue.title }}
+      issue-body: ${{ github.event.issue.body }}
+      dry-run: true
+    secrets:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
