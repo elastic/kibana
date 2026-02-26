@@ -29,6 +29,7 @@ export interface CreateChatModelOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  replacementsEsClient?: ElasticsearchClient;
   /** Promise resolving per-space salt for deterministic tokenization. */
   saltPromise?: Promise<string | undefined>;
   resolveEffectivePolicy?: (
@@ -47,6 +48,7 @@ export const createChatModel = async ({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  replacementsEsClient,
   saltPromise,
   resolveEffectivePolicy,
   callbacks,
@@ -58,6 +60,7 @@ export const createChatModel = async ({
     anonymizationRulesPromise,
     regexWorker,
     esClient,
+    ...(replacementsEsClient ? { replacementsEsClient } : {}),
     logger,
     saltPromise,
     resolveEffectivePolicy,

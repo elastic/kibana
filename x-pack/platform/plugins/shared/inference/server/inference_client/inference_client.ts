@@ -34,6 +34,7 @@ export function createInferenceClient({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  replacementsEsClient,
   callbacks,
   saltPromise,
   resolveEffectivePolicy,
@@ -46,6 +47,7 @@ export function createInferenceClient({
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  replacementsEsClient?: ElasticsearchClient;
   callbacks?: InferenceCallbacks;
   saltPromise?: Promise<string | undefined>;
   resolveEffectivePolicy?: (
@@ -63,6 +65,7 @@ export function createInferenceClient({
     anonymizationRulesPromise,
     regexWorker,
     esClient,
+    replacementsEsClient,
     callbackManager,
     saltPromise,
     resolveEffectivePolicy,

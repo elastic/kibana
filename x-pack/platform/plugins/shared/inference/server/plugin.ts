@@ -116,6 +116,7 @@ export class InferencePlugin
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          replacementsEsClient: core.elasticsearch.client.asInternalUser,
           saltPromise: policyService?.getSalt(namespace),
           resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
             if (!policyService || !target) {
@@ -143,6 +144,7 @@ export class InferencePlugin
           anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          replacementsEsClient: core.elasticsearch.client.asInternalUser,
           saltPromise: policyService?.getSalt(namespace),
           resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
             if (!policyService || !target) {

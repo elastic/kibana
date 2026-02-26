@@ -53,6 +53,7 @@ interface CreateChatCompleteApiOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  replacementsEsClient?: ElasticsearchClient;
   replacementsEncryptionKey?: string;
   callbackManager?: InferenceCallbackManager;
   saltPromise?: Promise<string | undefined>;
@@ -94,6 +95,7 @@ export function createChatCompleteCallbackApi({
   anonymizationRulesPromise,
   regexWorker,
   esClient,
+  replacementsEsClient,
   replacementsEncryptionKey,
   callbackManager,
   saltPromise,
@@ -148,7 +150,9 @@ export function createChatCompleteCallbackApi({
                 metadata?.anonymization?.target
               );
               const carriedReplacementsId = metadata?.anonymization?.replacementsId;
-              const repo = new ReplacementsRepository(esClient, {
+              // Replacements are stored in a hidden `.kibana-*` system index. Use an internal client
+              // for persistence so authorized Kibana users don't also need direct ES index privileges.
+              const repo = new ReplacementsRepository(replacementsEsClient ?? esClient, {
                 encryptionKey: replacementsEncryptionKey,
               });
               let replacementsId = carriedReplacementsId;

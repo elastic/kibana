@@ -30,6 +30,7 @@ interface CreateClientOptions {
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
+  replacementsEsClient?: ElasticsearchClient;
   callbacks?: InferenceCallbacks;
   /** Promise resolving per-space salt for deterministic tokenization. */
   saltPromise?: Promise<string | undefined>;
@@ -59,6 +60,7 @@ export function createClient(
     callbacks,
     saltPromise,
     resolveEffectivePolicy,
+    replacementsEsClient,
     replacementsEncryptionKey,
   } = options;
   const client = createInferenceClient({
@@ -69,6 +71,7 @@ export function createClient(
     anonymizationRulesPromise,
     regexWorker,
     esClient,
+    replacementsEsClient,
     callbacks,
     saltPromise,
     resolveEffectivePolicy,
