@@ -30,7 +30,10 @@ import { AlertStatus } from './alert_status';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { AlertDescription } from '../../../../flyout_v2/document/components/alert_description';
 import { ABOUT_SECTION_TITLE } from '../../../../flyout_v2/document/components/about_section';
-import { ALERT_REASON_BANNER, Reason } from '../../../../flyout_v2/document/components/reason';
+import {
+  ALERT_REASON_BANNER,
+  AlertReason,
+} from '../../../../flyout_v2/document/components/alert_reason';
 
 const KEY = 'about';
 
@@ -111,7 +114,7 @@ export const AboutSection = memo(() => {
           onShowRuleSummary={openRulePreview}
           ruleSummaryDisabled={ruleSummaryDisabled}
         />
-        <Reason hit={hit} onShowFullReason={openAlertReasonPreview} />
+        <AlertReason hit={hit} onShowFullReason={openAlertReasonPreview} />
         <MitreAttack />
         <AlertStatus />
       </>

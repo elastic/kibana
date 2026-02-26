@@ -14,7 +14,7 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { AlertDescription } from './alert_description';
-import { Reason } from './reason';
+import { AlertReason } from './alert_reason';
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 
@@ -64,7 +64,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
             <AlertDescription hit={hit} onShowRuleSummary={undefined} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <Reason hit={hit} onShowFullReason={undefined} />
+            <AlertReason hit={hit} onShowFullReason={undefined} />
           </EuiFlexItem>
         </>
       ) : null}

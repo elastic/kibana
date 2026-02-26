@@ -16,8 +16,8 @@ jest.mock('./alert_description', () => ({
   AlertDescription: () => <div>{'AlertDescription'}</div>,
 }));
 
-jest.mock('./reason', () => ({
-  Reason: () => <div>{'Reason'}</div>,
+jest.mock('./alert_reason', () => ({
+  AlertReason: () => <div>{'AlertReason'}</div>,
 }));
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
@@ -34,9 +34,6 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
 
 const alertHit = createMockHit({
   'event.kind': 'signal',
-});
-const eventHit = createMockHit({
-  'event.kind': 'event',
 });
 
 describe('AboutSection', () => {
@@ -84,7 +81,7 @@ describe('AboutSection', () => {
     await act(async () => {
       expect(getByTestId(`${ABOUT_SECTION_TEST_ID}Content`)).toBeVisible();
       expect(getByText('AlertDescription')).toBeInTheDocument();
-      expect(getByText('Reason')).toBeInTheDocument();
+      expect(getByText('AlertReason')).toBeInTheDocument();
     });
   });
 });

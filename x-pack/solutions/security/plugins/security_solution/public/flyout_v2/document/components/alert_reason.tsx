@@ -32,7 +32,7 @@ export const ALERT_REASON_BANNER = {
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
-export interface ReasonProps {
+export interface AlertReasonProps {
   /**
    * Alert/event document
    */
@@ -44,7 +44,7 @@ export interface ReasonProps {
   onShowFullReason?: () => void;
 }
 
-export const Reason: FC<ReasonProps> = ({ hit, onShowFullReason }) => {
+export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => {
   const isAlert = useIsAlertDocument(hit);
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
 
@@ -125,4 +125,4 @@ export const Reason: FC<ReasonProps> = ({ hit, onShowFullReason }) => {
   );
 };
 
-Reason.displayName = 'Reason';
+AlertReason.displayName = 'AlertReason';
