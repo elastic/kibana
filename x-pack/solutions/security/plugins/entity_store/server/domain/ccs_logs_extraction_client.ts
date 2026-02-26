@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import type {
   EntityType,
@@ -19,8 +18,7 @@ import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   extractPaginationParams,
 } from './logs_extraction/logs_extraction_query_builder';
-import { executeEsqlQuery } from '../infra/elasticsearch/esql';
-import type { Entity } from '../../common/domain/definitions/entity.gen';
+import { executeEsqlQuery, esqlResponseToBulkObjects } from '../infra/elasticsearch/esql';
 import type { CRUDClient } from './crud_client';
 
 export interface CcsExtractToUpdatesParams {
@@ -37,32 +35,6 @@ export interface CcsExtractToUpdatesResult {
   count: number;
   pages: number;
   error?: Error;
-}
-
-/**
- * Converts columnar ESQL response to bulk objects for the CRUD client.
- * Keeps flat dot-notation keys (e.g. entity.id); the CRUD API would flatten them later anyway.
- */
-function esqlResponseToBulkObjects(
-  esqlResponse: ESQLSearchResponse,
-  type: EntityType,
-  fieldsToIgnore: string[]
-): Array<{ type: EntityType; doc: Entity }> {
-  const { columns, values } = esqlResponse;
-  const objects: Array<{ type: EntityType; doc: Entity }> = [];
-
-  for (const row of values) {
-    const doc: Record<string, unknown> = {};
-    for (let i = 0; i < row.length; i++) {
-      const key = columns[i].name;
-      if (fieldsToIgnore.includes(key) || row[i] === null) {
-        continue;
-      }
-      doc[key] = row[i];
-    }
-    objects.push({ type, doc: doc as Entity });
-  }
-  return objects;
 }
 
 export class CcsLogsExtractionClient {
@@ -128,11 +100,9 @@ export class CcsLogsExtractionClient {
 
       totalCount += esqlResponse.values.length;
       pagination = extractPaginationParams(esqlResponse, docsLimit);
-      if (esqlResponse.values.length > 0) {
-        pages++;
-      }
 
       if (esqlResponse.values.length > 0) {
+        pages++;
         this.logger.debug(
           `CCS extraction ingesting ${esqlResponse.values.length} partial entities`
         );
@@ -142,7 +112,8 @@ export class CcsLogsExtractionClient {
 
         const momentToDate = moment.utc(toDateISO);
         let inc = 0;
-        await this.crudClient.upsertEntitiesBulk(bulkObjects, {
+        await this.crudClient.upsertEntitiesBulk({
+          objects: bulkObjects,
           force: true,
           // It's good to generate a sparse timestamp to avoid too many ts collisions
           // in the main extraction

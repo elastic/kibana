@@ -19,7 +19,15 @@ import {
 
 const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
 
-jest.mock('../infra/elasticsearch/esql');
+jest.mock('../infra/elasticsearch/esql', () => {
+  const actual = jest.requireActual<typeof import('../infra/elasticsearch/esql')>(
+    '../infra/elasticsearch/esql'
+  );
+  return {
+    ...actual,
+    executeEsqlQuery: jest.fn(),
+  };
+});
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 
@@ -73,11 +81,14 @@ describe('CcsLogsExtractionClient', () => {
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
     expect(mockCrudClient.upsertEntitiesBulk).toHaveBeenCalledTimes(1);
     expect(mockCrudClient.upsertEntitiesBulk).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        { type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:host-1' }) },
-        { type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:host-2' }) },
-      ]),
-      expect.objectContaining({ force: true, timestampGenerator: expect.any(Function) })
+      expect.objectContaining({
+        objects: expect.arrayContaining([
+          { type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:host-1' }) },
+          { type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:host-2' }) },
+        ]),
+        force: true,
+        timestampGenerator: expect.any(Function),
+      })
     );
   });
 
@@ -100,11 +111,11 @@ describe('CcsLogsExtractionClient', () => {
     });
 
     const call = mockCrudClient.upsertEntitiesBulk.mock.calls[0];
-    expect(call[0]).toEqual([
+    expect(call[0].objects).toEqual([
       { type: 'user', doc: { 'entity.id': 'user:u1', 'entity.name': 'alice' } },
     ]);
-    expect(call[1]).toMatchObject({ force: true });
-    const timestampGenerator = call[1]?.timestampGenerator;
+    expect(call[0]).toMatchObject({ force: true });
+    const timestampGenerator = call[0].timestampGenerator;
     expect(timestampGenerator).toBeDefined();
     const ts = timestampGenerator!();
     const tsDate = new Date(ts);
@@ -150,16 +161,22 @@ describe('CcsLogsExtractionClient', () => {
     expect(mockCrudClient.upsertEntitiesBulk).toHaveBeenCalledTimes(2);
     expect(mockCrudClient.upsertEntitiesBulk).toHaveBeenNthCalledWith(
       1,
-      expect.arrayContaining([
-        { type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:h1' }) },
-        { type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:h2' }) },
-      ]),
-      expect.objectContaining({ force: true, timestampGenerator: expect.any(Function) })
+      expect.objectContaining({
+        objects: expect.arrayContaining([
+          { type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:h1' }) },
+          { type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:h2' }) },
+        ]),
+        force: true,
+        timestampGenerator: expect.any(Function),
+      })
     );
     expect(mockCrudClient.upsertEntitiesBulk).toHaveBeenNthCalledWith(
       2,
-      [{ type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:h3' }) }],
-      expect.objectContaining({ force: true, timestampGenerator: expect.any(Function) })
+      expect.objectContaining({
+        objects: [{ type: 'host', doc: expect.objectContaining({ 'entity.id': 'host:h3' }) }],
+        force: true,
+        timestampGenerator: expect.any(Function),
+      })
     );
   });
 
