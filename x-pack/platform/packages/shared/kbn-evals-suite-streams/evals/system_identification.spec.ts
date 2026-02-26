@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Path from 'path';
-import { node } from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { identifySystems } from '@kbn/streams-ai';
 import kbnDatemath from '@kbn/datemath';
-import type { ScoutTestConfig } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { omit, uniq } from 'lodash';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
@@ -21,6 +17,7 @@ import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
 import type { SystemIdentificationEvaluationDataset } from './system_identification_datasets';
 import { SYSTEM_IDENTIFICATION_DATASETS } from './system_identification_datasets';
+import { indexSynthtraceScenario } from './synthtrace_helpers';
 
 evaluate.describe.configure({ timeout: 600_000 });
 
@@ -32,67 +29,6 @@ evaluate.describe.skip(
   () => {
     const from = kbnDatemath.parse('now-15m')!;
     const to = kbnDatemath.parse('now')!;
-
-    function getSharedArgs({ config }: { config: ScoutTestConfig }) {
-      const esUrl = new URL(config.hosts.elasticsearch);
-      const kbnUrl = new URL(config.hosts.kibana);
-
-      esUrl.username = config.auth.username;
-      esUrl.password = config.auth.password;
-
-      kbnUrl.username = config.auth.username;
-      kbnUrl.password = config.auth.password;
-
-      return [
-        `--from=${from.toISOString()}`,
-        `--to=${to.toISOString()}`,
-        `--kibana=${kbnUrl.toString()}`,
-        `--target=${esUrl.toString()}`,
-        '--assume-package-version=9.2.0',
-        '--workers=1',
-      ];
-    }
-
-    const synthtraceScript = Path.join(REPO_ROOT, 'scripts/synthtrace.js');
-
-    // Index serverless logs with optional feature filters derived from dataset examples.
-    async function indexServerlessLogs({
-      config,
-      systems,
-    }: {
-      config: ScoutTestConfig;
-      systems: string[];
-    }) {
-      const featureArg = `--scenarioOpts.systems="${systems.join(',')}"`;
-
-      await node(require.resolve(synthtraceScript), [
-        'serverless_logs',
-        ...getSharedArgs({ config }),
-        featureArg,
-        `--scenarioOpts.rpm=1000`,
-      ]);
-    }
-
-    async function indexSampleLogs({
-      config,
-      systems,
-    }: {
-      config: ScoutTestConfig;
-      systems: string[];
-    }) {
-      await node(
-        require.resolve(synthtraceScript),
-        [
-          'sample_logs',
-          ...getSharedArgs({ config }),
-          `--scenarioOpts.systems="${systems.join(',')}"`,
-          '--scenarioOpts.rpm=1000',
-        ],
-        {
-          stdio: 'inherit',
-        }
-      );
-    }
 
     async function runSystemIdentificationExperiment(
       dataset: SystemIdentificationEvaluationDataset,
@@ -237,16 +173,22 @@ evaluate.describe.skip(
             });
 
             if (input.systems.loghub.length) {
-              await indexSampleLogs({
-                systems: input.systems.loghub,
+              await indexSynthtraceScenario({
+                scenario: 'sample_logs',
+                scenarioOpts: { systems: input.systems.loghub.join(','), rpm: 1000 },
                 config,
+                from,
+                to,
               });
             }
 
             if (input.systems.serverless.length) {
-              await indexServerlessLogs({
-                systems: input.systems.serverless,
+              await indexSynthtraceScenario({
+                scenario: 'serverless_logs',
+                scenarioOpts: { systems: input.systems.serverless.join(','), rpm: 1000 },
                 config,
+                from,
+                to,
               });
             }
 

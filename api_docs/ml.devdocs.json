@@ -1409,7 +1409,7 @@
         "description": [],
         "signature": [
           "MlEmbeddableBaseApi",
-          "<Readonly<{ id?: string | undefined; description?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; title?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "<Readonly<{ id?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1417,7 +1417,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; hide_title?: boolean | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; description?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; title?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; title?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; hide_title?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1425,7 +1425,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; hide_title?: boolean | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>> & ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; title?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; hide_title?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -1509,7 +1509,7 @@
           "\nPersisted state for the Anomaly Swim Lane Embeddable."
         ],
         "signature": [
-          "Readonly<{ id?: string | undefined; description?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; title?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "Readonly<{ id?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1517,7 +1517,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; hide_title?: boolean | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; description?: string | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; title?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; title?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; hide_title?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query-constants",
             "scope": "common",
@@ -1525,7 +1525,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; hide_title?: boolean | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>"
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>[] | undefined; description?: string | undefined; title?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; hide_title?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
         "lineNumber": 60,
@@ -1907,7 +1907,7 @@
         "Filter",
         ">; updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]): Promise<",
         "Filter",
-        ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+        ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
           "scope": "common",
@@ -1973,7 +1973,7 @@
         "GetStoppedPartitionResult",
         ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
         "GetDatafeedResultsChartDataResult",
-        ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+        ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
           "scope": "common",
@@ -1983,7 +1983,7 @@
         },
         " | undefined; } & { fieldName: string; }>[], threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
         "QueryDslQueryContainer",
-        " | undefined): ",
+        "): ",
         "Observable",
         "<",
         "ExplorerChartsData",

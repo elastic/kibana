@@ -59,15 +59,17 @@ export const buildSourcesDefinitions = (
     let text = getSafeInsertSourceText(name);
     const isTimeseries = type === SOURCES_TYPES.TIMESERIES;
     let rangeToReplace: { start: number; end: number } | undefined;
+    let filterText: string | undefined;
 
-    // If this is a timeseries source we should replace FROM with TS
-    // With TS users can benefit from the timeseries optimizations
+    // If this is a timeseries source we should replace FROM with TS.
     if (isTimeseries && queryString) {
       text = `TS ${text}`;
       rangeToReplace = {
         start: 0,
         end: queryString.length + 1,
       };
+      // Keep filterText source-aware so Monaco can rank/filter by the typed source fragment.
+      filterText = `FROM ${name}`;
     }
 
     return withAutoSuggest({
@@ -86,10 +88,8 @@ export const buildSourcesDefinitions = (
             },
           }),
       sortText: 'A',
-      // with filterText we are explicitly telling the Monaco editor's filtering engine
-      //  to display the item when the text FROM  is present in the editor at the specified range,
-      // even though the label is different.
-      ...(rangeToReplace && { rangeToReplace, filterText: queryString }),
+      ...(rangeToReplace && { rangeToReplace }),
+      ...(filterText && { filterText }),
     });
   });
 

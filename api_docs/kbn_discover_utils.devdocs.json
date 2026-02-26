@@ -1194,7 +1194,7 @@
             "section": "def-public.SourcesApiOptions",
             "text": "SourcesApiOptions"
           },
-          ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+          ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
           {
             "pluginId": "apmSourcesAccess",
             "scope": "public",
@@ -1212,7 +1212,7 @@
             "section": "def-public.SourcesApiOptions",
             "text": "SourcesApiOptions"
           },
-          " & { body: Partial<Record<\"error\" | \"metric\" | \"transaction\" | \"span\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+          " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
           "SavedObject",
           "<{}>>; } | undefined; }) => Promise<",
           {
@@ -1259,7 +1259,7 @@
                     "section": "def-public.SourcesApiOptions",
                     "text": "SourcesApiOptions"
                   },
-                  ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; metric: string; transaction: string; span: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+                  ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
                   {
                     "pluginId": "apmSourcesAccess",
                     "scope": "public",
@@ -1277,7 +1277,7 @@
                     "section": "def-public.SourcesApiOptions",
                     "text": "SourcesApiOptions"
                   },
-                  " & { body: Partial<Record<\"error\" | \"metric\" | \"transaction\" | \"span\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+                  " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
                   "SavedObject",
                   "<{}>>; } | undefined"
                 ],
@@ -4045,7 +4045,7 @@
         "signature": [
           "({ logLevel, fallback, \"data-test-subj\": dataTestSubj, ...badgeProps }: Omit<",
           "EuiBadgeProps",
-          ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any> | undefined; }) => React.JSX.Element"
+          ", \"children\" | \"color\"> & { logLevel: {}; fallback?: React.ReactElement<any> | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
         "lineNumber": 21,
@@ -4063,7 +4063,7 @@
             "signature": [
               "Omit<",
               "EuiBadgeProps",
-              ", \"color\" | \"children\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
+              ", \"children\" | \"color\"> & { logLevel: {}; fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx",
             "lineNumber": 21,
@@ -5688,7 +5688,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "lineNumber": 22,

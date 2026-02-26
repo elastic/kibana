@@ -11,15 +11,18 @@ import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { JsonValue } from '@kbn/utility-types';
 import type {
+  BuiltHoverContext,
   HoverContext,
   ParameterContext,
   ProviderConfig,
   StepContext,
+  TriggerHoverContext,
 } from './provider_interfaces';
 import { getMonacoConnectorHandler } from './provider_registry';
-import { getPathAtOffset } from '../../../../../common/lib/yaml';
+import { getPathAtOffset, getTriggerNodes } from '../../../../../common/lib/yaml';
 import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
 import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
+import { triggerSchemas } from '../../../../trigger_schemas';
 import type {
   ExecutionContext,
   StepExecutionData,
@@ -28,6 +31,11 @@ import { getInterceptedHover } from '../hover/get_intercepted_hover';
 import { evaluateExpression } from '../template_expression/evaluate_expression';
 import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';
 import { formatValueAsJson } from '../template_expression/resolve_path_value';
+import {
+  getTriggerHoverContent,
+  getTriggerTypeAtPath,
+} from '../trigger_hover/get_trigger_hover_content';
+import { getMonacoRangeFromYamlNode } from '../utils';
 
 export const UNIFIED_HOVER_PROVIDER_ID = 'unified-hover-provider';
 
@@ -106,10 +114,13 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
         return null;
       }
 
-      // Detect context at current position
       const context = await this.buildHoverContext(model, position, yamlDocument);
       if (!context) {
         return null;
+      }
+
+      if (context.kind === 'trigger') {
+        return this.provideTriggerHover(context, model, yamlDocument);
       }
 
       // Only show connector hover for specific fields (type, or connector parameters)
@@ -141,38 +152,88 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
   }
 
   /**
-   * Build hover context from current position and YAML document
+   * Provide hover for trigger type: description + event schema; highlight full type value as block (e.g. example.custom_trigger).
+   */
+  private provideTriggerHover(
+    context: TriggerHoverContext,
+    model: monaco.editor.ITextModel,
+    yamlDocument: YAML.Document
+  ): monaco.languages.Hover | null {
+    const triggerHoverContent = getTriggerHoverContent(
+      context.triggerType,
+      triggerSchemas.getTriggerDefinition(context.triggerType)
+    );
+    if (!triggerHoverContent) {
+      return null;
+    }
+    const absolutePosition = model.getOffsetAt(context.position);
+    const triggerNodes = getTriggerNodes(yamlDocument);
+    const triggerAtPosition = triggerNodes.find(({ node }) => {
+      const r = node.range;
+      return r && absolutePosition >= r[0] && absolutePosition <= r[2];
+    });
+    const typeValueNode = triggerAtPosition?.typePair?.value;
+    const range = typeValueNode ? getMonacoRangeFromYamlNode(model, typeValueNode) : null;
+    return { contents: [triggerHoverContent], range: range ?? undefined };
+  }
+
+  /**
+   * Build hover context from current position and YAML document.
+   * Returns trigger context when the cursor is inside a trigger block, otherwise
+   * connector/step context when inside a step.
    */
   private async buildHoverContext(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     yamlDocument: YAML.Document
-  ): Promise<HoverContext | null> {
+  ): Promise<BuiltHoverContext | null> {
     try {
-      // Get current path in YAML
       const absolutePosition = model.getOffsetAt(position);
       let yamlPath = getPathAtOffset(yamlDocument, absolutePosition);
 
-      // If no path found (e.g., cursor after colon), try to find it from the current line
       if (yamlPath.length === 0) {
         yamlPath = this.getPathFromCurrentLine(model, position, yamlDocument);
       }
 
-      // Detect connector type and step context
+      const currentValue = yamlDocument.getIn(yamlPath, true);
+      const yamlPathStr = yamlPath.map((segment) => String(segment));
+
+      const triggerNodes = getTriggerNodes(yamlDocument);
+      const triggerAtPosition = triggerNodes.find(({ node }) => {
+        const r = node.range;
+        return r && absolutePosition >= r[0] && absolutePosition <= r[2];
+      });
+      let triggerType = getTriggerTypeAtPath(yamlPath, (path) => yamlDocument.getIn(path, true));
+      if (!triggerType && triggerAtPosition) {
+        triggerType = triggerAtPosition.triggerType;
+      }
+      const typeValueNode = triggerAtPosition?.typePair?.value ?? undefined;
+      if (triggerType && typeValueNode?.range) {
+        const [start, , end] = typeValueNode.range;
+        if (absolutePosition >= start && absolutePosition <= end) {
+          return {
+            kind: 'trigger',
+            triggerType,
+            yamlPath: yamlPathStr,
+            currentValue,
+            position,
+            model,
+            yamlDocument,
+          };
+        }
+      }
+
       const stepContext = this.detectStepContext(model.getValue(), position);
       if (!stepContext?.stepType) {
         return null;
       }
 
-      // Detect parameter context if we're in a parameter
       const parameterContext = this.detectParameterContext(yamlPath, stepContext);
 
-      // Get current value at position
-      const currentValue = yamlDocument.getIn(yamlPath, true);
-
       return {
+        kind: 'connector',
         connectorType: stepContext.stepType,
-        yamlPath: yamlPath.map((segment) => String(segment)),
+        yamlPath: yamlPathStr,
         currentValue,
         position,
         model,
