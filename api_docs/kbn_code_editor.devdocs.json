@@ -42,7 +42,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -64,7 +64,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 70,
             "deprecated": false,
             "trackAdoption": false,
@@ -95,7 +95,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
-        "lineNumber": 60,
+        "lineNumber": 61,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -117,7 +117,7 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 75,
             "deprecated": false,
             "trackAdoption": false,
