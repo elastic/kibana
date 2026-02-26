@@ -128,13 +128,17 @@ const ProfileFormTabs = ({ isGlobalProfile }: { isGlobalProfile: boolean }) => {
         }),
         content: <NerRulesPanel />,
       },
-      {
-        id: 'preview',
-        name: i18n.translate('anonymizationUi.profiles.flyout.tabs.preview', {
-          defaultMessage: 'Preview',
-        }),
-        content: <PreviewPanel />,
-      },
+      ...(isGlobalProfile
+        ? []
+        : [
+            {
+              id: 'preview',
+              name: i18n.translate('anonymizationUi.profiles.flyout.tabs.preview', {
+                defaultMessage: 'Preview',
+              }),
+              content: <PreviewPanel />,
+            },
+          ]),
     ],
     [
       isGlobalProfile,

@@ -36,6 +36,7 @@ describe('ProfileFormContent', () => {
     expect(screen.queryByText('Field rules')).not.toBeInTheDocument();
     expect(screen.getByText('Regex rules')).toBeInTheDocument();
     expect(screen.getByText('NER rules')).toBeInTheDocument();
+    expect(screen.queryByText('Preview')).not.toBeInTheDocument();
   });
 
   it('shows Field rules tab for non-global profiles', () => {
@@ -43,5 +44,6 @@ describe('ProfileFormContent', () => {
     render(<ProfileFormContent />);
 
     expect(screen.getByText('Field rules')).toBeInTheDocument();
+    expect(screen.getByText('Preview')).toBeInTheDocument();
   });
 });
