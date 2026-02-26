@@ -100,6 +100,7 @@ describe('JsonMetricsDashboard', () => {
       jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
       renderDashboard();
 
+      expect(capturedGetCreationOptions).toBeDefined();
       const options = await capturedGetCreationOptions!();
       const input = options.getInitialInput!();
 
