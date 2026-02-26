@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defineConfig } from '@playwright/test';
+import type { PlaywrightTestConfig } from '@playwright/test';
 import { createPlaywrightConfig } from '@kbn/scout-security';
 
 const baseConfig = createPlaywrightConfig({
@@ -14,7 +14,9 @@ const baseConfig = createPlaywrightConfig({
   runGlobalSetup: false,
 });
 
-export default defineConfig({
+const config: PlaywrightTestConfig = {
   ...baseConfig,
   testMatch: ['**/example.spec.ts', '**/rbac/navigation.spec.ts'],
-});
+};
+
+export default config;
