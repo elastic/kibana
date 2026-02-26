@@ -41,7 +41,7 @@ export function registerExportSourceRoute(router: VersionedRouter<RequestHandler
     },
     async (_ctx, req, res) => {
       try {
-        const { data, warnings } = stripUnmappedKeys(req.body.data);
+        const { data, warnings } = stripUnmappedKeys(req.body);
         return res.ok({
           body: {
             data,

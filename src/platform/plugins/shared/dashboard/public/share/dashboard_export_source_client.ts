@@ -16,7 +16,7 @@ export async function getSanitizedExportSource(dashboardState: DashboardState) {
     `${DASHBOARD_INTERNAL_API_PATH}/_export_source`,
     {
       version: '1',
-      body: JSON.stringify({ data: dashboardState }),
+      body: JSON.stringify(dashboardState),
     }
   );
 

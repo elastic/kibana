@@ -73,7 +73,9 @@ export const exportSourceDashboardShareIntegration =
             />
           ),
           generateAssetExport: async (_opts) => {
-            const { data } = await getSanitizedExportSource(typedSharingData.exportSource);
+            const data = await getSanitizedExportSource(typedSharingData.exportSource)
+              .then((result) => result.data)
+              .catch(() => typedSharingData.exportSource);
             const filename = getFileName(typedSharingData.title);
             const content = JSON.stringify(data, null, 2);
             await downloadFileAs(filename, { content, type: jsonMimeType });

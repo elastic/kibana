@@ -53,7 +53,7 @@ describe('registerExportSourceRoute', () => {
 
     const result = await handler(
       coreMock.createRequestHandlerContext(),
-      { body: { data: dashboardState } } as any,
+      { body: dashboardState } as any,
       kibanaResponseFactory
     );
 
@@ -86,7 +86,7 @@ describe('registerExportSourceRoute', () => {
 
     const result = await handler(
       coreMock.createRequestHandlerContext(),
-      { body: { data: dashboardState } } as any,
+      { body: dashboardState } as any,
       kibanaResponseFactory
     );
 
@@ -128,7 +128,7 @@ describe('registerExportSourceRoute', () => {
 
     const result = await handler(
       coreMock.createRequestHandlerContext(),
-      { body: { data: dashboardState } } as any,
+      { body: dashboardState } as any,
       kibanaResponseFactory
     );
 
@@ -161,13 +161,19 @@ describe('registerExportSourceRoute', () => {
     const handler = route.versions['1'].handler;
 
     const dashboardState: DashboardState = {
-      pinned_panels: [],
       title: 'my dashboard',
+      pinned_panels: [
+        {
+          type: 'pinnedPanelType',
+          uid: 'pinnedPanel1',
+          config: {},
+        },
+      ],
     } as unknown as DashboardState;
 
     const result = await handler(
       coreMock.createRequestHandlerContext(),
-      { body: { data: dashboardState } } as any,
+      { body: dashboardState } as any,
       kibanaResponseFactory
     );
 
