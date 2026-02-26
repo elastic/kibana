@@ -117,7 +117,7 @@ export class DatasetClient {
   async create(
     name: string,
     description: string,
-    examples: DatasetExampleInput[]
+    examples: DatasetExampleInput[] = []
   ): Promise<DatasetWithExamples> {
     const existing = await this.getByName(name);
     if (existing) {

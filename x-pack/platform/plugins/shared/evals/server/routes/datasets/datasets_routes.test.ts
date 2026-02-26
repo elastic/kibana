@@ -151,7 +151,7 @@ describe('dataset routes', () => {
         method: 'post',
         path: EVALS_DATASETS_URL,
       });
-      datasetClient.create.mockResolvedValueOnce({ ...dataset, examples: [datasetExample] });
+      datasetClient.create.mockResolvedValueOnce({ ...dataset, examples: [] });
 
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
@@ -159,30 +159,16 @@ describe('dataset routes', () => {
         body: {
           name: dataset.name,
           description: dataset.description,
-          examples: [
-            {
-              input: datasetExample.input,
-              output: datasetExample.output,
-              metadata: datasetExample.metadata,
-            },
-          ],
         },
       });
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetClient.create).toHaveBeenCalledWith(dataset.name, dataset.description, [
-        {
-          input: datasetExample.input,
-          output: datasetExample.output,
-          metadata: datasetExample.metadata,
-        },
-      ]);
+      expect(datasetClient.create).toHaveBeenCalledWith(dataset.name, dataset.description);
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         dataset_id: datasetId,
         name: dataset.name,
-        examples_count: 1,
       });
     });
 
@@ -197,7 +183,7 @@ describe('dataset routes', () => {
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
         path: EVALS_DATASETS_URL,
-        body: { name: dataset.name, description: dataset.description, examples: [] },
+        body: { name: dataset.name, description: dataset.description },
       });
 
       const response = await handler(context as any, request, kibanaResponseFactory);
@@ -217,7 +203,7 @@ describe('dataset routes', () => {
       const request = httpServerMock.createKibanaRequest({
         method: 'post',
         path: EVALS_DATASETS_URL,
-        body: { name: dataset.name, description: dataset.description, examples: [] },
+        body: { name: dataset.name, description: dataset.description },
       });
 
       const response = await handler(context as any, request, kibanaResponseFactory);

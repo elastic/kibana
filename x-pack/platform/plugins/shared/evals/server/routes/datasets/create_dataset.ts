@@ -40,19 +40,18 @@ export const registerCreateDatasetRoute = ({ router, logger }: RouteDependencies
       },
       async (context, request, response) => {
         try {
-          const { name, description, examples } = request.body;
+          const { name, description } = request.body;
           const coreContext = await context.core;
           const evalsContext = await context.evals;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const datasetClient = evalsContext.datasetService.getClient(esClient);
 
-          const dataset = await datasetClient.create(name, description, examples);
+          const dataset = await datasetClient.create(name, description);
 
           return response.ok({
             body: {
               dataset_id: dataset.id,
               name: dataset.name,
-              examples_count: dataset.examples.length,
             },
           });
         } catch (error) {

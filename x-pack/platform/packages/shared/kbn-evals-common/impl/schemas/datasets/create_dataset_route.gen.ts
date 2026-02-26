@@ -16,18 +16,10 @@
 
 import { z } from '@kbn/zod';
 
-export type CreateDatasetExamplePayload = z.infer<typeof CreateDatasetExamplePayload>;
-export const CreateDatasetExamplePayload = z.object({
-  input: z.object({}).catchall(z.unknown()),
-  output: z.object({}).catchall(z.unknown()),
-  metadata: z.object({}).catchall(z.unknown()),
-});
-
 export type CreateEvaluationDatasetRequestBody = z.infer<typeof CreateEvaluationDatasetRequestBody>;
 export const CreateEvaluationDatasetRequestBody = z.object({
   name: z.string(),
   description: z.string(),
-  examples: z.array(CreateDatasetExamplePayload),
 });
 export type CreateEvaluationDatasetRequestBodyInput = z.input<
   typeof CreateEvaluationDatasetRequestBody
@@ -37,5 +29,4 @@ export type CreateEvaluationDatasetResponse = z.infer<typeof CreateEvaluationDat
 export const CreateEvaluationDatasetResponse = z.object({
   dataset_id: z.string(),
   name: z.string(),
-  examples_count: z.number().int(),
 });

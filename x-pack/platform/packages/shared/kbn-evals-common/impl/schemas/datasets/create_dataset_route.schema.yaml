@@ -1,14 +1,14 @@
 openapi: 3.0.0
 info:
   title: Create Evaluation Dataset API endpoint
-  version: "1"
+  version: '1'
 paths:
   /internal/evals/datasets:
     post:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: CreateEvaluationDataset
-      description: Create an evaluation dataset with examples
+      description: Create an evaluation dataset
       summary: Create evaluation dataset
       tags:
         - Evals API
@@ -23,16 +23,11 @@ paths:
                   type: string
                 description:
                   type: string
-                examples:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/CreateDatasetExamplePayload'
               required:
                 - name
                 - description
-                - examples
       responses:
-        "200":
+        '200':
           description: Successful response
           content:
             application/json:
@@ -43,28 +38,6 @@ paths:
                     type: string
                   name:
                     type: string
-                  examples_count:
-                    type: integer
                 required:
                   - dataset_id
                   - name
-                  - examples_count
-
-components:
-  schemas:
-    CreateDatasetExamplePayload:
-      type: object
-      properties:
-        input:
-          type: object
-          additionalProperties: true
-        output:
-          type: object
-          additionalProperties: true
-        metadata:
-          type: object
-          additionalProperties: true
-      required:
-        - input
-        - output
-        - metadata

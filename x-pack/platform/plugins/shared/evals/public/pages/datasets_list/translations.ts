@@ -18,86 +18,43 @@ export const CREATE_DATASET_BUTTON = i18n.translate(
   }
 );
 
-export const CREATE_DATASET_MODAL_TITLE = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.title',
+export const CREATE_DATASET_FLYOUT_TITLE = i18n.translate(
+  'xpack.evals.datasetsList.createDatasetFlyout.title',
   {
     defaultMessage: 'Create dataset',
   }
 );
 
 export const CREATE_DATASET_NAME_LABEL = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.nameLabel',
+  'xpack.evals.datasetsList.createDatasetFlyout.nameLabel',
   {
     defaultMessage: 'Name',
   }
 );
 
 export const CREATE_DATASET_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.descriptionLabel',
+  'xpack.evals.datasetsList.createDatasetFlyout.descriptionLabel',
   {
     defaultMessage: 'Description',
   }
 );
 
-export const CREATE_DATASET_EXAMPLES_LABEL = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.examplesLabel',
-  {
-    defaultMessage: 'Examples JSON',
-  }
-);
-
-export const CREATE_DATASET_EXAMPLES_HELP_TEXT = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.examplesHelpText',
-  {
-    defaultMessage: 'Paste a JSON array of objects with input, output, and metadata fields.',
-  }
-);
-
 export const CREATE_DATASET_NAME_REQUIRED_ERROR = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.nameRequiredError',
+  'xpack.evals.datasetsList.createDatasetFlyout.nameRequiredError',
   {
     defaultMessage: 'Name is required.',
   }
 );
 
-export const CREATE_DATASET_EXAMPLES_PARSE_ERROR = (error: string) =>
-  i18n.translate('xpack.evals.datasetsList.createDatasetModal.examplesParseError', {
-    defaultMessage: 'Failed to parse examples JSON: {error}',
-    values: { error },
-  });
-
-export const CREATE_DATASET_EXAMPLES_ARRAY_ERROR = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.examplesArrayError',
-  {
-    defaultMessage: 'Examples JSON must be an array.',
-  }
-);
-
-export const CREATE_DATASET_EXAMPLES_ITEM_OBJECT_ERROR = (itemNumber: number) =>
-  i18n.translate('xpack.evals.datasetsList.createDatasetModal.examplesItemObjectError', {
-    defaultMessage: 'Examples item {itemNumber} must be a JSON object.',
-    values: { itemNumber },
-  });
-
-export const CREATE_DATASET_EXAMPLES_FIELD_OBJECT_ERROR = (
-  itemNumber: number,
-  fieldName: string,
-  label: string
-) =>
-  i18n.translate('xpack.evals.datasetsList.createDatasetModal.examplesFieldObjectError', {
-    defaultMessage: '{label} item {itemNumber} field "{fieldName}" must be a JSON object.',
-    values: { label, itemNumber, fieldName },
-  });
-
 export const CREATE_DATASET_CANCEL_BUTTON = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.cancelButton',
+  'xpack.evals.datasetsList.createDatasetFlyout.cancelButton',
   {
     defaultMessage: 'Cancel',
   }
 );
 
 export const CREATE_DATASET_SUBMIT_BUTTON = i18n.translate(
-  'xpack.evals.datasetsList.createDatasetModal.submitButton',
+  'xpack.evals.datasetsList.createDatasetFlyout.submitButton',
   {
     defaultMessage: 'Create dataset',
   }
