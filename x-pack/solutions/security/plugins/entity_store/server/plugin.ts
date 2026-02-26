@@ -26,12 +26,13 @@ import { registerTelemetry, createReportEvent } from './telemetry/events';
 
 export class EntityStorePlugin
   implements
-  Plugin<
-    EntityStoreSetupContract,
-    EntityStoreStartContract,
-    EntityStoreSetupPlugins,
-    EntityStoreStartPlugins
-  > {
+    Plugin<
+      EntityStoreSetupContract,
+      EntityStoreStartContract,
+      EntityStoreSetupPlugins,
+      EntityStoreStartPlugins
+    >
+{
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 
