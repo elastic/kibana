@@ -7,19 +7,52 @@
 
 import AdmZip from 'adm-zip';
 import type { IntegrationAttributes } from '..';
+import type { IntegrationManifest } from './types';
+import { addManifestToZip } from './util';
+
+const FORMAT_VERSION = '3.4.0';
+const KIBANA_MIN_VERSION = '^9.3.0';
 
 export interface BuildIntegrationPackageResult {
   buffer: Buffer;
   packageName: string;
 }
 
+const createManifest = (integration: IntegrationAttributes): IntegrationManifest => {
+  const name = integration.integration_id;
+  const title = integration.metadata?.title ?? name;
+  const version = integration.metadata?.version ?? '0.0.0';
+  const description = integration.metadata?.description ?? '';
+
+  return {
+    format_version: FORMAT_VERSION,
+    name,
+    title,
+    version,
+    description,
+    type: 'integration',
+    categories: ['security'],
+    conditions: {
+      kibana: {
+        version: KIBANA_MIN_VERSION,
+      },
+    },
+    policy_templates: [],
+    owner: {
+      github: '@elastic/integration-experience',
+      type: 'community',
+    },
+  };
+};
+
 export const buildIntegrationPackage = async (
   integration: IntegrationAttributes
 ): Promise<BuildIntegrationPackageResult> => {
-  const packageName = `${integration.integration_id}-${integration.metadata?.version ?? '0.0.0'}`;
+  const manifest = createManifest(integration);
+  const packageName = `${manifest.name}-${manifest.version}`;
 
   const zip = new AdmZip();
-  zip.addFile(`${packageName}/`, Buffer.alloc(0));
+  addManifestToZip(zip, packageName, manifest);
 
   const buffer = await zip.toBufferPromise();
   return { buffer, packageName };
