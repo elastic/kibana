@@ -16,6 +16,7 @@ import React, {
   useCallback,
   type PropsWithChildren,
   type RefObject,
+  type MutableRefObject,
 } from 'react';
 
 import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
@@ -76,7 +77,7 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   /** Ref to the trigger button for focus restoration. */
   buttonRef: RefObject<HTMLButtonElement>;
   /** Ref to the popover panel for click-outside detection. */
-  panelRef: RefObject<HTMLDivElement>;
+  panelRef: MutableRefObject<HTMLElement | null>;
   /** Generated HTML id for the dialog panel, used for ARIA `aria-controls`. */
   panelId: string;
   /** Optional initial focus target for the dialog panel. */
@@ -129,7 +130,7 @@ export function DateRangePickerProvider({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
   const panelId = useGeneratedHtmlId({ prefix: 'dateRangePickerPanel' });
   const lastValidText = useRef('');
   const [isEditing, setIsEditing] = useState<boolean>(false);

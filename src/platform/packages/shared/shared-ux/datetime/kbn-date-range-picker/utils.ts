@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RefObject } from 'react';
+
 import type { TimeRange, TimeRangeBoundsOption, InitialFocus } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
@@ -31,7 +33,7 @@ export function isValidTimeRange(range: TimeRange): boolean {
  * Falls back to the panel div itself when unset.
  */
 export function resolveInitialFocus(
-  panelRef: React.RefObject<HTMLDivElement>,
+  panelRef: RefObject<HTMLElement>,
   initialFocus?: InitialFocus
 ): HTMLElement | null {
   if (typeof initialFocus === 'string') {

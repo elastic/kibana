@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  type KeyboardEvent,
-  type MutableRefObject,
-  type PropsWithChildren,
-  useCallback,
-} from 'react';
+import React, { type KeyboardEvent, type PropsWithChildren, useCallback } from 'react';
 import { css } from '@emotion/react';
 
 import { EuiPopover } from '@elastic/eui';
@@ -85,8 +80,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       ownFocus={false}
       panelPaddingSize="none"
       panelRef={(node) => {
-        (panelRef as MutableRefObject<HTMLDivElement | null>).current =
-          node as HTMLDivElement | null;
+        panelRef.current = node;
       }}
       panelProps={{
         id: panelId,
