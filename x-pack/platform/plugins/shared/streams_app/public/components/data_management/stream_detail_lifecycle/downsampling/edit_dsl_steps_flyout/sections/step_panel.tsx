@@ -21,6 +21,8 @@ export interface StepPanelProps {
   onRemoveStep: (stepIndex: number) => void;
   dataTestSubj: string;
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
+  dataRetentionMs?: number;
+  dataRetentionEsFormat?: string;
 }
 
 export const StepPanel = ({
@@ -30,6 +32,8 @@ export const StepPanel = ({
   onRemoveStep,
   dataTestSubj,
   timeUnitOptions,
+  dataRetentionMs,
+  dataRetentionEsFormat,
 }: StepPanelProps) => {
   const isHidden = selectedStepIndex !== stepIndex;
   const stepNumber = stepIndex + 1;
@@ -45,7 +49,13 @@ export const StepPanel = ({
           data-test-subj={`${dataTestSubj}Panel-step-${stepIndex}`}
         >
           <EuiFlexItem grow={false}>
-            <AfterField item={item} dataTestSubj={dataTestSubj} timeUnitOptions={timeUnitOptions} />
+            <AfterField
+              item={item}
+              dataTestSubj={dataTestSubj}
+              timeUnitOptions={timeUnitOptions}
+              dataRetentionMs={dataRetentionMs}
+              dataRetentionEsFormat={dataRetentionEsFormat}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

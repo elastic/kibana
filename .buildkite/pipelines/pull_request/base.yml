@@ -168,8 +168,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
       diskSizeGb: 105
     key: build_api_docs
-    depends_on:
-      - build
     timeout_in_minutes: 60
     retry:
       automatic:
