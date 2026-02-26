@@ -10593,7 +10593,7 @@
           " & { title: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/queries.ts",
-        "lineNumber": 29,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

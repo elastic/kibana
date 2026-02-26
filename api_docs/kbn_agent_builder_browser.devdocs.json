@@ -55,6 +55,57 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.WorkflowComboBox",
+        "type": "Function",
+        "tags": [],
+        "label": "WorkflowComboBox",
+        "description": [],
+        "signature": [
+          "({ workflows, value, onChange, singleSelection, \"data-test-subj\": dataTestSubj, ...comboBoxProps }: ",
+          {
+            "pluginId": "@kbn/agent-builder-browser",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderBrowserPluginApi",
+            "section": "def-common.WorkflowComboBoxProps",
+            "text": "WorkflowComboBoxProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBox.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  workflows,\n  value,\n  onChange,\n  singleSelection = false,\n  'data-test-subj': dataTestSubj = 'workflowComboBox',\n  ...comboBoxProps\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.WorkflowComboBoxProps",
+                "text": "WorkflowComboBoxProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 28,
+            "columnNumber": 67,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -685,6 +736,93 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ListWorkflowsParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ListWorkflowsParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ListWorkflowsParams.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ListWorkflowsParams.limit",
+            "type": "number",
+            "tags": [],
+            "label": "limit",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.ListWorkflowsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ListWorkflowsResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ListWorkflowsResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.WorkflowListItem",
+                "text": "WorkflowListItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
         "id": "def-common.ToolServiceStartContract",
         "type": "Interface",
         "tags": [],
@@ -693,7 +831,7 @@
           "\nPublic-facing contract for AgentBuilder's tool service."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
-        "lineNumber": 21,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -727,7 +865,7 @@
               ", Record<string, unknown>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
-            "lineNumber": 25,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -743,7 +881,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
-                "lineNumber": 28,
+                "lineNumber": 43,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -781,7 +919,7 @@
               ", Record<string, unknown>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
-            "lineNumber": 29,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -817,7 +955,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
-            "lineNumber": 33,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -839,7 +977,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
-                "lineNumber": 36,
+                "lineNumber": 51,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -847,6 +985,285 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.ToolServiceStartContract.listWorkflows",
+            "type": "Function",
+            "tags": [],
+            "label": "listWorkflows",
+            "description": [
+              "\nList available workflows for pre-execution selection."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ListWorkflowsParams",
+                "text": "ListWorkflowsParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.ListWorkflowsResponse",
+                "text": "ListWorkflowsResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.ToolServiceStartContract.listWorkflows.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-browser",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                    "section": "def-common.ListWorkflowsParams",
+                    "text": "ListWorkflowsParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+                "lineNumber": 55,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.WorkflowComboBoxOption",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowComboBoxOption",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxOption.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxOption.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.WorkflowComboBoxProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowComboBoxProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-browser",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderBrowserPluginApi",
+            "section": "def-common.WorkflowComboBoxProps",
+            "text": "WorkflowComboBoxProps"
+          },
+          " extends Omit<",
+          "EuiComboBoxProps",
+          "<string>, \"options\" | \"onChange\" | \"selectedOptions\" | \"singleSelection\">"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxProps.workflows",
+            "type": "Array",
+            "tags": [],
+            "label": "workflows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.WorkflowComboBoxOption",
+                "text": "WorkflowComboBoxOption"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxProps.value",
+            "type": "Array",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(workflowIds: string[]) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.WorkflowComboBoxProps.onChange.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "workflowIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+                "lineNumber": 24,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowComboBoxProps.singleSelection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "singleSelection",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/workflow_combo_box/workflow_combo_box.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-browser",
+        "id": "def-common.WorkflowListItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowListItem",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowListItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowListItem.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.WorkflowListItem.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/tools/contract.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
