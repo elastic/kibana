@@ -13,6 +13,7 @@
       "_project_routing/{name}"
     ],
     "documentation": "",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-project-routing-delete",
     "availability": {
       "stack": false,
       "serverless": true

@@ -21,5 +21,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./conversations.ts'));
     loadTestFile(require.resolve('./attachments.ts'));
     loadTestFile(require.resolve('./spaces.ts'));
+    loadTestFile(require.resolve('./skills/skills_crud.ts'));
+    loadTestFile(require.resolve('./skills/skills_validation.ts'));
   });
 }
