@@ -48,6 +48,8 @@ export interface DslStepsFlyoutArrayViewProps {
   tabHasErrors: (stepPath: string) => boolean;
   pruneToStepPaths: (stepPaths: string[]) => void;
   reindexErrorsAfterRemoval: (removedIndex: number) => void;
+  dataRetentionMs?: number;
+  dataRetentionEsFormat?: string;
 }
 
 export const DslStepsFlyoutArrayView = ({
@@ -59,6 +61,8 @@ export const DslStepsFlyoutArrayView = ({
   tabHasErrors,
   pruneToStepPaths,
   reindexErrorsAfterRemoval,
+  dataRetentionMs,
+  dataRetentionEsFormat,
 }: DslStepsFlyoutArrayViewProps) => {
   const { items, form } = arrayField;
   const { sectionStyles, headerStyles, headerNoStepsStyles } = useStyles();
@@ -386,6 +390,8 @@ export const DslStepsFlyoutArrayView = ({
               onRemoveStep={removeStep}
               dataTestSubj={dataTestSubj}
               timeUnitOptions={TIME_UNIT_OPTIONS}
+              dataRetentionMs={dataRetentionMs}
+              dataRetentionEsFormat={dataRetentionEsFormat}
             />
           ))
         )}
