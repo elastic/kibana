@@ -67,9 +67,11 @@ export class UptimeSettingsPage {
     port: string;
   }): Promise<void> {
     await this.page.testSubj.click('createConnectorButton');
-    await this.page.testSubj.locator('createConnectorsModalSearch').waitFor();
-    await this.page.testSubj.click('.email-card');
-    await this.page.testSubj.waitForSelector('.email-card', { state: 'hidden' });
+    await this.page.testSubj.locator('create-connector-flyout').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('.email-card').click();
+    await this.page.testSubj
+      .locator('create-connector-flyout-save-btn')
+      .waitFor({ state: 'visible' });
     await this.page.testSubj.locator('nameInput').fill(config.name);
     await this.page.testSubj.locator('emailFromInput').fill(config.from);
     await this.page.testSubj.locator('emailServiceSelectInput').selectOption('other');
