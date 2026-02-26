@@ -57,7 +57,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse).toHaveStatusCode(201);
       expect(getResponse.body[SERVICE_KEY].title).toBe(title);
     });
   }

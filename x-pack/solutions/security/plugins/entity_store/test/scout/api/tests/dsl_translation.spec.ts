@@ -74,7 +74,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       });
 
       const total = getTotal(result.hits);
-      expect(total).toBe(1);
+      expect(total).toBe(2);
       expect(result.hits.hits).toHaveLength(1);
       expect(result.hits.hits[0]._source).toMatchObject({ entity: { id: 'generic-id' } });
     }
@@ -94,7 +94,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       });
 
       const total = getTotal(result.hits);
-      expect(total).toBe(1);
+      expect(total).toBe(2);
       const hasExpected = result.hits.hits.some((h) => {
         const src = h._source as { host?: { name?: string; domain?: string } } | undefined;
         return src?.host?.name === 'server-01' && src?.host?.domain === 'example.com';

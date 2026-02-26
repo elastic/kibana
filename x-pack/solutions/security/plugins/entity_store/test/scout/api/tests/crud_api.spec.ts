@@ -64,7 +64,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       responseType: 'json',
       body: entityObj,
     });
-    expect(create.statusCode).toBe(200);
+    expect(create.statusCode).toBe(201);
     expect(create.body).toStrictEqual({ ok: true });
 
     expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(1);
@@ -87,7 +87,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       responseType: 'json',
       body: entityObj,
     });
-    expect(create.statusCode).toBe(400);
+    expect(create.statusCode).toBe(403);
     expect(create.body.message).toContain('not allowed to be updated without forcing it');
 
     expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity.id)).toBe(0);

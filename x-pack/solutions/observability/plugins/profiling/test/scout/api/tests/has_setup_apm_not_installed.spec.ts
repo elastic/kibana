@@ -35,7 +35,7 @@ apiTest.describe(
       });
 
       const adminStatus = adminRes.body;
-      expect(adminStatus.has_setup).toBe(true);
+      expect(adminStatus.has_setup).toBe(false);
       expect(adminStatus.has_data).toBe(false);
       expect(adminStatus.pre_8_9_1_data).toBe(false);
     });
@@ -50,7 +50,7 @@ apiTest.describe(
       });
 
       const readStatus = readRes.body;
-      expect(readStatus.has_setup).toBe(true);
+      expect(readStatus.has_setup).toBe(false);
       expect(readStatus.has_data).toBe(false);
       expect(readStatus.pre_8_9_1_data).toBe(false);
       expect(readStatus.has_required_role).toBe(false);
