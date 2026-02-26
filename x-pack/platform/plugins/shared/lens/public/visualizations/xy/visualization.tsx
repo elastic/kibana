@@ -31,7 +31,7 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -77,6 +77,7 @@ import {
   isHorizontalChart,
   annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
+  isLineSeries,
   getColumnToLabelMap,
 } from './state_helpers';
 import {
@@ -102,6 +103,7 @@ import {
   getDescription,
   getFirstDataLayer,
   getLayersByType,
+  getRecommendedXAxisTitleVisibility,
   getReferenceLayers,
   getVisualizationType,
   isAnnotationsLayer,
@@ -285,14 +287,15 @@ export const getXyVisualization = ({
     const compatibleSeriesType: SeriesType = (currentStackingType?.subtypes[chosenTypeIndex] ||
       seriesType) as SeriesType;
 
+    const switchLayer = (layer: XYLayerConfig): XYLayerConfig =>
+      applySeriesDefaultsIfNeeded(layer, compatibleSeriesType);
+
     return {
       ...state,
       preferredSeriesType: compatibleSeriesType,
       layers: layerId
-        ? state.layers.map((layer) =>
-            layer.layerId === layerId ? { ...layer, seriesType: compatibleSeriesType } : layer
-          )
-        : state.layers.map((layer) => ({ ...layer, seriesType: compatibleSeriesType })),
+        ? state.layers.map((layer) => (layer.layerId === layerId ? switchLayer(layer) : layer))
+        : state.layers.map(switchLayer),
     };
   },
 
@@ -641,7 +644,7 @@ export const getXyVisualization = ({
   },
 
   setDimension(props) {
-    const { prevState, layerId, columnId, groupId } = props;
+    const { prevState, layerId, columnId, groupId, frame } = props;
 
     const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
       (l) => l.layerId === layerId
@@ -658,8 +661,24 @@ export const getXyVisualization = ({
     }
 
     const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
+    let stateWithRecommendedXAxisTitleVisibility = prevState;
+
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
+
+      const datasourceLayer = frame.datasourceLayers[layerId];
+      const operation = datasourceLayer?.getOperationForColumnId(columnId);
+      const recommendedAxisSettings = getRecommendedXAxisTitleVisibility(
+        prevState.axisTitlesVisibilitySettings,
+        operation,
+        prevState.xTitle
+      );
+      if (recommendedAxisSettings) {
+        stateWithRecommendedXAxisTitleVisibility = {
+          ...prevState,
+          axisTitlesVisibilitySettings: recommendedAxisSettings,
+        };
+      }
     }
     if (groupId === 'y') {
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
@@ -675,8 +694,10 @@ export const getXyVisualization = ({
       }
     }
     return {
-      ...prevState,
-      layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
+      ...stateWithRecommendedXAxisTitleVisibility,
+      layers: stateWithRecommendedXAxisTitleVisibility.layers.map((l) =>
+        l.layerId === layerId ? newLayer : l
+      ),
     };
   },
 
@@ -1242,6 +1263,52 @@ const getMappedAccessors = ({
   }
   return mappedAccessors;
 };
+
+/**
+ * Applies series-type-specific defaults to a layer after a type switch.
+ */
+function applySeriesDefaultsIfNeeded(
+  layer: XYLayerConfig,
+  toSeriesType: SeriesType
+): XYLayerConfig {
+  const updated = { ...layer, seriesType: toSeriesType };
+  if (isDataLayer(layer) && isDataLayer(updated) && updated.colorMapping) {
+    return {
+      ...updated,
+      colorMapping: resolveDefaultPaletteForSeriesType(
+        updated.colorMapping,
+        layer.seriesType,
+        toSeriesType
+      ),
+    };
+  }
+  return updated;
+}
+
+/**
+ * Resolves the default palette when switching between series types.
+ * Uses direction-specific matching so that user-chosen palettes are preserved:
+ *  - Switching TO line: only replaces 'default' with 'elastic_line_optimized'
+ *  - Switching FROM line: only replaces 'elastic_line_optimized' with 'default'
+ */
+function resolveDefaultPaletteForSeriesType(
+  colorMapping: NonNullable<XYDataLayerConfig['colorMapping']>,
+  fromSeriesType: SeriesType,
+  toSeriesType: SeriesType
+): NonNullable<XYDataLayerConfig['colorMapping']> {
+  if (isLineSeries(fromSeriesType) === isLineSeries(toSeriesType)) {
+    return colorMapping;
+  }
+
+  if (isLineSeries(toSeriesType) && colorMapping.paletteId === KbnPalette.Default) {
+    return { ...colorMapping, paletteId: KbnPalette.ElasticLineOptimized };
+  }
+  if (isLineSeries(fromSeriesType) && colorMapping.paletteId === KbnPalette.ElasticLineOptimized) {
+    return { ...colorMapping, paletteId: KbnPalette.Default };
+  }
+
+  return colorMapping;
+}
 
 function getVisualizationInfo(
   state: XYState,
