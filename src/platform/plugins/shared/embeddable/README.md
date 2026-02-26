@@ -300,8 +300,7 @@ embeddableServerSetup.registerTransforms(
       },
     }),
     getSchema: (getDrilldownsSchema) => schema: schema.object({
-      required_field_foo: schema.string(),
-      optional_field_foo: schema.maybe(schema.string()),
+      foo: schema.string(),
     })
   }
 });
