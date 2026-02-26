@@ -13,13 +13,7 @@ import { userEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
-import type {
-  Rule,
-  ActionType,
-  RuleTypeModel,
-  GetDescriptionFieldsFn,
-  RuleType,
-} from '../../../../types';
+import type { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
 import { EuiBadge, EuiButtonEmpty, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
@@ -570,21 +564,38 @@ describe('rule_details', () => {
           .props() as EuiPageHeaderProps;
         const rightSideItems = pageHeaderProps.rightSideItems;
         expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-          <React.Fragment>
-            <EuiButtonEmpty
-              aria-label="Edit"
-              data-test-subj="openEditRuleFlyoutButton"
-              disabled={false}
-              iconType="pencil"
-              name="edit"
-              onClick={[Function]}
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="Edit"
-                id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-              />
-            </EuiButtonEmpty>
-          </React.Fragment>
+          <ViewLinkedObject
+            rule={
+              Object {
+                "actions": Array [],
+                "apiKeyCreatedByUser": false,
+                "apiKeyOwner": null,
+                "consumer": "alerts",
+                "createdAt": 2026-02-26T15:18:46.902Z,
+                "createdBy": null,
+                "enabled": true,
+                "executionStatus": Object {
+                  "lastExecutionDate": 2020-08-20T19:23:38.000Z,
+                  "status": "unknown",
+                },
+                "id": "c9c3e56d-3690-4f32-8949-3527bf519e4a",
+                "muteAll": false,
+                "mutedInstanceIds": Array [],
+                "name": "rule-e3ea4b5d-96d7-4dfb-ab31-f378c60fdbd7",
+                "notifyWhen": null,
+                "params": Object {},
+                "revision": 0,
+                "ruleTypeId": ".noop",
+                "schedule": Object {
+                  "interval": "1m",
+                },
+                "tags": Array [],
+                "throttle": null,
+                "updatedAt": 2026-02-26T15:18:46.902Z,
+                "updatedBy": null,
+              }
+            }
+          />
         `);
       });
     });
@@ -634,21 +645,45 @@ describe('rule_details', () => {
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <EuiButtonEmpty
-            aria-label="Edit"
-            data-test-subj="openEditRuleFlyoutButton"
-            disabled={false}
-            iconType="pencil"
-            name="edit"
-            onClick={[Function]}
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </React.Fragment>
+        <ViewLinkedObject
+          rule={
+            Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": ".server-log",
+                  "group": "default",
+                  "id": "b2365d23-514c-4721-bc0e-08eaab1cc1ff",
+                  "params": Object {},
+                },
+              ],
+              "apiKeyCreatedByUser": false,
+              "apiKeyOwner": null,
+              "consumer": "alerts",
+              "createdAt": 2026-02-26T15:18:46.933Z,
+              "createdBy": null,
+              "enabled": true,
+              "executionStatus": Object {
+                "lastExecutionDate": 2020-08-20T19:23:38.000Z,
+                "status": "unknown",
+              },
+              "id": "083ecbb0-42ff-41f3-80d6-16d4c2184d0d",
+              "muteAll": false,
+              "mutedInstanceIds": Array [],
+              "name": "rule-716351b9-09b4-4534-ad0c-1a28de15d28e",
+              "notifyWhen": null,
+              "params": Object {},
+              "revision": 0,
+              "ruleTypeId": ".noop",
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [],
+              "throttle": null,
+              "updatedAt": 2026-02-26T15:18:46.933Z,
+              "updatedBy": null,
+            }
+          }
+        />
       `);
     });
 
@@ -698,21 +733,38 @@ describe('rule_details', () => {
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
       expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <EuiButtonEmpty
-            aria-label="Edit"
-            data-test-subj="openEditRuleFlyoutButton"
-            disabled={false}
-            iconType="pencil"
-            name="edit"
-            onClick={[Function]}
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </React.Fragment>
+        <ViewLinkedObject
+          rule={
+            Object {
+              "actions": Array [],
+              "apiKeyCreatedByUser": false,
+              "apiKeyOwner": null,
+              "consumer": "alerts",
+              "createdAt": 2026-02-26T15:18:46.946Z,
+              "createdBy": null,
+              "enabled": true,
+              "executionStatus": Object {
+                "lastExecutionDate": 2020-08-20T19:23:38.000Z,
+                "status": "unknown",
+              },
+              "id": "6425c066-c52e-412f-8eb3-5468f8d5f972",
+              "muteAll": false,
+              "mutedInstanceIds": Array [],
+              "name": "rule-e166b7cd-9bd7-4a56-9624-b98408c05889",
+              "notifyWhen": null,
+              "params": Object {},
+              "revision": 0,
+              "ruleTypeId": ".noop",
+              "schedule": Object {
+                "interval": "1m",
+              },
+              "tags": Array [],
+              "throttle": null,
+              "updatedAt": 2026-02-26T15:18:46.946Z,
+              "updatedBy": null,
+            }
+          }
+        />
       `);
     });
   });
@@ -1107,70 +1159,6 @@ describe('rule_details', () => {
         ids: [rule.id],
         untrack: false,
       });
-    });
-  });
-
-  describe('when the rule type includes the getDescriptionFields function in the registry definition', () => {
-    const getDescriptionFields: GetDescriptionFieldsFn = ({ rule }) => {
-      return [
-        {
-          title: 'my title',
-          description: <div>Generated Test Description Field - {rule.ruleTypeId}</div>,
-        },
-      ];
-    };
-
-    const ruleTypeWithDescriptionFields = {
-      ...ruleType,
-      id: '.noop-with-description-fields',
-      name: 'No Op with description fields',
-      getDescriptionFields,
-    };
-
-    const ruleTypeWithDescriptionFieldsModel: RuleTypeModel = {
-      id: '.noop-with-description-fields',
-      iconClass: 'test',
-      description: 'Rule when testing',
-      documentationUrl: 'https://localhost.local/docs',
-      validate: () => {
-        return { errors: {} };
-      },
-      ruleParamsExpression: jest.fn(),
-      requiresAppContext: false,
-      getDescriptionFields,
-    };
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-
-      ruleTypeRegistry.has.mockReturnValue(true);
-      ruleTypeRegistry.get.mockReturnValue(ruleTypeWithDescriptionFieldsModel);
-      useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-    });
-
-    it('should render the description fields', async () => {
-      const rule = mockRule({
-        ruleTypeId: '.noop-with-description-fields',
-      });
-      const requestRefresh = jest.fn();
-
-      render(
-        <QueryClientProvider client={queryClient}>
-          <IntlProvider locale="en">
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleTypeWithDescriptionFields}
-              actionTypes={[]}
-              {...mockRuleApis}
-              requestRefresh={requestRefresh}
-            />
-          </IntlProvider>
-        </QueryClientProvider>
-      );
-
-      expect(
-        await screen.findByText('Generated Test Description Field - .noop-with-description-fields')
-      ).toBeInTheDocument();
     });
   });
 

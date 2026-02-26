@@ -296,6 +296,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should open edit rule flyout', async () => {
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).toBe(false);
@@ -320,6 +322,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should reset rule when canceling an edit', async () => {
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
@@ -426,6 +430,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await openRulesSection();
         await openFirstRule(rule.name);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).toEqual(false);
@@ -523,6 +529,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
         await openFirstRule(rule.name);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
