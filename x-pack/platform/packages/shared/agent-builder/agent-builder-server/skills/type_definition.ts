@@ -36,6 +36,7 @@ export type SkillsDirectoryStructure = Directory<{
       entities: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
+    user: FileDirectory<{}>;
   }>;
 }>;
 

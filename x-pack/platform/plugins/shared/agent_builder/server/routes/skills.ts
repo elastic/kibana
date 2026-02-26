@@ -112,21 +112,27 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         }
 
         // Convert SkillDefinition to PublicSkillDefinition if needed
-        const publicSkill: GetSkillResponse =
-          'readonly' in skill
-            ? (skill as GetSkillResponse)
-            : {
-                id: skill.id,
-                name: skill.name,
-                description: skill.description,
-                content: skill.content,
-                referenced_content: skill.referencedContent?.map((rc) => ({
-                  name: rc.name,
-                  relativePath: rc.relativePath,
-                  content: rc.content,
-                })),
-                readonly: true,
-              };
+        let publicSkill: GetSkillResponse;
+        if ('readonly' in skill) {
+          publicSkill = skill as GetSkillResponse;
+        } else {
+          const allowedToolIds = skill.getAllowedTools?.() ?? [];
+          const inlineTools = (await skill.getInlineTools?.()) ?? [];
+          const inlineToolIds = inlineTools.map((tool) => tool.id);
+          publicSkill = {
+            id: skill.id,
+            name: skill.name,
+            description: skill.description,
+            content: skill.content,
+            referenced_content: skill.referencedContent?.map((rc) => ({
+              name: rc.name,
+              relativePath: rc.relativePath,
+              content: rc.content,
+            })),
+            tool_ids: [...allowedToolIds, ...inlineToolIds],
+            readonly: true,
+          };
+        }
 
         return response.ok<GetSkillResponse>({
           body: publicSkill,

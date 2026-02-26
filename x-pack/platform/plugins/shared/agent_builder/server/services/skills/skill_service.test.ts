@@ -277,10 +277,43 @@ describe('createSkillRegistry', () => {
       const persisted = result.find((s) => s.id === 'custom-skill-1');
       expect(persisted?.readonly).toBe(false);
     });
+
+    it('populates tool_ids from getAllowedTools for built-in skills', async () => {
+      const skillWithTools = createMockSkillDefinition({
+        id: 'skill-with-tools',
+        getAllowedTools: () => ['tool-a', 'tool-b'] as any[],
+      });
+      const registry = createSkillRegistry({
+        builtinSkills: [skillWithTools],
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list();
+      expect(result).toHaveLength(1);
+      expect(result[0].tool_ids).toEqual(['tool-a', 'tool-b']);
+    });
+
+    it('populates tool_ids from getInlineTools for built-in skills', async () => {
+      const skillWithInline = createMockSkillDefinition({
+        id: 'skill-with-inline',
+        getAllowedTools: undefined,
+        getInlineTools: () => [{ id: 'inline-tool-1' }, { id: 'inline-tool-2' }] as any[],
+      });
+      const registry = createSkillRegistry({
+        builtinSkills: [skillWithInline],
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list();
+      expect(result).toHaveLength(1);
+      expect(result[0].tool_ids).toEqual(['inline-tool-1', 'inline-tool-2']);
+    });
   });
 
   describe('listSkillDefinitions', () => {
-    it('returns only built-in skill definitions', async () => {
+    it('returns built-in and user-created skill definitions', async () => {
       const registry = createSkillRegistry({
         builtinSkills: [builtinSkill1, builtinSkill2],
         persistedProvider: createMockPersistedProvider([persistedSkill1]),
@@ -288,8 +321,40 @@ describe('createSkillRegistry', () => {
       });
 
       const result = await registry.listSkillDefinitions();
-      expect(result).toHaveLength(2);
-      expect(result.map((s) => s.id)).toEqual(['builtin-skill-1', 'builtin-skill-2']);
+      expect(result).toHaveLength(3);
+      expect(result.map((s) => s.id)).toEqual([
+        'builtin-skill-1',
+        'builtin-skill-2',
+        'custom-skill-1',
+      ]);
+    });
+
+    it('does not duplicate when persisted skill has same id as built-in', async () => {
+      const overlapSkill = createMockPublicSkillDefinition('builtin-skill-1');
+      const registry = createSkillRegistry({
+        builtinSkills: [builtinSkill1],
+        persistedProvider: createMockPersistedProvider([overlapSkill]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.listSkillDefinitions();
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(builtinSkill1);
+    });
+
+    it('converts persisted skills with tool_ids to getAllowedTools', async () => {
+      const persistedWithTools = createMockPublicSkillDefinition('user-skill', {
+        tool_ids: ['tool-a', 'tool-b'],
+      });
+      const registry = createSkillRegistry({
+        builtinSkills: [],
+        persistedProvider: createMockPersistedProvider([persistedWithTools]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.listSkillDefinitions();
+      expect(result).toHaveLength(1);
+      expect(result[0].getAllowedTools?.()).toEqual(['tool-a', 'tool-b']);
     });
   });
 
@@ -499,7 +564,7 @@ describe('createSkillRegistry', () => {
       expect(await registry.resolveSkillSelection([])).toEqual([]);
     });
 
-    it('expands wildcard to all built-in skills', async () => {
+    it('expands wildcard to all built-in skills when no persisted exist', async () => {
       const registry = createSkillRegistry({
         builtinSkills: [builtinSkill1, builtinSkill2],
         persistedProvider: createMockPersistedProvider([]),
@@ -509,6 +574,22 @@ describe('createSkillRegistry', () => {
       const result = await registry.resolveSkillSelection([{ skill_ids: ['*'] }]);
       expect(result).toHaveLength(2);
       expect(result.map((s) => s.id)).toEqual(['builtin-skill-1', 'builtin-skill-2']);
+    });
+
+    it('expands wildcard to all built-in and user-created skills', async () => {
+      const registry = createSkillRegistry({
+        builtinSkills: [builtinSkill1, builtinSkill2],
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.resolveSkillSelection([{ skill_ids: ['*'] }]);
+      expect(result).toHaveLength(3);
+      expect(result.map((s) => s.id)).toEqual([
+        'builtin-skill-1',
+        'builtin-skill-2',
+        'custom-skill-1',
+      ]);
     });
 
     it('resolves explicit IDs from built-in skills', async () => {

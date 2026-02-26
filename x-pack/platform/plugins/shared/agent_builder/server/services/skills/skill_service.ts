@@ -181,6 +181,35 @@ class SkillServiceImpl implements SkillService {
   }
 }
 
+/**
+ * Extracts tool IDs from a built-in SkillDefinition's getAllowedTools and getInlineTools.
+ */
+const getBuiltinSkillToolIds = async (skill: SkillDefinition): Promise<string[]> => {
+  const allowedToolIds = skill.getAllowedTools?.() ?? [];
+  const inlineTools = (await skill.getInlineTools?.()) ?? [];
+  const inlineToolIds = inlineTools.map((tool) => tool.id);
+  return [...allowedToolIds, ...inlineToolIds];
+};
+
+/**
+ * Converts a built-in SkillDefinition to a PublicSkillDefinition for API responses.
+ */
+const builtinToPublicDefinition = async (
+  skill: SkillDefinition
+): Promise<PublicSkillDefinition> => ({
+  id: skill.id,
+  name: skill.name,
+  description: skill.description,
+  content: skill.content,
+  referenced_content: skill.referencedContent?.map((rc) => ({
+    name: rc.name,
+    relativePath: rc.relativePath,
+    content: rc.content,
+  })),
+  tool_ids: await getBuiltinSkillToolIds(skill),
+  readonly: true,
+});
+
 class SkillRegistryImpl implements SkillRegistry {
   private readonly builtinSkillsMap: Map<string, SkillDefinition>;
   private readonly persistedProvider: SkillProvider;
@@ -216,19 +245,8 @@ class SkillRegistryImpl implements SkillRegistry {
    * Lists all skills (built-in + persisted) as PublicSkillDefinition for API responses.
    */
   async list(): Promise<PublicSkillDefinition[]> {
-    const builtinPublic: PublicSkillDefinition[] = [...this.builtinSkillsMap.values()].map(
-      (skill) => ({
-        id: skill.id,
-        name: skill.name,
-        description: skill.description,
-        content: skill.content,
-        referenced_content: skill.referencedContent?.map((rc) => ({
-          name: rc.name,
-          relativePath: rc.relativePath,
-          content: rc.content,
-        })),
-        readonly: true,
-      })
+    const builtinPublic: PublicSkillDefinition[] = await Promise.all(
+      [...this.builtinSkillsMap.values()].map((skill) => builtinToPublicDefinition(skill))
     );
 
     const persistedSkills = await this.persistedProvider.list();
@@ -237,10 +255,15 @@ class SkillRegistryImpl implements SkillRegistry {
   }
 
   /**
-   * Lists all built-in SkillDefinitions (for runtime use in the skill store).
+   * Lists all SkillDefinitions (built-in + user-created) for runtime use in the skill store.
    */
   async listSkillDefinitions(): Promise<SkillDefinition[]> {
-    return [...this.builtinSkillsMap.values()];
+    const builtinSkills = [...this.builtinSkillsMap.values()];
+    const persistedSkills = await this.persistedProvider.list();
+    const convertedPersisted = persistedSkills
+      .filter((skill) => !this.builtinSkillsMap.has(skill.id))
+      .map((skill) => this.convertPersistedToSkillDefinition(skill));
+    return [...builtinSkills, ...convertedPersisted];
   }
 
   async create(createRequest: PersistedSkillCreateRequest): Promise<PublicSkillDefinition> {
@@ -300,7 +323,8 @@ class SkillRegistryImpl implements SkillRegistry {
 
   /**
    * Resolves a SkillSelection[] to concrete SkillDefinition[] for runtime use.
-   * Expands wildcard '*' to all built-in skills, resolves explicit IDs from both providers.
+   * Expands wildcard '*' to all skills (built-in + user-created),
+   * resolves explicit IDs from both providers.
    */
   async resolveSkillSelection(selection: SkillSelection[]): Promise<SkillDefinition[]> {
     if (!selection || selection.length === 0) {
@@ -318,6 +342,14 @@ class SkillRegistryImpl implements SkillRegistry {
             if (!seenIds.has(skill.id)) {
               seenIds.add(skill.id);
               result.push(skill);
+            }
+          }
+          // Also add all user-created skills
+          const persistedSkills = await this.persistedProvider.list();
+          for (const skill of persistedSkills) {
+            if (!seenIds.has(skill.id)) {
+              seenIds.add(skill.id);
+              result.push(this.convertPersistedToSkillDefinition(skill));
             }
           }
         } else if (!seenIds.has(skillId)) {
@@ -381,7 +413,7 @@ class SkillRegistryImpl implements SkillRegistry {
     return {
       id: skill.id,
       name: skill.name as any, // Persisted skills use simpler name constraints
-      basePath: 'skills/platform' as any, // User-created skills use a generic base path
+      basePath: 'skills/user' as any,
       description: skill.description,
       content: skill.content,
       referencedContent: skill.referenced_content?.map((rc) => ({
