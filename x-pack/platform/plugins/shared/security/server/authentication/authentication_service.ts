@@ -280,7 +280,16 @@ export class AuthenticationService {
       }
 
       // We can only re-authenticate if the original request failed because of the expired access token.
-      if (getErrorStatusCode(error) !== 401 || error.body?.error?.reason !== 'token expired') {
+      if (
+        getErrorStatusCode(error) !== 401 ||
+        // Errors are slightly different when token expired and when token is missing, so we need to check both
+        // `reason` and `additional_unsuccessful_credentials` properties to be sure that token is the root cause
+        // of the error. These errors are covered by API integration tests (both classic and UIAM).
+        !(
+          error.body?.error?.reason?.includes('token') ||
+          error.body?.error?.additional_unsuccessful_credentials?.includes('token')
+        )
+      ) {
         this.logger.error(
           `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
             error

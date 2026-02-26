@@ -44,4 +44,5 @@ export {
   ensureSAMLRoleMapping,
   generateCosmosDBApiRequestHeaders,
   getSAMLRequestId,
+  createUiamSessionTokens,
 } from './utils';

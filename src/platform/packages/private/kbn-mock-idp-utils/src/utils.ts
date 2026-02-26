@@ -292,7 +292,7 @@ export function generateCosmosDBApiRequestHeaders(
   };
 }
 
-async function createUiamSessionTokens({
+export async function createUiamSessionTokens({
   username,
   organizationId,
   projectType,

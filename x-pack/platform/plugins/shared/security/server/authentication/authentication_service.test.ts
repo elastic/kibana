@@ -525,7 +525,7 @@ describe('AuthenticationService', () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({
             statusCode: 401,
-            body: { error: { reason: 'token expired' } },
+            body: { error: { reason: 'token' } },
           })
         ) as UnauthorizedError;
 
