@@ -33,7 +33,7 @@ export class MonitorDetailsPage {
     for (const title of itemList) {
       await this.page.click(`li[title="${title}"]`);
     }
-    await this.page.click(`[aria-label="Apply the selected filters for ${filterType}"]`);
+    await this.page.testSubj.click('o11yFieldValueSelectionApplyButton');
   }
 
   async setStatusFilterUp(): Promise<void> {
