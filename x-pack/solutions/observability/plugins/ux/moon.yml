@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/server-route-repository-utils'
   - '@kbn/core-chrome-browser'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -69,6 +70,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - public/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

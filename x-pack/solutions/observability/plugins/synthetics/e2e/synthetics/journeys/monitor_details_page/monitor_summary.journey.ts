@@ -6,9 +6,14 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
+<<<<<<< HEAD
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+=======
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+>>>>>>> 45aebb31f458 ([ux] migrate synthetics journeys to scout (#253366))
 import moment from 'moment';
+import { byTestId } from '../../../page_objects/utils';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
