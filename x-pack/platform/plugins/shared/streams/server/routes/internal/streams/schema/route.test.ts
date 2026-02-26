@@ -5,50 +5,56 @@
  * 2.0.
  */
 
+import type { NamedFieldDefinitionConfig } from '@kbn/streams-schema';
 import { __test__ } from './route';
 
 describe('schemaFieldsSimulationRoute', () => {
   describe('getSimulatableFieldDefinitions', () => {
     it('filters out documentation-only (typeless) overrides', () => {
-      const result = __test__.getSimulatableFieldDefinitions([
+      const fields: NamedFieldDefinitionConfig[] = [
         { name: 'attributes.message', description: 'docs only' },
         { name: 'attributes.user.id', type: 'keyword' },
-      ] as any);
+      ];
+      const result = __test__.getSimulatableFieldDefinitions(fields);
 
       expect(result).toEqual([{ name: 'attributes.user.id', type: 'keyword' }]);
     });
 
     it('returns an empty array when only doc-only overrides are provided', () => {
-      const result = __test__.getSimulatableFieldDefinitions([
+      const fields: NamedFieldDefinitionConfig[] = [
         { name: 'attributes.message', description: 'docs only' },
         { name: 'attributes.user.id', description: 'docs only' },
-      ] as any);
+      ];
+      const result = __test__.getSimulatableFieldDefinitions(fields);
 
       expect(result).toEqual([]);
     });
 
     it('filters out UI-only pseudo-type (system)', () => {
-      const result = __test__.getSimulatableFieldDefinitions([
+      const fields: NamedFieldDefinitionConfig[] = [
         { name: 'attributes.bar', type: 'system', description: 'docs' },
         { name: 'attributes.baz', type: 'boolean' },
-      ] as any);
+      ];
+      const result = __test__.getSimulatableFieldDefinitions(fields);
 
       expect(result).toEqual([{ name: 'attributes.baz', type: 'boolean' }]);
     });
 
     it('returns an empty array when only UI-only pseudo-types are provided', () => {
-      const result = __test__.getSimulatableFieldDefinitions([
+      const fields: NamedFieldDefinitionConfig[] = [
         { name: 'attributes.bar', type: 'system', description: 'docs' },
-      ] as any);
+      ];
+      const result = __test__.getSimulatableFieldDefinitions(fields);
 
       expect(result).toEqual([]);
     });
 
     it('keeps multiple mapping-affecting definitions', () => {
-      const result = __test__.getSimulatableFieldDefinitions([
+      const fields: NamedFieldDefinitionConfig[] = [
         { name: 'attributes.a', type: 'keyword' },
         { name: 'attributes.b', type: 'geo_point' },
-      ] as any);
+      ];
+      const result = __test__.getSimulatableFieldDefinitions(fields);
 
       expect(result).toEqual([
         { name: 'attributes.a', type: 'keyword' },
