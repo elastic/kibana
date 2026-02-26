@@ -124,7 +124,12 @@ export const productInterceptRegistrationConfig = ({
                 values={{
                   productOffering,
                   link: (chunks) => (
-                    <EuiLink external target="_blank" href={surveyUrl.toString()}>
+                    <EuiLink
+                      external
+                      target="_blank"
+                      href={surveyUrl.toString()}
+                      data-test-subj="productInterceptSurveyLink"
+                    >
                       {chunks}
                     </EuiLink>
                   ),
