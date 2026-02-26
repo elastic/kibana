@@ -70,6 +70,17 @@ export const unsavedChangesBadgeStrings = {
     }),
 };
 
+export const leaveConfirmStrings = {
+  getLeaveTitle: () =>
+    i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
+      defaultMessage: 'Unsaved changes',
+    }),
+  getLeaveSubtitle: () =>
+    i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
+      defaultMessage: 'Leave Dashboard with unsaved work?',
+    }),
+};
+
 export const getCreateVisualizationButtonTitle = () =>
   i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
     defaultMessage: 'Visualization',

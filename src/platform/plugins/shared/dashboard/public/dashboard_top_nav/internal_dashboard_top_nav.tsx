@@ -39,6 +39,7 @@ import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
   dashboardManagedBadge,
+  leaveConfirmStrings,
   getDashboardBreadcrumb,
   getDashboardTitle,
   topNavStrings,
@@ -235,6 +236,12 @@ export function InternalDashboardTopNav({
    */
   useEffect(() => {
     onAppLeave((actions) => {
+      if (viewMode === 'edit' && hasUnsavedChanges) {
+        return actions.confirm(
+          leaveConfirmStrings.getLeaveSubtitle(),
+          leaveConfirmStrings.getLeaveTitle()
+        );
+      }
       return actions.default();
     });
     return () => {
