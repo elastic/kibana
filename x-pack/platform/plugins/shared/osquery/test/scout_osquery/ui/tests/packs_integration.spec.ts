@@ -139,10 +139,10 @@ test.describe(
             .getByRole('link', { name: removingPack })
             .waitFor({ state: 'visible', timeout: 15_000 });
           await page.getByRole('link', { name: removingPack }).click();
-          await expect(page.getByText(`${removingPack} details`)).toBeVisible();
-          const editButton = page.getByRole('button', { name: 'Edit' });
-          await editButton.waitFor({ state: 'visible', timeout: 30_000 });
-          await editButton.click();
+          await expect(page.getByText(`${removingPack} details`)).toBeVisible({
+            timeout: 30_000,
+          });
+          await pageObjects.packs.clickEditPack();
 
           await expect(
             page.testSubj

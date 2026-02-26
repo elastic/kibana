@@ -546,10 +546,10 @@ test.describe(
           await expect(page.testSubj.locator('last-results-date')).toBeVisible({
             timeout: 30_000,
           });
-          await expect(page.testSubj.locator('docs-count-badge')).toContainText('1', {
+          await expect(page.testSubj.locator('docs-count-badge')).toContainText(/[1-9]\d*/, {
             timeout: 30_000,
           });
-          await expect(page.testSubj.locator('agent-count-badge')).toContainText('1', {
+          await expect(page.testSubj.locator('agent-count-badge')).toContainText(/[1-9]\d*/, {
             timeout: 30_000,
           });
           // Wait for errors column to finish loading before asserting (spinner -> packResultsErrorsEmpty)

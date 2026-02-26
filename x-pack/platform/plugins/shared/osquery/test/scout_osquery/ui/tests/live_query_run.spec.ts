@@ -139,7 +139,8 @@ test.describe(
       });
     });
 
-    test('should open query details by clicking the details icon', async ({ page }) => {
+    test('should open query details by clicking the details icon', async ({ page, config }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(120_000); // Details page can be slow to load in serverless
       await test.step('Navigate to Osquery and click details icon', async () => {
         await page.gotoApp('osquery');
