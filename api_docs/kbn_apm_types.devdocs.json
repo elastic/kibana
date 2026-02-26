@@ -3992,6 +3992,40 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ATTRIBUTE_HTTP_SCHEME",
+        "type": "string",
+        "tags": [],
+        "label": "ATTRIBUTE_HTTP_SCHEME",
+        "description": [],
+        "signature": [
+          "\"attributes.http.scheme\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ATTRIBUTE_HTTP_STATUS_CODE",
+        "type": "string",
+        "tags": [],
+        "label": "ATTRIBUTE_HTTP_STATUS_CODE",
+        "description": [],
+        "signature": [
+          "\"attributes.http.status_code\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.ATTRIBUTE_OTEL_JVM_MEMORY_TYPE",
         "type": "string",
         "tags": [],
