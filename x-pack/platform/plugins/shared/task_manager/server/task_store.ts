@@ -328,7 +328,6 @@ export class TaskStore {
         const foundKey = missingResult.get(id);
         if (foundKey === undefined) {
           this.logger.error(`unable to obtain API key for task ${id}`);
-          result.delete(id);
         } else {
           result.set(id, foundKey);
         }
