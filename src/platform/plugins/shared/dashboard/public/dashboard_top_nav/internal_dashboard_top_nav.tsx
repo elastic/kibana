@@ -39,7 +39,6 @@ import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
   dashboardManagedBadge,
-  leaveConfirmStrings,
   getDashboardBreadcrumb,
   getDashboardTitle,
   topNavStrings,
@@ -235,20 +234,26 @@ export function InternalDashboardTopNav({
    * Build app leave handler whenever hasUnsavedChanges changes
    */
   useEffect(() => {
-    onAppLeave((actions) => {
-      if (viewMode === 'edit' && hasUnsavedChanges) {
-        return actions.confirm(
-          leaveConfirmStrings.getLeaveSubtitle(),
-          leaveConfirmStrings.getLeaveTitle()
-        );
-      }
-      return actions.default();
-    });
+    onAppLeave((actions) => actions.default());
     return () => {
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
   }, [onAppLeave, hasUnsavedChanges, viewMode]);
+
+  // Browser refresh/close - only native confirmation, no custom message
+  useEffect(() => {
+    if (viewMode !== 'edit' || !hasUnsavedChanges) return;
+
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [hasUnsavedChanges, viewMode]);
 
   const visibilityProps = useMemo(() => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
