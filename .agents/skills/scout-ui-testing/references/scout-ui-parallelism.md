@@ -21,7 +21,7 @@ Use this when working under `.../test/scout*/ui/parallel_tests/` or a `parallel.
 import { spaceTest, tags } from '@kbn/scout'; // or the module's Scout package
 import { expect } from '@kbn/scout/ui'; // or '@kbn/scout-oblt/ui', etc.
 
-spaceTest.describe('my feature', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('my feature', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     // Worker-scoped setup in the isolated space.
     await scoutSpace.savedObjects.cleanStandardList();
