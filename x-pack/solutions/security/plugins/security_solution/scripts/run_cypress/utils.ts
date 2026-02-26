@@ -22,6 +22,10 @@ import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
   getArtifactMockedDataTests: 8,
   getArtifactTabsTests: 12,
+  createRbacPoliciesExistSuite: 1,
+  createRbacHostsExistSuite: 1,
+  createRbacEmptyStateSuite: 1,
+  createNavigationEssSuite: 4,
 };
 
 /**
