@@ -39,6 +39,16 @@ const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Remove once Zoom S2S OAuth i
 
 const ZOOM_API_BASE = 'https://api.zoom.us/v2';
 
+/**
+ * Zoom UUIDs that begin with `/` or contain `//` must be double-encoded
+ * when used as path parameters. Plain numeric meeting IDs pass through unchanged.
+ * See https://developers.zoom.us/docs/api/rest/using-zoom-apis/#meeting-id-and-uuid
+ */
+const encodeZoomId = (id: string): string =>
+  id.startsWith('/') || id.includes('//')
+    ? encodeURIComponent(encodeURIComponent(id))
+    : encodeURIComponent(id);
+
 const ZoomPaginationOutputSchema = z.object({
   page_size: z.number().optional().describe('Number of records per page'),
   next_page_token: z.string().optional().describe('Token to fetch the next page of results'),
@@ -120,21 +130,26 @@ export const Zoom: ConnectorSpec = {
         meetings: z.array(z.any()).describe('Array of meeting objects'),
       }),
       handler: async (ctx, input) => {
-        const { userId, type, pageSize, nextPageToken } = input as {
+        const typedInput = input as {
           userId: string;
           type: string;
           pageSize?: number;
           nextPageToken?: string;
         };
-        ctx.log.debug(`Zoom listing meetings for user ${userId}, type=${type}`);
+        ctx.log.debug(
+          `Zoom listing meetings for user ${typedInput.userId}, type=${typedInput.type}`
+        );
 
-        const response = await ctx.client.get(`${ZOOM_API_BASE}/users/${userId}/meetings`, {
-          params: {
-            type,
-            ...(pageSize !== undefined && { page_size: pageSize }),
-            ...(nextPageToken && { next_page_token: nextPageToken }),
-          },
-        });
+        const response = await ctx.client.get(
+          `${ZOOM_API_BASE}/users/${encodeURIComponent(typedInput.userId)}/meetings`,
+          {
+            params: {
+              type: typedInput.type,
+              ...(typedInput.pageSize !== undefined && { page_size: typedInput.pageSize }),
+              ...(typedInput.nextPageToken && { next_page_token: typedInput.nextPageToken }),
+            },
+          }
+        );
         return response.data;
       },
     },
@@ -169,11 +184,12 @@ export const Zoom: ConnectorSpec = {
         })
         .passthrough(),
       handler: async (ctx, input) => {
-        const { meetingId } = input as { meetingId: string };
-        ctx.log.debug(`Zoom getting recordings for meeting ${meetingId}`);
+        const typedInput = input as { meetingId: string };
+        const encodedId = encodeZoomId(typedInput.meetingId);
+        ctx.log.debug(`Zoom getting recordings for meeting ${typedInput.meetingId}`);
 
         const response = await ctx.client.get(
-          `${ZOOM_API_BASE}/meetings/${meetingId}/recordings`
+          `${ZOOM_API_BASE}/meetings/${encodedId}/recordings`
         );
         return response.data;
       },
@@ -215,23 +231,26 @@ export const Zoom: ConnectorSpec = {
           .describe('Array of meeting objects, each containing recording_files'),
       }),
       handler: async (ctx, input) => {
-        const { userId, from, to, pageSize, nextPageToken } = input as {
+        const typedInput = input as {
           userId: string;
           from?: string;
           to?: string;
           pageSize?: number;
           nextPageToken?: string;
         };
-        ctx.log.debug(`Zoom listing recordings for user ${userId}`);
+        ctx.log.debug(`Zoom listing recordings for user ${typedInput.userId}`);
 
-        const response = await ctx.client.get(`${ZOOM_API_BASE}/users/${userId}/recordings`, {
-          params: {
-            ...(from && { from }),
-            ...(to && { to }),
-            ...(pageSize !== undefined && { page_size: pageSize }),
-            ...(nextPageToken && { next_page_token: nextPageToken }),
-          },
-        });
+        const response = await ctx.client.get(
+          `${ZOOM_API_BASE}/users/${encodeURIComponent(typedInput.userId)}/recordings`,
+          {
+            params: {
+              ...(typedInput.from && { from: typedInput.from }),
+              ...(typedInput.to && { to: typedInput.to }),
+              ...(typedInput.pageSize !== undefined && { page_size: typedInput.pageSize }),
+              ...(typedInput.nextPageToken && { next_page_token: typedInput.nextPageToken }),
+            },
+          }
+        );
         return response.data;
       },
     },
@@ -258,10 +277,10 @@ export const Zoom: ConnectorSpec = {
         text: z.string().describe('File content as UTF-8 text'),
       }),
       handler: async (ctx, input) => {
-        const { downloadUrl } = input as { downloadUrl: string };
-        ctx.log.debug(`Zoom downloading recording file from ${downloadUrl}`);
+        const typedInput = input as { downloadUrl: string };
+        ctx.log.debug(`Zoom downloading recording file from ${typedInput.downloadUrl}`);
 
-        const response = await ctx.client.get(downloadUrl, {
+        const response = await ctx.client.get(typedInput.downloadUrl, {
           responseType: 'arraybuffer',
         });
         const buffer = Buffer.from(response.data);
@@ -297,19 +316,20 @@ export const Zoom: ConnectorSpec = {
           ),
       }),
       handler: async (ctx, input) => {
-        const { meetingId, pageSize, nextPageToken } = input as {
+        const typedInput = input as {
           meetingId: string;
           pageSize?: number;
           nextPageToken?: string;
         };
-        ctx.log.debug(`Zoom listing participants for past meeting ${meetingId}`);
+        const encodedId = encodeZoomId(typedInput.meetingId);
+        ctx.log.debug(`Zoom listing participants for past meeting ${typedInput.meetingId}`);
 
         const response = await ctx.client.get(
-          `${ZOOM_API_BASE}/past_meetings/${meetingId}/participants`,
+          `${ZOOM_API_BASE}/past_meetings/${encodedId}/participants`,
           {
             params: {
-              ...(pageSize !== undefined && { page_size: pageSize }),
-              ...(nextPageToken && { next_page_token: nextPageToken }),
+              ...(typedInput.pageSize !== undefined && { page_size: typedInput.pageSize }),
+              ...(typedInput.nextPageToken && { next_page_token: typedInput.nextPageToken }),
             },
           }
         );
