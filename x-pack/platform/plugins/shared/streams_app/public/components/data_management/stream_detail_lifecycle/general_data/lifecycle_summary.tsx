@@ -16,6 +16,7 @@ import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_su
 import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
 import { useIlmLifecycleSummary } from '../hooks/use_ilm_lifecycle_summary';
 import { useDslLifecycleSummary } from '../hooks/use_dsl_lifecycle_summary';
+import { MAX_DOWNSAMPLE_STEPS } from '../downsampling/edit_dsl_steps_flyout/form';
 import type {
   IlmPhaseSelectOption,
   IlmPhaseSelectRenderButtonProps,
@@ -38,6 +39,21 @@ const addPhaseAndDownsamplingButtonLabel = i18n.translate(
   'xpack.streams.dataLifecycleSummary.addPhaseAndDownsamplingButtonLabel',
   {
     defaultMessage: 'Add data phase and downsampling',
+  }
+);
+
+const addDownsampleStepButtonLabel = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.addDownsampleStepButtonLabel',
+  {
+    defaultMessage: 'Add downsample step',
+  }
+);
+
+const maxDownsampleStepsTooltip = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.maxDownsampleStepsTooltip',
+  {
+    defaultMessage: 'Maximum of {max} downsampling steps',
+    values: { max: MAX_DOWNSAMPLE_STEPS },
   }
 );
 
@@ -147,32 +163,75 @@ const NonIlmLifecycleSummary = ({
   stats,
   onFlyoutOpenChange,
   onFlyoutUnsavedChangesChange,
+  refreshDefinition,
 }: LifecycleSummaryProps) => {
   const isDsl = isDslLifecycle(definition.effective_lifecycle);
+  const { updateStreamLifecycle } = useUpdateStreamLifecycle(definition);
   const dslSummary = useDslLifecycleSummary({
     definition,
     stats,
+    refreshDefinition,
+    updateStreamLifecycle,
   });
 
   useEffect(() => {
-    onFlyoutOpenChange?.(false);
+    onFlyoutOpenChange?.(dslSummary.isEditLifecycleFlyoutOpen);
+    // For now DSL downsampling edits don't surface an external "unsaved changes" indicator.
     onFlyoutUnsavedChangesChange?.(false);
-  }, [onFlyoutOpenChange, onFlyoutUnsavedChangesChange]);
+  }, [dslSummary.isEditLifecycleFlyoutOpen, onFlyoutOpenChange, onFlyoutUnsavedChangesChange]);
+
+  const currentDslStepsCount = dslSummary.downsampleSteps?.length ?? 0;
+  const isAddDownsampleStepDisabled = currentDslStepsCount >= MAX_DOWNSAMPLE_STEPS;
+
+  const addDownsampleStepButton = (
+    <EuiButton
+      color="text"
+      size="s"
+      data-test-subj="dataLifecycleSummaryAddDownsampleStep"
+      onClick={() => dslSummary.onAddDownsampleStep?.()}
+      disabled={isAddDownsampleStepDisabled}
+    >
+      {addDownsampleStepButtonLabel}
+    </EuiButton>
+  );
+
+  const dslHeaderActions =
+    definition.privileges.lifecycle &&
+    isDsl &&
+    isMetricsStream &&
+    dslSummary.onAddDownsampleStep ? (
+      isAddDownsampleStepDisabled ? (
+        <EuiToolTip position="top" content={maxDownsampleStepsTooltip}>
+          {addDownsampleStepButton}
+        </EuiToolTip>
+      ) : (
+        addDownsampleStepButton
+      )
+    ) : undefined;
 
   return (
-    <DataLifecycleSummary
-      model={{
-        phases: dslSummary.phases,
-        loading: false,
-        downsampleSteps: isDsl ? dslSummary.downsampleSteps : undefined,
-      }}
-      showDownsampling={isMetricsStream}
-      capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
-      uiState={{
-        editedPhaseName: undefined,
-        isEditLifecycleFlyoutOpen: false,
-      }}
-    />
+    <>
+      <DataLifecycleSummary
+        model={{
+          phases: dslSummary.phases,
+          loading: false,
+          downsampleSteps: isDsl ? dslSummary.downsampleSteps : undefined,
+        }}
+        showDownsampling={isMetricsStream}
+        downsamplingActions={{
+          onRemoveDownsampleStep: dslSummary.onRemoveDownsampleStep,
+          onEditDownsampleStep: dslSummary.onEditDownsampleStep,
+        }}
+        capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
+        headerActions={dslHeaderActions}
+        uiState={{
+          editedPhaseName: undefined,
+          isEditLifecycleFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen,
+        }}
+      />
+
+      {dslSummary.modals}
+    </>
   );
 };
 
