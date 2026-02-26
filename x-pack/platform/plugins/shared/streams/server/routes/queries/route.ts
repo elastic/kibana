@@ -102,9 +102,15 @@ const upsertQueryRoute = createServerRoute({
       streamName,
       queries: [{ id: queryId, feature: body.feature }],
     });
+    const existingQueries = await queryClient.bulkGetByIds(streamName, [queryId]);
+    const existingQuery = existingQueries[0]?.query;
+    const timestamp = new Date().toISOString();
+    const createdAt = existingQuery ? existingQuery.created_at : timestamp;
+    const updatedAt = existingQuery ? timestamp : undefined;
+
     await queryClient.upsert(definition, {
       id: queryId,
-      stream_name: body.stream_name,
+      stream_name: streamName,
       title: body.title,
       feature: body.feature,
       kql: {
@@ -117,6 +123,9 @@ const upsertQueryRoute = createServerRoute({
       type: body.type,
       category: body.category,
       source: body.source,
+      model: body.model,
+      created_at: createdAt,
+      updated_at: updatedAt,
     });
 
     return {

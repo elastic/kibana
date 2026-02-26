@@ -17,7 +17,6 @@ interface StreamQueryBase {
   title: string;
 }
 
-
 export const streamQueryTypeSchema = z.enum(['match', 'stats']);
 export const streamQueryCategorySchema = z
   .enum(['operational', 'error', 'resource_health', 'configuration', 'security'])
@@ -71,7 +70,7 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   title: NonEmptyString,
 });
 
-export type StreamQueryInput = Omit<StreamQuery, 'esql' | 'updated_at'>;
+export type StreamQueryInput = Omit<StreamQuery, 'esql'>;
 
 export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection(
   streamQueryBaseSchema,
@@ -101,7 +100,6 @@ export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection
 export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
   streamQueryInputSchema,
   z.object({
-    stream_name: NonEmptyString,
     esql: z.object({
       query: z.string().describe('Full ES|QL query.'),
     }),
@@ -135,6 +133,8 @@ export const upsertStreamQueryRequestSchema = z.object({
   tags: z.array(z.string()),
   source: streamQuerySourceSchema,
   model: z.string().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
 });
 
 export interface GetQueriesFilters {

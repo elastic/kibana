@@ -51,7 +51,7 @@ const ensureEsqlQuery = (
       ...query,
       esql: query.esql ?? {
         query: buildEsqlQuery(indices, {
-          kql: { query: query.kql },
+          kql: query.kql,
           feature: query.feature,
         }),
       },

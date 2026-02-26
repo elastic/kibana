@@ -91,7 +91,9 @@ export function AddSignificantEventFlyout({
     isEditMode ? 'manual' : initialFlow
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
-  const [queries, setQueries] = useState<StreamQuery[]>([{ ...defaultQuery(), ...query }]);
+  const [queries, setQueries] = useState<StreamQuery[]>([
+    { ...defaultQuery({ streamName: definition.stream.name }), ...query },
+  ]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -153,27 +155,44 @@ export function AddSignificantEventFlyout({
     if (isNewlyCompleted) {
       setGeneratedQueries(
         task.queries
+          .map((nextQuery) => ({
+            ...nextQuery,
+            /**
+             * Older task results schema was saving `kql` property as
+             * string with the KQL body. New schema follow the StreamQuery
+             * interface and saves `kql` as `{ query: string }`.
+             */
+            kql: typeof nextQuery.kql === 'string' ? { query: nextQuery.kql } : nextQuery.kql,
+          }))
           .filter((nextQuery) => {
             const validation = validateQuery({
               title: nextQuery.title,
-              kql: { query: nextQuery.kql },
+              kql: nextQuery.kql,
             });
             return validation.kql.isInvalid === false;
           })
           .map((nextQuery) => ({
             id: v4(),
-            kql: { query: nextQuery.kql },
+            stream_name: definition.stream.name,
+            kql: nextQuery.kql,
             esql: nextQuery.esql,
             title: nextQuery.title,
             feature: nextQuery.feature,
             severity_score: nextQuery.severity_score,
             evidence: nextQuery.evidence,
+            type: nextQuery.type,
+            category: nextQuery.category,
+            source: nextQuery.source,
+            model: nextQuery.model,
+            description: nextQuery.description,
+            tags: nextQuery.tags,
+            created_at: nextQuery.created_at,
           }))
       );
     }
 
     prevTaskStatusRef.current = task?.status;
-  }, [task]);
+  }, [definition.stream.name, task]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -184,9 +203,9 @@ export function AddSignificantEventFlyout({
       flowRef.current = selectedFlow;
       setIsSubmitting(false);
       setCanSave(false);
-      setQueries([defaultQuery()]);
+      setQueries([defaultQuery({ streamName: definition.stream.name })]);
     }
-  }, [selectedFlow]);
+  }, [definition.stream.name, selectedFlow]);
 
   const generateQueries = (systemsOverride?: System[]) => {
     const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
@@ -376,6 +395,7 @@ export function AddSignificantEventFlyout({
                             type: 'single',
                             query: {
                               ...queries[0],
+                              source: 'user_created',
                               feature: queries[0].feature
                                 ? omit(queries[0].feature, 'description')
                                 : undefined,
@@ -388,6 +408,7 @@ export function AddSignificantEventFlyout({
                             type: 'multiple',
                             queries: queries.map((nextQuery) => ({
                               ...nextQuery,
+                              source: 'ai_generated',
                               feature: nextQuery.feature
                                 ? omit(nextQuery.feature, 'description')
                                 : undefined,

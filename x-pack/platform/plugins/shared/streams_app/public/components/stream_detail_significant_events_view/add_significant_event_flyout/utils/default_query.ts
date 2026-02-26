@@ -8,7 +8,7 @@
 import type { StreamQuery } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 
-export function defaultQuery(): StreamQuery {
+export function defaultQuery({ streamName }: { streamName: string }): StreamQuery {
   return {
     id: v4(),
     title: '',
@@ -18,6 +18,9 @@ export function defaultQuery(): StreamQuery {
     esql: {
       query: '',
     },
+    stream_name: streamName,
     feature: undefined,
+    type: 'match',
+    tags: [],
   };
 }

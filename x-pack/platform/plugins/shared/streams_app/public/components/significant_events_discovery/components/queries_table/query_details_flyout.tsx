@@ -139,7 +139,10 @@ export function QueryDetailsFlyout({
   const evidence = (item.evidence ?? []).map((value) => value.trim()).filter(Boolean);
   const source = item.source;
 
-  const infoListItems: Array<{ title: string; description: React.ReactNode }> = [
+  const infoListItems: Array<{
+    title: NonNullable<React.ReactNode>;
+    description: NonNullable<React.ReactNode>;
+  }> = [
     {
       title: QUERY_LABEL,
       description: (
@@ -305,7 +308,7 @@ export function QueryDetailsFlyout({
               <EuiFlexItem>
                 <InfoPanel title={QUERY_INFORMATION_TITLE}>
                   {infoListItems.map((listItem, index) => (
-                    <React.Fragment key={listItem.title}>
+                    <React.Fragment key={listItem.title.toString()}>
                       <EuiDescriptionList
                         type="column"
                         columnWidths={[1, 2]}
@@ -438,7 +441,7 @@ function getDisplayQueryValue(query: StreamQuery) {
   return queryText || DEFAULT_QUERY_PLACEHOLDER;
 }
 
-function getSourceDisplayName(source: NonNullable<StreamQuery['source']>) {
+function getSourceDisplayName(source: NonNullable<StreamQuery['source']>): string {
   switch (source) {
     case 'ai_generated':
       return SOURCE_AI_GENERATED_BADGE_LABEL;
@@ -446,6 +449,8 @@ function getSourceDisplayName(source: NonNullable<StreamQuery['source']>) {
       return SOURCE_USER_CREATED_BADGE_LABEL;
     case 'predefined':
       return SOURCE_PREDEFINED_BADGE_LABEL;
+    default:
+      return source;
   }
 }
 
@@ -496,7 +501,7 @@ const SOURCE_AI_GENERATED_BADGE_LABEL = i18n.translate(
 
 const SOURCE_USER_CREATED_BADGE_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourceUserCreatedBadgeLabel',
-  { defaultMessage: 'User created' }
+  { defaultMessage: 'Created manually' }
 );
 
 const SOURCE_PREDEFINED_BADGE_LABEL = i18n.translate(

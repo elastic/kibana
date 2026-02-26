@@ -201,7 +201,7 @@ const toStreamQuery = (queryLink: QueryLink): StreamQuery => {
     id: queryLink.query.id,
     title: queryLink.query.title,
     description: queryLink.query.description,
-    stream_name: queryLink.query.stream_name,
+    stream_name: queryLink.stream_name,
     kql: queryLink.query.kql,
     feature: queryLink.query.feature,
     severity_score: queryLink.query.severity_score,
