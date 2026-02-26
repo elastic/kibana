@@ -35,6 +35,10 @@ export const ConnectorIconsMap: Map<
   ],
   ['.notion', lazy(() => import(/* webpackChunkName: "connectorNotion" */ './specs/notion/icon'))],
   [
+    '.pagerduty-v2',
+    lazy(() => import(/* webpackChunkName: "connectorIconPagerduty" */ './specs/pagerduty/icon')),
+  ],
+  [
     '.brave-search',
     lazy(
       () => import(/* webpackChunkName: "connectorIconBraveSearch" */ './specs/brave_search/icon')

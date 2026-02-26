@@ -87,6 +87,10 @@ function buildSecretsFromMCPConnectorConfig(
       }
       break;
     }
+    case 'token_header': {
+      secrets.apiKey = credentials;
+      break;
+    }
     case 'basic': {
       // credentials is in the format "username:password"
       secrets.user = credentials.split(':')[0];

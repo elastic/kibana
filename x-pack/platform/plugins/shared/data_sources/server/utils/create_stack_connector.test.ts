@@ -167,6 +167,50 @@ describe('createStackConnector', () => {
       });
     });
 
+    it('should create MCP connector with token_header auth type (e.g. PagerDuty)', async () => {
+      const mockStackConnector = {
+        id: 'mcp-connector-token-header',
+        name: '.mcp',
+        actionTypeId: '.mcp',
+      };
+
+      const connectorConfigTokenHeader: StackConnectorConfig = {
+        type: '.mcp',
+        config: {
+          serverUrl: 'https://mcp.pagerduty.com/mcp',
+          hasAuth: true,
+          authType: 'token_header' as const,
+        },
+        importedTools: undefined,
+      };
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      const result = await createStackConnector(
+        mockActions as any,
+        mockRequest,
+        MOCK_DATA_SOURCE_NAME,
+        connectorConfigTokenHeader,
+        'pagerduty-token-abc'
+      );
+
+      expect(result).toEqual(mockStackConnector);
+      expect(mockActionsClient.create).toHaveBeenCalledWith({
+        action: {
+          name: MOCK_DATA_SOURCE_NAME,
+          actionTypeId: '.mcp',
+          config: {
+            serverUrl: 'https://mcp.pagerduty.com/mcp',
+            hasAuth: true,
+            authType: 'token_header',
+          },
+          secrets: {
+            apiKey: 'pagerduty-token-abc',
+          },
+        },
+      });
+    });
+
     it('should create MCP connector with no auth', async () => {
       const mockStackConnector = {
         id: 'mcp-connector-no-auth',

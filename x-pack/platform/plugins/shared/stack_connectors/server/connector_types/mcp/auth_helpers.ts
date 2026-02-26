@@ -52,6 +52,13 @@ export function buildHeadersFromSecrets(
       }
       break;
 
+    case MCPAuthType.TokenHeader:
+      // PagerDuty and similar: Authorization: Token token=<apiKey>
+      if (secrets.apiKey) {
+        headers.Authorization = `Token token=${secrets.apiKey}`;
+      }
+      break;
+
     default:
       // No specific auth type configured - this is valid when hasAuth is false
       break;

@@ -17,6 +17,7 @@ export const MCPAuthType = {
   Bearer: 'bearer',
   ApiKey: 'apiKey',
   Basic: 'basic',
+  TokenHeader: 'token_header',
 } as const;
 
 /**
@@ -37,7 +38,13 @@ export const MCPConnectorConfigSchema = z.object({
    * Authentication type to use when hasAuth is true.
    */
   authType: z
-    .enum([MCPAuthType.None, MCPAuthType.Bearer, MCPAuthType.ApiKey, MCPAuthType.Basic])
+    .enum([
+      MCPAuthType.None,
+      MCPAuthType.Bearer,
+      MCPAuthType.ApiKey,
+      MCPAuthType.Basic,
+      MCPAuthType.TokenHeader,
+    ])
     .optional(),
   /**
    * Custom header name for API key authentication.

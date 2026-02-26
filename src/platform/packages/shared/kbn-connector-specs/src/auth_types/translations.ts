@@ -79,6 +79,24 @@ export const BEARER_AUTH_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const TOKEN_HEADER_AUTH_LABEL = i18n.translate('connectorSpecs.tokenHeaderAuth.label', {
+  defaultMessage: 'Token header',
+});
+
+export const TOKEN_HEADER_TOKEN_LABEL = i18n.translate(
+  'connectorSpecs.tokenHeaderAuth.token.label',
+  {
+    defaultMessage: 'Token',
+  }
+);
+
+export const TOKEN_HEADER_TOKEN_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.tokenHeaderAuth.token.requiredMessage',
+  {
+    defaultMessage: 'Token is required',
+  }
+);
+
 export const NO_AUTH_LABEL = i18n.translate('connectorSpecs.authType.noAuth.label', {
   defaultMessage: 'None',
 });

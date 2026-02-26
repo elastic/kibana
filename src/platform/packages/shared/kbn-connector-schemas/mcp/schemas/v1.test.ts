@@ -55,7 +55,7 @@ describe('MCP Schema', () => {
     });
 
     it('validates all auth types', () => {
-      const authTypes = ['none', 'bearer', 'apiKey', 'basic'];
+      const authTypes = ['none', 'bearer', 'apiKey', 'basic', 'token_header'];
       authTypes.forEach((authType) => {
         expect(() =>
           MCPConnectorConfigSchema.parse({
