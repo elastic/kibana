@@ -15,6 +15,26 @@ import { FieldRule } from '../../model';
 
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
+function assertField(index: number, field: string) {
+  const comboEl = document.querySelector(
+    `[data-test-subj~="fieldRuleEditorField-${index}-combo"]`
+  );
+  const expressionEl = document.querySelector(
+    `[data-test-subj~="fieldRuleEditorField-${index}-expression"]`
+  );
+
+  if (index === 0) {
+    expect(comboEl).toBeInTheDocument();
+    expect(expressionEl).not.toBeInTheDocument();
+    const input = comboEl!.querySelector('input');
+    expect(input).toHaveValue(field);
+  } else {
+    expect(expressionEl).toBeInTheDocument();
+    expect(comboEl).not.toBeInTheDocument();
+    expect(expressionEl).toHaveTextContent(field);
+  }
+}
+
 function assertValue(index: number, value: any) {
   const valueField = screen.getByTestId(`fieldRuleEditorValue-${index}`);
   expect(valueField).toHaveValue(value);
@@ -34,6 +54,7 @@ describe('FieldRuleEditor', () => {
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
     assertValueType(0, 'text');
     assertValue(0, '*');
   });
@@ -46,6 +67,7 @@ describe('FieldRuleEditor', () => {
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
     assertValueType(0, 'number');
     assertValue(0, 12);
   });
@@ -58,6 +80,7 @@ describe('FieldRuleEditor', () => {
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
     assertValueType(0, 'null');
     assertValue(0, '-- null --');
   });
@@ -70,6 +93,7 @@ describe('FieldRuleEditor', () => {
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
     assertValueType(0, 'boolean');
     assertValue(0, 'true');
   });
@@ -82,6 +106,7 @@ describe('FieldRuleEditor', () => {
     };
 
     renderWithIntl(<FieldRuleEditor {...props} />);
+    assertField(0, 'username');
     assertValueType(0, 'boolean');
     assertValue(0, 'false');
   });
@@ -96,18 +121,23 @@ describe('FieldRuleEditor', () => {
     renderWithIntl(<FieldRuleEditor {...props} />);
     expect(screen.getByTestId('addAlternateValueButton')).toBeInTheDocument();
 
+    assertField(0, 'username');
     assertValueType(0, 'text');
     assertValue(0, '*');
 
+    assertField(1, 'username');
     assertValueType(1, 'number');
     assertValue(1, 12);
 
+    assertField(2, 'username');
     assertValueType(2, 'null');
     assertValue(2, '-- null --');
 
+    assertField(3, 'username');
     assertValueType(3, 'boolean');
     assertValue(3, 'true');
 
+    assertField(4, 'username');
     assertValueType(4, 'boolean');
     assertValue(4, 'false');
   });
