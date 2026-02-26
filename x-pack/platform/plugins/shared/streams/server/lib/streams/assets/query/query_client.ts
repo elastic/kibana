@@ -64,6 +64,30 @@ function termQuery<T extends string>(
   return [{ term: { [field]: value } }];
 }
 
+function ruleBackedFilter(value: boolean | undefined): QueryDslQueryContainer[] {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!value) {
+    return termQuery(RULE_BACKED, false);
+  }
+
+  // When filtering for rule-backed queries, also include legacy docs
+  // that predate the rule_backed field.
+  return [
+    {
+      bool: {
+        should: [
+          { term: { [RULE_BACKED]: true } },
+          { bool: { must_not: [{ exists: { field: RULE_BACKED } }] } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+}
+
 function termsQuery<T extends string>(
   field: T,
   values: Array<TermQueryFieldValue | undefined> | null | undefined
@@ -320,7 +344,7 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, filters?.ruleBacked),
+      ...ruleBackedFilter(filters?.ruleBacked),
     ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
@@ -341,23 +365,7 @@ export class QueryClient {
    * Used internally by promoteQueries.
    */
   private async getUnbackedQueries(streamName: string): Promise<QueryLink[]> {
-    const filter = [
-      ...termQuery(STREAM_NAME, streamName),
-      ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, false),
-    ];
-
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-        },
-      },
-    });
-
-    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return this.getQueryLinks([streamName], { ruleBacked: false });
   }
 
   /**
@@ -384,19 +392,7 @@ export class QueryClient {
    * Returns all query links across streams that do not have a backing Kibana rule.
    */
   async getAllUnbackedQueries(): Promise<QueryLink[]> {
-    const filter = [...termQuery(ASSET_TYPE, 'query'), ...termQuery(RULE_BACKED, false)];
-
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-        },
-      },
-    });
-
-    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+    return this.getQueryLinks([], { ruleBacked: false });
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -428,7 +424,7 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, filters?.ruleBacked),
+      ...ruleBackedFilter(filters?.ruleBacked),
     ];
 
     const assetsResponse = await this.dependencies.storageClient.search({
