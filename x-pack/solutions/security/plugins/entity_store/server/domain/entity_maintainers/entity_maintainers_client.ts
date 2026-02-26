@@ -135,7 +135,9 @@ export class EntityMaintainersClient {
           };
         } catch (error) {
           if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            this.logger.error(`Failed to get task snapshot for entity maintainer: ${id}`, { error });
+            this.logger.error(`Failed to get task snapshot for entity maintainer: ${id}`, {
+              error,
+            });
             throw error;
           }
         }

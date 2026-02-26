@@ -54,13 +54,21 @@ export function registerGetMaintainers(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: false,
       },
-      wrapMiddlewares(async (ctx, _req, res): Promise<IKibanaResponse<{ list: EntityMaintainerResponseItem[] }>> => {
-        const entityStoreCtx = await ctx.entityStore;
-        const { entityMaintainersClient } = entityStoreCtx;
-        const maintainers = await entityMaintainersClient.getMaintainers();
-        const list: EntityMaintainerResponseItem[] = maintainers.map(toGetMaintainersResponseItem);
-        
-        return res.ok({ body: { list } });
-      })
+      wrapMiddlewares(
+        async (
+          ctx,
+          _req,
+          res
+        ): Promise<IKibanaResponse<{ list: EntityMaintainerResponseItem[] }>> => {
+          const entityStoreCtx = await ctx.entityStore;
+          const { entityMaintainersClient } = entityStoreCtx;
+          const maintainers = await entityMaintainersClient.getMaintainers();
+          const list: EntityMaintainerResponseItem[] = maintainers.map(
+            toGetMaintainersResponseItem
+          );
+
+          return res.ok({ body: { list } });
+        }
+      )
     );
 }
