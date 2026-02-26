@@ -334,10 +334,11 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
       }}
       onTableChange={({ page }: CriteriaWithPagination<ActiveSource>) => {
         if (page) {
-          setPageIndex(page.index);
           if (page.size !== pageSize) {
             setPageSize(page.size);
             setPageIndex(0);
+          } else {
+            setPageIndex(page.index);
           }
         }
       }}
