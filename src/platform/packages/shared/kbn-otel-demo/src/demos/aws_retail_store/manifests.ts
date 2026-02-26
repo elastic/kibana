@@ -282,7 +282,22 @@ function createDeployment(opts: {
   image: string;
   ports?: number[];
   env?: Record<string, string>;
+  command?: string[];
+  args?: string[];
   resources?: ServiceConfig['resources'];
+  initContainers?: Array<{
+    name: string;
+    image: string;
+    command?: string[];
+    args?: string[];
+    volumeMounts?: Array<{ name: string; mountPath: string }>;
+  }>;
+  volumes?: Array<{
+    name: string;
+    emptyDir?: Record<string, never>;
+    configMap?: { name: string };
+  }>;
+  volumeMounts?: Array<{ name: string; mountPath: string }>;
 }): object {
   const envList = opts.env
     ? Object.entries(opts.env).map(([name, value]) => ({ name, value }))
@@ -301,8 +316,32 @@ function createDeployment(opts: {
     container.env = envList;
   }
 
+  if (opts.command) {
+    container.command = opts.command;
+  }
+
+  if (opts.args) {
+    container.args = opts.args;
+  }
+
   if (opts.resources) {
     container.resources = opts.resources;
+  }
+
+  if (opts.volumeMounts) {
+    container.volumeMounts = opts.volumeMounts;
+  }
+
+  const podSpec: Record<string, unknown> = {
+    containers: [container],
+  };
+
+  if (opts.initContainers && opts.initContainers.length > 0) {
+    podSpec.initContainers = opts.initContainers;
+  }
+
+  if (opts.volumes && opts.volumes.length > 0) {
+    podSpec.volumes = opts.volumes;
   }
 
   return {
@@ -332,9 +371,7 @@ function createDeployment(opts: {
             'app.kubernetes.io/part-of': opts.demoId,
           },
         },
-        spec: {
-          containers: [container],
-        },
+        spec: podSpec,
       },
     },
   };
@@ -392,7 +429,12 @@ export const awsRetailStoreManifests: DemoManifestGenerator = {
           image: svc.image,
           ports: svc.port ? [svc.port] : [],
           env: finalEnv,
+          command: svc.command,
+          args: svc.args,
           resources: svc.resources,
+          initContainers: svc.initContainers,
+          volumes: svc.volumes,
+          volumeMounts: svc.volumeMounts,
         })
       );
 

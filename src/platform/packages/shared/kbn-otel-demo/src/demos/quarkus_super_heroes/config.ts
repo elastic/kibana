@@ -109,7 +109,7 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
       port: 8083,
       env: {
         QUARKUS_DATASOURCE_REACTIVE_URL: 'postgresql://heroes-db:5432/heroes_database',
-        QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: 'validate',
+        QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: 'drop-and-create',
         QUARKUS_DATASOURCE_USERNAME: 'superman',
         QUARKUS_DATASOURCE_PASSWORD: 'superman',
         QUARKUS_HIBERNATE_ORM_SQL_LOAD_SCRIPT: 'no-file',
@@ -125,7 +125,7 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
       port: 8084,
       env: {
         QUARKUS_DATASOURCE_JDBC_URL: 'jdbc:postgresql://villains-db:5432/villains_database',
-        QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: 'validate',
+        QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: 'drop-and-create',
         QUARKUS_DATASOURCE_USERNAME: 'superbad',
         QUARKUS_DATASOURCE_PASSWORD: 'superbad',
         QUARKUS_HIBERNATE_ORM_SQL_LOAD_SCRIPT: 'no-file',
@@ -152,7 +152,7 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
       port: 8089,
       env: {
         QUARKUS_DATASOURCE_JDBC_URL: 'jdbc:mariadb://locations-db:3306/locations_database',
-        QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: 'validate',
+        QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: 'drop-and-create',
         QUARKUS_DATASOURCE_USERNAME: 'locations',
         QUARKUS_DATASOURCE_PASSWORD: 'locations',
         QUARKUS_HIBERNATE_ORM_SQL_LOAD_SCRIPT: 'no-file',
@@ -209,6 +209,27 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         OTEL_SERVICE_NAME: 'ui-super-heroes',
       },
     },
+
+    // Load generator - triggers fights periodically
+    {
+      name: 'load-generator',
+      image: 'curlimages/curl:8.5.0',
+      command: ['/bin/sh', '-c'],
+      args: [
+        `while true; do
+          curl -s -X POST http://rest-fights:8082/api/fights/randomfighters -H 'Accept: application/json' || true;
+          sleep 2;
+          FIGHTERS=$(curl -s http://rest-fights:8082/api/fights/randomfighters -H 'Accept: application/json');
+          if [ -n "$FIGHTERS" ]; then
+            curl -s -X POST http://rest-fights:8082/api/fights -H 'Content-Type: application/json' -H 'Accept: application/json' -d "$FIGHTERS" || true;
+          fi;
+          sleep 3;
+        done`,
+      ],
+      env: {
+        OTEL_SERVICE_NAME: 'load-generator',
+      },
+    },
   ],
 };
 
@@ -240,4 +261,5 @@ export const SERVICE_DEFAULTS: Record<string, Record<string, string>> = {
   'ui-super-heroes': {
     API_BASE_URL: 'http://rest-fights:8082',
   },
+  'load-generator': {},
 };

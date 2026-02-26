@@ -94,7 +94,7 @@ export const awsRetailStoreConfig: DemoConfig = {
         RETAIL_CATALOG_PERSISTENCE_DB_NAME: 'catalogdb',
         RETAIL_CATALOG_PERSISTENCE_USER: 'catalog_user',
         RETAIL_CATALOG_PERSISTENCE_PASSWORD: 'catalog_password',
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317',
+        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318',
         OTEL_SERVICE_NAME: 'catalog',
       },
       resources: {
@@ -115,7 +115,7 @@ export const awsRetailStoreConfig: DemoConfig = {
         AWS_ACCESS_KEY_ID: 'dummy',
         AWS_SECRET_ACCESS_KEY: 'dummy',
         AWS_REGION: 'us-east-1',
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317',
+        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318',
         OTEL_SERVICE_NAME: 'cart',
       },
       resources: {
@@ -134,7 +134,7 @@ export const awsRetailStoreConfig: DemoConfig = {
         RETAIL_ORDERS_PERSISTENCE_NAME: 'orders',
         RETAIL_ORDERS_PERSISTENCE_USERNAME: 'orders_user',
         RETAIL_ORDERS_PERSISTENCE_PASSWORD: 'orders_password',
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317',
+        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318',
         OTEL_SERVICE_NAME: 'orders',
       },
       resources: {
@@ -151,7 +151,7 @@ export const awsRetailStoreConfig: DemoConfig = {
         RETAIL_CHECKOUT_PERSISTENCE_PROVIDER: 'redis',
         RETAIL_CHECKOUT_PERSISTENCE_REDIS_URL: 'redis://checkout-redis:6379',
         RETAIL_CHECKOUT_ENDPOINTS_ORDERS: 'http://orders:8080',
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317',
+        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318',
         OTEL_SERVICE_NAME: 'checkout',
       },
       resources: {
@@ -171,12 +171,50 @@ export const awsRetailStoreConfig: DemoConfig = {
         RETAIL_UI_ENDPOINTS_CARTS: 'http://cart:8080',
         RETAIL_UI_ENDPOINTS_ORDERS: 'http://orders:8080',
         RETAIL_UI_ENDPOINTS_CHECKOUT: 'http://checkout:8080',
-        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317',
+        OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4318',
         OTEL_SERVICE_NAME: 'ui',
       },
       resources: {
         requests: { memory: '256Mi', cpu: '100m' },
         limits: { memory: '512Mi', cpu: '500m' },
+      },
+    },
+
+    // Load generator - simulates shopping activity
+    {
+      name: 'load-generator',
+      image: 'curlimages/curl:8.5.0',
+      command: ['/bin/sh', '-c'],
+      args: [
+        `while true; do
+          curl -s http://ui:8080/home || true;
+          sleep 1;
+          curl -s http://ui:8080/catalog || true;
+          sleep 1;
+          PRODUCTS=$(curl -s http://catalog:8080/catalogue | grep -o '"id":"[^"]*"' | head -5 | cut -d'"' -f4 || echo "");
+          for PROD in $PRODUCTS; do
+            curl -s "http://ui:8080/catalog/$PROD" || true;
+            sleep 0.5;
+          done;
+          FIRST_PROD=$(echo "$PRODUCTS" | head -1);
+          if [ -n "$FIRST_PROD" ]; then
+            curl -s -X POST http://ui:8080/cart -d "productId=$FIRST_PROD" || true;
+          fi;
+          sleep 1;
+          curl -s http://ui:8080/cart || true;
+          sleep 2;
+          curl -s http://ui:8080/checkout || true;
+          sleep 1;
+          curl -s -X POST http://ui:8080/checkout -d "firstName=Test&lastName=User&email=test@example.com&streetAddress=123 Main St&city=Testville&state=CA&zipCode=12345" || true;
+          sleep 2;
+        done`,
+      ],
+      env: {
+        OTEL_SERVICE_NAME: 'load-generator',
+      },
+      resources: {
+        requests: { memory: '32Mi', cpu: '25m' },
+        limits: { memory: '64Mi', cpu: '100m' },
       },
     },
   ],
@@ -205,4 +243,5 @@ export const SERVICE_DEFAULTS: Record<string, Record<string, string>> = {
     RETAIL_CHECKOUT_PERSISTENCE_REDIS_URL: 'redis://checkout-redis:6379',
     RETAIL_CHECKOUT_ENDPOINTS_ORDERS: 'http://orders:8080',
   },
+  'load-generator': {},
 };

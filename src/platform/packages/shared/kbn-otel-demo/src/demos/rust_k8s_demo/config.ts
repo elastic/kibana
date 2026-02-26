@@ -15,11 +15,8 @@ const CONTAINER_REGISTRY = 'ghcr.io/caulagi/rust-k8s-demo';
  * Rust K8s Demo - Rust microservices with gRPC
  * https://github.com/caulagi/rust-k8s-demo
  *
- * Note: This demo requires building and pushing images to GHCR or using local images.
- * The project uses skaffold for local development. To build and push:
- *   1. Clone https://github.com/caulagi/rust-k8s-demo
- *   2. Run `make bootstrap` to set up
- *   3. Build images: `skaffold build --default-repo=ghcr.io/<your-username>/rust-k8s-demo`
+ * WARNING: This demo requires custom-built container images that are NOT available in public registries.
+ * See customImageInstructions below for build steps.
  *
  * Architecture:
  * - frontendservice: HTTP server (port 8080) that returns quotations
@@ -34,6 +31,13 @@ export const rustK8sDemoConfig: DemoConfig = {
     'Rust microservices demo with gRPC communication - frontend, quotation service, and PostgreSQL',
   defaultVersion: 'latest',
   availableVersions: ['latest'],
+  requiresCustomImages: true,
+  customImageInstructions: `This demo requires building and pushing images to GHCR or using local images.
+The project uses skaffold for local development. To build and push:
+  1. Clone https://github.com/caulagi/rust-k8s-demo
+  2. Run: make bootstrap
+  3. Build images: skaffold build --default-repo=ghcr.io/<your-username>/rust-k8s-demo
+  4. Push to your registry or load into minikube: minikube image load <image>`,
 
   frontendService: {
     name: 'frontendservice',

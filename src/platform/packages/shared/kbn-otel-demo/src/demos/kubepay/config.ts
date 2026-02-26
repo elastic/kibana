@@ -15,13 +15,8 @@ const CONTAINER_REGISTRY = 'ghcr.io/teamlead/kubepay';
  * KubePay - Spring Boot microservices financial demo
  * https://github.com/teamlead/spring-microservices-kubernetes-demo
  *
- * Note: This demo requires building and pushing images to GHCR or using local images.
- * See the KubePay repo for build instructions: ./mvnw clean install -DskipTests
- * Then build Docker images:
- *   docker build -t ghcr.io/teamlead/kubepay/gateway:latest ./gateway/gateway-service
- *   docker build -t ghcr.io/teamlead/kubepay/auth:latest ./auth/auth-service
- *   docker build -t ghcr.io/teamlead/kubepay/user:latest ./user/user-service
- *   docker build -t ghcr.io/teamlead/kubepay/wallet:latest ./wallet/wallet-service
+ * WARNING: This demo requires custom-built container images that are NOT available in public registries.
+ * See customImageInstructions below for build steps.
  */
 export const kubepayConfig: DemoConfig = {
   id: 'kubepay',
@@ -31,6 +26,17 @@ export const kubepayConfig: DemoConfig = {
     'Spring Boot 3 microservices demo for user registration, balance top-up, and fund transfers with Zipkin tracing',
   defaultVersion: 'latest',
   availableVersions: ['latest'],
+  requiresCustomImages: true,
+  customImageInstructions: `This demo requires building and pushing images to GHCR or using local images.
+See the KubePay repo for build instructions:
+  1. Clone https://github.com/teamlead/spring-microservices-kubernetes-demo
+  2. Run: ./mvnw clean install -DskipTests
+  3. Build Docker images:
+     docker build -t ghcr.io/teamlead/kubepay/gateway:latest ./gateway/gateway-service
+     docker build -t ghcr.io/teamlead/kubepay/auth:latest ./auth/auth-service
+     docker build -t ghcr.io/teamlead/kubepay/user:latest ./user/user-service
+     docker build -t ghcr.io/teamlead/kubepay/wallet:latest ./wallet/wallet-service
+  4. Push to your registry or load into minikube: minikube image load <image>`,
 
   frontendService: {
     name: 'gateway',

@@ -33,6 +33,8 @@ export {
   getDemoServiceDefaults,
   getScenarioById,
   listAvailableDemos,
+  listReadyDemos,
+  requiresCustomImages,
 } from './src/demo_registry';
 
 // Re-export specific functions with different names to avoid conflicts

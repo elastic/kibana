@@ -60,7 +60,8 @@ export const bankOfAnthosConfig: DemoConfig = {
       env: {
         VERSION: version,
         PORT: '8080',
-        ENABLE_TRACING: 'true',
+        ENABLE_TRACING: 'false',
+        ENABLE_METRICS: 'false',
         TOKEN_EXPIRY_SECONDS: '3600',
         PRIV_KEY_PATH: '/tmp/.ssh/privatekey',
         LOG_LEVEL: 'info',
@@ -78,7 +79,8 @@ export const bankOfAnthosConfig: DemoConfig = {
       env: {
         VERSION: version,
         PORT: '8080',
-        ENABLE_TRACING: 'true',
+        ENABLE_TRACING: 'false',
+        ENABLE_METRICS: 'false',
         LOG_LEVEL: 'info',
         ACCOUNTS_DB_URI: 'postgresql://accounts-admin:accounts-pwd@accounts-db:5432/accounts-db',
         LOCAL_ROUTING_NUM: '883745000',
@@ -96,8 +98,8 @@ export const bankOfAnthosConfig: DemoConfig = {
       env: {
         VERSION: version,
         PORT: '8080',
-        ENABLE_TRACING: 'true',
-        ENABLE_METRICS: 'true',
+        ENABLE_TRACING: 'false',
+        ENABLE_METRICS: 'false',
         JVM_OPTS:
           '-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Xms256m -Xmx512m',
         LOG_LEVEL: 'info',
@@ -118,8 +120,8 @@ export const bankOfAnthosConfig: DemoConfig = {
       env: {
         VERSION: version,
         PORT: '8080',
-        ENABLE_TRACING: 'true',
-        ENABLE_METRICS: 'true',
+        ENABLE_TRACING: 'false',
+        ENABLE_METRICS: 'false',
         POLL_MS: '100',
         CACHE_SIZE: '1000000',
         JVM_OPTS:
@@ -141,8 +143,8 @@ export const bankOfAnthosConfig: DemoConfig = {
       env: {
         VERSION: version,
         PORT: '8080',
-        ENABLE_TRACING: 'true',
-        ENABLE_METRICS: 'true',
+        ENABLE_TRACING: 'false',
+        ENABLE_METRICS: 'false',
         POLL_MS: '100',
         CACHE_SIZE: '1000',
         CACHE_MINUTES: '60',
@@ -168,7 +170,8 @@ export const bankOfAnthosConfig: DemoConfig = {
       env: {
         VERSION: version,
         PORT: '8080',
-        ENABLE_TRACING: 'true',
+        ENABLE_TRACING: 'false',
+        ENABLE_METRICS: 'false',
         SCHEME: 'http',
         LOG_LEVEL: 'info',
         DEFAULT_USERNAME: 'testuser',

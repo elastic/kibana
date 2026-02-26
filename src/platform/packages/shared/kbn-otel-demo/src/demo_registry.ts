@@ -166,6 +166,22 @@ export function listAvailableDemos(): DemoType[] {
 }
 
 /**
+ * List demos that are ready to use (don't require custom images)
+ */
+export function listReadyDemos(): DemoType[] {
+  return (Object.keys(DEMO_CONFIGS) as DemoType[]).filter(
+    (type) => !DEMO_CONFIGS[type].requiresCustomImages
+  );
+}
+
+/**
+ * Check if a demo requires custom-built images
+ */
+export function requiresCustomImages(type: DemoType): boolean {
+  return DEMO_CONFIGS[type]?.requiresCustomImages ?? false;
+}
+
+/**
  * List all scenario IDs for a specific demo
  */
 export function listScenarioIds(type: DemoType): string[] {

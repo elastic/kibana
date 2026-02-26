@@ -283,10 +283,24 @@ function createDeployment(opts: {
   ports?: number[];
   env?: Record<string, string>;
   command?: string[];
+  args?: string[];
   resources?: {
     limits?: { memory?: string; cpu?: string };
     requests?: { memory?: string; cpu?: string };
   };
+  initContainers?: Array<{
+    name: string;
+    image: string;
+    command?: string[];
+    args?: string[];
+    volumeMounts?: Array<{ name: string; mountPath: string }>;
+  }>;
+  volumes?: Array<{
+    name: string;
+    emptyDir?: Record<string, never>;
+    configMap?: { name: string };
+  }>;
+  volumeMounts?: Array<{ name: string; mountPath: string }>;
 }): object {
   const envList = opts.env
     ? Object.entries(opts.env).map(([name, value]) => ({ name, value }))
@@ -309,8 +323,28 @@ function createDeployment(opts: {
     container.command = opts.command;
   }
 
+  if (opts.args) {
+    container.args = opts.args;
+  }
+
   if (opts.resources) {
     container.resources = opts.resources;
+  }
+
+  if (opts.volumeMounts) {
+    container.volumeMounts = opts.volumeMounts;
+  }
+
+  const podSpec: Record<string, unknown> = {
+    containers: [container],
+  };
+
+  if (opts.initContainers && opts.initContainers.length > 0) {
+    podSpec.initContainers = opts.initContainers;
+  }
+
+  if (opts.volumes && opts.volumes.length > 0) {
+    podSpec.volumes = opts.volumes;
   }
 
   return {
@@ -340,9 +374,7 @@ function createDeployment(opts: {
             'app.kubernetes.io/part-of': opts.demoId,
           },
         },
-        spec: {
-          containers: [container],
-        },
+        spec: podSpec,
       },
     },
   };
@@ -464,7 +496,7 @@ export const quarkusSuperHeroesManifests: DemoManifestGenerator = {
                 limits: { memory: '1Gi', cpu: '1' },
                 requests: { memory: '256Mi', cpu: '0.5' },
               }
-            : undefined;
+            : svc.resources;
 
         manifests.push(
           createDeployment({
@@ -474,7 +506,12 @@ export const quarkusSuperHeroesManifests: DemoManifestGenerator = {
             image: svc.image,
             ports: svc.port ? [svc.port] : [],
             env: finalEnv,
+            command: svc.command,
+            args: svc.args,
             resources,
+            initContainers: svc.initContainers,
+            volumes: svc.volumes,
+            volumeMounts: svc.volumeMounts,
           })
         );
       }

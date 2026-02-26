@@ -130,6 +130,22 @@ export async function ensureOtelDemo({
   log.info(`Starting ${demoConfig.displayName} on Kubernetes (minikube)...`);
   log.info(`  Version: ${demoVersion}`);
 
+  if (demoConfig.requiresCustomImages) {
+    log.write('');
+    log.warning(
+      `${chalk.bold('WARNING:')} This demo requires custom-built container images that are NOT available in public registries.`
+    );
+    log.warning('Pods will fail to start with ImagePullBackOff errors until images are built.');
+    if (demoConfig.customImageInstructions) {
+      log.write('');
+      log.write(chalk.dim('Build instructions:'));
+      for (const line of demoConfig.customImageInstructions.split('\n')) {
+        log.write(chalk.dim(`  ${line}`));
+      }
+    }
+    log.write('');
+  }
+
   // Ensure minikube is running
   log.info('Ensuring minikube is running...');
   await ensureMinikubeRunning();
