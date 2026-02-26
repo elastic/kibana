@@ -42,7 +42,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.aggregate',
-    handlerHash: 'PLACEHOLDER',
+    handlerHash: '0223bec699354d5878732a6ebcb99a2b4b43a28b4f01da293df1ab7165c33e00',
   },
   {
     id: 'data.dedupe',
