@@ -28,11 +28,10 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataFilterStep.documentation.details', {
-      defaultMessage: `The ${DataFilterStepTypeId} step filters arrays using Kibana Query Language (KQL) conditions. Use {itemSyntax} to reference item properties and {indexSyntax} to access the item's position. Returns an array of matching items. Set {detailedSyntax} to get metadata about input/matched counts. Use {limitSyntax} to cap the number of matches returned.`,
+      defaultMessage: `The ${DataFilterStepTypeId} step filters arrays using Kibana Query Language (KQL) conditions. Use {itemSyntax} to reference item properties and {indexSyntax} to access the item's position. Always returns an array of matching items. Use {limitSyntax} to cap the number of matches returned.`,
       values: {
         itemSyntax: '`item.field`',
         indexSyntax: '`index`',
-        detailedSyntax: '`detailed: true`',
         limitSyntax: '`limit`',
       },
     }),
@@ -78,23 +77,18 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
       }),
 
       i18n.translate('workflowsExtensions.dataFilterStep.documentation.example4', {
-        defaultMessage: `## Detailed output for observability
+        defaultMessage: `## Chain filter with count using Liquid
 \`\`\`yaml
-- name: filter-with-metrics
+- name: filter-enabled
   type: ${DataFilterStepTypeId}
   items: "\${{ steps.fetch_data.output }}"
-  detailed: true
   with:
     condition: "item.enabled: true"
 
-# Output:
-# {
-#   items: [...],
-#   metadata: {
-#     inputCount: 100,
-#     matchedCount: 42
-#   }
-# }
+- name: log-count
+  type: console
+  with:
+    message: "Matched {{steps.filter-enabled.output | size}} out of {{steps.fetch_data.output | size}} items"
 \`\`\``,
       }),
 

@@ -8,6 +8,7 @@
  */
 
 import { evaluateKql } from '@kbn/eval-kql';
+import { isKqlSyntaxError } from './kql_utils';
 import { dataFindStepCommonDefinition } from '../../../common/steps/data';
 import type { StepHandlerContext } from '../../step_registry/types';
 import { createServerStepDefinition } from '../../step_registry/types';
@@ -17,94 +18,35 @@ type FindStepContext = StepHandlerContext<
   typeof dataFindStepCommonDefinition.configSchema
 >;
 
-function isKqlSyntaxError(error: unknown): boolean {
-  return error instanceof Error && error.name === 'KQLSyntaxError';
-}
-
-function handleEmptyCondition(
-  items: unknown[],
-  errorIfEmpty: boolean | undefined,
-  detailed: boolean,
-  logger: FindStepContext['logger']
-) {
-  logger.debug('No condition provided, returning first item');
-  const firstItem = items.length > 0 ? items[0] : null;
-
-  if (errorIfEmpty && firstItem === null) {
-    logger.error('No items found and errorIfEmpty is true');
-    return { error: new Error('No items found in the collection') };
-  }
-
-  if (detailed) {
-    return {
-      output: {
-        item: firstItem,
-        metadata: { matchIndex: firstItem !== null ? 0 : null },
-      },
-    };
-  }
-  return { output: firstItem };
-}
-
 function searchForMatch(
   items: unknown[],
   condition: string,
   context: FindStepContext
-): { foundItem: unknown; matchIndex: number | null } {
-  for (let index = 0; index < items.length; index++) {
-    const item = items[index];
+): { item: unknown; index: number | null; aborted?: boolean } {
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
 
     if (context.abortSignal?.aborted) {
       context.logger.warn('Find operation aborted by signal');
-      throw new Error('Operation was aborted');
+      return { item: null, index: null, aborted: true };
     }
 
     try {
-      const matches = evaluateKql(condition, { item, index });
+      const matches = evaluateKql(condition, { item, index: i });
 
       if (matches) {
-        context.logger.debug(`Found match at index ${index}`);
-        return { foundItem: item, matchIndex: index };
+        context.logger.debug(`Found match at index ${i}`);
+        return { item, index: i };
       }
     } catch (error) {
-      // KQL syntax errors are fatal - invalid condition provided by the user
       if (isKqlSyntaxError(error)) {
         throw new Error(`Invalid KQL condition: ${(error as Error).message}`);
       }
-      // Runtime evaluation errors (e.g. null item) - skip and continue
-      context.logger.warn(`Failed to evaluate condition for item at index ${index}`, error);
+      context.logger.warn(`Failed to evaluate condition for item at index ${i}`, error);
     }
   }
 
-  return { foundItem: null, matchIndex: null };
-}
-
-function formatOutput(
-  foundItem: unknown,
-  matchIndex: number | null,
-  errorIfEmpty: boolean | undefined,
-  detailed: boolean,
-  logger: FindStepContext['logger']
-) {
-  if (foundItem === null) {
-    logger.debug('No matching item found');
-
-    if (errorIfEmpty) {
-      logger.error('No match found and errorIfEmpty is true');
-      return { error: new Error('No item matching the condition was found') };
-    }
-  }
-
-  if (detailed) {
-    return {
-      output: {
-        item: foundItem,
-        metadata: { matchIndex },
-      },
-    };
-  }
-
-  return { output: foundItem };
+  return { item: null, index: null };
 }
 
 export const dataFindStepDefinition = createServerStepDefinition({
@@ -113,7 +55,6 @@ export const dataFindStepDefinition = createServerStepDefinition({
     try {
       const items = context.contextManager.renderInputTemplate(context.config.items);
       const { condition, errorIfEmpty } = context.input;
-      const detailed = context.config.detailed ?? false;
 
       if (!Array.isArray(items)) {
         context.logger.error(`Input items has invalid type: ${typeof items}`);
@@ -125,16 +66,33 @@ export const dataFindStepDefinition = createServerStepDefinition({
       }
 
       if (!condition || condition.trim() === '') {
-        return handleEmptyCondition(items, errorIfEmpty, detailed, context.logger);
+        context.logger.debug('No condition provided, returning first item');
+        const firstItem = items.length > 0 ? items[0] : null;
+
+        if (errorIfEmpty && firstItem === null) {
+          context.logger.error('No items found and errorIfEmpty is true');
+          return { error: new Error('No items found in the collection') };
+        }
+
+        return { output: { item: firstItem, index: firstItem !== null ? 0 : null } };
       }
 
       context.logger.debug(
         `Finding first match in ${items.length} item(s) with condition: ${condition}`
       );
 
-      const { foundItem, matchIndex } = searchForMatch(items, condition, context);
+      const { aborted, ...result } = searchForMatch(items, condition, context);
 
-      return formatOutput(foundItem, matchIndex, errorIfEmpty, detailed, context.logger);
+      if (aborted) {
+        return { error: new Error('Operation was aborted') };
+      }
+
+      if (result.item === null && errorIfEmpty) {
+        context.logger.error('No match found and errorIfEmpty is true');
+        return { error: new Error('No item matching the condition was found') };
+      }
+
+      return { output: result };
     } catch (error) {
       context.logger.error('Failed to find item', error);
       return {

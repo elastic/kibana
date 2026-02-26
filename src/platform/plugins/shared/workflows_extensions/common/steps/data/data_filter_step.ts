@@ -14,7 +14,6 @@ export const DataFilterStepTypeId = 'data.filter';
 
 export const ConfigSchema = z.object({
   items: z.unknown(),
-  detailed: z.boolean().optional(),
 });
 
 export const InputSchema = z.object({
@@ -22,16 +21,7 @@ export const InputSchema = z.object({
   limit: z.number().positive().optional(),
 });
 
-export const OutputSchema = z.union([
-  z.array(z.unknown()),
-  z.object({
-    items: z.array(z.unknown()),
-    metadata: z.object({
-      inputCount: z.number(),
-      matchedCount: z.number(),
-    }),
-  }),
-]);
+export const OutputSchema = z.array(z.unknown());
 
 export type DataFilterStepConfigSchema = typeof ConfigSchema;
 export type DataFilterStepInputSchema = typeof InputSchema;

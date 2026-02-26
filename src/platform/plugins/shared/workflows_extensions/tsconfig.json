@@ -23,7 +23,8 @@
     "@kbn/inference-common",
     "@kbn/actions-plugin",
     "@kbn/utility-types",
-    "@kbn/eval-kql"
+    "@kbn/eval-kql",
+    "@kbn/es-query"
   ],
   "exclude": [
     "target/**/*"

@@ -28,12 +28,11 @@ export const dataFindStepDefinition: PublicStepDefinition = {
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataFindStep.documentation.details', {
-      defaultMessage: `The ${DataFindStepTypeId} step finds the first item in an array matching a KQL condition. Use {itemSyntax} to reference item properties and {indexSyntax} to access the item's position. Returns the first matching item or {nullSyntax}. Set {detailedSyntax} to get metadata about the match index. Use {errorIfEmptySyntax} to return an error instead of null when no match is found.`,
+      defaultMessage: `The ${DataFindStepTypeId} step finds the first item in an array matching a KQL condition. Use {itemSyntax} to reference item properties and {indexSyntax} to access the item's position. Always returns {outputShape}. Use {errorIfEmptySyntax} to return an error instead of null when no match is found.`,
       values: {
         itemSyntax: '`item.field`',
         indexSyntax: '`index`',
-        nullSyntax: '`null`',
-        detailedSyntax: '`detailed: true`',
+        outputShape: '`{ item, index }`',
         errorIfEmptySyntax: '`errorIfEmpty: true`',
       },
     }),
@@ -47,7 +46,8 @@ export const dataFindStepDefinition: PublicStepDefinition = {
   with:
     condition: "item.role: primary_owner"
 
-# Output: First item where role equals "primary_owner", or null if not found
+# Output: { item: { role: "primary_owner", ... }, index: 2 }
+# Or if no match: { item: null, index: null }
 \`\`\``,
       }),
 
@@ -79,29 +79,18 @@ export const dataFindStepDefinition: PublicStepDefinition = {
       }),
 
       i18n.translate('workflowsExtensions.dataFindStep.documentation.example4', {
-        defaultMessage: `## Detailed output for observability
+        defaultMessage: `## Access the matched item and its index
 \`\`\`yaml
-- name: find-with-metadata
+- name: find-enabled
   type: ${DataFindStepTypeId}
   items: "\${{ steps.fetch_data.output }}"
-  detailed: true
   with:
     condition: "item.enabled: true"
 
-# Output:
-# {
-#   item: { enabled: true, id: 5 },
-#   metadata: {
-#     matchIndex: 4
-#   }
-# }
-# Or if no match:
-# {
-#   item: null,
-#   metadata: {
-#     matchIndex: null
-#   }
-# }
+- name: log-result
+  type: console
+  with:
+    message: "Found item at index {{steps.find-enabled.output.index}}: {{steps.find-enabled.output.item | json}}"
 \`\`\``,
       }),
 

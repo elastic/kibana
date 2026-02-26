@@ -14,7 +14,6 @@ export const DataFindStepTypeId = 'data.find';
 
 export const ConfigSchema = z.object({
   items: z.unknown(),
-  detailed: z.boolean().optional(),
 });
 
 export const InputSchema = z.object({
@@ -22,16 +21,10 @@ export const InputSchema = z.object({
   errorIfEmpty: z.boolean().optional(),
 });
 
-export const OutputSchema = z.union([
-  z.unknown(),
-  z.null(),
-  z.object({
-    item: z.unknown().nullable(),
-    metadata: z.object({
-      matchIndex: z.number().nullable(),
-    }),
-  }),
-]);
+export const OutputSchema = z.object({
+  item: z.unknown().nullable(),
+  index: z.number().nullable(),
+});
 
 export type DataFindStepConfigSchema = typeof ConfigSchema;
 export type DataFindStepInputSchema = typeof InputSchema;

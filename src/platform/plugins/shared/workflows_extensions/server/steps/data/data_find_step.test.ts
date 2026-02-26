@@ -15,7 +15,6 @@ describe('dataFindStepDefinition', () => {
   const createMockContext = (
     config: {
       items: unknown[];
-      detailed?: boolean;
     },
     input: {
       condition: string;
@@ -43,7 +42,7 @@ describe('dataFindStepDefinition', () => {
   });
 
   describe('basic finding', () => {
-    it('should find first matching item based on KQL condition', async () => {
+    it('should find first matching item and return { item, index }', async () => {
       const config = {
         items: [
           { status: 'inactive', id: 1 },
@@ -58,7 +57,7 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toEqual({ status: 'active', id: 2 });
+      expect(result.output).toEqual({ item: { status: 'active', id: 2 }, index: 1 });
     });
 
     it('should find first item matching complex KQL condition', async () => {
@@ -76,10 +75,10 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toEqual({ status: 'active', severity: 3 });
+      expect(result.output).toEqual({ item: { status: 'active', severity: 3 }, index: 1 });
     });
 
-    it('should return null when no items match', async () => {
+    it('should return { item: null, index: null } when no items match', async () => {
       const config = {
         items: [
           { status: 'active', severity: 1 },
@@ -93,7 +92,7 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toBeNull();
+      expect(result.output).toEqual({ item: null, index: null });
     });
   });
 
@@ -114,7 +113,7 @@ describe('dataFindStepDefinition', () => {
       expect(result.error?.message).toContain('No item matching the condition was found');
     });
 
-    it('should return null when no match found and errorIfEmpty is false', async () => {
+    it('should return { item: null, index: null } when no match found and errorIfEmpty is false', async () => {
       const config = {
         items: [{ status: 'inactive' }],
       };
@@ -126,11 +125,11 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toBeNull();
+      expect(result.output).toEqual({ item: null, index: null });
       expect(result.error).toBeUndefined();
     });
 
-    it('should return null by default when no match found', async () => {
+    it('should return { item: null, index: null } by default when no match found', async () => {
       const config = {
         items: [{ status: 'inactive' }],
       };
@@ -141,74 +140,13 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toBeNull();
+      expect(result.output).toEqual({ item: null, index: null });
       expect(result.error).toBeUndefined();
-    });
-  });
-
-  describe('detailed mode', () => {
-    it('should return metadata when detailed is true and item found', async () => {
-      const config = {
-        items: [
-          { status: 'inactive', id: 1 },
-          { status: 'active', id: 2 },
-          { status: 'active', id: 3 },
-        ],
-        detailed: true,
-      };
-      const input = {
-        condition: 'item.status: active',
-      };
-
-      const context = createMockContext(config, input);
-      const result = await dataFindStepDefinition.handler(context);
-
-      expect(result.output).toEqual({
-        item: { status: 'active', id: 2 },
-        metadata: {
-          matchIndex: 1,
-        },
-      });
-    });
-
-    it('should return metadata with null when detailed is true and no item found', async () => {
-      const config = {
-        items: [{ status: 'inactive' }],
-        detailed: true,
-      };
-      const input = {
-        condition: 'item.status: active',
-      };
-
-      const context = createMockContext(config, input);
-      const result = await dataFindStepDefinition.handler(context);
-
-      expect(result.output).toEqual({
-        item: null,
-        metadata: {
-          matchIndex: null,
-        },
-      });
-    });
-
-    it('should return just item when detailed is false', async () => {
-      const config = {
-        items: [{ status: 'active', id: 1 }],
-        detailed: false,
-      };
-      const input = {
-        condition: 'item.status: active',
-      };
-
-      const context = createMockContext(config, input);
-      const result = await dataFindStepDefinition.handler(context);
-
-      expect(result.output).toEqual({ status: 'active', id: 1 });
     });
   });
 
   describe('empty condition handling', () => {
-    it('should return first item when condition is empty', async () => {
+    it('should return first item with index 0 when condition is empty', async () => {
       const config = {
         items: [{ id: 1 }, { id: 2 }, { id: 3 }],
       };
@@ -219,10 +157,10 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toEqual({ id: 1 });
+      expect(result.output).toEqual({ item: { id: 1 }, index: 0 });
     });
 
-    it('should return null when condition is empty and items array is empty', async () => {
+    it('should return { item: null, index: null } when condition is empty and items array is empty', async () => {
       const config = {
         items: [],
       };
@@ -233,7 +171,7 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toBeNull();
+      expect(result.output).toEqual({ item: null, index: null });
     });
 
     it('should return error when condition is empty, items array is empty, and errorIfEmpty is true', async () => {
@@ -250,6 +188,20 @@ describe('dataFindStepDefinition', () => {
 
       expect(result.error).toBeDefined();
       expect(result.error?.message).toContain('No items found');
+    });
+
+    it('should return first item when condition is whitespace', async () => {
+      const config = {
+        items: [{ id: 10 }, { id: 20 }],
+      };
+      const input = {
+        condition: '   ',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataFindStepDefinition.handler(context);
+
+      expect(result.output).toEqual({ item: { id: 10 }, index: 0 });
     });
   });
 
@@ -295,7 +247,7 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toEqual({ status: 'active', id: 2 });
+      expect(result.output).toEqual({ item: { status: 'active', id: 2 }, index: 1 });
       expect(context.logger.warn).toHaveBeenCalled();
     });
   });
@@ -312,7 +264,7 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toEqual({ value: 'c' });
+      expect(result.output).toEqual({ item: { value: 'c' }, index: 2 });
     });
   });
 
@@ -329,7 +281,6 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       context.abortSignal = abortController.signal;
 
-      // Abort immediately
       abortController.abort();
 
       const result = await dataFindStepDefinition.handler(context);
@@ -354,8 +305,7 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
-      expect(result.output).toEqual({ id: 5, status: 'active' });
-      // Should have logged finding at index 5, not processed all 1000 items
+      expect(result.output).toEqual({ item: { id: 5, status: 'active' }, index: 5 });
       expect(context.logger.debug).toHaveBeenCalledWith('Found match at index 5');
     });
   });

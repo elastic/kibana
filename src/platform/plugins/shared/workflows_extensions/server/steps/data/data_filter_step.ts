@@ -8,12 +8,9 @@
  */
 
 import { evaluateKql } from '@kbn/eval-kql';
+import { isKqlSyntaxError } from './kql_utils';
 import { dataFilterStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
-
-function isKqlSyntaxError(error: unknown): boolean {
-  return error instanceof Error && error.name === 'KQLSyntaxError';
-}
 
 export const dataFilterStepDefinition = createServerStepDefinition({
   ...dataFilterStepCommonDefinition,
@@ -21,7 +18,6 @@ export const dataFilterStepDefinition = createServerStepDefinition({
     try {
       const items = context.contextManager.renderInputTemplate(context.config.items);
       const { condition, limit } = context.input;
-      const detailed = context.config.detailed ?? false;
 
       if (!Array.isArray(items)) {
         context.logger.error(`Input items has invalid type: ${typeof items}`);
@@ -32,23 +28,13 @@ export const dataFilterStepDefinition = createServerStepDefinition({
         };
       }
 
-      const inputCount = items.length;
-
       if (!condition || condition.trim() === '') {
         context.logger.debug('No condition provided, returning all items');
-        if (detailed) {
-          return {
-            output: {
-              items,
-              metadata: { inputCount, matchedCount: inputCount },
-            },
-          };
-        }
         return { output: items };
       }
 
       context.logger.debug(
-        `Filtering ${inputCount} item(s) with condition: ${condition}${
+        `Filtering ${items.length} item(s) with condition: ${condition}${
           limit ? ` (limit: ${limit})` : ''
         }`
       );
@@ -77,28 +63,17 @@ export const dataFilterStepDefinition = createServerStepDefinition({
             }
           }
         } catch (error) {
-          // KQL syntax errors are fatal - invalid condition provided by the user
           if (isKqlSyntaxError(error)) {
             context.logger.error('Invalid KQL condition', error);
             return {
               error: new Error(`Invalid KQL condition: ${(error as Error).message}`),
             };
           }
-          // Runtime evaluation errors (e.g. null item) - skip and continue
           context.logger.warn(`Failed to evaluate condition for item at index ${index}`, error);
         }
       }
 
-      context.logger.debug(`Filtered ${matchedCount} item(s) from ${inputCount} total`);
-
-      if (detailed) {
-        return {
-          output: {
-            items: filteredItems,
-            metadata: { inputCount, matchedCount },
-          },
-        };
-      }
+      context.logger.debug(`Filtered ${matchedCount} item(s) from ${items.length} total`);
 
       return { output: filteredItems };
     } catch (error) {

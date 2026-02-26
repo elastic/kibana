@@ -15,7 +15,6 @@ describe('dataFilterStepDefinition', () => {
   const createMockContext = (
     config: {
       items: unknown[];
-      detailed?: boolean;
     },
     input: {
       condition: string;
@@ -98,6 +97,24 @@ describe('dataFilterStepDefinition', () => {
 
       expect(result.output).toEqual([]);
     });
+
+    it('should always return a plain array', async () => {
+      const config = {
+        items: [
+          { status: 'active', id: 1 },
+          { status: 'inactive', id: 2 },
+        ],
+      };
+      const input = {
+        condition: 'item.status: active',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataFilterStepDefinition.handler(context);
+
+      expect(Array.isArray(result.output)).toBe(true);
+      expect(result.output).toEqual([{ status: 'active', id: 1 }]);
+    });
   });
 
   describe('limit parameter', () => {
@@ -146,55 +163,6 @@ describe('dataFilterStepDefinition', () => {
     });
   });
 
-  describe('detailed mode', () => {
-    it('should return metadata when detailed is true', async () => {
-      const config = {
-        items: [
-          { status: 'active', id: 1 },
-          { status: 'inactive', id: 2 },
-          { status: 'active', id: 3 },
-        ],
-        detailed: true,
-      };
-      const input = {
-        condition: 'item.status: active',
-      };
-
-      const context = createMockContext(config, input);
-      const result = await dataFilterStepDefinition.handler(context);
-
-      expect(result.output).toEqual({
-        items: [
-          { status: 'active', id: 1 },
-          { status: 'active', id: 3 },
-        ],
-        metadata: {
-          inputCount: 3,
-          matchedCount: 2,
-        },
-      });
-    });
-
-    it('should return just items array when detailed is false', async () => {
-      const config = {
-        items: [
-          { status: 'active', id: 1 },
-          { status: 'inactive', id: 2 },
-        ],
-        detailed: false,
-      };
-      const input = {
-        condition: 'item.status: active',
-      };
-
-      const context = createMockContext(config, input);
-      const result = await dataFilterStepDefinition.handler(context);
-
-      expect(Array.isArray(result.output)).toBe(true);
-      expect(result.output).toEqual([{ status: 'active', id: 1 }]);
-    });
-  });
-
   describe('empty condition handling', () => {
     it('should return all items when condition is empty', async () => {
       const config = {
@@ -222,6 +190,20 @@ describe('dataFilterStepDefinition', () => {
       const result = await dataFilterStepDefinition.handler(context);
 
       expect(result.output).toEqual([{ id: 1 }, { id: 2 }]);
+    });
+
+    it('should return empty array when condition is empty and items array is empty', async () => {
+      const config = {
+        items: [],
+      };
+      const input = {
+        condition: '',
+      };
+
+      const context = createMockContext(config, input);
+      const result = await dataFilterStepDefinition.handler(context);
+
+      expect(result.output).toEqual([]);
     });
   });
 
@@ -304,7 +286,6 @@ describe('dataFilterStepDefinition', () => {
       const context = createMockContext(config, input);
       context.abortSignal = abortController.signal;
 
-      // Abort immediately
       abortController.abort();
 
       const result = await dataFilterStepDefinition.handler(context);
