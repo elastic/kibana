@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies -- `ulid` dependency is in root `package.json`
 import { monotonicFactory } from 'ulid';
 import crypto from 'node:crypto';
 import type {
@@ -15,7 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
-import type { ClientBulkOperation } from '@kbn/data-streams/src/types/es_api';
+import type { ClientCreateRequest } from '@kbn/data-streams/src/types/es_api';
 import type { Logger } from '@kbn/logging';
 import { changeHistoryMappings } from './src/mappings';
 import type {
@@ -179,20 +178,21 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(err);
       throw err;
     }
-    const operations = [] as Array<ClientBulkOperation | ChangeHistoryDocument>;
+    const { timestamp, userId, spaceId: space } = opts;
+    const request: ClientCreateRequest<ChangeHistoryDocument> = { documents: [], space };
     for (const change of changes) {
       // Create document and populate
       const { id, objectType, objectId, sequence } = change;
       const hash = sha256(JSON.stringify(change.after));
-      const document = this.createDocument(id, opts.timestamp, opts.data);
-      document.user = { id: opts.userId };
+      const document = this.createDocument(id, timestamp, opts.data);
+      document.user = { id: userId };
       document.event = { ...document.event, module, dataset, action: opts.action };
       if (correlationId && !document.event.group) document.event.group = { id: correlationId };
       const fields = {} as { changed?: string[]; ignored?: string[]; masked?: string[] };
       const { masked, snapshot } = maskSensitiveFields(change.after, opts.maskFields);
       fields.masked = masked;
       document.object = { id: objectId, type: objectType, hash, sequence, fields, snapshot };
-      document.kibana = { space_id: opts.spaceId, version: kibanaVersion };
+      document.kibana = { space_id: space, version: kibanaVersion };
       // Do we have "before" state?
       // Perform diff using diffDocCalculation(), defaulted to standard if not passed in.
       if (change.before) {
@@ -214,12 +214,11 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         }
       }
       // Queue operations
-      operations.push({ create: { _id: document.event.id } });
-      operations.push(document);
+      request.documents.push({ _id: document.event.id, ...document });
     }
 
     try {
-      await client.bulk({ refresh: true, operations });
+      await client.create({ refresh: true, ...request });
     } catch (err) {
       const error = new Error(`Error saving change history: ${err}`, { cause: err });
       this.logger.error(error);
