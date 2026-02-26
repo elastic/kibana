@@ -11,18 +11,18 @@ Security event visualization using an Actor-Action-Target model. Entities (users
 
 Events follow an **Actor-Action-Target** model:
 
-- **Actor**: the entity that performs the action. Resolved by priority: `user.entity.id` > `host.entity.id` > `service.entity.id` > `entity.id`. Only one actor per event (first match wins, but the field may have multiple values).
-- **Action**: `event.action` — the operation performed (e.g. "ConsoleLogin", "AssumeRole").
-- **Targets**: all `*.target.entity.id` / `entity.target.id` fields are included (no priority, multiple supported). Each target becomes a separate node.
+- **Actor**: the entity that performs the action. Resolved by priority (user > host > service > generic). Only one actor per event.
+- **Action**: the operation performed (e.g. "ConsoleLogin", "AssumeRole").
+- **Targets**: all target entity fields are included (no priority, multiple supported). Each target becomes a separate node.
 
-An event renders in the graph only when it has at least one actor field, `event.action`, and at least one target field.
+See `references/field-mappings.md` for exact field names, resolution rules, and rendering requirements.
 
 ## Node types
 
-- **Entity nodes**: 5 shapes mapped by entity type in `entity_type_constants.ts` (45+ types). Ellipse=user, hexagon=cloud resource, rectangle=host/container, diamond=network, pentagon=other. Grouped entities are rendered as entity nodes showing an entities count.
-- **Label nodes**: connectors between entities representing events/alerts. Color: `danger`=alerts, `primary`=events. Grouped events are rendered as label nodes showing an events count and an alerts count. Support stacked display when count > 2.
+- **Entity nodes**: 5 shapes mapped by entity type (ellipse=user, hexagon=cloud resource, rectangle=host/container, diamond=network, pentagon=other). Grouped entities show an entities count.
+- **Label nodes**: connectors between entities representing events/alerts. Color: `danger`=alerts, `primary`=events. Grouped events show events count and alerts count. Support stacked display when count > 2.
 - **Relationship nodes**: connectors from entity store (static relationships like "owns", "supervises").
-- **Stack nodes** (aka group nodes): created in `parse_records.ts` when multiple connectors share the same source-target pair. Color: `subdued`. Note: stacking refers to the grouping of connectors, while entity/label nodes handle their own internal grouping (entity count, event/alert counts) independently.
+- **Stack nodes** (aka group nodes): created when multiple connectors share the same source-target pair. Color: `subdued`. Stacking groups connectors; entity/label nodes handle their own internal grouping independently.
 - **Connector nodes** = label nodes + relationship nodes (both connect entity nodes).
 
 ## Limits
@@ -32,19 +32,13 @@ An event renders in the graph only when it has at least one actor field, `event.
 
 ## Architecture
 
-- **API**: Versioned internal POST at `GRAPH_ROUTE_PATH` (v1). Requires `cloud-security-posture-read` privilege.
+- **API**: Versioned internal POST (v1). Requires `cloud-security-posture-read` privilege.
 - **License**: Platinum+ (ESS/self-hosted), Complete tier (Serverless). Feature flag: `securitySolution:enableGraphVisualization`.
-- **Backend flow**: `route.ts` (endpoint + license check) -> `v1.ts` (orchestrator) -> `fetch_graph.ts` (parallel `Promise.all`) -> `parse_records.ts` (dedup, grouping, node/edge creation).
-- **Parallel fetch**: `fetch_events_graph.ts` (ES|QL with LOOKUP JOIN for entity enrichment) + `fetch_entity_relationships_graph.ts` (entity store queries via FORK + LOOKUP JOIN).
-- **Frontend**: `GraphInvestigation` is the main reusable component using `@xyflow/react`. Node shapes in `components/node/`. Lazy-loaded in Security Solution flyout via `graph_visualization.tsx`. Uses `useFetchGraphData()` hook for API calls.
+- **Backend flow**: endpoint with license check -> orchestrator -> parallel fetch (events via ES|QL + entity relationships via entity store) -> parse, deduplicate, and group into nodes/edges.
+- **Frontend**: `GraphInvestigation` is the main reusable component using `@xyflow/react`. Lazy-loaded in Security Solution flyout. Uses `useFetchGraphData()` hook for API calls.
 - **Client-side gating**: the reusable `useGraphPreview` hook determines whether the graph should render (checks license, feature flag, and required fields in the event).
-- **Graph -> Flyout communication**: one-way via `useExpandableFlyoutApi` — the graph appends serializable params to the URL so the flyout panel reads from there (no non-serializable callbacks in flyout state).
-- **Flyout -> Graph communication**: reverse direction uses a lightweight Pub-Sub (`groupedItemClick$` RxJS Subject) that `GraphVisualization` subscribes to, keeping the graph package decoupled from plugin-specific imports.
-
-## Conventions
-
-- Entity type -> shape/icon mapping lives in `entity_type_constants.ts`; add new entries there for new entity types.
-- Frontend styling: EUI components + Emotion (`@emotion/react`).
+- **Graph -> Flyout**: one-way via `useExpandableFlyoutApi` — serializable params appended to the URL so the flyout panel reads from there.
+- **Flyout -> Graph**: reverse via lightweight Pub-Sub (`groupedItemClick$` RxJS Subject), keeping the graph package decoupled from plugin-specific imports.
 
 ## Philosophy
 
@@ -57,7 +51,7 @@ An event renders in the graph only when it has at least one actor field, `event.
 
 Open only what you need:
 
-- `references/code-locations.md` — file paths grouped by area (schema, backend, frontend, license gating).
+- `references/code-locations.md` — file paths grouped by area (schema, backend, frontend, license gating) and code conventions.
 - `references/testing.md` — how to run Jest, FTR, and Storybook tests; test file locations, fixtures, and testing conventions.
 - `references/field-mappings.md` — required fields, actor resolution logic, target population rules, entity enrichment, and ECS references.
 - `references/examples.md` — real-world cloud audit log examples and edge cases.

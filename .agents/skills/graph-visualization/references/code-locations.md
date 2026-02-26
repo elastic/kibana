@@ -32,3 +32,8 @@ All paths are relative to `x-pack/solutions/security/`.
 
 - `packages/features/src/product_features_keys.ts` - `ProductFeatureSecurityKey.graphVisualization`
 - `plugins/security_solution_serverless/common/pli/pli_config.ts` - Complete tier only
+
+## Conventions
+
+- Entity type -> shape/icon mapping lives in `entity_type_constants.ts`; add new entries there for new entity types.
+- Frontend styling: EUI components + Emotion (`@emotion/react`).

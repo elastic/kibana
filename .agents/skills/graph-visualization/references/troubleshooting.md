@@ -46,8 +46,6 @@ Feature flag: `securitySolution:enableGraphVisualization` (enabled by default fr
 
 ## Performance
 
-**Built-in limits**: 1,000 events/alerts fetched, 300 nodes max rendered.
-
 **Optimization tips**:
 - Start with narrow time ranges (24h, 7d), expand gradually
 - Use selective filters (specific actor + action) before broad ones
