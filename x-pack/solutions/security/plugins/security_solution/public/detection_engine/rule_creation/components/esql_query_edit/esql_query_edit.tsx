@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import type { DataViewBase } from '@kbn/es-query';
 import { debounceAsync } from '@kbn/securitysolution-utils';
 import type { FieldConfig } from '../../../../shared_imports';
@@ -36,6 +37,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   disabled = false,
   onValidityChange,
 }: EsqlQueryEditProps): JSX.Element {
+  const queryClient = useQueryClient();
   const componentProps = useMemo(
     () => ({
       isDisabled: disabled,
@@ -63,12 +65,12 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
             ]
           : []),
         {
-          validator: debounceAsync(esqlQueryValidatorFactory(), 300),
+          validator: debounceAsync(esqlQueryValidatorFactory({ queryClient }), 300),
           isAsync: true,
         },
       ],
     }),
-    [required, path, fieldsToValidateOnChange]
+    [required, path, fieldsToValidateOnChange, queryClient]
   );
 
   return (

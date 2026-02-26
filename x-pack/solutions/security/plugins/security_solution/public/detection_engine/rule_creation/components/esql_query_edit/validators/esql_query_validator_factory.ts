@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import type { QueryClient } from '@kbn/react-query';
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
+import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
 import { ESQL_ERROR_CODES } from './error_codes';
 import * as i18n from './translations';
 
-export function esqlQueryValidatorFactory(): ValidationFunc<FormData, string, FieldValueQueryBar> {
+interface EsqlQueryValidatorFactoryParams {
+  queryClient: QueryClient;
+}
+
+export function esqlQueryValidatorFactory({
+  queryClient,
+}: EsqlQueryValidatorFactoryParams): ValidationFunc<FormData, string, FieldValueQueryBar> {
   return async (...args) => {
     const [{ value }] = args;
     const esqlQuery = value.query.query as string;
@@ -26,6 +34,8 @@ export function esqlQueryValidatorFactory(): ValidationFunc<FormData, string, Fi
       if (errors.length) {
         return constructSyntaxError(new Error(errors[0].message));
       }
+
+      await fetchEsqlQueryColumns({ esqlQuery, queryClient });
     } catch (error) {
       return constructValidationError(error);
     }

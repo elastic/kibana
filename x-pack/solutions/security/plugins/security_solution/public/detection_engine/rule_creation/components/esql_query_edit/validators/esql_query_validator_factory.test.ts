@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { QueryClient } from '@kbn/react-query';
 import type { FormData, ValidationFunc, ValidationFuncArg } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { esqlQueryValidatorFactory } from './esql_query_validator_factory';
 import { ESQL_ERROR_CODES } from './error_codes';
+
+jest.mock('@kbn/esql-utils', () => ({
+  getESQLQueryColumns: jest.fn().mockResolvedValue([{ id: '_id' }]),
+}));
+jest.mock('../../../../../common/lib/kibana');
 
 describe('esqlQueryValidator', () => {
   describe('ES|QL query syntax', () => {
@@ -54,7 +59,15 @@ describe('esqlQueryValidator', () => {
 type EsqlQueryValidatorArgs = ValidationFuncArg<FormData, FieldValueQueryBar>;
 
 function createValidator(): ValidationFunc<FormData, string, FieldValueQueryBar> {
-  return esqlQueryValidatorFactory();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+      },
+    },
+  });
+
+  return esqlQueryValidatorFactory({ queryClient });
 }
 
 function createEsqlQueryFieldValue(esqlQuery: string): Readonly<FieldValueQueryBar> {
