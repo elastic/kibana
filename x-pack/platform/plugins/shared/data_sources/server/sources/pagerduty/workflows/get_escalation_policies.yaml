@@ -1,6 +1,6 @@
 version: '1'
 name: sources.pagerduty.get_escalation_policies
-description: 'Get escalation policies in PagerDuty. Supports limit and filtering by query, user_ids, and team_ids. Note: include is not passed to avoid MCP validation errors on escalation target types.'
+description: 'Get escalation policies in PagerDuty. Supports limit and filtering by query, user_ids, and team_ids.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
