@@ -12,6 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -188,8 +189,9 @@ describe('JsonMetricsDashboard', () => {
 
       const options = await capturedGetCreationOptions!();
       const input = options.getInitialInput!();
+      const config = input.pinned_panels![0].config as OptionsListDSLControlState;
 
-      expect(input.pinned_panels![0].config.data_view_id).toBe('');
+      expect(config.data_view_id).toBe('');
     });
   });
 });
