@@ -4124,7 +4124,7 @@
           "\"/api/detection_engine/rules/_find\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 301,
+        "lineNumber": 308,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4179,7 +4179,7 @@
           "string[]"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
-        "lineNumber": 575,
+        "lineNumber": 582,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
