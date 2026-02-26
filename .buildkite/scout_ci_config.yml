@@ -1,7 +1,6 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
-    - agent_builder
     - apm
     - console
     - dashboard

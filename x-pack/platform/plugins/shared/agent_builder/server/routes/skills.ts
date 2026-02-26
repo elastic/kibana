@@ -20,7 +20,6 @@ import type {
 } from '../../common/http_api/skills';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
-import { internalToPublicDefinition } from '../services/skills/utils';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
   schema.object({
@@ -33,73 +32,8 @@ const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
     content: schema.string({
       meta: { description: 'Content of the reference.' },
     }),
-  }),
-  { maxSize: 20 }
+  })
 );
-
-const skillIdParamSchema = schema.object({
-  skillId: schema.string({
-    meta: { description: 'The unique identifier of the skill.' },
-  }),
-});
-
-const createSkillBodySchema = schema.object({
-  id: schema.string({
-    meta: { description: 'Unique identifier for the skill.' },
-  }),
-  name: schema.string({
-    meta: { description: 'Human-readable name for the skill.' },
-  }),
-  description: schema.string({
-    meta: { description: 'Description of what the skill does.' },
-  }),
-  content: schema.string({
-    meta: { description: 'Skill instructions content (markdown).' },
-  }),
-  referenced_content: schema.maybe(REFERENCED_CONTENT_SCHEMA),
-  tool_ids: schema.arrayOf(
-    schema.string({
-      meta: { description: 'Tool ID from the tool registry.' },
-    }),
-    {
-      defaultValue: [],
-      maxSize: 5,
-      meta: {
-        description: 'Tool IDs from the tool registry that this skill references.',
-      },
-    }
-  ),
-});
-
-const updateSkillBodySchema = schema.object({
-  name: schema.maybe(
-    schema.string({
-      meta: { description: 'Updated name for the skill.' },
-    })
-  ),
-  description: schema.maybe(
-    schema.string({
-      meta: { description: 'Updated description.' },
-    })
-  ),
-  content: schema.maybe(
-    schema.string({
-      meta: { description: 'Updated skill instructions content.' },
-    })
-  ),
-  referenced_content: schema.maybe(REFERENCED_CONTENT_SCHEMA),
-  tool_ids: schema.maybe(
-    schema.arrayOf(
-      schema.string({
-        meta: { description: 'Updated tool ID.' },
-      }),
-      {
-        maxSize: 5,
-        meta: { description: 'Updated tool IDs from the tool registry.' },
-      }
-    )
-  ),
-});
 
 const featureFlagConfig = {
   featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -120,10 +54,6 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'List all available skills (built-in and user-created).',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
-        availability: {
-          stability: 'experimental',
-          since: '9.4.0',
-        },
       },
     })
     .addVersion(
@@ -137,7 +67,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const skills = await registry.list();
         return response.ok<ListSkillsResponse>({
           body: {
-            results: await Promise.all(skills.map(internalToPublicDefinition)),
+            results: skills,
           },
         });
       }, featureFlagConfig)
@@ -155,10 +85,6 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'Get a specific skill by ID.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
-        availability: {
-          stability: 'experimental',
-          since: '9.4.0',
-        },
       },
     })
     .addVersion(
@@ -166,7 +92,11 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         version: '2023-10-31',
         validate: {
           request: {
-            params: skillIdParamSchema,
+            params: schema.object({
+              skillId: schema.string({
+                meta: { description: 'The unique identifier of the skill to retrieve.' },
+              }),
+            }),
           },
         },
       },
@@ -175,8 +105,31 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.get(skillId);
+        if (!skill) {
+          return response.notFound({
+            body: { message: `Skill with id '${skillId}' not found` },
+          });
+        }
+
+        // Convert SkillDefinition to PublicSkillDefinition if needed
+        const publicSkill: GetSkillResponse =
+          'readonly' in skill
+            ? (skill as GetSkillResponse)
+            : {
+                id: skill.id,
+                name: skill.name,
+                description: skill.description,
+                content: skill.content,
+                referenced_content: skill.referencedContent?.map((rc) => ({
+                  name: rc.name,
+                  relativePath: rc.relativePath,
+                  content: rc.content,
+                })),
+                readonly: true,
+              };
+
         return response.ok<GetSkillResponse>({
-          body: await internalToPublicDefinition(skill),
+          body: publicSkill,
         });
       }, featureFlagConfig)
     );
@@ -193,10 +146,6 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'Create a new user-defined skill.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
-        availability: {
-          stability: 'experimental',
-          since: '9.4.0',
-        },
       },
     })
     .addVersion(
@@ -204,7 +153,32 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         version: '2023-10-31',
         validate: {
           request: {
-            body: createSkillBodySchema,
+            body: schema.object({
+              id: schema.string({
+                meta: { description: 'Unique identifier for the skill.' },
+              }),
+              name: schema.string({
+                meta: { description: 'Human-readable name for the skill.' },
+              }),
+              description: schema.string({
+                meta: { description: 'Description of what the skill does.' },
+              }),
+              content: schema.string({
+                meta: { description: 'Skill instructions content (markdown).' },
+              }),
+              referenced_content: schema.maybe(REFERENCED_CONTENT_SCHEMA),
+              tool_ids: schema.arrayOf(
+                schema.string({
+                  meta: { description: 'Tool ID from the tool registry.' },
+                }),
+                {
+                  defaultValue: [],
+                  meta: {
+                    description: 'Tool IDs from the tool registry that this skill references.',
+                  },
+                }
+              ),
+            }),
           },
         },
       },
@@ -214,7 +188,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.create(createRequest);
         return response.ok<CreateSkillResponse>({
-          body: await internalToPublicDefinition(skill),
+          body: skill,
         });
       }, featureFlagConfig)
     );
@@ -231,10 +205,6 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'Update an existing user-created skill.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
-        availability: {
-          stability: 'experimental',
-          since: '9.4.0',
-        },
       },
     })
     .addVersion(
@@ -242,8 +212,39 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         version: '2023-10-31',
         validate: {
           request: {
-            params: skillIdParamSchema,
-            body: updateSkillBodySchema,
+            params: schema.object({
+              skillId: schema.string({
+                meta: { description: 'The unique identifier of the skill to update.' },
+              }),
+            }),
+            body: schema.object({
+              name: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated name for the skill.' },
+                })
+              ),
+              description: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated description.' },
+                })
+              ),
+              content: schema.maybe(
+                schema.string({
+                  meta: { description: 'Updated skill instructions content.' },
+                })
+              ),
+              referenced_content: schema.maybe(REFERENCED_CONTENT_SCHEMA),
+              tool_ids: schema.maybe(
+                schema.arrayOf(
+                  schema.string({
+                    meta: { description: 'Updated tool ID.' },
+                  }),
+                  {
+                    meta: { description: 'Updated tool IDs from the tool registry.' },
+                  }
+                )
+              ),
+            }),
           },
         },
       },
@@ -254,7 +255,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.update(skillId, update);
         return response.ok<UpdateSkillResponse>({
-          body: await internalToPublicDefinition(skill),
+          body: skill,
         });
       }, featureFlagConfig)
     );
@@ -271,10 +272,6 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       description: 'Delete a user-created skill by ID. This action cannot be undone.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
-        availability: {
-          stability: 'experimental',
-          since: '9.4.0',
-        },
       },
     })
     .addVersion(
@@ -282,7 +279,11 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         version: '2023-10-31',
         validate: {
           request: {
-            params: skillIdParamSchema,
+            params: schema.object({
+              skillId: schema.string({
+                meta: { description: 'The unique identifier of the skill to delete.' },
+              }),
+            }),
           },
         },
       },
@@ -290,9 +291,9 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         const { skillId } = request.params;
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
-        await registry.delete(skillId);
+        const success = await registry.delete(skillId);
         return response.ok<DeleteSkillResponse>({
-          body: { success: true },
+          body: { success },
         });
       }, featureFlagConfig)
     );

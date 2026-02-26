@@ -10,12 +10,15 @@ import {
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
+  type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp } from './register';
+import { registerAnalytics, registerApp, enableSkillsDeepLink } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -53,12 +56,12 @@ import { createVisualizationAttachmentDefinition } from './application/component
 
 export class AgentBuilderPlugin
   implements
-    Plugin<
-      AgentBuilderPluginSetup,
-      AgentBuilderPluginStart,
-      AgentBuilderSetupDependencies,
-      AgentBuilderStartDependencies
-    >
+  Plugin<
+    AgentBuilderPluginSetup,
+    AgentBuilderPluginStart,
+    AgentBuilderSetupDependencies,
+    AgentBuilderStartDependencies
+  >
 {
   logger: Logger;
   private conversationActiveConfig: EmbeddableConversationProps = {};
@@ -71,6 +74,7 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
   } | null = null;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -94,6 +98,7 @@ export class AgentBuilderPlugin
         }
         return this.internalServices;
       },
+      appUpdater$: this.appUpdater$,
     });
 
     registerAnalytics({ analytics: core.analytics });
@@ -134,6 +139,14 @@ export class AgentBuilderPlugin
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
+
+    const isExperimentalFeaturesEnabled = core.settings.client.get<boolean>(
+      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+      false
+    );
+    if (isExperimentalFeaturesEnabled) {
+      enableSkillsDeepLink(this.appUpdater$);
+    }
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');
@@ -247,7 +260,7 @@ export class AgentBuilderPlugin
               agentBuilderService={agentBuilderService}
             />,
             element,
-            () => {}
+            () => { }
           );
 
           return () => {
