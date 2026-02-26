@@ -46,9 +46,7 @@ describe('muteAlertBodySchema', () => {
   test('allows body with both expires_at and conditions', () => {
     const body = {
       expires_at: '2025-12-31T23:59:59Z',
-      conditions: [
-        { type: 'field_change' as const, field: 'kibana.alert.severity' },
-      ],
+      conditions: [{ type: 'field_change' as const, field: 'kibana.alert.severity' }],
       condition_operator: 'any' as const,
     };
     expect(() => muteAlertBodySchema.validate(body)).not.toThrow();
