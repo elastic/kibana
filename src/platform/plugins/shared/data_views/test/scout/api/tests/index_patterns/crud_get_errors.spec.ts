@@ -16,38 +16,38 @@ import {
 } from '../../fixtures/constants';
 
 apiTest.describe(
-  `DELETE ${DATA_VIEW_PATH_LEGACY}/{id} - errors (legacy index pattern api)`,
+  'GET api/index_patterns/index_pattern/{id} - errors (legacy index pattern api)',
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let viewerApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      viewerApiCredentials = await requestAuth.getApiKeyForViewer();
     });
 
     apiTest('returns 404 error on non-existing index_pattern', async ({ apiClient }) => {
       const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-      const response = await apiClient.delete(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
+      const response = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
 
-      expect(response.statusCode).toBe(404);
+      expect(response).toHaveStatusCode(404);
     });
 
     apiTest('returns error when ID is too long', async ({ apiClient }) => {
-      const response = await apiClient.delete(`${DATA_VIEW_PATH_LEGACY}/${ID_OVER_MAX_LENGTH}`, {
+      const response = await apiClient.get(`${DATA_VIEW_PATH_LEGACY}/${ID_OVER_MAX_LENGTH}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
 
-      expect(response.statusCode).toBe(400);
+      expect(response).toHaveStatusCode(400);
       expect(response.body.message).toBe(
         '[request params.id]: value has length [1759] but it must have a maximum length of [1000].'
       );

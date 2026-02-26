@@ -9,45 +9,41 @@
 
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import {
-  COMMON_HEADERS,
-  DATA_VIEW_PATH_LEGACY,
-  ID_OVER_MAX_LENGTH,
-} from '../../fixtures/constants';
+import { COMMON_HEADERS, DATA_VIEW_PATH, ID_OVER_MAX_LENGTH } from '../../fixtures/constants';
 
 apiTest.describe(
-  `DELETE ${DATA_VIEW_PATH_LEGACY}/{id} - errors (legacy index pattern api)`,
+  'GET api/data_views/data_view/{id} - errors (data view api)',
   { tag: tags.deploymentAgnostic },
   () => {
-    let adminApiCredentials: RoleApiCredentials;
+    let viewerApiCredentials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      viewerApiCredentials = await requestAuth.getApiKeyForViewer();
     });
 
-    apiTest('returns 404 error on non-existing index_pattern', async ({ apiClient }) => {
+    apiTest('returns 404 error on non-existing data_view', async ({ apiClient }) => {
       const id = `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-${Date.now()}`;
-      const response = await apiClient.delete(`${DATA_VIEW_PATH_LEGACY}/${id}`, {
+      const response = await apiClient.get(`${DATA_VIEW_PATH}/${id}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
 
-      expect(response.statusCode).toBe(404);
+      expect(response).toHaveStatusCode(404);
     });
 
     apiTest('returns error when ID is too long', async ({ apiClient }) => {
-      const response = await apiClient.delete(`${DATA_VIEW_PATH_LEGACY}/${ID_OVER_MAX_LENGTH}`, {
+      const response = await apiClient.get(`${DATA_VIEW_PATH}/${ID_OVER_MAX_LENGTH}`, {
         headers: {
           ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
+          ...viewerApiCredentials.apiKeyHeader,
         },
         responseType: 'json',
       });
 
-      expect(response.statusCode).toBe(400);
+      expect(response).toHaveStatusCode(400);
       expect(response.body.message).toBe(
         '[request params.id]: value has length [1759] but it must have a maximum length of [1000].'
       );
