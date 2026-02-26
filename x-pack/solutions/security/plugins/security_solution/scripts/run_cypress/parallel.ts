@@ -37,6 +37,7 @@ import {
   orderSpecFilesForLoadBalance,
   parseTestFileConfig,
   retrieveIntegrations,
+  retrieveIntegrationsConfigAware,
   setDefaultToolingLoggingLevel,
 } from './utils';
 import type { SpecGroup } from './utils';
@@ -141,8 +142,15 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               : undefined
           ); // convert the glob pattern to concrete file paths
 
-      const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths);
-      let files = retrieveIntegrations(orderedFilePaths);
+      const shareStacks = process.env.CYPRESS_SHARE_STACKS === 'true';
+
+      let files: string[];
+      if (shareStacks) {
+        files = retrieveIntegrationsConfigAware(concreteFilePaths);
+      } else {
+        const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths);
+        files = retrieveIntegrations(orderedFilePaths);
+      }
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
 
@@ -560,8 +568,6 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 
         return results;
       };
-
-      const shareStacks = process.env.CYPRESS_SHARE_STACKS === 'true';
 
       if (shareStacks) {
         const specGroups = groupSpecsByFtrConfig(files);

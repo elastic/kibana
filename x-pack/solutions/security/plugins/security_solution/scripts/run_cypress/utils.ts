@@ -22,9 +22,9 @@ import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
   getArtifactMockedDataTests: 40,
   getArtifactTabsTests: 12,
-  createRbacPoliciesExistSuite: 1,
-  createRbacHostsExistSuite: 1,
-  createRbacEmptyStateSuite: 1,
+  createRbacPoliciesExistSuite: 27,
+  createRbacHostsExistSuite: 27,
+  createRbacEmptyStateSuite: 27,
   createNavigationEssSuite: 4,
 };
 
@@ -105,6 +105,82 @@ export const retrieveIntegrations = (integrationsPaths: string[]) => {
 
     return nonSkippedSpecsForChunk;
   }
+};
+
+/**
+ * Stack setup cost expressed in weight units (~4 min setup ≈ 22 weight units at ~0.18 min/weight).
+ * Used by the config-aware load balancer to penalize assigning a spec whose ftrConfig
+ * would require spinning up an additional stack on the target agent.
+ */
+const SETUP_COST_WEIGHT = 22;
+
+/**
+ * Config-aware spec distribution for parallel CI agents.
+ * Instead of naive round-robin, this uses greedy bin-packing that accounts for
+ * ftrConfig setup cost: assigning a spec to an agent that already has its config
+ * avoids an extra ~4 min stack setup. This keeps specs with the same ftrConfig
+ * together on the same agents whenever possible, dramatically reducing total
+ * setup time when CYPRESS_SHARE_STACKS is enabled.
+ */
+export const retrieveIntegrationsConfigAware = (integrationsPaths: string[]): string[] => {
+  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
+
+  if (process.env.RUN_ALL_TESTS === 'true') {
+    return nonSkippedSpecs;
+  }
+
+  const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+    : 1;
+  const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+    ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+    : 0;
+
+  if (chunksTotal <= 1) {
+    return nonSkippedSpecs;
+  }
+
+  const specs = nonSkippedSpecs.map((filePath) => ({
+    path: filePath,
+    weight: getSpecFileWeight(filePath),
+    configKey: ftrConfigToKey(parseTestFileConfig(filePath)),
+  }));
+
+  specs.sort((a, b) => b.weight - a.weight || a.path.localeCompare(b.path));
+
+  const agents: Array<{
+    paths: string[];
+    totalWeight: number;
+    configs: Set<string>;
+  }> = Array.from({ length: chunksTotal }, () => ({
+    paths: [],
+    totalWeight: 0,
+    configs: new Set<string>(),
+  }));
+
+  const getAgentCost = (agent: (typeof agents)[number], specConfigKey: string): number => {
+    const newConfigPenalty = agent.configs.has(specConfigKey) ? 0 : SETUP_COST_WEIGHT;
+    return agent.totalWeight + agent.configs.size * SETUP_COST_WEIGHT + newConfigPenalty;
+  };
+
+  for (const spec of specs) {
+    let bestIdx = 0;
+    let bestCost = Infinity;
+
+    for (let i = 0; i < agents.length; i++) {
+      const cost = getAgentCost(agents[i], spec.configKey);
+      if (cost < bestCost) {
+        bestCost = cost;
+        bestIdx = i;
+      }
+    }
+
+    agents[bestIdx].paths.push(spec.path);
+    agents[bestIdx].totalWeight += spec.weight;
+    agents[bestIdx].configs.add(spec.configKey);
+  }
+
+  return agents[chunkIndex].paths;
 };
 
 export const isSkipped = (filePath: string): boolean => {
