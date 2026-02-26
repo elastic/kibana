@@ -68,7 +68,6 @@ export const exportSourceDashboardShareIntegration =
           }),
           generateAssetComponent: (
             <ExportSourceAssetPanel
-              title={typedSharingData.title}
               dashboardState={typedSharingData.exportSource}
             />
           ),

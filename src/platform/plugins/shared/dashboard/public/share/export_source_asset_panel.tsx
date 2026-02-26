@@ -28,7 +28,6 @@ import { getSanitizedExportSource } from './dashboard_export_source_client';
 import { coreServices, shareService } from '../services/kibana_services';
 
 export interface ExportSourceAssetPanelProps {
-  title: string;
   dashboardState: DashboardState;
 }
 
@@ -37,10 +36,7 @@ type LoadState =
   | { status: 'success'; data: DashboardState; warnings: string[] }
   | { status: 'error'; errorMessage: string };
 
-const WARNING_LIST_MAX_HEIGHT = 240;
-
 export const ExportSourceAssetPanel = ({
-  title,
   dashboardState,
 }: ExportSourceAssetPanelProps) => {
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' });
@@ -84,9 +80,8 @@ export const ExportSourceAssetPanel = ({
   );
 
   const openInConsoleRequest = useMemo(() => {
-    const requestBody = JSON.stringify(dashboardState, null, 2);
-    return `POST kbn:${DASHBOARD_API_PATH}\n${requestBody}`;
-  }, [dashboardState]);
+    return `POST kbn:${DASHBOARD_API_PATH}\n${jsonValue}`;
+  }, [jsonValue]);
 
   return (
     <EuiFlexItem grow css={{ minHeight: 0 }}>
@@ -131,7 +126,7 @@ export const ExportSourceAssetPanel = ({
                   <EuiText
                     size="s"
                     css={{
-                      maxHeight: WARNING_LIST_MAX_HEIGHT,
+                      maxHeight: 240,
                       overflowY: 'auto',
                       paddingRight: 8,
                       paddingBottom: 8,
@@ -175,7 +170,7 @@ export const ExportSourceAssetPanel = ({
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
                   {i18n.translate('dashboard.exportSource.loadingText', {
-                    defaultMessage: 'Checking panels for export compatibility…',
+                    defaultMessage: 'Loading JSON source…',
                   })}
                 </EuiText>
               </EuiFlexItem>

@@ -34,7 +34,7 @@ describe('ExportSourceAssetPanel', () => {
       warnings: [],
     });
 
-    render(<ExportSourceAssetPanel title="my dashboard" dashboardState={dashboardState} />);
+    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
 
     expect(screen.getByTestId('dashboardExportSourceLoading')).toBeInTheDocument();
 
@@ -43,7 +43,6 @@ describe('ExportSourceAssetPanel', () => {
     });
 
     expect(screen.getByTestId('exportAssetValue')).toBeInTheDocument();
-    expect(screen.getByText(/my dashboard \(sanitized\)/)).toBeInTheDocument();
   });
 
   it('renders warnings when the server reports unsupported panels', async () => {
@@ -53,7 +52,7 @@ describe('ExportSourceAssetPanel', () => {
       warnings: ['Dropped panel panel1, panel schema not available for panel type: foo.'],
     });
 
-    render(<ExportSourceAssetPanel title="my dashboard" dashboardState={dashboardState} />);
+    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('dashboardExportSourceWarnings')).toBeInTheDocument();
@@ -79,7 +78,7 @@ describe('ExportSourceAssetPanel', () => {
       warnings,
     });
 
-    render(<ExportSourceAssetPanel title="my dashboard" dashboardState={dashboardState} />);
+    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('dashboardExportSourceWarnings')).toBeInTheDocument();
@@ -96,10 +95,9 @@ describe('ExportSourceAssetPanel', () => {
   });
 
   it('renders an error callout when sanitization fails and hides sanitized JSON', async () => {
-    const user = userEvent.setup();
     (getSanitizedExportSource as jest.Mock).mockRejectedValue(new Error('boom'));
 
-    render(<ExportSourceAssetPanel title="my dashboard" dashboardState={dashboardState} />);
+    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
@@ -120,7 +118,7 @@ describe('ExportSourceAssetPanel', () => {
         warnings: [],
       });
 
-    render(<ExportSourceAssetPanel title="my dashboard" dashboardState={dashboardState} />);
+    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
@@ -134,7 +132,6 @@ describe('ExportSourceAssetPanel', () => {
     await waitFor(() => {
       expect(screen.getByTestId('exportAssetValue')).toBeInTheDocument();
     });
-    expect(screen.getByText(/my dashboard \(sanitized\)/)).toBeInTheDocument();
   });
 });
 
