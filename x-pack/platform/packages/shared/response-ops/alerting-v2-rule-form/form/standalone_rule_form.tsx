@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
-import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { FormValues } from './types';
 import { RuleForm, type RuleFormServices } from './rule_form';
 import { useFormDefaults } from './hooks/use_form_defaults';
@@ -22,10 +21,8 @@ export interface StandaloneRuleFormProps {
   /* Called after successful rule creation (only used when includeSubmission is true) */
   onSuccess?: () => void;
   onCancel?: () => void;
-  /* Whether to include YAML editor toggle (default: false) */
+  /* Whether to include YAML editor toggle (default: false). Requires services.application. */
   includeYaml?: boolean;
-  /* ES|QL callbacks for YAML editor autocomplete (required if includeYaml is true) */
-  esqlCallbacks?: ESQLCallbacks;
   /* Whether the form is in a loading/disabled state */
   isDisabled?: boolean;
   /* Whether to include submit/cancel buttons (default: false).
@@ -51,7 +48,6 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
   services,
   onSubmit,
   includeYaml = false,
-  esqlCallbacks,
   isDisabled = false,
   includeSubmission = false,
   onSuccess,
@@ -72,7 +68,6 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
         services={services}
         onSubmit={onSubmit}
         includeYaml={includeYaml}
-        esqlCallbacks={esqlCallbacks}
         isDisabled={isDisabled}
         includeSubmission={includeSubmission}
         onSuccess={onSuccess}

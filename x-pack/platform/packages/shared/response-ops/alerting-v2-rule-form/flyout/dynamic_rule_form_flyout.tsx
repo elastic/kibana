@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -28,6 +28,7 @@ export interface DynamicRuleFormFlyoutProps {
     data: DataPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;
     notifications: NotificationsStart;
+    application: ApplicationStart;
   };
 }
 
@@ -45,7 +46,7 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
   query,
   services,
 }) => {
-  const { http, notifications, data, dataViews } = services;
+  const { http, notifications, data, dataViews, application } = services;
 
   const { createRule, isLoading } = useCreateRule({
     http,
@@ -59,7 +60,11 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
 
   return (
     <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
-      <DynamicRuleForm onSubmit={handleSubmit} query={query} services={{ http, data, dataViews }} />
+      <DynamicRuleForm
+        onSubmit={handleSubmit}
+        query={query}
+        services={{ http, data, dataViews, application }}
+      />
     </RuleFormFlyout>
   );
 };

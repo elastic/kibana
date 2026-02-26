@@ -11,8 +11,6 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ESQLCallbacks } from '@kbn/esql-types';
-import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory, useParams } from 'react-router-dom';
 import { StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
@@ -42,23 +40,15 @@ export const CreateRulePage = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoadingRule, setIsLoadingRule] = useState(false);
 
-  const esqlCallbacks = useMemo<ESQLCallbacks>(
-    () => ({
-      getSources: async () => getESQLSources({ application, http }, undefined),
-      getColumnsFor: async ({ query }: { query?: string } | undefined = {}) =>
-        getEsqlColumns({ esqlQuery: query, search: data.search.search }),
-    }),
-    [application, http, data.search.search]
-  );
-
   const ruleFormServices = useMemo(
     () => ({
       http,
       data,
       dataViews,
       notifications,
+      application,
     }),
-    [http, data, dataViews, notifications]
+    [http, data, dataViews, notifications, application]
   );
 
   // Load existing rule for editing
@@ -148,7 +138,6 @@ export const CreateRulePage = () => {
         query={initialQuery}
         services={ruleFormServices}
         includeYaml
-        esqlCallbacks={esqlCallbacks}
         isDisabled={isLoadingRule}
         includeSubmission
         onSuccess={onSuccess}
