@@ -303,7 +303,7 @@
             "label": "_identifyingParams",
             "description": [],
             "signature": [
-              "() => { connectorId: string; timeout?: number | undefined; metadata?: ",
+              "() => { connectorId: string; timeout?: number | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -311,7 +311,7 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; abortSignal?: AbortSignal | undefined; temperature?: number | undefined; tools?: ",
+              " | undefined; temperature?: number | undefined; tools?: ",
               "ToolDefinitions",
               " | undefined; toolChoice?: ",
               {
@@ -355,7 +355,7 @@
             "label": "identifyingParams",
             "description": [],
             "signature": [
-              "() => { connectorId: string; timeout?: number | undefined; metadata?: ",
+              "() => { connectorId: string; timeout?: number | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -363,7 +363,7 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; abortSignal?: AbortSignal | undefined; temperature?: number | undefined; tools?: ",
+              " | undefined; temperature?: number | undefined; tools?: ",
               "ToolDefinitions",
               " | undefined; toolChoice?: ",
               {
