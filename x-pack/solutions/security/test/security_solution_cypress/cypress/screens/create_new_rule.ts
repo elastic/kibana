@@ -267,7 +267,7 @@ export const NEW_TERMS_TYPE = '[data-test-subj="newTermsRuleType"]';
 
 export const ESQL_TYPE = '[data-test-subj="esqlRuleType"]';
 
-export const ESQL_QUERY_BAR_INPUT_AREA = '[data-test-subj="ruleEsqlQueryBar"] textarea';
+export const ESQL_QUERY_BAR_INPUT_AREA = '[data-test-subj="ruleEsqlQueryBar"] textarea.inputarea';
 
 export const ESQL_QUERY_BAR = '[data-test-subj="ruleEsqlQueryBar"]';
 

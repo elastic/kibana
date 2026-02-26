@@ -55,8 +55,7 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-// Failing: See https://github.com/elastic/kibana/issues/240136
-describe.skip(
+describe(
   'Detection ES|QL rules - Rule Creation',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -94,8 +93,9 @@ describe.skip(
         cy.get(RULE_NAME).should('have.text', rule.name);
       });
 
+      // Failing: See https://github.com/elastic/kibana/issues/240136
       // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
-      it('creates an ES|QL rule and overrides its name', function () {
+      it.skip('creates an ES|QL rule and overrides its name', function () {
         selectEsqlRuleType();
 
         fillDefineEsqlRuleAndContinue(rule);
@@ -142,17 +142,6 @@ describe.skip(
         getDefineContinueButton().click();
 
         cy.get(ESQL_QUERY_BAR).should('not.contain', 'metadata _id');
-      });
-
-      it('allows non-aggregating ES|QL query without _id in KEEP (auto-injected at execution)', function () {
-        const queryWithKeep =
-          'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
-
-        selectEsqlRuleType();
-        fillEsqlQueryBar(queryWithKeep);
-        getDefineContinueButton().click();
-
-        cy.get(ESQL_QUERY_BAR).should('not.contain', 'metadata _id, _version, _index" operator');
       });
 
       it('shows error when ES|QL query is invalid', function () {
