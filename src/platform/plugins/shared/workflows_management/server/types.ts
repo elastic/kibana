@@ -12,6 +12,7 @@ import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server/tools';
 import type {
   AlertingApiRequestHandlerContext,
   AlertingServerSetup,
@@ -32,10 +33,30 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { ZodObject, ZodRawShape } from '@kbn/zod';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
+
+/**
+ * Minimal AgentBuilder plugin setup contract interface.
+ * Uses types from @kbn/agent-builder-server (shared package) instead of
+ * importing from the plugin directly, to avoid a circular dependency.
+ */
+export interface AgentBuilderPluginSetupContract {
+  tools: {
+    register: <RunInput extends ZodObject<ZodRawShape>>(
+      tool: StaticToolRegistration<RunInput>
+    ) => void;
+  };
+}
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
+  /**
+   * Register the Agent Builder plugin with Workflows Management.
+   * Called by the agentBuilder plugin during its setup phase to allow
+   * workflowsManagement to register tools without creating a circular dependency.
+   */
+  registerAgentBuilder: (agentBuilder: AgentBuilderPluginSetupContract) => void;
 }
 
 export type WorkflowsServerPluginStart = Record<string, never>;
