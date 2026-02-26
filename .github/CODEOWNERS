@@ -3323,6 +3323,7 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 /.agents/skills/api-authz/** @elastic/kibana-security
 /.agents/skills/codeql/** @elastic/kibana-security
 /.agents/skills/kibana-privilege-deprecation/** @elastic/kibana-security
+/.agents/skills/encrypted-saved-objects/** @elastic/kibana-security
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
