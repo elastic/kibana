@@ -261,6 +261,13 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
 
+/** This Kibana Advanced Setting allows users to include only selected data stream namespaces in search during rule execution */
+export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
+  'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
+
+/** The default value for the included data stream namespaces setting (empty = no filter) */
+export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
+
 /** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
 export const ENABLE_GRAPH_VISUALIZATION_SETTING =
   'securitySolution:enableGraphVisualization' as const;

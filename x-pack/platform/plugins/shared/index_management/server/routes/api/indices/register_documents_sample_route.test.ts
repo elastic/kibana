@@ -9,7 +9,7 @@ import { registerDocumentsSampleRoute } from './register_documents_sample_route'
 import { addInternalBasePath } from '..';
 import type { RequestMock } from '../../../test/helpers';
 import { RouterMock, routeDependencies, withStubbedHandleEsError } from '../../../test/helpers';
-import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents';
+import { DEFAULT_DOCUMENT_PAGE_SIZE } from '../../../../common/constants';
 
 const router = new RouterMock();
 const searchMock = router.getMockESApiFn('search');
@@ -41,7 +41,9 @@ describe('Documents sample API', () => {
 
       expect(searchMock).toHaveBeenCalledWith({
         index: 'my-index',
-        size: DEFAULT_DOCS_PER_PAGE,
+        size: DEFAULT_DOCUMENT_PAGE_SIZE,
+        sort: ['_doc'],
+        track_total_hits: false,
       });
 
       expect(res).toEqual({
