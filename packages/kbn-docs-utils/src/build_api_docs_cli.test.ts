@@ -18,6 +18,7 @@ import {
   writeDocs,
 } from './cli';
 import { runCheckPackageDocs } from './check_package_docs_cli';
+import { resolveAffectedBuildPlanFromMoon } from './build_api_docs_affected';
 
 jest.mock('elastic-apm-node', () => {
   const tx = {
@@ -57,6 +58,15 @@ jest.mock('./check_package_docs_cli', () => ({
   runCheckPackageDocs: jest.fn(),
 }));
 
+jest.mock('./build_api_docs_affected', () => ({
+  resolveAffectedBuildPlanFromMoon: jest.fn(() => ({
+    mode: 'full',
+    pluginFilter: [],
+    packageFilter: [],
+    message: 'Falling back to full build.',
+  })),
+}));
+
 const mockTx = (apm as any).__tx;
 
 describe('build_api_docs_cli', () => {
@@ -68,7 +78,12 @@ describe('build_api_docs_cli', () => {
   });
 
   it('routes --stats to check CLI and skips build tasks', async () => {
-    (parseCliFlags as jest.Mock).mockReturnValue({ stats: ['any'], collectReferences: false });
+    (parseCliFlags as jest.Mock).mockReturnValue({
+      fullBuild: false,
+      changesMode: undefined,
+      stats: ['any'],
+      collectReferences: false,
+    });
 
     runBuildApiDocsCli();
     expect(registeredHandler).toBeDefined();
@@ -95,7 +110,12 @@ describe('build_api_docs_cli', () => {
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
     };
-    (parseCliFlags as jest.Mock).mockReturnValue({ stats: undefined, collectReferences: false });
+    (parseCliFlags as jest.Mock).mockReturnValue({
+      fullBuild: false,
+      changesMode: undefined,
+      stats: undefined,
+      collectReferences: false,
+    });
     (setupProject as jest.Mock).mockResolvedValue(setupResult);
     (buildApiMap as jest.Mock).mockReturnValue(apiMapResult);
     (collectStats as jest.Mock).mockResolvedValue({});
@@ -104,16 +124,74 @@ describe('build_api_docs_cli', () => {
     await registeredHandler({ log, flags: {} });
 
     expect(setupProject).toHaveBeenCalled();
+    expect(resolveAffectedBuildPlanFromMoon).toHaveBeenCalled();
     expect(buildApiMap).toHaveBeenCalledWith(
       setupResult.project,
       setupResult.plugins,
       log,
       mockTx,
-      { stats: undefined, collectReferences: false }
+      {
+        fullBuild: false,
+        stats: undefined,
+        collectReferences: false,
+      }
     );
     expect(collectStats).toHaveBeenCalled();
     expect(reportMetrics).toHaveBeenCalled();
     expect(writeDocs).toHaveBeenCalled();
     expect(mockTx.end).toHaveBeenCalled();
+  });
+
+  it('skips build flow when affected planning returns skip', async () => {
+    (resolveAffectedBuildPlanFromMoon as jest.Mock).mockReturnValue({
+      mode: 'skip',
+      pluginFilter: [],
+      packageFilter: [],
+      message: 'No affected plugin/package targets found. Skipping API docs build.',
+    });
+    (parseCliFlags as jest.Mock).mockReturnValue({
+      fullBuild: false,
+      changesMode: undefined,
+      stats: undefined,
+      collectReferences: false,
+    });
+
+    runBuildApiDocsCli();
+    await registeredHandler({ log, flags: {} });
+
+    expect(setupProject).not.toHaveBeenCalled();
+    expect(mockTx.end).toHaveBeenCalled();
+  });
+
+  it('does not resolve affected targets when full build is requested', async () => {
+    const setupResult = {
+      project: {},
+      plugins: [
+        { id: 'p1', manifest: { owner: { name: 'team' }, serviceFolders: [] }, isPlugin: true },
+      ],
+    };
+    const apiMapResult = {
+      pluginApiMap: {},
+      missingApiItems: {},
+      referencedDeprecations: {},
+      unreferencedDeprecations: {},
+      adoptionTrackedAPIs: {},
+    };
+
+    (parseCliFlags as jest.Mock).mockReturnValue({
+      fullBuild: true,
+      changesMode: undefined,
+      stats: undefined,
+      collectReferences: false,
+    });
+    (setupProject as jest.Mock).mockResolvedValue(setupResult);
+    (buildApiMap as jest.Mock).mockReturnValue(apiMapResult);
+    (collectStats as jest.Mock).mockResolvedValue({});
+
+    runBuildApiDocsCli();
+    await registeredHandler({ log, flags: { full: true } });
+
+    expect(resolveAffectedBuildPlanFromMoon).not.toHaveBeenCalled();
+    expect(setupProject).toHaveBeenCalled();
   });
 });

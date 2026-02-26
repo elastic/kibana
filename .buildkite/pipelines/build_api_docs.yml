@@ -1,5 +1,6 @@
 env:
   PUBLISH_API_DOCS_CHANGES: 'true'
+  API_DOCS_BUILD_MODE: full
 steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check types'

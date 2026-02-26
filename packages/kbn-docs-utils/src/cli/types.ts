@@ -28,6 +28,10 @@ import type { EnzymeImportCounts } from '../count_enzyme_imports';
  * Parsed CLI flags from the command line.
  */
 export interface CliFlags {
+  /** Whether to force a full API docs build. */
+  full?: boolean;
+  /** Only consider uncommitted local changes: 'staged', 'unstaged', or all if no value. */
+  changes?: string | boolean;
   /** Whether to collect references for API items. */
   references?: boolean;
   /** Stats flags: 'any', 'comments', and/or 'exports'. */
@@ -44,6 +48,10 @@ export interface CliFlags {
  * Validated and normalized CLI options.
  */
 export interface CliOptions {
+  /** Whether to force a full API docs build. */
+  fullBuild?: boolean;
+  /** Only consider uncommitted local changes. 'all' = staged + unstaged, 'staged', or 'unstaged'. */
+  changesMode?: 'all' | 'staged' | 'unstaged';
   /** Whether to collect references for API items. */
   collectReferences: boolean;
   /** Stats flags to display. */
