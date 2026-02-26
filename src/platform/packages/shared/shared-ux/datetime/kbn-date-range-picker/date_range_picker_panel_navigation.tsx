@@ -13,10 +13,14 @@ import React, {
   useState,
   useMemo,
   useCallback,
+  useRef,
+  useLayoutEffect,
   type PropsWithChildren,
 } from 'react';
 
 import type { IconType } from '@elastic/eui';
+
+import { FOCUSABLE_SELECTOR } from './constants';
 
 /** Metadata describing a navigatable panel inside the date range picker dialog. */
 export interface DateRangePickerPanelDescriptor {
@@ -115,6 +119,9 @@ interface DateRangePickerPanelProps {
 
 /**
  * Gate component that renders its children only when the panel is active.
+ * Automatically saves and restores focus when navigating away and back,
+ * so keyboard users return to the element they last interacted with.
+ *
  * Use inside a `DateRangePickerPanelNavigationProvider`.
  */
 export function DateRangePickerPanel({
@@ -122,10 +129,51 @@ export function DateRangePickerPanel({
   children,
 }: PropsWithChildren<DateRangePickerPanelProps>) {
   const { activePanelId } = useDateRangePickerPanelNavigation();
+  const isActive = activePanelId === id;
+  const containerRef = useFocusRestore(isActive);
 
-  if (activePanelId !== id) {
+  if (!isActive) {
     return null;
   }
 
-  return <>{children}</>;
+  return <div ref={containerRef}>{children}</div>;
+}
+
+/**
+ * Saves the index of the focused element when `isActive` becomes false,
+ * and restores focus to that index when `isActive` becomes true again.
+ *
+ * Focus is captured during the render phase (before React commits DOM
+ * changes) so the previous container and `document.activeElement` are
+ * still valid. Restoration runs in a layout effect before paint.
+ *
+ * @returns A ref to attach to the container element.
+ */
+function useFocusRestore(isActive: boolean) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const focusedIndexRef = useRef(-1);
+  const wasActiveRef = useRef(false);
+
+  if (wasActiveRef.current && !isActive && containerRef.current) {
+    const focusables = containerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+    focusedIndexRef.current = Array.from(focusables).indexOf(document.activeElement as HTMLElement);
+  }
+  wasActiveRef.current = isActive;
+
+  useLayoutEffect(() => {
+    if (!isActive || focusedIndexRef.current < 0) return;
+    const container = containerRef.current;
+    if (!container) return;
+
+    const idx = focusedIndexRef.current;
+    focusedIndexRef.current = -1;
+
+    const focusables = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+    const target = focusables[Math.min(idx, focusables.length - 1)];
+    if (target) {
+      target.focus();
+    }
+  }, [isActive]);
+
+  return containerRef;
 }
