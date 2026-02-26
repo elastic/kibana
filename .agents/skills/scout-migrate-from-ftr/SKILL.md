@@ -125,7 +125,7 @@ test('create and edit entity', async () => {
   `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
 - If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config set from the Playwright config path.
 - `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <configSet>` when your tests require a custom config set.
-- Each test must include assertions.
+- Each test must include assertions in the test body (not hidden inside page objects; page objects should return state).
 - UI tests must have at least one supported tag (Scout validates UI tags at runtime). API tests should also be tagged.
 - Avoid checking raw data in UI tests; prefer page object methods over direct selectors.
 - Preserve or update tags for deployment targets when needed.
@@ -159,3 +159,4 @@ test('create and edit entity', async () => {
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs instead).
 - Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
+- Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert).
