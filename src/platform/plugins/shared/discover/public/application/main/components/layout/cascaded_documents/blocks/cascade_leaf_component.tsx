@@ -51,13 +51,13 @@ interface ESQLDataCascadeLeafCellProps
 
 interface CustomCascadeGridBodyProps
   extends EuiDataGridCustomBodyProps,
-  Pick<ESQLDataCascadeLeafCellProps, 'getScrollElement' | 'getScrollMargin'> {
+    Pick<ESQLDataCascadeLeafCellProps, 'getScrollElement' | 'getScrollMargin'> {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   initialOffset: () => number;
   initialVirtualizationMetadata:
-  | CascadedDocumentsDataGridUiState['virtualizationMetadata']
-  | undefined;
+    | CascadedDocumentsDataGridUiState['virtualizationMetadata']
+    | undefined;
   propagateVirtualizationMetadata: (
     virtualizationMetadata: NonNullable<CascadedDocumentsDataGridUiState['virtualizationMetadata']>
   ) => void;

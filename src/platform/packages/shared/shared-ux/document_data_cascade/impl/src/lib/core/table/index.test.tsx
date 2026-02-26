@@ -19,7 +19,7 @@ describe('table', () => {
     children,
     helper: Helper = React.Fragment,
   }: PropsWithChildren<{ helper?: React.FC<PropsWithChildren> }>) => (
-    <DataCascadeProvider cascadeGroups={[]}>
+    <DataCascadeProvider data={[]} cascadeGroups={[]}>
       <Helper>{children}</Helper>
     </DataCascadeProvider>
   );

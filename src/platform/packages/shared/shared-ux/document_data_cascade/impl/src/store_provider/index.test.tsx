@@ -14,7 +14,7 @@ import { DataCascadeProvider } from '.';
 describe('DataCascadeProvider', () => {
   it('should render children', () => {
     render(
-      <DataCascadeProvider cascadeGroups={[]}>
+      <DataCascadeProvider data={[]} cascadeGroups={[]}>
         <div>Test Child</div>
       </DataCascadeProvider>
     );

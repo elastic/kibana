@@ -124,9 +124,9 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
    * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
    * Returns an unregister function.
    */
-  const preventSizeChangePropagation = useCallback(() => {
-    return rootVirtualizer.preventRowSizeChangePropagation(row.index);
-  }, [rootVirtualizer, row.index]);
+  // const preventSizeChangePropagation = useCallback(() => {
+  //   return rootVirtualizer.preventRowSizeChangePropagation(row.index);
+  // }, [rootVirtualizer, row.index]);
 
   const memoizedChild = useMemo(() => {
     return React.createElement(children, {
@@ -137,7 +137,8 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
       getScrollElement,
       getScrollOffset,
       getScrollMargin,
-      preventSizeChangePropagation,
+      // TODO: rootVirtualizer.preventRowSizeChangePropagation doesn't exist anymore
+      preventSizeChangePropagation: () => () => {},
     });
   }, [
     children,
@@ -147,7 +148,7 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
     getScrollElement,
     getScrollOffset,
     getScrollMargin,
-    preventSizeChangePropagation,
+    // preventSizeChangePropagation,
   ]);
 
   return (
