@@ -276,12 +276,15 @@ const hasAllTestsSkipped = (ast: any): boolean => {
     }
 
     for (const key of Object.keys(node)) {
-      if (key === 'type' || key === 'start' || key === 'end' || key === 'loc') continue;
-      const child = node[key];
-      if (Array.isArray(child)) {
-        for (const item of child) walk(item, insideSkip);
-      } else if (child && typeof child === 'object' && child.type) {
-        walk(child, insideSkip);
+      if (key === 'type' || key === 'start' || key === 'end' || key === 'loc') {
+        // Skip metadata keys that don't contain child AST nodes
+      } else {
+        const child = node[key];
+        if (Array.isArray(child)) {
+          for (const item of child) walk(item, insideSkip);
+        } else if (child && typeof child === 'object' && child.type) {
+          walk(child, insideSkip);
+        }
       }
     }
   };
