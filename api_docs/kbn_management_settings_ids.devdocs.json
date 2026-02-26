@@ -50,7 +50,7 @@
           "\"agentBuilder:experimentalFeatures\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 65,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +67,24 @@
           "\"agentBuilder:navEnabled\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 64,
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS",
+        "description": [],
+        "signature": [
+          "\"agentBuilder:prePromptWorkflowIds\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "lineNumber": 65,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
