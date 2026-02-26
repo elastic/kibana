@@ -19,27 +19,19 @@ export const SourcesPage: React.FC = () => {
   useBreadcrumbs([]);
 
   const [showSelectionFlyout, setShowSelectionFlyout] = useState(false);
-  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | null>(null);
 
-  const { openFlyout: openAddSourceFlyout, flyout: addSourceFlyout } = useAddConnectorFlyout({
-    dataSourceType: selectedDataSourceId || undefined,
-    onConnectorCreated: () => {
-      setSelectedDataSourceId(null);
-    },
-  });
+  const { openFlyout: openAddSourceFlyout, flyout: addSourceFlyout } = useAddConnectorFlyout();
 
   const handleAddSource = useCallback(() => {
-    setSelectedDataSourceId(null);
     setShowSelectionFlyout(true);
   }, []);
 
   const handleSourceSelected = useCallback(
     (source: Connector) => {
       setShowSelectionFlyout(false);
-      // source.id is the data source identifier (e.g., "github") used by our API
-      setSelectedDataSourceId(source.id);
       // source.type is the stack connector actionTypeId (e.g., ".github") used by triggersActionsUi
-      openAddSourceFlyout(source.type);
+      // source.id is the data source identifier (e.g., "github") used by our API
+      openAddSourceFlyout(source.type, source.id);
     },
     [openAddSourceFlyout]
   );
