@@ -170,6 +170,7 @@ describe('CascadeRowCellPrimitive', () => {
           expect.objectContaining({
             cellId: expect.any(String),
             nodePath: expect.any(Array),
+            nodePathMap: expect.any(Object),
             getScrollElement: expect.any(Function),
             getScrollOffset: expect.any(Function),
             getScrollMargin: expect.any(Function),

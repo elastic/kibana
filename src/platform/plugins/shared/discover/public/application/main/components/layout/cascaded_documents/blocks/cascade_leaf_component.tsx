@@ -49,6 +49,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
+import { constructCascadeQuery } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import debounce from 'lodash/debounce';
@@ -76,6 +77,8 @@ interface ESQLDataCascadeLeafCellProps
     > {
   cellData: DataTableRecord[];
   cellId: string;
+  nodePath: string[];
+  nodePathMap: Record<string, string>;
   expandedDocStore?: ExpandedDocStore;
   onExpandDoc?: (cellId: string, doc: DataTableRecord | undefined, rows: DataTableRecord[]) => void;
 }
@@ -529,6 +532,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
   ({
     cellData,
     cellId,
+    nodePath,
+    nodePathMap,
     dataGridDensityState,
     showTimeCol,
     dataView,
@@ -558,7 +563,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
 
-    const { getDataGridUiStateMap, setDataGridUiState, openInNewTab, esqlQuery } =
+    const { getDataGridUiStateMap, setDataGridUiState, openInNewTab, esqlQuery, esqlVariables } =
       useCascadedDocumentsContext();
 
     // Add "// @light" to the ES|QL query to use the lightweight table, omit for EUI DataGrid
@@ -704,11 +709,17 @@ export const ESQLDataCascadeLeafCell = React.memo(
             propagateVirtualizationMetadata={setInitialInViewVirtualItemIndex}
             resultsCount={cellData.length}
             onOpenInDiscoverTab={() => {
-              openInNewTab({
-                appState: {
-                  query: esqlQuery,
-                },
+              const query = constructCascadeQuery({
+                query: esqlQuery,
+                dataView,
+                esqlVariables,
+                nodeType: 'leaf',
+                nodePath,
+                nodePathMap,
               });
+              if (query) {
+                openInNewTab({ appState: { query } });
+              }
             }}
           />
         ) : (

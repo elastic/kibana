@@ -68,6 +68,7 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   data: L[] | null;
   cellId: string;
   nodePath: string[];
+  nodePathMap: Record<string, string>;
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>

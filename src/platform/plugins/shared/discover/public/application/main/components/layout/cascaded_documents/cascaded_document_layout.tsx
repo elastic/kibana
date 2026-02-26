@@ -160,7 +160,15 @@ const ESQLDataCascade = React.memo(
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => (
+      ({
+        data: cellData,
+        cellId,
+        nodePath,
+        nodePathMap,
+        getScrollElement,
+        getScrollOffset,
+        getScrollMargin,
+      }) => (
         <ESQLDataCascadeLeafCell
           dataGridDensityState={dataGridDensityState}
           showTimeCol={showTimeCol}
@@ -173,6 +181,8 @@ const ESQLDataCascade = React.memo(
           onExpandDoc={onExpandDoc}
           cellData={cellData!}
           cellId={cellId}
+          nodePath={nodePath}
+          nodePathMap={nodePathMap}
           getScrollElement={getScrollElement}
           getScrollOffset={getScrollOffset}
           getScrollMargin={getScrollMargin}
