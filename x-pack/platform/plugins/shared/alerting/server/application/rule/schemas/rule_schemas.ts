@@ -164,18 +164,8 @@ export const snoozedInstanceConfigSchema = schema.object({
   ),
 });
 
-export const snoozedInstanceEntrySchema = schema.object({
+export const snoozedInstanceEntrySchema = snoozedInstanceConfigSchema.extends({
   instanceId: schema.string(),
-  expiresAt: schema.maybe(schema.string()),
-  conditions: schema.maybe(
-    schema.arrayOf(perAlertSnoozeConditionSchema, { maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY })
-  ),
-  conditionOperator: schema.maybe(
-    schema.oneOf([
-      schema.literal(snoozeConditionOperator.ANY),
-      schema.literal(snoozeConditionOperator.ALL),
-    ])
-  ),
 });
 
 export const snoozeScheduleSchema = schema.object({
