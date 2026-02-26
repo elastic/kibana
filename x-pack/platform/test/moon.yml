@@ -170,6 +170,7 @@ dependsOn:
   - '@kbn/alerting-v2-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/dev-cli-runner'
+  - '@kbn/ui-actions-plugin'
 tags:
   - test-helper
   - package
