@@ -5,35 +5,31 @@
  * 2.0.
  */
 
-import { COMPUTED_FEATURE_TYPES } from '@kbn/streams-schema/src/feature';
 import {
   createGetFeatureQueryFromToolArgs,
   createGetFeatureTypesFromToolArgs,
+  createGetStreamFeaturesTool,
   resolveFeatureTypeFilters,
   toFeatureForLlmContext,
   type GetStreamFeaturesInput,
   type GetStreamFeaturesQuery,
   type LlmFeature,
-} from '../../features/tool';
+} from '../../src/features/tool';
 
-export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = [
-  'infrastructure',
-  'technology',
-  'dependency',
-  'entity',
-  'schema',
-  ...COMPUTED_FEATURE_TYPES,
-] as const;
+export const PARTITION_FEATURE_TOOL_TYPES = ['entity'] as const;
 
-export type SignificantEventsFeatureToolType =
-  (typeof SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES)[number];
+export type PartitionFeatureToolType = (typeof PARTITION_FEATURE_TOOL_TYPES)[number];
 
 export const getFeatureTypesFromToolArgs = createGetFeatureTypesFromToolArgs(
-  SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES
+  PARTITION_FEATURE_TOOL_TYPES
 );
 
 export const getFeatureQueryFromToolArgs = createGetFeatureQueryFromToolArgs(
-  SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES
+  PARTITION_FEATURE_TOOL_TYPES
+);
+
+export const partitionStreamFeaturesTool = createGetStreamFeaturesTool(
+  PARTITION_FEATURE_TOOL_TYPES
 );
 
 export { resolveFeatureTypeFilters, toFeatureForLlmContext };
