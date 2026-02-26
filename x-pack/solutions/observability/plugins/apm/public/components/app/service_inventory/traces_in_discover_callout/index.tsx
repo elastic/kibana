@@ -117,7 +117,6 @@ export function TracesInDiscoverCallout() {
       <EuiButton
         data-test-subj="apmServiceInventoryTracesInDiscoverCalloutButton"
         fill
-        isDisabled={!discoverHref}
         href={discoverHref}
         aria-label={buttonLabel}
       >
