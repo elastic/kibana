@@ -214,6 +214,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                   size="xs"
                   color="subdued"
                   tabIndex={0}
+                  data-test-subj="streamsAppProcessorDescription"
                   css={css`
                     font-family: ${euiTheme.font.familyCode};
                     ${euiTextTruncate()}
