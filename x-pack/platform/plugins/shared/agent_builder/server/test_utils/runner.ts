@@ -97,6 +97,7 @@ export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock
   return {
     validate: jest.fn(),
     getTypeDefinition: jest.fn(),
+    getRegisteredTypeIds: jest.fn(),
   };
 };
 
@@ -104,6 +105,7 @@ export const createAttachmentsService = (): AttachmentsServiceMock => {
   return {
     getTypeDefinition: jest.fn(),
     convertAttachmentTool: jest.fn(),
+    getRegisteredTypeIds: jest.fn(),
   };
 };
 
@@ -120,8 +122,8 @@ export const createPromptManagerMock = (): PromptManagerMock => {
 
 export const createSkillsServiceMock = (): SkillsServiceMock => {
   return {
-    list: jest.fn(),
-    getSkillDefinition: jest.fn(),
+    list: jest.fn().mockResolvedValue([]),
+    get: jest.fn().mockResolvedValue(undefined),
     convertSkillTool: jest.fn(),
   };
 };
@@ -146,6 +148,8 @@ export const createStateManagerMock = (): StateManagerMock => {
 export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
     getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
+    registerSkill: jest.fn().mockResolvedValue(undefined),
+    unregisterSkill: jest.fn().mockResolvedValue(false),
   };
 };
 

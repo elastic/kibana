@@ -24,7 +24,6 @@ export const getGitSHA1ForPath = async (p: string) => {
 export interface ScoutConfigManifest {
   path: string;
   exists: boolean;
-  lastModified: string;
   sha1: string;
   tests: {
     id: string;

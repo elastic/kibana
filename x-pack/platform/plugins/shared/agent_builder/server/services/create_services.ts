@@ -63,6 +63,7 @@ export class ServiceManager {
     inference,
     uiSettings,
     savedObjects,
+    featureFlags,
     actions,
     taskManager,
     trackingService,
@@ -105,7 +106,6 @@ export class ServiceManager {
       elasticsearch,
       uiSettings,
       savedObjects,
-      getRunner,
       toolsService: tools,
     });
 
@@ -147,6 +147,7 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      runAgent: runner.runAgent,
       uiSettings,
       savedObjects,
       spaces,
@@ -162,6 +163,8 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      runAgent: runner.runAgent,
+      attachmentsService: attachments,
       uiSettings,
       savedObjects,
       trackingService,
@@ -179,6 +182,10 @@ export class ServiceManager {
       execution,
       taskHandler,
       hooks,
+      spaces,
+      featureFlags,
+      uiSettings,
+      savedObjects,
     };
 
     return this.internalStart;

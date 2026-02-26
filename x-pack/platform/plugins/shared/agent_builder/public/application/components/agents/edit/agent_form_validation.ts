@@ -90,5 +90,6 @@ export const agentFormSchema = z.object({
         })
       )
       .optional(),
+    workflow_ids: z.array(z.string()).optional(),
   }),
 });

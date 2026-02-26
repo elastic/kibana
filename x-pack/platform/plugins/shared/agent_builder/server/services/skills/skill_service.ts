@@ -8,8 +8,7 @@
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { MaybePromise } from '@kbn/utility-types';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { SkillDefinition, InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import {
@@ -21,50 +20,30 @@ import {
   type SkillSelection,
   allSkillsSelectionWildcard,
 } from '@kbn/agent-builder-common';
-import { createClient } from './client';
-import type { SkillPersistedDefinition } from './client';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
+import type { SkillProvider, WritableSkillProvider } from './skill_provider';
+import { isWritableSkillProvider } from './skill_provider';
+import { createBuiltinSkillProvider } from './builtin';
+import { createPersistedSkillProvider } from './persisted';
+import { internalToPublicDefinition } from './utils';
 
-const toPublicDefinition = (skill: SkillPersistedDefinition): PublicSkillDefinition => {
-  return {
-    id: skill.id,
-    name: skill.name,
-    description: skill.description,
-    content: skill.content,
-    referenced_content: skill.referenced_content,
-    tool_ids: skill.tool_ids,
-    readonly: false,
-  };
-};
-
-export interface SkillProvider {
-  id: string;
-  has(skillId: string): MaybePromise<boolean>;
-  get(skillId: string): MaybePromise<PublicSkillDefinition | undefined>;
-  list(): MaybePromise<PublicSkillDefinition[]>;
-  create(params: PersistedSkillCreateRequest): MaybePromise<PublicSkillDefinition>;
-  update(
-    skillId: string,
-    update: PersistedSkillUpdateRequest
-  ): MaybePromise<PublicSkillDefinition>;
-  delete(skillId: string): MaybePromise<boolean>;
-}
+export type { SkillProvider };
 
 export interface SkillRegistry {
   has(skillId: string): Promise<boolean>;
-  get(skillId: string): Promise<SkillDefinition | PublicSkillDefinition | undefined>;
+  get(skillId: string): Promise<InternalSkillDefinition | undefined>;
   list(): Promise<PublicSkillDefinition[]>;
-  listSkillDefinitions(): Promise<SkillDefinition[]>;
+  listSkillDefinitions(): Promise<InternalSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): Promise<PublicSkillDefinition>;
   update(skillId: string, update: PersistedSkillUpdateRequest): Promise<PublicSkillDefinition>;
   delete(skillId: string): Promise<boolean>;
-  resolveSkillSelection(selection: SkillSelection[]): Promise<SkillDefinition[]>;
+  resolveSkillSelection(selection: SkillSelection[]): Promise<InternalSkillDefinition[]>;
 }
 
 interface CreateSkillRegistryParams {
-  builtinSkills: SkillDefinition[];
-  persistedProvider: SkillProvider;
+  builtinProvider: SkillProvider;
+  persistedProvider: WritableSkillProvider;
   toolRegistry: ToolRegistry;
 }
 
@@ -76,14 +55,36 @@ export interface SkillServiceSetup {
   /**
    * @deprecated This API is still in development and not ready to be used yet.
    */
-  registerSkill(skill: SkillDefinition): Promise<void>;
+  registerSkill(skill: SkillDefinition): void;
 }
 
 export interface SkillServiceStart {
   /**
    * Create a skill registry scoped to the current user and context.
+   *
+   * Each call snapshots the currently registered builtin skills, so
+   * dynamic registrations or unregistrations that happen after the
+   * registry is created do not affect that registry instance.
    */
   getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
+
+  /**
+   * Register a skill dynamically after plugin start.
+   *
+   * The operation is serialized internally so concurrent calls are safe.
+   * Only affects future `getRegistry()` calls -- existing registry
+   * instances hold an immutable snapshot of the builtin skills that
+   * existed at creation time.
+   */
+  registerSkill(skill: SkillDefinition): Promise<void>;
+
+  /**
+   * Unregister a previously registered skill by ID.
+   *
+   * Returns `true` if the skill was found and removed, `false` otherwise.
+   * Serialized with `registerSkill` to avoid races.
+   */
+  unregisterSkill(skillId: string): Promise<boolean>;
 }
 
 export interface SkillService {
@@ -106,11 +107,15 @@ class SkillServiceImpl implements SkillService {
   private readonly skills: Map<string, SkillDefinition> = new Map();
   private readonly skillFullPaths: Set<string> = new Set();
 
+  /**
+   * Promise chain used to serialize dynamic registration / unregistration
+   * so that the async validate-then-mutate sequence is atomic.
+   */
+  private mutationQueue: Promise<unknown> = Promise.resolve();
+
   setup(): SkillServiceSetup {
     return {
-      registerSkill: async (skill) => {
-        await validateSkillDefinition(skill);
-
+      registerSkill: (skill) => {
         if (this.skills.has(skill.id)) {
           throw new Error(`Skill type with id ${skill.id} already registered`);
         }
@@ -133,137 +138,114 @@ class SkillServiceImpl implements SkillService {
     logger,
     getToolRegistry,
   }: SkillServiceStartDeps): SkillServiceStart {
+    const validated = Promise.all(
+      [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
+    );
+
     return {
       getRegistry: async ({ request }) => {
+        await this.mutationQueue;
+        await validated;
         const space = getCurrentSpaceId({ request, spaces });
-        const esClient = elasticsearch.client.asInternalUser;
-        const skillClient = createClient({ space, esClient, logger });
-
-        const persistedProvider: SkillProvider = {
-          id: 'persisted',
-          async has(skillId: string) {
-            return skillClient.has(skillId);
-          },
-          async get(skillId: string) {
-            try {
-              const skill = await skillClient.get(skillId);
-              return toPublicDefinition(skill);
-            } catch {
-              return undefined;
-            }
-          },
-          async list() {
-            const skills = await skillClient.list();
-            return skills.map(toPublicDefinition);
-          },
-          async create(createRequest) {
-            const skill = await skillClient.create(createRequest);
-            return toPublicDefinition(skill);
-          },
-          async update(skillId, updateRequest) {
-            const skill = await skillClient.update(skillId, updateRequest);
-            return toPublicDefinition(skill);
-          },
-          async delete(skillId: string) {
-            return skillClient.delete(skillId);
-          },
-        };
-
+        const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
+        const persistedProvider = createPersistedSkillProvider({
+          space,
+          esClient: elasticsearch.client.asInternalUser,
+          logger,
+        });
         const toolRegistry = await getToolRegistry({ request });
 
         return createSkillRegistry({
-          builtinSkills: [...this.skills.values()],
+          builtinProvider,
           persistedProvider,
           toolRegistry,
         });
+      },
+      registerSkill: (skill) => {
+        const op = this.mutationQueue.then(async () => {
+          await validateSkillDefinition(skill);
+
+          if (this.skills.has(skill.id)) {
+            throw new Error(`Skill type with id ${skill.id} already registered`);
+          }
+
+          const fullPath = getSkillEntryPath({ skill });
+          if (this.skillFullPaths.has(fullPath)) {
+            throw new Error(
+              `Skill with path ${skill.basePath} and name ${skill.name} already registered`
+            );
+          }
+          this.skillFullPaths.add(fullPath);
+          this.skills.set(skill.id, skill);
+        });
+        this.mutationQueue = op.catch(() => {});
+        return op;
+      },
+      unregisterSkill: (skillId) => {
+        const op = this.mutationQueue.then(async () => {
+          const skill = this.skills.get(skillId);
+          if (!skill) {
+            return false;
+          }
+
+          const fullPath = getSkillEntryPath({ skill });
+          this.skillFullPaths.delete(fullPath);
+          this.skills.delete(skillId);
+          return true;
+        });
+        this.mutationQueue = op.catch(() => {});
+        return op;
       },
     };
   }
 }
 
-/**
- * Extracts tool IDs from a built-in SkillDefinition's getAllowedTools and getInlineTools.
- */
-const getBuiltinSkillToolIds = async (skill: SkillDefinition): Promise<string[]> => {
-  const allowedToolIds = skill.getAllowedTools?.() ?? [];
-  const inlineTools = (await skill.getInlineTools?.()) ?? [];
-  const inlineToolIds = inlineTools.map((tool) => tool.id);
-  return [...allowedToolIds, ...inlineToolIds];
-};
-
-/**
- * Converts a built-in SkillDefinition to a PublicSkillDefinition for API responses.
- */
-const builtinToPublicDefinition = async (
-  skill: SkillDefinition
-): Promise<PublicSkillDefinition> => ({
-  id: skill.id,
-  name: skill.name,
-  description: skill.description,
-  content: skill.content,
-  referenced_content: skill.referencedContent?.map((rc) => ({
-    name: rc.name,
-    relativePath: rc.relativePath,
-    content: rc.content,
-  })),
-  tool_ids: await getBuiltinSkillToolIds(skill),
-  readonly: true,
-});
-
 class SkillRegistryImpl implements SkillRegistry {
-  private readonly builtinSkillsMap: Map<string, SkillDefinition>;
-  private readonly persistedProvider: SkillProvider;
+  private readonly builtinProvider: SkillProvider;
+  private readonly persistedProvider: WritableSkillProvider;
   private readonly toolRegistry: ToolRegistry;
 
-  constructor({
-    builtinSkills,
-    persistedProvider,
-    toolRegistry,
-  }: CreateSkillRegistryParams) {
-    this.builtinSkillsMap = new Map(builtinSkills.map((skill) => [skill.id, skill]));
+  constructor({ builtinProvider, persistedProvider, toolRegistry }: CreateSkillRegistryParams) {
+    this.builtinProvider = builtinProvider;
     this.persistedProvider = persistedProvider;
     this.toolRegistry = toolRegistry;
   }
 
   async has(skillId: string): Promise<boolean> {
-    if (this.builtinSkillsMap.has(skillId)) {
+    if (await this.builtinProvider.has(skillId)) {
       return true;
     }
     return this.persistedProvider.has(skillId);
   }
 
-  async get(skillId: string): Promise<SkillDefinition | PublicSkillDefinition | undefined> {
-    // Built-in first, then persisted
-    const builtinSkill = this.builtinSkillsMap.get(skillId);
+  async get(skillId: string): Promise<InternalSkillDefinition | undefined> {
+    const builtinSkill = await this.builtinProvider.get(skillId);
     if (builtinSkill) {
       return builtinSkill;
     }
     return this.persistedProvider.get(skillId);
   }
 
-  /**
-   * Lists all skills (built-in + persisted) as PublicSkillDefinition for API responses.
-   */
   async list(): Promise<PublicSkillDefinition[]> {
-    const builtinPublic: PublicSkillDefinition[] = await Promise.all(
-      [...this.builtinSkillsMap.values()].map((skill) => builtinToPublicDefinition(skill))
+    const builtinSkills = await this.builtinProvider.list();
+    const builtinPublic = await Promise.all(
+      builtinSkills.map((skill) => internalToPublicDefinition(skill))
     );
 
     const persistedSkills = await this.persistedProvider.list();
+    const persistedPublic = await Promise.all(
+      persistedSkills.map((skill) => internalToPublicDefinition(skill))
+    );
 
-    return [...builtinPublic, ...persistedSkills];
+    return [...builtinPublic, ...persistedPublic];
   }
 
-  /**
-   * Lists all SkillDefinitions (built-in + user-created) for runtime use in the skill store.
-   */
-  async listSkillDefinitions(): Promise<SkillDefinition[]> {
-    const builtinSkills = [...this.builtinSkillsMap.values()];
+  async listSkillDefinitions(): Promise<InternalSkillDefinition[]> {
+    const builtinSkills = await this.builtinProvider.list();
     const persistedSkills = await this.persistedProvider.list();
-    const convertedPersisted = persistedSkills
-      .filter((skill) => !this.builtinSkillsMap.has(skill.id))
-      .map((skill) => this.convertPersistedToSkillDefinition(skill));
-    return [...builtinSkills, ...convertedPersisted];
+    const builtinIds = new Set(builtinSkills.map((s) => s.id));
+    const filteredPersisted = persistedSkills.filter((skill) => !builtinIds.has(skill.id));
+    return [...builtinSkills, ...filteredPersisted];
   }
 
   async create(createRequest: PersistedSkillCreateRequest): Promise<PublicSkillDefinition> {
@@ -274,97 +256,72 @@ class SkillRegistryImpl implements SkillRegistry {
       throw createBadRequestError(`Invalid skill id: "${skillId}": ${validationError}`);
     }
 
-    // Check for duplicates across both providers
     if (await this.has(skillId)) {
       throw createBadRequestError(`Skill with id '${skillId}' already exists`);
     }
 
-    // Validate tool IDs exist in the tool registry
     await this.validateToolIds(createRequest.tool_ids);
 
-    return this.persistedProvider.create(createRequest);
+    const created = await this.persistedProvider.create(createRequest);
+    return internalToPublicDefinition(created);
   }
 
   async update(
     skillId: string,
     update: PersistedSkillUpdateRequest
   ): Promise<PublicSkillDefinition> {
-    // Check if this is a built-in skill (read-only)
-    if (this.builtinSkillsMap.has(skillId)) {
+    if (await this.builtinProvider.has(skillId)) {
       throw createBadRequestError(`Skill '${skillId}' is read-only and can't be updated`);
     }
 
-    // Check if skill exists in persisted provider
     if (!(await this.persistedProvider.has(skillId))) {
       throw createBadRequestError(`Skill with id '${skillId}' not found`);
     }
 
-    // Validate tool IDs if provided
     if (update.tool_ids) {
       await this.validateToolIds(update.tool_ids);
     }
 
-    return this.persistedProvider.update(skillId, update);
+    const updated = await this.persistedProvider.update(skillId, update);
+    return internalToPublicDefinition(updated);
   }
 
   async delete(skillId: string): Promise<boolean> {
-    // Check if this is a built-in skill (read-only)
-    if (this.builtinSkillsMap.has(skillId)) {
+    if (await this.builtinProvider.has(skillId)) {
       throw createBadRequestError(`Skill '${skillId}' is read-only and can't be deleted`);
     }
 
-    // Check if skill exists in persisted provider
     if (!(await this.persistedProvider.has(skillId))) {
       throw createBadRequestError(`Skill with id '${skillId}' not found`);
     }
 
-    return this.persistedProvider.delete(skillId);
+    await this.persistedProvider.delete(skillId);
+    return true;
   }
 
-  /**
-   * Resolves a SkillSelection[] to concrete SkillDefinition[] for runtime use.
-   * Expands wildcard '*' to all skills (built-in + user-created),
-   * resolves explicit IDs from both providers.
-   */
-  async resolveSkillSelection(selection: SkillSelection[]): Promise<SkillDefinition[]> {
+  async resolveSkillSelection(selection: SkillSelection[]): Promise<InternalSkillDefinition[]> {
     if (!selection || selection.length === 0) {
       return [];
     }
 
-    const result: SkillDefinition[] = [];
+    const result: InternalSkillDefinition[] = [];
     const seenIds = new Set<string>();
 
     for (const sel of selection) {
       for (const skillId of sel.skill_ids) {
         if (skillId === allSkillsSelectionWildcard) {
-          // Wildcard: add all built-in skills
-          for (const skill of this.builtinSkillsMap.values()) {
+          const allSkills = await this.listSkillDefinitions();
+          for (const skill of allSkills) {
             if (!seenIds.has(skill.id)) {
               seenIds.add(skill.id);
               result.push(skill);
             }
           }
-          // Also add all user-created skills
-          const persistedSkills = await this.persistedProvider.list();
-          for (const skill of persistedSkills) {
-            if (!seenIds.has(skill.id)) {
-              seenIds.add(skill.id);
-              result.push(this.convertPersistedToSkillDefinition(skill));
-            }
-          }
         } else if (!seenIds.has(skillId)) {
-          // Try built-in first
-          const builtinSkill = this.builtinSkillsMap.get(skillId);
-          if (builtinSkill) {
+          const skill = await this.get(skillId);
+          if (skill) {
             seenIds.add(skillId);
-            result.push(builtinSkill);
-          } else {
-            // Try persisted - convert to SkillDefinition for runtime
-            const persistedSkill = await this.persistedProvider.get(skillId);
-            if (persistedSkill) {
-              seenIds.add(skillId);
-              result.push(this.convertPersistedToSkillDefinition(persistedSkill));
-            }
+            result.push(skill);
           }
         }
       }
@@ -375,10 +332,6 @@ class SkillRegistryImpl implements SkillRegistry {
 
   private static readonly MAX_TOOL_IDS_PER_SKILL = 5;
 
-  /**
-   * Validates that all tool IDs exist in the tool registry
-   * and enforces a maximum of 5 tools per skill.
-   */
   private async validateToolIds(toolIds: string[]): Promise<void> {
     if (!toolIds || toolIds.length === 0) {
       return;
@@ -402,26 +355,5 @@ class SkillRegistryImpl implements SkillRegistry {
         `Invalid tool IDs: ${invalidIds.join(', ')}. These tools do not exist in the tool registry.`
       );
     }
-  }
-
-  /**
-   * Converts a PublicSkillDefinition (persisted) to a runtime SkillDefinition.
-   * Maps `tool_ids` to `getAllowedTools()`.
-   */
-  private convertPersistedToSkillDefinition(skill: PublicSkillDefinition): SkillDefinition {
-    const toolIds = skill.tool_ids ?? [];
-    return {
-      id: skill.id,
-      name: skill.name as any, // Persisted skills use simpler name constraints
-      basePath: 'skills/user' as any,
-      description: skill.description,
-      content: skill.content,
-      referencedContent: skill.referenced_content?.map((rc) => ({
-        name: rc.name,
-        relativePath: rc.relativePath,
-        content: rc.content,
-      })),
-      getAllowedTools: () => toolIds as any[],
-    };
   }
 }

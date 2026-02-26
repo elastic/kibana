@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { type Streams } from '@kbn/streams-schema';
-import { isCondition } from '@kbn/streamlang';
+import { type Condition, isCondition } from '@kbn/streamlang';
 import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useMatchRate } from './use_match_rate';
 import {
@@ -52,8 +52,12 @@ export function SuggestedStreamPanel({
   onEdit(index: number, suggestion: PartitionSuggestion): void;
   onSave?: (suggestion: PartitionSuggestion) => void;
 }) {
-  const { changeSuggestionNameDebounced, changeSuggestionCondition, reviewSuggestedRule } =
-    useStreamRoutingEvents();
+  const {
+    changeSuggestionNameDebounced,
+    changeSuggestionCondition,
+    reviewSuggestedRule,
+    setConditionEditorValidity,
+  } = useStreamRoutingEvents();
 
   const isEditing = useStreamsRoutingSelector(
     (snapshot) =>
@@ -98,7 +102,7 @@ export function SuggestedStreamPanel({
     changeSuggestionNameDebounced(name);
   };
 
-  const handleConditionChange = (condition: any) => {
+  const handleConditionChange = (condition: Condition) => {
     if (!isEditing) return;
     changeSuggestionCondition(condition);
   };
@@ -124,6 +128,7 @@ export function SuggestedStreamPanel({
             status="enabled"
             condition={currentSuggestion.condition}
             onConditionChange={handleConditionChange}
+            onValidityChange={setConditionEditorValidity}
             onStatusChange={() => {}}
             isSuggestionRouting={true}
           />

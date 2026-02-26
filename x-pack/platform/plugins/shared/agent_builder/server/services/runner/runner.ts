@@ -203,7 +203,6 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       defaultConnectorId,
       abortSignal,
       resultStore,
-      skillsStore,
       attachmentStateManager,
       skillRegistry,
       stateManager,

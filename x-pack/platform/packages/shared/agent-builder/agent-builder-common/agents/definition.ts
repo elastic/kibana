@@ -96,6 +96,11 @@ export interface AgentConfiguration {
   skills?: SkillSelection[];
 
   /**
+   * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
+   */
+  workflow_ids?: string[];
+
+  /**
    * Custom configuration for the research step of the agent.
    */
   research?: AgentResearchStepConfiguration;

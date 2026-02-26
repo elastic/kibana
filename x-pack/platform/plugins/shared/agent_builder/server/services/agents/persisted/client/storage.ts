@@ -25,7 +25,12 @@ const storageSettings = {
       labels: types.keyword({}),
       avatar_color: types.keyword({}),
       avatar_symbol: types.keyword({}),
-      config: types.object({ properties: {}, dynamic: false }),
+      config: types.object({
+        properties: {
+          workflow_ids: types.keyword({}),
+        },
+        dynamic: false,
+      }),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
@@ -52,6 +57,7 @@ export interface AgentConfigurationProperties {
   instructions?: string;
   tools: ToolSelection[];
   skills?: SkillSelection[];
+  workflow_ids?: string[];
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;

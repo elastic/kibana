@@ -45,6 +45,7 @@ const emptyState = (): AgentEditState => ({
     instructions: '',
     tools: defaultToolSelection,
     skills: defaultSkillSelection,
+    workflow_ids: [],
   },
 });
 

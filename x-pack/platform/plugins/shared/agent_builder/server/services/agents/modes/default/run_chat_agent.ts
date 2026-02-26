@@ -120,6 +120,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     request,
     abortSignal,
     nextInput: processedConversation.nextInput,
+    agentId,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 

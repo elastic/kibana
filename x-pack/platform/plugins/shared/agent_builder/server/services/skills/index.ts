@@ -13,4 +13,14 @@ export {
   type SkillRegistry,
   type SkillProvider,
   createSkillService,
+  createSkillRegistry,
 } from './skill_service';
+export {
+  type ReadonlySkillProvider,
+  type WritableSkillProvider,
+  isReadonlySkillProvider,
+  isWritableSkillProvider,
+} from './skill_provider';
+export { createBuiltinSkillProvider } from './builtin';
+export { createPersistedSkillProvider } from './persisted';
+export { internalToPublicDefinition } from './utils';
