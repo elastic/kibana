@@ -83,9 +83,10 @@ test.describe(
       page,
       kbnUrl,
       pageObjects,
+      config,
     }) => {
-      test.skip();
-      test.setTimeout(180_000); // Alert tests can take time
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.setTimeout(180_000);
       const TIMELINE_NAME = 'Untitled timeline';
 
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list

@@ -64,9 +64,13 @@ test.describe(
       }
     });
 
-    test('runs osquery against alert and creates a new case', async ({ page, kbnClient }) => {
-      test.skip();
-      test.setTimeout(180_000); // Alert tests can take time
+    test('runs osquery against alert and creates a new case', async ({
+      page,
+      kbnClient,
+      config,
+    }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.setTimeout(180_000);
 
       const caseName = `Test case ${Date.now()}`;
       const caseDescription = `Test case description ${Date.now()}`;
@@ -146,9 +150,9 @@ test.describe(
       }
     });
 
-    test('sees osquery results from last action and add to a case', async ({ page }) => {
-      test.skip();
-      test.setTimeout(180_000); // Alert tests can take time
+    test('sees osquery results from last action and add to a case', async ({ page, config }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.setTimeout(180_000);
 
       await test.step('Expand alert and open response actions', async () => {
         // eslint-disable-next-line playwright/no-nth-methods -- first event in list

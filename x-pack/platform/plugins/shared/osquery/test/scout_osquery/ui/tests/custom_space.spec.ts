@@ -83,9 +83,10 @@ for (const testSpace of testSpaces) {
       page,
       pageObjects,
       kbnUrl,
+      config,
     }) => {
-      test.skip();
-      test.setTimeout(180_000); // Live queries can take time for agents to respond
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.setTimeout(180_000);
 
       // Navigate to osquery page in the space
       await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
@@ -140,9 +141,9 @@ for (const testSpace of testSpaces) {
       });
     });
 
-    test('runs packs normally', async ({ page, pageObjects, kbnUrl }) => {
-      test.skip();
-      test.setTimeout(180_000); // Live queries can take time for agents to respond
+    test('runs packs normally', async ({ page, pageObjects, kbnUrl, config }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.setTimeout(180_000);
 
       await page.goto(kbnUrl.get(`/s/${spaceId}/app/osquery`));
       await waitForPageReady(page);

@@ -109,9 +109,9 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
 
   test(
     'should add result to a case without showing add to timeline button (security)',
-    { tag: [...tags.serverless.security.complete] },
-    async ({ page, pageObjects, kbnUrl, kbnClient }) => {
-      test.skip();
+    { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+    async ({ page, pageObjects, kbnUrl, kbnClient, config }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(180_000);
 
       const caseData = await loadCase(kbnClient, 'securitySolution');

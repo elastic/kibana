@@ -35,8 +35,8 @@ test.describe(
       }
     });
 
-    test('should substitute parameters in investigation guide', async ({ page }) => {
-      test.skip();
+    test('should substitute parameters in investigation guide', async ({ page, config }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       await page.testSubj
@@ -75,8 +75,9 @@ test.describe(
     test('should substitute parameters in live query and increase number of ran queries', async ({
       page,
       pageObjects,
+      config,
     }) => {
-      test.skip();
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       const notificationBadge = page.testSubj.locator('response-actions-notification');
@@ -117,8 +118,9 @@ test.describe(
     test('should be able to run take action query against all enrolled agents', async ({
       page,
       pageObjects,
+      config,
     }) => {
-      test.skip();
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(600_000);
 
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
@@ -161,8 +163,9 @@ test.describe(
     test('should substitute params in osquery ran from timelines alerts', async ({
       page,
       pageObjects,
+      config,
     }) => {
-      test.skip();
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(300_000);
 
       // Send alert to timeline

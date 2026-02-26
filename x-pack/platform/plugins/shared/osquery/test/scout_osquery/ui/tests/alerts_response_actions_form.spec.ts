@@ -65,8 +65,7 @@ test.describe(
       page,
       kbnUrl,
     }) => {
-      test.skip();
-      test.setTimeout(180_000); // Complex form test
+      test.setTimeout(180_000);
       await browserAuth.loginWithCustomRole(socManagerRole);
 
       await page.goto(kbnUrl.get('/app/security/rules'));

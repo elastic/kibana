@@ -13,7 +13,6 @@ import { loadRule, cleanupRule } from '../../common/api_helpers';
 import { waitForAlerts } from '../../common/constants';
 
 test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
-  test.skip();
   let ruleId: string;
 
   test.beforeAll(async ({ kbnClient }) => {

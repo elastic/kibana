@@ -40,8 +40,7 @@ test.describe(
       'can visit discover from response action results',
       { tag: [...tags.stateful.classic] },
       async ({ page }) => {
-        test.skip();
-        test.setTimeout(180_000); // Alert tests can take time
+        test.setTimeout(180_000);
         const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
 
         await test.step('Expand alert and open response action results', async () => {
