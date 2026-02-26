@@ -31,12 +31,10 @@ export const useWorkflowsCapabilities = (): WorkflowsManagementCapabilities => {
   } = useKibana<{ application: ApplicationStart }>();
   const workflowsCapabilities = application?.capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID] ?? {};
 
-  return {
-    ...(Object.fromEntries(
-      Object.entries(CapabilitiesMap).map(([key, value]) => [
-        key,
-        Boolean(workflowsCapabilities[value]),
-      ])
-    ) as WorkflowsManagementCapabilities),
-  };
+  return Object.fromEntries(
+    Object.entries(CapabilitiesMap).map(([key, value]) => [
+      key,
+      Boolean(workflowsCapabilities[value]),
+    ])
+  ) as WorkflowsManagementCapabilities;
 };

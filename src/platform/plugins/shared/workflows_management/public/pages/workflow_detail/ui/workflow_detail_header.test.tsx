@@ -19,6 +19,7 @@ import {
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
@@ -133,13 +134,7 @@ describe('WorkflowDetailHeader', () => {
     });
     mockUseParams.mockReturnValue({ id: 'test-123' });
     mockUseWorkflowsCapabilities.mockReturnValue({
-      canCreateWorkflow: true,
-      canReadWorkflow: true,
-      canUpdateWorkflow: true,
-      canDeleteWorkflow: true,
-      canExecuteWorkflow: true,
-      canReadWorkflowExecution: true,
-      canCancelWorkflowExecution: true,
+      ...mockWorkflowsManagementCapabilities,
     });
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow',
