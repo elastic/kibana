@@ -69,9 +69,9 @@ export async function openSaveModal({
      */
     const getShouldAddAccessControl = async () => {
       try {
-        const currentUser = await coreServices.userProfile.getCurrent();
+        const currentProfileUid = (await coreServices.security.authc.getCurrentUser()).profile_uid;
         const isCreatingNewDashboard = Boolean(!lastSavedId);
-        return isCreatingNewDashboard && Boolean(currentUser);
+        return isCreatingNewDashboard && Boolean(currentProfileUid);
       } catch {
         return false;
       }
