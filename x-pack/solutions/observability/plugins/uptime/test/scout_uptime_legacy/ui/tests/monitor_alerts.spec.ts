@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
@@ -17,7 +16,7 @@ const alertThreshold = 'major';
 
 const mlJobId = '0000_intermittent_high_latency_by_geo';
 
-test.describe('MonitorAlerts', { tag: tags.stateful.classic }, () => {
+test.describe('MonitorAlerts', { tag: '@local-stateful-classic' }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.ml.deleteJobs({
       jobIds: [mlJobId],
@@ -59,11 +58,11 @@ test.describe('MonitorAlerts', { tag: tags.stateful.classic }, () => {
 
     await test.step('go to ML management page and find job', async () => {
       await page.gotoApp('management/ml/anomaly_detection');
-      await page.testSubj.locator('mlJobListColumnId').waitFor();
-      await expect(page.testSubj.locator('mlJobListColumnId')).toHaveCount(1);
-      await expect(
-        page.testSubj.locator('mlJobListColumnId').locator('.euiTableCellContent')
-      ).toHaveText(mlJobId);
+      const jobIdCell = page.testSubj
+        .locator('mlJobListColumnId')
+        .locator('.euiTableCellContent')
+        .filter({ hasText: mlJobId });
+      await expect(jobIdCell).toHaveCount(1);
     });
   });
 });

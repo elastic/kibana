@@ -75,7 +75,7 @@ export class UptimeSettingsPage {
     await this.page.testSubj.locator('emailServiceSelectInput').selectOption('other');
     await this.page.testSubj.locator('emailHostInput').fill(config.host);
     await this.page.testSubj.locator('emailPortInput').fill(config.port);
-    await this.page.testSubj.click('input');
+    await this.page.testSubj.click('emailHasAuthSwitch');
     await this.page.testSubj.click('create-connector-flyout-save-btn');
     await this.page.testSubj.waitForSelector('nameInput', { state: 'hidden' });
   }

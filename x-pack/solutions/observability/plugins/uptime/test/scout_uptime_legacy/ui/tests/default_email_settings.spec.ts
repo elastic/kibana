@@ -23,8 +23,16 @@ test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => 
     await browserAuth.loginAsAdmin();
     await pageObjects.uptimeSettings.goto(queryParams);
 
-    await test.step('no connector is defined by default', async () => {
+    await test.step('reset alerting defaults for idempotency', async () => {
       await pageObjects.uptimeSettings.waitForDefaultConnectorsLoaded();
+      await pageObjects.uptimeSettings.clearToEmailAddresses();
+      await pageObjects.uptimeSettings.clearDefaultConnectors();
+      if (await pageObjects.uptimeSettings.getApplyButton().isEnabled()) {
+        await pageObjects.uptimeSettings.clickSaveSettings();
+      }
+    });
+
+    await test.step('no connector is defined by default', async () => {
       await expect(
         page.testSubj.locator('default-connectors-input-loaded').locator('input')
       ).toHaveValue('');

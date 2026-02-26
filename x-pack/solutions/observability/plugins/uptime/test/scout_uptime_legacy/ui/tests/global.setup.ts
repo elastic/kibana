@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { globalSetupHook, tags } from '@kbn/scout-oblt';
+import { globalSetupHook } from '@kbn/scout-oblt';
 import { testData } from '../fixtures';
 
 globalSetupHook(
   'Ingest Uptime test data',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   async ({ esArchiver, log }) => {
     log.info('[setup] Loading ES archives for Uptime Scout tests...');
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
