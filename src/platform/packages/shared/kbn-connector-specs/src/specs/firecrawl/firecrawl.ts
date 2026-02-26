@@ -33,9 +33,12 @@ export const FirecrawlConnector: ConnectorSpec = {
   actions: {
     scrape: {
       isTool: true,
-      description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.scrape.description', {
-        defaultMessage: 'Scrape a single URL and extract content (e.g. markdown)',
-      }),
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.firecrawl.actions.scrape.description',
+        {
+          defaultMessage: 'Scrape a single URL and extract content (e.g. markdown)',
+        }
+      ),
       input: z.object({
         url: z.string().url().describe('The URL to scrape'),
         onlyMainContent: z.boolean().optional().default(true),
@@ -53,9 +56,12 @@ export const FirecrawlConnector: ConnectorSpec = {
 
     search: {
       isTool: true,
-      description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.actions.search.description', {
-        defaultMessage: 'Search the web and get full page content from results',
-      }),
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.firecrawl.actions.search.description',
+        {
+          defaultMessage: 'Search the web and get full page content from results',
+        }
+      ),
       input: z.object({
         query: z.string().min(1).describe('Search query'),
         limit: z.number().int().min(1).max(100).optional().default(5),

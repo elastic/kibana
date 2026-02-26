@@ -141,11 +141,11 @@ describe('FirecrawlConnector', () => {
       const mockData = { status: 'completed', total: 10, completed: 10 };
       mockClient.get.mockResolvedValue({ data: mockData });
 
-      const result = await FirecrawlConnector.actions.getCrawlStatus.handler(mockContext, { id: crawlId });
+      const result = await FirecrawlConnector.actions.getCrawlStatus.handler(mockContext, {
+        id: crawlId,
+      });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        `https://api.firecrawl.dev/v2/crawl/${crawlId}`
-      );
+      expect(mockClient.get).toHaveBeenCalledWith(`https://api.firecrawl.dev/v2/crawl/${crawlId}`);
       expect(result).toEqual(mockData);
     });
   });
@@ -159,10 +159,9 @@ describe('FirecrawlConnector', () => {
       }
       const result = await FirecrawlConnector.test.handler(mockContext);
 
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://api.firecrawl.dev/v2/scrape',
-        { url: 'https://example.com' }
-      );
+      expect(mockClient.post).toHaveBeenCalledWith('https://api.firecrawl.dev/v2/scrape', {
+        url: 'https://example.com',
+      });
       expect(mockContext.log.debug).toHaveBeenCalledWith('Firecrawl test handler');
       expect(result).toEqual({
         ok: true,
