@@ -40,6 +40,8 @@ import {
   oauthStateModelVersions,
   userConnectorTokenModelVersions,
 } from './model_versions';
+import { connectorModelVersionsWithAuthMode } from './model_versions/connector_model_versions';
+import { connectorTokenModelVersionsWithRefreshToken } from './model_versions/connector_token_model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -76,7 +78,9 @@ export function setupSavedObjects(
         };
       },
     },
-    modelVersions: connectorModelVersions,
+    modelVersions: authorizationCodeEnabled
+      ? connectorModelVersionsWithAuthMode
+      : connectorModelVersions,
   });
 
   // Encrypted attributes
@@ -135,7 +139,9 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
-    modelVersions: connectorTokenModelVersions,
+    modelVersions: authorizationCodeEnabled
+      ? connectorTokenModelVersionsWithRefreshToken(encryptedSavedObjects)
+      : connectorTokenModelVersions,
   });
 
   const connectorTokenAttributesToEncrypt = new Set(['token']);
@@ -211,10 +217,7 @@ export function setupSavedObjects(
       attributesToIncludeInAAD: new Set([
         'state',
         'connectorId',
-        'authorizationUrl',
-        'scope',
         'spaceId',
-        'createdAt',
         'expiresAt',
         'createdBy',
       ]),

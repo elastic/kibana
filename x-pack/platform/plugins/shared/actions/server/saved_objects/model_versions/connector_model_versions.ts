@@ -15,6 +15,15 @@ export const connectorModelVersions: SavedObjectsModelVersionMap = {
       create: rawConnectorSchemaV1,
     },
   },
+};
+
+export const connectorModelVersionsWithAuthMode: SavedObjectsModelVersionMap = {
+  '1': {
+    changes: [],
+    schemas: {
+      create: rawConnectorSchemaV1,
+    },
+  },
   '2': {
     changes: [
       {
