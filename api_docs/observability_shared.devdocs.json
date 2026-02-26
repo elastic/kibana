@@ -1310,6 +1310,26 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.Section.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "StyledComponentProps",
+              "<C, T, O, A> & { as?: undefined; forwardedAs?: undefined; }"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "lineNumber": 161,
+            "columnNumber": 9,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1363,7 +1383,7 @@
           "CommonProps",
           " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
           "EuiListGroupItemProps",
-          "[] | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
+          "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
           "Property",
           ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }) => React.JSX.Element"
         ],
@@ -1385,7 +1405,7 @@
               "CommonProps",
               " & Omit<React.HTMLAttributes<HTMLUListElement>, \"color\"> & { bordered?: boolean | undefined; flush?: boolean | undefined; gutterSize?: \"m\" | \"none\" | \"s\" | undefined; listItems?: ",
               "EuiListGroupItemProps",
-              "[] | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
+              "[] | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; maxWidth?: boolean | ",
               "Property",
               ".MaxWidth<string | number> | undefined; showToolTips?: boolean | undefined; wrapText?: boolean | undefined; ariaLabelledby?: string | undefined; }"
             ],
@@ -4221,7 +4241,7 @@
             "section": "def-public.KibanaPageTemplateProps",
             "text": "KibanaPageTemplateProps"
           },
-          ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -4304,7 +4324,7 @@
             "section": "def-public.KibanaPageTemplateProps",
             "text": "KibanaPageTemplateProps"
           },
-          ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -4447,7 +4467,7 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"rel\" | \"onClick\" | \"target\"> & { size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; color?: \"text\" | \"primary\" | \"subdued\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"rel\" | \"color\" | \"onClick\" | \"target\"> & { size?: \"m\" | \"s\" | \"xs\" | \"l\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",
