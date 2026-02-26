@@ -7682,7 +7682,7 @@
         "label": "ESQLVariablesCompatibleDashboardApi",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 494,
+        "lineNumber": 495,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8048,7 +8048,7 @@
               "[] | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 495,
+            "lineNumber": 496,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8414,7 +8414,7 @@
               "> | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 496,
+            "lineNumber": 497,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8580,7 +8580,7 @@
               "; }; toPromise: { (): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: unknown; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: unknown; } | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 497,
+            "lineNumber": 498,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9161,6 +9161,22 @@
           },
           {
             "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.ExpressionWrapperProps.paddingTop",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "paddingTop",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
+            "lineNumber": 435,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
             "id": "def-common.ExpressionWrapperProps.abortController",
             "type": "Object",
             "tags": [],
@@ -9170,7 +9186,7 @@
               "AbortController | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 435,
+            "lineNumber": 436,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -19664,7 +19680,7 @@
         "label": "StructuredDatasourceStates",
         "description": [],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 440,
+        "lineNumber": 441,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -19687,7 +19703,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 441,
+            "lineNumber": 442,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -19710,7 +19726,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-            "lineNumber": 442,
+            "lineNumber": 443,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -29970,7 +29986,7 @@
           " | undefined; managed?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 438,
+        "lineNumber": 439,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -31255,7 +31271,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 490,
+        "lineNumber": 491,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32517,7 +32533,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 486,
+        "lineNumber": 487,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32863,7 +32879,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 492,
+        "lineNumber": 493,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35441,7 +35457,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 445,
+        "lineNumber": 446,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -36689,7 +36705,7 @@
           "[] | undefined; onAlertRule?: ((data: unknown) => void) | undefined; hidePanelTitles?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 491,
+        "lineNumber": 492,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -37654,7 +37670,7 @@
           " | undefined; }; visualization: unknown; }; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/embeddable/types.ts",
-        "lineNumber": 466,
+        "lineNumber": 467,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
