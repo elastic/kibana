@@ -40,7 +40,7 @@ interface BulkObjectResponse {
   reason: string;
 }
 
-interface UpsertEntitiesBulkOptions {
+interface UpsertEntitiesBulkParams {
   objects: BulkObject[];
   force?: boolean;
   timestampGenerator?: () => string;
@@ -104,7 +104,7 @@ export class CRUDClient {
     objects,
     force = false,
     timestampGenerator,
-  }: UpsertEntitiesBulkOptions): Promise<BulkObjectResponse[]> {
+  }: UpsertEntitiesBulkParams): Promise<BulkObjectResponse[]> {
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
