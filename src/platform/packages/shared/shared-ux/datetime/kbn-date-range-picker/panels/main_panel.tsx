@@ -32,10 +32,12 @@ interface OptionsListProps {
   options: TimeRangeBoundsOption[];
   /** When true, show the shorthand of the time range. */
   showShorthand?: boolean;
+  /** When true, show the extra actions. */
+  showExtraActions?: boolean;
 }
 
 /** Renders a list of time range options as selectable `PanelListItem` entries. */
-const OptionsList = ({ options, showShorthand }: OptionsListProps) => {
+const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListProps) => {
   const { applyRange, onPresetDelete } = useDateRangePickerContext();
   const euiThemeContext = useEuiTheme();
   const styles = mainPanelStyles(euiThemeContext);
@@ -55,7 +57,7 @@ const OptionsList = ({ options, showShorthand }: OptionsListProps) => {
           onClick={() => handleSelect(option)}
           suffix={showShorthand ? getOptionShorthand(option) ?? undefined : undefined}
           extraActions={
-            onPresetDelete ? (
+            showExtraActions && onPresetDelete ? (
               <EuiButtonIcon
                 aria-label={mainPanelTexts.deletePresetAriaLabel}
                 iconType="trash"
@@ -99,7 +101,9 @@ const PresetsRecentTabs = () => {
         </EuiTab>
       </EuiTabs>
 
-      {selectedTabId === 'presets' && <OptionsList options={presets} showShorthand />}
+      {selectedTabId === 'presets' && (
+        <OptionsList options={presets} showShorthand showExtraActions />
+      )}
       {selectedTabId === 'recent' && <OptionsList options={recent} />}
     </>
   );
