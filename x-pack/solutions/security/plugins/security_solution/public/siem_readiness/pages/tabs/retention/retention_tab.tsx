@@ -48,6 +48,10 @@ const getDataStreamUrl = (basePath: string, dataStreamName: string): string => {
   return `${basePath}/app/management/data/index_management/data_streams/${dataStreamName}`;
 };
 
+const getIndexDetailsUrl = (basePath: string, indexName: string): string => {
+  return `${basePath}/app/management/data/index_management/indices/index_details?indexName=${indexName}`;
+};
+
 // Extended RetentionInfo for table compatibility
 interface RetentionInfoWithStatus extends RetentionInfo, Record<string, unknown> {}
 
@@ -324,7 +328,8 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         }),
         width: '10%',
         render: (item: RetentionInfoWithStatus) => {
-          if (item.retentionType === 'dsl') {
+          // Data stream with DSL or no management -> View Data Stream
+          if (item.retentionType === 'dsl' || (item.isDataStream && item.retentionType === null)) {
             return (
               <div style={{ textAlign: 'right' }}>
                 <EuiButtonEmpty
@@ -334,13 +339,17 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
                   iconType="popout"
                   iconSide="right"
                 >
-                  {i18n.translate('xpack.securitySolution.siemReadiness.retention.action.viewDsl', {
-                    defaultMessage: 'View DSL',
-                  })}
+                  {i18n.translate(
+                    'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
+                    {
+                      defaultMessage: 'View Data Stream',
+                    }
+                  )}
                 </EuiButtonEmpty>
               </div>
             );
           }
+          // ILM managed (data stream or standalone index)
           if (item.retentionType === 'ilm' && item.policyName) {
             return (
               <div style={{ textAlign: 'right' }}>
@@ -354,6 +363,27 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
                   {i18n.translate('xpack.securitySolution.siemReadiness.retention.action.viewIlm', {
                     defaultMessage: 'View ILM policies',
                   })}
+                </EuiButtonEmpty>
+              </div>
+            );
+          }
+          // Standalone index with no management -> View Index
+          if (!item.isDataStream && item.retentionType === null) {
+            return (
+              <div style={{ textAlign: 'right' }}>
+                <EuiButtonEmpty
+                  size="xs"
+                  href={getIndexDetailsUrl(basePath, item.indexName)}
+                  target="_blank"
+                  iconType="popout"
+                  iconSide="right"
+                >
+                  {i18n.translate(
+                    'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
+                    {
+                      defaultMessage: 'View Index',
+                    }
+                  )}
                 </EuiButtonEmpty>
               </div>
             );

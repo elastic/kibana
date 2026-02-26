@@ -160,6 +160,7 @@ const extractStandaloneIndices = (
     const retentionDays = parseRetentionToDays(ilmRetention);
     return {
       indexName,
+      isDataStream: false,
       retentionType: ilmPolicyName ? 'ilm' : null,
       retentionPeriod: ilmRetention,
       retentionDays,
@@ -232,6 +233,7 @@ export const getReadinessRetentionRoute = (
 
               return {
                 indexName: dataStream.name,
+                isDataStream: true,
                 retentionType,
                 retentionPeriod,
                 retentionDays,

@@ -107,6 +107,7 @@ export type RetentionStatus = 'healthy' | 'non-compliant';
 
 export interface RetentionInfo {
   indexName: string;
+  isDataStream: boolean;
   retentionType: RetentionType;
   retentionPeriod: string | null;
   retentionDays: number | null;

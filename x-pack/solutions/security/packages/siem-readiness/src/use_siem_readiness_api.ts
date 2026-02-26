@@ -23,6 +23,8 @@ import {
   GET_INDEX_RESULTS_LATEST_API_PATH,
 } from './constants';
 
+const REFETCH_INTERVAL = 30000;
+
 const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'] as const;
 const GET_READINESS_RETENTION_QUERY_KEY = ['readiness-retention'] as const;
 const GET_READINESS_PIPELINES_QUERY_KEY = ['readiness-pipelines'] as const;
@@ -74,6 +76,7 @@ export const useSiemReadinessApi = () => {
     queryFn: () => {
       return http.get<PipelineStats[]>(GET_SIEM_READINESS_PIPELINES_API_PATH);
     },
+    refetchInterval: REFETCH_INTERVAL,
   });
 
   const getReadinessRetention = useQuery({
@@ -81,6 +84,7 @@ export const useSiemReadinessApi = () => {
     queryFn: () => {
       return http.get<RetentionResponse>(GET_SIEM_READINESS_RETENTION_API_PATH);
     },
+    refetchInterval: REFETCH_INTERVAL,
   });
   return {
     getReadinessCategories,
