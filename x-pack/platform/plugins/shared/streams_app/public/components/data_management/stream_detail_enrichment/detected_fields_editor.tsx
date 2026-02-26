@@ -87,16 +87,7 @@ export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEdito
         onFieldUpdate={(field) => {
           const normalizedDescription = field.description?.trim();
           if (field.status === 'mapped') {
-            const isTypelessMappedField = !field.type;
-            if (isTypelessMappedField) {
-              if (normalizedDescription) {
-                stageDocOnlyOverride({ fieldName: field.name, description: normalizedDescription });
-              } else {
-                unmapField(field.name);
-              }
-            } else {
-              mapField(field);
-            }
+            mapField(field);
           } else if (field.status === 'unmapped') {
             // Keep "Unmapped" selectable for documentation-only overrides.
             if (normalizedDescription) {

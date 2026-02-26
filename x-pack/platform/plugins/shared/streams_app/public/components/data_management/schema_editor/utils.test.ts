@@ -227,7 +227,7 @@ describe('buildSchemaSavePayload', () => {
 
     const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
 
-    expect(payload.ingest.wired!.fields).toEqual({
+    expect('wired' in payload.ingest && payload.ingest.wired.fields).toEqual({
       trace_id: { description: 'Description override on child stream' },
       new_field: { type: 'keyword', description: 'A newly mapped field' },
     });
@@ -256,7 +256,7 @@ describe('buildSchemaSavePayload', () => {
     const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
 
     // Should not include trace_id since description matches inherited
-    expect(payload.ingest.wired!.fields).toEqual({});
+    expect('wired' in payload.ingest && payload.ingest.wired.fields).toEqual({});
   });
 });
 

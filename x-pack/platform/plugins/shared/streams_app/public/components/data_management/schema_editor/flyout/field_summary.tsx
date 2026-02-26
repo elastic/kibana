@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiSpacer,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';

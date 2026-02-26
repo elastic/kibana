@@ -49,6 +49,7 @@ describe('validateAncestorFields', () => {
         validateAncestorFields({
           ancestors: [ancestor],
           fields,
+          streamName: 'logs.otel',
         })
       ).not.toThrow();
     });
@@ -67,6 +68,7 @@ describe('validateAncestorFields', () => {
         validateAncestorFields({
           ancestors: [ancestor],
           fields,
+          streamName: 'logs.otel',
         })
       ).not.toThrow();
     });
@@ -84,6 +86,7 @@ describe('validateAncestorFields', () => {
         validateAncestorFields({
           ancestors: [ancestor],
           fields,
+          streamName: 'logs.otel',
         })
       ).not.toThrow();
     });

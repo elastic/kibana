@@ -267,8 +267,13 @@ export function addAliasesForNamespacedFields(
   const rootStream = getRoot(streamDefinition.name);
   Object.entries(otelBaseMappings).forEach(([key, fieldDef]) => {
     if (fieldDef.type === 'alias') {
+      const targetField = otelBaseFields[fieldDef.path!];
+      const targetType = targetField.type;
+      if (!targetType) {
+        return;
+      }
       inheritedFields[key] = {
-        type: otelBaseFields[fieldDef.path!].type,
+        type: targetType,
         alias_for: fieldDef.path,
         from: rootStream,
       };
