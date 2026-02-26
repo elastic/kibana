@@ -18,6 +18,7 @@ export const DATA_SOURCES_SHORT_TITLE = i18n.translate('xpack.dataSources.app.sh
 
 export const API_BASE_PATH = '/api/data_sources';
 export const STACK_CONNECTOR_API_ROUTE = '/api/actions/connector';
+export const BULK_DELETE_API_ROUTE = `${API_BASE_PATH}/_bulk_delete`;
 
 // Pagination constants
 export const DEFAULT_ITEMS_PER_PAGE = 10;
