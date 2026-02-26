@@ -85,7 +85,7 @@ export const suggestPartitionsRoute = createServerRoute({
       logger,
       start: params.body.start,
       end: params.body.end,
-      maxSteps: 1, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
+      maxSteps: 4, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
       signal: getRequestAbortSignal(request),
       getFeatures: async (filters) => {
         const { hits } = await featureClient.getFeatures(params.path.name, filters);
