@@ -111,44 +111,46 @@ const MetricsExplorerContent = () => {
   };
 
   return (
-    <InfraPageTemplate onboardingFlow={OnboardingFlow.Infra}>
+    <>
       <MetricsInDiscoverCallout timeRange={timeRange} />
-      <MetricsExplorerToolbar
-        timeRange={timeRange}
-        options={options}
-        chartOptions={chartOptions}
-        onRefresh={refresh}
-        onTimeChange={handleTimeChange}
-        onGroupByChange={handleGroupByChange}
-        onFilterQuerySubmit={handleFilterQuerySubmit}
-        onMetricsChange={handleMetricsChange}
-        onAggregationChange={handleAggregationChange}
-        onChartOptionsChange={setChartOptions}
-        rightSideItems={<SavedViews viewState={viewState} />}
-      />
-      {error ? (
-        <NoData
-          titleText="Whoops!"
-          bodyText={i18n.translate('xpack.infra.metricsExplorer.errorMessage', {
-            defaultMessage: 'It looks like the request failed with "{message}"',
-            values: { message: error.message },
-          })}
-          onRefetch={refresh}
-          refetchText="Try Again"
-        />
-      ) : (
-        <MetricsExplorerCharts
+      <InfraPageTemplate onboardingFlow={OnboardingFlow.Infra}>
+        <MetricsExplorerToolbar
           timeRange={timeRange}
-          isLoading={isLoading}
-          data={data}
           options={options}
           chartOptions={chartOptions}
-          onLoadMore={handleLoadMore}
-          onFilter={onFilter}
-          onRefetch={refresh}
+          onRefresh={refresh}
           onTimeChange={handleTimeChange}
+          onGroupByChange={handleGroupByChange}
+          onFilterQuerySubmit={handleFilterQuerySubmit}
+          onMetricsChange={handleMetricsChange}
+          onAggregationChange={handleAggregationChange}
+          onChartOptionsChange={setChartOptions}
+          rightSideItems={<SavedViews viewState={viewState} />}
         />
-      )}
-    </InfraPageTemplate>
+        {error ? (
+          <NoData
+            titleText="Whoops!"
+            bodyText={i18n.translate('xpack.infra.metricsExplorer.errorMessage', {
+              defaultMessage: 'It looks like the request failed with "{message}"',
+              values: { message: error.message },
+            })}
+            onRefetch={refresh}
+            refetchText="Try Again"
+          />
+        ) : (
+          <MetricsExplorerCharts
+            timeRange={timeRange}
+            isLoading={isLoading}
+            data={data}
+            options={options}
+            chartOptions={chartOptions}
+            onLoadMore={handleLoadMore}
+            onFilter={onFilter}
+            onRefetch={refresh}
+            onTimeChange={handleTimeChange}
+          />
+        )}
+      </InfraPageTemplate>
+    </>
   );
 };

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ElasticAgentCardIllustration } from '@kbn/shared-ux-card-no-data';
 import type { ReactNode } from 'react';
 import React from 'react';
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 
 interface NoDataProps {
   titleText: string;
@@ -28,9 +30,22 @@ export const NoData: React.FC<NoDataProps> = ({
   const showRefetchButton = refetchText && onRefetch;
 
   return (
-    <CenteredEmptyPrompt
-      title={<h2>{titleText}</h2>}
-      titleSize="m"
+    <EuiPageTemplate.EmptyPrompt
+      data-test-subj={testString}
+      css={css`
+        align-self: center;
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      `}
+      title={
+        <EuiTitle size="m">
+          <h2>{titleText}</h2>
+        </EuiTitle>
+      }
+      icon={<ElasticAgentCardIllustration />}
       body={<p>{bodyText}</p>}
       actions={
         showRefetchButton ? (
@@ -43,18 +58,24 @@ export const NoData: React.FC<NoDataProps> = ({
           >
             {refetchText}
           </EuiButton>
-        ) : null
+        ) : undefined
       }
-      data-test-subj={testString}
+      footer={
+        <>
+          <EuiTitle size="xxs">
+            <span>
+              {i18n.translate('xpack.infra.noData.learnMore', {
+                defaultMessage: 'Want to learn more?',
+              })}
+            </span>
+          </EuiTitle>{' '}
+          <EuiLink href="#" onClick={(e) => e.preventDefault()} data-test-subj="infraNoDataReadTheDocsLink">
+            {i18n.translate('xpack.infra.noData.readTheDocs', {
+              defaultMessage: 'Read the docs',
+            })}
+          </EuiLink>
+        </>
+      }
     />
   );
 };
-
-const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
-  align-self: center;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-`;
