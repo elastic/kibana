@@ -25,7 +25,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
   readRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
-      validate: () => ({
+      validate: {
         request: {
           params: schema.object({
             id: schema.string({
@@ -40,7 +40,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
             body: () => readResponseBodySchema,
           },
         },
-      }),
+      },
     },
     async (ctx, req, res) => {
       try {

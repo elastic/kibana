@@ -25,7 +25,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
   updateRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
-      validate: () => ({
+      validate: {
         request: {
           params: schema.object({
             id: schema.string({
@@ -39,7 +39,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
             body: () => updateResponseBodySchema,
           },
         },
-      }),
+      },
     },
     async (ctx, req, res) => {
       try {
