@@ -11,3 +11,4 @@ export { pickFilesToLint } from './pick_files_to_lint';
 export { lintFiles } from './lint_files';
 export { runEslintWithTypes } from './run_eslint_with_types';
 export { eslintBinPath } from './eslint_bin_path';
+export { LINT_LABEL, LINT_LOG_PREFIX } from './constants';

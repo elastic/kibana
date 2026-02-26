@@ -15,7 +15,7 @@
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
-Always run `node scripts/check_changes.ts` to validate your changes
+Always run `node scripts/check_changes.ts --profile agent` to validate your changes
 
 ### Jest unit
 `yarn test:jest [--config=<pathToConfigFile>] [TestPathPattern]`

@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/ts-type-check-cli');
+require('@kbn/ts-type-check-cli').runTypeCheckCli();

@@ -6,4 +6,9 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/test').runJest();
+
+if (process.env.KBN_JEST_CONTRACT_DISABLED === 'true') {
+  require('@kbn/test').runJest();
+} else {
+  require('@kbn/test').runJestContract();
+}

@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
+const { createRequire } = require('module');
 
-if (process.env.KBN_JEST_CONTRACT_DISABLED === 'true') {
-  require('@kbn/test').runJest();
-} else {
-  require('@kbn/test').runJestContract();
-}
+require('@kbn/babel-register').install();
+
+const requireFromHere = createRequire(__filename);
+const { executeTypeCheckValidation, TSC_LABEL } = requireFromHere(
+  '../../packages/kbn-ts-type-check-cli'
+);
+
+module.exports = {
+  executeTypeCheckValidation,
+  TSC_LABEL,
+};
