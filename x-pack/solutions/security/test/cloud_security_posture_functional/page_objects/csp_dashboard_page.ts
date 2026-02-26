@@ -228,7 +228,8 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       log.debug('Polling KSPM stats API for data');
       const response = await supertest
         .get('/internal/cloud_security_posture/stats/kspm')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .query({ namespace: 'default' })
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
       expect(response.body.stats.totalFindings).to.be.above(0);
