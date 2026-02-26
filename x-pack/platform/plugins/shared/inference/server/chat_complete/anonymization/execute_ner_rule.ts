@@ -42,6 +42,16 @@ function isModelNotDeployedError(error: unknown): boolean {
 
 const DEFAULT_BATCH_SIZE = 1_000;
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 7;
+type NerEntityClass = NonNullable<NamedEntityRecognitionRule['allowedEntityClasses']>[number];
+
+const isNerEntityClass = (entityClass: string): entityClass is NerEntityClass => {
+  return (
+    entityClass === 'PER' ||
+    entityClass === 'ORG' ||
+    entityClass === 'LOC' ||
+    entityClass === 'MISC'
+  );
+};
 
 /**
  * Executes a NER anonymization rule, by:
@@ -168,12 +178,16 @@ export async function executeNerRule({
 
           let anonymizedValue = allTexts[position];
 
-          for (const entity of ((nerOutput?.entities ?? []) as Array<{
-            class_name: string;
-            start_pos: number;
-            end_pos: number;
-          }>).filter((e) =>
-            allowedNerEntities ? allowedNerEntities.includes(e.class_name as any) : true
+          for (const entity of (
+            (nerOutput?.entities ?? []) as Array<{
+              class_name: string;
+              start_pos: number;
+              end_pos: number;
+            }>
+          ).filter((e) =>
+            allowedNerEntities
+              ? isNerEntityClass(e.class_name) && allowedNerEntities.includes(e.class_name)
+              : true
           )) {
             const from = entity.start_pos + offset;
             const to = entity.end_pos + offset;

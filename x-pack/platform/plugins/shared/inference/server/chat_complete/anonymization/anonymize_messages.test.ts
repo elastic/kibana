@@ -6,6 +6,7 @@
  */
 
 import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { anonymizeMessages } from './anonymize_messages';
 import type {
@@ -23,7 +24,8 @@ const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
   },
-} as any;
+};
+const esClient = mockEsClient as unknown as ElasticsearchClient;
 const testConfig = {
   enabled: false,
 } as AnonymizationWorkerConfig;
@@ -41,6 +43,9 @@ describe('anonymizeMessages', () => {
       inference_results: entities,
     });
   };
+
+  const hasNonEmptyRecordValue = (entry: [string, string | undefined]): entry is [string, string] =>
+    typeof entry[1] === 'string' && entry[1].length > 0;
 
   const nerRule: AnonymizationRule = {
     type: 'NER',
@@ -80,22 +85,22 @@ describe('anonymizeMessages', () => {
 
     setupMockResponse(
       Object.entries(rec)
-        .filter(([, value]) => value.length > 0)
+        .filter(hasNonEmptyRecordValue)
         .map(([pointer]) =>
-        pointer === '/toolCalls/0/function/arguments/query'
-          ? {
-              predicted_value: '',
-              entities: [
-                {
-                  entity: 'Bob',
-                  class_name: 'PER',
-                  class_probability: 0.9828533515650252,
-                  start_pos: q.indexOf('Bob'),
-                  end_pos: q.indexOf('Bob') + 3,
-                },
-              ],
-            }
-          : { entities: [] }
+          pointer === '/toolCalls/0/function/arguments/query'
+            ? {
+                predicted_value: '',
+                entities: [
+                  {
+                    entity: 'Bob',
+                    class_name: 'PER',
+                    class_probability: 0.9828533515650252,
+                    start_pos: q.indexOf('Bob'),
+                    end_pos: q.indexOf('Bob') + 3,
+                  },
+                ],
+              }
+            : { entities: [] }
         )
     );
 
@@ -104,11 +109,11 @@ describe('anonymizeMessages', () => {
       messages,
       anonymizationRules: [nerRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
     });
 
     const assistantMsgResult = result.messages[0] as AssistantMessage & {
-      toolCalls: Array<{ function: { arguments: Record<string, any> } }>;
+      toolCalls: Array<{ function: { arguments: { query: string } } }>;
     };
     const args = assistantMsgResult.toolCalls![0].function.arguments;
     expect(args).toHaveProperty('query');
@@ -143,7 +148,7 @@ describe('anonymizeMessages', () => {
         messages,
         anonymizationRules: [nerRule],
         regexWorker,
-        esClient: mockEsClient,
+        esClient,
       })
     ).resolves.toBeDefined();
   });
@@ -155,7 +160,7 @@ describe('anonymizeMessages', () => {
       messages,
       anonymizationRules: [disabledRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
     });
 
     expect(result.messages).toBe(messages); // same reference
@@ -170,7 +175,7 @@ describe('anonymizeMessages', () => {
       messages,
       anonymizationRules: [disabledRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
       effectivePolicy: {
         '/content': {
           action: 'anonymize',
@@ -194,7 +199,7 @@ describe('anonymizeMessages', () => {
       messages,
       anonymizationRules: [disabledRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
     });
 
     expect((result.messages[0] as UserMessage).content).toBe('First');
@@ -222,7 +227,7 @@ describe('anonymizeMessages', () => {
       messages,
       anonymizationRules: [regexRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
     });
 
     expect((result.messages[0] as UserMessage).content).toEqual([
@@ -272,39 +277,39 @@ describe('anonymizeMessages', () => {
 
     setupMockResponse(
       Object.entries(rec)
-        .filter(([, value]) => value.length > 0)
+        .filter(hasNonEmptyRecordValue)
         .map(([pointer]) => {
-        if (pointer === '/toolCalls/0/function/arguments/query') {
-          return {
-            predicted_value: '',
-            entities: [
-              {
-                entity: 'Bob',
-                class_name: 'PER',
-                class_probability: 0.99,
-                start_pos: q0.indexOf('Bob'),
-                end_pos: q0.indexOf('Bob') + 3,
-              },
-            ],
-          };
-        }
+          if (pointer === '/toolCalls/0/function/arguments/query') {
+            return {
+              predicted_value: '',
+              entities: [
+                {
+                  entity: 'Bob',
+                  class_name: 'PER',
+                  class_probability: 0.99,
+                  start_pos: q0.indexOf('Bob'),
+                  end_pos: q0.indexOf('Bob') + 3,
+                },
+              ],
+            };
+          }
 
-        if (pointer === '/toolCalls/1/function/arguments/query') {
-          return {
-            predicted_value: '',
-            entities: [
-              {
-                entity: 'Bob',
-                class_name: 'PER',
-                class_probability: 0.99,
-                start_pos: q1.indexOf('Bob'),
-                end_pos: q1.indexOf('Bob') + 3,
-              },
-            ],
-          };
-        }
+          if (pointer === '/toolCalls/1/function/arguments/query') {
+            return {
+              predicted_value: '',
+              entities: [
+                {
+                  entity: 'Bob',
+                  class_name: 'PER',
+                  class_probability: 0.99,
+                  start_pos: q1.indexOf('Bob'),
+                  end_pos: q1.indexOf('Bob') + 3,
+                },
+              ],
+            };
+          }
 
-        return { entities: [] };
+          return { entities: [] };
         })
     );
 
@@ -312,7 +317,7 @@ describe('anonymizeMessages', () => {
       messages,
       regexWorker,
       anonymizationRules: [nerRule],
-      esClient: mockEsClient,
+      esClient,
     });
 
     const assistant = result.messages[0] as (typeof messages)[0];
@@ -356,7 +361,7 @@ describe('anonymizeMessages', () => {
       messages: [],
       anonymizationRules: [nerRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
     });
     expect(result.system).toBe(
       '<ConversationHistory>\n' +
@@ -411,7 +416,7 @@ describe('anonymizeMessages', () => {
       ],
       anonymizationRules: [nerRule], // nerRule allows only PER
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
     });
 
     const maskedContent = (maskedMsgs[0] as UserMessage).content;
@@ -437,7 +442,7 @@ describe('anonymizeMessages', () => {
       messages,
       anonymizationRules: [regexRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
     });
 
     const anonymizedContent = result.messages[0] as UserMessage;
@@ -463,7 +468,7 @@ describe('anonymizeMessages', () => {
       messages,
       anonymizationRules: [disabledRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
       knownReplacements: [{ anonymized: 'USER_NAME_abc123', original: 'Alice' }],
     });
 
@@ -477,7 +482,7 @@ describe('anonymizeMessages', () => {
       messages: [{ role: MessageRole.User, content: 'Alice alice@example.com' }],
       anonymizationRules: [regexRule],
       regexWorker,
-      esClient: mockEsClient,
+      esClient,
       knownReplacements: [{ anonymized: 'USER_NAME_abc123', original: 'Alice' }],
     });
 

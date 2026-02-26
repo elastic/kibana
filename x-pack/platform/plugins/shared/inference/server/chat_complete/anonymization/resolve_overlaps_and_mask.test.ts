@@ -189,9 +189,7 @@ describe('processMatches', () => {
 
   it('handles unsorted matches where a later rule matches at an earlier position', () => {
     const content = 'Visit example.com or email admin@example.com today';
-    const state = createInitialState([
-      { content },
-    ]);
+    const state = createInitialState([{ content }]);
     // Matches arrive in rule order (not position order): email rule first at pos 30,
     // domain rule second at pos 6. Without sorting, the domain match at pos 6 would be
     // incorrectly skipped because it appears after the email match in the array.
