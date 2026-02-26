@@ -20,7 +20,7 @@ import type {
   SearchInferenceEndpointsPluginStart,
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
-import { MANAGEMENT_APP_ID, PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
+import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 
 export class SearchInferenceEndpointsPlugin
   implements
@@ -58,7 +58,7 @@ export class SearchInferenceEndpointsPlugin
       app: ['kibana'],
       catalogue: [],
       management: {
-        ml: [MANAGEMENT_APP_ID],
+        ml: [INFERENCE_ENDPOINTS_APP_ID],
       },
       privileges: {
         all: {
@@ -66,7 +66,7 @@ export class SearchInferenceEndpointsPlugin
           api: [],
           catalogue: [],
           management: {
-            ml: [MANAGEMENT_APP_ID],
+            ml: [INFERENCE_ENDPOINTS_APP_ID],
           },
           savedObject: {
             all: [],

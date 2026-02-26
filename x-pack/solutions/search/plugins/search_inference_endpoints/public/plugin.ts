@@ -9,7 +9,7 @@ import type { Subscription } from 'rxjs';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import { MANAGEMENT_APP_ID, PLUGIN_TITLE } from '../common/constants';
+import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_TITLE } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
@@ -72,7 +72,7 @@ export class SearchInferenceEndpointsPlugin
       ) {
         const coreSetupRef = this.coreSetup;
         this.managementSetup.sections.section.machineLearning.registerApp({
-          id: MANAGEMENT_APP_ID,
+          id: INFERENCE_ENDPOINTS_APP_ID,
           title: PLUGIN_TITLE,
           order: 2,
           async mount(params) {
