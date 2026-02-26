@@ -13,7 +13,6 @@ import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
@@ -52,6 +51,7 @@ export async function update(
 
     const myComment = await attachmentService.getter.get({
       attachmentId: queryCommentId,
+      caseId: caseID,
     });
 
     if (myComment == null) {
@@ -80,13 +80,6 @@ export async function update(
         queryRestAttributes.externalReferenceStorage.type
     ) {
       throw Boom.badRequest(`You cannot change the storage type of an external reference comment.`);
-    }
-
-    const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
-    if (caseRef == null || (caseRef != null && caseRef.id !== model.savedObject.id)) {
-      throw Boom.notFound(
-        `This comment ${queryCommentId} does not exist in ${model.savedObject.id}).`
-      );
     }
 
     if (queryCommentVersion !== myComment.version) {

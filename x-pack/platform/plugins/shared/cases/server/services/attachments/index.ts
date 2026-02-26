@@ -6,15 +6,16 @@
  */
 
 import type {
+  SavedObject,
+  SavedObjectReference,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { estypes } from '@elastic/elasticsearch';
-import { fromKueryExpression } from '@kbn/es-query';
 import { AttachmentAttributesRt, AttachmentType } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import {
@@ -22,14 +23,7 @@ import {
   CASE_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
-import { buildFilter, combineFilters } from '../../client/utils';
-import { defaultSortField } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';
-import {
-  extractAttachmentSORefsFromAttributes,
-  injectAttachmentSOAttributesFromRefs,
-  injectAttachmentSOAttributesFromRefsForPatch,
-} from '../so_references';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type {
   AlertsAttachedToCaseArgs,
@@ -41,11 +35,9 @@ import type {
   DeleteAttachmentArgs,
   ServiceContext,
   UpdateAttachmentArgs,
-  UpdateArgs,
 } from './types';
 import { AttachmentGetter } from './operations/get';
 import type {
-  AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
 } from '../../common/types/attachments';
@@ -53,7 +45,43 @@ import {
   AttachmentTransformedAttributesRt,
   AttachmentPartialAttributesRt,
 } from '../../common/types/attachments';
-import { isSOError } from '../../common/error';
+import type {
+  CasePersistedAttributes,
+  EmbeddedAttachmentPersistedAttributes,
+} from '../../common/types/case';
+
+/**
+ * Converts an embedded attachment into a SavedObject shape for backward compatibility
+ * with callers that expect the SavedObject structure.
+ */
+export function embeddedToSavedObject(
+  attachment: EmbeddedAttachmentPersistedAttributes,
+  _caseVersion?: string
+): AttachmentSavedObjectTransformed {
+  const { id, _version, ...attributes } = attachment;
+  return {
+    id,
+    type: CASE_COMMENT_SAVED_OBJECT,
+    // Use the per-attachment version counter (independent of case SO version)
+    version: String(_version ?? 1),
+    attributes: attributes as unknown as AttachmentTransformedAttributes,
+    references: [],
+    namespaces: [],
+  };
+}
+
+/**
+ * Converts an embedded attachment into a SavedObjectsFindResult shape.
+ */
+function embeddedToFindResult(
+  attachment: EmbeddedAttachmentPersistedAttributes,
+  caseVersion?: string
+): SavedObjectsFindResult<AttachmentTransformedAttributes> {
+  return {
+    ...embeddedToSavedObject(attachment, caseVersion),
+    score: 0,
+  };
+}
 
 export class AttachmentService {
   private readonly _getter: AttachmentGetter;
@@ -66,65 +94,96 @@ export class AttachmentService {
     return this._getter;
   }
 
+  /**
+   * Reads the case SO and returns the case along with its embedded attachments.
+   */
+  public async getCaseWithAttachments(caseId: string): Promise<{
+    caseSO: SavedObject<CasePersistedAttributes>;
+    attachments: EmbeddedAttachmentPersistedAttributes[];
+  }> {
+    const caseSO = await this.context.unsecuredSavedObjectsClient.get<CasePersistedAttributes>(
+      CASE_SAVED_OBJECT,
+      caseId
+    );
+    return { caseSO, attachments: caseSO.attributes.attachments ?? [] };
+  }
+
+  /**
+   * Computes attachment stats from the embedded array.
+   */
+  private computeStats(attachments: EmbeddedAttachmentPersistedAttributes[]) {
+    let totalComments = 0;
+    const alertIds = new Set<string>();
+    const eventIds = new Set<string>();
+
+    for (const a of attachments) {
+      if (a.type === AttachmentType.user) {
+        totalComments++;
+      }
+      if (a.type === AttachmentType.alert && a.alertId) {
+        const ids = Array.isArray(a.alertId) ? a.alertId : [a.alertId];
+        ids.forEach((id) => alertIds.add(id));
+      }
+      if (a.type === AttachmentType.event && a.eventId) {
+        const ids = Array.isArray(a.eventId) ? a.eventId : [a.eventId];
+        ids.forEach((id) => eventIds.add(id));
+      }
+    }
+
+    return {
+      total_comments: totalComments,
+      total_alerts: alertIds.size,
+      total_events: eventIds.size,
+    };
+  }
+
   public async countAlertsAttachedToCase(
     params: AlertsAttachedToCaseArgs
   ): Promise<number | undefined> {
     try {
       this.context.log.debug(`Attempting to count alerts for case id ${params.caseId}`);
-      const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
-        ...params,
-        attachmentType: AttachmentType.alert,
-        aggregations: this.buildAlertsAggs(),
-      });
+      const { attachments } = await this.getCaseWithAttachments(params.caseId);
+      const alertIds = new Set<string>();
 
-      return res?.alerts?.value;
+      for (const a of attachments) {
+        if (a.type === AttachmentType.alert && a.alertId) {
+          const ids = Array.isArray(a.alertId) ? a.alertId : [a.alertId];
+          ids.forEach((id) => alertIds.add(id));
+        }
+      }
+
+      return alertIds.size;
     } catch (error) {
       this.context.log.error(`Error while counting alerts for case id ${params.caseId}: ${error}`);
       throw error;
     }
   }
 
-  private buildAlertsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
-    return {
-      alerts: {
-        cardinality: {
-          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
-        },
-      },
-    };
-  }
-
   /**
    * Executes the aggregations against a type of attachment attached to a case.
+   * For embedded attachments, this computes the equivalent in-memory.
    */
   public async executeCaseAggregations<Agg extends AggregationResponse = AggregationResponse>({
     caseId,
-    filter,
-    aggregations,
     attachmentType,
   }: AttachmentsAttachedToCaseArgs): Promise<Agg | undefined> {
     try {
       this.context.log.debug(`Attempting to aggregate for case id ${caseId}`);
-      const attachmentFilter = buildFilter({
-        filters: attachmentType,
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
+      const { attachments } = await this.getCaseWithAttachments(caseId);
+      const filtered = attachments.filter((a) => a.type === attachmentType);
 
-      const combinedFilter = combineFilters([attachmentFilter, filter]);
+      if (attachmentType === AttachmentType.alert) {
+        const alertIds = new Set<string>();
+        for (const a of filtered) {
+          if (a.alertId) {
+            const ids = Array.isArray(a.alertId) ? a.alertId : [a.alertId];
+            ids.forEach((id) => alertIds.add(id));
+          }
+        }
+        return { alerts: { value: alertIds.size } } as unknown as Agg;
+      }
 
-      const response = await this.context.unsecuredSavedObjectsClient.find<unknown, Agg>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        aggs: aggregations,
-        filter: combinedFilter,
-      });
-
-      return response.aggregations;
+      return { count: filtered.length } as unknown as Agg;
     } catch (error) {
       this.context.log.error(`Error while executing aggregation for case id ${caseId}: ${error}`);
       throw error;
@@ -143,30 +202,14 @@ export class AttachmentService {
       this.context.log.debug(
         `Attempting to count persistableState and externalReference attachments for case id ${caseId}`
       );
+      const { attachments } = await this.getCaseWithAttachments(caseId);
 
-      const typeFilter = buildFilter({
-        filters: [AttachmentType.persistableState, AttachmentType.externalReference],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
-
-      const excludeFilesFilter = fromKueryExpression(
-        `not ${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId: ${FILE_ATTACHMENT_TYPE}`
-      );
-
-      const combinedFilter = combineFilters([typeFilter, excludeFilesFilter]);
-
-      const response = await this.context.unsecuredSavedObjectsClient.find<{ total: number }>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        filter: combinedFilter,
-      });
-
-      return response.total;
+      return attachments.filter(
+        (a) =>
+          (a.type === AttachmentType.persistableState ||
+            a.type === AttachmentType.externalReference) &&
+          a.externalReferenceAttachmentTypeId !== FILE_ATTACHMENT_TYPE
+      ).length;
     } catch (error) {
       this.context.log.error(
         `Error while attempting to count persistableState and externalReference attachments for case id ${caseId}: ${error}`
@@ -193,18 +236,29 @@ export class AttachmentService {
     }
   }
 
-  public async bulkDelete({ attachmentIds, refresh }: DeleteAttachmentArgs) {
+  public async bulkDelete({ attachmentIds, refresh, caseId }: DeleteAttachmentArgs) {
     try {
       if (attachmentIds.length <= 0) {
         return;
       }
 
       this.context.log.debug(`Attempting to DELETE attachments ${attachmentIds}`);
-      await this.context.unsecuredSavedObjectsClient.bulkDelete(
-        attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT })),
-        {
-          refresh,
-        }
+      const { caseSO, attachments } = await this.getCaseWithAttachments(caseId);
+      const idsToDelete = new Set(attachmentIds);
+      const remaining = attachments.filter((a) => !idsToDelete.has(a.id));
+
+      // Clean up references namespaced to deleted attachments
+      const cleanedRefs = (caseSO.references ?? []).filter(
+        (ref) => !attachmentIds.some((id) => ref.name.startsWith(`attachment:${id}:`))
+      );
+
+      const stats = this.computeStats(remaining);
+
+      await this.context.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
+        CASE_SAVED_OBJECT,
+        caseId,
+        { attachments: remaining, ...stats },
+        { version: caseSO.version, references: cleanedRefs, refresh }
       );
     } catch (error) {
       this.context.log.error(`Error on DELETE attachments ${attachmentIds}: ${error}`);
@@ -217,40 +271,52 @@ export class AttachmentService {
     references,
     id,
     refresh,
+    caseId,
   }: CreateAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
     try {
       this.context.log.debug(`Attempting to POST a new comment`);
 
       const decodedAttributes = decodeOrThrow(AttachmentAttributesRt)(attributes);
 
-      const { attributes: extractedAttributes, references: extractedReferences } =
-        extractAttachmentSORefsFromAttributes(
-          decodedAttributes,
-          references,
-          this.context.persistableStateAttachmentTypeRegistry
+      // Build the embedded attachment
+      const embeddedAttachment: EmbeddedAttachmentPersistedAttributes = {
+        id,
+        _version: 1,
+        ...(decodedAttributes as unknown as Omit<EmbeddedAttachmentPersistedAttributes, 'id' | '_version'>),
+      };
+
+      // Read current case
+      const { caseSO, attachments: existingAttachments } =
+        await this.getCaseWithAttachments(caseId);
+
+      const updatedAttachments = [...existingAttachments, embeddedAttachment];
+
+      // Namespace attachment-specific references (strip case ref, prefix others)
+      const attachmentRefs: SavedObjectReference[] = references
+        .filter((ref) => ref.type !== CASE_SAVED_OBJECT)
+        .map((ref) => ({ ...ref, name: `attachment:${id}:${ref.name}` }));
+
+      const mergedRefs = [...(caseSO.references ?? []), ...attachmentRefs];
+
+      const stats = this.computeStats(updatedAttachments);
+
+      // Single write: update case SO with new attachment + updated stats
+      const updatedCase =
+        await this.context.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
+          CASE_SAVED_OBJECT,
+          caseId,
+          { attachments: updatedAttachments, ...stats },
+          { version: caseSO.version, references: mergedRefs, refresh }
         );
 
-      const attachment =
-        await this.context.unsecuredSavedObjectsClient.create<AttachmentPersistedAttributes>(
-          CASE_COMMENT_SAVED_OBJECT,
-          extractedAttributes,
-          {
-            references: extractedReferences,
-            id,
-            refresh,
-          }
-        );
-
-      const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-        attachment,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      // Return a SavedObject-shaped response for backward compatibility
+      const result = embeddedToSavedObject(embeddedAttachment, updatedCase.version);
 
       const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-        transformedAttachment.attributes
+        result.attributes
       );
 
-      return Object.assign(transformedAttachment, { attributes: validatedAttributes });
+      return Object.assign(result, { attributes: validatedAttributes });
     } catch (error) {
       this.context.log.error(`Error on POST a new comment: ${error}`);
       throw error;
@@ -260,113 +326,129 @@ export class AttachmentService {
   public async bulkCreate({
     attachments,
     refresh,
+    caseId,
   }: BulkCreateAttachments): Promise<SavedObjectsBulkResponse<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to bulk create attachments`);
-      const res =
-        await this.context.unsecuredSavedObjectsClient.bulkCreate<AttachmentPersistedAttributes>(
-          attachments.map((attachment) => {
-            const decodedAttributes = decodeOrThrow(AttachmentAttributesRt)(attachment.attributes);
 
-            const { attributes: extractedAttributes, references: extractedReferences } =
-              extractAttachmentSORefsFromAttributes(
-                decodedAttributes,
-                attachment.references,
-                this.context.persistableStateAttachmentTypeRegistry
-              );
+      const { caseSO, attachments: existingAttachments } =
+        await this.getCaseWithAttachments(caseId);
 
-            return {
-              type: CASE_COMMENT_SAVED_OBJECT,
-              ...attachment,
-              attributes: extractedAttributes,
-              references: extractedReferences,
-            };
-          }),
-          { refresh }
+      const newEmbedded: EmbeddedAttachmentPersistedAttributes[] = [];
+      const newRefs: SavedObjectReference[] = [];
+
+      for (const attachment of attachments) {
+        const decodedAttributes = decodeOrThrow(AttachmentAttributesRt)(attachment.attributes);
+
+        const embedded: EmbeddedAttachmentPersistedAttributes = {
+          id: attachment.id,
+          _version: 1,
+          ...(decodedAttributes as unknown as Omit<EmbeddedAttachmentPersistedAttributes, 'id' | '_version'>),
+        };
+
+        newEmbedded.push(embedded);
+
+        // Namespace references
+        const attachmentRefs = attachment.references
+          .filter((ref) => ref.type !== CASE_SAVED_OBJECT)
+          .map((ref) => ({ ...ref, name: `attachment:${attachment.id}:${ref.name}` }));
+        newRefs.push(...attachmentRefs);
+      }
+
+      const updatedAttachments = [...existingAttachments, ...newEmbedded];
+      const mergedRefs = [...(caseSO.references ?? []), ...newRefs];
+      const stats = this.computeStats(updatedAttachments);
+
+      const updatedCase =
+        await this.context.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
+          CASE_SAVED_OBJECT,
+          caseId,
+          { attachments: updatedAttachments, ...stats },
+          { version: caseSO.version, references: mergedRefs, refresh }
         );
 
-      return this.transformAndDecodeBulkCreateResponse(res);
+      // Build a SavedObjectsBulkResponse-shaped response
+      const savedObjects = newEmbedded.map((embedded) => {
+        const so = embeddedToSavedObject(embedded, updatedCase.version);
+        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+          so.attributes
+        );
+        return Object.assign(so, { attributes: validatedAttributes });
+      });
+
+      return { saved_objects: savedObjects };
     } catch (error) {
       this.context.log.error(`Error on bulk create attachments: ${error}`);
       throw error;
     }
   }
 
-  private transformAndDecodeBulkCreateResponse(
-    res: SavedObjectsBulkResponse<AttachmentPersistedAttributes>
-  ): SavedObjectsBulkResponse<AttachmentTransformedAttributes> {
-    const validatedAttachments: AttachmentSavedObjectTransformed[] = [];
-
-    for (const so of res.saved_objects) {
-      if (isSOError(so)) {
-        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
-      } else {
-        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-          so,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
-
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-          transformedAttachment.attributes
-        );
-
-        validatedAttachments.push(Object.assign(so, { attributes: validatedAttributes }));
-      }
-    }
-
-    return Object.assign(res, { saved_objects: validatedAttachments });
-  }
-
   public async update({
     attachmentId,
     updatedAttributes,
     options,
+    caseId,
   }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
 
       const decodedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(updatedAttributes);
 
-      const {
-        attributes: extractedAttributes,
-        references: extractedReferences,
-        didDeleteOperation,
-      } = extractAttachmentSORefsFromAttributes(
-        decodedAttributes,
-        options?.references ?? [],
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      const { caseSO, attachments } = await this.getCaseWithAttachments(caseId);
 
-      const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
-
-      const res =
-        await this.context.unsecuredSavedObjectsClient.update<AttachmentPersistedAttributes>(
+      const attachmentIndex = attachments.findIndex((a) => a.id === attachmentId);
+      if (attachmentIndex === -1) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
           CASE_COMMENT_SAVED_OBJECT,
-          attachmentId,
-          extractedAttributes,
-          {
-            ...options,
-            /**
-             * If options?.references are undefined and there is no field to move to the refs
-             * then the extractedReferences will be an empty array. If we pass the empty array
-             * on the update then all previously refs will be removed. The check below is needed
-             * to prevent this.
-             */
-            references: shouldUpdateRefs ? extractedReferences : undefined,
-          }
+          attachmentId
+        );
+      }
+
+      // Merge updated attributes into the existing embedded attachment
+      // Increment per-attachment version counter
+      const updatedAttachment = {
+        ...attachments[attachmentIndex],
+        ...(decodedAttributes as Record<string, unknown>),
+        _version: (attachments[attachmentIndex]._version ?? 1) + 1,
+      };
+
+      const updatedAttachments = [...attachments];
+      updatedAttachments[attachmentIndex] =
+        updatedAttachment as EmbeddedAttachmentPersistedAttributes;
+
+      // Handle references from options
+      let mergedRefs = caseSO.references ?? [];
+      if (options?.references) {
+        // Remove old refs for this attachment, add new ones
+        mergedRefs = mergedRefs.filter(
+          (ref) => !ref.name.startsWith(`attachment:${attachmentId}:`)
+        );
+        const newAttachmentRefs = options.references
+          .filter((ref) => ref.type !== CASE_SAVED_OBJECT)
+          .map((ref) => ({ ...ref, name: `attachment:${attachmentId}:${ref.name}` }));
+        mergedRefs = [...mergedRefs, ...newAttachmentRefs];
+      }
+
+      const stats = this.computeStats(updatedAttachments);
+
+      const updatedCase =
+        await this.context.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
+          CASE_SAVED_OBJECT,
+          caseId,
+          { attachments: updatedAttachments, ...stats },
+          { version: caseSO.version, references: mergedRefs }
         );
 
-      const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
-        updatedAttributes,
-        res,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
+      // Return an UpdateResponse-shaped result
+      const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(decodedAttributes);
 
-      const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
-        transformedAttachment.attributes
-      );
-
-      return Object.assign(transformedAttachment, { attributes: validatedAttributes });
+      return {
+        id: attachmentId,
+        type: CASE_COMMENT_SAVED_OBJECT,
+        version: updatedCase.version ?? '0',
+        attributes: validatedAttributes,
+        references: options?.references ?? [],
+      };
     } catch (error) {
       this.context.log.error(`Error on UPDATE comment ${attachmentId}: ${error}`);
       throw error;
@@ -376,6 +458,7 @@ export class AttachmentService {
   public async bulkUpdate({
     comments,
     refresh,
+    caseId,
   }: BulkUpdateAttachmentArgs): Promise<
     SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributes>
   > {
@@ -384,42 +467,49 @@ export class AttachmentService {
         `Attempting to UPDATE comments ${comments.map((c) => c.attachmentId).join(', ')}`
       );
 
-      const res =
-        await this.context.unsecuredSavedObjectsClient.bulkUpdate<AttachmentPersistedAttributes>(
-          comments.map((c) => {
-            const decodedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
-              c.updatedAttributes
-            );
+      const { caseSO, attachments } = await this.getCaseWithAttachments(caseId);
+      const updatedAttachments = [...attachments];
+      const resultObjects: Array<SavedObjectsUpdateResponse<AttachmentTransformedAttributes>> = [];
 
-            const {
-              attributes: extractedAttributes,
-              references: extractedReferences,
-              didDeleteOperation,
-            } = extractAttachmentSORefsFromAttributes(
-              decodedAttributes,
-              c.options?.references ?? [],
-              this.context.persistableStateAttachmentTypeRegistry
-            );
-
-            const shouldUpdateRefs = extractedReferences.length > 0 || didDeleteOperation;
-
-            return {
-              ...c.options,
-              type: CASE_COMMENT_SAVED_OBJECT,
-              id: c.attachmentId,
-              attributes: extractedAttributes,
-              /* If c.options?.references are undefined and there is no field to move to the refs
-               * then the extractedAttributes will be an empty array. If we pass the empty array
-               * on the update then all previously refs will be removed. The check below is needed
-               * to prevent this.
-               */
-              references: shouldUpdateRefs ? extractedReferences : undefined,
-            };
-          }),
-          { refresh }
+      for (const c of comments) {
+        const decodedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
+          c.updatedAttributes
         );
 
-      return this.transformAndDecodeBulkUpdateResponse(res, comments);
+        const idx = updatedAttachments.findIndex((a) => a.id === c.attachmentId);
+        if (idx !== -1) {
+          updatedAttachments[idx] = {
+            ...updatedAttachments[idx],
+            ...(decodedAttributes as Record<string, unknown>),
+            _version: (updatedAttachments[idx]._version ?? 1) + 1,
+          } as EmbeddedAttachmentPersistedAttributes;
+        }
+      }
+
+      const stats = this.computeStats(updatedAttachments);
+
+      const updatedCase =
+        await this.context.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
+          CASE_SAVED_OBJECT,
+          caseId,
+          { attachments: updatedAttachments, ...stats },
+          { version: caseSO.version, refresh }
+        );
+
+      for (const c of comments) {
+        const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
+          c.updatedAttributes
+        );
+        resultObjects.push({
+          id: c.attachmentId,
+          type: CASE_COMMENT_SAVED_OBJECT,
+          version: updatedCase.version ?? '0',
+          attributes: validatedAttributes,
+          references: c.options?.references ?? [],
+        });
+      }
+
+      return { saved_objects: resultObjects };
     } catch (error) {
       this.context.log.error(
         `Error on UPDATE comments ${comments.map((c) => c.attachmentId).join(', ')}: ${error}`
@@ -428,78 +518,64 @@ export class AttachmentService {
     }
   }
 
-  private transformAndDecodeBulkUpdateResponse(
-    res: SavedObjectsBulkUpdateResponse<AttachmentPersistedAttributes>,
-    comments: UpdateArgs[]
-  ): SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributes> {
-    const validatedAttachments: Array<SavedObjectsUpdateResponse<AttachmentTransformedAttributes>> =
-      [];
-
-    for (let i = 0; i < res.saved_objects.length; i++) {
-      const attachment = res.saved_objects[i];
-
-      if (isSOError(attachment)) {
-        // Forcing the type here even though it is an error. The client is responsible for
-        // determining what to do with the errors
-        // TODO: we should fix the return type of this function so that it can return errors
-        validatedAttachments.push(attachment as AttachmentSavedObjectTransformed);
-      } else {
-        const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
-          comments[i].updatedAttributes,
-          attachment,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
-
-        const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
-          transformedAttachment.attributes
-        );
-
-        validatedAttachments.push(
-          Object.assign(transformedAttachment, { attributes: validatedAttributes })
-        );
-      }
-    }
-
-    return Object.assign(res, { saved_objects: validatedAttachments });
-  }
-
   public async find({
     options,
+    caseId,
   }: {
     options?: SavedObjectFindOptionsKueryNode;
+    caseId?: string;
   }): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find comments`);
-      const res =
-        await this.context.unsecuredSavedObjectsClient.find<AttachmentPersistedAttributes>({
-          sortField: defaultSortField,
-          ...options,
-          type: CASE_COMMENT_SAVED_OBJECT,
-        });
 
-      const validatedAttachments: Array<SavedObjectsFindResult<AttachmentTransformedAttributes>> =
-        [];
-
-      for (const so of res.saved_objects) {
-        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-          so,
-          this.context.persistableStateAttachmentTypeRegistry
-          // casting here because injectAttachmentSOAttributesFromRefs returns a SavedObject but we need a SavedObjectsFindResult
-          // which has the score in it. The score is returned but the type is not correct
-        ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
-
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-          transformedAttachment.attributes
-        );
-
-        validatedAttachments.push(
-          Object.assign(transformedAttachment, {
-            attributes: validatedAttributes,
-          })
-        );
+      if (!caseId) {
+        // Fallback: if no caseId provided, return empty response
+        return {
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: options?.perPage ?? 20,
+        };
       }
 
-      return Object.assign(res, { saved_objects: validatedAttachments });
+      const { caseSO, attachments } = await this.getCaseWithAttachments(caseId);
+
+      // Apply type filter if present
+      let filtered = attachments;
+
+      // Check if the filter is looking for specific attachment types
+      // The find endpoint typically filters for type === 'user' (comments only)
+      if (options?.filter) {
+        // Simple heuristic: check if filter string mentions a specific type
+        const filterStr = JSON.stringify(options.filter);
+        if (filterStr.includes('"user"')) {
+          filtered = attachments.filter((a) => a.type === AttachmentType.user);
+        }
+      }
+
+      // Apply sorting (default: created_at asc)
+      const sortOrder = options?.sortOrder ?? 'asc';
+      filtered.sort((a, b) => {
+        const aDate = new Date(a.created_at).getTime();
+        const bDate = new Date(b.created_at).getTime();
+        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+      });
+
+      // Apply pagination
+      const page = options?.page ?? 1;
+      const perPage = options?.perPage ?? 20;
+      const start = (page - 1) * perPage;
+      const paged = filtered.slice(start, start + perPage);
+
+      const savedObjects: Array<SavedObjectsFindResult<AttachmentTransformedAttributes>> =
+        paged.map((a) => embeddedToFindResult(a, caseSO.version));
+
+      return {
+        saved_objects: savedObjects,
+        total: filtered.length,
+        page,
+        per_page: perPage,
+      };
     } catch (error) {
       this.context.log.error(`Error on find comments: ${error}`);
       throw error;

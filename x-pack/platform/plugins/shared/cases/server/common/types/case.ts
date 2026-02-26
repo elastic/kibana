@@ -13,6 +13,7 @@ import { CaseAttributesRt } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { ExternalServicePersisted } from './external_service';
 import type { User, UserProfile } from './user';
+import type { AttachmentPersistedAttributes } from './attachments';
 
 export enum CasePersistedSeverity {
   LOW = 0,
@@ -26,6 +27,16 @@ export enum CasePersistedStatus {
   IN_PROGRESS = 10,
   CLOSED = 20,
 }
+
+/**
+ * An attachment stored as an embedded object within the case saved object.
+ * Combines the attachment ID with all the standard attachment attributes.
+ */
+export type EmbeddedAttachmentPersistedAttributes = {
+  id: string;
+  /** Per-attachment version counter, independent of the case SO version */
+  _version: number;
+} & AttachmentPersistedAttributes;
 
 export interface CasePersistedAttributes {
   assignees: UserProfile[];
@@ -57,6 +68,7 @@ export interface CasePersistedAttributes {
   time_to_acknowledge?: number | null;
   time_to_investigate?: number | null;
   time_to_resolve?: number | null;
+  attachments?: EmbeddedAttachmentPersistedAttributes[];
 }
 
 type CasePersistedCustomFields = Array<{

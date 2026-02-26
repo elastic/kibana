@@ -5,66 +5,116 @@
  * 2.0.
  */
 
-import type {
-  SavedObject,
-  SavedObjectsBulkResponse,
-  SavedObjectsFindResponse,
-} from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
-import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
-import { isSOError } from '../../../common/error';
+import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
-  AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
 } from '../../../common/types/attachments';
 import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  MAX_ALERTS_PER_CASE,
-  MAX_DOCS_PER_PAGE,
-} from '../../../../common/constants';
-import { buildFilter, combineFilters } from '../../../client/utils';
 import type {
   AttachmentTotals,
   DocumentAttachmentAttributes,
 } from '../../../../common/types/domain';
 import { AttachmentType, DocumentAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
-  AlertIdsAggsResult,
-  BulkOptionalAttributes,
-  EventIdsAggsResult,
   GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
   GetAttachmentArgs,
   ServiceContext,
+  BulkOptionalAttributes,
 } from '../types';
-import {
-  injectAttachmentAttributesAndHandleErrors,
-  injectAttachmentSOAttributesFromRefs,
-} from '../../so_references';
-import { partitionByCaseAssociation } from '../../../common/partitioning';
-import type { AttachmentSavedObject } from '../../../common/types';
-import { getCaseReferenceId } from '../../../common/references';
+import type { CasePersistedAttributes, EmbeddedAttachmentPersistedAttributes } from '../../../common/types/case';
+import { embeddedToSavedObject } from '..';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
 
+  /**
+   * Read the case SO and return its embedded attachments.
+   */
+  private async getCaseWithAttachments(caseId: string): Promise<{
+    caseSO: SavedObject<CasePersistedAttributes>;
+    attachments: EmbeddedAttachmentPersistedAttributes[];
+  }> {
+    const caseSO = await this.context.unsecuredSavedObjectsClient.get<CasePersistedAttributes>(
+      CASE_SAVED_OBJECT,
+      caseId
+    );
+    return { caseSO, attachments: caseSO.attributes.attachments ?? [] };
+  }
+
+  public async get({
+    attachmentId,
+    caseId,
+  }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
+    try {
+      this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
+      const { caseSO, attachments } = await this.getCaseWithAttachments(caseId);
+      const embedded = attachments.find((a) => a.id === attachmentId);
+
+      if (!embedded) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          CASE_COMMENT_SAVED_OBJECT,
+          attachmentId
+        );
+      }
+
+      const so = embeddedToSavedObject(embedded, caseSO.version);
+      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(so.attributes);
+
+      return Object.assign(so, { attributes: validatedAttributes });
+    } catch (error) {
+      this.context.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
+      throw error;
+    }
+  }
+
   public async bulkGet(
-    attachmentIds: string[]
+    attachmentIds: string[],
+    caseId?: string
   ): Promise<BulkOptionalAttributes<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(
         `Attempting to retrieve attachments with ids: ${attachmentIds.join()}`
       );
 
-      const response =
-        await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentPersistedAttributes>(
-          attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT }))
-        );
+      if (!caseId) {
+        // If no caseId is provided, return empty results
+        return { saved_objects: [] };
+      }
 
-      return this.transformAndDecodeBulkGetResponse(response);
+      const { caseSO, attachments } = await this.getCaseWithAttachments(caseId);
+      const idSet = new Set(attachmentIds);
+
+      const savedObjects: AttachmentSavedObjectTransformed[] = [];
+
+      for (const id of attachmentIds) {
+        const embedded = attachments.find((a) => a.id === id);
+        if (!embedded) {
+          // Return an error object for missing attachments
+          savedObjects.push({
+            id,
+            type: 'cases-comments',
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: `Saved object [cases-comments/${id}] not found`,
+            },
+            references: [],
+            attributes: {} as AttachmentTransformedAttributes,
+          } as unknown as AttachmentSavedObjectTransformed);
+        } else {
+          const so = embeddedToSavedObject(embedded, caseSO.version);
+          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+            so.attributes
+          );
+          savedObjects.push(Object.assign(so, { attributes: validatedAttributes }));
+        }
+      }
+
+      return { saved_objects: savedObjects };
     } catch (error) {
       this.context.log.error(
         `Error retrieving attachments with ids ${attachmentIds.join()}: ${error}`
@@ -73,61 +123,16 @@ export class AttachmentGetter {
     }
   }
 
-  private transformAndDecodeBulkGetResponse(
-    response: SavedObjectsBulkResponse<AttachmentPersistedAttributes>
-  ): BulkOptionalAttributes<AttachmentTransformedAttributes> {
-    const validatedAttachments: AttachmentSavedObjectTransformed[] = [];
-
-    for (const so of response.saved_objects) {
-      if (isSOError(so)) {
-        // Forcing the type here even though it is an error. The caller is responsible for
-        // determining what to do with the errors
-        // TODO: we should fix the return type of this bulkGet so that it can return errors
-        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
-      } else {
-        const transformedAttachment = injectAttachmentAttributesAndHandleErrors(
-          so,
-          this.context.persistableStateAttachmentTypeRegistry
-        );
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-          transformedAttachment.attributes
-        );
-
-        validatedAttachments.push(
-          Object.assign(transformedAttachment, { attributes: validatedAttributes })
-        );
-      }
-    }
-
-    return Object.assign(response, { saved_objects: validatedAttachments });
-  }
-
   public async getAttachmentIdsForCases({ caseIds }: { caseIds: string[] }) {
     try {
       this.context.log.debug(
         `Attempting to retrieve attachments associated with cases: [${caseIds}]`
       );
 
-      // We are intentionally not adding the type here because we only want to interact with the id and this function
-      // should not use the attributes
-      const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<unknown>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
-        sortField: 'created_at',
-        sortOrder: 'asc',
-        /**
-         * We only care about the ids so to reduce the data returned we should limit the fields in the response. Core
-         * doesn't support retrieving no fields (id would always be returned anyway) so to limit it we'll only request
-         * the owner even though we don't need it.
-         */
-        fields: ['owner'],
-        perPage: MAX_DOCS_PER_PAGE,
-      });
-
       const ids: string[] = [];
-
-      for await (const attachmentSavedObject of finder.find()) {
-        ids.push(...attachmentSavedObject.saved_objects.map((attachment) => attachment.id));
+      for (const caseId of caseIds) {
+        const { attachments } = await this.getCaseWithAttachments(caseId);
+        ids.push(...attachments.map((a) => a.id));
       }
 
       return ids;
@@ -144,52 +149,25 @@ export class AttachmentGetter {
    */
   public async getAllDocumentsAttachedToCase({
     caseId,
-    filter,
     attachmentTypes = [AttachmentType.alert, AttachmentType.event],
   }: GetAllDocumentsAttachedToCaseArgs): Promise<Array<SavedObject<DocumentAttachmentAttributes>>> {
     try {
       this.context.log.debug(`Attempting to GET all documents for case id ${caseId}`);
-      const documentsFilter = buildFilter({
-        filters: attachmentTypes,
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
+      const { caseSO, attachments } = await this.getCaseWithAttachments(caseId);
+
+      const filtered = attachments.filter((a) =>
+        attachmentTypes.includes(a.type as AttachmentType)
+      );
+
+      return filtered.map((a) => {
+        const so = embeddedToSavedObject(a, caseSO.version);
+        const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRt)(so.attributes);
+        return Object.assign(so, { attributes: validatedAttributes });
       });
-
-      const combinedFilter = combineFilters([documentsFilter, filter]);
-
-      const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
-          {
-            type: CASE_COMMENT_SAVED_OBJECT,
-            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-            sortField: 'created_at',
-            sortOrder: 'asc',
-            filter: combinedFilter,
-            perPage: MAX_DOCS_PER_PAGE,
-          }
-        );
-
-      let result: Array<SavedObject<DocumentAttachmentAttributes>> = [];
-      for await (const userActionSavedObject of finder.find()) {
-        result = result.concat(AttachmentGetter.decodeDocuments(userActionSavedObject));
-      }
-
-      return result;
     } catch (error) {
       this.context.log.error(`Error on GET all documents for case id ${caseId}: ${error}`);
       throw error;
     }
-  }
-
-  private static decodeDocuments(
-    response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
-  ): Array<SavedObject<DocumentAttachmentAttributes>> {
-    return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRt)(so.attributes);
-
-      return Object.assign(so, { attributes: validatedAttributes });
-    });
   }
 
   /**
@@ -198,32 +176,17 @@ export class AttachmentGetter {
   public async getAllAlertIds({ caseId }: { caseId: string }): Promise<Set<string>> {
     try {
       this.context.log.debug(`Attempting to GET all alerts ids for case id ${caseId}`);
-      const alertsFilter = buildFilter({
-        filters: [AttachmentType.alert],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
+      const { attachments } = await this.getCaseWithAttachments(caseId);
 
-      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AlertIdsAggsResult>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        sortField: 'created_at',
-        sortOrder: 'asc',
-        filter: alertsFilter,
-        perPage: 0,
-        aggs: {
-          alertIds: {
-            terms: {
-              field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
-              size: MAX_ALERTS_PER_CASE,
-            },
-          },
-        },
-      });
+      const alertIds = new Set<string>();
+      for (const a of attachments) {
+        if (a.type === AttachmentType.alert && a.alertId) {
+          const ids = Array.isArray(a.alertId) ? a.alertId : [a.alertId];
+          ids.forEach((id) => alertIds.add(id));
+        }
+      }
 
-      const alertIds = res.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
-      return new Set(alertIds);
+      return alertIds;
     } catch (error) {
       this.context.log.error(`Error on GET all alerts ids for case id ${caseId}: ${error}`);
       throw error;
@@ -236,58 +199,19 @@ export class AttachmentGetter {
   public async getAllEventIds({ caseId }: { caseId: string }): Promise<Set<string>> {
     try {
       this.context.log.debug(`Attempting to GET all event ids for case id ${caseId}`);
-      const eventsFilter = buildFilter({
-        filters: [AttachmentType.event],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
+      const { attachments } = await this.getCaseWithAttachments(caseId);
 
-      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, EventIdsAggsResult>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        sortField: 'created_at',
-        sortOrder: 'asc',
-        filter: eventsFilter,
-        perPage: 0,
-        aggs: {
-          eventIds: {
-            terms: {
-              field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.eventId`,
-              size: MAX_ALERTS_PER_CASE,
-            },
-          },
-        },
-      });
+      const eventIds = new Set<string>();
+      for (const a of attachments) {
+        if (a.type === AttachmentType.event && a.eventId) {
+          const ids = Array.isArray(a.eventId) ? a.eventId : [a.eventId];
+          ids.forEach((id) => eventIds.add(id));
+        }
+      }
 
-      const eventIds = res.aggregations?.eventIds.buckets.map((bucket) => bucket.key) ?? [];
-      return new Set(eventIds);
+      return eventIds;
     } catch (error) {
       this.context.log.error(`Error on GET all event ids for case id ${caseId}: ${error}`);
-      throw error;
-    }
-  }
-
-  public async get({ attachmentId }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformed> {
-    try {
-      this.context.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      const res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
-        CASE_COMMENT_SAVED_OBJECT,
-        attachmentId
-      );
-
-      const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-        res,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
-
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-        transformedAttachment.attributes
-      );
-
-      return Object.assign(transformedAttachment, { attributes: validatedAttributes });
-    } catch (error) {
-      this.context.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;
     }
   }
@@ -301,90 +225,44 @@ export class AttachmentGetter {
       return new Map();
     }
 
-    interface AggsResult {
-      references: {
-        caseIds: {
-          buckets: Array<{
-            key: string;
-            doc_count: number;
-            reverse: {
-              alerts: {
-                value: number;
-              };
-              comments: {
-                doc_count: number;
-              };
-              events: {
-                value: number;
-              };
-            };
-          }>;
-        };
-      };
+    const result = new Map<string, AttachmentTotals>();
+
+    for (const caseId of caseIds) {
+      try {
+        const { attachments } = await this.getCaseWithAttachments(caseId);
+        let userComments = 0;
+        const alertIds = new Set<string>();
+        const eventIds = new Set<string>();
+
+        for (const a of attachments) {
+          if (a.type === AttachmentType.user) {
+            userComments++;
+          }
+          if (a.type === AttachmentType.alert && a.alertId) {
+            const ids = Array.isArray(a.alertId) ? a.alertId : [a.alertId];
+            ids.forEach((id) => alertIds.add(id));
+          }
+          if (a.type === AttachmentType.event && a.eventId) {
+            const ids = Array.isArray(a.eventId) ? a.eventId : [a.eventId];
+            ids.forEach((id) => eventIds.add(id));
+          }
+        }
+
+        result.set(caseId, {
+          userComments,
+          alerts: alertIds.size,
+          events: eventIds.size,
+        });
+      } catch (error) {
+        this.context.log.error(
+          `Error computing attachment stats for case ${caseId}: ${error}`
+        );
+        // Set defaults on error
+        result.set(caseId, { userComments: 0, alerts: 0, events: 0 });
+      }
     }
 
-    const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AggsResult>({
-      hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
-      hasReferenceOperator: 'OR',
-      type: CASE_COMMENT_SAVED_OBJECT,
-      perPage: 0,
-      aggs: AttachmentGetter.buildCommentStatsAggs(caseIds),
-    });
-
-    return (
-      res.aggregations?.references.caseIds.buckets.reduce((acc, idBucket) => {
-        acc.set(idBucket.key, {
-          userComments: idBucket.reverse.comments.doc_count,
-          alerts: idBucket.reverse.alerts.value,
-          events: idBucket.reverse.events.value,
-        });
-        return acc;
-      }, new Map<string, AttachmentTotals>()) ?? new Map()
-    );
-  }
-
-  private static buildCommentStatsAggs(
-    ids: string[]
-  ): Record<string, estypes.AggregationsAggregationContainer> {
-    return {
-      references: {
-        nested: {
-          path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
-        },
-        aggregations: {
-          caseIds: {
-            terms: {
-              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
-              size: ids.length,
-            },
-            aggregations: {
-              reverse: {
-                reverse_nested: {},
-                aggregations: {
-                  alerts: {
-                    cardinality: {
-                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
-                    },
-                  },
-                  comments: {
-                    filter: {
-                      term: {
-                        [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: AttachmentType.user,
-                      },
-                    },
-                  },
-                  events: {
-                    cardinality: {
-                      field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.eventId`,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
+    return result;
   }
 
   public async getFileAttachments({
@@ -396,86 +274,34 @@ export class AttachmentGetter {
   }): Promise<AttachmentSavedObjectTransformed[]> {
     try {
       this.context.log.debug('Attempting to find file attachments');
+      const { caseSO, attachments } = await this.getCaseWithAttachments(caseId);
 
-      /**
-       * This is making a big assumption that a single file service saved object can only be associated within a single
-       * case. If a single file can be attached to multiple cases it will complicate deleting a file.
-       *
-       * The file's metadata would have to contain all case ids and deleting a file would need to removing a case id from
-       * array instead of deleting the entire saved object in the situation where the file is attached to multiple cases.
-       */
-      const references = fileIds.map((id) => ({ id, type: FILE_SO_TYPE }));
+      // Filter for external reference attachments that reference the given file IDs
+      const fileAttachments = attachments.filter((a) => {
+        if (a.type !== AttachmentType.externalReference) {
+          return false;
+        }
+        // Check if the external reference metadata contains matching file IDs
+        const metadata = a.externalReferenceMetadata as Record<string, unknown> | undefined;
+        if (metadata && Array.isArray(metadata.files)) {
+          return metadata.files.some(
+            (file: { name?: string; extension?: string; mimeType?: string; fileId?: string }) =>
+              file.fileId && fileIds.includes(file.fileId)
+          );
+        }
+        return false;
+      });
 
-      /**
-       * In the event that we add the ability to attach a file to a case that has already been uploaded we'll run into a
-       * scenario where a single file id could be associated with multiple case attachments. So we need
-       * to retrieve them all.
-       */
-      const finder =
-        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentPersistedAttributes>(
-          {
-            type: CASE_COMMENT_SAVED_OBJECT,
-            hasReference: references,
-            sortField: 'created_at',
-            sortOrder: 'asc',
-            perPage: MAX_DOCS_PER_PAGE,
-          }
+      return fileAttachments.map((a) => {
+        const so = embeddedToSavedObject(a, caseSO.version);
+        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+          so.attributes
         );
-
-      const foundAttachments: AttachmentSavedObjectTransformed[] = [];
-
-      for await (const attachmentSavedObjects of finder.find()) {
-        foundAttachments.push(...this.transformAndDecodeFileAttachments(attachmentSavedObjects));
-      }
-
-      const [validFileAttachments, invalidFileAttachments] = partitionByCaseAssociation(
-        caseId,
-        foundAttachments
-      );
-
-      this.logInvalidFileAssociations(invalidFileAttachments, fileIds, caseId);
-
-      return validFileAttachments;
+        return Object.assign(so, { attributes: validatedAttributes });
+      });
     } catch (error) {
       this.context.log.error(`Error retrieving file attachments file ids: ${fileIds}: ${error}`);
       throw error;
-    }
-  }
-
-  private transformAndDecodeFileAttachments(
-    response: SavedObjectsFindResponse<AttachmentPersistedAttributes>
-  ): AttachmentSavedObjectTransformed[] {
-    return response.saved_objects.map((so) => {
-      const transformedFileAttachment = injectAttachmentSOAttributesFromRefs(
-        so,
-        this.context.persistableStateAttachmentTypeRegistry
-      );
-
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-        transformedFileAttachment.attributes
-      );
-
-      return Object.assign(transformedFileAttachment, { attributes: validatedAttributes });
-    });
-  }
-
-  private logInvalidFileAssociations(
-    attachments: AttachmentSavedObject[],
-    fileIds: string[],
-    targetCaseId: string
-  ) {
-    const caseIds: string[] = [];
-    for (const attachment of attachments) {
-      const caseRefId = getCaseReferenceId(attachment.references);
-      if (caseRefId != null) {
-        caseIds.push(caseRefId);
-      }
-    }
-
-    if (caseIds.length > 0) {
-      this.context.log.warn(
-        `Found files associated to cases outside of request: ${caseIds} file ids: ${fileIds} target case id: ${targetCaseId}`
-      );
     }
   }
 }

@@ -29,10 +29,7 @@ import {
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
 import {
-  countAlertsForID,
   flattenCaseSavedObject,
-  countUserAttachments,
-  countEventsForID,
 } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
@@ -77,29 +74,12 @@ export const getCasesByAlertID = async (
   try {
     const queryParams = decodeWithExcessOrThrow(CasesByAlertIDRequestRt)(options);
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
-
-    const filter = combineAuthorizedAndOwnerFilter(
-      queryParams.owner,
-      authorizationFilter,
-      Operations.getCaseIDsByAlertID.savedObjectType
-    );
-
-    // This will likely only return one comment saved object, the response aggregation will contain
-    // the keys we need to retrieve the cases
+    // With embedded attachments, getCaseIdsByAlertId scans all cases.
+    // Authorization is handled below by filtering unauthorized cases.
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
       alertId: alertID,
-      filter,
+      filter: undefined,
     });
-
-    // make sure the comments returned have the right owner
-    ensureSavedObjectsAreAuthorized(
-      commentsWithAlert.saved_objects.map((comment) => ({
-        owner: comment.attributes.owner,
-        id: comment.id,
-      }))
-    );
 
     const caseIds = CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
 
@@ -108,28 +88,33 @@ export const getCasesByAlertID = async (
       return [];
     }
 
-    const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
-      caseIds,
-    });
-
     const casesInfo = await caseService.getCases({
       caseIds,
     });
 
-    // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
-    // just ignore it
+    // Filter out cases with errors
     const validCasesInfo = casesInfo.saved_objects.filter(
       (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => caseInfo.error === undefined
     );
 
-    ensureSavedObjectsAreAuthorized(
-      validCasesInfo.map((caseInfo) => ({
-        owner: caseInfo.attributes.owner,
-        id: caseInfo.id,
-      }))
-    );
+    // Use getAndEnsureAuthorizedEntities to filter unauthorized cases
+    const { authorized: authorizedCases } =
+      await authorization.getAndEnsureAuthorizedEntities({
+        savedObjects: validCasesInfo,
+        operation: Operations.getCaseIDsByAlertID,
+      });
 
-    const res = validCasesInfo.map((caseInfo) => ({
+    // Apply owner filter if specified
+    const ownerFilteredCases = queryParams.owner
+      ? authorizedCases.filter((c) => queryParams.owner!.includes(c.attributes.owner))
+      : authorizedCases;
+
+    const authorizedCaseIds = ownerFilteredCases.map((c) => c.id);
+    const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
+      caseIds: authorizedCaseIds,
+    });
+
+    const res = ownerFilteredCases.map((caseInfo) => ({
       id: caseInfo.id,
       title: caseInfo.attributes.title,
       description: caseInfo.attributes.description,
@@ -219,20 +204,25 @@ export const get = async (
       );
     }
 
-    const theComments = await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    });
+    const [theComments, commentStats] = await Promise.all([
+      caseService.getAllCaseComments({
+        id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+      }),
+      attachmentService.getter.getCaseAttatchmentStats({ caseIds: [id] }),
+    ]);
+
+    const stats = commentStats.get(id);
 
     const res = flattenCaseSavedObject({
       savedObject: theCase,
       comments: theComments.saved_objects,
-      totalComment: countUserAttachments(theComments.saved_objects),
-      totalAlerts: countAlertsForID({ comments: theComments, id }),
-      totalEvents: countEventsForID({ comments: theComments }),
+      totalComment: stats?.userComments ?? 0,
+      totalAlerts: stats?.alerts ?? 0,
+      totalEvents: stats?.events ?? 0,
     });
 
     return decodeOrThrow(CaseRt)(res);
@@ -251,7 +241,7 @@ export const resolve = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResolveResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, attachmentService },
     logger,
     authorization,
   } = clientArgs;
@@ -283,22 +273,29 @@ export const resolve = async (
       });
     }
 
-    const theComments = await caseService.getAllCaseComments({
-      id: resolvedSavedObject.id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    });
+    const [theComments, commentStats] = await Promise.all([
+      caseService.getAllCaseComments({
+        id: resolvedSavedObject.id,
+        options: {
+          sortField: 'created_at',
+          sortOrder: 'asc',
+        },
+      }),
+      attachmentService.getter.getCaseAttatchmentStats({
+        caseIds: [resolvedSavedObject.id],
+      }),
+    ]);
+
+    const resolveStats = commentStats.get(resolvedSavedObject.id);
 
     const res = {
       ...resolveData,
       case: flattenCaseSavedObject({
         savedObject: resolvedSavedObject,
         comments: theComments.saved_objects,
-        totalComment: theComments.total,
-        totalEvents: countEventsForID({ comments: theComments }),
-        totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
+        totalComment: resolveStats?.userComments ?? 0,
+        totalAlerts: resolveStats?.alerts ?? 0,
+        totalEvents: resolveStats?.events ?? 0,
       }),
     };
 
