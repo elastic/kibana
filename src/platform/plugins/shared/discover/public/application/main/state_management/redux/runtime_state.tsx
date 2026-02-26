@@ -147,9 +147,6 @@ export const selectTabRuntimeInternalState = (
   };
 };
 
-/** Default chart height for new tabs, matching UnifiedHistogramLayout's minTopPanelHeight (euiTheme.base * 12) */
-const DEFAULT_CHART_HEIGHT = 192;
-
 export const selectInitialUnifiedHistogramLayoutPropsMap = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string
@@ -157,25 +154,15 @@ export const selectInitialUnifiedHistogramLayoutPropsMap = (
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const layoutPropsMap = tabRuntimeState?.unifiedHistogramConfig$.getValue().layoutPropsMap ?? {};
 
-  const result = Object.keys(layoutPropsMap).reduce<InitialUnifiedHistogramLayoutPropsMap>(
-    (acc, key) => {
-      const topPanelHeight = layoutPropsMap[key]?.topPanelHeight;
+  return Object.keys(layoutPropsMap).reduce<InitialUnifiedHistogramLayoutPropsMap>((acc, key) => {
+    const topPanelHeight = layoutPropsMap[key]?.topPanelHeight;
 
-      if (topPanelHeight !== undefined) {
-        acc[key] = { topPanelHeight };
-      }
+    if (topPanelHeight !== undefined) {
+      acc[key] = { topPanelHeight };
+    }
 
-      return acc;
-    },
-    {}
-  );
-
-  // New tabs have empty layoutPropsMap - use default chart height so chart opens by default
-  if (Object.keys(result).length === 0) {
-    result[DEFAULT_HISTOGRAM_KEY_PREFIX] = { topPanelHeight: DEFAULT_CHART_HEIGHT };
-  }
-
-  return result;
+    return acc;
+  }, {});
 };
 
 export const useCurrentTabRuntimeState = <T,>(
