@@ -6,4 +6,5 @@
  */
 
 export type { RuleExecutionMiddleware, RuleExecutionMiddlewareContext } from './types';
+export { ApmMiddleware } from './apm_middleware';
 export { ErrorHandlingMiddleware } from './error_handling_middleware';
