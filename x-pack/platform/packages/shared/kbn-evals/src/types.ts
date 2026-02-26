@@ -188,6 +188,7 @@ export interface EvaluationReport {
 
 export interface EvaluationSpecificWorkerFixtures {
   inferenceClient: BoundInferenceClient;
+  evaluationsKbnClient: ScoutWorkerFixtures['kbnClient'];
   /**
    * Executor client used to run experiments.
    */

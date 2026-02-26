@@ -22,6 +22,7 @@ import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
+import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
@@ -92,6 +93,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async ({ kbnClient, log }, use) => {
       // Centralize request retries for evals so suites don't need to wrap calls.
       await use(wrapKbnClientWithRetries({ kbnClient, log }));
+    },
+    { scope: 'worker' },
+  ],
+  evaluationsKbnClient: [
+    async ({ kbnClient, log }, use) => {
+      await use(getEvaluationsKbnClient({ kbnClient, log }));
     },
     { scope: 'worker' },
   ],
@@ -215,7 +222,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async (
       {
         log,
-        kbnClient,
+        evaluationsKbnClient,
         connector,
         evaluationConnector,
         repetitions,
@@ -251,7 +258,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const listDatasetsPerPage = 100;
 
       const upsertDataset = async (dataset: EvaluationDataset) => {
-        await kbnClient.request({
+        await evaluationsKbnClient.request({
           path: EVALS_DATASET_UPSERT_URL,
           method: 'POST',
           body: {
@@ -271,7 +278,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
         while ((page - 1) * listDatasetsPerPage < total) {
           const listResponse = GetEvaluationDatasetsResponse.parse(
-            await kbnClient.request({
+            await evaluationsKbnClient.request({
               path: EVALS_DATASETS_URL,
               method: 'GET',
               query: {
@@ -287,7 +294,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           const datasetSummary = listResponse.datasets.find(({ name }) => name === datasetName);
           if (datasetSummary) {
             const datasetResponse = GetEvaluationDatasetResponse.parse(
-              await kbnClient.request({
+              await evaluationsKbnClient.request({
                 path: EVALS_DATASET_URL.replace(
                   '{datasetId}',
                   encodeURIComponent(datasetSummary.id)
