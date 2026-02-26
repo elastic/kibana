@@ -44,6 +44,7 @@ describe('getHistoryUsersRoute', () => {
     if (!routeVersion) {
       throw new Error(`Handler for version [${API_VERSIONS.internal.v1}] not found!`);
     }
+
     routeHandler = routeVersion.handler;
   };
 

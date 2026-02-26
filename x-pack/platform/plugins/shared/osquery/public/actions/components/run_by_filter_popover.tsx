@@ -99,6 +99,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
       } else {
         updated.push(userId);
       }
+
       onSelectedUsersChanged(updated);
     },
     [selectedUserIds, onSelectedUsersChanged]

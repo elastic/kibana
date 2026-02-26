@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-const escapeKuery = (value: string): string =>
-  value.replace(/[\\"/():<>*{}[\]]/g, '\\$&');
+const escapeKuery = (value: string): string => value.replace(/[\\"/():<>*{}[\]]/g, '\\$&');
 
 export const buildHistoryKuery = ({
   searchTerm,
