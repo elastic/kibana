@@ -84,6 +84,7 @@ describe('writeDocs', () => {
       referencedDeprecations: {},
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
+      unnamedExports: {},
     };
 
     allPluginStats = {
@@ -107,6 +108,7 @@ describe('writeDocs', () => {
         eslintDisableLineCount: 0,
         eslintDisableFileCount: 0,
         enzymeImportCount: 0,
+        unnamedExports: [],
       },
     };
 

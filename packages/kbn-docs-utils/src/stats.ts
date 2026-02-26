@@ -20,7 +20,7 @@ import {
  * Collects API stats for a single plugin.
  */
 export function collectApiStatsForPlugin(doc: PluginApi, issues: IssuesByPlugin): ApiStats {
-  const { missingApiItems, referencedDeprecations, adoptionTrackedAPIs } = issues;
+  const { missingApiItems, referencedDeprecations, adoptionTrackedAPIs, unnamedExports } = issues;
 
   const stats: ApiStats = {
     missingComments: [],
@@ -36,6 +36,7 @@ export function collectApiStatsForPlugin(doc: PluginApi, issues: IssuesByPlugin)
     adoptionTrackedAPIsUnreferencedCount: 0,
     apiCount: countApiForPlugin(doc),
     missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
+    unnamedExports: unnamedExports?.[doc.id] || [],
   };
   Object.values(doc.client).forEach((def) => {
     collectStatsForApi(def, stats, doc);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { urlDrilldownValidateUrl } from '@kbn/ui-actions-enhanced-plugin/public';
+import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { coreServices } from '../../services/kibana_services';
 import { ExternalLinkStrings } from './external_link_strings';
 
@@ -24,7 +24,7 @@ export const validateUrl = (url: string): { valid: boolean; message?: string } =
     if (allowedUrl === null) {
       return { valid: false, message: ExternalLinkStrings.getDisallowedUrlError() };
     }
-    const validatedUrl = urlDrilldownValidateUrl(url);
+    const validatedUrl = urlUtils.validate(url);
     if (!validatedUrl.isValid) {
       throw new Error(); // will be caught below
     }

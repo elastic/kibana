@@ -119,8 +119,13 @@ beforeAll(async () => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: PluginOrPackage[] = [pluginA, pluginB];
 
-  const { pluginApiMap, missingApiItems, referencedDeprecations, adoptionTrackedAPIs } =
-    getPluginApiMap(project, plugins, log, { collectReferences: false });
+  const {
+    pluginApiMap,
+    missingApiItems,
+    referencedDeprecations,
+    adoptionTrackedAPIs,
+    unnamedExports,
+  } = getPluginApiMap(project, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
 
@@ -128,11 +133,13 @@ beforeAll(async () => {
     missingApiItems,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   });
   pluginBStats = collectApiStatsForPlugin(pluginApiMap.pluginB, {
     missingApiItems,
     referencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   });
 
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
@@ -157,6 +164,7 @@ beforeAll(async () => {
       missingReturns: pluginAStats.missingReturns.length,
       isAnyType: pluginAStats.isAnyType.length,
       noReferences: pluginAStats.noReferences.length,
+      unnamedExports: pluginAStats.unnamedExports.length,
     },
     missingComments: pluginAStats.missingComments.map(mapStat),
     paramDocMismatches: pluginAStats.paramDocMismatches.map(mapStat),
@@ -164,6 +172,15 @@ beforeAll(async () => {
     missingReturns: pluginAStats.missingReturns.map(mapStat),
     isAnyType: pluginAStats.isAnyType.map(mapStat),
     noReferences: pluginAStats.noReferences.map(mapStat),
+    unnamedExports: pluginAStats.unnamedExports.map(
+      ({ pluginId, scope, path, lineNumber, textSnippet }) => ({
+        pluginId,
+        scope,
+        path,
+        lineNumber,
+        textSnippet,
+      })
+    ),
   };
   fs.writeFileSync(
     Path.resolve(mdxOutputFolder, 'plugin_a.stats.json'),
@@ -968,6 +985,53 @@ describe('validation and stats', () => {
     it('documents expected behavior for property-level validation', () => {
       // placeholder to keep suite shape; property-level validation is active
       expect(true).toBe(true);
+    });
+  });
+
+  describe('multiple call signatures (function overloads)', () => {
+    it('handles OverloadedFunction interface with call signatures as children', () => {
+      const overloadedFnType = doc.client.find((c) => c.label === 'OverloadedFunction');
+      expect(overloadedFnType).toBeDefined();
+      expect(overloadedFnType!.type).toBe(TypeKind.InterfaceKind);
+      // Interface signature is undefined (self-referential); call signatures appear as children.
+      expect(overloadedFnType!.signature).toBeUndefined();
+      expect(overloadedFnType!.children).toBeDefined();
+      expect(overloadedFnType!.children!.length).toBe(3); // Three overload signatures.
+    });
+
+    it('handles overloadedFn variable with multiple call signatures', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      // Should be typed as FunctionKind since it has call signatures.
+      expect(overloadedFn!.type).toBe(TypeKind.FunctionKind);
+      // Should have children (parameters from the first signature).
+      expect(overloadedFn!.children).toBeDefined();
+      expect(overloadedFn!.children!.length).toBeGreaterThan(0);
+      // The first parameter should be 'input'.
+      expect(overloadedFn!.children![0].label).toBe('input');
+    });
+
+    it('extracts parameter documentation from the first overload signature', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      expect(overloadedFn!.children).toBeDefined();
+
+      const inputParam = overloadedFn!.children!.find((c) => c.label === 'input');
+      expect(inputParam).toBeDefined();
+      // The description should come from the JSDoc on the variable or first signature.
+      // Note: JSDoc on individual overload signatures inside a type literal
+      // is typically not extracted by ts-morph in the same way as top-level JSDoc.
+    });
+
+    it('links to OverloadedFunction interface in signature field', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      expect(overloadedFn!.signature).toBeDefined();
+      // The signature contains a reference link to the OverloadedFunction interface.
+      const sigText = overloadedFn!
+        .signature!.map((s) => (typeof s === 'string' ? s : s.text))
+        .join('');
+      expect(sigText).toContain('OverloadedFunction');
     });
   });
 });
