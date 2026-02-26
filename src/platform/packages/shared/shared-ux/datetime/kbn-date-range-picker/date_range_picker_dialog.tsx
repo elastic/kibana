@@ -10,7 +10,7 @@
 import React, { type KeyboardEvent, type PropsWithChildren, useCallback } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, keys } from '@elastic/eui';
 
 import { FOCUSABLE_SELECTOR } from './constants';
 import { useDateRangePickerContext } from './date_range_picker_context';
@@ -38,14 +38,14 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
    */
   const onPanelKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === 'Escape') {
+      if (event.key === keys.ESCAPE) {
         event.preventDefault();
         event.stopPropagation();
         setIsEditing(false);
         return;
       }
 
-      if (event.key === 'Tab') {
+      if (event.key === keys.TAB) {
         const panel = panelRef.current;
         if (!panel) return;
 
