@@ -21,6 +21,7 @@ import type {
   AfterToolCallHookContext,
   HookContext,
   HookRegistration,
+  ToolHandlerContext,
 } from '@kbn/agent-builder-server';
 
 const baseContext: BeforeAgentHookContext = {
@@ -41,6 +42,7 @@ const createAfterToolCallContext = (
 ): AfterToolCallHookContext => ({
   ...baseToolCallContext,
   toolReturn: { results: [] },
+  toolHandlerContext: {} as ToolHandlerContext,
   ...overrides,
 });
 
