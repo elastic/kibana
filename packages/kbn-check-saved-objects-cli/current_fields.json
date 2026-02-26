@@ -86,6 +86,7 @@
     "snoozeSchedule.skipRecurrences",
     "tags",
     "throttle",
+    "uiamApiKey",
     "updatedAt",
     "updatedBy"
   ],
@@ -93,10 +94,12 @@
     "createdAt",
     "createdBy",
     "description",
+    "destinations",
+    "destinations.id",
+    "destinations.type",
     "name",
     "updatedAt",
-    "updatedBy",
-    "workflow_id"
+    "updatedBy"
   ],
   "alerting_rule": [
     "createdAt",
@@ -132,7 +135,8 @@
   ],
   "api_key_pending_invalidation": [
     "apiKeyId",
-    "createdAt"
+    "createdAt",
+    "uiamApiKey"
   ],
   "api_key_to_invalidate": [
     "apiKeyId",
@@ -391,8 +395,15 @@
     "error",
     "filter",
     "integrationName",
+    "integrations",
+    "integrations.syncData",
+    "integrations.syncData.lastFullSync",
+    "integrations.syncData.lastUpdateProcessed",
+    "integrations.syncMarkerIndex",
     "managed",
+    "managedVersion",
     "matchers",
+    "matchersModifiedByUser",
     "name",
     "type"
   ],
@@ -419,6 +430,7 @@
     "error.message",
     "logExtractionState",
     "logExtractionState.additionalIndexPattern",
+    "logExtractionState.additionalIndexPatterns",
     "logExtractionState.delay",
     "logExtractionState.docsLimit",
     "logExtractionState.fieldHistoryLength",
@@ -426,6 +438,7 @@
     "logExtractionState.frequency",
     "logExtractionState.lastExecutionTimestamp",
     "logExtractionState.lookbackPeriod",
+    "logExtractionState.paginationId",
     "logExtractionState.paginationTimestamp",
     "logExtractionState.timeout",
     "status",
@@ -890,6 +903,7 @@
   ],
   "integration-config": [
     "created_by",
+    "created_by_profile_uid",
     "data_stream_count",
     "integration_id",
     "metadata",
@@ -1393,6 +1407,12 @@
     "kibanaSavedObjectMeta",
     "title",
     "version"
+  ],
+  "watchlist-config": [
+    "description",
+    "managed",
+    "name",
+    "riskModifier"
   ],
   "workplace_search_telemetry": []
 }

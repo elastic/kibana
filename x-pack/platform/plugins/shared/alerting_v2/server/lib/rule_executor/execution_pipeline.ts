@@ -35,7 +35,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @multiInject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
-    @inject(RuleExecutionMiddlewaresToken) private readonly middlewares: RuleExecutionMiddleware[]
+    @multiInject(RuleExecutionMiddlewaresToken)
+    private readonly middlewares: RuleExecutionMiddleware[]
   ) {}
 
   public async execute(input: RuleExecutionInput): Promise<RuleExecutionPipelineResult> {

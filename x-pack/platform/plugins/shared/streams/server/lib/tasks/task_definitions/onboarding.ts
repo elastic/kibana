@@ -17,9 +17,12 @@ import { v4 } from 'uuid';
 import type { IdentifyFeaturesResult, OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import type { LogMeta } from '@kbn/logging';
 import type { StreamsTaskType, TaskContext } from '.';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { QueryClient } from '../../streams/assets/query/query_client';
+import type { StreamsClient } from '../../streams/client';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskClient } from '../task_client';
 import type { TaskParams } from '../types';
@@ -63,7 +66,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { connectorId, streamName, from, to, steps, _task } = runContext.taskInstance
                 .params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, inferenceClient, queryClient } =
+              const { taskClient, inferenceClient, queryClient, streamsClient } =
                 await taskContext.getScopedClients({
                   request: runContext.fakeRequest,
                 });
@@ -119,7 +122,10 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                         return;
                       }
 
-                      await saveQueries(streamName, queriesTaskResult.queries, { queryClient });
+                      await saveQueries(streamName, queriesTaskResult.queries, {
+                        queryClient,
+                        streamsClient,
+                      });
                       break;
 
                     default:
@@ -138,7 +144,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
@@ -149,7 +155,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 taskContext.logger.error(
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`,
-                  { error }
+                  { error } as LogMeta
                 );
 
                 await taskClient.fail<OnboardingTaskParams>(
@@ -251,16 +257,19 @@ export async function saveQueries(
   queries: GeneratedSignificantEventQuery[],
   deps: {
     queryClient: QueryClient;
+    streamsClient: StreamsClient;
   }
 ) {
-  const { queryClient } = deps;
+  const { queryClient, streamsClient } = deps;
 
   if (queries.length === 0) {
     return;
   }
 
+  const definition = await streamsClient.getStream(streamName);
+
   await queryClient.bulk(
-    streamName,
+    definition,
     queries.map((query) => ({
       index: {
         id: v4(),

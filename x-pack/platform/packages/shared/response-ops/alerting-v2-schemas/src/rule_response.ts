@@ -29,14 +29,13 @@ export interface RuleResponse {
   evaluation: {
     query: {
       base: string;
-      condition: string;
+      condition?: string;
     };
   };
   recovery_policy?: {
     type: 'query' | 'no_breach';
     query?: {
       base?: string;
-      condition?: string;
     };
   };
   state_transition?: {

@@ -45,7 +45,7 @@
             "label": "addContext",
             "description": [],
             "signature": [
-              "(element: React.ReactNode) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "(element: React.ReactNode) => React.ReactElement<any>"
             ],
             "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
             "lineNumber": 13,

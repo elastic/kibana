@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { AlertEvent } from '@kbn/alerting-v2-plugin/server/resources/alert_events';
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
-import { createAlertEvent } from './fixtures';
+import { createAlertEvent, indexAlertEvents } from './fixtures';
 
 const ALERT_ACTION_API_PATH = '/internal/alerting/v2/alerts';
 const ALERTS_EVENTS_INDEX = '.alerts-events';
@@ -21,70 +20,49 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
 
   describe('Create Alert Action API', function () {
+    this.tags(['skipServerless']);
     let roleAuthc: RoleCredentials;
-    let alertEvent: AlertEvent;
-    let olderAlertEvent: AlertEvent;
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-
-      olderAlertEvent = createAlertEvent({
-        group_hash: 'test-group-hash',
-        episode: { id: 'episode-1', status: 'active' },
-        '@timestamp': '2024-01-01T00:00:00.000Z',
-      });
-      alertEvent = createAlertEvent({
-        group_hash: 'test-group-hash',
-        episode: { id: 'episode-2', status: 'active' },
-        '@timestamp': '2024-01-02T00:00:00.000Z',
-      });
-
-      await Promise.all([
-        esClient.index({
-          index: ALERTS_EVENTS_INDEX,
-          document: olderAlertEvent,
-          refresh: 'wait_for',
-        }),
-        esClient.index({
-          index: ALERTS_EVENTS_INDEX,
-          document: alertEvent,
-          refresh: 'wait_for',
-        }),
-      ]);
     });
 
     after(async () => {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await Promise.all([
-        esClient.deleteByQuery({
-          index: ALERTS_EVENTS_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-          wait_for_completion: true,
-        }),
-        esClient.deleteByQuery({
-          index: ALERTS_ACTIONS_INDEX,
-          query: { match_all: {} },
-          refresh: true,
-          wait_for_completion: true,
-        }),
+        esClient.deleteByQuery(
+          {
+            index: ALERTS_EVENTS_INDEX,
+            query: { match_all: {} },
+            refresh: true,
+            wait_for_completion: true,
+            conflicts: 'proceed',
+          },
+          { ignore: [404] }
+        ),
+        esClient.deleteByQuery(
+          {
+            index: ALERTS_ACTIONS_INDEX,
+            query: { match_all: {} },
+            refresh: true,
+            wait_for_completion: true,
+            conflicts: 'proceed',
+          },
+          { ignore: [404] }
+        ),
       ]);
     });
 
-    afterEach(async () => {
-      // Clean up actions after each test
-      await esClient.deleteByQuery({
-        index: ALERTS_ACTIONS_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-        wait_for_completion: true,
-      });
-    });
-
-    async function getLatestAction() {
+    async function getLatestAction(ruleIds: string[]) {
+      await esClient.indices.refresh({ index: ALERTS_ACTIONS_INDEX });
       const result = await esClient.search({
         index: ALERTS_ACTIONS_INDEX,
-        query: { match_all: {} },
+        query: {
+          bool: {
+            must_not: [{ terms: { action_type: ['fire', 'suppress'] } }],
+            filter: [{ terms: { rule_id: ruleIds } }],
+          },
+        },
         sort: [{ '@timestamp': 'desc' }],
         size: 1,
       });
@@ -92,58 +70,95 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
 
     it('should return 204 for ack action and write action document', async () => {
+      const ruleId = 'ack-test-rule';
+      const groupHash = 'ack-test-group';
+      const episodeId = 'ack-test-episode';
+      const event = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: episodeId, status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'ack', episode_id: 'episode-2' });
+        .send({ action_type: 'ack', episode_id: episodeId });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('ack');
-      expect(action!.episode_id).to.be(alertEvent.episode?.id);
-      expect(action!.rule_id).to.be(alertEvent.rule.id);
-      expect(action!.last_series_event_timestamp).to.be(alertEvent['@timestamp']);
+      expect(action!.episode_id).to.be(episodeId);
+      expect(action!.rule_id).to.be(ruleId);
+      expect(action!.last_series_event_timestamp).to.be(event['@timestamp']);
     });
 
     it('should return 204 for unack action and write action document', async () => {
+      const ruleId = 'unack-test-rule';
+      const groupHash = 'unack-test-group';
+      const episodeId = 'unack-test-episode';
+      const event = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: episodeId, status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'unack', episode_id: 'episode-2' });
+        .send({ action_type: 'unack', episode_id: episodeId });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('unack');
-      expect(action!.episode_id).to.be(alertEvent.episode?.id);
+      expect(action!.episode_id).to.be(episodeId);
     });
 
     it('should return 204 for tag action with tags and write action document', async () => {
+      const ruleId = 'tag-test-rule';
+      const groupHash = 'tag-test-group';
+      const event = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'tag-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'tag', tags: ['tag1', 'tag2'] });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('tag');
       expect(action!.tags).to.eql(['tag1', 'tag2']);
     });
 
     it('should return 400 for tag action without tags', async () => {
+      const groupHash = 'tag-no-tags-test-group';
+      const event = createAlertEvent({
+        rule: { id: 'tag-no-tags-test-rule', version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'tag-no-tags-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'tag' });
@@ -152,70 +167,114 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should return 204 for untag action with tags and write action document', async () => {
+      const ruleId = 'untag-test-rule';
+      const groupHash = 'untag-test-group';
+      const event = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'untag-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'untag', tags: ['tag1'] });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('untag');
       expect(action!.tags).to.eql(['tag1']);
     });
 
     it('should return 204 for snooze action and write action document', async () => {
+      const ruleId = 'snooze-test-rule';
+      const groupHash = 'snooze-test-group';
+      const event = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'snooze-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'snooze' });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('snooze');
     });
 
     it('should return 204 for unsnooze action and write action document', async () => {
+      const ruleId = 'unsnooze-test-rule';
+      const groupHash = 'unsnooze-test-group';
+      const event = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'unsnooze-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'unsnooze' });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('unsnooze');
     });
 
     it('should return 204 for activate action with reason and write action document', async () => {
+      const ruleId = 'activate-test-rule';
+      const groupHash = 'activate-test-group';
+      const event = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'activate-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'activate', reason: 'test reason' });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('activate');
       expect(action!.reason).to.be('test reason');
     });
 
     it('should return 400 for activate action without reason', async () => {
+      const groupHash = 'activate-no-reason-test-group';
+      const event = createAlertEvent({
+        rule: { id: 'activate-no-reason-test-rule', version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'activate-no-reason-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'activate' });
@@ -224,24 +283,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('should return 204 for deactivate action with reason and write action document', async () => {
+      const ruleId = 'deactivate-test-rule';
+      const groupHash = 'deactivate-test-group';
+      const event = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'deactivate-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'deactivate', reason: 'test reason' });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('deactivate');
       expect(action!.reason).to.be('test reason');
     });
 
     it('should return 400 for deactivate action without reason', async () => {
+      const groupHash = 'deactivate-no-reason-test-group';
+      const event = createAlertEvent({
+        rule: { id: 'deactivate-no-reason-test-rule', version: 1 },
+        group_hash: groupHash,
+        episode: { id: 'deactivate-no-reason-test-episode', status: 'active' },
+      });
+      await indexAlertEvents(esClient, [event]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ action_type: 'deactivate' });
@@ -254,26 +330,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${ALERT_ACTION_API_PATH}/unknown-group-hash/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'ack', episode_id: 'episode-2' });
+        .send({ action_type: 'ack', episode_id: 'unknown-episode' });
 
       expect(response.status).to.be(404);
     });
 
     it('should filter by episode_id when provided in request body', async () => {
+      const ruleId = 'episode-filter-test-rule';
+      const groupHash = 'episode-filter-test-group';
+      const olderEpisodeId = 'episode-filter-older';
+      const newerEpisodeId = 'episode-filter-newer';
+
+      const olderEvent = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: olderEpisodeId, status: 'active' },
+        '@timestamp': '2024-01-01T00:00:00.000Z',
+      });
+      const newerEvent = createAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        episode: { id: newerEpisodeId, status: 'active' },
+        '@timestamp': '2024-01-02T00:00:00.000Z',
+      });
+      await indexAlertEvents(esClient, [olderEvent, newerEvent]);
+
       const response = await supertestWithoutAuth
-        .post(`${ALERT_ACTION_API_PATH}/test-group-hash/action`)
+        .post(`${ALERT_ACTION_API_PATH}/${groupHash}/action`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ action_type: 'ack', episode_id: 'episode-1' });
+        .send({ action_type: 'ack', episode_id: olderEpisodeId });
 
       expect(response.status).to.be(204);
 
-      const action = await getLatestAction();
+      const action = await getLatestAction([ruleId]);
       expect(action).to.be.ok();
-      expect(action!.group_hash).to.be('test-group-hash');
+      expect(action!.group_hash).to.be(groupHash);
       expect(action!.action_type).to.be('ack');
-      expect(action!.episode_id).to.be(olderAlertEvent.episode?.id);
-      expect(action!.last_series_event_timestamp).to.be(olderAlertEvent['@timestamp']);
+      expect(action!.episode_id).to.be(olderEpisodeId);
+      expect(action!.last_series_event_timestamp).to.be(olderEvent['@timestamp']);
     });
   });
 }

@@ -82,3 +82,17 @@ export const DELETE_DATA_STREAM_ERROR = i18n.translate(
     defaultMessage: 'Failed to delete data stream',
   }
 );
+
+export const REANALYZE_DATA_STREAM_SUCCESS = i18n.translate(
+  'xpack.automaticImportV2.hooks.reanalyzeDataStream.success',
+  {
+    defaultMessage: 'Data stream analysis restarted',
+  }
+);
+
+export const REANALYZE_DATA_STREAM_ERROR = i18n.translate(
+  'xpack.automaticImportV2.hooks.reanalyzeDataStream.error',
+  {
+    defaultMessage: 'Failed to restart data stream analysis',
+  }
+);

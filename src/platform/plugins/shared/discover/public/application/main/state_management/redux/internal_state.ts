@@ -45,6 +45,8 @@ import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
+import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
+import { createCascadedDocumentsStateManager } from './cascaded_documents_state_manager';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -56,6 +58,7 @@ const initialState: DiscoverInternalState = {
   persistedDiscoverSession: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
+  defaultProfileEsqlQuery: undefined,
   savedDataViews: [],
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
@@ -147,6 +150,13 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
+    },
+
+    setDefaultProfileEsqlQuery: (
+      state,
+      action: PayloadAction<DiscoverInternalState['defaultProfileEsqlQuery']>
+    ) => {
+      state.defaultProfileEsqlQuery = action.payload;
     },
 
     setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
@@ -552,16 +562,23 @@ export interface InternalStateDependencies {
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
   getInternalState$: () => Observable<DiscoverInternalState>;
+  getCascadedDocumentsStateManager: (tabId: string) => CascadedDocumentsStateManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (
-  options: Omit<InternalStateDependencies, 'getInternalState$'>
+  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
+    getCascadedDocumentsStateManager: (tabId) => {
+      return createCascadedDocumentsStateManager({
+        internalState,
+        tabId,
+      });
+    },
   };
 
   const internalState = configureStore({
