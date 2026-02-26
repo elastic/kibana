@@ -34,26 +34,6 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-const sloOverviewFlyoutViewedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED,
-  schema: {},
-};
-
-const sloOverviewFlyoutServiceNameClickedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED,
-  schema: {},
-};
-
-const sloOverviewFlyoutSloLinkClickedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED,
-  schema: {},
-};
-
-const sloOverviewFlyoutAlertClickedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_ALERT_CLICKED,
-  schema: {},
-};
-
 const sloOverviewFlyoutSearchQueriedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED,
   schema: {
@@ -79,18 +59,8 @@ const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
   },
 };
 
-const sloOverviewFlyoutSloClickedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_CLICKED,
-  schema: {},
-};
-
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
-  sloOverviewFlyoutViewedEventType,
-  sloOverviewFlyoutServiceNameClickedEventType,
-  sloOverviewFlyoutSloLinkClickedEventType,
-  sloOverviewFlyoutAlertClickedEventType,
   sloOverviewFlyoutSearchQueriedEventType,
   sloOverviewFlyoutStatusFilteredEventType,
-  sloOverviewFlyoutSloClickedEventType,
 ];

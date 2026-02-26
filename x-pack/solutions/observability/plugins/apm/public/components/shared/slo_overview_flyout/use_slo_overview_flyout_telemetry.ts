@@ -15,15 +15,10 @@ export const useSloOverviewFlyoutTelemetry = () => {
 
   return useMemo(
     () => ({
-      reportViewed: () => telemetry.reportSloOverviewFlyoutViewed(),
-      reportServiceNameClicked: () => telemetry.reportSloOverviewFlyoutServiceNameClicked(),
-      reportSloLinkClicked: () => telemetry.reportSloOverviewFlyoutSloLinkClicked(),
-      reportAlertClicked: () => telemetry.reportSloOverviewFlyoutAlertClicked(),
       reportSearchQueried: (searchQuery: string) =>
         telemetry.reportSloOverviewFlyoutSearchQueried({ searchQuery }),
       reportStatusFiltered: (statuses: string[]) =>
         telemetry.reportSloOverviewFlyoutStatusFiltered({ statuses }),
-      reportSloClicked: () => telemetry.reportSloOverviewFlyoutSloClicked(),
     }),
     [telemetry]
   );

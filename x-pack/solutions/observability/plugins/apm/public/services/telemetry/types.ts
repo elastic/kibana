@@ -36,27 +36,22 @@ export type TelemetryEventParams =
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
-  reportSloOverviewFlyoutViewed(): void;
-  reportSloOverviewFlyoutServiceNameClicked(): void;
-  reportSloOverviewFlyoutSloLinkClicked(): void;
-  reportSloOverviewFlyoutAlertClicked(): void;
   reportSloOverviewFlyoutSearchQueried(params: SloOverviewFlyoutSearchQueriedParams): void;
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
-  reportSloOverviewFlyoutSloClicked(): void;
 }
 
 export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
-  SLO_OVERVIEW_FLYOUT_VIEWED = 'SLO Overview Flyout Viewed',
-  SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED = 'SLO Overview Flyout Service Name Clicked',
-  SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED = 'SLO Overview Flyout SLO Link Clicked',
-  SLO_OVERVIEW_FLYOUT_ALERT_CLICKED = 'SLO Overview Flyout Alert Clicked',
-  SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED = 'SLO Overview Flyout Search Queried',
-  SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'SLO Overview Flyout Status Filtered',
-  SLO_OVERVIEW_FLYOUT_SLO_CLICKED = 'SLO Overview Flyout SLO Clicked',
+  SLO_OVERVIEW_FLYOUT_VIEWED = 'slo_overview_flyout_viewed',
+  SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED = 'slo_overview_flyout_service_name_clicked',
+  SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED = 'slo_overview_flyout_slo_link_clicked',
+  SLO_OVERVIEW_FLYOUT_ALERT_CLICKED = 'slo_overview_flyout_alert_clicked',
+  SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED = 'slo_overview_flyout_search_queried',
+  SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
+  SLO_OVERVIEW_FLYOUT_SLO_CLICKED = 'slo_overview_flyout_slo_clicked',
 }
 
 export interface TelemetryEvent {
   eventType: TelemetryEventTypes;
-  schema: RootSchema<TelemetryEventParams> | Record<string, never>;
+  schema: RootSchema<TelemetryEventParams>;
 }

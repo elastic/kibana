@@ -9,11 +9,6 @@ import type { ITelemetryClient } from '../types';
 
 export const mockTelemetryClient: ITelemetryClient = {
   reportSearchQuerySubmitted: jest.fn(),
-  reportSloOverviewFlyoutViewed: jest.fn(),
-  reportSloOverviewFlyoutServiceNameClicked: jest.fn(),
-  reportSloOverviewFlyoutSloLinkClicked: jest.fn(),
-  reportSloOverviewFlyoutAlertClicked: jest.fn(),
   reportSloOverviewFlyoutSearchQueried: jest.fn(),
   reportSloOverviewFlyoutStatusFiltered: jest.fn(),
-  reportSloOverviewFlyoutSloClicked: jest.fn(),
 };

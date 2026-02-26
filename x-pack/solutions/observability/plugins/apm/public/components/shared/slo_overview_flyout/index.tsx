@@ -36,7 +36,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -45,6 +45,8 @@ import { AgentIcon } from '@kbn/custom-icons';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
+import { TelemetryEventTypes } from '../../../services/telemetry';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -120,9 +122,11 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
-  useEffect(() => {
-    flyoutTelemetry.reportViewed();
-  }, [flyoutTelemetry]);
+  useTrackMetric({
+    app: 'apm',
+    metric: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED,
+    metricType: METRIC_TYPE.COUNT,
+  });
 
   useDebounce(
     () => {
@@ -196,19 +200,15 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     [activeAlerts]
   );
 
-  const handleActiveAlertsClick = useCallback(
-    (sloItem: SLOWithSummaryResponse) => {
-      flyoutTelemetry.reportAlertClicked();
-      setSelectedSloTabId(undefined);
-      setSelectedSloId(null);
+  const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
+    setSelectedSloTabId(undefined);
+    setSelectedSloId(null);
 
-      requestAnimationFrame(() => {
-        setSelectedSloTabId(ALERTS_TAB_ID);
-        setSelectedSloId(sloItem.id);
-      });
-    },
-    [flyoutTelemetry]
-  );
+    requestAnimationFrame(() => {
+      setSelectedSloTabId(ALERTS_TAB_ID);
+      setSelectedSloId(sloItem.id);
+    });
+  }, []);
 
   const statusCounts = useMemo(() => {
     const backendCounts = data?.statusCounts;
@@ -275,18 +275,14 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     setSearchQuery(e.target.value);
   }, []);
 
-  const handleSloClick = useCallback(
-    (sloId: string) => {
-      flyoutTelemetry.reportSloClicked();
-      setSelectedSloId(null);
-      setSelectedSloTabId(undefined);
+  const handleSloClick = useCallback((sloId: string) => {
+    setSelectedSloId(null);
+    setSelectedSloTabId(undefined);
 
-      requestAnimationFrame(() => {
-        setSelectedSloId(sloId);
-      });
-    },
-    [flyoutTelemetry]
-  );
+    requestAnimationFrame(() => {
+      setSelectedSloId(sloId);
+    });
+  }, []);
 
   const handleCloseSloDetails = useCallback(() => {
     setSelectedSloId(null);
@@ -362,7 +358,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                   'xpack.apm.sloOverviewFlyout.activeAlertsBadge.ariaLabel',
                   { defaultMessage: 'active alerts badge' }
                 )}
-                data-test-subj="apmSloActiveAlertsBadge"
+                data-test-subj="apmSloOverviewFlyoutTableActiveAlertsBadge"
                 css={{ cursor: 'pointer' }}
               >
                 {alertCount}
@@ -392,7 +388,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         render: (name: string, sloItem: SLOWithSummaryResponse) => (
           <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
             <EuiLink
-              data-test-subj="apmSloNameLink"
+              data-test-subj="apmSloOverviewFlyoutTableSloNameLink"
               onClick={() => handleSloClick(sloItem.id)}
               css={{
                 display: 'flex',
@@ -454,13 +450,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiLink
-              href={sloAppUrl}
-              target="_blank"
-              data-test-subj="sloOverviewFlyoutSloLink"
-              onClick={() => flyoutTelemetry.reportSloLinkClicked()}
-            >
+            <EuiLink href={sloAppUrl} target="_blank" data-test-subj="sloOverviewFlyoutSloLink">
               {flyoutTitle}
             </EuiLink>
           </h2>
@@ -468,23 +458,21 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
 
         <EuiSpacer size="m" />
 
-        <span onClickCapture={() => flyoutTelemetry.reportServiceNameClicked()}>
-          <EuiBadge
-            href={serviceOverviewUrl}
-            color="hollow"
-            css={{ color: euiTheme.colors.textPrimary }}
-            data-test-subj="sloOverviewFlyoutServiceLink"
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              {agentName && (
-                <EuiFlexItem grow={false}>
-                  <AgentIcon agentName={agentName} size="s" role="presentation" />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>{serviceName}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiBadge>
-        </span>
+        <EuiBadge
+          href={serviceOverviewUrl}
+          color="hollow"
+          css={{ color: euiTheme.colors.textPrimary }}
+          data-test-subj="sloOverviewFlyoutServiceLink"
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            {agentName && (
+              <EuiFlexItem grow={false}>
+                <AgentIcon agentName={agentName} size="s" role="presentation" />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>{serviceName}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBadge>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
