@@ -192,7 +192,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
       enableStickyGroupHeader &&
       activeStickyIndex !== null &&
       (virtualizerInstance.current?.scrollOffset ?? 0) >
-      (virtualizerInstance.current?.virtualizedRowComputedTranslateValue.get(0) ?? 0)
+        (virtualizerInstance.current?.virtualizedRowComputedTranslateValue.get(0) ?? 0)
     );
   }, [activeStickyIndex, enableStickyGroupHeader]);
 
@@ -204,6 +204,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
         style={{
           ...containerSize,
         }}
+        data-test-subj="data-cascade-scroll-container"
       >
         {/* Always render the slot so the ref is available immediately.
           Use hidden style when not visible to avoid layout impact. */}
