@@ -48,7 +48,6 @@ paths:
       summary: Create anonymization profile
       tags:
         - Anonymization API
-        - Anonymization API
   /api/anonymization/profiles/_find:
     get:
       operationId: FindAnonymizationProfiles
@@ -107,7 +106,6 @@ paths:
       summary: Find anonymization profiles (ensures global profile in current space)
       tags:
         - Anonymization API
-        - Anonymization API
   /api/anonymization/profiles/{id}:
     delete:
       operationId: DeleteAnonymizationProfile
@@ -145,7 +143,6 @@ paths:
       summary: Delete anonymization profile
       tags:
         - Anonymization API
-        - Anonymization API
     get:
       operationId: GetAnonymizationProfile
       parameters:
@@ -175,7 +172,6 @@ paths:
           description: Server error.
       summary: Get anonymization profile by id
       tags:
-        - Anonymization API
         - Anonymization API
     put:
       operationId: UpdateAnonymizationProfile
@@ -219,7 +215,6 @@ paths:
       summary: Update anonymization profile
       tags:
         - Anonymization API
-        - Anonymization API
   /api/inference/anonymization/replacements/_deanonymize:
     post:
       operationId: DeanonymizeWithReplacements
@@ -250,7 +245,6 @@ paths:
           description: Server error.
       summary: Deanonymize text using replacements
       tags:
-        - Anonymization API
         - Anonymization API
   /api/inference/anonymization/replacements/_import:
     post:
@@ -289,7 +283,6 @@ paths:
       summary: Import and merge replacements
       tags:
         - Anonymization API
-        - Anonymization API
   /api/inference/anonymization/replacements/{id}:
     get:
       operationId: GetAnonymizationReplacements
@@ -321,9 +314,24 @@ paths:
       summary: Resolve replacements by id
       tags:
         - Anonymization API
-        - Anonymization API
 components:
   schemas:
+    AnonymizationEntityClass:
+      enum:
+        - PER
+        - ORG
+        - LOC
+        - MISC
+        - HOST_NAME
+        - USER_NAME
+        - IP
+        - EMAIL
+        - CLOUD_ACCOUNT
+        - ENTITY_NAME
+        - RESOURCE_NAME
+        - RESOURCE_ID
+      example: HOST_NAME
+      type: string
     AnonymizationProfile:
       type: object
       properties:
@@ -456,8 +464,7 @@ components:
           example: true
           type: boolean
         entityClass:
-          example: HOST_NAME
-          type: string
+          $ref: '#/components/schemas/AnonymizationEntityClass'
         field:
           example: host.name
           type: string
@@ -514,6 +521,14 @@ components:
       required:
         - id
         - merged
+    NerEntityClass:
+      enum:
+        - PER
+        - ORG
+        - LOC
+        - MISC
+      example: PER
+      type: string
     NerRule:
       type: object
       properties:
@@ -522,7 +537,7 @@ components:
             - PER
             - ORG
           items:
-            type: string
+            $ref: '#/components/schemas/NerEntityClass'
           type: array
         enabled:
           example: true
@@ -556,8 +571,7 @@ components:
           example: true
           type: boolean
         entityClass:
-          example: EMAIL
-          type: string
+          $ref: '#/components/schemas/AnonymizationEntityClass'
         id:
           example: regex-1
           type: string

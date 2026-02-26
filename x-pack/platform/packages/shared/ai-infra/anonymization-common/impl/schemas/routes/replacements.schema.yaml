@@ -9,7 +9,6 @@ paths:
       x-labels: [ess, serverless]
       operationId: GetAnonymizationReplacements
       summary: Resolve replacements by id
-      tags: [Anonymization API]
       parameters:
         - in: path
           name: id
@@ -42,7 +41,6 @@ paths:
       x-labels: [ess, serverless]
       operationId: DeanonymizeWithReplacements
       summary: Deanonymize text using replacements
-      tags: [Anonymization API]
       requestBody:
         required: true
         content:
@@ -75,7 +73,6 @@ paths:
       x-labels: [ess, serverless]
       operationId: ImportAnonymizationReplacements
       summary: Import and merge replacements
-      tags: [Anonymization API]
       requestBody:
         required: true
         content:

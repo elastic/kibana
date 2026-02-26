@@ -9,7 +9,6 @@ paths:
       x-labels: [ess, serverless]
       operationId: CreateAnonymizationProfile
       summary: Create anonymization profile
-      tags: [Anonymization API]
       requestBody:
         required: true
         content:
@@ -48,7 +47,6 @@ paths:
       x-labels: [ess, serverless]
       operationId: FindAnonymizationProfiles
       summary: Find anonymization profiles (ensures global profile in current space)
-      tags: [Anonymization API]
       parameters:
         - in: query
           name: filter
@@ -108,7 +106,6 @@ paths:
       x-labels: [ess, serverless]
       operationId: GetAnonymizationProfile
       summary: Get anonymization profile by id
-      tags: [Anonymization API]
       parameters:
         - in: path
           name: id
@@ -139,7 +136,6 @@ paths:
       x-labels: [ess, serverless]
       operationId: UpdateAnonymizationProfile
       summary: Update anonymization profile
-      tags: [Anonymization API]
       parameters:
         - in: path
           name: id
@@ -182,7 +178,6 @@ paths:
       x-labels: [ess, serverless]
       operationId: DeleteAnonymizationProfile
       summary: Delete anonymization profile
-      tags: [Anonymization API]
       parameters:
         - in: path
           name: id
