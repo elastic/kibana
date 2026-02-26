@@ -481,11 +481,11 @@ steps:
               min_entity_score: 4
               # Ignore common service accounts that create false correlation chains
               ignore_entities:
-                - field: "user.name"
-                  values: ["root", "SYSTEM", "Administrator"]
+                - field: "user.id"
+                  values: ["S-1-5-18", "S-1-5-19", "S-1-5-20", "0"]
               seed_window: "1h"
               expand_window: "1h"
-              max_depth: 100
+              max_depth: 20
               max_alerts: 20
 
           # -------------------------------------------------------------------
