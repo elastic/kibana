@@ -168,50 +168,59 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  href={router.link('/_discovery')}
-                  iconType="crosshairs"
-                  data-test-subj="streamsSignificantEventsDiscoveryButton"
-                >
-                  {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
-                    defaultMessage: 'SigEvents Discovery',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
             <FeedbackButton />
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="gear"
-                size="s"
-                onClick={() => setIsSettingsFlyoutOpen(true)}
-                aria-label={i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
-                  defaultMessage: 'Settings',
-                })}
-              >
-                {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
-                  defaultMessage: 'Settings',
-                })}
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          href={router.link('/_discovery')}
+                          iconType="crosshairs"
+                          size="s"
+                          data-test-subj="streamsSignificantEventsDiscoveryButton"
+                        >
+                          {i18n.translate(
+                            'xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel',
+                            { defaultMessage: 'SigEvents Discovery' }
+                          )}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
+                    size="s"
+                    disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+                  >
+                    {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
+                      defaultMessage: 'Create classic stream',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+                {queryStreams?.enabled && (
+                  <EuiFlexItem grow={false}>
+                    <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="gear"
+                    size="s"
+                    color="primary"
+                    onClick={() => setIsSettingsFlyoutOpen(true)}
+                    data-test-subj="streamsAppStreamsListViewSettingsAction"
+                  >
+                    {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
+                      defaultMessage: 'Settings',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={() => setIsClassicStreamCreationFlyoutOpen(true)}
-                size="s"
-                disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
-              >
-                {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
-                  defaultMessage: 'Create classic stream',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            {queryStreams?.enabled && (
-              <EuiFlexItem grow={false}>
-                <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         }
       />
