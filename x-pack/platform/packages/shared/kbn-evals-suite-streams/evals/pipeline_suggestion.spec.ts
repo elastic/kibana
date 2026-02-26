@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import Path from 'path';
-import { node } from 'execa';
-import { REPO_ROOT } from '@kbn/repo-info';
 import kbnDatemath from '@kbn/datemath';
 import { tags } from '@kbn/scout';
-import type { ScoutTestConfig } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ProcessingSimulationResponse, FlattenRecord } from '@kbn/streams-schema';
@@ -25,6 +21,7 @@ import {
   calculatePipelineSuggestionMetrics,
   type PipelineSuggestionMetrics,
 } from './pipeline_suggestion_metrics';
+import { indexSynthtraceScenario } from './synthtrace_helpers';
 
 /**
  * Pipeline suggestion quality evaluation.
@@ -40,28 +37,6 @@ evaluate.describe.configure({ timeout: 600_000 });
 evaluate.describe('Pipeline suggestion quality evaluation', () => {
   const from = kbnDatemath.parse('now-2m')!;
   const to = kbnDatemath.parse('now')!;
-
-  function getSharedArgs({ config }: { config: ScoutTestConfig }) {
-    const esUrl = new URL(config.hosts.elasticsearch);
-    const kbnUrl = new URL(config.hosts.kibana);
-
-    esUrl.username = config.auth.username;
-    esUrl.password = config.auth.password;
-
-    kbnUrl.username = config.auth.username;
-    kbnUrl.password = config.auth.password;
-
-    return [
-      `--from=${from.toISOString()}`,
-      `--to=${to.toISOString()}`,
-      `--kibana=${kbnUrl.toString()}`,
-      `--target=${esUrl.toString()}`,
-      '--assume-package-version=9.2.0',
-      '--workers=1',
-    ];
-  }
-
-  const synthtraceScript = Path.join(REPO_ROOT, 'scripts/synthtrace.js');
 
   /**
    * Flatten nested objects into dot notation.
@@ -81,23 +56,6 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
     }
 
     return flattened;
-  }
-
-  /**
-   * Index logs for a specific system using synthtrace.
-   */
-  async function indexSystemLogs({ config, system }: { config: ScoutTestConfig; system: string }) {
-    await node(
-      require.resolve(synthtraceScript),
-      [
-        'sample_logs',
-        ...getSharedArgs({ config }),
-        `--scenarioOpts.systems="${system}"`,
-        '--scenarioOpts.rpm=100',
-        '--scenarioOpts.streamType=wired',
-      ],
-      { stdio: 'inherit' }
-    );
   }
 
   /**
@@ -633,7 +591,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
         evaluate(
           `${idx + 1}. ${example.input.system}`,
           async ({
-            phoenixClient,
+            executorClient,
             kbnClient,
             esClient,
             connector,
@@ -657,9 +615,12 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
               });
 
               // Index logs for this system - this will route to the child stream
-              await indexSystemLogs({
+              await indexSynthtraceScenario({
+                scenario: 'sample_logs',
+                scenarioOpts: { systems: example.input.system, rpm: 100, streamType: 'wired' },
                 config,
-                system: example.input.system,
+                from,
+                to,
               });
 
               // Wait for documents to be indexed and routed
@@ -667,7 +628,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
             }
             // Both modes: stream now exists, documents ready (inline in example, indexed for system)
 
-            await phoenixClient.runExperiment(
+            await executorClient.runExperiment(
               {
                 dataset: {
                   name: `Pipeline Suggestion - ${example.input.system}`,
