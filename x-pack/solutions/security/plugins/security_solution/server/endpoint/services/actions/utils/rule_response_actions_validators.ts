@@ -127,11 +127,28 @@ export const validateRuleResponseActions = async <
             );
           }
 
-          await validateEndpointRunscriptResponseAction(
-            endpointService.getScriptsLibraryClient(spaceId, 'elastic'),
-            logger,
-            actionData.params
-          );
+          // We only validate the runscript response action if it is in the rule update payload -
+          // there is no need to validate a script (aside form Authz above) if it is being removed
+          // from the rule via the update
+          if (
+            isScriptIdReferencedInRunscriptResponseActions(
+              ruleResponseActions ?? [],
+              getScriptIdsFromRunscriptConfig(actionData.params.config)
+            )
+          ) {
+            await validateEndpointRunscriptResponseAction(
+              endpointService.getScriptsLibraryClient(spaceId, 'elastic'),
+              logger,
+              actionData.params
+            );
+          } else {
+            logger.debug(
+              () =>
+                `Skipping validation of runscript response action - script IDs [${getScriptIdsFromRunscriptConfig(
+                  (actionData.params as RunscriptParams).config ?? {}
+                ).join(', ')}] not in rulePayload`
+            );
+          }
           break;
       }
     } else {
@@ -270,6 +287,16 @@ const validateEndpointKillSuspendProcessResponseAction = ({ config, command }: P
   }
 };
 
+const getScriptIdsFromRunscriptConfig = (config: RunscriptParams['config']): string[] => {
+  return Object.values(config ?? {}).reduce((acc, osConfig) => {
+    if (osConfig.scriptId && !acc.includes(osConfig.scriptId)) {
+      acc.push(osConfig.scriptId);
+    }
+
+    return acc;
+  }, [] as string[]);
+};
+
 /** @private */
 const validateEndpointRunscriptResponseAction = async (
   scriptsClient: ScriptsLibraryClientInterface,
@@ -283,13 +310,7 @@ const validateEndpointRunscriptResponseAction = async (
     );
   }
 
-  const scriptIds = Object.values(config).reduce((acc, osConfig) => {
-    if (osConfig.scriptId && !acc.includes(osConfig.scriptId)) {
-      acc.push(osConfig.scriptId);
-    }
-
-    return acc;
-  }, [] as string[]);
+  const scriptIds = getScriptIdsFromRunscriptConfig(config);
 
   if (scriptIds.length === 0) {
     throw new CustomHttpRequestError(
@@ -336,4 +357,22 @@ const validateEndpointRunscriptResponseAction = async (
       }
     }
   }
+};
+const isScriptIdReferencedInRunscriptResponseActions = (
+  /** Rule actions that would be provided for a create/update type of operation */
+  ruleActions: ResponseAction[],
+  scriptId: string | string[]
+): boolean => {
+  const scriptIdList = Array.isArray(scriptId) ? scriptId : [scriptId];
+
+  return ruleActions.some((action) => {
+    return (
+      action.action_type_id === '.endpoint' &&
+      action.params.command === 'runscript' &&
+      action.params.config &&
+      Object.values(action.params.config).some((osConfig) =>
+        scriptIdList.includes(osConfig.scriptId ?? '')
+      )
+    );
+  });
 };
