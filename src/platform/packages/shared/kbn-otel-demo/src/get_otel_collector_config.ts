@@ -17,7 +17,7 @@ export function getFullOtelCollectorConfig({
   elasticsearchEndpoint,
   username,
   password,
-  logsIndex = 'logs',
+  logsIndex = 'logs.otel',
   namespace = 'otel-demo',
 }: {
   elasticsearchEndpoint: string;

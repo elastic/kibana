@@ -41,7 +41,7 @@ test.describe(
 
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
       await logsSynthtraceEsClient.clean();
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
 
       llmSetup = await setupLlmProxyAndConnector(log, apiServices);
     });
