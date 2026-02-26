@@ -51,9 +51,16 @@ import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 
 let mockServices = createDiscoverServicesMock();
 let savedSearchMock = copySavedSearch(originalSavedSearchMock);
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLQueryColumns: jest.fn(),
+}));
+const getESQLQueryColumnsMock = jest.mocked(getESQLQueryColumns);
 
 async function getState(url: string = '/', { savedSearch }: { savedSearch?: SavedSearch } = {}) {
   const nextHistory = createBrowserHistory<HistoryLocationState>();
@@ -103,6 +110,7 @@ describe('Discover state', () => {
   beforeEach(() => {
     mockServices = createDiscoverServicesMock();
     savedSearchMock = copySavedSearch(originalSavedSearchMock);
+    getESQLQueryColumnsMock.mockResolvedValue([]);
   });
 
   describe('Test discover state', () => {

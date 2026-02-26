@@ -306,7 +306,7 @@ describe('buildEsqlFetchSubscribe', () => {
     replaceUrlState.mockClear();
 
     documents$.next({
-      fetchStatus: FetchStatus.PARTIAL,
+      fetchStatus: FetchStatus.COMPLETE,
       result: [
         {
           id: '1',
