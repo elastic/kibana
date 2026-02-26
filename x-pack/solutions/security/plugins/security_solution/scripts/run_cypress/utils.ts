@@ -28,6 +28,10 @@ const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
   createNavigationEssSuite: 4,
 };
 
+const FILTERED_RUNNER_WEIGHTS: Record<string, number> = {
+  getArtifactMockedDataTests: 8,
+};
+
 /**
  * Estimate spec file weight for load-balanced ordering across parallel CI agents.
  * Weight = inline `it(` count + estimated dynamic tests from shared runners.
@@ -39,9 +43,17 @@ const getSpecFileWeight = (filePath: string): number => {
     const itSkipMatches = content.match(/\bit\.skip\s*\(/g);
     let testCount = (itMatches?.length ?? 0) + (itSkipMatches?.length ?? 0);
 
+    const hasSiemVersionFilter = content.includes('siemVersionFilter');
+
     for (const [runner, weight] of Object.entries(DYNAMIC_RUNNER_WEIGHTS)) {
       const occurrences = content.split(runner).length - 1;
-      testCount += occurrences * weight;
+      if (occurrences > 0) {
+        const effectiveWeight =
+          hasSiemVersionFilter && runner in FILTERED_RUNNER_WEIGHTS
+            ? FILTERED_RUNNER_WEIGHTS[runner]
+            : weight;
+        testCount += occurrences * effectiveWeight;
+      }
     }
 
     return testCount;

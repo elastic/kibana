@@ -9,8 +9,9 @@ import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_pa
 import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
 describe(
-  'Host Isolation Exceptions RBAC',
+  'Blocklist RBAC (siem)',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
-
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('hostIsolationExceptions'))
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('blocklists'), {
+    siemVersionFilter: (versions) => versions.filter((v) => v === 'siem'),
+  })
 );
