@@ -30,9 +30,9 @@ test.describe('DataViewPermissions', { tag: '@local-stateful-classic' }, () => {
     await pageObjects.uptimeOverview.goto(queryParams);
 
     await pageObjects.uptimeOverview.clickExploreDataButton();
-    await pageObjects.uptimeOverview.waitForLoadingToFinish();
+    await page.testSubj.locator('exploratoryViewMainContainer').waitFor();
 
-    await expect(page.getByText('browser')).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByText('browser')).toBeVisible();
     await expect(page.getByText('Monitor duration')).toBeVisible();
   });
 });

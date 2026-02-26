@@ -10,7 +10,7 @@ import { test } from '../fixtures';
 
 test.describe('UptimeOverview', { tag: '@local-stateful-classic' }, () => {
   test('navigates to overview and clicks monitor', async ({ pageObjects, browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
 
     await test.step('configure heartbeat indices', async () => {
       await pageObjects.uptimeOverview.goto({ dateRangeStart: '2018-01-01', dateRangeEnd: 'now' });
