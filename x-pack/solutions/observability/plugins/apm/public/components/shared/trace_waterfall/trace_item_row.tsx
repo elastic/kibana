@@ -43,7 +43,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
   const widthPercent = (item.duration / duration) * 100;
   const leftPercent = ((item.offset + item.skew) / duration) * 100;
   const hasToggle = showAccordion && childrenCount > 0;
-  const accordionIndent = ACCORDION_PADDING_LEFT * item.depth;
+  const accordionIndent = ACCORDION_PADDING_LEFT * (item.depth > 200 ? 200 : item.depth);
   const { euiTheme } = useEuiTheme();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
 
@@ -57,9 +57,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
 
   function calculateMarginLeft() {
     const marginLeft =
-      margin.left -
-      accordionIndent -
-      (itemStatusIsFailureOrError ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
+      margin.left - (itemStatusIsFailureOrError ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
     return hasToggle ? marginLeft - TOGGLE_BUTTON_WIDTH : marginLeft;
   }
 

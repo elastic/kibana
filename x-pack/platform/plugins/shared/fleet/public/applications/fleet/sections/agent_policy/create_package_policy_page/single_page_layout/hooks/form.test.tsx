@@ -13,6 +13,7 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 
 import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { SelectedPolicyTab } from '../../components';
 
@@ -228,6 +229,9 @@ describe('useOnSubmit', () => {
   describe('input deployment mode filtering', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableVarGroups: true,
+      } as any);
     });
 
     it('should disable inputs that are not allowed for agentless deployment mode', async () => {
@@ -406,6 +410,69 @@ describe('useOnSubmit', () => {
         expect(logsInput?.enabled).toBe(false);
         expect(httpInput?.enabled).toBe(false);
         expect(metricsInput?.enabled).toBe(false);
+      });
+    });
+
+    it('should disable inputs hidden by var_group selection (same pattern as deployment mode)', async () => {
+      const packageInfoWithVarGroups = {
+        ...packageInfo,
+        var_groups: [
+          {
+            name: 'credential_type',
+            title: 'Credential',
+            selector_title: 'Select credential',
+            required: true,
+            options: [
+              { name: 'cloud_connectors', title: 'Cloud Connector', vars: [] },
+              { name: 'direct_access_key', title: 'Direct', vars: [] },
+            ],
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'guardduty',
+            title: 'GuardDuty',
+            description: 'GuardDuty',
+            inputs: [
+              {
+                type: 'guardduty',
+                title: 'GuardDuty',
+                description: 'GuardDuty input',
+                hide_in_var_group_options: { credential_type: ['cloud_connectors'] },
+              },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoWithVarGroups,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      act(() => {
+        renderResult.result.current.updatePackagePolicy({
+          var_group_selections: { credential_type: 'cloud_connectors' },
+        });
+      });
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const guarddutyInput = packagePolicy.inputs?.find(
+          (input: any) => input.type === 'guardduty'
+        );
+        expect(guarddutyInput?.enabled).toBe(false);
       });
     });
 
@@ -694,7 +761,7 @@ describe('useOnSubmit', () => {
       });
     });
 
-    it('should clear cloud_connectors and set supports_cloud_connector to false for gcp', () => {
+    it('should update cloud_connectors with target_csp gcp and set supports_cloud_connector to false for gcp', () => {
       const setNewAgentPolicy = jest.fn();
       const setPackagePolicy = jest.fn();
 
@@ -736,7 +803,10 @@ describe('useOnSubmit', () => {
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
-          cloud_connectors: undefined,
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'gcp',
+          },
         },
       });
       expect(setPackagePolicy).toHaveBeenCalledWith({
