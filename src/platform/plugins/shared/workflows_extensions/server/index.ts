@@ -31,7 +31,6 @@ export type {
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
-  OnCancelHandler,
 } from './step_registry/types';
 
 export { createServerStepDefinition } from './step_registry/types';
