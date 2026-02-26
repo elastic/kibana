@@ -15,14 +15,18 @@ import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-ser
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
+import type { Session } from './session_management';
+import { getPrintableSessionId } from './session_management';
 import type { UserProfileServiceStartInternal } from './user_profile';
 
 export const buildSecurityApi = ({
   getAuthc,
+  getSession,
   audit,
   config,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
+  getSession: () => Pick<Session, 'getSID'>;
   audit: AuditServiceSetup;
   config: { uiam?: { enabled: boolean } };
 }): CoreSecurityDelegateContract => {
@@ -30,6 +34,10 @@ export const buildSecurityApi = ({
     authc: {
       getCurrentUser: (request) => {
         return getAuthc().getCurrentUser(request);
+      },
+      getRedactedSessionId: async (request) => {
+        const sid = await getSession().getSID(request);
+        return sid ? getPrintableSessionId(sid) : undefined;
       },
       apiKeys: {
         areAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
