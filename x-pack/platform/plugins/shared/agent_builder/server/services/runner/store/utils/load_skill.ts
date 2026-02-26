@@ -28,12 +28,12 @@ export async function loadSkillTools({
   toolManager: ToolManager;
   logger: Logger;
 }) {
-  const skill = skillsService.getSkillDefinition(entry.metadata.skill_id);
+  const skill = await skillsService.get(entry.metadata.skill_id);
   if (skill) {
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineExecutableTools = inlineTools.map((tool) => skillsService.convertSkillTool(tool));
 
-    const registryToolIds = (await skill.getRegistryTools?.()) ?? [];
+    const registryToolIds = await skill.getRegistryTools();
     if (registryToolIds.length > 25) {
       throw new Error(
         `Skill '${skill.id}' returned ${registryToolIds.length} registry tools, exceeding the 25-tool limit.`
@@ -55,6 +55,6 @@ export async function loadSkillTools({
       }
     );
   } else {
-    logger.debug(`Skill '${entry.metadata.skill_id}' not found in registry.`);
+    logger.warn(`Skill '${entry.metadata.skill_id}' not found in registry. Skipping tool loading.`);
   }
 }
