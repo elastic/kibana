@@ -19,8 +19,8 @@ import {
   createToolRegistryMock,
   createMockedTool,
 } from '@kbn/agent-builder-plugin/server/test_utils/tools';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server/types';
 
 const mockLoadWorkflows = jest.fn();
 jest.mock('@kbn/data-catalog-plugin/common/workflow_loader', () => ({
@@ -123,19 +123,8 @@ describe('createConnectorAndRelatedResources', () => {
   const mockActions = {
     getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
   };
-  const mockAgentBuilder: AgentBuilderPluginStart = {
-    agents: {
-      runAgent: jest.fn(),
-    },
-    tools: {
-      execute: jest.fn(),
-      getRegistry: jest.fn().mockResolvedValue(mockToolRegistry),
-    },
-    skills: {
-      register: jest.fn(),
-      unregister: jest.fn(),
-    },
-  };
+  const mockAgentBuilder = agentBuilderMocks.createStart();
+  mockAgentBuilder.tools.getRegistry.mockResolvedValue(mockToolRegistry);
 
   const mockRequest = httpServerMock.createKibanaRequest();
 
