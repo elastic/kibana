@@ -7313,6 +7313,10 @@
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_test_workflow.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_validate_workflow.ts"
+              },
+              {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/tools.ts"
               },
@@ -16282,6 +16286,14 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
                 "plugin": "automaticImportVTwo",
                 "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
               },
@@ -17214,10 +17226,6 @@
                 "path": "x-pack/solutions/security/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
               },
               {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/server/options_list/options_list_cluster_settings_route.ts"
-              },
-              {
                 "plugin": "@kbn/test-suites-src",
                 "path": "src/platform/test/plugin_functional/plugins/core_http/server/plugin.ts"
               },
@@ -17539,6 +17547,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
@@ -18098,6 +18110,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/a2a.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
               },
               {
                 "plugin": "aiops",
@@ -19448,6 +19464,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/attachments.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
