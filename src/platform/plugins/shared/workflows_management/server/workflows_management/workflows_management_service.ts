@@ -8,7 +8,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { v4 as generateUuid } from 'uuid';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
@@ -40,7 +39,6 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type { ConnectorInstanceConfig } from '@kbn/workflows/types/v1';
 import type {
   IWorkflowEventLoggerService,
   LogSearchResult,
@@ -50,37 +48,30 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { ConnectorInstanceConfig } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod/v4';
+import { v4 as generateUuid } from 'uuid';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
+import {
+  WorkflowConflictError,
+  WorkflowValidationError
+} from '../../common/lib/errors';
 import type {
   DeleteWorkflowsResponse,
   GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
-import {
-  InvalidYamlSchemaError,
-  WorkflowConflictError,
-  WorkflowValidationError,
-} from '../../common/lib/errors';
 
-import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { validateTriggers } from '../../common/lib/validate_triggers';
-import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
-
-/** Derives a list of trigger type ids from a workflow definition (e.g. ['manual', 'scheduled', 'cases.updated']). */
-function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefined): string[] {
-  const triggers = definition?.triggers ?? [];
-  return triggers
-    .map((t) => (t && typeof (t as { type?: string }).type === 'string' ? (t as { type: string }).type : null))
-    .filter((t): t is string => t != null);
-}
+import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
+import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
+import { updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -89,7 +80,16 @@ import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
+/** Derives a list of trigger type ids from a workflow definition (e.g. ['manual', 'scheduled', 'cases.updated']). */
+function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefined): string[] {
+  const triggers = definition?.triggers ?? [];
+  return triggers
+    .map((t) => (t && typeof (t as { type?: string }).type === 'string' ? (t as { type: string }).type : null))
+    .filter((t): t is string => t != null);
+}
+
 const DEFAULT_PAGE_SIZE = 100;
+
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
@@ -207,28 +207,13 @@ export class WorkflowsService {
       valid: false,
     };
 
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
-    if (parsedYaml.success) {
-      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(
-        parsedYaml.data as unknown as WorkflowYaml
-      );
-
-      const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
-      if (!stepValidation.isValid) {
-        workflowToCreate.valid = false;
-        workflowToCreate.definition = undefined;
-      }
-
-      if (workflowToCreate.definition) {
-        const triggerValidation = validateTriggers(
-          workflowToCreate.definition,
-          triggerDefinitions ?? []
-        );
-        if (!triggerValidation.valid) {
-          workflowToCreate.valid = false;
-          workflowToCreate.definition = undefined;
-        }
-      }
+    const validation = validateWorkflowYaml(workflow.yaml, zodSchema, { triggerDefinitions });
+    if (validation.valid && validation.parsedWorkflow) {
+      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+    } else if (validation.parsedWorkflow) {
+      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+      workflowToCreate.valid = false;
+      workflowToCreate.definition = undefined;
     }
 
     const id = workflow.id || this.generateWorkflowId();
@@ -476,44 +461,19 @@ export class WorkflowsService {
   }> {
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, zodSchema);
+    const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
 
-    if (!parsedYaml.success) {
-      const validationErrors =
-        parsedYaml.error instanceof InvalidYamlSchemaError && parsedYaml.error.formattedZodError
-          ? parsedYaml.error.formattedZodError.issues.map((e) => e.message)
-          : [parsedYaml.error.message];
+    if (!validation.valid || !validation.parsedWorkflow) {
       return {
         updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
-        validationErrors,
+        validationErrors: validation.diagnostics
+          .filter((d) => d.severity === 'error')
+          .map((d) => d.message),
         shouldUpdateScheduler: true,
       };
     }
 
-    const stepValidation = validateStepNameUniqueness(parsedYaml.data as unknown as WorkflowYaml);
-    if (!stepValidation.isValid) {
-      return {
-        updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
-        validationErrors: stepValidation.errors.map((e) => e.message),
-        shouldUpdateScheduler: true,
-      };
-    }
-
-    const triggerValidation = validateTriggers(
-      parsedYaml.data as unknown as WorkflowYaml,
-      triggerDefinitions
-    );
-    if (!triggerValidation.valid) {
-      return {
-        updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
-        validationErrors: triggerValidation.errors.map((e) => e.message),
-        shouldUpdateScheduler: true,
-      };
-    }
-
-    const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
-      parsedYaml.data as unknown as WorkflowYaml
-    );
+    const workflowDef = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
     return {
       updatedDataPatch: {
         definition: workflowDef.definition,
@@ -1491,6 +1451,16 @@ export class WorkflowsService {
       return { config: { taskType: connector.config?.taskType } };
     }
     return undefined;
+  }
+
+  public async validateWorkflow(
+    yaml: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ValidateWorkflowResponse> {
+    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    return validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
   }
 
   public async getWorkflowZodSchema(

@@ -80,6 +80,7 @@ export function runCheckSavedObjectsCli() {
               ctx.kibanaServer = await setupKibana();
               const coreStart = await ctx.kibanaServer.start();
               ctx.registeredTypes = coreStart!.savedObjects.getTypeRegistry().getAllTypes();
+              ctx.encryptedSavedObjects = coreStart._plugins?.get('encryptedSavedObjects');
             },
             enabled: !server && !test,
           },

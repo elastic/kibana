@@ -24,6 +24,7 @@
       "_ingest/pipeline/{id}"
     ],
     "documentation": "https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines",
+    "documentation_serverless": "https://www.elastic.co/docs/manage-data/ingest/transform-enrich/ingest-pipelines",
     "availability": {
       "stack": true,
       "serverless": true
