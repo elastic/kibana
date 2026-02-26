@@ -60,17 +60,6 @@ export const useAnonymizationProfilesSectionState = ({
     };
   }, [application.capabilities]);
 
-  const listTrustedNerModels = useCallback(async () => {
-    // TODO: Remove this temporary stub when a server-side trusted NER models API is available.
-    // The real implementation should resolve trusted and deployed models from ML/inference services.
-    return [
-      {
-        id: 'elastic-ner-stub-v1',
-        label: 'elastic-ner-stub-v1',
-      },
-    ];
-  }, []);
-
   const fetchPreviewDocument = useCallback(
     async ({
       targetType,
@@ -156,8 +145,10 @@ export const useAnonymizationProfilesSectionState = ({
   }, [notifications.toasts]);
 
   const onOpenConflictError = useCallback(
-    (error: Error) => {
-      notifications.toasts.addError(error, {
+    (error: unknown) => {
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+
+      notifications.toasts.addError(normalizedError, {
         title: i18n.translate('genAiSettings.anonymizationProfiles.conflict.openFailed', {
           defaultMessage: 'Unable to open conflicting profile',
         }),
@@ -170,7 +161,6 @@ export const useAnonymizationProfilesSectionState = ({
     activeSpaceId,
     canShow: anonymizationCapabilities.show,
     canManage: anonymizationCapabilities.manage,
-    listTrustedNerModels,
     fetchPreviewDocument,
     onCreateSuccess,
     onUpdateSuccess,

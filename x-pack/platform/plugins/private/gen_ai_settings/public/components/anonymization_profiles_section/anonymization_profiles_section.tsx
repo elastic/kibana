@@ -20,7 +20,6 @@ export const AnonymizationProfilesSection = () => {
       spaceId={state.activeSpaceId}
       canShow={state.canShow}
       canManage={state.canManage}
-      listTrustedNerModels={state.listTrustedNerModels}
       fetchPreviewDocument={state.fetchPreviewDocument}
       onCreateSuccess={state.onCreateSuccess}
       onUpdateSuccess={state.onUpdateSuccess}

@@ -415,25 +415,11 @@ export const NerRulesPanel = () => {
                 fullWidth
               />
             ) : (
-              <EuiFieldText
-                compressed
-                value={nerDraft.modelId}
-                aria-label={i18n.translate(
-                  'anonymizationUi.profiles.nerRules.create.modelIdAriaLabel',
-                  {
-                    defaultMessage: 'New NER model id',
-                  }
-                )}
-                onChange={(event) => setNerDraftModelId(event.target.value)}
-                placeholder={i18n.translate(
-                  'anonymizationUi.profiles.nerRules.modelIdPlaceholder',
-                  {
-                    defaultMessage: 'NER model id',
-                  }
-                )}
-                disabled={isNerInputDisabled}
-                fullWidth
-              />
+              <EuiText size="s">
+                <span data-test-subj="anonymizationProfilesNerRulesDefaultModelId">
+                  {nerDraft.modelId}
+                </span>
+              </EuiText>
             )}
           </EuiFormRow>
         </EuiFlexItem>

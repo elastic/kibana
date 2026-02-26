@@ -42,11 +42,13 @@ describe('NerRulesPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('shows labeled inputs for creating new rules', () => {
+  it('shows fields for creating new rules', () => {
     setContext();
     render(<NerRulesPanel />);
 
-    expect(screen.getByLabelText('Model id')).toBeInTheDocument();
+    expect(screen.getByTestId('anonymizationProfilesNerRulesDefaultModelId')).toHaveTextContent(
+      NER_MODEL_ID
+    );
     expect(screen.getByLabelText('Allowed entities')).toBeInTheDocument();
   });
 
@@ -64,7 +66,10 @@ describe('NerRulesPanel', () => {
     });
     render(<NerRulesPanel />);
 
-    expect(screen.getByLabelText('Model id')).toHaveValue(NER_MODEL_ID);
+    expect(screen.getByTestId('anonymizationProfilesNerRulesDefaultModelId')).toHaveTextContent(
+      NER_MODEL_ID
+    );
+    expect(screen.queryByLabelText('New NER model id')).not.toBeInTheDocument();
     expect(screen.getByLabelText('NER model id for rule ner-1')).toHaveValue(NER_MODEL_ID);
   });
 
