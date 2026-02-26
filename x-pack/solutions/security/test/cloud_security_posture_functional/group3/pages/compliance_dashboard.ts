@@ -31,6 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
       data_stream: {
         dataset: 'cloud_security_posture.findings',
+        namespace: 'default',
+        type: 'logs',
       },
     },
   ];
