@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiSkeletonText,
   EuiToolTip,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -80,11 +81,9 @@ const ActionsTableComponent = () => {
     kuery: 'user_id: *',
   });
 
-  const onTableChange = useCallback(({ page = {} }: any) => {
-    const { index, size } = page;
-
-    setPageIndex(index);
-    setPageSize(size);
+  const onTableChange = useCallback(({ page }: CriteriaWithPagination<SearchHit>) => {
+    setPageIndex(page.index);
+    setPageSize(page.size);
   }, [setPageSize]);
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
