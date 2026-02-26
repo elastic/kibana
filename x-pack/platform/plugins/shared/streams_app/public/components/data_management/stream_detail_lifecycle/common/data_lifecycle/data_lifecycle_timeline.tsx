@@ -14,6 +14,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { PhaseName } from '@kbn/streams-schema';
 import type { LifecyclePhase } from './lifecycle_types';
 import type { TimelineSegment } from './data_lifecycle_segments';
 
@@ -22,11 +23,15 @@ export const DataLifecycleTimeline = ({
   isRetentionInfinite,
   timelineSegments,
   gridTemplateColumns,
+  invalidPhases,
+  invalidStepIndices,
 }: {
   phases: LifecyclePhase[];
   isRetentionInfinite: boolean;
   timelineSegments?: TimelineSegment[];
   gridTemplateColumns: string;
+  invalidPhases?: PhaseName[];
+  invalidStepIndices?: number[];
 }) => {
   const { euiTheme } = useEuiTheme();
   const segments: TimelineSegment[] =
@@ -36,6 +41,41 @@ export const DataLifecycleTimeline = ({
       leftValue: phase.min_age,
       isDelete: phase.isDelete,
     }));
+
+  const invalidLeftValuesSet = (() => {
+    if (
+      (!invalidPhases || invalidPhases.length === 0) &&
+      (!invalidStepIndices || invalidStepIndices.length === 0)
+    ) {
+      return new Set<string>();
+    }
+
+    const invalidPhasesSet = new Set<string>(invalidPhases ?? []);
+    const invalidStepIndicesSet = new Set(invalidStepIndices ?? []);
+    const leftValuesSet = new Set<string>();
+
+    if (invalidPhasesSet.has('hot')) {
+      const first = segments[0]?.leftValue;
+      if (first) leftValuesSet.add(first);
+    }
+
+    for (const phase of phases) {
+      const phaseName = phase.name;
+      if (phaseName === 'hot') continue;
+      if (!invalidPhasesSet.has(phaseName)) continue;
+      if (phase.min_age) leftValuesSet.add(phase.min_age);
+    }
+
+    if (invalidStepIndicesSet.size > 0) {
+      for (const segment of segments) {
+        if (segment.stepIndex === undefined) continue;
+        if (!invalidStepIndicesSet.has(segment.stepIndex)) continue;
+        if (segment.leftValue) leftValuesSet.add(segment.leftValue);
+      }
+    }
+
+    return leftValuesSet;
+  })();
 
   return (
     <EuiPanel
@@ -70,6 +110,9 @@ export const DataLifecycleTimeline = ({
                   leftValue={segment.leftValue}
                   showInfinite={showInfinite}
                   isFirstPhase={isFirstPhase}
+                  isInvalidPoint={Boolean(
+                    segment.leftValue && invalidLeftValuesSet.has(segment.leftValue)
+                  )}
                 />
               </EuiFlexItem>
             );
@@ -85,11 +128,13 @@ const DataLifecyclePhaseTimeline = ({
   leftValue,
   showInfinite,
   isFirstPhase,
+  isInvalidPoint,
 }: {
   phase: TimelineSegment;
   leftValue?: string;
   showInfinite?: boolean;
   isFirstPhase?: boolean;
+  isInvalidPoint?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const isDeletePhase = phase.isDelete;
@@ -123,8 +168,9 @@ const DataLifecyclePhaseTimeline = ({
             hasShadow={false}
             css={{ transform: 'translateX(-50%)' }}
             data-test-subj={`dataLifecycleTimeline-value-${leftValue}`}
+            data-is-invalid={isInvalidPoint ? 'true' : undefined}
           >
-            <EuiText textAlign="center" size="xs" color="subdued">
+            <EuiText textAlign="center" size="xs" color={isInvalidPoint ? 'danger' : 'subdued'}>
               {leftValue}
             </EuiText>
           </EuiPanel>

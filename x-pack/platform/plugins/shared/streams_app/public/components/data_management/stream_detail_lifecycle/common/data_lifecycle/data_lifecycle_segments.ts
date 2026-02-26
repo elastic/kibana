@@ -16,6 +16,7 @@ interface BaseLifecycleSegment {
 
 export interface TimelineSegment extends BaseLifecycleSegment {
   leftValue?: string;
+  stepIndex?: number;
 }
 
 export interface DownsamplingSegment extends BaseLifecycleSegment {
@@ -145,10 +146,15 @@ export const buildDslSegments = (
   const stepStartToIndex = new Map(stepStarts.map((value, index) => [value, index]));
 
   // Build timeline segments
-  const timelineSegments: TimelineSegment[] = growValues.map((grow, index) => ({
-    grow,
-    leftValue: boundaries[index],
-  }));
+  const timelineSegments: TimelineSegment[] = growValues.map((grow, index) => {
+    const leftValue = boundaries[index];
+    const stepIndex = stepStartToIndex.get(leftValue);
+    return {
+      grow,
+      leftValue,
+      stepIndex,
+    };
+  });
 
   // Build downsampling segments
   const downsamplingSegments: DownsamplingSegment[] = growValues.map((grow, index) => {

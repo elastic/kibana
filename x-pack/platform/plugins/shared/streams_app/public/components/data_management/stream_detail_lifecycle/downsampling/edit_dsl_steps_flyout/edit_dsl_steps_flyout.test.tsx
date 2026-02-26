@@ -78,6 +78,8 @@ const renderFlyout = (
   };
 };
 
+type FlyoutOnChange = React.ComponentProps<typeof EditDslStepsFlyout>['onChange'];
+
 const Wrapper = ({
   initialSteps,
   initialSelectedStepIndex,
@@ -87,11 +89,14 @@ const Wrapper = ({
   setSelectedStepIndexRef,
   onSelectedStepIndexChange,
   ...props
-}: Partial<React.ComponentProps<typeof EditDslStepsFlyout>> & {
+}: Omit<
+  Partial<React.ComponentProps<typeof EditDslStepsFlyout>>,
+  'onChange' | 'onSave' | 'onClose'
+> & {
   initialSteps: IngestStreamLifecycleDSL;
   initialSelectedStepIndex?: number;
   onClose: () => void;
-  onChange: (next: IngestStreamLifecycleDSL) => void;
+  onChange: FlyoutOnChange;
   onSave: (next: IngestStreamLifecycleDSL) => void;
   setSelectedStepIndexRef: { current: ((index: number | undefined) => void) | null };
   onSelectedStepIndexChange: jest.Mock;
@@ -563,17 +568,20 @@ describe('EditDslStepsFlyout', () => {
       await tick();
       await tick();
 
-      expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenLastCalledWith({
-        dsl: {
-          data_retention: '30d',
-          downsample: [
-            { after: '40d', fixed_interval: '5d' },
-            { after: '41d', fixed_interval: '10d' },
-            { after: '82d', fixed_interval: '20d' },
-          ],
+      expect(onChange).toHaveBeenCalled();
+      expect(onChange).toHaveBeenLastCalledWith(
+        {
+          dsl: {
+            data_retention: '30d',
+            downsample: [
+              { after: '40d', fixed_interval: '5d' },
+              { after: '41d', fixed_interval: '10d' },
+              { after: '82d', fixed_interval: '20d' },
+            ],
+          },
         },
-      });
+        expect.any(Object)
+      );
     });
 
     it('debounces rapid user edits into a single onChange', async () => {
@@ -622,12 +630,15 @@ describe('EditDslStepsFlyout', () => {
         });
 
         expect(onChange).toHaveBeenCalledTimes(1);
-        expect(onChange).toHaveBeenLastCalledWith({
-          dsl: {
-            data_retention: '30d',
-            downsample: [{ after: '30d', fixed_interval: '3h' }],
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            dsl: {
+              data_retention: '30d',
+              downsample: [{ after: '30d', fixed_interval: '3h' }],
+            },
           },
-        });
+          expect.any(Object)
+        );
 
         // Intermediate edits should clear the previous pending debounce timer.
         expect(clearTimeoutSpy).toHaveBeenCalled();

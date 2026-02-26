@@ -9,7 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { DataLifecycleTimeline } from './data_lifecycle_timeline';
 import type { LifecyclePhase } from './lifecycle_types';
+import { buildDslSegments } from './data_lifecycle_segments';
 import type { TimelineSegment } from './data_lifecycle_segments';
+import type { PhaseName } from '@kbn/streams-schema';
 
 describe('DataLifecycleTimeline', () => {
   const defaultProps = {
@@ -68,6 +70,81 @@ describe('DataLifecycleTimeline', () => {
       expect(screen.getByText('0d')).toBeInTheDocument();
       expect(screen.getByText('10d')).toBeInTheDocument();
       expect(screen.getByText('20d')).toBeInTheDocument();
+    });
+
+    it('should mark decreasing timeline points as invalid', () => {
+      const phases: LifecyclePhase[] = [
+        { grow: true, color: '#FF0000', name: 'hot', min_age: '0h', label: 'hot' },
+        { grow: true, color: '#FFA500', name: 'warm', min_age: '28h', label: 'warm' },
+        { grow: true, color: '#00FF00', name: 'cold', min_age: '15h', label: 'cold' },
+      ];
+      const timelineSegments: TimelineSegment[] = [
+        { grow: 3, leftValue: '0h' },
+        { grow: 3, leftValue: '28h' },
+        { grow: 3, leftValue: '15h' },
+      ];
+
+      render(
+        <DataLifecycleTimeline
+          {...defaultProps}
+          phases={phases}
+          timelineSegments={timelineSegments}
+          gridTemplateColumns="1fr 1fr 1fr"
+          invalidPhases={['cold'] as PhaseName[]}
+        />
+      );
+
+      expect(screen.getByTestId('dataLifecycleTimeline-value-28h')).not.toHaveAttribute(
+        'data-is-invalid'
+      );
+      expect(screen.getByTestId('dataLifecycleTimeline-value-15h')).toHaveAttribute(
+        'data-is-invalid',
+        'true'
+      );
+    });
+
+    it('should mark invalid step indices using DSL segment stepIndex mapping', () => {
+      const phases: LifecyclePhase[] = [
+        { grow: true, color: '#FF0000', name: 'hot', min_age: '0d', label: 'hot' },
+        {
+          grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
+          min_age: '60d',
+          isDelete: true,
+        },
+      ];
+
+      const dslSegments = buildDslSegments(
+        [
+          { grow: 3, min_age: '0d' },
+          { grow: 1, min_age: '60d', isDelete: true },
+        ],
+        [
+          { after: '10d', fixed_interval: '1d' },
+          { after: '20d', fixed_interval: '1d' },
+        ]
+      );
+
+      render(
+        <DataLifecycleTimeline
+          {...defaultProps}
+          phases={phases}
+          timelineSegments={dslSegments.timelineSegments}
+          gridTemplateColumns="1fr 1fr 1fr 50px"
+          invalidStepIndices={[1]}
+          invalidPhases={[] as PhaseName[]}
+        />
+      );
+
+      expect(screen.getByTestId('dataLifecycleTimeline-value-10d')).not.toHaveAttribute(
+        'data-is-invalid'
+      );
+      expect(screen.getByTestId('dataLifecycleTimeline-value-20d')).toHaveAttribute(
+        'data-is-invalid',
+        'true'
+      );
     });
   });
 

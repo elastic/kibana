@@ -7,11 +7,15 @@
 
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
 
+export interface EditDslStepsFlyoutChangeMeta {
+  invalidStepIndices: number[];
+}
+
 export interface EditDslStepsFlyoutProps {
   initialSteps: IngestStreamLifecycleDSL;
   selectedStepIndex: number | undefined;
   setSelectedStepIndex: (index: number | undefined) => void;
-  onChange: (next: IngestStreamLifecycleDSL) => void;
+  onChange: (next: IngestStreamLifecycleDSL, meta: EditDslStepsFlyoutChangeMeta) => void;
   onSave: (next: IngestStreamLifecycleDSL) => void;
   onClose: () => void;
   onChangeDebounceMs?: number;

@@ -241,10 +241,13 @@ describe('EditIlmPhasesFlyout', () => {
       });
 
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-          warm: { name: 'warm', size_in_bytes: 0, min_age: '10d' },
-        })
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '10d' },
+          },
+          expect.any(Object)
+        )
       );
     });
 
@@ -336,15 +339,18 @@ describe('EditIlmPhasesFlyout', () => {
       fireEvent.click(switchEl);
 
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-          warm: {
-            name: 'warm',
-            size_in_bytes: 0,
-            min_age: '30d',
-            downsample: { after: '30d', fixed_interval: '1d' },
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: {
+              name: 'warm',
+              size_in_bytes: 0,
+              min_age: '30d',
+              downsample: { after: '30d', fixed_interval: '1d' },
+            },
           },
-        })
+          expect.any(Object)
+        )
       );
 
       expect(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingIntervalValue`)).toBeVisible();
@@ -394,20 +400,23 @@ describe('EditIlmPhasesFlyout', () => {
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
 
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: {
-            name: 'hot',
-            size_in_bytes: 0,
-            rollover: {},
-            downsample: { after: '0ms', fixed_interval: '1d' },
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: {
+              name: 'hot',
+              size_in_bytes: 0,
+              rollover: {},
+              downsample: { after: '0ms', fixed_interval: '1d' },
+            },
+            warm: {
+              name: 'warm',
+              size_in_bytes: 0,
+              min_age: '30d',
+              downsample: { after: '30d', fixed_interval: '2d' },
+            },
           },
-          warm: {
-            name: 'warm',
-            size_in_bytes: 0,
-            min_age: '30d',
-            downsample: { after: '30d', fixed_interval: '2d' },
-          },
-        })
+          expect.any(Object)
+        )
       );
     });
 
@@ -441,15 +450,18 @@ describe('EditIlmPhasesFlyout', () => {
       expect(warmPanel.queryByTestId(`${DATA_TEST_SUBJ}ReadOnlyCheckbox`)).not.toBeInTheDocument();
 
       // Ensure output does not include warm.readonly even if it was previously enabled.
-      expect(onChange).toHaveBeenLastCalledWith({
-        hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-        warm: {
-          name: 'warm',
-          size_in_bytes: 0,
-          min_age: '30d',
-          downsample: { after: '30d', fixed_interval: '1d' },
+      expect(onChange).toHaveBeenLastCalledWith(
+        {
+          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          warm: {
+            name: 'warm',
+            size_in_bytes: 0,
+            min_age: '30d',
+            downsample: { after: '30d', fixed_interval: '1d' },
+          },
         },
-      });
+        expect.any(Object)
+      );
 
       // Disable downsampling -> readonly should re-appear (re-mounted).
       fireEvent.click(warmPanel.getByTestId(`${DATA_TEST_SUBJ}DownsamplingSwitch`));
@@ -611,17 +623,20 @@ describe('EditIlmPhasesFlyout', () => {
       });
 
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          ...initialPhases,
-          cold: {
-            ...initialPhases.cold,
-            searchable_snapshot: 'repo2',
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            ...initialPhases,
+            cold: {
+              ...initialPhases.cold,
+              searchable_snapshot: 'repo2',
+            },
+            frozen: {
+              ...initialPhases.frozen,
+              searchable_snapshot: 'repo2',
+            },
           },
-          frozen: {
-            ...initialPhases.frozen,
-            searchable_snapshot: 'repo2',
-          },
-        })
+          expect.any(Object)
+        )
       );
     });
 
@@ -695,9 +710,12 @@ describe('EditIlmPhasesFlyout', () => {
 
       await waitFor(() => expect(queryTab('warm')).not.toBeInTheDocument());
       await waitFor(() =>
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-        })
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+          },
+          expect.any(Object)
+        )
       );
       expect(getPanel('hot')).toBeVisible();
     });
@@ -818,10 +836,13 @@ describe('EditIlmPhasesFlyout', () => {
         });
 
         expect(onChange).toHaveBeenCalledTimes(1);
-        expect(onChange).toHaveBeenLastCalledWith({
-          hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
-          warm: { name: 'warm', size_in_bytes: 0, min_age: '3d' },
-        });
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '3d' },
+          },
+          expect.any(Object)
+        );
 
         expect(clearTimeoutSpy).toHaveBeenCalled();
       } finally {
