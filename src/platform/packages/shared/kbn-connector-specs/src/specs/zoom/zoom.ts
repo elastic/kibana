@@ -166,23 +166,21 @@ export const Zoom: ConnectorSpec = {
       input: z.object({
         meetingId: z.string().describe('Meeting ID or UUID'),
       }),
-      output: z
-        .object({
-          uuid: z.string().optional(),
-          id: z.number().optional(),
-          host_id: z.string().optional(),
-          topic: z.string().optional(),
-          start_time: z.string().optional(),
-          duration: z.number().optional(),
-          total_size: z.number().optional(),
-          recording_count: z.number().optional(),
-          recording_files: z
-            .array(z.any())
-            .describe(
-              'Array of recording file objects. Each has: id, meeting_id, recording_start, recording_end, file_type, file_extension, file_size, download_url, status, recording_type'
-            ),
-        })
-        .passthrough(),
+      output: z.object({
+        uuid: z.string().optional(),
+        id: z.number().optional(),
+        host_id: z.string().optional(),
+        topic: z.string().optional(),
+        start_time: z.string().optional(),
+        duration: z.number().optional(),
+        total_size: z.number().optional(),
+        recording_count: z.number().optional(),
+        recording_files: z
+          .array(z.any())
+          .describe(
+            'Array of recording file objects. Each has: id, meeting_id, recording_start, recording_end, file_type, file_extension, file_size, download_url, status, recording_type'
+          ),
+      }),
       handler: async (ctx, input) => {
         const typedInput = input as { meetingId: string };
         const encodedId = encodeZoomId(typedInput.meetingId);
@@ -339,10 +337,7 @@ export const Zoom: ConnectorSpec = {
           .optional()
           .describe('Filter by registration status. Defaults to approved.'),
         pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
-        nextPageToken: z
-          .string()
-          .optional()
-          .describe('Pagination token from a previous response'),
+        nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
       }),
       output: ZoomPaginationOutputSchema.extend({
         registrants: z
