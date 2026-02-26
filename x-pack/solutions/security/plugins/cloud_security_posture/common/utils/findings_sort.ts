@@ -20,7 +20,13 @@ export const FIELDS_REQUIRING_CASE_INSENSITIVE_SORT = [
  * This painless script will sort the field in case-insensitive manner.
  * Missing values are placed last regardless of sort direction.
  */
-export const getSortField = ({ field, direction }: { field: string; direction: string }) => {
+export const getSortField = ({
+  field,
+  direction,
+}: {
+  field: string;
+  direction: 'asc' | 'desc';
+}) => {
   if (FIELDS_REQUIRING_CASE_INSENSITIVE_SORT.includes(field)) {
     // Use a high Unicode sentinel for ascending so missing values sort last,
     // and an empty string for descending so missing values also sort last.
@@ -44,7 +50,7 @@ export const getSortField = ({ field, direction }: { field: string; direction: s
 export const getMultiFieldsSort = (sort: string[][]) => {
   return sort.map(([id, direction]) => {
     return {
-      ...getSortField({ field: id, direction }),
+      ...getSortField({ field: id, direction: direction as 'asc' | 'desc' }),
     };
   });
 };
