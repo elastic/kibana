@@ -57,7 +57,6 @@ import {
   type ApmIndicatorType,
 } from '../../../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useSloOverviewFlyoutTelemetry } from './use_slo_overview_flyout_telemetry';
 
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
@@ -115,8 +114,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const { uiSettings, slo: sloPlugin } = services;
-  const flyoutTelemetry = useSloOverviewFlyoutTelemetry();
+  const { uiSettings, slo: sloPlugin, telemetry } = services;
   const { link } = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
   const [searchQuery, setSearchQuery] = useState('');
@@ -133,7 +131,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       setDebouncedSearchQuery(searchQuery);
       setPage(0);
       if (searchQuery.trim()) {
-        flyoutTelemetry.reportSearchQueried(searchQuery.trim());
+        telemetry.reportSloOverviewFlyoutSearchQueried({ searchQuery });
       }
     },
     SEARCH_DEBOUNCE_MS,
@@ -265,10 +263,10 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       setSelectedStatuses(selected);
       setPage(0);
       if (selected.length > 0) {
-        flyoutTelemetry.reportStatusFiltered(selected);
+        telemetry.reportSloOverviewFlyoutStatusFiltered({ statuses: selected });
       }
     },
-    [flyoutTelemetry]
+    [telemetry]
   );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
