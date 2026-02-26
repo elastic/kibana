@@ -231,6 +231,76 @@ describe('LoginPage', () => {
       expect(container.children[0]).toMatchSnapshot();
     });
 
+    it('renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      Object.defineProperty(window, 'navigator', {
+        value: { cookieEnabled: false },
+        writable: true,
+      });
+      Object.defineProperty(window, 'top', {
+        value: {},
+        writable: true,
+      });
+
+      const { container } = renderPage(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          sameSiteCookies="Lax"
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'To view this content, open it in a new window or ask your administrator to allow cross-origin cookies.'
+          )
+        ).toBeInTheDocument();
+        expect(screen.getByText('Open in new window')).toBeInTheDocument();
+      });
+      expect(container.children[0]).toMatchSnapshot();
+    });
+
+    it('renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState());
+
+      Object.defineProperty(window, 'navigator', {
+        value: { cookieEnabled: false },
+        writable: true,
+      });
+      Object.defineProperty(window, 'top', {
+        value: {},
+        writable: true,
+      });
+
+      const { container } = renderPage(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+          sameSiteCookies="None"
+          customBranding={customBrandingMock}
+        />
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'To view this content, open it in a new window or adjust your browser settings to allow third-party cookies.'
+          )
+        ).toBeInTheDocument();
+        expect(screen.getByText('Open in new window')).toBeInTheDocument();
+      });
+      expect(container.children[0]).toMatchSnapshot();
+    });
+
     it('renders warning when cookies are disabled and document is not embedded inside iframe', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());

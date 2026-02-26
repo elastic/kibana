@@ -1,5 +1,147 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`LoginPage disabled form states renders CTA and browser settings warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are allowed 1`] = `
+<div
+  class="css-1pqcqfr-kbnFullScreenBgCss"
+  data-test-subj="loginForm"
+>
+  <header
+    class="css-1uhsdzt-LoginPage"
+  >
+    <div
+      class="css-145su9k-LoginPage-LoginPage"
+    >
+      <span
+        class="loginWelcome__logo"
+      >
+        <span
+          data-euiicon-type="logoElastic"
+        />
+      </span>
+      <h1
+        class="euiTitle loginWelcome__title emotion-euiTitle-m"
+        data-test-subj="loginWelcomeTitle"
+      >
+        Welcome to Elastic
+      </h1>
+    </div>
+  </header>
+  <div
+    class="css-145su9k-LoginPage-LoginPage"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          style="max-width: 36em; margin: auto; text-align: center;"
+        >
+          <div
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          >
+            <p>
+              To view this content, open it in a new window or adjust your browser settings to allow third-party cookies.
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <a
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+            href="http://some-host/bar"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <span
+              class="emotion-euiButtonDisplayContent"
+            >
+              Open in new window
+              <span
+                color="inherit"
+                data-euiicon-type="popout"
+              />
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`LoginPage disabled form states renders CTA and cross-origin cookie warning when cookies are disabled, document is embedded inside iframe, and cross-origin cookies are blocked 1`] = `
+<div
+  class="css-1pqcqfr-kbnFullScreenBgCss"
+  data-test-subj="loginForm"
+>
+  <header
+    class="css-1uhsdzt-LoginPage"
+  >
+    <div
+      class="css-145su9k-LoginPage-LoginPage"
+    >
+      <span
+        class="loginWelcome__logo"
+      >
+        <span
+          data-euiicon-type="logoElastic"
+        />
+      </span>
+      <h1
+        class="euiTitle loginWelcome__title emotion-euiTitle-m"
+        data-test-subj="loginWelcomeTitle"
+      >
+        Welcome to Elastic
+      </h1>
+    </div>
+  </header>
+  <div
+    class="css-145su9k-LoginPage-LoginPage"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          style="max-width: 36em; margin: auto; text-align: center;"
+        >
+          <div
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          >
+            <p>
+              To view this content, open it in a new window or ask your administrator to allow cross-origin cookies.
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <a
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+            href="http://some-host/bar"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <span
+              class="emotion-euiButtonDisplayContent"
+            >
+              Open in new window
+              <span
+                color="inherit"
+                data-euiicon-type="popout"
+              />
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
 <div
   class="css-1pqcqfr-kbnFullScreenBgCss"
