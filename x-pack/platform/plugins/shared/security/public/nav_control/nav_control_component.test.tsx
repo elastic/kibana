@@ -65,7 +65,6 @@ describe('SecurityNavControl', () => {
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('userMenuButton')).toMatchInlineSnapshot(`
       <button
-        aria-controls="headerUserMenu"
         aria-expanded="false"
         aria-haspopup="true"
         aria-label="Account menu"
@@ -78,7 +77,7 @@ describe('SecurityNavControl', () => {
           class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
-            class="eui-textTruncate euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
           >
             <span
               class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
@@ -120,7 +119,6 @@ describe('SecurityNavControl', () => {
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('userMenuButton')).toMatchInlineSnapshot(`
       <button
-        aria-controls="headerUserMenu"
         aria-expanded="false"
         aria-haspopup="true"
         aria-label="Account menu"
@@ -133,7 +131,7 @@ describe('SecurityNavControl', () => {
           class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
-            class="eui-textTruncate euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
           >
             <span
               class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"

@@ -468,7 +468,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
                   class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
                 >
                   <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
                     style="--euiFormControlLeftIconsCount: 1;"
                   >
                     <div
@@ -496,7 +496,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
                     />
                   </div>
                   <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
                   >
                     <button
                       aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
@@ -666,7 +666,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
                   class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
                 >
                   <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
                     style="--euiFormControlLeftIconsCount: 1;"
                   >
                     <div
@@ -694,7 +694,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
                     />
                   </div>
                   <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
                   >
                     <button
                       aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
@@ -845,7 +845,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
                   class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
                 >
                   <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
                     style="--euiFormControlLeftIconsCount: 1;"
                   >
                     <div
@@ -873,7 +873,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
                     />
                   </div>
                   <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
                   >
                     <button
                       aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
@@ -1038,7 +1038,7 @@ exports[`LoginPage page renders as expected 1`] = `
                   class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
                 >
                   <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
                     style="--euiFormControlLeftIconsCount: 1;"
                   >
                     <div
@@ -1066,7 +1066,7 @@ exports[`LoginPage page renders as expected 1`] = `
                     />
                   </div>
                   <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
                   >
                     <button
                       aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
@@ -1225,7 +1225,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                   class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-group"
                 >
                   <div
-                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+                    class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
                     style="--euiFormControlLeftIconsCount: 1;"
                   >
                     <div
@@ -1253,7 +1253,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
                     />
                   </div>
                   <div
-                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append"
+                    class="euiFormControlLayout__append emotion-euiFormControlLayout__side"
                   >
                     <button
                       aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
