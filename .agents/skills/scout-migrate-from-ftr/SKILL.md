@@ -15,6 +15,7 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 - **REQUIRED SUB-SKILL:** scout-ui-testing (page objects, browser auth, parallel UI patterns).
 - **REQUIRED SUB-SKILL:** scout-api-testing (apiClient/auth, apiServices patterns).
 - **REQUIRED SUB-SKILL:** ftr-testing (understand FTR structure, loadTestFile, and configs).
+- **REQUIRED SUB-SKILL:** scout-best-practices-reviewer (review new Scout tests and migration parity).
 
 ## Guardrails / gotchas (high signal)
 
@@ -62,10 +63,10 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 9. Update Scout manifests (discovery/CI).
    - Run `node scripts/scout.js update-test-config-manifests` so `.meta` manifests reflect the new/changed tests and configs.
 10. Verify in both stateful and serverless when applicable.
-   - Use `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>` and
-     `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust the serverless domain).
-   - If tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the config set from the Playwright config path.
-   - If you start servers separately, pass `--serverConfigSet <configSet>` to `node scripts/scout.js start-server ...`.
+
+- Use `node scripts/scout.js run-tests --stateful --testFiles <path>` and
+  `node scripts/scout.js run-tests --serverless=oblt --testFiles <path>` (adjust serverless target).
+- If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config dir from the Playwright config path (use `--config-dir <configSet>` only to override, or when using `start-server`).
 
 ## Common patterns
 
