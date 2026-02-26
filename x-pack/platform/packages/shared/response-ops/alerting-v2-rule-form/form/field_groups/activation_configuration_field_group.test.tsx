@@ -17,7 +17,9 @@ describe('ActivationConfigurationFieldGroup', () => {
     });
 
     expect(screen.getByText('Activation configuration')).toBeInTheDocument();
-    expect(screen.getByTestId('activationConfigDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('activationCountInput')).toBeInTheDocument();
+    expect(screen.getByTestId('activationTimeframeNumberInput')).toBeInTheDocument();
+    expect(screen.getByTestId('activationTimeframeUnitInput')).toBeInTheDocument();
   });
 
   it('does not render when kind is "signal"', () => {
