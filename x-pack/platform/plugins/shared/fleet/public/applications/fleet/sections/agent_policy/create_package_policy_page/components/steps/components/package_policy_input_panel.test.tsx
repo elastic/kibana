@@ -463,7 +463,9 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessEnabled: true,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        isAgentlessIntegration: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: true,
       });
@@ -498,7 +500,9 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        isAgentlessIntegration: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: false,
       });
@@ -745,6 +749,127 @@ describe('PackagePolicyInputPanel', () => {
       await waitFor(() => {
         expect(
           renderResult.getByTestId('PackagePolicy.InputStreamConfig.deprecatedIcon')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+      const simpleStreams: RegistryStreamWithDataStream[] = [
+        {
+          input: 'logfile',
+          title: 'Stream 1',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Test stream',
+          data_stream: {
+            ...mockPackageInputStreams[0].data_stream,
+          },
+        },
+        {
+          input: 'logfile',
+          title: 'Stream 2',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Test stream 2',
+          data_stream: {
+            ...mockPackageInputStreams[1].data_stream,
+          },
+        },
+      ];
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={simpleStreams}
+          packagePolicyInput={packagePolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+          isSingleInputAndStreams={true}
+        />
+      );
+      await waitFor(() => {
+        expect(
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+        ).toBeInTheDocument();
+        expect(
+          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('should render toggle switch when isSingleInputAndStreams is false', async () => {
+      const simpleStreams: RegistryStreamWithDataStream[] = [
+        {
+          input: 'logfile',
+          title: 'Stream 1',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Test stream',
+          data_stream: {
+            ...mockPackageInputStreams[0].data_stream,
+          },
+        },
+        {
+          input: 'logfile',
+          title: 'Stream 2',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Test stream 2',
+          data_stream: {
+            ...mockPackageInputStreams[1].data_stream,
+          },
+        },
+      ];
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={simpleStreams}
+          packagePolicyInput={packagePolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+          isSingleInputAndStreams={false}
+        />
+      );
+      await waitFor(() => {
+        expect(
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
       });
     });
