@@ -134,7 +134,7 @@ export function ExecutionGraphNode(node: Node<WorkflowNodeData>) {
                     <EuiIcon type="checkCircleFill" color="#16C5C0" />
                   )}
                   {node.data.stepExecution?.status === ExecutionStatus.FAILED && (
-                    <EuiIcon type="alert" color={euiTheme.colors.danger} />
+                    <EuiIcon type="warning" color={euiTheme.colors.danger} />
                   )}
                 </span>
                 <div

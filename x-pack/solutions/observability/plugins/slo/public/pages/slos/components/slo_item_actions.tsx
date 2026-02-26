@@ -169,7 +169,7 @@ export function SloItemActions({
 
   const showRemoteLinkIcon = isRemote ? (
     <EuiIcon
-      type="popout"
+      type="external"
       size="s"
       css={{
         marginLeft: '10px',

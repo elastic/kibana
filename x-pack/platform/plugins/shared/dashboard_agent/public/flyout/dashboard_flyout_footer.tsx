@@ -73,7 +73,7 @@ export const DashboardFlyoutFooter: React.FC<DashboardFlyoutFooterProps> = ({
           <EuiButton
             onClick={handleOpenInDashboard}
             fill
-            iconType="popout"
+            iconType="external"
             data-test-subj="dashboardFlyoutOpenInDashboardButton"
           >
             {i18n.translate('xpack.dashboardAgent.flyout.openInDashboardButton', {

@@ -153,7 +153,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             {hasSchemaConflicts && (
               <>
                 <EuiFlexItem>
-                  <EuiIcon type="alert" color="danger" />
+                  <EuiIcon type="warning" color="danger" />
                 </EuiFlexItem>
                 {!isTourClosed && <EuiSpacer size="xs" />}
               </>

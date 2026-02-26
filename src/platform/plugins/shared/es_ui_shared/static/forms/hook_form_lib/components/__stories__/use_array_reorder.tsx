@@ -90,7 +90,7 @@ export function Reorder() {
                                     css={{ marginTop: '20px' }}
                                     aria-label="Change row order"
                                   >
-                                    <EuiIcon type="grab" />
+                                    <EuiIcon type="dragVertical" />
                                   </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem>
@@ -217,7 +217,7 @@ const MyFormComponent = () => {
                                   css={{ marginTop: '20px' }}
                                   aria-label="Change row order"
                                 >
-                                  <EuiIcon type="grab" />
+                                  <EuiIcon type="dragVertical" />
                                 </div>
                               </EuiFlexItem>
                               <EuiFlexItem>

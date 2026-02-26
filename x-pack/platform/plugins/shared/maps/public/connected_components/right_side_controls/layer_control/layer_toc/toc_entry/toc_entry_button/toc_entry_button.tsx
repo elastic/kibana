@@ -110,7 +110,7 @@ export class TOCEntryButton extends Component<Props, State> {
       const minZoom = this.props.layer.getMinZoom();
       const maxZoom = this.props.layer.getMaxZoom();
       return {
-        icon: <EuiIcon size="m" type="expand" />,
+        icon: <EuiIcon size="m" type="maximize" />,
         tooltipContent: i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
           defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
           values: { minZoom, maxZoom },

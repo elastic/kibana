@@ -42,7 +42,7 @@ export const CreateNewIntegrationButton: React.FC = () => {
         <EuiButton
           fill
           size="s"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => onCreateClick()}
           style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
           data-test-subj="createNewIntegrationBtn"
@@ -63,7 +63,7 @@ export const CreateNewIntegrationButton: React.FC = () => {
             <EuiButtonIcon
               display="fill"
               color="primary"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               aria-label={i18n.translate(
                 'xpack.fleet.epmList.createNewIntegrationDropdownAriaLabel',
                 { defaultMessage: 'More integration creation options' }
@@ -84,7 +84,7 @@ export const CreateNewIntegrationButton: React.FC = () => {
             items={[
               <EuiContextMenuItem
                 key="upload"
-                icon="exportAction"
+                icon="upload"
                 href={uploadHref}
                 onClick={(ev) => {
                   ev.preventDefault();

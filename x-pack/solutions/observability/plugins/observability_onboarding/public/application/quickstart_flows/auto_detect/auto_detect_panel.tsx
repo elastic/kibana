@@ -337,7 +337,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                               isSupportedLogo(integration.pkgName) ? (
                                 <LogoIcon size="l" logo={integration.pkgName} />
                               ) : (
-                                <EuiIcon type="desktop" size="l" />
+                                <EuiIcon type="display" size="l" />
                               )
                             }
                             title={i18n.translate(

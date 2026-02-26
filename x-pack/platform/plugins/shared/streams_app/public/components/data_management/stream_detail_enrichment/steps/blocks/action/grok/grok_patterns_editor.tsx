@@ -179,7 +179,7 @@ const DraggablePatternInput = ({
                   { defaultMessage: 'Drag Handle' }
                 )}
               >
-                <EuiIcon type="grab" />
+                <EuiIcon type="dragVertical" />
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem style={{ minWidth: 0 }}>

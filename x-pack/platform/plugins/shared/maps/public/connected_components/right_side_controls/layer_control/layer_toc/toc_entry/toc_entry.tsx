@@ -357,7 +357,7 @@ export class TOCEntry extends Component<Props, State> {
 
         {this.props.isFeatureEditorOpenForLayer && (
           <div className="mapTocEntry-isInEditingMode__row">
-            <EuiIcon type="vector" size="s" />
+            <EuiIcon type="vectorSquare" size="s" />
             <span className="mapTocEntry-isInEditingMode__editFeatureText">
               <FormattedMessage
                 id="xpack.maps.layerControl.tocEntry.EditFeatures"

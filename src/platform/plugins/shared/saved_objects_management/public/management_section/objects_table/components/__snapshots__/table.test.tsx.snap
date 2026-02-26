@@ -57,7 +57,7 @@ exports[`Table should render normally 1`] = `
           button={
             <EuiButton
               iconSide="right"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               isDisabled={false}
               onClick={[Function]}
             >
@@ -98,7 +98,7 @@ exports[`Table should render normally 1`] = `
           <EuiFormRow>
             <EuiButton
               fill={true}
-              iconType="exportAction"
+              iconType="upload"
               onClick={[Function]}
             >
               <Memo(MemoizedFormattedMessage)
@@ -157,7 +157,7 @@ exports[`Table should render normally 1`] = `
               Object {
                 "data-test-subj": "savedObjectsTableAction-relationships",
                 "description": "View the relationships this saved object has to other saved objects",
-                "icon": "kqlSelector",
+                "icon": "querySelector",
                 "name": "Relationships",
                 "onClick": [Function],
                 "type": "icon",

@@ -204,7 +204,7 @@ export const useColumns = (
           <>
             <EuiIconTip
               content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}
-              type="alert"
+              type="warning"
               size="s"
               color="warning"
             />

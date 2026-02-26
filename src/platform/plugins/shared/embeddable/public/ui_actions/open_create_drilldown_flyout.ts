@@ -50,7 +50,7 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
   id: OPEN_FLYOUT_ADD_DRILLDOWN,
   type: OPEN_FLYOUT_ADD_DRILLDOWN,
   order: 12,
-  getIconType: () => 'plusInCircle',
+  getIconType: () => 'plusCircle',
   grouping: [DRILLDOWN_ACTION_GROUP],
   getDisplayName: () =>
     i18n.translate('embeddableApi.createDrilldownAction.displayName', {

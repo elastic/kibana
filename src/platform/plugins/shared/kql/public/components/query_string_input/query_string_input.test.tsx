@@ -204,7 +204,7 @@ describe('QueryStringInput', () => {
 
     await waitFor(() => {
       expect(screen.getByDisplayValue(luceneQuery.query)).toBeInTheDocument();
-      const icon = document.querySelector('[data-euiicon-type="search"]');
+      const icon = document.querySelector('[data-euiicon-type="magnify"]');
       expect(icon).toBeInTheDocument();
     });
   });

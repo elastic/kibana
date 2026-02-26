@@ -73,7 +73,7 @@ exports[`LicenseStatus component should display normally when license is active 
             <span
               class="emotion-euiPageHeaderContent__titleIcon"
               color="success"
-              data-euiicon-type="checkInCircleFilled"
+              data-euiicon-type="checkCircleFill"
             />
             <span
               data-test-subj="licenseText"

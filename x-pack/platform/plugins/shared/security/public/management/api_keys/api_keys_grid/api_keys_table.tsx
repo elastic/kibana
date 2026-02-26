@@ -397,7 +397,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
                     data-test-subj="apiKeysTablePreviousPageButton"
                     disabled={!hasPreviousPage || loading}
                     onClick={onPreviousPage}
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     iconSide="left"
                   >
                     <FormattedMessage
@@ -411,7 +411,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
                     data-test-subj="apiKeysTableNextPageButton"
                     disabled={!hasNextPage || loading}
                     onClick={onNextPage}
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                     iconSide="right"
                   >
                     <FormattedMessage

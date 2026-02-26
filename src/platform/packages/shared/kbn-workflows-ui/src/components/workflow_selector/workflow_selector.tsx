@@ -303,7 +303,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
                         id="workflows.params.viewAllWorkflowsLinkText"
                         defaultMessage="View all workflows"
                       />
-                      <EuiIcon type="popout" size="s" />
+                      <EuiIcon type="external" size="s" />
                     </EuiLink>
                   </EuiText>
                 </EuiPopoverFooter>

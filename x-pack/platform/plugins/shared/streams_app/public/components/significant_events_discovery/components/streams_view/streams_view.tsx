@@ -297,7 +297,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           </EuiButtonEmpty>
 
           <EuiButtonEmpty
-            iconType="crosshairs"
+            iconType="crosshair"
             onClick={() => scheduleInsightsTask()}
             disabled={!aiFeatures?.genAiConnectors?.connectors?.length}
             isLoading={isSchedulingInsights || isWaitingForInsightsTask}

@@ -1345,7 +1345,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.throttlingDisabled.label"
         defaultMessage="Connection profile ( {icon} Important information about throttling: {link})"
         values={{
-          icon: <EuiIcon type="alert" color="warning" size="s" />,
+          icon: <EuiIcon type="warning" color="warning" size="s" />,
           link: (
             <EuiLink
               data-test-subj="syntheticsFIELDNoticeLink"

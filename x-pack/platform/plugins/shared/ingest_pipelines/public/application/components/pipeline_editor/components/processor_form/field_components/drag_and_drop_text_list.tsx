@@ -160,7 +160,7 @@ function DragAndDropTextListComponent({
                         <EuiFlexGroup css={styles.item} justifyContent="center" gutterSize="none">
                           <EuiFlexItem grow={false}>
                             <div {...provided.dragHandleProps} css={styles.grabIcon}>
-                              <EuiIcon type="grab" />
+                              <EuiIcon type="dragVertical" />
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem>

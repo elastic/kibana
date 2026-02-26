@@ -78,7 +78,7 @@ export function ESQLMenu({
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={starredQueryLabel} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType={isStarred ? 'starFilled' : 'starEmpty'}
+              iconType={isStarred ? 'starFill' : 'star'}
               size="xs"
               aria-label={starredQueryLabel}
               className={!isStarred ? 'cm-favorite-button--empty' : ''}

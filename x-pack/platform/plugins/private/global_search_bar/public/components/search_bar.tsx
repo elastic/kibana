@@ -350,7 +350,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           setIsVisible(true);
         }}
       >
-        <EuiIcon type="search" size="m" />
+        <EuiIcon type="magnify" size="m" />
       </EuiHeaderSectionItemButton>
     );
   }
@@ -434,7 +434,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }}
       popoverButton={
         <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
-          <EuiIcon type="search" size="m" />
+          <EuiIcon type="magnify" size="m" />
         </EuiHeaderSectionItemButton>
       }
       popoverFooter={<PopoverFooter />}

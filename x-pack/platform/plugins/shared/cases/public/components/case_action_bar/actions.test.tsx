@@ -74,7 +74,7 @@ describe('CaseView actions', () => {
       .find('button[data-test-subj="property-actions-case-ellipses"]')
       .first()
       .simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-case-copyClipboard"]').simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-case-copy"]').simulate('click');
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
 
@@ -97,7 +97,7 @@ describe('CaseView actions', () => {
       .simulate('click');
     expect(wrapper.find('[data-test-subj="property-actions-case-trash"]').exists()).toBeFalsy();
     expect(
-      wrapper.find('[data-test-subj="property-actions-case-copyClipboard"]').exists()
+      wrapper.find('[data-test-subj="property-actions-case-copy"]').exists()
     ).toBeTruthy();
   });
 
@@ -145,7 +145,7 @@ describe('CaseView actions', () => {
       .first()
       .simulate('click');
     expect(
-      wrapper.find('[data-test-subj="property-actions-case-popout"]').first().prop('aria-label')
+      wrapper.find('[data-test-subj="property-actions-case-external"]').first().prop('aria-label')
     ).toEqual(i18n.VIEW_INCIDENT(basicPush.externalTitle));
   });
 });

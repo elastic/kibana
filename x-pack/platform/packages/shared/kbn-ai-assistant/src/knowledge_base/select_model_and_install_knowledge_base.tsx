@@ -111,7 +111,7 @@ export function SelectModelAndInstallKnowledgeBase({
       >
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" color="danger" />
+            <EuiIcon type="warning" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="danger">

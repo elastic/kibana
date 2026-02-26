@@ -3916,7 +3916,7 @@ describe('xy_visualization', () => {
                 "description": "Saves the annotation group as a part of the Lens Saved Object",
                 "displayName": "Unlink from library",
                 "execute": [Function],
-                "icon": "unlink",
+                "icon": "linkSlash",
                 "isCompatible": true,
                 "order": 300,
               },

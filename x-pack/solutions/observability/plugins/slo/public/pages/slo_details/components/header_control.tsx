@@ -199,7 +199,7 @@ export function HeaderControl({ slo }: Props) {
 
   const showRemoteLinkIcon = isRemote ? (
     <EuiIcon
-      type="popout"
+      type="external"
       size="s"
       css={{
         marginLeft: '10px',

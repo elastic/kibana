@@ -358,7 +358,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
                 defaultMessage: 'Vulnerability ',
               }
             )}
-            <EuiIcon type={'popout'} />
+            <EuiIcon type="external" />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
           <DistributionBar stats={vulnerabilityStats} />

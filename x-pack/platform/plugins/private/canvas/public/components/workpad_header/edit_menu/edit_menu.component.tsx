@@ -433,7 +433,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       },
       {
         name: shortcutHelp.CUT,
-        icon: <EuiIcon type="cut" size="m" />,
+        icon: <EuiIcon type="scissors" size="m" />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         disabled: selectedNodes.length < 1,
         onClick: () => {

@@ -72,7 +72,7 @@ const NewLiveQueryButton = React.memo(() => {
     <EuiButton
       fill
       {...newQueryLinkProps}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       isDisabled={
         !(
           permissions.writeLiveQueries ||

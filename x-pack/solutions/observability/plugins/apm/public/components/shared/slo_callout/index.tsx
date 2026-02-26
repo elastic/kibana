@@ -126,7 +126,7 @@ export function SloCallout({ dismissCallout, serviceName, environment }: Props) 
                   size="s"
                   href={docLinks.links.observability.slo}
                   target="_blank"
-                  iconType="popout"
+                  iconType="external"
                   iconSide="right"
                 >
                   {i18n.translate('xpack.apm.slo.callout.viewDocumentation', {
