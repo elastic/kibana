@@ -53,10 +53,14 @@ describe('getPathForFeedback ', () => {
       value: null as any,
       result: '/app/apm',
     },
+    {
+      value: '',
+      result: '/app/apm',
+    },
   ];
 
   it.each(testData)(
-    'Returns correct path for the feedback form $value -> $result',
+    'Returns correct path for the feedback form "$value" -> "$result"',
     ({ value, result }) => {
       expect(getPathForFeedback(value)).toBe(result);
     }

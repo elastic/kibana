@@ -16,9 +16,7 @@ const shortenPath = (path: string, pathStart: string) => {
 };
 
 export const getPathForFeedback = (path: string) => {
-  // We have seem some instances where path can be undefined at this point https://github.com/elastic/kibana/issues/254202
-  // We're falling back to the a generic apm app path to avoid crashing at still direct the feedback towards the APM plugin
-  const sanitizedPath = typeof path !== 'string' ? '/app/apm' : path;
+  const sanitizedPath = path || `${APP_BASE_PATH}/apm`;
   const pathStartingFromApp = shortenPath(sanitizedPath, APP_BASE_PATH);
   const pathParts = pathStartingFromApp.split('/');
   const constructPath = `/${pathParts.slice(1, 4).join('/')}`;
