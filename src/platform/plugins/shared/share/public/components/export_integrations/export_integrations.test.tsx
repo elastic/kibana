@@ -13,7 +13,7 @@ import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EuiFlyout, EuiButton } from '@elastic/eui';
-import { ExportMenu, ManagedFlyout } from './export_integrations';
+import { ExportMenu, ManagedExportFlyout } from './export_integrations';
 import type { IShareContext } from '../context';
 import type { ExportShareConfig, ShareConfigs } from '../../types';
 
@@ -200,8 +200,12 @@ describe('Export Integrations', () => {
 
       if (isFlyoutVisible) {
         flyout = (
-          <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)}>
-            <ManagedFlyout
+          <EuiFlyout
+            aria-label="csv export test flyout"
+            ownFocus
+            onClose={() => setIsFlyoutVisible(false)}
+          >
+            <ManagedExportFlyout
               exportIntegration={mockCsvConfigForFlyout}
               shareObjectType={mockShareContext.objectType}
               shareObjectTypeMeta={mockCsvObjectTypeMeta}

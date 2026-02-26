@@ -61,7 +61,7 @@ interface LayoutOptionsProps {
   printLayoutChange: (evt: EuiSwitchEvent) => void;
 }
 
-export interface ManagedFlyoutProps {
+export interface ManagedExportFlyoutProps {
   exportIntegration: ExportShareConfig;
   intl: InjectedIntl;
   isDirty: boolean;
@@ -131,7 +131,7 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   );
 }
 
-export function ManagedFlyout({
+export function ManagedExportFlyout({
   exportIntegration,
   intl,
   isDirty,
@@ -144,7 +144,7 @@ export function ManagedFlyout({
   isSaving,
   sharingData,
   shareableUrlLocatorParams,
-}: ManagedFlyoutProps) {
+}: ManagedExportFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
 
@@ -489,7 +489,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             }}
           />
           {selectedMenuItemMeta!.group === 'export' ? (
-            <ManagedFlyout
+            <ManagedExportFlyout
               exportIntegration={selectedMenuItem as ExportShareConfig}
               shareObjectType={objectType}
               shareObjectTypeAlias={objectTypeAlias}

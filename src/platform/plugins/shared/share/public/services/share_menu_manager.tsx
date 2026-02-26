@@ -23,8 +23,8 @@ import type { ShareRegistry } from './share_menu_registry';
 import { ShareMenu } from '../components/share_tabs';
 import {
   ExportMenu,
-  ManagedFlyout,
-  type ManagedFlyoutProps,
+  ManagedExportFlyout,
+  type ManagedExportFlyoutProps,
 } from '../components/export_integrations';
 import { ShareProvider, type IShareContext } from '../components/context';
 
@@ -113,23 +113,21 @@ export class ShareMenuManager {
               };
             }
 
-            const flyoutSession = getFlyoutSession();
-
             return {
               flyoutContent: (
-                <ManagedFlyout
+                <ManagedExportFlyout
                   exportIntegration={exportIntegration as ExportShareConfig}
                   intl={intl}
                   isDirty={options.isDirty}
                   onCloseFlyout={() => {
-                    flyoutSession.close();
+                    getFlyoutSession().close();
                     onClose();
                   }}
                   publicAPIEnabled={!isServerless}
                   shareObjectType={options.objectType}
                   shareObjectTypeAlias={options.objectTypeAlias}
                   shareObjectTypeMeta={
-                    options.objectTypeMeta as ManagedFlyoutProps['shareObjectTypeMeta']
+                    options.objectTypeMeta as ManagedExportFlyoutProps['shareObjectTypeMeta']
                   }
                   onSave={options.onSave}
                   isSaving={false}
@@ -184,12 +182,10 @@ export class ShareMenuManager {
 
             const flyoutRef = createRef<HTMLDivElement>();
 
-            const flyoutSession = getFlyoutSession();
-
             return {
               flyoutContent: derivativeConfig.flyoutContent({
                 closeFlyout: () => {
-                  flyoutSession.close();
+                  getFlyoutSession().close();
                   onClose();
                 },
                 flyoutRef,
@@ -217,6 +213,10 @@ export class ShareMenuManager {
     isServerless: boolean,
     cb: (
       objectTypeMenuItems: ShareConfigs[],
+      /**
+       * Returns the flyout session object for the current export integration.
+       * Hence its return value will be undefined until the flyout has been created.
+       */
       getFlyoutSession: () => ReturnType<typeof core.overlays.openFlyout>,
       onClose: () => void
     ) =>
