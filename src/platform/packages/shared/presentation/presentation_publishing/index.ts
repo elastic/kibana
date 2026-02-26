@@ -208,6 +208,7 @@ export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
   apiCanPinPanels,
+  apiHasPinnedPanels,
   type CanDuplicatePanels,
   type CanExpandPanels,
   type CanPinPanels,
