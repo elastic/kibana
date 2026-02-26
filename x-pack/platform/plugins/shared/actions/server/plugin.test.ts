@@ -155,14 +155,54 @@ describe('Actions Plugin', () => {
       );
     });
 
-    it('should register user_connector_token saved object type and encryption', async () => {
+    it('should not register user_connector_token saved object type and encryption when oauth_authorization_code is disabled', async () => {
       await plugin.setup(coreSetup, pluginsSetup);
-      expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+      expect(coreSetup.savedObjects.registerType).not.toHaveBeenCalledWith(
         expect.objectContaining({ name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
       );
-      expect(pluginsSetup.encryptedSavedObjects.registerType).toHaveBeenCalledWith(
+      expect(pluginsSetup.encryptedSavedObjects.registerType).not.toHaveBeenCalledWith(
         expect.objectContaining({ type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
       );
+    });
+
+    describe('when oauth_authorization_code is enabled', () => {
+      beforeEach(() => {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>({
+          enabledActionTypes: ['*'],
+          allowedHosts: ['*'],
+          preconfiguredAlertHistoryEsIndex: false,
+          preconfigured: {},
+          maxResponseContentLength: new ByteSizeValue(1000000),
+          responseTimeout: moment.duration(60000),
+          enableFooterInEmail: true,
+          microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+          microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+          microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+          usage: {
+            url: 'ca.path',
+          },
+          oAuthRateLimit: {
+            authorize: { lookbackWindow: '1h', limit: 100 },
+            callback: { lookbackWindow: '1h', limit: 100 },
+          },
+          auth: {
+            oauth_authorization_code: {
+              enabled: true,
+            },
+          },
+        });
+        plugin = new ActionsPlugin(context);
+      });
+
+      it('should register user_connector_token saved object type and encryption', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+          expect.objectContaining({ name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
+        );
+        expect(pluginsSetup.encryptedSavedObjects.registerType).toHaveBeenCalledWith(
+          expect.objectContaining({ type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
+        );
+      });
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
