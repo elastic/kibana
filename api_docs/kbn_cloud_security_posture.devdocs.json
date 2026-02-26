@@ -2580,6 +2580,24 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.FindingsGroupingAggregation.cloudProvider",
+            "type": "Object",
+            "tags": [],
+            "label": "cloudProvider",
+            "description": [],
+            "signature": [
+              "{ buckets?: ",
+              "GenericBuckets",
+              "[] | undefined; } | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
             "id": "def-public.FindingsGroupingAggregation.clusterName",
             "type": "Object",
             "tags": [],
@@ -2591,7 +2609,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 212,
+            "lineNumber": 215,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2607,7 +2625,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 215,
+            "lineNumber": 218,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3245,7 +3263,7 @@
         "label": "VulnerabilitiesGroupingAggregation",
         "description": [],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-        "lineNumber": 218,
+        "lineNumber": 221,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3269,7 +3287,7 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 219,
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3293,7 +3311,7 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 222,
+            "lineNumber": 225,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3311,7 +3329,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 225,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3329,7 +3347,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 228,
+            "lineNumber": 231,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3347,7 +3365,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 231,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3365,7 +3383,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 234,
+            "lineNumber": 237,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3381,7 +3399,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 237,
+            "lineNumber": 240,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3405,7 +3423,7 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 238,
+            "lineNumber": 241,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3429,7 +3447,7 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 241,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3453,7 +3471,7 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 244,
+            "lineNumber": 247,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3477,7 +3495,7 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 247,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3495,7 +3513,7 @@
               "[] | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "lineNumber": 250,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
