@@ -45,8 +45,6 @@ const DEFAULT_FIELDS_TO_KEEP = [
 const CCS_FIELDS_TO_KEEP = [
   TIMESTAMP_FIELD,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  // In case anyone provided it as source field
-  MAIN_ENTITY_ID_FIELD,
   // Keep it for debug visibility purposes
   ENGINE_METADATA_UNTYPED_ID_FIELD,
 ];
@@ -204,7 +202,6 @@ export function buildCcsLogsExtractionEsqlQuery({
     | STATS
       ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}),
       ${recentData(ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD)} = MIN(${TIMESTAMP_FIELD}),
-      ${MAIN_ENTITY_ID_FIELD} = FIRST(${MAIN_ENTITY_ID_FIELD}, ${TIMESTAMP_FIELD}) WHERE ${MAIN_ENTITY_ID_FIELD} IS NOT NULL,
       ${aggregationStats(fields, false)}
       BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
       | EVAL
