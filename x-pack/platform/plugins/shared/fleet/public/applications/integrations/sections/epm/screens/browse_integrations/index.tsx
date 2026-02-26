@@ -80,10 +80,46 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
+    setUrlandPushHistory,
     setUrlandReplaceHistory,
     filteredCards,
     onCategoryChange,
+    availableSubCategories,
+    selectedSubCategory,
+    setSelectedSubCategory,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
+
+  const onSubCategoryClick = useCallback(
+    (subCategory: string) => {
+      setSelectedSubCategory(subCategory);
+      setUrlandPushHistory({
+        categoryId: selectedCategory,
+        subCategoryId: subCategory,
+        onlyAgentless: onlyAgentlessFilter,
+      });
+    },
+    [selectedCategory, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
+  );
+
+  const onCategoryBadgeDismiss = useCallback(() => {
+    if (selectedSubCategory) {
+      setSelectedSubCategory(undefined);
+      setUrlandReplaceHistory({
+        categoryId: selectedCategory,
+        subCategoryId: '',
+        onlyAgentless: onlyAgentlessFilter,
+      });
+    } else {
+      onCategoryChange({ id: '' });
+    }
+  }, [
+    selectedSubCategory,
+    selectedCategory,
+    setSelectedSubCategory,
+    setUrlandReplaceHistory,
+    onlyAgentlessFilter,
+    onCategoryChange,
+  ]);
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
     setUrlandReplaceHistory({
@@ -148,7 +184,14 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
               <EuiSpacer size="m" />
             </StickyFlexItem>
           ) : (
-            <SearchAndFiltersBar />
+            <SearchAndFiltersBar
+              selectedCategory={selectedCategory}
+              categories={mainCategories}
+              availableSubCategories={availableSubCategories}
+              selectedSubCategory={selectedSubCategory}
+              onSubCategoryClick={onSubCategoryClick}
+              onCategoryBadgeDismiss={onCategoryBadgeDismiss}
+            />
           )}
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
