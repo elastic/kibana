@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowTriggerTab } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, type WorkflowTriggerTab } from '@kbn/workflows-ui';
 import {
   selectEditorYaml,
   selectIsTestModalOpen,
@@ -25,14 +25,13 @@ import {
 import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { useAsyncThunk } from '../../../hooks/use_async_thunk';
-import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
   const { notifications } = useKibana().services;
-  const { canExecuteWorkflow } = useCapabilities();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
 
   const { setSelectedExecution } = useWorkflowUrlState();
 

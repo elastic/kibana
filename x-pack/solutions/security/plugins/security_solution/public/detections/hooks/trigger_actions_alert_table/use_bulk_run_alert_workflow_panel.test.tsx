@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, renderHook, screen } from '@testing-library/react';
 import type { RenderContentPanelProps, TimelineItem } from '@kbn/response-ops-alerts-table/types';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import { useBulkRunAlertWorkflowPanel } from './use_bulk_run_alert_workflow_panel';
 import { RUN_WORKFLOW_BULK_PANEL_ID } from '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { TestProviders } from '../../../common/mock';
@@ -17,23 +17,25 @@ import * as i18n from '../../components/alerts_table/translations';
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsCapabilities: jest.fn(),
+  useWorkflowsUIEnabledSetting: jest.fn(),
 }));
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 
 const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
 >;
+const useWorkflowsUIEnabledSettingMock = useWorkflowsUIEnabledSetting as jest.MockedFunction<
+  typeof useWorkflowsUIEnabledSetting
+>;
 
 const createCapabilities = (
   overrides: {
-    workflowUIEnabled?: boolean;
     canExecuteWorkflow?: boolean;
   } = {}
 ) => {
-  const { workflowUIEnabled = true, canExecuteWorkflow = true } = overrides;
+  const { canExecuteWorkflow = true } = overrides;
 
   return {
-    workflowUIEnabled,
     canCreateWorkflow: true,
     canReadWorkflow: true,
     canUpdateWorkflow: true,
@@ -71,6 +73,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
   beforeEach(() => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
+    useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -102,9 +105,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty arrays when workflow UI is disabled', () => {
-      useWorkflowsCapabilitiesMock.mockReturnValue(
-        createCapabilities({ workflowUIEnabled: false })
-      );
+      useWorkflowsUIEnabledSettingMock.mockReturnValue(false);
 
       const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
         wrapper: TestProviders,

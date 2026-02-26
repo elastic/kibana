@@ -10,7 +10,12 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiPanel, EuiFlexGroup } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useRunWorkflow, useWorkflowsCapabilities, WorkflowSelector } from '@kbn/workflows-ui';
+import {
+  useRunWorkflow,
+  useWorkflowsCapabilities,
+  useWorkflowsUIEnabledSetting,
+  WorkflowSelector,
+} from '@kbn/workflows-ui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { RunWorkflowResponseDto } from '@kbn/workflows';
@@ -165,7 +170,8 @@ export const useRunAlertWorkflowPanel = ({
   closePopover,
   ecsRowData,
 }: UseRunAlertWorkflowPanelProps): UseRunAlertWorkflowPanelResult => {
-  const { workflowUIEnabled, canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
   const canRunWorkflow = useMemo(
     () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,

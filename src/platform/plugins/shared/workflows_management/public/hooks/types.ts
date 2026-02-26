@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  type CapabilitiesKey,
-  useWorkflowsCapabilities,
-  type WorkflowsManagementCapabilities,
-} from '@kbn/workflows-ui';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { WorkflowDetailDto, WorkflowListDto } from '@kbn/workflows';
 
-export type { CapabilitiesKey, WorkflowsManagementCapabilities };
+export interface OptimisticContext {
+  previousData: Map<string, WorkflowListDto>;
+  previousWorkflowDetail?: WorkflowDetailDto;
+}
 
-export const useCapabilities = (): WorkflowsManagementCapabilities => {
-  const { workflowUIEnabled: _workflowUIEnabled, ...capabilities } = useWorkflowsCapabilities();
-  return capabilities;
-};
+export type HttpError = IHttpFetchError<ResponseErrorBody>;

@@ -10,7 +10,7 @@ import type {
   ContentPanelConfig,
   RenderContentPanelProps,
 } from '@kbn/response-ops-alerts-table/types';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import React, { useCallback, useMemo } from 'react';
 import * as i18n from '../../components/alerts_table/translations';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -25,7 +25,8 @@ export interface UseBulkRunAlertWorkflowPanelResult {
 }
 
 export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResult => {
-  const { workflowUIEnabled, canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite } = useAlertsPrivileges();
   const canRunWorkflow = useMemo(
     () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,

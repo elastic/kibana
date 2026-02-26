@@ -27,12 +27,12 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
-import { useWorkflowActions, useWorkflows, type WorkflowTriggerTab } from '@kbn/workflows-ui';
+import { useWorkflows, type WorkflowTriggerTab } from '@kbn/workflows-ui';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
-import { useWorkflowActionsTelemetry } from '../../../hooks/use_workflow_actions_telemetry';
+import { useWorkflowActions } from '../../../hooks/use_workflow_actions';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
@@ -53,9 +53,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
-  const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions({
-    useTelemetry: useWorkflowActionsTelemetry,
-  });
+  const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {

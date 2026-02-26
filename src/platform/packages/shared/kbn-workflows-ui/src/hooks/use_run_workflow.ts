@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { RunWorkflowCommand, RunWorkflowResponseDto } from '@kbn/workflows';
-import type { HttpError } from './types';
 import type { WorkflowTriggerTab } from '../types';
+
+type HttpError = IHttpFetchError<ResponseErrorBody>;
 
 export type RunWorkflowParams = RunWorkflowCommand & {
   /** Workflow ID to run. */

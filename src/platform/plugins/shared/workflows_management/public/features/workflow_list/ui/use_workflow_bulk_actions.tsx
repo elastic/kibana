@@ -16,8 +16,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { useWorkflowActions } from '@kbn/workflows-ui';
-import { useWorkflowActionsTelemetry } from '../../../hooks/use_workflow_actions_telemetry';
+import { useWorkflowActions } from '../../../hooks/use_workflow_actions';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
@@ -38,9 +37,7 @@ export const useWorkflowBulkActions = ({
   deselectWorkflows,
 }: UseWorkflowBulkActionsProps): UseWorkflowBulkActionsReturn => {
   const { application, notifications } = useKibana().services;
-  const { deleteWorkflows, updateWorkflow } = useWorkflowActions({
-    useTelemetry: useWorkflowActionsTelemetry,
-  });
+  const { deleteWorkflows, updateWorkflow } = useWorkflowActions();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 

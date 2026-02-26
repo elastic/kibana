@@ -8,9 +8,8 @@
  */
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_MANAGEMENT_FEATURE_ID, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows';
 import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
 
 const CapabilitiesMap = {
@@ -25,19 +24,14 @@ const CapabilitiesMap = {
 
 export type CapabilitiesKey = keyof typeof CapabilitiesMap;
 export type WorkflowsManagementCapabilities = Record<CapabilitiesKey, boolean>;
-export type WorkflowsCapabilities = WorkflowsManagementCapabilities & {
-  workflowUIEnabled: boolean;
-};
 
-export const useWorkflowsCapabilities = (): WorkflowsCapabilities => {
+export const useWorkflowsCapabilities = (): WorkflowsManagementCapabilities => {
   const {
-    services: { application, uiSettings },
-  } = useKibana<{ application: ApplicationStart; uiSettings: IUiSettingsClient }>();
+    services: { application },
+  } = useKibana<{ application: ApplicationStart }>();
   const workflowsCapabilities = application?.capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID] ?? {};
-  const workflowUIEnabled = uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
 
   return {
-    workflowUIEnabled,
     ...(Object.fromEntries(
       Object.entries(CapabilitiesMap).map(([key, value]) => [
         key,

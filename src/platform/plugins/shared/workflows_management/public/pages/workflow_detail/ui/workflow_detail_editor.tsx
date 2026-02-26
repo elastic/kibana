@@ -20,14 +20,13 @@ import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
-import { useWorkflowActions } from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowActionsTelemetry } from '../../../hooks/use_workflow_actions_telemetry';
+import { useWorkflowActions } from '../../../hooks/use_workflow_actions';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
@@ -58,9 +57,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const { uiSettings, notifications } = useKibana().services;
   const { setSelectedExecution } = useWorkflowUrlState();
   const getContextOverrideData = useContextOverrideData();
-  const { runIndividualStep } = useWorkflowActions({
-    useTelemetry: useWorkflowActionsTelemetry,
-  });
+  const { runIndividualStep } = useWorkflowActions();
 
   // Local state
   const [testStepId, setTestStepId] = useState<string | null>(null);

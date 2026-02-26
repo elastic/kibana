@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './use_workflows';
-export * from './use_run_workflow';
-export * from './use_workflows_capabilities';
-export * from './use_workflows_ui_settings';
+import type { WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
+
+export const mockWorkflowsManagementCapabilities: WorkflowsManagementCapabilities = {
+  canCreateWorkflow: true,
+  canReadWorkflow: true,
+  canUpdateWorkflow: true,
+  canDeleteWorkflow: true,
+  canExecuteWorkflow: true,
+  canReadWorkflowExecution: true,
+  canCancelWorkflowExecution: true,
+};
