@@ -36,8 +36,11 @@ describe('FirecrawlConnector', () => {
   });
 
   it('should have a valid schema', () => {
-    expect(FirecrawlConnector.schema).toBeDefined();
-    expect(FirecrawlConnector.schema.parse({})).toEqual({});
+    const schema = FirecrawlConnector.schema;
+    expect(schema).toBeDefined();
+    if (schema) {
+      expect(schema.parse({})).toEqual({});
+    }
   });
 
   it('should have a test handler', () => {
