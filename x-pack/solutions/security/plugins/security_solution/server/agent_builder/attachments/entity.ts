@@ -14,6 +14,7 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
 const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
   identifierType: z.enum(['host', 'user', 'service', 'generic']),
   identifier: z.string().min(1),
+  link: z.string().optional(),
 });
 
 /**

@@ -12,6 +12,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
+import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
 import { IdentifierType } from '../../../../../../common/api/entity_analytics/common/common.gen';
 import type { EntityType } from '../../../../../../common/api/entity_analytics';
 import {
@@ -180,6 +181,17 @@ export const riskScoreStaticInlineToolHandler = async (
       esClient: esClient.asCurrentUser,
       latestIndex: riskScoreIndexPattern,
       timeseriesIndex: riskScoreTimeSeriesIndexPattern,
+    });
+
+    await toolContext.attachments.add({
+      type: SecurityAgentBuilderAttachments.entity,
+      data: {
+        identifier: 'Camille_Kris',
+        identifierType: 'user',
+        attachmentLabel: 'User',
+        link: '/app/security/users/name/Camille_Kris/events',
+      },
+      description: `User Entity Camille_Kris`,
     });
 
     return { results };
