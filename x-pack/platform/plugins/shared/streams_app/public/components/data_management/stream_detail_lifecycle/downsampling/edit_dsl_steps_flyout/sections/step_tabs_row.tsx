@@ -55,7 +55,7 @@ export const StepTabsRow = ({
     const id = window.requestAnimationFrame(() => {
       const selector = `[data-test-subj="${dataTestSubj}Tab-step-${selectedStepIndex + 1}"]`;
       const selectedTabEl = containerEl.querySelector<HTMLElement>(selector);
-      selectedTabEl?.scrollIntoView({
+      selectedTabEl?.scrollIntoView?.({
         behavior: 'smooth',
         block: 'nearest',
         inline: 'nearest',

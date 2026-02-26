@@ -56,7 +56,7 @@ export const PhaseTabsRow = ({
     const id = window.requestAnimationFrame(() => {
       const selector = `[data-test-subj="${dataTestSubj}Tab-${selectedPhase}"]`;
       const selectedTabEl = containerEl.querySelector<HTMLElement>(selector);
-      selectedTabEl?.scrollIntoView({
+      selectedTabEl?.scrollIntoView?.({
         behavior: 'smooth',
         block: 'nearest',
         inline: 'nearest',
