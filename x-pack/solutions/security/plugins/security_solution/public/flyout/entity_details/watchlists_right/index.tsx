@@ -24,11 +24,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FiltersGlobal } from '../../../common/components/filters_global';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import { WatchlistsFlyoutFooter } from './footer';
 import { SUPPORTED_FILE_TYPES } from './constants';
+import { SiemSearchBar } from '../../../common/components/search_bar';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 
 export type WatchlistsFlyoutMode = 'create' | 'edit';
 
@@ -160,6 +163,15 @@ export const WatchlistsFlyoutPanel = ({
                 }
               )}
             />
+          </EuiFormRow>
+          <EuiFormRow label="Custom query">
+            <FiltersGlobal>
+              <SiemSearchBar
+                dataView={dataView}
+                id={InputsModelId.global}
+                sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
+              />
+            </FiltersGlobal>
           </EuiFormRow>
         </EuiForm>
       </FlyoutHeader>
