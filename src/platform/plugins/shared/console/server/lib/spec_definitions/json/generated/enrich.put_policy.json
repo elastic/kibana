@@ -18,6 +18,7 @@
       "_enrich/policy/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-enrich-put-policy",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-enrich-put-policy",
     "availability": {
       "stack": true,
       "serverless": true
