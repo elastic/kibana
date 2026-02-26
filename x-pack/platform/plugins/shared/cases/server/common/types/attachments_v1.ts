@@ -11,16 +11,6 @@ import type { AttachmentAttributes } from '../../../common/types/domain';
 import { AttachmentAttributesRt, AttachmentPatchAttributesRt } from '../../../common/types/domain';
 import type { User } from './user';
 
-interface AttachmentCommonPersistedAttributes {
-  created_at: string;
-  created_by: User;
-  owner: string;
-  pushed_at: string | null;
-  pushed_by: User | null;
-  updated_at: string | null;
-  updated_by: User | null;
-}
-
 export interface AttachmentRequestAttributes {
   type: string;
   alertId?: string | string[];
@@ -46,9 +36,17 @@ export interface AttachmentRequestAttributes {
   persistableStateAttachmentState?: Record<string, JsonValue>;
   persistableStateAttachmentTypeId?: string;
 }
+export interface CommonAttributes {
+  created_at: string;
+  created_by: User;
+  pushed_at: string | null;
+  pushed_by: User | null;
+  updated_at: string | null;
+  updated_by: User | null;
+}
 
 export type AttachmentPersistedAttributes = AttachmentRequestAttributes &
-  AttachmentCommonPersistedAttributes;
+  CommonAttributes & { owner: string };
 
 export type AttachmentTransformedAttributes = AttachmentAttributes;
 export type AttachmentSavedObjectTransformed = SavedObject<AttachmentTransformedAttributes>;
