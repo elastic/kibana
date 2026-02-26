@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Stack Management', 'Rules']);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Stack Management', 'Rules']);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`index pattern listing shows disabled create button`, async () => {
