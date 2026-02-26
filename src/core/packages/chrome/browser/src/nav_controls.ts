@@ -53,7 +53,10 @@ export interface ChromeNavControls {
   /** Register an extension to be presented to the left of the top-right side of the chrome header. */
   registerExtension(navControl: ChromeNavControl): void;
 
-  /** Set the help menu links */
+  /**
+   * Set the help menu links
+   * @deprecated Use {@link ChromeStart.setHelpMenuLinks} instead
+   */
   setHelpMenuLinks(links: ChromeHelpMenuLink[]): void;
 
   /** @internal */
