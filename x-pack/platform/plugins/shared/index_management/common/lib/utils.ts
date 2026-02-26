@@ -11,6 +11,7 @@ import type {
   TemplateSerialized,
   IndexMode,
   IndexSettings,
+  Mappings,
 } from '../types';
 
 /**
@@ -33,17 +34,35 @@ export const buildTemplateSettings = (
   const { index: existingIndexSettings, ...otherSettings } = template?.settings || {};
 
   // Remove mode from existing index settings as we'll set it from indexMode parameter
-  const { mode: _existingMode, ...otherIndexSettings } = existingIndexSettings || {};
+  const {
+    mode: _existingMode,
+    mapping: existingMappingSettings,
+    ...otherIndexSettings
+  } = existingIndexSettings || {};
 
   // Build index settings: include if we have indexMode to set or other index settings to preserve
   const hasIndexMode = indexMode !== undefined;
   const hasOtherIndexSettings = Object.keys(otherIndexSettings).length > 0;
 
+  const { source: existingSourceSettings, ...otherMappingSettings } = existingMappingSettings || {};
+  const sourceModeFromMappings = template?.mappings?._source?.mode;
+  const sourceMode = existingSourceSettings?.mode ?? sourceModeFromMappings;
+  const hasSourceMode = sourceMode !== undefined;
+  const hasOtherMappingSettings = Object.keys(otherMappingSettings).length > 0;
+
   const indexSettings =
-    hasIndexMode || hasOtherIndexSettings
+    hasIndexMode || hasOtherIndexSettings || hasSourceMode || hasOtherMappingSettings
       ? {
           ...otherIndexSettings,
           ...(hasIndexMode && { mode: indexMode }),
+          ...((sourceMode || hasOtherMappingSettings) && {
+            mapping: {
+              ...otherMappingSettings,
+              ...(sourceMode && {
+                source: { ...(existingSourceSettings ?? {}), mode: sourceMode },
+              }),
+            },
+          }),
         }
       : undefined;
 
@@ -55,6 +74,39 @@ export const buildTemplateSettings = (
 
   // Return undefined if settings object is empty
   return Object.keys(settings).length > 0 ? settings : undefined;
+};
+
+export const buildTemplateMappings = (
+  template?: { mappings?: Mappings } | TemplateDeserialized['template']
+): Mappings | undefined => {
+  // Extract existing mappings, separating source mappings from other mappings
+  const { _source: existingSourceMappings, ...otherMappings } = template?.mappings || {};
+
+  // Remove mode from existing source mappings as we'll set it from template settings
+  const { mode: existingSourceMode, ...otherSourceMappings } = existingSourceMappings || {};
+
+  // `disabled` source mode is represented via `_source.enabled: false` in mappings.
+  const normalizedSourceMappings =
+    existingSourceMode === 'disabled' && otherSourceMappings.enabled === undefined
+      ? { ...otherSourceMappings, enabled: false }
+      : otherSourceMappings;
+
+  const hasOtherSourceMappings = Object.keys(normalizedSourceMappings).length > 0;
+
+  const sourceMappings = hasOtherSourceMappings
+    ? {
+        ...normalizedSourceMappings,
+      }
+    : undefined;
+
+  // Build mappings object: only include if we have source mappings or other mappings
+  const mappings = {
+    ...otherMappings,
+    ...(sourceMappings && { _source: sourceMappings }),
+  };
+
+  // Return undefined if mappings object is empty
+  return Object.keys(mappings).length > 0 ? mappings : undefined;
 };
 
 /**

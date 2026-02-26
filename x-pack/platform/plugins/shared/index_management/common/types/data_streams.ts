@@ -37,6 +37,7 @@ export type DataStreamIndexFromEs = IndicesDataStreamIndex;
 export type Health = 'green' | 'yellow' | 'red';
 
 export type IndexMode = (typeof IndexMode)[keyof typeof IndexMode];
+export type SourceMode = 'stored' | 'synthetic' | undefined;
 
 export interface EnhancedDataStreamFromEs extends IndicesDataStream {
   global_max_retention?: string;

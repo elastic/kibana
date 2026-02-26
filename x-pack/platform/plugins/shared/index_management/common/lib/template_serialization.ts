@@ -20,7 +20,7 @@ import {
   LOGSDB_INDEX_MODE,
 } from '../constants';
 import type { DataStreamOptions } from '../types/data_streams';
-import { buildTemplateSettings } from './utils';
+import { buildTemplateMappings, buildTemplateSettings } from './utils';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -42,20 +42,28 @@ export function serializeTemplate(
     deprecated,
   } = templateDeserialized;
 
-  // Build settings object, properly handling index mode
+  // Build settings object, properly handling index mode source mode
   const settings = buildTemplateSettings(template, indexMode);
+  const mappings = buildTemplateMappings(template);
 
   // Separate settings and lifecycle from other template properties so we can rebuild template cleanly
-  const { settings: _templateSettings, lifecycle, ...otherTemplateProperties } = template || {};
+  const {
+    settings: _templateSettings,
+    lifecycle,
+    mappings: _templateMappings,
+    ...otherTemplateProperties
+  } = template || {};
 
   const showTemplateOptions =
     Object.keys(otherTemplateProperties).length > 0 ||
+    (mappings && Object.keys(mappings).length > 0) ||
     (settings && Object.keys(settings).length > 0) ||
     (lifecycle && Object.keys(lifecycle).length > 0) ||
     dataStreamOptions;
 
   const templateOptions = {
     ...otherTemplateProperties,
+    ...(mappings && { mappings }),
     ...(settings && { settings }),
     ...(lifecycle && { lifecycle }),
     // If the existing template contains data stream options, we need to persist them.
@@ -113,13 +121,23 @@ export function deserializeTemplate(
       ? LOGSDB_INDEX_MODE
       : undefined)) as IndexMode | undefined;
 
+  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
+  // and strip the deprecated `_source.mode` from mappings.
+  const migratedSettings = buildTemplateSettings(template as any, indexMode);
+  const migratedMappings = buildTemplateMappings(template as any);
+  const migratedTemplate = {
+    ...template,
+    ...(migratedSettings ? { settings: migratedSettings } : {}),
+    ...(migratedMappings ? { mappings: migratedMappings } : {}),
+  };
+
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
     priority,
     ...(template.lifecycle ? { lifecycle: deserializeESLifecycle(template.lifecycle) } : {}),
     indexPatterns: indexPatterns.sort(),
-    template,
+    template: migratedTemplate,
     indexMode,
     ilmPolicy: ilmPolicyName ? { name: ilmPolicyName } : undefined,
     composedOf: composedOf ?? [],
@@ -165,21 +183,24 @@ export function deserializeTemplateList(
  * ------------------------------------------
  */
 
-export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyTemplateSerialized {
-  const {
-    version,
-    order,
-    indexPatterns,
-    template: { settings, aliases, mappings } = {},
-  } = template;
+export function serializeLegacyTemplate({
+  template,
+  indexPatterns,
+  version,
+  order,
+}: TemplateDeserialized): LegacyTemplateSerialized {
+  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
+  // and strip the deprecated `_source.mode` from mappings.
+  const migratedSettings = buildTemplateSettings(template, undefined);
+  const migratedMappings = buildTemplateMappings(template as any);
 
   return {
     version,
     order,
     index_patterns: indexPatterns,
-    settings,
-    aliases,
-    mappings,
+    settings: migratedSettings,
+    aliases: template?.aliases,
+    mappings: migratedMappings,
   };
 }
 

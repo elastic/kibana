@@ -13,6 +13,7 @@ import type {
   ComponentTemplateSerialized,
 } from '../types';
 import type { DataStreamOptions } from '../types/data_streams';
+import { buildTemplateMappings, buildTemplateSettings } from './utils';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -56,9 +57,19 @@ export function deserializeComponentTemplate(
 
   const indexTemplatesToUsedBy = getIndexTemplatesToUsedBy(indexTemplatesEs);
 
+  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
+  // and strip the deprecated `_source.mode` from mappings.
+  const migratedSettings = buildTemplateSettings(template, undefined);
+  const migratedMappings = buildTemplateMappings(template as any);
+  const migratedTemplate = {
+    ...template,
+    ...(migratedMappings ? { mappings: migratedMappings } : {}),
+    ...(migratedSettings ? { settings: migratedSettings } : {}),
+  };
+
   const deserializedComponentTemplate: ComponentTemplateDeserialized = {
     name,
-    template,
+    template: migratedTemplate,
     version,
     _meta,
     deprecated,
@@ -108,9 +119,19 @@ export function serializeComponentTemplate(
     ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
   };
 
+  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
+  // and strip the deprecated `_source.mode` from mappings.
+  const migratedSettings = buildTemplateSettings(updatedTemplate as any, undefined);
+  const migratedMappings = buildTemplateMappings(updatedTemplate as any);
+  const migratedTemplate = {
+    ...updatedTemplate,
+    ...(migratedMappings ? { mappings: migratedMappings } : {}),
+    ...(migratedSettings ? { settings: migratedSettings } : {}),
+  };
+
   return {
     version,
-    template: updatedTemplate,
+    template: migratedTemplate,
     _meta,
     deprecated,
   };

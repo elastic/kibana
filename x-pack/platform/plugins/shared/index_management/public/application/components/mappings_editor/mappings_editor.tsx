@@ -34,7 +34,11 @@ import type { DocLinksStart } from './shared_imports';
 import { DocumentFieldsHeader } from './components/document_fields/document_fields_header';
 import { SearchResult } from './components/document_fields/search_fields';
 import { parseMappings } from '../../shared/parse_mappings';
-import { LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../../../../common/constants';
+import {
+  STANDARD_INDEX_MODE,
+  LOGSDB_INDEX_MODE,
+  TIME_SERIES_MODE,
+} from '../../../../common/constants';
 
 type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
@@ -169,6 +173,7 @@ export const MappingsEditor = React.memo(
       advanced: (
         <ConfigurationForm
           value={state.configuration.defaultValue}
+          indexMode={indexMode ?? STANDARD_INDEX_MODE}
           esNodesPlugins={esNodesPlugins}
         />
       ),
