@@ -113,7 +113,7 @@ const colorByValueBase = schema.object({
 
 export const colorByValueAbsolute = colorByValueBase.extends(
   { range: schema.literal('absolute') },
-  { meta: { id: 'colorByValueAbsolute' } }
+  { meta: { id: 'colorByValueAbsolute', title: 'Color By Value (Absolute)' } }
 );
 
 export const colorByValueSchema = schema.oneOf(
@@ -145,10 +145,10 @@ export const colorByValueSchema = schema.oneOf(
          */
         range: schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
       },
-      { meta: { id: 'colorByValueRelative' } }
+      { meta: { id: 'colorByValueRelative', title: 'Color By Value (Relative)' } }
     ),
   ],
-  { meta: { id: 'colorByValue' } }
+  { meta: { id: 'colorByValue', title: 'Color By Value' } }
 );
 
 export const staticColorSchema = schema.object(
@@ -159,7 +159,7 @@ export const staticColorSchema = schema.object(
      */
     color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
   },
-  { meta: { id: 'staticColor' } }
+  { meta: { id: 'staticColor', title: 'Static Color' } }
 );
 
 const colorFromPaletteSchema = schema.object(
@@ -168,7 +168,7 @@ const colorFromPaletteSchema = schema.object(
     index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
     palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
   },
-  { meta: { id: 'colorFromPalette' } }
+  { meta: { id: 'colorFromPalette', title: 'Color From Palette' } }
 );
 
 const colorCodeSchema = schema.object(
@@ -176,7 +176,7 @@ const colorCodeSchema = schema.object(
     type: schema.literal('colorCode'),
     value: schema.string({ meta: { description: 'The static color value to use.' } }),
   },
-  { meta: { id: 'colorCode' } }
+  { meta: { id: 'colorCode', title: 'Color Code' } }
 );
 
 const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
@@ -196,7 +196,7 @@ const categoricalColorMappingSchema = schema.object(
     ),
     unassignedColor: schema.maybe(colorCodeSchema),
   },
-  { meta: { id: 'categoricalColorMapping' } }
+  { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
 );
 
 const gradientColorMappingSchema = schema.object(
@@ -216,7 +216,7 @@ const gradientColorMappingSchema = schema.object(
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
     unassignedColor: schema.maybe(colorCodeSchema),
   },
-  { meta: { id: 'gradientColorMapping' } }
+  { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );
 
 export const colorMappingSchema = schema.oneOf(
@@ -230,7 +230,7 @@ export const colorMappingSchema = schema.oneOf(
      */
     gradientColorMappingSchema,
   ],
-  { meta: { id: 'colorMapping' } }
+  { meta: { id: 'colorMapping', title: 'Color Mapping' } }
 );
 
 export const allColoringTypeSchema = schema.oneOf([
