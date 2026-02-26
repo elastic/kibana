@@ -12,6 +12,22 @@ import type { ConnectorSpec } from '../../connector_spec';
 
 const BASE_URL = 'https://api.1password.com/v1beta1';
 
+// So we get something like: 1Password API error (403): {"code":7,"message":"no_owner_remain","details":[]}
+const throwWithApiError = (error: unknown): never => {
+  const axiosError = error as {
+    response?: { status?: number; data?: unknown };
+    message?: string;
+  };
+  if (axiosError.response?.data) {
+    const detail =
+      typeof axiosError.response.data === 'string'
+        ? axiosError.response.data
+        : JSON.stringify(axiosError.response.data);
+    throw new Error(`1Password API error (${axiosError.response.status}): ${detail}`);
+  }
+  throw error;
+};
+
 export const OnePasswordConnector: ConnectorSpec = {
   metadata: {
     id: '.one_password',
@@ -80,16 +96,19 @@ export const OnePasswordConnector: ConnectorSpec = {
         };
         const { accountUuid } = ctx.config as { accountUuid: string };
 
-        const response = await ctx.client.get(`${BASE_URL}/users`, {
-          params: {
-            accountUuid,
-            ...(typedInput.status && { status: typedInput.status }),
-            ...(typedInput.maxPageSize && { max_page_size: typedInput.maxPageSize }),
-            ...(typedInput.pageToken && { page_token: typedInput.pageToken }),
-          },
-        });
-
-        return response.data;
+        try {
+          const response = await ctx.client.get(`${BASE_URL}/users`, {
+            params: {
+              accountUuid,
+              ...(typedInput.status && { status: typedInput.status }),
+              ...(typedInput.maxPageSize && { max_page_size: typedInput.maxPageSize }),
+              ...(typedInput.pageToken && { page_token: typedInput.pageToken }),
+            },
+          });
+          return response.data;
+        } catch (error) {
+          throwWithApiError(error);
+        }
       },
     },
 
@@ -106,11 +125,14 @@ export const OnePasswordConnector: ConnectorSpec = {
         const { uuid } = input as { uuid: string };
         const { accountUuid } = ctx.config as { accountUuid: string };
 
-        const response = await ctx.client.get(`${BASE_URL}/users/${uuid}`, {
-          params: { accountUuid },
-        });
-
-        return response.data;
+        try {
+          const response = await ctx.client.get(`${BASE_URL}/users/${uuid}`, {
+            params: { accountUuid },
+          });
+          return response.data;
+        } catch (error) {
+          throwWithApiError(error);
+        }
       },
     },
 
@@ -130,11 +152,15 @@ export const OnePasswordConnector: ConnectorSpec = {
         const { uuid } = input as { uuid: string };
         const { accountUuid } = ctx.config as { accountUuid: string };
 
-        const response = await ctx.client.patch(`${BASE_URL}/users/${uuid}/suspend`, null, {
-          params: { accountUuid },
-        });
-
-        return response.data;
+        try {
+          const response = await ctx.client.patch(`${BASE_URL}/users/${uuid}/suspend`, undefined, {
+            params: { accountUuid },
+            headers: { 'Content-Type': 'application/json' },
+          });
+          return response.data;
+        } catch (error) {
+          throwWithApiError(error);
+        }
       },
     },
 
@@ -151,11 +177,19 @@ export const OnePasswordConnector: ConnectorSpec = {
         const { uuid } = input as { uuid: string };
         const { accountUuid } = ctx.config as { accountUuid: string };
 
-        const response = await ctx.client.patch(`${BASE_URL}/users/${uuid}/reactivate`, null, {
-          params: { accountUuid },
-        });
-
-        return response.data;
+        try {
+          const response = await ctx.client.patch(
+            `${BASE_URL}/users/${uuid}/reactivate`,
+            undefined,
+            {
+              params: { accountUuid },
+              headers: { 'Content-Type': 'application/json' },
+            }
+          );
+          return response.data;
+        } catch (error) {
+          throwWithApiError(error);
+        }
       },
     },
   },
@@ -168,15 +202,19 @@ export const OnePasswordConnector: ConnectorSpec = {
       ctx.log.debug('1Password test handler');
       const { accountUuid } = ctx.config as { accountUuid: string };
 
-      const response = await ctx.client.get(`${BASE_URL}/users`, {
-        params: { accountUuid, max_page_size: 1 },
-      });
+      try {
+        const response = await ctx.client.get(`${BASE_URL}/users`, {
+          params: { accountUuid, max_page_size: 1 },
+        });
 
-      if (response.status === 200) {
-        return { ok: true, message: 'Successfully connected to 1Password Users API' };
+        if (response.status === 200) {
+          return { ok: true, message: 'Successfully connected to 1Password Users API' };
+        }
+
+        return { ok: false, message: 'Failed to connect to 1Password Users API' };
+      } catch (error) {
+        return throwWithApiError(error);
       }
-
-      return { ok: false, message: 'Failed to connect to 1Password Users API' };
     },
   },
 };

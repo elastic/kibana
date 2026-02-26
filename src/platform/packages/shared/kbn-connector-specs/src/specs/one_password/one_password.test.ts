@@ -199,8 +199,8 @@ describe('OnePasswordConnector', () => {
 
       expect(mockClient.patch).toHaveBeenCalledWith(
         `${BASE_URL}/users/USER1234567890ABCDEF12/suspend`,
-        null,
-        { params: { accountUuid: ACCOUNT_UUID } }
+        {},
+        { params: { accountUuid: ACCOUNT_UUID }, headers: { 'Content-Type': 'application/json' } }
       );
       expect(result).toEqual(suspendedUser);
       expect(result.status).toBe('SUSPENDED');
@@ -234,8 +234,8 @@ describe('OnePasswordConnector', () => {
 
       expect(mockClient.patch).toHaveBeenCalledWith(
         `${BASE_URL}/users/USER1234567890ABCDEF12/reactivate`,
-        null,
-        { params: { accountUuid: ACCOUNT_UUID } }
+        {},
+        { params: { accountUuid: ACCOUNT_UUID }, headers: { 'Content-Type': 'application/json' } }
       );
       expect(result).toEqual(reactivatedUser);
       expect(result.status).toBe('ACTIVE');
