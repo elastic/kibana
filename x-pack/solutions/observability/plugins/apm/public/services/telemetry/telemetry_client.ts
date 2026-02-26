@@ -9,13 +9,8 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type {
   ITelemetryClient,
   SearchQuerySubmittedParams,
-  SloOverviewFlyoutViewedParams,
-  SloOverviewFlyoutServiceNameClickedParams,
-  SloOverviewFlyoutSloLinkClickedParams,
-  SloOverviewFlyoutAlertClickedParams,
   SloOverviewFlyoutSearchQueriedParams,
   SloOverviewFlyoutStatusFilteredParams,
-  SloOverviewFlyoutSloClickedParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -26,27 +21,20 @@ export class TelemetryClient implements ITelemetryClient {
     this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, params);
   };
 
-  public reportSloOverviewFlyoutViewed = (params: SloOverviewFlyoutViewedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED, params);
+  public reportSloOverviewFlyoutViewed = () => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED, {});
   };
 
-  public reportSloOverviewFlyoutServiceNameClicked = (
-    params: SloOverviewFlyoutServiceNameClickedParams
-  ) => {
-    this.analytics.reportEvent(
-      TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED,
-      params
-    );
+  public reportSloOverviewFlyoutServiceNameClicked = () => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SERVICE_NAME_CLICKED, {});
   };
 
-  public reportSloOverviewFlyoutSloLinkClicked = (
-    params: SloOverviewFlyoutSloLinkClickedParams
-  ) => {
-    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED, params);
+  public reportSloOverviewFlyoutSloLinkClicked = () => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_LINK_CLICKED, {});
   };
 
-  public reportSloOverviewFlyoutAlertClicked = (params: SloOverviewFlyoutAlertClickedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_ALERT_CLICKED, params);
+  public reportSloOverviewFlyoutAlertClicked = () => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_ALERT_CLICKED, {});
   };
 
   public reportSloOverviewFlyoutSearchQueried = (params: SloOverviewFlyoutSearchQueriedParams) => {
@@ -59,7 +47,7 @@ export class TelemetryClient implements ITelemetryClient {
     this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED, params);
   };
 
-  public reportSloOverviewFlyoutSloClicked = (params: SloOverviewFlyoutSloClickedParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_CLICKED, params);
+  public reportSloOverviewFlyoutSloClicked = () => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SLO_CLICKED, {});
   };
 }

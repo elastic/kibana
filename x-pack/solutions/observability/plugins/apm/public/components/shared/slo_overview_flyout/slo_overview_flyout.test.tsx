@@ -146,12 +146,7 @@ describe('SloOverviewFlyout', () => {
 
   it('renders the flyout with service name', async () => {
     renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        agentName="nodejs"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
+      <SloOverviewFlyout serviceName="test-service" agentName="nodejs" onClose={mockOnClose} />
     );
 
     expect(screen.getByText('SLOs')).toBeInTheDocument();
@@ -159,13 +154,7 @@ describe('SloOverviewFlyout', () => {
   });
 
   it('calls onClose when flyout close button is clicked', async () => {
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     const closeButton = screen.getByRole('button', { name: /close/i });
     fireEvent.click(closeButton);
@@ -180,13 +169,7 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByText('Loading SLOs...')).toBeInTheDocument();
   });
@@ -232,13 +215,7 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByText('Latency SLO')).toBeInTheDocument();
     expect(screen.getByText('Error Rate SLO')).toBeInTheDocument();
@@ -258,13 +235,7 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByTestId('sloOverviewFlyoutEmptyState')).toBeInTheDocument();
     expect(screen.getByText('No SLOs (APM)')).toBeInTheDocument();
@@ -272,13 +243,7 @@ describe('SloOverviewFlyout', () => {
   });
 
   it('displays status stats panel', async () => {
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByText('Violated')).toBeInTheDocument();
     expect(screen.getByText('Degrading')).toBeInTheDocument();
@@ -287,13 +252,7 @@ describe('SloOverviewFlyout', () => {
   });
 
   it('opens status filter popover when filter button is clicked', async () => {
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     const filterButton = screen.getByTestId('sloOverviewFlyoutStatusFilterButton');
     fireEvent.click(filterButton);
@@ -304,9 +263,7 @@ describe('SloOverviewFlyout', () => {
   });
 
   it('renders correctly with service name prop', async () => {
-    renderWithIntl(
-      <SloOverviewFlyout serviceName="my-service" telemetryLocation="test" onClose={mockOnClose} />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="my-service" onClose={mockOnClose} />);
 
     expect(screen.getByText('my-service')).toBeInTheDocument();
   });
@@ -320,13 +277,7 @@ describe('SloOverviewFlyout', () => {
       },
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByText('test-service')).toBeInTheDocument();
   });
@@ -347,13 +298,7 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByTestId('apmSloActiveAlertsBadge')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
@@ -361,12 +306,7 @@ describe('SloOverviewFlyout', () => {
 
   it('renders service link badge', async () => {
     renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        agentName="nodejs"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
+      <SloOverviewFlyout serviceName="test-service" agentName="nodejs" onClose={mockOnClose} />
     );
 
     const serviceLink = screen.getByTestId('sloOverviewFlyoutServiceLink');
@@ -375,13 +315,7 @@ describe('SloOverviewFlyout', () => {
   });
 
   it('renders SLO app link in header', async () => {
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     const sloLink = screen.getByTestId('sloOverviewFlyoutSloLink');
     expect(sloLink).toBeInTheDocument();
@@ -406,13 +340,7 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByTestId('sloOverviewFlyoutPagination')).toBeInTheDocument();
   });
@@ -433,26 +361,14 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByText('Test SLO')).toBeInTheDocument();
     expect(screen.queryByTestId('sloOverviewFlyoutPagination')).not.toBeInTheDocument();
   });
 
   it('renders search input', async () => {
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByTestId('sloOverviewFlyoutSearch')).toBeInTheDocument();
   });
@@ -473,13 +389,7 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByTestId('sloOverviewFlyoutTable')).toBeInTheDocument();
   });
@@ -501,13 +411,7 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByTestId('apmSloNameLink')).toBeInTheDocument();
 
@@ -527,13 +431,7 @@ describe('SloOverviewFlyout', () => {
       refetch: jest.fn(),
     });
 
-    renderWithIntl(
-      <SloOverviewFlyout
-        serviceName="test-service"
-        telemetryLocation="test"
-        onClose={mockOnClose}
-      />
-    );
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
     expect(screen.getByTestId('sloOverviewFlyoutEmptyState')).toBeInTheDocument();
   });

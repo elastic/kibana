@@ -21,57 +21,28 @@ export interface SearchQuerySubmittedParams {
   action: SearchQueryActions;
 }
 
-export interface SloOverviewFlyoutViewedParams {
-  location: string;
-}
-
-export interface SloOverviewFlyoutServiceNameClickedParams {
-  location: string;
-}
-
-export interface SloOverviewFlyoutSloLinkClickedParams {
-  location: string;
-}
-
-export interface SloOverviewFlyoutAlertClickedParams {
-  location: string;
-}
-
 export interface SloOverviewFlyoutSearchQueriedParams {
-  location: string;
   searchQuery: string;
 }
 
 export interface SloOverviewFlyoutStatusFilteredParams {
-  location: string;
   statuses: string[];
-}
-
-export interface SloOverviewFlyoutSloClickedParams {
-  location: string;
 }
 
 export type TelemetryEventParams =
   | SearchQuerySubmittedParams
-  | SloOverviewFlyoutViewedParams
-  | SloOverviewFlyoutServiceNameClickedParams
-  | SloOverviewFlyoutSloLinkClickedParams
-  | SloOverviewFlyoutAlertClickedParams
   | SloOverviewFlyoutSearchQueriedParams
-  | SloOverviewFlyoutStatusFilteredParams
-  | SloOverviewFlyoutSloClickedParams;
+  | SloOverviewFlyoutStatusFilteredParams;
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
-  reportSloOverviewFlyoutViewed(params: SloOverviewFlyoutViewedParams): void;
-  reportSloOverviewFlyoutServiceNameClicked(
-    params: SloOverviewFlyoutServiceNameClickedParams
-  ): void;
-  reportSloOverviewFlyoutSloLinkClicked(params: SloOverviewFlyoutSloLinkClickedParams): void;
-  reportSloOverviewFlyoutAlertClicked(params: SloOverviewFlyoutAlertClickedParams): void;
+  reportSloOverviewFlyoutViewed(): void;
+  reportSloOverviewFlyoutServiceNameClicked(): void;
+  reportSloOverviewFlyoutSloLinkClicked(): void;
+  reportSloOverviewFlyoutAlertClicked(): void;
   reportSloOverviewFlyoutSearchQueried(params: SloOverviewFlyoutSearchQueriedParams): void;
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
-  reportSloOverviewFlyoutSloClicked(params: SloOverviewFlyoutSloClickedParams): void;
+  reportSloOverviewFlyoutSloClicked(): void;
 }
 
 export enum TelemetryEventTypes {
@@ -87,5 +58,5 @@ export enum TelemetryEventTypes {
 
 export interface TelemetryEvent {
   eventType: TelemetryEventTypes;
-  schema: RootSchema<TelemetryEventParams>;
+  schema: RootSchema<TelemetryEventParams> | Record<string, never>;
 }

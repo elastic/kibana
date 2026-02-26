@@ -6,36 +6,25 @@
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type {
-  ISloTelemetryClient,
-  SloDetailsFlyoutViewedParams,
-  SloDetailsFlyoutTabChangedParams,
-  SloDetailsFlyoutOpenInAppClickedParams,
-  SloCreateFlyoutViewedParams,
-} from './types';
+import type { ISloTelemetryClient, SloDetailsFlyoutTabChangedParams } from './types';
 import { SloTelemetryEventTypes } from './types';
 
 export class SloTelemetryClient implements ISloTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceStart) {}
 
-  public reportSloDetailsFlyoutViewed = (params: SloDetailsFlyoutViewedParams) => {
-    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_VIEWED, params);
+  public reportSloDetailsFlyoutViewed = () => {
+    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_VIEWED, {});
   };
 
   public reportSloDetailsFlyoutTabChanged = (params: SloDetailsFlyoutTabChangedParams) => {
     this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_TAB_CHANGED, params);
   };
 
-  public reportSloDetailsFlyoutOpenInAppClicked = (
-    params: SloDetailsFlyoutOpenInAppClickedParams
-  ) => {
-    this.analytics.reportEvent(
-      SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_OPEN_IN_APP_CLICKED,
-      params
-    );
+  public reportSloDetailsFlyoutOpenInAppClicked = () => {
+    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_OPEN_IN_APP_CLICKED, {});
   };
 
-  public reportSloCreateFlyoutViewed = (params: SloCreateFlyoutViewedParams) => {
-    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_CREATE_FLYOUT_VIEWED, params);
+  public reportSloCreateFlyoutViewed = () => {
+    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_CREATE_FLYOUT_VIEWED, {});
   };
 }

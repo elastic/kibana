@@ -23,14 +23,12 @@ export default function CreateSLOFormFlyout({
   onClose,
   initialValues = {},
   formSettings,
-  telemetryLocation,
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
   formSettings?: FormSettings;
-  telemetryLocation?: string;
 }) {
-  const flyoutTelemetry = useSloFlyoutTelemetry(telemetryLocation);
+  const flyoutTelemetry = useSloFlyoutTelemetry();
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
   useEffect(() => {

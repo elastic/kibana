@@ -39,7 +39,6 @@ export interface SLODetailsFlyoutProps {
   hideFooter?: boolean;
   session?: 'start' | 'inherit';
   initialTabId?: SloTabId;
-  telemetryLocation?: string;
 }
 
 const TITLES = {
@@ -63,10 +62,9 @@ export default function SLODetailsFlyout({
   hideFooter = false,
   session = 'inherit',
   initialTabId,
-  telemetryLocation,
 }: SLODetailsFlyoutProps) {
   const { share } = useKibana().services;
-  const flyoutTelemetry = useSloFlyoutTelemetry(telemetryLocation);
+  const flyoutTelemetry = useSloFlyoutTelemetry();
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',
@@ -171,14 +169,8 @@ export default function SLODetailsFlyout({
       return null;
     }
 
-    return (
-      <SloOverviewDetailsContent
-        slo={slo}
-        initialTabId={initialTabId}
-        telemetryLocation={telemetryLocation}
-      />
-    );
-  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId, telemetryLocation]);
+    return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} />;
+  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId]);
 
   const renderFooter = useCallback(() => {
     if (isError || isNotFound || isLoading || !slo) {

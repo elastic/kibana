@@ -636,7 +636,6 @@ export function ApmServicesTable({
         <SloOverviewFlyout
           serviceName={sloOverviewFlyout.serviceName}
           agentName={sloOverviewFlyout.agentName}
-          telemetryLocation="service_inventory"
           onClose={closeSloOverviewFlyout}
         />
       )}

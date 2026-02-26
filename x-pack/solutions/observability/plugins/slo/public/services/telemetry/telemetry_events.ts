@@ -8,22 +8,14 @@
 import type { SloTelemetryEvent } from './types';
 import { SloTelemetryEventTypes } from './types';
 
-const locationSchema = {
-  type: 'keyword' as const,
-  _meta: { description: 'Where the flyout was opened from' },
-};
-
 const sloDetailsFlyoutViewedEventType: SloTelemetryEvent = {
   eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_VIEWED,
-  schema: {
-    location: locationSchema,
-  },
+  schema: {},
 };
 
 const sloDetailsFlyoutTabChangedEventType: SloTelemetryEvent = {
   eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_TAB_CHANGED,
   schema: {
-    location: locationSchema,
     tabId: {
       type: 'keyword',
       _meta: { description: 'The tab identifier that was selected' },
@@ -33,16 +25,12 @@ const sloDetailsFlyoutTabChangedEventType: SloTelemetryEvent = {
 
 const sloDetailsFlyoutOpenInAppClickedEventType: SloTelemetryEvent = {
   eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_OPEN_IN_APP_CLICKED,
-  schema: {
-    location: locationSchema,
-  },
+  schema: {},
 };
 
 const sloCreateFlyoutViewedEventType: SloTelemetryEvent = {
   eventType: SloTelemetryEventTypes.SLO_CREATE_FLYOUT_VIEWED,
-  schema: {
-    location: locationSchema,
-  },
+  schema: {},
 };
 
 export const sloTelemetryEventBasedTypes = [

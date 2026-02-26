@@ -38,16 +38,14 @@ import { useSloFlyoutTelemetry } from '../../../hooks/use_slo_flyout_telemetry';
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
   initialTabId?: SloTabId;
-  telemetryLocation?: string;
 }
 
 export function SloOverviewDetailsContent({
   slo,
   initialTabId = OVERVIEW_TAB_ID,
-  telemetryLocation,
 }: SloOverviewDetailsContentProps) {
   const { agentBuilder } = useKibana().services;
-  const flyoutTelemetry = useSloFlyoutTelemetry(telemetryLocation);
+  const flyoutTelemetry = useSloFlyoutTelemetry();
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
 
   const handleTabChange = useCallback(

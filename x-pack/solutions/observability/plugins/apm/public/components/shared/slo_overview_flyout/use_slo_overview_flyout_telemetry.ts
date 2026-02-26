@@ -9,36 +9,22 @@ import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 
-const noop = () => {};
-
-export const useSloOverviewFlyoutTelemetry = (location?: string) => {
+export const useSloOverviewFlyoutTelemetry = () => {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
 
-  return useMemo(() => {
-    if (!location) {
-      return {
-        reportViewed: noop,
-        reportServiceNameClicked: noop,
-        reportSloLinkClicked: noop,
-        reportAlertClicked: noop,
-        reportSearchQueried: noop as (searchQuery: string) => void,
-        reportStatusFiltered: noop as (statuses: string[]) => void,
-        reportSloClicked: noop,
-      };
-    }
-
-    return {
-      reportViewed: () => telemetry.reportSloOverviewFlyoutViewed({ location }),
-      reportServiceNameClicked: () =>
-        telemetry.reportSloOverviewFlyoutServiceNameClicked({ location }),
-      reportSloLinkClicked: () => telemetry.reportSloOverviewFlyoutSloLinkClicked({ location }),
-      reportAlertClicked: () => telemetry.reportSloOverviewFlyoutAlertClicked({ location }),
+  return useMemo(
+    () => ({
+      reportViewed: () => telemetry.reportSloOverviewFlyoutViewed(),
+      reportServiceNameClicked: () => telemetry.reportSloOverviewFlyoutServiceNameClicked(),
+      reportSloLinkClicked: () => telemetry.reportSloOverviewFlyoutSloLinkClicked(),
+      reportAlertClicked: () => telemetry.reportSloOverviewFlyoutAlertClicked(),
       reportSearchQueried: (searchQuery: string) =>
-        telemetry.reportSloOverviewFlyoutSearchQueried({ location, searchQuery }),
+        telemetry.reportSloOverviewFlyoutSearchQueried({ searchQuery }),
       reportStatusFiltered: (statuses: string[]) =>
-        telemetry.reportSloOverviewFlyoutStatusFiltered({ location, statuses }),
-      reportSloClicked: () => telemetry.reportSloOverviewFlyoutSloClicked({ location }),
-    };
-  }, [telemetry, location]);
+        telemetry.reportSloOverviewFlyoutStatusFiltered({ statuses }),
+      reportSloClicked: () => telemetry.reportSloOverviewFlyoutSloClicked(),
+    }),
+    [telemetry]
+  );
 };

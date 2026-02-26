@@ -10,11 +10,11 @@ import { usePluginContext } from './use_plugin_context';
 
 const noop = () => {};
 
-export const useSloFlyoutTelemetry = (location?: string) => {
+export const useSloFlyoutTelemetry = () => {
   const { telemetry } = usePluginContext();
 
   return useMemo(() => {
-    if (!location || !telemetry) {
+    if (!telemetry) {
       return {
         reportDetailsFlyoutViewed: noop,
         reportDetailsFlyoutTabChanged: noop as (tabId: string) => void,
@@ -24,12 +24,11 @@ export const useSloFlyoutTelemetry = (location?: string) => {
     }
 
     return {
-      reportDetailsFlyoutViewed: () => telemetry.reportSloDetailsFlyoutViewed({ location }),
+      reportDetailsFlyoutViewed: () => telemetry.reportSloDetailsFlyoutViewed(),
       reportDetailsFlyoutTabChanged: (tabId: string) =>
-        telemetry.reportSloDetailsFlyoutTabChanged({ location, tabId }),
-      reportDetailsFlyoutOpenInAppClicked: () =>
-        telemetry.reportSloDetailsFlyoutOpenInAppClicked({ location }),
-      reportCreateFlyoutViewed: () => telemetry.reportSloCreateFlyoutViewed({ location }),
+        telemetry.reportSloDetailsFlyoutTabChanged({ tabId }),
+      reportDetailsFlyoutOpenInAppClicked: () => telemetry.reportSloDetailsFlyoutOpenInAppClicked(),
+      reportCreateFlyoutViewed: () => telemetry.reportSloCreateFlyoutViewed(),
     };
-  }, [telemetry, location]);
+  }, [telemetry]);
 };

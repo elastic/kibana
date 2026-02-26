@@ -7,34 +7,17 @@
 
 import type { RootSchema } from '@kbn/core/public';
 
-export interface SloDetailsFlyoutViewedParams {
-  location: string;
-}
-
 export interface SloDetailsFlyoutTabChangedParams {
-  location: string;
   tabId: string;
 }
 
-export interface SloDetailsFlyoutOpenInAppClickedParams {
-  location: string;
-}
-
-export interface SloCreateFlyoutViewedParams {
-  location: string;
-}
-
-export type SloTelemetryEventParams =
-  | SloDetailsFlyoutViewedParams
-  | SloDetailsFlyoutTabChangedParams
-  | SloDetailsFlyoutOpenInAppClickedParams
-  | SloCreateFlyoutViewedParams;
+export type SloTelemetryEventParams = SloDetailsFlyoutTabChangedParams;
 
 export interface ISloTelemetryClient {
-  reportSloDetailsFlyoutViewed(params: SloDetailsFlyoutViewedParams): void;
+  reportSloDetailsFlyoutViewed(): void;
   reportSloDetailsFlyoutTabChanged(params: SloDetailsFlyoutTabChangedParams): void;
-  reportSloDetailsFlyoutOpenInAppClicked(params: SloDetailsFlyoutOpenInAppClickedParams): void;
-  reportSloCreateFlyoutViewed(params: SloCreateFlyoutViewedParams): void;
+  reportSloDetailsFlyoutOpenInAppClicked(): void;
+  reportSloCreateFlyoutViewed(): void;
 }
 
 export enum SloTelemetryEventTypes {
@@ -46,5 +29,5 @@ export enum SloTelemetryEventTypes {
 
 export interface SloTelemetryEvent {
   eventType: SloTelemetryEventTypes;
-  schema: RootSchema<SloTelemetryEventParams>;
+  schema: RootSchema<SloTelemetryEventParams> | Record<string, never>;
 }

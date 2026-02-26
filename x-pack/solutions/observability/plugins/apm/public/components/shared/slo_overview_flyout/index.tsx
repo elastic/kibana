@@ -89,7 +89,6 @@ const STATUS_OPTIONS: Array<{ label: string; value: SloStatusFilter }> = [
 interface Props {
   serviceName: string;
   agentName?: AgentName;
-  telemetryLocation?: string;
   onClose: () => void;
 }
 
@@ -110,12 +109,12 @@ const STATUS_PRIORITY: Record<string, number> = {
 const SEARCH_DEBOUNCE_MS = 300;
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 
-export function SloOverviewFlyout({ serviceName, agentName, telemetryLocation, onClose }: Props) {
+export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { uiSettings, slo: sloPlugin } = services;
-  const flyoutTelemetry = useSloOverviewFlyoutTelemetry(telemetryLocation);
+  const flyoutTelemetry = useSloOverviewFlyoutTelemetry();
   const { link } = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
   const [searchQuery, setSearchQuery] = useState('');
@@ -323,7 +322,6 @@ export function SloOverviewFlyout({ serviceName, agentName, telemetryLocation, o
         formSettings: {
           allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
         },
-        telemetryLocation,
       })
     : null;
 
@@ -700,7 +698,6 @@ export function SloOverviewFlyout({ serviceName, agentName, telemetryLocation, o
           hideFooter
           session="inherit"
           initialTabId={selectedSloTabId}
-          telemetryLocation={telemetryLocation}
         />
       )}
       {CreateSloFlyout}
