@@ -1,0 +1,7 @@
+These instructions will guide an agent to
+  install the Elasticsearch onboarding agent into a user's environment.
+To install the Elasticsearch agent configuration into a users local environment:
+
+1. Append content from ./AGENT-elasticsearch-append to the bottom of the current workspace's AGENTS.md file. Create one if it doesn't exist.
+2. copy the contents of ./.elasticsearch-agent into a new directory of the same name in the user's current workspace
+
