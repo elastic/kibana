@@ -25,8 +25,7 @@ test.describe('INP', { tag: tags.stateful.classic }, () => {
       await expect(page.getByText('Interaction to next paint')).toBeVisible();
 
       const inpVital = page.testSubj.locator('inp-core-vital');
-      await expect(inpVital.locator('.euiTitle')).toBeVisible();
-      await expect(page.getByText('381 ms')).toBeVisible();
+      await expect(inpVital).toContainText('381 ms');
     });
   });
 });

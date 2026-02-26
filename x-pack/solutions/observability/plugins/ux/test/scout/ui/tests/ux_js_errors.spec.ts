@@ -18,8 +18,7 @@ test.describe('UX JS Errors', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('Confirm error count', async () => {
-      const jsErrorsPlaceholder = page.locator('[aria-label="JavaScript errors"]');
-      await jsErrorsPlaceholder.scrollIntoViewIfNeeded();
+      await pageObjects.uxDashboard.scrollToSection('JavaScript errors');
       await pageObjects.uxDashboard.waitForChartData();
 
       const jsErrorsTotal = page.testSubj.locator('uxJsErrorsTotal');

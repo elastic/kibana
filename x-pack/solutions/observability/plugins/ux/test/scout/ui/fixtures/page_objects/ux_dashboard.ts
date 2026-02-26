@@ -17,8 +17,7 @@ export class UxDashboardPage {
   }
 
   async waitForLoadingToFinish(): Promise<void> {
-    await this.page.testSubj.locator('kbnLoadingMessage').waitFor({ state: 'hidden' });
-    await this.page.waitForLoadingIndicatorHidden();
+    await this.page.testSubj.locator('uxClientMetrics-totalPageLoad').waitFor({ state: 'visible' });
   }
 
   async waitForChartData(): Promise<void> {
@@ -29,8 +28,13 @@ export class UxDashboardPage {
     );
   }
 
-  async scrollToBottom(): Promise<void> {
-    await this.page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  async scrollToSection(ariaLabel: string): Promise<void> {
+    await this.page.locator(`[aria-label="${ariaLabel}"]`).scrollIntoViewIfNeeded();
+  }
+
+  async selectBreakdownOption(filterTestSubj: string, optionText: string): Promise<void> {
+    await this.page.testSubj.click(filterTestSubj);
+    await this.page.getByRole('option', { name: optionText }).click();
   }
 
   lensEmbeddableLocator(dataTestId: string) {

@@ -13,7 +13,7 @@ const OS_NAME_CHART_ID = 'ux-visitor-breakdown-user_agent-os-name';
 const UA_NAME_CHART_ID = 'ux-visitor-breakdown-user_agent-name';
 
 test.describe('UX Visitor Breakdown', { tag: tags.stateful.classic }, () => {
-  test('displays visitor breakdown charts', async ({ pageObjects, page, browserAuth }) => {
+  test('displays visitor breakdown charts', async ({ pageObjects, browserAuth }) => {
     await test.step('Navigate to UX Dashboard', async () => {
       await browserAuth.loginAsViewer();
       await pageObjects.uxDashboard.goto();
@@ -21,10 +21,7 @@ test.describe('UX Visitor Breakdown', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('Confirm visitor breakdown charts are visible', async () => {
-      const visitorBreakdownPlaceholder = page.locator(
-        '[aria-label="Page load duration by region (avg.)"]'
-      );
-      await visitorBreakdownPlaceholder.scrollIntoViewIfNeeded();
+      await pageObjects.uxDashboard.scrollToSection('Page load duration by region (avg.)');
       await pageObjects.uxDashboard.waitForChartData();
       await pageObjects.uxDashboard.waitForLoadingToFinish();
 

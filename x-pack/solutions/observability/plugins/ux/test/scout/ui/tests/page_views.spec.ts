@@ -20,8 +20,7 @@ test.describe('Page Views Chart', { tag: tags.stateful.classic }, () => {
 
     await test.step('Select browser breakdown', async () => {
       await pageObjects.uxDashboard.waitForChartData();
-      await page.testSubj.click('pvBreakdownFilter');
-      await page.locator('button[role="option"]:has-text("Browser")').click();
+      await pageObjects.uxDashboard.selectBreakdownOption('pvBreakdownFilter', 'Browser');
     });
 
     await test.step('Verify browser breakdown values', async () => {
