@@ -14,6 +14,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FormValues } from './types';
 import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
+import { ActivationConfigurationFieldGroup } from './field_groups/activation_configuration_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 
 export interface RuleFormServices {
@@ -45,6 +46,8 @@ export const RuleForm: React.FC<RuleFormProps> = ({ formId, services, onSubmit }
     <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
       <ErrorCallOut />
       <RuleDetailsFieldGroup />
+      <EuiSpacer size="m" />
+      <ActivationConfigurationFieldGroup />
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup services={services} />
     </EuiForm>

@@ -7,3 +7,4 @@
 
 export { RuleDetailsFieldGroup } from './rule_details_field_group';
 export { RuleExecutionFieldGroup } from './rule_execution_field_group';
+export { ActivationConfigurationFieldGroup } from './activation_configuration_field_group';

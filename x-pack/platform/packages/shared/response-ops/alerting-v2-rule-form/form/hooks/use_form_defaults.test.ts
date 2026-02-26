@@ -27,6 +27,7 @@ describe('useFormDefaults', () => {
         },
       },
       grouping: undefined,
+      stateTransition: { pendingCount: 1 },
     });
   });
 

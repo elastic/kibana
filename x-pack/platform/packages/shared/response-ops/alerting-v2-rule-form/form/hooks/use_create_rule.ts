@@ -22,7 +22,12 @@ interface UseCreateRuleProps {
  * and the API contract (CreateRuleData).
  */
 const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData => {
-  const { kind, metadata, timeField, schedule, evaluation, grouping } = formValues;
+  const { kind, metadata, timeField, schedule, evaluation, grouping, stateTransition } = formValues;
+
+  const hasStateTransition =
+    kind === 'alert' &&
+    stateTransition != null &&
+    (stateTransition.pendingCount != null || stateTransition.pendingTimeframe != null);
 
   return {
     kind,
@@ -43,6 +48,18 @@ const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData =
       },
     },
     ...(grouping?.fields?.length ? { grouping: { fields: grouping.fields } } : {}),
+    ...(hasStateTransition
+      ? {
+          state_transition: {
+            ...(stateTransition!.pendingCount != null
+              ? { pending_count: stateTransition!.pendingCount }
+              : {}),
+            ...(stateTransition!.pendingTimeframe != null
+              ? { pending_timeframe: stateTransition!.pendingTimeframe }
+              : {}),
+          },
+        }
+      : {}),
   };
 };
 
