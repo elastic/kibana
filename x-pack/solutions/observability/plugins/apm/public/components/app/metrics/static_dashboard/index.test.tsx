@@ -85,6 +85,10 @@ describe('JsonMetricsDashboard', () => {
     capturedGetCreationOptions = undefined;
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
   describe('getCreationOptions', () => {
     it('returns useControlsIntegration: true', async () => {
       jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
