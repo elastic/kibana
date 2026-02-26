@@ -80,8 +80,12 @@ export const DataLifecycleSummary = ({
 }: DataLifecycleSummaryProps) => {
   const { phases, downsampleSteps, loading = false, testSubjPrefix } = model;
   const { canManageLifecycle } = capabilities;
-  const { editedPhaseName, isEditLifecycleFlyoutOpen = false, invalidPhases, invalidStepIndices } =
-    uiState ?? {};
+  const {
+    editedPhaseName,
+    isEditLifecycleFlyoutOpen = false,
+    invalidPhases,
+    invalidStepIndices,
+  } = uiState ?? {};
 
   const showPhaseActions =
     phaseActions?.showPhaseActions ??
