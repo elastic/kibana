@@ -20,7 +20,6 @@ import { css } from '@emotion/react';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
-  CASE_CLOSE_REASON,
   CASE_CREATED,
   CASE_IN_PROGRESS_DURATION,
   CASE_OPEN_DURATION,
@@ -33,15 +32,7 @@ import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyCellValue } from '../../empty_value';
 
 export const CaseStatusMetrics = React.memo(
-  ({
-    metrics,
-    features,
-    closeReason,
-  }: {
-    metrics: SingleCaseMetrics;
-    features: SingleCaseMetricsFeature[];
-    closeReason?: string | null;
-  }) => {
+  ({ metrics, features }: { metrics: SingleCaseMetrics; features: SingleCaseMetricsFeature[] }) => {
     const lifespanMetrics = useGetLifespanMetrics(metrics, features);
     const { euiTheme } = useEuiTheme();
 
@@ -94,17 +85,6 @@ export const CaseStatusMetrics = React.memo(
           />
         ),
         dataTestSubject: 'case-metrics-lifespan-item-open-to-close-duration',
-      },
-      {
-        key: 'close-reason',
-        component: (
-          <CaseStatusMetricsItem
-            title={CASE_CLOSE_REASON}
-            value={closeReason ?? getEmptyCellValue()}
-            euiTheme={euiTheme}
-          />
-        ),
-        dataTestSubject: 'case-metrics-lifespan-item-close-reason',
       },
     ];
 

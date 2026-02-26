@@ -61,10 +61,6 @@ export const CASE_OPEN_TO_CLOSE_DURATION = i18n.translate(
   }
 );
 
-export const CASE_CLOSE_REASON = i18n.translate('xpack.cases.caseView.metrics.closeReason', {
-  defaultMessage: 'Close reason',
-});
-
 export const CASE_REOPENED = i18n.translate('xpack.cases.caseView.metrics.lifespan.reopened', {
   defaultMessage: '(reopened)',
 });

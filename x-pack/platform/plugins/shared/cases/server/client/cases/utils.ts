@@ -381,18 +381,15 @@ export const getClosedInfoForUpdate = ({
   user,
   status,
   closedDate,
-  closeReason,
 }: {
   closedDate: string;
   user: User;
   status?: CaseStatuses;
-  closeReason?: string;
-}): Pick<CaseAttributes, 'closed_at' | 'closed_by' | 'close_reason'> | undefined => {
+}): Pick<CaseAttributes, 'closed_at' | 'closed_by'> | undefined => {
   if (status && status === CaseStatuses.closed) {
     return {
       closed_at: closedDate,
       closed_by: user,
-      close_reason: closeReason ?? null,
     };
   }
 
@@ -400,7 +397,6 @@ export const getClosedInfoForUpdate = ({
     return {
       closed_at: null,
       closed_by: null,
-      close_reason: null,
     };
   }
 };

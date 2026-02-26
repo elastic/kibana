@@ -29,12 +29,10 @@ const renderCaseMetrics = ({
   metrics = basicCaseMetrics,
   features = [...basicCaseNumericValueFeatures, ...basicCaseStatusFeatures],
   isLoading = false,
-  closeReason,
 }: {
   metrics?: SingleCaseMetrics;
   features?: SingleCaseMetricsFeature[];
   isLoading?: boolean;
-  closeReason?: string | null;
 } = {}) => {
   useFetchCaseMetricsMock.mockImplementation(() => ({
     data: { metrics },
@@ -42,7 +40,7 @@ const renderCaseMetrics = ({
   }));
 
   useCasesFeaturesMock.mockReturnValue({ metricsFeatures: features });
-  return renderWithTestingProviders(<CaseViewMetrics caseId={'1234'} closeReason={closeReason} />);
+  return renderWithTestingProviders(<CaseViewMetrics caseId={'1234'} />);
 };
 
 interface FeatureTest {
@@ -129,13 +127,7 @@ describe('CaseViewMetrics', () => {
   it('should render status metrics with default value of a dash', () => {
     renderCaseMetrics({ metrics: {} });
     // \u2014 is the unicode for a long dash
-    expect(screen.getAllByText('\u2014')).toHaveLength(4);
-  });
-
-  it('should render close reason in status metrics', () => {
-    renderCaseMetrics({ closeReason: 'false_positive' });
-    expect(screen.getByText('Close reason')).toBeInTheDocument();
-    expect(screen.getByText('false_positive')).toBeInTheDocument();
+    expect(screen.getAllByText('\u2014')).toHaveLength(3);
   });
 
   it('should not render if no features are returned', () => {

@@ -26,7 +26,6 @@ import {
   modelVersion6,
   modelVersion7,
   modelVersion8,
-  modelVersion9,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 
@@ -67,9 +66,6 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
         },
-      },
-      close_reason: {
-        type: 'keyword',
       },
       created_at: {
         type: 'date',
@@ -287,7 +283,6 @@ export const createCaseSavedObjectType = (
     6: modelVersion6,
     7: modelVersion7,
     8: modelVersion8,
-    9: modelVersion9,
   },
   management: {
     importableAndExportable: true,

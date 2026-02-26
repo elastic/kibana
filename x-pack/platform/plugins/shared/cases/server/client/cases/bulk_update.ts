@@ -238,13 +238,12 @@ async function updateAlerts({
 
   // build a map of case id to the status it has, and optionally a closing reason
   const casesToSyncToStatus = casesToSync.reduce((acc, { updateReq, originalCase }) => {
-    const status = updateReq.status ?? originalCase.attributes.status ?? CaseStatuses.open;
-    const closeReason =
-      status === CaseStatuses.closed
-        ? updateReq.closeReason ?? originalCase.attributes.close_reason ?? undefined
-        : undefined;
-
-    acc.set(updateReq.id, [status, closeReason]);
+    acc.set(updateReq.id, [
+      updateReq.status ?? originalCase.attributes.status ?? CaseStatuses.open,
+      updateReq.status && updateReq.status === CaseStatuses.closed
+        ? updateReq.closeReason
+        : undefined,
+    ]);
     return acc;
   }, new Map<string, [CaseStatuses, string?]>());
 
@@ -656,13 +655,13 @@ const createPatchCasesPayload = ({
 
   return {
     cases: casesToUpdate.map(({ updateReq, originalCase }) => {
-      // intentionally removing owner from the case so that we don't accidentally allow it to be updated
+      // intentionally removing owner and closeReason from the case so that we don't accidentally allow it to be updated
       const {
         id: caseId,
         version,
         owner,
         assignees,
-        closeReason,
+        closeReason: _closeReason,
         ...updateCaseAttributes
       } = updateReq;
 
@@ -683,7 +682,6 @@ const createPatchCasesPayload = ({
             user,
             closedDate: updatedDt,
             status: trimmedCaseAttributes.status,
-            closeReason,
           }),
           ...getDurationForUpdate({
             status: trimmedCaseAttributes.status,
