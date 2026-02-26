@@ -10,10 +10,9 @@ import type {
   EntityDefinition,
   EntityType,
 } from '../../../common/domain/definitions/entity_schema';
-import { ENTITY_BASE_PREFIX } from '../constants';
+import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2 } from '../constants';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
-
 const BASE_ENTITY_INDEX_MAPPING = {
   '@timestamp': { type: 'date' },
   'event.ingested': { type: 'date' },
@@ -22,14 +21,14 @@ const BASE_ENTITY_INDEX_MAPPING = {
   'entity.id': { type: 'keyword' },
   'entity.EngineMetadata.Type': { type: 'keyword' },
   'entity.EngineMetadata.UntypedId': { type: 'keyword' },
-
-  // 'asset.criticality': { type: 'keyword' },
-  // 'entity.name': { type: 'keyword' },
-  // 'entity.source': { type: 'keyword' },
+  'entity.source': { type: 'keyword' },
+  'entity.risk.calculated_level': { type: 'keyword' },
+  'entity.risk.calculated_score': { type: 'float' },
+  'entity.risk.calculated_score_norm': { type: 'float' },
 } as const satisfies MappingProperties;
 
 export const getComponentTemplateName = (type: EntityType, namespace: string) =>
-  `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-latest@platform`;
+  `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${type}_${namespace}-latest@platform`;
 
 export const getEntityDefinitionComponentTemplate = (
   definition: EntityDefinition,
@@ -53,7 +52,7 @@ const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => (
 });
 
 export const getUpdatesComponentTemplateName = (type: EntityType, namespace: string) =>
-  `${ENTITY_BASE_PREFIX}-security_${type}_${namespace}-updates@platform`;
+  `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V2}-security_${type}_${namespace}-updates@platform`;
 
 export const getUpdatesEntityDefinitionComponentTemplate = (
   definition: EntityDefinition,
