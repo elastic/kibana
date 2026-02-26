@@ -430,8 +430,17 @@ export class LogsExtractionClient {
     const all = await this.getAllIndexPatternsIncludingRemote(additionalIndexPatterns);
     const alertsIndex = getAlertsIndexName(this.namespace);
     const withoutAlerts = all.filter((index) => index !== alertsIndex);
-    const localIndexPatterns = withoutAlerts.filter((index) => !isCCSRemoteIndexName(index));
-    const remoteIndexPatterns = withoutAlerts.filter((index) => isCCSRemoteIndexName(index));
+    const localIndexPatterns: string[] = [];
+    const remoteIndexPatterns: string[] = [];
+
+    withoutAlerts.forEach((index) => {
+      if (isCCSRemoteIndexName(index)) {
+        remoteIndexPatterns.push(index);
+      } else {
+        localIndexPatterns.push(index);
+      }
+    });
+
     return { localIndexPatterns, remoteIndexPatterns };
   }
 
