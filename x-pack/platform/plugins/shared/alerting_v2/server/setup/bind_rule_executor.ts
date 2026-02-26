@@ -31,11 +31,11 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
 
   /**
-   * Middleware list (first is outermost)
+   * Middleware list via multi-injection.
+   * Binding order defines execution order.
    */
-  bind(RuleExecutionMiddlewaresToken)
-    .toDynamicValue(({ get }) => [get(ApmMiddleware), get(ErrorHandlingMiddleware)])
-    .inSingletonScope();
+  bind(RuleExecutionMiddlewaresToken).to(ApmMiddleware).inSingletonScope();
+  bind(RuleExecutionMiddlewaresToken).to(ErrorHandlingMiddleware).inSingletonScope();
 
   /**
    * Rule execution steps via multi-injection.
