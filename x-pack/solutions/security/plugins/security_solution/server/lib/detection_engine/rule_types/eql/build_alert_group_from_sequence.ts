@@ -328,7 +328,7 @@ const pruneEmptyNestedObjects = (obj: Record<string, unknown>): void => {
   type PruneItem = [Record<string, unknown> | null, string | null, Record<string, unknown>];
   const pruneStack: PruneItem[] = [[null, null, obj]];
   const toPrune: PruneItem[] = [];
-  while (pruneStack.length > 0 && pruneStack.at(-1) != null) {
+  while (pruneStack.length > 0) {
     const item = pruneStack.pop() as PruneItem;
     toPrune.push(item);
     const [, , o] = item;
