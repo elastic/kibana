@@ -5,252 +5,368 @@
  * 2.0.
  */
 
-import { createSkillRegistry } from './skill_registry';
-import type { SkillRegistry, SkillProvider } from './skill_service';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import { createSkillRegistry } from './skill_registry';
+import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
 
-const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
+const createMockInternalSkillDefinition = (
+  overrides: Partial<InternalSkillDefinition> = {}
+): InternalSkillDefinition => ({
   id: 'test-skill-1',
   name: 'test-skill',
-  basePath: 'skills/platform',
   description: 'A test skill',
   content: 'Skill body content',
+  readonly: true,
+  getRegistryTools: () => [],
   ...overrides,
 });
 
-const createMockPersistedProvider = (overrides: Partial<SkillProvider> = {}): SkillProvider => ({
-  id: 'persisted',
-  has: jest.fn().mockResolvedValue(false),
-  get: jest.fn().mockResolvedValue(undefined),
-  list: jest.fn().mockResolvedValue([]),
-  create: jest.fn().mockImplementation(async (req) => ({
-    id: req.id,
-    name: req.name,
-    description: req.description,
-    content: req.content,
-  })),
-  update: jest.fn().mockImplementation(async (_id, req) => ({
-    id: _id,
-    name: req.name ?? 'updated',
-    description: req.description ?? '',
-    content: req.content ?? '',
-  })),
-  delete: jest.fn().mockResolvedValue(true),
-  ...overrides,
-});
+const createMockBuiltinProvider = (
+  skills: InternalSkillDefinition[]
+): jest.Mocked<ReadonlySkillProvider> => {
+  const skillsMap = new Map(skills.map((s) => [s.id, s]));
+  return {
+    id: 'builtin',
+    readonly: true,
+    has: jest.fn(async (id: string) => skillsMap.has(id)),
+    get: jest.fn(async (id: string) => skillsMap.get(id)),
+    list: jest.fn(async () => skills),
+  };
+};
 
-const createMockToolRegistry = (overrides: Partial<ToolRegistry> = {}): ToolRegistry =>
+const createMockPersistedProvider = (
+  skills: InternalSkillDefinition[]
+): jest.Mocked<WritableSkillProvider> => {
+  const skillsMap = new Map(skills.map((s) => [s.id, s]));
+  return {
+    id: 'persisted',
+    readonly: false,
+    has: jest.fn(async (id: string) => skillsMap.has(id)),
+    get: jest.fn(async (id: string) => skillsMap.get(id)),
+    list: jest.fn(async () => skills),
+    create: jest.fn(async (params) => ({
+      ...params,
+      readonly: false,
+      getRegistryTools: () => params.tool_ids ?? [],
+    })),
+    update: jest.fn(async (id, update) => ({
+      id,
+      name: update.name ?? 'original-name',
+      description: update.description ?? 'original-description',
+      content: update.content ?? 'original-content',
+      readonly: false,
+      getRegistryTools: () => update.tool_ids ?? [],
+    })),
+    delete: jest.fn(async (_skillId: string) => undefined),
+  };
+};
+
+const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
-    has: jest.fn().mockReturnValue(true),
-    get: jest.fn().mockReturnValue(undefined),
-    list: jest.fn().mockReturnValue([]),
-    ...overrides,
+    has: jest.fn(async (id: string) => toolIds.includes(id)),
   } as unknown as ToolRegistry);
 
-const createMockRegistryParams = ({
-  builtinSkills = [],
-  persistedProvider,
-  toolRegistry,
-}: {
-  builtinSkills?: SkillDefinition[];
-  persistedProvider?: SkillProvider;
-  toolRegistry?: ToolRegistry;
-} = {}) => ({
-  builtinSkills,
-  persistedProvider: persistedProvider ?? createMockPersistedProvider(),
-  toolRegistry: toolRegistry ?? createMockToolRegistry(),
-});
-
-describe('SkillRegistry', () => {
-  let registry: SkillRegistry;
-
-  beforeEach(() => {
-    registry = createSkillRegistry(createMockRegistryParams());
+describe('createSkillRegistry', () => {
+  const builtinSkill1 = createMockInternalSkillDefinition({
+    id: 'builtin-skill-1',
+    name: 'builtin-skill-1-name',
+    readonly: true,
+  });
+  const persistedSkill1 = createMockInternalSkillDefinition({
+    id: 'custom-skill-1',
+    name: 'custom-skill-1-name',
+    description: 'Description for custom-skill-1',
+    content: 'Content for custom-skill-1',
+    readonly: false,
   });
 
   describe('has', () => {
-    it('returns false for non-existent skill', async () => {
-      expect(await registry.has('non-existent')).toBe(false);
-    });
-
-    it('returns true for a builtin skill', async () => {
-      const skill = createMockSkill({ id: 'builtin-1' });
-      registry = createSkillRegistry(createMockRegistryParams({ builtinSkills: [skill] }));
-      expect(await registry.has('builtin-1')).toBe(true);
-    });
-
-    it('delegates to persisted provider when not a builtin', async () => {
-      const persistedProvider = createMockPersistedProvider({
-        has: jest.fn().mockResolvedValue(true),
+    it('returns true for a built-in skill', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
       });
-      registry = createSkillRegistry(createMockRegistryParams({ persistedProvider }));
-      expect(await registry.has('persisted-1')).toBe(true);
-      expect(persistedProvider.has).toHaveBeenCalledWith('persisted-1');
+
+      expect(await registry.has('builtin-skill-1')).toBe(true);
+    });
+
+    it('returns true for a persisted skill', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      expect(await registry.has('custom-skill-1')).toBe(true);
+    });
+
+    it('returns false for a non-existent skill', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      expect(await registry.has('non-existent')).toBe(false);
     });
   });
 
   describe('get', () => {
-    it('returns undefined for non-existent skill', async () => {
-      expect(await registry.get('non-existent')).toBeUndefined();
+    it('returns built-in skill when it exists', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      expect(await registry.get('builtin-skill-1')).toEqual(builtinSkill1);
     });
 
-    it('returns a builtin skill', async () => {
-      const skill = createMockSkill({ id: 'builtin-1', description: 'Builtin skill' });
-      registry = createSkillRegistry(createMockRegistryParams({ builtinSkills: [skill] }));
+    it('returns persisted skill when no built-in exists', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+      });
 
-      const retrieved = await registry.get('builtin-1');
-      expect(retrieved).toEqual(skill);
+      expect(await registry.get('custom-skill-1')).toEqual(persistedSkill1);
     });
 
-    it('delegates to persisted provider for non-builtin skills', async () => {
-      const publicSkill: PublicSkillDefinition = {
-        id: 'persisted-1',
-        name: 'persisted',
-        description: 'A persisted skill',
-        content: 'content',
+    it('prefers built-in over persisted', async () => {
+      const overlapSkill = createMockInternalSkillDefinition({
+        id: 'builtin-skill-1',
         readonly: false,
-      };
-      const persistedProvider = createMockPersistedProvider({
-        get: jest.fn().mockResolvedValue(publicSkill),
       });
-      registry = createSkillRegistry(createMockRegistryParams({ persistedProvider }));
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([overlapSkill]),
+        toolRegistry: createMockToolRegistry(),
+      });
 
-      const retrieved = await registry.get('persisted-1');
-      expect(retrieved).toEqual(publicSkill);
+      expect(await registry.get('builtin-skill-1')).toEqual(builtinSkill1);
     });
 
-    it('returns builtin skill even if persisted provider also has it', async () => {
-      const builtinSkill = createMockSkill({ id: 'overlap', description: 'builtin version' });
-      const persistedProvider = createMockPersistedProvider({
-        get: jest.fn().mockResolvedValue({ id: 'overlap', description: 'persisted version' }),
+    it('throws for non-existent skill', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
       });
-      registry = createSkillRegistry(
-        createMockRegistryParams({ builtinSkills: [builtinSkill], persistedProvider })
-      );
 
-      const retrieved = await registry.get('overlap');
-      expect(retrieved).toEqual(builtinSkill);
+      await expect(registry.get('non-existent')).rejects.toThrow('Skill non-existent not found');
     });
   });
 
   describe('list', () => {
-    it('returns empty array when no skills exist', async () => {
-      expect(await registry.list()).toEqual([]);
-    });
-
-    it('returns builtin skills as public definitions', async () => {
-      const skill1 = createMockSkill({ id: 'skill-1', name: 'skill-1' });
-      const skill2 = createMockSkill({ id: 'skill-2', name: 'skill-2' });
-      registry = createSkillRegistry(createMockRegistryParams({ builtinSkills: [skill1, skill2] }));
-
-      const list = await registry.list();
-      expect(list).toHaveLength(2);
-      expect(list[0].id).toBe('skill-1');
-      expect(list[0].readonly).toBe(true);
-      expect(list[1].id).toBe('skill-2');
-    });
-
-    it('includes persisted skills alongside builtins', async () => {
-      const builtinSkill = createMockSkill({ id: 'builtin-1', name: 'builtin' });
-      const persistedSkill: PublicSkillDefinition = {
-        id: 'persisted-1',
-        name: 'persisted',
-        description: 'Persisted skill',
-        content: 'content',
-        readonly: false,
-      };
-      const persistedProvider = createMockPersistedProvider({
-        list: jest.fn().mockResolvedValue([persistedSkill]),
+    it('returns merged list with correct readonly flags', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
       });
-      registry = createSkillRegistry(
-        createMockRegistryParams({ builtinSkills: [builtinSkill], persistedProvider })
-      );
 
-      const list = await registry.list();
-      expect(list).toHaveLength(2);
-      expect(list.find((s) => s.id === 'builtin-1')).toBeDefined();
-      expect(list.find((s) => s.id === 'persisted-1')).toBeDefined();
+      const result = await registry.list();
+      expect(result).toHaveLength(2);
+
+      const builtin = result.find((s) => s.id === 'builtin-skill-1');
+      expect(builtin?.readonly).toBe(true);
+
+      const persisted = result.find((s) => s.id === 'custom-skill-1');
+      expect(persisted?.readonly).toBe(false);
     });
   });
 
   describe('create', () => {
-    it('creates a persisted skill', async () => {
-      const created = await registry.create({
+    it('creates a new persisted skill', async () => {
+      const persistedProvider = createMockPersistedProvider([]);
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(['tool-a']),
+      });
+
+      await registry.create({
         id: 'new-skill',
         name: 'New Skill',
         description: 'A new skill',
-        content: 'content',
-        tool_ids: [],
+        content: 'Instructions...',
+        tool_ids: ['tool-a'],
       });
-      expect(created.id).toBe('new-skill');
+
+      expect(persistedProvider.create).toHaveBeenCalledWith({
+        id: 'new-skill',
+        name: 'New Skill',
+        description: 'A new skill',
+        content: 'Instructions...',
+        tool_ids: ['tool-a'],
+      });
     });
 
-    it('rejects creating a skill with a duplicate builtin id', async () => {
-      const skill = createMockSkill({ id: 'builtin-1' });
-      registry = createSkillRegistry(createMockRegistryParams({ builtinSkills: [skill] }));
+    it('throws when skill ID already exists in built-in', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
 
       await expect(
         registry.create({
-          id: 'builtin-1',
+          id: 'builtin-skill-1',
           name: 'Duplicate',
-          description: '',
-          content: '',
+          description: 'Duplicate',
+          content: 'Duplicate',
           tool_ids: [],
         })
-      ).rejects.toThrow(/already exists/);
+      ).rejects.toThrow("Skill with id 'builtin-skill-1' already exists");
     });
 
-    it('rejects creating a skill with a duplicate persisted id', async () => {
-      const persistedProvider = createMockPersistedProvider({
-        has: jest.fn().mockResolvedValue(true),
+    it('throws when tool IDs are invalid', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(['tool-a']),
       });
-      registry = createSkillRegistry(createMockRegistryParams({ persistedProvider }));
 
       await expect(
         registry.create({
-          id: 'existing-persisted',
-          name: 'Dup',
-          description: '',
-          content: '',
-          tool_ids: [],
+          id: 'new-skill',
+          name: 'New Skill',
+          description: 'Description',
+          content: 'Content',
+          tool_ids: ['tool-a', 'invalid-tool'],
         })
-      ).rejects.toThrow(/already exists/);
+      ).rejects.toThrow('Invalid tool IDs: invalid-tool');
+    });
+
+    it('throws when more than 5 tool IDs are provided', async () => {
+      const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'];
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(toolIds),
+      });
+
+      await expect(
+        registry.create({
+          id: 'new-skill',
+          name: 'New Skill',
+          description: 'Description',
+          content: 'Content',
+          tool_ids: toolIds,
+        })
+      ).rejects.toThrow('A skill can reference at most 5 tools, but 6 were provided');
+    });
+
+    it('allows exactly 5 tool IDs', async () => {
+      const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5'];
+      const persistedProvider = createMockPersistedProvider([]);
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(toolIds),
+      });
+
+      await registry.create({
+        id: 'new-skill',
+        name: 'New Skill',
+        description: 'Description',
+        content: 'Content',
+        tool_ids: toolIds,
+      });
+
+      expect(persistedProvider.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('update', () => {
+    it('updates a persisted skill', async () => {
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      await registry.update('custom-skill-1', { name: 'Updated Name' });
+
+      expect(persistedProvider.update).toHaveBeenCalledWith('custom-skill-1', {
+        name: 'Updated Name',
+      });
+    });
+
+    it('throws when trying to update a built-in skill', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      await expect(registry.update('builtin-skill-1', { name: 'Updated' })).rejects.toThrow(
+        "Skill 'builtin-skill-1' is read-only"
+      );
+    });
+
+    it('throws when skill does not exist', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      await expect(registry.update('non-existent', { name: 'Updated' })).rejects.toThrow(
+        'Skill non-existent not found'
+      );
+    });
+
+    it('throws when updating with more than 5 tool IDs', async () => {
+      const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'];
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(toolIds),
+      });
+
+      await expect(registry.update('custom-skill-1', { tool_ids: toolIds })).rejects.toThrow(
+        'A skill can reference at most 5 tools, but 6 were provided'
+      );
     });
   });
 
   describe('delete', () => {
     it('deletes a persisted skill', async () => {
-      const persistedProvider = createMockPersistedProvider({
-        has: jest.fn().mockResolvedValue(true),
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
       });
-      registry = createSkillRegistry(createMockRegistryParams({ persistedProvider }));
 
-      const result = await registry.delete('persisted-1');
-      expect(result).toBe(true);
-      expect(persistedProvider.delete).toHaveBeenCalledWith('persisted-1');
+      await registry.delete('custom-skill-1');
+      expect(persistedProvider.delete).toHaveBeenCalledWith('custom-skill-1');
     });
 
-    it('rejects deleting a builtin skill', async () => {
-      const skill = createMockSkill({ id: 'builtin-1' });
-      registry = createSkillRegistry(createMockRegistryParams({ builtinSkills: [skill] }));
+    it('throws when trying to delete a built-in skill', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
 
-      await expect(registry.delete('builtin-1')).rejects.toThrow(/read-only/);
-    });
-  });
-
-  describe('createSkillRegistry', () => {
-    it('creates a new registry instance', () => {
-      const registry1 = createSkillRegistry(createMockRegistryParams());
-      const registry2 = createSkillRegistry(createMockRegistryParams());
-
-      expect(registry1).not.toBe(registry2);
+      await expect(registry.delete('builtin-skill-1')).rejects.toThrow(
+        "Skill 'builtin-skill-1' is read-only"
+      );
     });
 
-    it('creates an empty registry', async () => {
-      const newRegistry = createSkillRegistry(createMockRegistryParams());
-      expect(await newRegistry.list()).toEqual([]);
+    it('throws when skill does not exist', async () => {
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      await expect(registry.delete('non-existent')).rejects.toThrow('Skill non-existent not found');
     });
   });
 });

@@ -78,7 +78,7 @@ export const registerSkills = async ({
     agentBuilder.skills.register(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL),
   ]);
   if (experimentalFeatures.automaticTroubleshootingSkill) {
-    await agentBuilder.skills.register(
+    agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService)
     );
   }
@@ -86,6 +86,4 @@ export const registerSkills = async ({
   await agentBuilder.skills.register(
     getEntityAnalyticsSkill({ getStartServices, kibanaVersion, logger })
   );
-
-  // agentBuilder.skills.register(alertAnalysisSampleSkill);
 };

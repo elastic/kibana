@@ -8,73 +8,45 @@
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { MaybePromise } from '@kbn/utility-types';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
-import type {
-  PublicSkillDefinition,
-  PersistedSkillCreateRequest,
-  PersistedSkillUpdateRequest,
-  SkillSelection,
-} from '@kbn/agent-builder-common';
-import { createClient } from './client';
-import type { SkillPersistedDefinition } from './client';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
-
-const toPublicDefinition = (skill: SkillPersistedDefinition): PublicSkillDefinition => {
-  return {
-    id: skill.id,
-    name: skill.name,
-    description: skill.description,
-    content: skill.content,
-    referenced_content: skill.referenced_content,
-    tool_ids: skill.tool_ids,
-    readonly: false,
-  };
-};
-
-export interface SkillProvider {
-  id: string;
-  has(skillId: string): MaybePromise<boolean>;
-  get(skillId: string): MaybePromise<PublicSkillDefinition | undefined>;
-  list(): MaybePromise<PublicSkillDefinition[]>;
-  create(params: PersistedSkillCreateRequest): MaybePromise<PublicSkillDefinition>;
-  update(skillId: string, update: PersistedSkillUpdateRequest): MaybePromise<PublicSkillDefinition>;
-  delete(skillId: string): MaybePromise<boolean>;
-}
-
-export interface SkillRegistry {
-  has(skillId: string): Promise<boolean>;
-  get(skillId: string): Promise<SkillDefinition | PublicSkillDefinition | undefined>;
-  list(): Promise<PublicSkillDefinition[]>;
-  listSkillDefinitions(): Promise<SkillDefinition[]>;
-  create(params: PersistedSkillCreateRequest): Promise<PublicSkillDefinition>;
-  update(skillId: string, update: PersistedSkillUpdateRequest): Promise<PublicSkillDefinition>;
-  delete(skillId: string): Promise<boolean>;
-  resolveSkillSelection(selection: SkillSelection[]): Promise<SkillDefinition[]>;
-}
+import type { SkillRegistry } from './skill_registry';
+import { createBuiltinSkillProvider } from './builtin';
+import { createPersistedSkillProvider } from './persisted';
 
 export interface SkillServiceSetup {
-  /**
-   * @deprecated This API is still in development and not ready to be used yet.
-   */
-  registerSkill(skill: SkillDefinition): Promise<void>;
+  registerSkill(skill: SkillDefinition): void;
 }
 
 export interface SkillServiceStart {
   /**
    * Create a skill registry scoped to the current user and context.
+   *
+   * Each call snapshots the currently registered builtin skills, so
+   * dynamic registrations or unregistrations that happen after the
+   * registry is created do not affect that registry instance.
    */
   getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
+
   /**
    * Register a skill dynamically after plugin start.
+   *
+   * The operation is serialized internally so concurrent calls are safe.
+   * Only affects future `getRegistry()` calls -- existing registry
+   * instances hold an immutable snapshot of the builtin skills that
+   * existed at creation time.
    */
   registerSkill(skill: SkillDefinition): Promise<void>;
+
   /**
    * Unregister a previously registered skill by ID.
+   *
+   * Returns `true` if the skill was found and removed, `false` otherwise.
+   * Serialized with `registerSkill` to avoid races.
    */
   unregisterSkill(skillId: string): Promise<boolean>;
 }
@@ -99,11 +71,15 @@ class SkillServiceImpl implements SkillService {
   private readonly skills: Map<string, SkillDefinition> = new Map();
   private readonly skillFullPaths: Set<string> = new Set();
 
+  /**
+   * Promise chain used to serialize dynamic registration / unregistration
+   * so that the async validate-then-mutate sequence is atomic.
+   */
+  private mutationQueue: Promise<unknown> = Promise.resolve();
+
   setup(): SkillServiceSetup {
     return {
-      registerSkill: async (skill) => {
-        await validateSkillDefinition(skill);
-
+      registerSkill: (skill) => {
         if (this.skills.has(skill.id)) {
           throw new Error(`Skill type with id ${skill.id} already registered`);
         }
@@ -126,59 +102,63 @@ class SkillServiceImpl implements SkillService {
     logger,
     getToolRegistry,
   }: SkillServiceStartDeps): SkillServiceStart {
+    const validated = Promise.all(
+      [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
+    );
+
     return {
       getRegistry: async ({ request }) => {
+        await this.mutationQueue;
+        await validated;
         const space = getCurrentSpaceId({ request, spaces });
-        const esClient = elasticsearch.client.asInternalUser;
-        const skillClient = createClient({ space, esClient, logger });
-
-        const persistedProvider: SkillProvider = {
-          id: 'persisted',
-          async has(skillId: string) {
-            return skillClient.has(skillId);
-          },
-          async get(skillId: string) {
-            try {
-              const skill = await skillClient.get(skillId);
-              return toPublicDefinition(skill);
-            } catch {
-              return undefined;
-            }
-          },
-          async list() {
-            const skills = await skillClient.list();
-            return skills.map(toPublicDefinition);
-          },
-          async create(createRequest) {
-            const skill = await skillClient.create(createRequest);
-            return toPublicDefinition(skill);
-          },
-          async update(skillId, updateRequest) {
-            const skill = await skillClient.update(skillId, updateRequest);
-            return toPublicDefinition(skill);
-          },
-          async delete(skillId: string) {
-            return skillClient.delete(skillId);
-          },
-        };
-
+        const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
+        const persistedProvider = createPersistedSkillProvider({
+          space,
+          esClient: elasticsearch.client.asInternalUser,
+          logger,
+        });
         const toolRegistry = await getToolRegistry({ request });
 
         return createSkillRegistry({
-          builtinSkills: [...this.skills.values()],
+          builtinProvider,
           persistedProvider,
           toolRegistry,
         });
       },
-      registerSkill: async (skill: SkillDefinition): Promise<void> => {
-        await validateSkillDefinition(skill);
-        if (this.skills.has(skill.id)) {
-          throw new Error(`Skill with id ${skill.id} already registered`);
-        }
-        this.skills.set(skill.id, skill);
+      registerSkill: (skill) => {
+        const op = this.mutationQueue.then(async () => {
+          await validateSkillDefinition(skill);
+
+          if (this.skills.has(skill.id)) {
+            throw new Error(`Skill type with id ${skill.id} already registered`);
+          }
+
+          const fullPath = getSkillEntryPath({ skill });
+          if (this.skillFullPaths.has(fullPath)) {
+            throw new Error(
+              `Skill with path ${skill.basePath} and name ${skill.name} already registered`
+            );
+          }
+          this.skillFullPaths.add(fullPath);
+          this.skills.set(skill.id, skill);
+        });
+        this.mutationQueue = op.catch(() => {});
+        return op;
       },
-      unregisterSkill: async (skillId: string): Promise<boolean> => {
-        return this.skills.delete(skillId);
+      unregisterSkill: (skillId) => {
+        const op = this.mutationQueue.then(async () => {
+          const skill = this.skills.get(skillId);
+          if (!skill) {
+            return false;
+          }
+
+          const fullPath = getSkillEntryPath({ skill });
+          this.skillFullPaths.delete(fullPath);
+          this.skills.delete(skillId);
+          return true;
+        });
+        this.mutationQueue = op.catch(() => {});
+        return op;
       },
     };
   }

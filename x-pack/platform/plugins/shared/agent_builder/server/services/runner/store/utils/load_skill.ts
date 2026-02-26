@@ -58,7 +58,6 @@ export async function loadSkillTools({
       }
     );
   } else {
-    // Skill not found - could be a user-created skill that was deleted
     logger.warn(`Skill '${entry.metadata.skill_id}' not found in registry. Skipping tool loading.`);
   }
 }

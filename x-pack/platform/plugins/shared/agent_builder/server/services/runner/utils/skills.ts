@@ -32,7 +32,7 @@ const isSkillDefinition = (
   return 'basePath' in skill;
 };
 
-export const createSkillsService = ({
+export const createSkillsService = async ({
   skillRegistry,
   toolsServiceStart,
   runner,
@@ -44,7 +44,7 @@ export const createSkillsService = ({
   runner: Runner;
   request: KibanaRequest;
   spaceId: string;
-}): SkillsService => {
+}): Promise<SkillsService> => {
   const toolConverterFn = createSkillToolConverter({
     request,
     spaceId,

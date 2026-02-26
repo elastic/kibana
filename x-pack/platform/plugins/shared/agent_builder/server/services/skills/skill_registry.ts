@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import {
   createBadRequestError,
+  createSkillNotFoundError,
   validateSkillId,
-  type PublicSkillDefinition,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
-  type SkillSelection,
-  allSkillsSelectionWildcard,
 } from '@kbn/agent-builder-common';
-import type { SkillProvider, SkillRegistry } from './skill_service';
+import type { SkillProvider, ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
+import { isReadonlySkillProvider } from './skill_provider';
 
-interface CreateSkillRegistryParams {
-  builtinSkills: SkillDefinition[];
-  persistedProvider: SkillProvider;
+export interface SkillRegistry {
+  has(skillId: string): Promise<boolean>;
+  get(skillId: string): Promise<InternalSkillDefinition>;
+  list(): Promise<InternalSkillDefinition[]>;
+  create(params: PersistedSkillCreateRequest): Promise<InternalSkillDefinition>;
+  update(skillId: string, update: PersistedSkillUpdateRequest): Promise<InternalSkillDefinition>;
+  /** Deletes a skill. Throws if the skill does not exist or is read-only. */
+  delete(skillId: string): Promise<void>;
+}
+
+export interface CreateSkillRegistryParams {
+  builtinProvider: ReadonlySkillProvider;
+  persistedProvider: WritableSkillProvider;
   toolRegistry: ToolRegistry;
 }
 
@@ -31,57 +40,49 @@ export const createSkillRegistry = (params: CreateSkillRegistryParams): SkillReg
 class SkillRegistryImpl implements SkillRegistry {
   private static readonly MAX_TOOL_IDS_PER_SKILL = 5;
 
-  private readonly builtinSkillsMap: Map<string, SkillDefinition>;
-  private readonly persistedProvider: SkillProvider;
+  private readonly builtinProvider: ReadonlySkillProvider;
+  private readonly persistedProvider: WritableSkillProvider;
   private readonly toolRegistry: ToolRegistry;
 
-  constructor({ builtinSkills, persistedProvider, toolRegistry }: CreateSkillRegistryParams) {
-    this.builtinSkillsMap = new Map(builtinSkills.map((skill) => [skill.id, skill]));
+  constructor({ builtinProvider, persistedProvider, toolRegistry }: CreateSkillRegistryParams) {
+    this.builtinProvider = builtinProvider;
     this.persistedProvider = persistedProvider;
     this.toolRegistry = toolRegistry;
   }
 
+  private get orderedProviders(): SkillProvider[] {
+    return [this.builtinProvider, this.persistedProvider];
+  }
+
   async has(skillId: string): Promise<boolean> {
-    if (this.builtinSkillsMap.has(skillId)) {
-      return true;
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(skillId)) {
+        return true;
+      }
     }
-    return this.persistedProvider.has(skillId);
+    return false;
   }
 
-  async get(skillId: string): Promise<SkillDefinition | PublicSkillDefinition | undefined> {
-    const builtinSkill = this.builtinSkillsMap.get(skillId);
-    if (builtinSkill) {
-      return builtinSkill;
+  async get(skillId: string): Promise<InternalSkillDefinition> {
+    for (const provider of this.orderedProviders) {
+      const skill = await provider.get(skillId);
+      if (skill) {
+        return skill;
+      }
     }
-    return this.persistedProvider.get(skillId);
+    throw createSkillNotFoundError({ skillId });
   }
 
-  async list(): Promise<PublicSkillDefinition[]> {
-    const builtinPublic: PublicSkillDefinition[] = [...this.builtinSkillsMap.values()].map(
-      (skill) => ({
-        id: skill.id,
-        name: skill.name,
-        description: skill.description,
-        content: skill.content,
-        referenced_content: skill.referencedContent?.map((rc) => ({
-          name: rc.name,
-          relativePath: rc.relativePath,
-          content: rc.content,
-        })),
-        readonly: true,
-      })
-    );
-
-    const persistedSkills = await this.persistedProvider.list();
-
-    return [...builtinPublic, ...persistedSkills];
+  async list(): Promise<InternalSkillDefinition[]> {
+    const allSkills: InternalSkillDefinition[] = [];
+    for (const provider of this.orderedProviders) {
+      const skills = await provider.list();
+      allSkills.push(...skills);
+    }
+    return allSkills;
   }
 
-  async listSkillDefinitions(): Promise<SkillDefinition[]> {
-    return [...this.builtinSkillsMap.values()];
-  }
-
-  async create(createRequest: PersistedSkillCreateRequest): Promise<PublicSkillDefinition> {
+  async create(createRequest: PersistedSkillCreateRequest): Promise<InternalSkillDefinition> {
     const { id: skillId } = createRequest;
 
     const validationError = validateSkillId(skillId);
@@ -101,70 +102,40 @@ class SkillRegistryImpl implements SkillRegistry {
   async update(
     skillId: string,
     update: PersistedSkillUpdateRequest
-  ): Promise<PublicSkillDefinition> {
-    if (this.builtinSkillsMap.has(skillId)) {
-      throw createBadRequestError(`Skill '${skillId}' is read-only and can't be updated`);
-    }
-
-    if (!(await this.persistedProvider.has(skillId))) {
-      throw createBadRequestError(`Skill with id '${skillId}' not found`);
-    }
-
-    if (update.tool_ids) {
-      await this.validateToolIds(update.tool_ids);
-    }
-
-    return this.persistedProvider.update(skillId, update);
-  }
-
-  async delete(skillId: string): Promise<boolean> {
-    if (this.builtinSkillsMap.has(skillId)) {
-      throw createBadRequestError(`Skill '${skillId}' is read-only and can't be deleted`);
-    }
-
-    if (!(await this.persistedProvider.has(skillId))) {
-      throw createBadRequestError(`Skill with id '${skillId}' not found`);
-    }
-
-    return this.persistedProvider.delete(skillId);
-  }
-
-  async resolveSkillSelection(selection: SkillSelection[]): Promise<SkillDefinition[]> {
-    if (!selection || selection.length === 0) {
-      return [];
-    }
-
-    const result: SkillDefinition[] = [];
-    const seenIds = new Set<string>();
-
-    for (const sel of selection) {
-      for (const skillId of sel.skill_ids) {
-        if (skillId === allSkillsSelectionWildcard) {
-          for (const skill of this.builtinSkillsMap.values()) {
-            if (!seenIds.has(skill.id)) {
-              seenIds.add(skill.id);
-              result.push(skill);
-            }
-          }
-        } else if (!seenIds.has(skillId)) {
-          const builtinSkill = this.builtinSkillsMap.get(skillId);
-          if (builtinSkill) {
-            seenIds.add(skillId);
-            result.push(builtinSkill);
-          } else {
-            const persistedSkill = await this.persistedProvider.get(skillId);
-            if (persistedSkill) {
-              seenIds.add(skillId);
-              result.push(this.convertPersistedToSkillDefinition(persistedSkill));
-            }
-          }
+  ): Promise<InternalSkillDefinition> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(skillId)) {
+        if (isReadonlySkillProvider(provider)) {
+          throw createBadRequestError(`Skill '${skillId}' is read-only and can't be updated`);
         }
+
+        if (update.tool_ids) {
+          await this.validateToolIds(update.tool_ids);
+        }
+
+        return provider.update(skillId, update);
       }
     }
-
-    return result;
+    throw createSkillNotFoundError({ skillId });
   }
 
+  async delete(skillId: string): Promise<void> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(skillId)) {
+        if (isReadonlySkillProvider(provider)) {
+          throw createBadRequestError(`Skill '${skillId}' is read-only and can't be deleted`);
+        }
+        await provider.delete(skillId);
+        return;
+      }
+    }
+    throw createSkillNotFoundError({ skillId });
+  }
+
+  /**
+   * Validates that all tool IDs exist in the tool registry
+   * and enforces a maximum of 5 tools per skill.
+   */
   private async validateToolIds(toolIds: string[]): Promise<void> {
     if (!toolIds || toolIds.length === 0) {
       return;
@@ -188,22 +159,5 @@ class SkillRegistryImpl implements SkillRegistry {
         `Invalid tool IDs: ${invalidIds.join(', ')}. These tools do not exist in the tool registry.`
       );
     }
-  }
-
-  private convertPersistedToSkillDefinition(skill: PublicSkillDefinition): SkillDefinition {
-    const toolIds = skill.tool_ids ?? [];
-    return {
-      id: skill.id,
-      name: skill.name as any,
-      basePath: 'skills/platform' as any,
-      description: skill.description,
-      content: skill.content,
-      referencedContent: skill.referenced_content?.map((rc) => ({
-        name: rc.name,
-        relativePath: rc.relativePath,
-        content: rc.content,
-      })),
-      getAllowedTools: () => toolIds as any[],
-    };
   }
 }
