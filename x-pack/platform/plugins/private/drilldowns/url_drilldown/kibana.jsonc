@@ -13,7 +13,6 @@
     "server": true,
     "requiredPlugins": [
       "embeddable",
-      "uiActionsEnhanced"
     ],
     "requiredBundles": [
       "kibanaUtils",
