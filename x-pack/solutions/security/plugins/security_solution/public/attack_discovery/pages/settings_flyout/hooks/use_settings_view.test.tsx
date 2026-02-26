@@ -31,6 +31,7 @@ jest.mock('@elastic/eui', () => ({
 
 // Mock for discover-utils UI_SETTINGS in case META_FIELDS is imported from there
 jest.mock('@kbn/discover-utils', () => ({
+  ...jest.requireActual('@kbn/discover-utils/src/constants'),
   UI_SETTINGS: {
     META_FIELDS: 'metaFields',
     SORT_DEFAULT_ORDER_SETTING: 'discover:sort:defaultOrder',
