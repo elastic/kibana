@@ -1,5 +1,12 @@
 # Migration Workflow (Condensed)
 
+## TL;DR migration recipe
+
+- If the suite mostly validates **data correctness**, migrate it to a Scout **API** test (or unit/integration) instead of a Scout UI test.
+- Follow steps **1–9** below. Common migration failures: missing UI tags, wrong Scout package imports, relying on ordering/shared state, and ingestion/setup that isn’t space/parallel-safe.
+
+## Migration checklist
+
 Use this as a checklist when migrating FTR tests to Scout.
 
 ## 0) Key differences / constraints (FTR -> Scout) [scout-ftr-to-scout-mapping]
@@ -100,8 +107,3 @@ test('create and edit entity', async () => {
 - Prefer page object methods over direct selectors.
 - Preserve or update tags for deployment targets when needed.
 - Run Scout tests in both stateful and serverless if the plugin supports both.
-
-## TL;DR migration recipe [scout-ftr-to-scout-recipe]
-
-- If the suite mostly validates **data correctness**, migrate it to a Scout **API** test (or unit/integration) instead of a Scout UI test.
-- Follow steps **1–9** above. Common migration failures: missing UI tags, wrong Scout package imports, relying on ordering/shared state, and ingestion/setup that isn’t space/parallel-safe.
