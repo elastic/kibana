@@ -19,6 +19,7 @@ export const entityItemSchema = schema.object({
   type: schema.maybe(schema.string()),
   subType: schema.maybe(schema.string()),
   ecsParentField: schema.maybe(schema.string()),
+  // Risk score is not currently populated but will be in a future iteration
   risk: schema.maybe(schema.number()),
   icon: schema.maybe(schema.string()),
   availableInEntityStore: schema.maybe(schema.boolean()),

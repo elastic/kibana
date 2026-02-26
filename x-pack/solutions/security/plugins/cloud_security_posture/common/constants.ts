@@ -46,6 +46,12 @@ export const GRAPH_EVENTS_API_CURRENT_VERSION = '1';
  */
 export const GRAPH_DOCUMENT_DETAILS_LIMIT = 1000;
 
+/**
+ * Partial identifier for security alerts indices.
+ * Used to detect whether an index is an alerts index (e.g., for isAlert flag in ESQL queries).
+ */
+export const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
+
 export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
   '/internal/cloud_security_posture/rules/_bulk_action';
 export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';

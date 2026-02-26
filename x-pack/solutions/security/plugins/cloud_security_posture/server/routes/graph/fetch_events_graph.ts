@@ -25,6 +25,7 @@ import {
   buildEntityEnrichment,
   checkEnrichmentAvailability,
 } from './utils';
+import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
 
 interface BuildEsqlQueryParams {
@@ -84,7 +85,6 @@ export const fetchEvents = async ({
     logger,
     spaceId
   );
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
@@ -252,8 +252,6 @@ const buildEsqlQuery = ({
   alertsMappingsIncluded,
   pinnedIds,
 }: BuildEsqlQueryParams): string => {
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
-
   const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
 
   // Generate target entity ID collection logic

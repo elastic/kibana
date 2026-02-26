@@ -6,6 +6,7 @@
  */
 
 import type { EventsResponse } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
+import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import { fetchEvents } from './fetch';
 import { parseEventRecords } from './parse';
 import type { DocumentDetailsContextServices } from '../graph/types';
@@ -35,7 +36,10 @@ export const getEvents = async ({
   page,
 }: GetEventsParams): Promise<EventsResponse> => {
   // Default index patterns if not provided
-  const resolvedIndexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
+  const resolvedIndexPatterns = indexPatterns ?? [
+    `${SECURITY_ALERTS_PARTIAL_IDENTIFIER}${spaceId}`,
+    'logs-*',
+  ];
 
   logger.trace(
     `Fetching events [eventIds count: ${

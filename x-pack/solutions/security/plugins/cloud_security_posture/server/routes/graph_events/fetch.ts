@@ -11,7 +11,10 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { GRAPH_DOCUMENT_DETAILS_LIMIT } from '../../../common/constants';
+import {
+  GRAPH_DOCUMENT_DETAILS_LIMIT,
+  SECURITY_ALERTS_PARTIAL_IDENTIFIER,
+} from '../../../common/constants';
 import {
   buildActorEntityIdEval,
   buildTargetEntityIdEvals,
@@ -70,7 +73,7 @@ export const fetchEvents = async ({
       columnar: false,
       filter: buildDslFilter(eventIds, start, end),
       query,
-      // @ts-ignore - types are not up to date
+      // @ts-expect-error - esql helper params types are not up to date
       params: eventIds.map((id, idx) => ({ [`doc_id${idx}`]: id })),
     })
     .toRecords<EventRecord>();
@@ -113,8 +116,6 @@ const buildEventsEsqlQuery = ({
   spaceId,
   limit,
 }: BuildEventsQueryParams): string => {
-  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
-
   // Generate document ID params
   const documentIdParams = Array.from({ length: eventCount }, (_, idx) => `?doc_id${idx}`).join(
     ', '
@@ -140,7 +141,7 @@ ${buildSourceMetadataEvals()}
 // Aggregate by document ID to ensure each document appears only once
 | STATS eventId = MIN(eventId),
   index = MIN(index),
-  timestamp = VALUES(timestamp),
+  timestamp = MAX(timestamp),
   action = MIN(action),
   isAlert = MAX(isAlert),
   actorEntityId = MIN(actorEntityId),

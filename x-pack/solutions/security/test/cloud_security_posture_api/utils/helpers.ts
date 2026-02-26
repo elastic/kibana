@@ -78,15 +78,16 @@ export const loadAlertArchive = async ({
 }): Promise<void> => {
   const archiveIndex = '.internal.alerts-security.alerts-default-000001';
 
-  // Delete any leftover internal alerts indices from Kibana startup or previous test suites
+  // Delete only the specific archive index if it exists from a previous test suite.
+  // We avoid a broad wildcard delete (e.g., -default-*) to prevent interfering
+  // with other test suites that may have created their own alert indices.
   try {
     await es.indices.delete({
-      index: '.internal.alerts-security.alerts-default-*',
-      allow_no_indices: true,
+      index: archiveIndex,
       expand_wildcards: ['open', 'closed', 'hidden'],
     });
   } catch (e) {
-    // Ignore if indices don't exist
+    // Ignore if index doesn't exist
   }
 
   try {
