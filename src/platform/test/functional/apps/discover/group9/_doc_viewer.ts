@@ -277,7 +277,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
         });
 
-        const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
+        await discover.openFilterByFieldTypeInDocViewer();
+        await testSubjects.click('typeFilter-keyword');
+
+        const initialFieldsCount = 8;
+        await retry.waitFor('filter applied', async () => {
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === initialFieldsCount;
+        });
+        await discover.closeFilterByFieldTypeInDocViewer();
 
         let hideNullValuesSwitch = await testSubjects.find('unifiedDocViewerHideNullValuesSwitch');
         await hideNullValuesSwitch.click();
