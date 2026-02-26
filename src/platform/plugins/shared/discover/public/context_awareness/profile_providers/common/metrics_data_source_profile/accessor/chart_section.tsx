@@ -8,7 +8,6 @@
  */
 
 import React, { useCallback } from 'react';
-import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import {
