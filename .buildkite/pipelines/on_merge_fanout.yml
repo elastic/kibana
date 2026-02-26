@@ -18,7 +18,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
     cancel_on_build_failing: true
@@ -36,7 +36,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     cancel_on_build_failing: true
@@ -54,7 +54,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     cancel_on_build_failing: true
@@ -72,7 +72,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
     cancel_on_build_failing: true
@@ -90,7 +90,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
     cancel_on_build_failing: true
@@ -108,7 +108,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
     cancel_on_build_failing: true
@@ -126,7 +126,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
     cancel_on_build_failing: true
@@ -144,7 +144,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     cancel_on_build_failing: true
@@ -162,7 +162,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
     cancel_on_build_failing: true
@@ -180,7 +180,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
     cancel_on_build_failing: true
@@ -198,7 +198,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
     cancel_on_build_failing: true
@@ -216,7 +216,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
     cancel_on_build_failing: true
@@ -234,7 +234,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     cancel_on_build_failing: true
@@ -252,7 +252,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
     cancel_on_build_failing: true
@@ -270,7 +270,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     cancel_on_build_failing: true
@@ -288,7 +288,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
     cancel_on_build_failing: true
@@ -306,7 +306,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
     cancel_on_build_failing: true
@@ -324,7 +324,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
     cancel_on_build_failing: true
@@ -342,7 +342,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     cancel_on_build_failing: true
@@ -360,7 +360,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
     cancel_on_build_failing: true
@@ -378,7 +378,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     cancel_on_build_failing: true
@@ -396,7 +396,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     cancel_on_build_failing: true
@@ -414,7 +414,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     cancel_on_build_failing: true
@@ -432,7 +432,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     cancel_on_build_failing: true
@@ -452,7 +452,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     cancel_on_build_failing: true
@@ -472,7 +472,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     cancel_on_build_failing: true
@@ -490,4 +490,4 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3

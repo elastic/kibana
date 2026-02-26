@@ -47,6 +47,10 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'

@@ -37,3 +37,7 @@ steps:
       - jest-integration
     timeout_in_minutes: 50
     key: ingest
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

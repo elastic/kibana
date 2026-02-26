@@ -13,7 +13,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3
 
   - command: .buildkite/scripts/steps/functional/asset_inventory.sh
     cancel_on_build_failing: true
@@ -29,4 +29,4 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 1
+          limit: 3

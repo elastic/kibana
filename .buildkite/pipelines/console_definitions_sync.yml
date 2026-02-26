@@ -8,3 +8,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
