@@ -8395,68 +8395,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-language",
-        "id": "def-common.getBinaryOperatorParamTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "getBinaryOperatorParamTypes",
-        "description": [],
-        "signature": [
-          "(operator: string, paramIndex: number) => ",
-          {
-            "pluginId": "@kbn/esql-language",
-            "scope": "common",
-            "docId": "kibKbnEsqlLanguagePluginApi",
-            "section": "def-common.PromQLFunctionParamType",
-            "text": "PromQLFunctionParamType"
-          },
-          "[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 189,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-language",
-            "id": "def-common.getBinaryOperatorParamTypes.$1",
-            "type": "string",
-            "tags": [],
-            "label": "operator",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 190,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-language",
-            "id": "def-common.getBinaryOperatorParamTypes.$2",
-            "type": "number",
-            "tags": [],
-            "label": "paramIndex",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 191,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-language",
         "id": "def-common.getHoverItem",
         "type": "Function",
         "tags": [],
@@ -8560,7 +8498,7 @@
           ") => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 211,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8582,62 +8520,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 211,
+            "lineNumber": 114,
             "columnNumber": 42,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-language",
-        "id": "def-common.getMetricTypesForSignature",
-        "type": "Function",
-        "tags": [],
-        "label": "getMetricTypesForSignature",
-        "description": [
-          "Derives ES|QL types from PromQL function signature types."
-        ],
-        "signature": [
-          "(signatureTypes: ",
-          {
-            "pluginId": "@kbn/esql-language",
-            "scope": "common",
-            "docId": "kibKbnEsqlLanguagePluginApi",
-            "section": "def-common.PromQLFunctionParamType",
-            "text": "PromQLFunctionParamType"
-          },
-          "[]) => readonly string[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 251,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-language",
-            "id": "def-common.getMetricTypesForSignature.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "signatureTypes",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-language",
-                "scope": "common",
-                "docId": "kibKbnEsqlLanguagePluginApi",
-                "section": "def-common.PromQLFunctionParamType",
-                "text": "PromQLFunctionParamType"
-              },
-              "[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 253,
-            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -8702,6 +8586,105 @@
       },
       {
         "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.getPreGroupedAggregationName",
+        "type": "Function",
+        "tags": [],
+        "label": "getPreGroupedAggregationName",
+        "description": [],
+        "signature": [
+          "(textBeforeCursor: string) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.getPreGroupedAggregationName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "textBeforeCursor",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
+            "lineNumber": 102,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
+        "id": "def-common.getPromqlBinaryOperatorParamTypes",
+        "type": "Function",
+        "tags": [],
+        "label": "getPromqlBinaryOperatorParamTypes",
+        "description": [],
+        "signature": [
+          "(operator: string, paramIndex: number) => ",
+          {
+            "pluginId": "@kbn/esql-language",
+            "scope": "common",
+            "docId": "kibKbnEsqlLanguagePluginApi",
+            "section": "def-common.PromQLFunctionParamType",
+            "text": "PromQLFunctionParamType"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.getPromqlBinaryOperatorParamTypes.$1",
+            "type": "string",
+            "tags": [],
+            "label": "operator",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.getPromqlBinaryOperatorParamTypes.$2",
+            "type": "number",
+            "tags": [],
+            "label": "paramIndex",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-language",
         "id": "def-common.getPromqlFunctionDefinition",
         "type": "Function",
         "tags": [],
@@ -8719,7 +8702,7 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 102,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8735,7 +8718,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 103,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8747,13 +8730,13 @@
       },
       {
         "parentPluginId": "@kbn/esql-language",
-        "id": "def-common.getPromqlFunctionSuggestions",
+        "id": "def-common.getPromqlFunctionParamTypes",
         "type": "Function",
         "tags": [],
-        "label": "getPromqlFunctionSuggestions",
+        "label": "getPromqlFunctionParamTypes",
         "description": [],
         "signature": [
-          "(returnTypes?: ",
+          "(name: string | undefined, paramIndex: number) => ",
           {
             "pluginId": "@kbn/esql-language",
             "scope": "common",
@@ -8761,62 +8744,49 @@
             "section": "def-common.PromQLFunctionParamType",
             "text": "PromQLFunctionParamType"
           },
-          "[]) => ",
-          "ISuggestionItem",
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 82,
-        "columnNumber": 14,
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/esql-language",
-            "id": "def-common.getPromqlFunctionSuggestions.$1",
-            "type": "Array",
+            "id": "def-common.getPromqlFunctionParamTypes.$1",
+            "type": "string",
             "tags": [],
-            "label": "returnTypes",
+            "label": "name",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/esql-language",
-                "scope": "common",
-                "docId": "kibKbnEsqlLanguagePluginApi",
-                "section": "def-common.PromQLFunctionParamType",
-                "text": "PromQLFunctionParamType"
-              },
-              "[]"
+              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 83,
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-language",
+            "id": "def-common.getPromqlFunctionParamTypes.$2",
+            "type": "number",
+            "tags": [],
+            "label": "paramIndex",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-language",
-        "id": "def-common.getPromqlLabelMatcherSuggestions",
-        "type": "Function",
-        "tags": [],
-        "label": "getPromqlLabelMatcherSuggestions",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ISuggestionItem",
-          "[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 205,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -8839,7 +8809,7 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 114,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8855,94 +8825,11 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 115,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-language",
-        "id": "def-common.getPromqlOperatorSuggestions",
-        "type": "Function",
-        "tags": [],
-        "label": "getPromqlOperatorSuggestions",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ISuggestionItem",
-          "[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 174,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-language",
-        "id": "def-common.getPromqlParamTypesForFunction",
-        "type": "Function",
-        "tags": [],
-        "label": "getPromqlParamTypesForFunction",
-        "description": [],
-        "signature": [
-          "(name: string | undefined, paramIndex: number) => ",
-          {
-            "pluginId": "@kbn/esql-language",
-            "scope": "common",
-            "docId": "kibKbnEsqlLanguagePluginApi",
-            "section": "def-common.PromQLFunctionParamType",
-            "text": "PromQLFunctionParamType"
-          },
-          "[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 130,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-language",
-            "id": "def-common.getPromqlParamTypesForFunction.$1",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 131,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-language",
-            "id": "def-common.getPromqlParamTypesForFunction.$2",
-            "type": "number",
-            "tags": [],
-            "label": "paramIndex",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 132,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -10186,7 +10073,7 @@
           "(name: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-        "lineNumber": 145,
+        "lineNumber": 88,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10202,7 +10089,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/promql.ts",
-            "lineNumber": 145,
+            "lineNumber": 88,
             "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
