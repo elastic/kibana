@@ -39,7 +39,6 @@ export const ErrorCallOut: React.FC = () => {
     formState: { errors, isSubmitted },
   } = useFormContext<FormValues>();
 
-  // Show callout only after form submission and when there are errors
   const shouldShowCallout = isSubmitted && Object.keys(errors).length > 0;
 
   if (!shouldShowCallout) {
