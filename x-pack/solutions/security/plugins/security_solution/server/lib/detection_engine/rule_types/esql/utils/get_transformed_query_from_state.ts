@@ -46,7 +46,7 @@ export const getTransformedQueryFromState = async ({
     return originalQuery;
   }
 
-  // if query not changed return early to avoid unnecesary validation
+  // if query not changed return early to avoid unnecessary validation
   if (candidateQuery === originalQuery) {
     return originalQuery;
   }
