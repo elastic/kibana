@@ -202,6 +202,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
               coreContext.uiSettings.client.get<string | undefined>(
                 LEGACY_ANONYMIZATION_UI_SETTING_KEY
               ),
+            forceEnsure: true,
           });
           const result = await repo.find({
             namespace,

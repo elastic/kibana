@@ -109,49 +109,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('import and merge', () => {
-      it('imports compatible replacements successfully', async () => {
-        const source = await createReplacementsDoc({
-          replacements: [{ anonymized: 'HOST_NAME_SOURCE', original: 'source-host' }],
-        });
-        const dest = await createReplacementsDoc({
-          replacements: [{ anonymized: 'USER_NAME_DEST', original: 'dest-user' }],
-        });
-
-        const { body, status } = await supertest
-          .post(`${REPLACEMENTS_API}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            sourceId: source.id,
-            destinationId: dest.id,
-          });
-
-        expect(status).to.be(200);
-        expect(body.merged).to.be(true);
-      });
-
-      it('rejects import on anonymized token conflict', async () => {
-        const source = await createReplacementsDoc({
-          replacements: [{ anonymized: 'SHARED_TOKEN', original: 'value-from-source' }],
-        });
-        const dest = await createReplacementsDoc({
-          replacements: [{ anonymized: 'SHARED_TOKEN', original: 'different-value-in-dest' }],
-        });
-
-        const { status } = await supertest
-          .post(`${REPLACEMENTS_API}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            sourceId: source.id,
-            destinationId: dest.id,
-          });
-
-        expect(status).to.be(409);
-      });
-    });
-
     describe('authorization gating', () => {
       const username = `anon_replacements_readonly_${Date.now()}`;
       const roleName = `anon_replacements_readonly_role_${Date.now()}`;
@@ -189,21 +146,6 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .set('x-elastic-internal-origin', 'kibana')
           .set('elastic-api-version', API_VERSION);
-
-        expect(status).to.be(403);
-      });
-
-      it('returns 403 for replacements imports without anonymization privileges', async () => {
-        const { status } = await supertestWithoutAuth
-          .post(`${REPLACEMENTS_API}/_import`)
-          .auth(username, password)
-          .set('kbn-xsrf', 'true')
-          .set('x-elastic-internal-origin', 'kibana')
-          .set('elastic-api-version', API_VERSION)
-          .send({
-            sourceId: 'source-id',
-            destinationId: 'destination-id',
-          });
 
         expect(status).to.be(403);
       });

@@ -108,7 +108,10 @@ export const anonymizationProfileSchema = z.object({
   targetId: z.string(),
   /** Per-field and text-scanning rules. */
   rules: anonymizationProfileRulesSchema,
-  /** Reference to the per-space encrypted salt used for deterministic tokenization. */
+  /**
+   * Derived per-space salt key identifier (`salt-${namespace}`) used by profile APIs.
+   * This is not the encrypted saved object document ID.
+   */
   saltId: z.string(),
   /** Space identifier. */
   namespace: z.string(),

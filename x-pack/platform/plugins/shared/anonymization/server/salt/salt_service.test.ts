@@ -11,9 +11,10 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import { SaltService, ANONYMIZATION_SALT_SAVED_OBJECT_TYPE } from './salt_service';
 
 describe('SaltService namespace handling', () => {
-  it('writes salts in default space with undefined namespace', async () => {
+  it('writes salts using a namespace-scoped internal SO client in default space', async () => {
     const create = jest.fn().mockResolvedValue(undefined);
-    const getUnsafeInternalClient = jest.fn().mockReturnValue({ create });
+    const asScopedToNamespace = jest.fn().mockReturnValue({ create });
+    const getUnsafeInternalClient = jest.fn().mockReturnValue({ asScopedToNamespace });
     const savedObjects = { getUnsafeInternalClient } as unknown as SavedObjectsServiceStart;
 
     const getDecryptedAsInternalUser = jest.fn().mockRejectedValue({ statusCode: 404 });
@@ -24,16 +25,18 @@ describe('SaltService namespace handling', () => {
 
     await service.getSalt('default');
 
-    expect(create.mock.calls[0][2]).toEqual(
-      expect.objectContaining({
-        namespace: undefined,
-      })
+    expect(asScopedToNamespace).toHaveBeenCalledWith('default');
+    expect(create).toHaveBeenCalledWith(
+      ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
+      expect.any(Object),
+      expect.objectContaining({ id: expect.any(String) })
     );
   });
 
-  it('writes salts in non-default space using that namespace', async () => {
+  it('writes salts using a namespace-scoped internal SO client in non-default space', async () => {
     const create = jest.fn().mockResolvedValue(undefined);
-    const getUnsafeInternalClient = jest.fn().mockReturnValue({ create });
+    const asScopedToNamespace = jest.fn().mockReturnValue({ create });
+    const getUnsafeInternalClient = jest.fn().mockReturnValue({ asScopedToNamespace });
     const savedObjects = { getUnsafeInternalClient } as unknown as SavedObjectsServiceStart;
 
     const getDecryptedAsInternalUser = jest.fn().mockRejectedValue({ statusCode: 404 });
@@ -44,16 +47,18 @@ describe('SaltService namespace handling', () => {
 
     await service.getSalt('security');
 
-    expect(create.mock.calls[0][2]).toEqual(
-      expect.objectContaining({
-        namespace: 'security',
-      })
+    expect(asScopedToNamespace).toHaveBeenCalledWith('security');
+    expect(create).toHaveBeenCalledWith(
+      ANONYMIZATION_SALT_SAVED_OBJECT_TYPE,
+      expect.any(Object),
+      expect.objectContaining({ id: expect.any(String) })
     );
   });
 
   it('uses hidden type for reads and writes', async () => {
     const create = jest.fn().mockResolvedValue(undefined);
-    const getUnsafeInternalClient = jest.fn().mockReturnValue({ create });
+    const asScopedToNamespace = jest.fn().mockReturnValue({ create });
+    const getUnsafeInternalClient = jest.fn().mockReturnValue({ asScopedToNamespace });
     const savedObjects = { getUnsafeInternalClient } as unknown as SavedObjectsServiceStart;
 
     const getDecryptedAsInternalUser = jest.fn().mockRejectedValue({ statusCode: 404 });
@@ -67,5 +72,6 @@ describe('SaltService namespace handling', () => {
     expect(getUnsafeInternalClient).toHaveBeenCalledWith({
       includedHiddenTypes: [ANONYMIZATION_SALT_SAVED_OBJECT_TYPE],
     });
+    expect(asScopedToNamespace).toHaveBeenCalled();
   });
 });

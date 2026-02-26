@@ -182,6 +182,38 @@ export default function ({ getService }: FtrProviderContext) {
         expect(globalProfile.rules.fieldRules).to.eql([]);
       });
 
+      it('recreates global profile immediately on _find after deletion', async () => {
+        const findResponse = await supertest
+          .get(`${PROFILES_API}/_find`)
+          .set('elastic-api-version', API_VERSION);
+
+        expect(findResponse.status).to.be(200);
+        const globalProfile = findResponse.body.data.find(
+          (profile: { id: string; targetType: string; targetId: string }) =>
+            profile.targetType === GLOBAL_PROFILE_TARGET_TYPE &&
+            profile.targetId === GLOBAL_PROFILE_TARGET_ID
+        );
+        expect(globalProfile).to.be.ok();
+
+        const deleteResponse = await supertest
+          .delete(`${PROFILES_API}/${globalProfile.id}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', API_VERSION);
+        expect(deleteResponse.status).to.be(200);
+
+        const healResponse = await supertest
+          .get(`${PROFILES_API}/_find`)
+          .set('elastic-api-version', API_VERSION);
+        expect(healResponse.status).to.be(200);
+
+        const healedGlobalProfile = healResponse.body.data.find(
+          (profile: { targetType: string; targetId: string }) =>
+            profile.targetType === GLOBAL_PROFILE_TARGET_TYPE &&
+            profile.targetId === GLOBAL_PROFILE_TARGET_ID
+        );
+        expect(healedGlobalProfile).to.be.ok();
+      });
+
       it('rejects non-empty fieldRules on create for global profile', async () => {
         const { body, status } = await supertest
           .post(PROFILES_API)

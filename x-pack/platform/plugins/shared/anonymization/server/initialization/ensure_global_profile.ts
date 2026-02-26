@@ -49,11 +49,13 @@ export const ensureGlobalProfileForNamespace = async ({
   profilesRepo,
   logger,
   getLegacySettingsString,
+  forceEnsure = false,
 }: {
   namespace: string;
   profilesRepo: ProfilesRepository;
   logger: Logger;
   getLegacySettingsString?: () => Promise<string | undefined>;
+  forceEnsure?: boolean;
 }): Promise<void> => {
   const now = Date.now();
   const currentState = ensuredStateByNamespace.get(namespace);
@@ -74,7 +76,11 @@ export const ensureGlobalProfileForNamespace = async ({
     return;
   }
 
-  if (currentState && now - currentState.lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS) {
+  if (
+    !forceEnsure &&
+    currentState &&
+    now - currentState.lastEnsuredAt < ENSURE_GLOBAL_PROFILE_CACHE_MS
+  ) {
     return;
   }
 

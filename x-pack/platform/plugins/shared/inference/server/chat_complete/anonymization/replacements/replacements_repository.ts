@@ -284,7 +284,10 @@ export class ReplacementsRepository {
       }
     }
 
-    throw this.setStatusCode(new Error('Failed to update replacements due to repeated conflicts'), 409);
+    throw this.setStatusCode(
+      new Error('Failed to update replacements due to repeated conflicts'),
+      409
+    );
   }
 
   /**

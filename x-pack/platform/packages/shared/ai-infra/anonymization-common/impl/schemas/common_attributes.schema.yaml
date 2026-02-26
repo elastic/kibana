@@ -218,6 +218,7 @@ components:
           $ref: '#/components/schemas/AnonymizationProfileRules'
         saltId:
           type: string
+          description: Derived per-space salt key identifier (`salt-${namespace}`) used by profile APIs (not an encrypted saved object document id).
           example: salt-default
         namespace:
           type: string
