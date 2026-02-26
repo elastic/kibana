@@ -6,18 +6,18 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { LineClamp } from '../../../common/components/line_clamp';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import { useIsAlertDocument } from '../../shared/hooks/use_is_alert_document';
 
 export interface AlertDescriptionProps {
   /**
@@ -42,7 +42,7 @@ export const AlertDescription: FC<AlertDescriptionProps> = ({
   onShowRuleSummary,
   ruleSummaryDisabled,
 }) => {
-  const isAlert = useIsAlertDocument(hit);
+  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
 
   const ruleDescription = useMemo(
     () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
