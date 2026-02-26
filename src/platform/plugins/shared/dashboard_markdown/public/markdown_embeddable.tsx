@@ -120,10 +120,12 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     return {
       api,
       Component: function MarkdownEmbeddableComponent() {
-        const [content, isEditing, viewMode] = useBatchedPublishingSubjects(
+        const [content, isEditing, viewMode, title, hideTitle] = useBatchedPublishingSubjects(
           markdownStateManager.api.content$,
           isEditing$,
-          getViewModeSubject(api) ?? new BehaviorSubject('view')
+          getViewModeSubject(api) ?? new BehaviorSubject('view'),
+          titleManager.api.title$,
+          titleManager.api.hideTitle$
         );
 
         const { processingPlugins: processingPluginList, uiPlugins } =
@@ -138,7 +140,11 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 
         const editorContent =
           viewMode === 'view' || !isEditing ? (
-            <MarkdownRenderer processingPluginList={processingPluginList} content={content} />
+            <MarkdownRenderer
+              processingPluginList={processingPluginList}
+              content={content}
+              title={hideTitle ? undefined : title} // we will reduce the upper padding when the panel has a title
+            />
           ) : (
             <MarkdownEditor
               uiPlugins={uiPlugins}
