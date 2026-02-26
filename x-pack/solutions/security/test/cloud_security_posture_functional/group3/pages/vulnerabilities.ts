@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { vulnerabilitiesLatestMock } from '../../../mocks/vulnerabilities_latest_mock';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { vulnerabilitiesLatestMock } from '../../mocks/vulnerabilities_latest_mock';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

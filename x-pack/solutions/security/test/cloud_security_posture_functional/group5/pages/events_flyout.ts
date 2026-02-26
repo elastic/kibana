@@ -14,8 +14,8 @@ import {
   executeEnrichPolicy,
   dataViewRouteHelpersFactory,
   initEntityEnginesWithRetry,
-} from '../../../../cloud_security_posture_api/utils';
-import type { SecurityTelemetryFtrProviderContext } from '../../../config.base';
+} from '../../../cloud_security_posture_api/utils';
+import type { SecurityTelemetryFtrProviderContext } from '../../config.base';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: SecurityTelemetryFtrProviderContext) {

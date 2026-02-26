@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { k8sFindingsMock } from '../../../../mocks/latest_findings_mock';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { k8sFindingsMock } from '../../../mocks/latest_findings_mock';
 import {
   RULES_BULK_ACTION_OPTION_DISABLE,
   RULES_BULK_ACTION_OPTION_ENABLE,
-} from '../../../../page_objects/rule_page';
+} from '../../../page_objects/rule_page';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
