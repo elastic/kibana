@@ -97,6 +97,16 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
+  const authHeaderConflictCases: Array<[string, { auth?: {}; secrets?: {} }]> = [
+    ['username/password', { auth: { username: 'testuser', password: 'testpassword' } }],
+    [
+      'username/password as secret',
+      { auth: { username: 'testuser' }, secrets: { auth: { password: 'testpassword' } } },
+    ],
+    ['api_key', { auth: { api_key: 'my-api-key' } }],
+    ['api_key as secret', { secrets: { auth: { api_key: 'my-api-key' } } }],
+  ];
+
   describe('fleet_download_sources_crud', function () {
     let defaultDownloadSourceId: string;
     let fleetServerPolicyId: string;
@@ -505,15 +515,6 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      const authHeaderConflictCases: Array<[string, { auth?: {}; secrets?: {} }]> = [
-        ['username/password', { auth: { username: 'testuser', password: 'testpassword' } }],
-        [
-          'username/password as secret',
-          { auth: { username: 'testuser' }, secrets: { auth: { password: 'testpassword' } } },
-        ],
-        ['api_key', { auth: { api_key: 'my-api-key' } }],
-        ['api_key as secret', { secrets: { auth: { api_key: 'my-api-key' } } }],
-      ];
       authHeaderConflictCases.forEach(([description, { auth, secrets }]) => {
         it(`should return 400 when Authorization header is combined with ${description} credentials on create`, async function () {
           const baseAuth = {
@@ -823,15 +824,6 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      const authHeaderConflictCases: Array<[string, { auth?: {}; secrets?: {} }]> = [
-        ['username/password', { auth: { username: 'testuser', password: 'testpassword' } }],
-        [
-          'username/password as secret',
-          { auth: { username: 'testuser' }, secrets: { auth: { password: 'testpassword' } } },
-        ],
-        ['api_key', { auth: { api_key: 'my-api-key' } }],
-        ['api_key as secret', { secrets: { auth: { api_key: 'my-api-key' } } }],
-      ];
       authHeaderConflictCases.forEach(([description, { auth, secrets }]) => {
         it(`should return 400 when Authorization header is combined with ${description} credentials on update`, async function () {
           const { body: createRes } = await supertest
