@@ -16,6 +16,7 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
       offset={0}
       minHeight={0}
       restrictWidth={false}
+      paddingSize="m"
       className={css`
         height: 0;
       `}

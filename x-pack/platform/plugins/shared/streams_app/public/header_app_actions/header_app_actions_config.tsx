@@ -99,6 +99,14 @@ export function getStreamsHeaderAppActionsConfig(
             icon: 'gear',
             onClick: onSettings,
           },
+          { isSeparator: true as const, key: 'sepFeedback' },
+          {
+            name: i18n.translate('xpack.streams.headerAppActions.feedback', {
+              defaultMessage: 'Feedback',
+            }),
+            icon: 'comment',
+            onClick: noop,
+          },
         ],
       },
     ],

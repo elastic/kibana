@@ -133,7 +133,6 @@ export function WelcomeTourCallout({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <EuiSpacer size="l" />
     </>
   );
 }
