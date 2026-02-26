@@ -29,12 +29,12 @@ export const Default: Story = {
           data_retention: '30d',
           downsample: [
             {
-              after: '30d',
+              after: '5d',
               fixed_interval: '1h',
             },
             {
-              after: '40d',
-              fixed_interval: '5d',
+              after: '10d',
+              fixed_interval: '2h',
             },
           ],
         },
