@@ -14,6 +14,7 @@ import { registerUpdateRoute } from './update';
 import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
 import { registerReadRoute } from './read';
+import { registerExportSourceRoute } from './export_source';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const { versioned: versionedRouter } = http.createRouter();
@@ -22,4 +23,5 @@ export function registerRoutes(http: HttpServiceSetup) {
   registerUpdateRoute(versionedRouter);
   registerDeleteRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
+  registerExportSourceRoute(versionedRouter);
 }
