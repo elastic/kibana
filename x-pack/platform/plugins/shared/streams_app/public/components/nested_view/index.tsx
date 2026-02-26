@@ -14,15 +14,18 @@ export function NestedView({
   last,
   first,
   isBeingDragged,
+  useDarkBorders = false,
 }: {
   children: React.ReactNode;
   last?: boolean;
   first?: boolean;
   isBeingDragged?: boolean;
+  useDarkBorders?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
 
-  const borderStyle = `${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade}`;
+  const borderColor = useDarkBorders ? euiTheme.colors.darkShade : euiTheme.border.color;
+  const borderStyle = `${euiTheme.border.width.thin} solid ${borderColor}`;
 
   return isBeingDragged ? (
     <>{children}</>

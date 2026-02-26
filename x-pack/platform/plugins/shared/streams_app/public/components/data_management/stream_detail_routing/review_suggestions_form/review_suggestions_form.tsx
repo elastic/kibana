@@ -179,10 +179,17 @@ export function ReviewSuggestionsForm({
               })}
               aria-label={masterCheckboxLabel}
               data-test-subj="streamsAppMasterSuggestionCheckbox"
+              className={css`
+                margin-left: 16px;
+              `}
             />
             <EuiSpacer size="m" />
             {suggestions.map((partition, index) => (
-              <NestedView key={partition.name} last={index === suggestions.length - 1}>
+              <NestedView
+                key={partition.name}
+                last={index === suggestions.length - 1}
+                useDarkBorders
+              >
                 <SuggestedStreamPanel
                   definition={definition}
                   partition={partition}
