@@ -36,14 +36,12 @@ import {
 import {
   actionTaskParamsModelVersions,
   connectorModelVersions,
+  connectorTokenModelVersions,
   oauthStateModelVersions,
   userConnectorTokenModelVersions,
 } from './model_versions';
 import { connectorModelVersionsWithAuthMode } from './model_versions/connector_model_versions';
-import {
-  connectorTokenModelVersions,
-  connectorTokenModelVersionsWithRefreshToken,
-} from './model_versions/connector_token_model_versions';
+import { connectorTokenModelVersionsWithRefreshToken } from './model_versions/connector_token_model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
