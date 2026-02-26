@@ -23,10 +23,8 @@ import { type AppStateUrl, cleanupUrlState } from '../../utils/cleanup_url_state
 import { getEsqlDataView } from '../../utils/get_esql_data_view';
 import { loadAndResolveDataView } from '../../utils/resolve_data_view';
 import { isDataViewSource } from '../../../../../../common/data_sources';
-import { copySavedSearch } from '../../discover_saved_search_container';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
-import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
@@ -193,7 +191,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         dataViewId,
         locationDataViewSpec: dataViewSpec,
         initialAdHocDataViewSpec,
-        savedSearch: persistedTabSavedSearch,
+        currentDataView: persistedTabDataView,
         isEsqlMode,
         services,
         internalState: stateContainer.internalState,
@@ -228,8 +226,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       initialGlobalState.filters = urlGlobalState.filters;
     }
 
-    // Get the initial app state based on a combo of the URL and persisted tab saved search,
-    // then get an updated copy of the saved search with the applied initial state
+    // Get the initial app state based on a combo of the URL and persisted tab saved search
     const initialAppState = getInitialAppState({
       initialUrlState: urlAppState,
       hasGlobalState: Object.keys(urlGlobalState || {}).length > 0,
@@ -237,16 +234,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dataView,
       services,
       defaultProfileEsqlQuery: getState().defaultProfileEsqlQuery,
-    });
-
-    const savedSearch = updateSavedSearch({
-      savedSearch: persistedTabSavedSearch
-        ? copySavedSearch(persistedTabSavedSearch)
-        : services.savedSearch.getNew(),
-      dataView,
-      appState: initialAppState,
-      globalState: initialGlobalState,
-      services,
     });
 
     /**
@@ -306,16 +293,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Update state containers
      */
 
-    if (persistedTabSavedSearch) {
-      // Set the persisted tab saved search first, then assign the
-      // updated saved search to ensure unsaved changes are detected
-      stateContainer.savedSearchState.set(persistedTabSavedSearch);
-      stateContainer.savedSearchState.assignNextSavedSearch(savedSearch);
-    } else {
-      stateContainer.savedSearchState.set(savedSearch);
-    }
-
-    // Make sure app state is completely reset
+    // Make sure app state state is completely reset
     dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
 
     // Set runtime state
