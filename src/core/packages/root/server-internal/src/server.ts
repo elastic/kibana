@@ -537,7 +537,8 @@ export class Server {
 
     this.coreApp.start(this.coreStart);
 
-    await this.plugins.start(this.coreStart);
+    const { contracts } = await this.plugins.start(this.coreStart);
+    this.coreStart._plugins = contracts;
 
     await this.http.start();
 

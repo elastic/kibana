@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
 type Response = Array<{
   _id: string;
@@ -52,6 +53,6 @@ export const executeEsqlRequest = async ({
       error instanceof Error ? error.message : String(error)
     }`;
     logger.debug(message);
-    throw new Error(message);
+    throw createTaskRunError(new Error(message), TaskErrorSource.USER);
   }
 };
