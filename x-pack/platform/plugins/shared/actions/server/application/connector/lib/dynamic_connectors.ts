@@ -67,11 +67,11 @@ export function updateDynamicInMemoryConnectors(
   return addedConnectors;
 }
 
-function getConnectorIdFromEndpoint(endpoint: InferenceInferenceEndpointInfo) {
+function getConnectorIdFromEndpoint(endpoint: InferenceInferenceEndpointInfo): string {
   return endpoint.inference_id;
 }
 
-function getConnectorNameFromEndpoint(endpoint: InferenceInferenceEndpointInfo) {
+function getConnectorNameFromEndpoint(endpoint: InferenceInferenceEndpointInfo): string {
   const modelId = endpoint.service_settings?.model_id;
   if (modelId) {
     // This is a hack until we have a display name available from the endpoint metadata.

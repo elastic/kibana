@@ -24,7 +24,7 @@ export class DynamicConnectorsPoller {
   private readonly client: ElasticsearchClient;
   private readonly actions: ActionsPluginStartContract;
   private readonly pollingIntervalMs: number;
-  private readonly polling$: Observable<any>;
+  private readonly polling$: Observable<unknown>;
   private subscription: Subscription | undefined;
 
   constructor(
@@ -112,8 +112,8 @@ export class DynamicConnectorsPoller {
     }
   }
 
-  private handleError(error: any, _caught$: Observable<any>): Observable<any> {
+  private handleError(error: unknown, _caught$: Observable<unknown>): Observable<never> {
     this.logger.error(`Error polling inference endpoints for dynamic connectors.`, { error });
-    throw error;
+    return Rx.throwError(() => error);
   }
 }

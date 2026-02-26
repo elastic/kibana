@@ -34,8 +34,8 @@ describe('DynamicConnectorsPoller', () => {
   };
   const actions = mockActions as unknown as ActionsPluginStartContract;
   let poller: DynamicConnectorsPoller;
-  const pollingInervalMins = 1;
-  const pollingIntervalMs = pollingInervalMins * 60 * 1000;
+  const pollingIntervalMins = 1;
+  const pollingIntervalMs = pollingIntervalMins * 60 * 1000;
   const testInitialAdvance = initialDelayMs + 100;
 
   beforeEach(() => {
@@ -46,7 +46,7 @@ describe('DynamicConnectorsPoller', () => {
     });
     mockActions.updateDynamicInMemoryConnectors.mockReturnValue(true);
 
-    poller = new DynamicConnectorsPoller(logger, actions, client, pollingInervalMins);
+    poller = new DynamicConnectorsPoller(logger, actions, client, pollingIntervalMins);
   });
 
   afterEach(() => {
