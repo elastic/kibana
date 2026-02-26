@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { DateRangePicker, type DateRangePickerProps } from './date_range_picker';
@@ -102,6 +102,49 @@ describe('DateRangePickerControl', () => {
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
     });
 
-    // TODO test popover opens according to editing mode
+    it('exits editing and restores text on Shift+Tab from the first tabbable', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+      const input = openEditing();
+      fireEvent.change(input, { target: { value: 'something else' } });
+      fireEvent.keyDown(input, { key: 'Tab', shiftKey: true });
+
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent(
+        'Last 20 minutes'
+      );
+      expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+    });
+
+    it('exits editing and restores text on Tab from the last tabbable', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+      const input = openEditing();
+      fireEvent.change(input, { target: { value: 'something else' } });
+
+      const clearButton = screen.getByLabelText('Clear input');
+      clearButton.focus();
+      fireEvent.keyDown(clearButton, { key: 'Tab' });
+
+      expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent(
+        'Last 20 minutes'
+      );
+      expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+    });
+
+    it('opens popover when entering editing mode and closes it when exiting', async () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+      const input = openEditing();
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      });
+    });
   });
 });
