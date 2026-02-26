@@ -69,9 +69,6 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
 };
 
 export const StandaloneRuleFormFlyout: React.FC<StandaloneRuleFormFlyoutProps> = (props) => {
-  /* QueryClientProvider is needed for useCreateRule hook
-   * used by the submit button which exists outside of the
-   * StandaloneRuleForm component. */
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>

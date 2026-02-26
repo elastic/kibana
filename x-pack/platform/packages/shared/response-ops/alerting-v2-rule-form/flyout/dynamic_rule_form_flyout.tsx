@@ -65,9 +65,6 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
 };
 
 export const DynamicRuleFormFlyout: React.FC<DynamicRuleFormFlyoutProps> = (props) => {
-  /* QueryClientProvider is needed for useCreateRule hook
-   * used by the submit button which exists outside of the
-   * DynamicRuleForm component. */
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>
