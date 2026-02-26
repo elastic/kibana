@@ -132,13 +132,17 @@ const SubPanelMenu = () => {
 };
 
 export function MainPanel() {
-  const { onPresetSave, timeRange } = useDateRangePickerContext();
+  const { onPresetSave, timeRange, applyRange } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
 
   const handlePresetSave = useCallback(() => {
     if (timeRange.isInvalid || !onPresetSave) return;
-    onPresetSave({ start: timeRange.start, end: timeRange.end, label: timeRange.value });
-  }, [onPresetSave, timeRange]);
+    const label = timeRange.isNaturalLanguage
+      ? timeRange.value.charAt(0).toUpperCase() + timeRange.value.slice(1)
+      : timeRange.value;
+    onPresetSave({ start: timeRange.start, end: timeRange.end, label });
+    applyRange();
+  }, [onPresetSave, applyRange, timeRange]);
 
   const stickyMenuStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};

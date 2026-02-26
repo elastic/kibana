@@ -80,7 +80,7 @@ export const mainPanelTexts = {
   ),
   savePresetTooltip: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',
-    { defaultMessage: 'Save input time range as preset' }
+    { defaultMessage: 'Save input range as preset and apply it' }
   ),
   deletePresetAriaLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.deletePresetAriaLabel',
