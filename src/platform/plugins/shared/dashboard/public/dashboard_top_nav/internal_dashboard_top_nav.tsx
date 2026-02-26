@@ -234,14 +234,16 @@ export function InternalDashboardTopNav({
    * Build app leave handler whenever hasUnsavedChanges changes
    */
   useEffect(() => {
-    onAppLeave((actions) => actions.default());
+    onAppLeave((actions) => {
+      return actions.default();
+    });
     return () => {
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
   }, [onAppLeave, hasUnsavedChanges, viewMode]);
 
-  // Browser refresh/close - only native confirmation, no custom message
+  // Browser refresh/close with unsaved changes - only native confirmation, no custom message
   useEffect(() => {
     if (viewMode !== 'edit' || !hasUnsavedChanges) return;
 
