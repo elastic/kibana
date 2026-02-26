@@ -30,6 +30,7 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 
@@ -57,6 +58,7 @@ export interface AgentBuilderSetupDependencies {
 
 export interface AgentBuilderStartDependencies {
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  evals?: EvalsPublicStart;
   inference: InferencePublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
