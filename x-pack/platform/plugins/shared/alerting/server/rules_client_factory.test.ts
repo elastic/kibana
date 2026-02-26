@@ -463,6 +463,84 @@ describe('RulesClientFactory', () => {
     });
   });
 
+  test('createAPIKey() logs an error and does not call uiam.grant when shouldGrantUiam is true but request has no authorization header', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+    const requestWithoutAuth = mockRouter.createKibanaRequest();
+    await factory.create(requestWithoutAuth, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn(),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
+
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+    expect(createAPIKeyResult).toEqual({
+      apiKeysEnabled: true,
+      result: { api_key: '123', id: 'abc', name: '' },
+    });
+    expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
+    expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
+      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials'
+    );
+    expect(uiamApiKeys.grant).not.toHaveBeenCalled();
+  });
+
+  test('createAPIKey() logs an error and does not call uiam.grant when shouldGrantUiam is true but request has non-UIAM credentials', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+    const requestWithNonUiamAuth = mockRouter.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from('id:regular_es_api_key').toString('base64')}`,
+      },
+    });
+    await factory.create(requestWithNonUiamAuth, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn(),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+    securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
+
+    const createAPIKeyResult = await constructorCall.createAPIKey('test');
+
+    expect(createAPIKeyResult).toEqual({
+      apiKeysEnabled: true,
+      result: { api_key: '123', id: 'abc', name: '' },
+    });
+    expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
+    expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
+      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials'
+    );
+    expect(uiamApiKeys.grant).not.toHaveBeenCalled();
+  });
+
   test('createAPIKey() returns an API key when security is enabled and grantAsInternalUser succeeds', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({

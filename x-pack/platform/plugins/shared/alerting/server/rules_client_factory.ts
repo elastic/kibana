@@ -160,7 +160,7 @@ export class RulesClientFactory {
   private async createUiamApiKey(
     request: KibanaRequest,
     name: string
-  ): Promise<GrantAPIKeyResult | null | undefined> {
+  ): Promise<GrantAPIKeyResult | undefined> {
     if (!this.shouldGrantUiam) {
       return;
     }
@@ -181,8 +181,9 @@ export class RulesClientFactory {
       }
       return result;
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(
-        `Failed to create UIAM API key for alerting rule : ${name}: ${(err as Error).message}`
+        `Failed to create UIAM API key for alerting rule : ${name}: ${errorMessage}`
       );
       return;
     }
@@ -193,14 +194,13 @@ export class RulesClientFactory {
    */
   private async invalidateUiamApiKey(
     request: KibanaRequest,
-    name: string,
-    id?: string
+    ruleName: string,
+    id: string
   ): Promise<void> {
-    if (!id) return;
     const result = await this.securityService.authc.apiKeys.uiam?.invalidate(request, { id });
     if (result && result.error_count > 0) {
       this.logger.error(
-        `Failed to invalidate UIAM API key for alerting rule : ${name}: ${result.error_details
+        `Failed to invalidate UIAM API key for alerting rule : ${ruleName}: ${result.error_details
           ?.map((error) => error.reason)
           .join(', ')}  `
       );
@@ -284,14 +284,18 @@ export class RulesClientFactory {
           });
         } catch (err) {
           // if the ES API key creation failed, we need to invalidate the UIAM API key
-          await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult?.id);
+          if (createUiamApiKeyResult?.id) {
+            await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
+          }
           // rethrow the error to be handled by the caller
           throw err;
         }
 
         // if we created a UIAM API key but the ES API key creation failed, we need to invalidate the UIAM API key
         if (!createEsAPIKeyResult) {
-          await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult?.id);
+          if (createUiamApiKeyResult?.id) {
+            await factory.invalidateUiamApiKey(request, name, createUiamApiKeyResult.id);
+          }
           return { apiKeysEnabled: false };
         }
 
