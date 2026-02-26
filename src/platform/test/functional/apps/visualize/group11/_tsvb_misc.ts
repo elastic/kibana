@@ -59,7 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const switchIndexTest = async (useKibanaIndexes: boolean) => {
         await visualBuilder.clickPanelOptions('metric');
-        await visualBuilder.setIndexPatternValue('', false);
 
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {

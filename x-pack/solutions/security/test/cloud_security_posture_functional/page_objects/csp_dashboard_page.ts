@@ -46,6 +46,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
           es.index({
             index: LATEST_FINDINGS_INDEX,
             document: finding,
+            refresh: 'wait_for',
           })
         )
       );
