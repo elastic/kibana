@@ -20,15 +20,15 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
 
     // Connector types R-T (resilient through torq)
     loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/resilient'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/server_log'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/servicenow_itom'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/servicenow_itsm'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/servicenow_sir'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/slack_api'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/slack_webhook'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/swimlane'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/thehive'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/tines'));
-    loadTestFile(require.resolve('../../group2/tests/actions/connector_types/torq'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/server_log'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/servicenow_itom'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/servicenow_itsm'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/servicenow_sir'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/slack_api'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/slack_webhook'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/swimlane'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/thehive'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/tines'));
+    loadTestFile(require.resolve('../../../group2/tests/actions/connector_types/torq'));
   });
 }

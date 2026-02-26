@@ -9,6 +9,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration security and spaces enabled - Group 13', function () {
-    loadTestFile(require.resolve('../../../group2/tests/alerting'));
+    loadTestFile(require.resolve('../../group2/tests/alerting'));
   });
 }
