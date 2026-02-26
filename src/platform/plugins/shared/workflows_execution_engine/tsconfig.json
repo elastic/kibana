@@ -29,6 +29,8 @@
     "@kbn/es-mappings",
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
+    "@kbn/usage-api-plugin",
+    "@kbn/server-http-tools",
     "@kbn/logging-mocks"
   ],
   "exclude": ["target/**/*"]
