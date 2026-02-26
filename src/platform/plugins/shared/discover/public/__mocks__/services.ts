@@ -54,6 +54,8 @@ import { createBrowserHistory } from 'history';
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
 
+  dataPlugin.query.queryString.getDefaultQuery = jest.fn(() => ({ query: '', language: 'kuery' }));
+
   dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
   dataPlugin.query.filterManager.getUpdates$ = jest.fn(() => of({}) as unknown as Observable<void>);
 
@@ -84,12 +86,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   dataPlugin.dataViews = createDiscoverDataViewsMock();
 
-  dataPlugin.search.searchSource.createEmpty = jest.fn(() => {
+  const createSearchSourceWithDeps = (fields?: Record<string, unknown>) => {
     const deps = {
       getConfig: jest.fn(),
     } as unknown as SearchSourceDependencies;
-    const searchSource = new SearchSource({}, deps);
-    searchSource.fetch$ = jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }));
+    const searchSource = new SearchSource(fields ?? {}, deps);
+    searchSource.fetch$ = jest
+      .fn()
+      .mockReturnValue(of({ rawResponse: { hits: { total: 2, hits: [] } } }));
     searchSource.createChild = jest.fn((options = {}) => {
       const childSearchSource = new SearchSource({}, deps);
       childSearchSource.setParent(searchSource, options);
@@ -100,6 +104,20 @@ export function createDiscoverServicesMock(): DiscoverServices {
       return childSearchSource;
     });
     return searchSource;
+  };
+
+  dataPlugin.search.searchSource.createEmpty = jest.fn(() => createSearchSourceWithDeps());
+
+  dataPlugin.search.searchSource.create = jest.fn(async (fields?: Record<string, unknown>) => {
+    if (typeof fields?.index === 'string') {
+      try {
+        const dataView = await dataPlugin.dataViews.get(fields.index);
+        return createSearchSourceWithDeps({ ...fields, index: dataView });
+      } catch {
+        // Data view not found in mock, create with raw fields
+      }
+    }
+    return createSearchSourceWithDeps(fields);
   });
 
   const expressionsPlugin = expressionsPluginMock.createStartContract();
@@ -248,9 +266,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
     },
-    notifications: {
-      toasts: notificationServiceMock.createStartContract().toasts,
-    },
+    notifications: notificationServiceMock.createStartContract(),
     expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {

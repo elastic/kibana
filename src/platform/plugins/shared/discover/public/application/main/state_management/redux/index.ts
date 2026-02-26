@@ -51,6 +51,7 @@ export {
   selectTabCombinedFilters,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
+  selectTabSavedSearch,
 } from './selectors';
 
 export {
