@@ -183,7 +183,7 @@ export const ManageIntegrationsTable: React.FC<{
     async (integrationId: string) => {
       try {
         const response = await http.get(
-          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/package`,
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/download`,
           {
             version: '1',
             headers: { Accept: 'application/zip' },

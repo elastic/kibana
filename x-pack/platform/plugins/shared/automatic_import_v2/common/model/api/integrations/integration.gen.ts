@@ -124,6 +124,19 @@ export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
 >;
 
+export type DownloadAutoImportIntegrationRequestParams = z.infer<
+  typeof DownloadAutoImportIntegrationRequestParams
+>;
+export const DownloadAutoImportIntegrationRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+});
+export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
+  typeof DownloadAutoImportIntegrationRequestParams
+>;
+
 export type GetAllAutoImportIntegrationsResponse = z.infer<
   typeof GetAllAutoImportIntegrationsResponse
 >;

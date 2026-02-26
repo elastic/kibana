@@ -6,6 +6,7 @@
  */
 
 import assert from 'assert';
+import AdmZip from 'adm-zip';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
   Logger,
@@ -296,6 +297,14 @@ export class AutomaticImportService {
 
     // Bump semantic version (defaults to patch) on approval.
     await this.savedObjectService.updateIntegration(updateData, version);
+  }
+
+  public async buildIntegrationPackage(integrationId: string): Promise<Buffer> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+
+    const zip = new AdmZip();
+
+    return zip.toBufferPromise();
   }
 
   public async createDataStream(
