@@ -6,31 +6,35 @@
  */
 
 import { FetchPoliciesStep } from './fetch_policies_step';
-import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import type { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { createNotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
 import { createDispatcherPipelineState, createRule } from '../fixtures/test_utils';
 
-const createMockNpSoService = (): jest.Mocked<NotificationPolicySavedObjectServiceContract> => ({
-  bulkGetByIds: jest.fn(),
-  create: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-});
-
 describe('FetchPoliciesStep', () => {
+  let npSoService: NotificationPolicySavedObjectService;
+
+  beforeEach(() => {
+    ({ notificationPolicySavedObjectService: npSoService } =
+      createNotificationPolicySavedObjectService());
+  });
+
   it('fetches unique policies from rules', async () => {
-    const mockService = createMockNpSoService();
-    mockService.bulkGetByIds.mockResolvedValue([
+    jest.spyOn(npSoService, 'bulkGetByIds').mockResolvedValue([
       {
         id: 'p1',
         attributes: {
           name: 'Policy 1',
-          workflow_id: 'w1',
+          description: 'Test',
+          destinations: [{ type: 'workflow' as const, id: 'w1' }],
+          createdBy: null,
+          updatedBy: null,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          updatedAt: '2026-01-01T00:00:00.000Z',
         },
       },
-    ] as any);
+    ]);
 
-    const step = new FetchPoliciesStep(mockService);
+    const step = new FetchPoliciesStep(npSoService);
     const state = createDispatcherPipelineState({
       rules: new Map([
         ['r1', createRule({ id: 'r1', notificationPolicyIds: ['p1'] })],
@@ -44,12 +48,12 @@ describe('FetchPoliciesStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(1);
     expect(result.data?.policies?.get('p1')?.name).toBe('Policy 1');
-    expect(mockService.bulkGetByIds).toHaveBeenCalledWith(['p1']);
+    expect(npSoService.bulkGetByIds).toHaveBeenCalledWith(['p1']);
   });
 
   it('returns empty map when rules is empty', async () => {
-    const mockService = createMockNpSoService();
-    const step = new FetchPoliciesStep(mockService);
+    jest.spyOn(npSoService, 'bulkGetByIds');
+    const step = new FetchPoliciesStep(npSoService);
 
     const state = createDispatcherPipelineState({ rules: new Map() });
     const result = await step.execute(state);
@@ -57,12 +61,12 @@ describe('FetchPoliciesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
-    expect(mockService.bulkGetByIds).not.toHaveBeenCalled();
+    expect(npSoService.bulkGetByIds).not.toHaveBeenCalled();
   });
 
   it('returns empty map when rules have no policy IDs', async () => {
-    const mockService = createMockNpSoService();
-    const step = new FetchPoliciesStep(mockService);
+    jest.spyOn(npSoService, 'bulkGetByIds');
+    const step = new FetchPoliciesStep(npSoService);
 
     const state = createDispatcherPipelineState({
       rules: new Map([['r1', createRule({ id: 'r1', notificationPolicyIds: [] })]]),
@@ -73,16 +77,15 @@ describe('FetchPoliciesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
-    expect(mockService.bulkGetByIds).not.toHaveBeenCalled();
+    expect(npSoService.bulkGetByIds).not.toHaveBeenCalled();
   });
 
   it('skips documents with errors', async () => {
-    const mockService = createMockNpSoService();
-    mockService.bulkGetByIds.mockResolvedValue([
-      { id: 'p1', error: { statusCode: 404, message: 'Not found' } },
-    ] as any);
+    jest
+      .spyOn(npSoService, 'bulkGetByIds')
+      .mockResolvedValue([{ id: 'p1', error: { statusCode: 404, message: 'Not found' } }] as any);
 
-    const step = new FetchPoliciesStep(mockService);
+    const step = new FetchPoliciesStep(npSoService);
     const state = createDispatcherPipelineState({
       rules: new Map([['r1', createRule({ id: 'r1', notificationPolicyIds: ['p1'] })]]),
     });

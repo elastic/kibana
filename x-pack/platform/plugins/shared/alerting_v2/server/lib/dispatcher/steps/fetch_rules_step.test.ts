@@ -6,35 +6,30 @@
  */
 
 import { FetchRulesStep } from './fetch_rules_step';
-import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
+import type { RulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service';
+import { createRulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service.mock';
+import { createRuleSoAttributes } from '../../test_utils';
 import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
 
-const createMockRulesSoService = (): jest.Mocked<RulesSavedObjectServiceContract> => ({
-  bulkGetByIds: jest.fn(),
-  create: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  find: jest.fn(),
-});
-
 describe('FetchRulesStep', () => {
+  let rulesSoService: RulesSavedObjectService;
+
+  beforeEach(() => {
+    ({ rulesSavedObjectService: rulesSoService } = createRulesSavedObjectService());
+  });
+
   it('fetches rules for unique rule IDs from active episodes', async () => {
-    const mockService = createMockRulesSoService();
-    mockService.bulkGetByIds.mockResolvedValue([
+    jest.spyOn(rulesSoService, 'bulkGetByIds').mockResolvedValue([
       {
         id: 'r1',
-        attributes: {
+        attributes: createRuleSoAttributes({
           metadata: { name: 'Rule 1' },
           notification_policies: [{ ref: 'p1' }],
-          enabled: true,
-          createdAt: '2026-01-01T00:00:00.000Z',
-          updatedAt: '2026-01-01T00:00:00.000Z',
-        },
+        }),
       },
-    ] as any);
+    ]);
 
-    const step = new FetchRulesStep(mockService);
+    const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
       dispatchable: [
         createAlertEpisode({ rule_id: 'r1' }),
@@ -48,12 +43,12 @@ describe('FetchRulesStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.size).toBe(1);
     expect(result.data?.rules?.get('r1')?.name).toBe('Rule 1');
-    expect(mockService.bulkGetByIds).toHaveBeenCalledWith(['r1']);
+    expect(rulesSoService.bulkGetByIds).toHaveBeenCalledWith(['r1']);
   });
 
   it('returns empty map when no active episodes', async () => {
-    const mockService = createMockRulesSoService();
-    const step = new FetchRulesStep(mockService);
+    jest.spyOn(rulesSoService, 'bulkGetByIds');
+    const step = new FetchRulesStep(rulesSoService);
 
     const state = createDispatcherPipelineState({ dispatchable: [] });
     const result = await step.execute(state);
@@ -61,16 +56,15 @@ describe('FetchRulesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.size).toBe(0);
-    expect(mockService.bulkGetByIds).not.toHaveBeenCalled();
+    expect(rulesSoService.bulkGetByIds).not.toHaveBeenCalled();
   });
 
   it('skips documents with errors', async () => {
-    const mockService = createMockRulesSoService();
-    mockService.bulkGetByIds.mockResolvedValue([
-      { id: 'r1', error: { statusCode: 404, message: 'Not found' } },
-    ] as any);
+    jest
+      .spyOn(rulesSoService, 'bulkGetByIds')
+      .mockResolvedValue([{ id: 'r1', error: { statusCode: 404, message: 'Not found' } }] as any);
 
-    const step = new FetchRulesStep(mockService);
+    const step = new FetchRulesStep(rulesSoService);
     const state = createDispatcherPipelineState({
       dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
     });
