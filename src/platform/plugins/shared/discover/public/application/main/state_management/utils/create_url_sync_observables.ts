@@ -93,7 +93,6 @@ export const createUrlSyncObservables = ({
   return {
     appState$,
     appStateContainer,
-    globalState$,
     globalStateContainer,
   };
 };
