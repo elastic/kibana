@@ -90,7 +90,14 @@ export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => 
   const type = useWatch({ control: methods.control, name: 'type' });
 
   const handleSubmit: SubmitHandler<SchemaField> = (data) => {
-    onAddField(data);
+    const { type: rawType, ...rest } = data;
+    const effectiveType = rawType === 'unmapped' ? undefined : rawType;
+
+    onAddField({
+      ...rest,
+      ...(effectiveType !== undefined ? { type: effectiveType } : {}),
+      status: effectiveType !== undefined ? 'mapped' : 'unmapped',
+    } as SchemaField);
     onClose();
   };
 
@@ -113,7 +120,7 @@ export const AddFieldFlyout = ({ onAddField, onClose }: AddFieldFlyoutProps) => 
             <FieldTypeSelector />
             {typeSupportsFormat(type) && <FieldFormatSelector />}
             <FieldDescriptionSelector />
-            {type !== 'unmapped' && <AdvancedFieldMappingEditor />}
+            {type && type !== 'unmapped' && <AdvancedFieldMappingEditor />}
           </EuiForm>
         </FormProvider>
       </EuiFlyoutBody>
@@ -285,16 +292,20 @@ export const FieldNameSelector = () => {
 
 export const FieldTypeSelector = () => {
   const { stream } = useSchemaEditorContext();
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
   const { field, fieldState } = useController<SchemaField, 'type'>({
     name: 'type',
     rules: {
-      required: i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldNameRequiredError', {
-        defaultMessage: 'A field type is required.',
-      }),
+      // Wired streams support description-only overrides without a type.
+      required: isWiredStream
+        ? false
+        : i18n.translate('xpack.streams.schemaEditor.addFieldFlyout.fieldNameRequiredError', {
+            defaultMessage: 'A field type is required.',
+          }),
     },
   });
 
-  const streamType = Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic';
+  const streamType = isWiredStream ? 'wired' : 'classic';
 
   return (
     <EuiFormRow

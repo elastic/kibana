@@ -274,19 +274,6 @@ describe('convertToFieldDefinitionConfig', () => {
     );
   });
 
-  it('throws for unmapped field type', () => {
-    const field = {
-      name: 'some_field',
-      parent: 'logs',
-      status: 'mapped',
-      type: 'unmapped',
-    } as MappedSchemaField;
-
-    expect(() => convertToFieldDefinitionConfig(field)).toThrow(
-      'Cannot convert unmapped field type to FieldDefinitionConfig'
-    );
-  });
-
   it('converts a valid mapped field', () => {
     const field = {
       name: 'message',

@@ -52,12 +52,6 @@ export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldD
     throw new Error('Cannot convert system-managed field type to FieldDefinitionConfig');
   }
 
-  if (field.type === 'unmapped') {
-    // `unmapped` is a UI-only pseudo-type representing "no mapping".
-    // This should not reach here - the flyout should have filtered it out.
-    throw new Error('Cannot convert unmapped field type to FieldDefinitionConfig');
-  }
-
   return {
     type: field.type,
     ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
@@ -77,9 +71,13 @@ export function isFieldUncommitted(field: SchemaEditorField, storedFields: Schem
   // Check if field is new (not in stored fields)
   const storedField = storedFields.find((stored) => stored.name === field.name);
   if (!storedField) {
-    // If the field is not stored yet and is still unmapped, then we didn't touch
-    // it and it is not uncommitted, since it won't be saved to the stream definition.
-    return field.status !== 'unmapped';
+    // If the field is not stored yet and is still unmapped without a description,
+    // then we didn't touch it and it is not uncommitted.
+    // However, an unmapped field with a description is a doc-only override that needs saving.
+    if (field.status === 'unmapped') {
+      return Boolean(field.description && field.description.trim().length > 0);
+    }
+    return true;
   }
 
   // Create copies without SchemaEditorField-specific properties (result, uncommitted)
