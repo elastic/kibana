@@ -133,9 +133,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText('A secure connection is required for log in')
-        ).toBeInTheDocument();
+        expect(screen.getByText('A secure connection is required for log in')).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
       expect(container.children[0]).toMatchSnapshot();
@@ -156,9 +154,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText('Cannot connect to the Elasticsearch cluster')
-        ).toBeInTheDocument();
+        expect(screen.getByText('Cannot connect to the Elasticsearch cluster')).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
       expect(container.children[0]).toMatchSnapshot();
@@ -255,9 +251,7 @@ describe('LoginPage', () => {
       );
 
       await waitFor(() => {
-        expect(
-          screen.getByText('Cookies are required to log in to Elastic')
-        ).toBeInTheDocument();
+        expect(screen.getByText('Cookies are required to log in to Elastic')).toBeInTheDocument();
         expect(screen.queryByTestId('loginSubmit')).not.toBeInTheDocument();
       });
       expect(container.children[0]).toMatchSnapshot();
