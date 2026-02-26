@@ -29,20 +29,8 @@ test.describe('MonitorDetails', { tag: '@local-stateful-classic' }, () => {
     });
 
     await test.step('verify ping list items', async () => {
-      const pingIds = [
-        'XZtoHm0B0I9WX_CznN-6',
-        '7ZtoHm0B0I9WX_CzJ96M',
-        'pptnHm0B0I9WX_Czst5X',
-        'I5tnHm0B0I9WX_CzPd46',
-        'y5tmHm0B0I9WX_Czx93x',
-        'XZtmHm0B0I9WX_CzUt3H',
-        '-JtlHm0B0I9WX_Cz3dyX',
-        'k5tlHm0B0I9WX_CzaNxm',
-        'NZtkHm0B0I9WX_Cz89w9',
-        'zJtkHm0B0I9WX_CzftsN',
-      ];
-
-      await Promise.all(pingIds.map((id) => pageObjects.monitorDetails.waitForPingListItem(id)));
+      const pingRows = page.testSubj.locator('uptimePingListTable').locator('tbody tr');
+      await expect(pingRows).toHaveCount(10, { timeout: 20_000 });
       await expect(
         page.testSubj.locator('uptimeWithResponsiveWrapper--panel').locator('.echChart')
       ).toBeVisible({

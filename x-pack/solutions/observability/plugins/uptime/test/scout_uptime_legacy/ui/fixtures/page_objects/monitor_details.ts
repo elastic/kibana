@@ -76,8 +76,4 @@ export class MonitorDetailsPage {
     await this.page.testSubj.click('ruleFlyoutFooterSaveButton');
     await this.page.testSubj.click('confirmModalConfirmButton');
   }
-
-  async waitForPingListItem(pingId: string): Promise<void> {
-    await this.page.testSubj.locator(`xpack.synthetics.pingList.ping-${pingId}`).waitFor();
-  }
 }
