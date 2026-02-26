@@ -6,10 +6,10 @@
  */
 
 import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_page';
-import { getArtifactTabsTests } from '../../support/artifact_tabs_in_policy_details_runner';
+import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
 describe(
-  'Artifact tabs in Policy Details',
+  'Endpoint Exceptions RBAC',
   {
     env: {
       ftrConfig: {
@@ -22,12 +22,6 @@ describe(
     },
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
-  getArtifactTabsTests([
-    getArtifactsListTestDataForArtifact('blocklists'),
-    getArtifactsListTestDataForArtifact('endpointExceptions'),
-    getArtifactsListTestDataForArtifact('eventFilters'),
-    getArtifactsListTestDataForArtifact('hostIsolationExceptions'),
-    getArtifactsListTestDataForArtifact('trustedApps'),
-    getArtifactsListTestDataForArtifact('trustedDevices'),
-  ])
+
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('endpointExceptions'))
 );

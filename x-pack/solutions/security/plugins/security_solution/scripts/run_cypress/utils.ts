@@ -20,8 +20,8 @@ import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
  * Files importing these runners show 0 inline `it(` but actually produce many tests at runtime.
  */
 const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
-  getArtifactMockedDataTests: 8,
-  getArtifactTabsTests: 72,
+  getArtifactMockedDataTests: 40,
+  getArtifactTabsTests: 12,
   createRbacPoliciesExistSuite: 1,
   createRbacHostsExistSuite: 1,
   createRbacEmptyStateSuite: 1,
@@ -29,14 +29,8 @@ const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
 };
 
 /**
- * Every spec incurs a fixed overhead for spinning up ES + Kibana (+ Fleet Server).
- * This constant ensures the load balancer accounts for that ~4 min setup cost per spec.
- */
-const SETUP_OVERHEAD_WEIGHT = 4;
-
-/**
  * Estimate spec file weight for load-balanced ordering across parallel CI agents.
- * Weight = fixed setup overhead + inline `it(` count + estimated dynamic tests from shared runners.
+ * Weight = inline `it(` count + estimated dynamic tests from shared runners.
  */
 const getSpecFileWeight = (filePath: string): number => {
   try {
@@ -50,7 +44,7 @@ const getSpecFileWeight = (filePath: string): number => {
       testCount += occurrences * weight;
     }
 
-    return SETUP_OVERHEAD_WEIGHT + testCount;
+    return testCount;
   } catch {
     return 0;
   }
@@ -194,6 +188,52 @@ const TestFileFtrConfigSchema = schema.object(
 );
 
 export type SecuritySolutionDescribeBlockFtrConfig = TypeOf<typeof TestFileFtrConfigSchema>;
+
+/**
+ * Serialize an ftrConfig to a stable string key for grouping specs that can share a stack.
+ * Specs with identical keys need the same ES license, Kibana args, and product types,
+ * so they can run sequentially against a single ES/Kibana/Fleet instance.
+ */
+const ftrConfigToKey = (config: SecuritySolutionDescribeBlockFtrConfig): string => {
+  const normalized = {
+    license: config.license ?? '',
+    kbnServerArgs: [...(config.kbnServerArgs ?? [])].sort(),
+    productTypes: [...(config.productTypes ?? [])].sort((a, b) =>
+      `${a.product_line}:${a.product_tier}`.localeCompare(`${b.product_line}:${b.product_tier}`)
+    ),
+  };
+  return JSON.stringify(normalized);
+};
+
+export interface SpecGroup {
+  configKey: string;
+  ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
+  specFilePaths: string[];
+}
+
+/**
+ * Group spec file paths by their parsed ftrConfig so that specs sharing the
+ * same stack configuration can be run against a single ES/Kibana instance.
+ * Order within each group is preserved from the input array.
+ */
+export const groupSpecsByFtrConfig = (filePaths: string[]): SpecGroup[] => {
+  const groupMap = new Map<string, SpecGroup>();
+  const groupOrder: string[] = [];
+
+  for (const filePath of filePaths) {
+    const config = parseTestFileConfig(filePath);
+    const key = ftrConfigToKey(config);
+
+    if (!groupMap.has(key)) {
+      groupMap.set(key, { configKey: key, ftrConfig: config, specFilePaths: [] });
+      groupOrder.push(key);
+    }
+
+    groupMap.get(key)!.specFilePaths.push(filePath);
+  }
+
+  return groupOrder.map((key) => groupMap.get(key)!);
+};
 
 export const getOnBeforeHook = (module: unknown, beforeSpecFilePath: string): Function => {
   if (typeof module !== 'object' || module === null) {

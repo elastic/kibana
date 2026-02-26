@@ -6,10 +6,10 @@
  */
 
 import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_page';
-import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
+import { getArtifactTabsTests } from '../../support/artifact_tabs_in_policy_details_runner';
 
 describe(
-  'Endpoint Exceptions RBAC (siemV5)',
+  'Artifact tabs in Policy Details - Event Filters',
   {
     env: {
       ftrConfig: {
@@ -22,7 +22,5 @@ describe(
     },
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('endpointExceptions'), {
-    siemVersionFilter: (versions) => versions.filter((v) => v === 'siemV5'),
-  })
+  getArtifactTabsTests([getArtifactsListTestDataForArtifact('eventFilters')])
 );
