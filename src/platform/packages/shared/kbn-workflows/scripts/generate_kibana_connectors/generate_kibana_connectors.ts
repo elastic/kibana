@@ -37,7 +37,7 @@ import {
   getRequestSchemaName,
   getResponseSchemaName,
   getSchemaNamePrefix,
-  parseXState,
+  getStabilityFromXState,
   StaticImports,
   toSnakeCase,
 } from '../shared';
@@ -288,7 +288,7 @@ function generateContractMetasFromPath(
       ...(outputSchemaString.includes(responseName) ? [responseName] : []),
     ];
 
-    const stability = parseXState(operation);
+    const stability = getStabilityFromXState(operation);
 
     contractMetas.push({
       type,

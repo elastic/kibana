@@ -108,11 +108,20 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                     <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
                   </h6>
                 </EuiTitle>
-                {option.isTechPreview && (
+                {option.stability === 'tech_preview' && (
                   <EuiBetaBadge
                     iconType="flask"
                     label={i18n.translate('workflows.actionsMenu.techPreviewBadge', {
                       defaultMessage: 'Tech preview',
+                    })}
+                    size="s"
+                    css={styles.techPreviewBadge}
+                  />
+                )}
+                {option.stability === 'beta' && (
+                  <EuiBetaBadge
+                    label={i18n.translate('workflows.actionsMenu.betaBadge', {
+                      defaultMessage: 'Beta',
                     })}
                     size="s"
                     css={styles.techPreviewBadge}

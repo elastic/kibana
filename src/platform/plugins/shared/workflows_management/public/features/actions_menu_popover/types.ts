@@ -8,6 +8,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import type { StepStabilityLevel } from '@kbn/workflows';
 
 interface ActionBase {
   id: string;
@@ -15,7 +16,7 @@ interface ActionBase {
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
-  isTechPreview?: boolean;
+  stability?: StepStabilityLevel;
 }
 
 export interface ActionGroup extends ActionBase {

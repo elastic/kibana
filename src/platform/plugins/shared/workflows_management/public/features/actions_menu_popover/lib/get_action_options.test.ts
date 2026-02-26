@@ -188,7 +188,7 @@ describe('getActionOptions', () => {
     }
   });
 
-  it('should mark kibana connectors with tech_preview stability as isTechPreview', () => {
+  it('should pass tech_preview stability for kibana connectors with tech_preview stability', () => {
     const mockConnector = {
       type: 'kibana.streams.list',
       summary: 'Get stream list',
@@ -209,11 +209,11 @@ describe('getActionOptions', () => {
       expect(kibanaGroup.options).toHaveLength(1);
       const option = kibanaGroup.options[0];
       expect(option.id).toBe('kibana.streams.list');
-      expect(option.isTechPreview).toBe(true);
+      expect(option.stability).toBe('tech_preview');
     }
   });
 
-  it('should not mark kibana connectors without stability as isTechPreview', () => {
+  it('should not set stability for kibana connectors without stability', () => {
     const mockConnector = {
       type: 'kibana.saved_object',
       summary: 'Kibana Saved Object',
@@ -232,7 +232,7 @@ describe('getActionOptions', () => {
     if (kibanaGroup && isActionGroup(kibanaGroup)) {
       expect(kibanaGroup.options).toHaveLength(1);
       const option = kibanaGroup.options[0];
-      expect(option.isTechPreview).toBeUndefined();
+      expect(option.stability).toBeUndefined();
     }
   });
 

@@ -228,7 +228,7 @@ export function getActionOptions(
         label: customStepDefinition.label,
         description: customStepDefinition.description,
         iconType: customStepDefinition.icon ?? group.iconType,
-        isTechPreview: connector.stability === 'tech_preview' ? true : undefined,
+        stability: connector.stability,
       });
     } else if (connector.type.startsWith('elasticsearch.')) {
       elasticSearchGroup.options.push({
@@ -236,7 +236,7 @@ export function getActionOptions(
         label: connector.description || connector.type,
         description: connector.type,
         iconType: 'logoElasticsearch',
-        isTechPreview: connector.stability === 'tech_preview' ? true : undefined,
+        stability: connector.stability,
       });
     } else if (connector.type.startsWith('kibana.')) {
       kibanaGroup.options.push({
@@ -244,7 +244,7 @@ export function getActionOptions(
         label: connector.summary || connector.description || connector.type,
         description: connector.type,
         iconType: 'logoKibana',
-        isTechPreview: connector.stability === 'tech_preview' ? true : undefined,
+        stability: connector.stability,
       });
     } else if (isDynamicConnector(connector)) {
       const [baseType, subtype] = connector.type.split('.');
@@ -282,7 +282,7 @@ export function getActionOptions(
           connectorType: connector.type,
           instancesLabel: getInstancesLabel(connector.instances?.length),
           iconType,
-          isTechPreview: connector.stability === 'tech_preview' ? true : undefined,
+          stability: connector.stability,
         });
       }
     }

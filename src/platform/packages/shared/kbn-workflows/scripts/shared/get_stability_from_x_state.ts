@@ -8,9 +8,11 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ConnectorStability } from '../../types/latest';
+import type { StepStabilityLevel } from '../../types/latest';
 
-export function parseXState(operation: OpenAPIV3.OperationObject): ConnectorStability | undefined {
+export function getStabilityFromXState(
+  operation: OpenAPIV3.OperationObject
+): StepStabilityLevel | undefined {
   const xState = (operation as Record<string, unknown>)['x-state'];
   if (typeof xState !== 'string') {
     return undefined;

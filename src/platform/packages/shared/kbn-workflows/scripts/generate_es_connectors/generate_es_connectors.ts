@@ -24,7 +24,7 @@ import {
 } from './constants';
 import { INCLUDED_OPERATIONS } from './included_operations';
 import type { SpecificationTypes } from './types';
-import type { ConnectorStability, HttpMethod } from '../../types/latest';
+import type { HttpMethod, StepStabilityLevel } from '../../types/latest';
 import {
   type ContractMeta,
   eslintFixGeneratedCode,
@@ -327,14 +327,14 @@ function generateMethodsAndPatterns(endpoint: SpecificationTypes.Endpoint): {
   return { methods: Array.from(methods), patterns };
 }
 
-const SPEC_STABILITY_MAP: Partial<Record<SpecificationTypes.Stability, ConnectorStability>> = {
+const SPEC_STABILITY_MAP: Partial<Record<SpecificationTypes.Stability, StepStabilityLevel>> = {
   beta: 'beta',
   experimental: 'tech_preview',
 };
 
 function resolveEndpointStability(
   endpoint: SpecificationTypes.Endpoint
-): ConnectorStability | undefined {
+): StepStabilityLevel | undefined {
   const specStability = endpoint.stability ?? endpoint.availability?.stack?.stability;
   if (specStability === undefined) {
     return undefined;
