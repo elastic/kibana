@@ -20,6 +20,7 @@ import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/d
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import { createSearchSource } from '../../../state_management/utils/create_search_source';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -51,7 +52,8 @@ const CreateAlertFlyout: React.FC<{
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
   const timeField = getTimeField(dataView);
-  const { query, savedQuery: savedQueryId } = stateContainer.getCurrentTab().appState;
+  const currentTab = stateContainer.getCurrentTab();
+  const { query, savedQuery: savedQueryId } = currentTab.appState;
 
   /**
    * Provides the default parameters used to initialize the new rule
@@ -65,14 +67,18 @@ const CreateAlertFlyout: React.FC<{
         timeField,
       };
     }
+    const searchSource = createSearchSource({
+      dataView,
+      appState: currentTab.appState,
+      globalState: currentTab.globalState,
+      services,
+    });
     return {
       searchType: 'searchSource',
-      searchConfiguration: stateContainer.savedSearchState
-        .getState()
-        .searchSource.getSerializedFields(),
+      searchConfiguration: searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [isEsqlMode, stateContainer.savedSearchState, savedQueryId, query, timeField]);
+  }, [isEsqlMode, currentTab, dataView, services, savedQueryId, query, timeField]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({

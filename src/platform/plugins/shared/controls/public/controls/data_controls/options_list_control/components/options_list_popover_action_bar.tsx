@@ -87,7 +87,6 @@ export const OptionsListPopoverActionBar = ({
     totalCardinality,
     field,
     fieldName,
-    allowExpensiveQueries,
     availableOptions = [],
     dataLoading,
     singleSelect,
@@ -98,7 +97,6 @@ export const OptionsListPopoverActionBar = ({
     componentApi.totalCardinality$,
     componentApi.field$,
     componentApi.fieldName$,
-    componentApi.allowExpensiveQueries$,
     componentApi.availableOptions$,
     componentApi.dataLoading$,
     componentApi.singleSelect$
@@ -173,9 +171,7 @@ export const OptionsListPopoverActionBar = ({
             }}
             value={searchString}
             data-test-subj="optionsList-control-search-input"
-            placeholder={OptionsListStrings.popover.getSearchPlaceholder(
-              allowExpensiveQueries ? defaultSearchTechnique : 'exact'
-            )}
+            placeholder={OptionsListStrings.popover.getSearchPlaceholder(defaultSearchTechnique)}
             aria-label={OptionsListStrings.popover.getSearchAriaLabel(fieldName)}
           />
         </EuiFormRow>
@@ -187,18 +183,14 @@ export const OptionsListPopoverActionBar = ({
           gutterSize="s"
           responsive={false}
         >
-          {allowExpensiveQueries && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
-                  {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div css={styles.borderDiv} />
-              </EuiFlexItem>
-            </>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
+              {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <div css={styles.borderDiv} />
+          </EuiFlexItem>
           {!singleSelect && (
             <EuiFlexItem grow={false}>
               <EuiToolTip

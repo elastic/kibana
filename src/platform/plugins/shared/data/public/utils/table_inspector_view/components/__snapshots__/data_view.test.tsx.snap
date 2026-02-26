@@ -187,6 +187,7 @@ Array [
         id="inspectorDownloadData"
       >
         <button
+          aria-expanded="false"
           class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
           type="button"
         >
@@ -302,6 +303,7 @@ Array [
             class="euiPopover emotion-euiPopover-inline-block"
           >
             <button
+              aria-expanded="false"
               class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
               data-test-subj="tablePaginationPopoverButton"
               type="button"
@@ -441,6 +443,7 @@ Array [
               id="inspectorTableChooser"
             >
               <button
+                aria-expanded="false"
                 class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
                 data-test-subj="inspectorTableChooser"
                 type="button"
@@ -472,6 +475,7 @@ Array [
         id="inspectorDownloadData"
       >
         <button
+          aria-expanded="false"
           class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
           type="button"
         >
@@ -588,6 +592,7 @@ Array [
             class="euiPopover emotion-euiPopover-inline-block"
           >
             <button
+              aria-expanded="false"
               class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
               data-test-subj="tablePaginationPopoverButton"
               type="button"

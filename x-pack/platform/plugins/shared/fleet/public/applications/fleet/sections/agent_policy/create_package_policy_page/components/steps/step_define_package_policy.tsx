@@ -28,12 +28,19 @@ import {
 import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
+import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
+import {
+  useGetEpmDatastreams,
+  useStartServices,
+  useVarGroupCloudConnector,
+} from '../../../../../hooks';
 
 import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
+
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
 import { useOutputs } from './components/hooks';
@@ -69,19 +76,35 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isEditPage = false,
     isAgentlessSelected = false,
   }) => {
-    const { docLinks } = useStartServices();
+    const { docLinks, cloud } = useStartServices();
+    const { enableVarGroups } = ExperimentalFeaturesService.get();
+
+    const varGroups =
+      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-    // Var group selections - derives from policy, initializes defaults, handles changes
     const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
       useVarGroupSelections({
-        varGroups: packageInfo.var_groups,
+        varGroups,
         savedSelections: packagePolicy.var_group_selections,
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
+        packagePolicy,
       });
+
+    const {
+      isSelected: isCloudConnectorSelected,
+      cloudProvider,
+      iacTemplateUrl,
+      cloudConnectorVars,
+      handleCloudConnectorUpdate,
+    } = useVarGroupCloudConnector({
+      varGroups,
+      varGroupSelections,
+      updatePackagePolicy,
+    });
 
     // Package-level vars, filtered by var_group visibility
     // and hiding deprecated vars on new installations
@@ -91,21 +114,20 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
       if (packageInfo.vars) {
         packageInfo.vars.forEach((varDef) => {
-          // Hide deprecated vars on new installations
-          if (!isEditPage && !!varDef.deprecated) {
+          if (cloudConnectorVars.has(varDef.name) || (!isEditPage && !!varDef.deprecated)) {
             return;
           }
 
           // Check if var should be shown based on var_group selections
           if (
-            packageInfo.var_groups &&
-            packageInfo.var_groups.length > 0 &&
-            !shouldShowVar(varDef.name, packageInfo.var_groups, varGroupSelections)
+            varGroups &&
+            varGroups.length > 0 &&
+            !shouldShowVar(varDef.name, varGroups, varGroupSelections)
           ) {
             return; // Skip this var, it's hidden by var_group selection
           }
 
-          if (isAdvancedVar(varDef, packageInfo.var_groups, varGroupSelections)) {
+          if (isAdvancedVar(varDef, varGroups, varGroupSelections)) {
             _advancedVars.push(varDef);
           } else {
             _requiredVars.push(varDef);
@@ -114,7 +136,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       }
 
       return { requiredVars: _requiredVars, advancedVars: _advancedVars };
-    }, [packageInfo.vars, packageInfo.var_groups, varGroupSelections, isEditPage]);
+    }, [packageInfo.vars, varGroups, varGroupSelections, cloudConnectorVars, isEditPage]);
 
     // Outputs
     const {
@@ -266,16 +288,35 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             </EuiFlexItem>
 
             {/* Var Group Selectors */}
-            {packageInfo.var_groups?.map((varGroup) => (
+            {varGroups?.map((varGroup) => (
               <EuiFlexItem key={varGroup.name}>
                 <VarGroupSelector
                   varGroup={varGroup}
                   selectedOptionName={varGroupSelections[varGroup.name]}
                   onSelectionChange={handleVarGroupSelectionChange}
                   isAgentlessEnabled={isAgentlessSelected}
+                  disabled={isEditPage && isCloudConnectorSelected}
                 />
               </EuiFlexItem>
             ))}
+
+            {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
+            {isCloudConnectorSelected && cloudProvider && (
+              <EuiFlexItem>
+                <CloudConnectorSetup
+                  newPolicy={packagePolicy}
+                  packageInfo={packageInfo}
+                  updatePolicy={handleCloudConnectorUpdate}
+                  isEditPage={isEditPage}
+                  hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
+                  cloud={cloud}
+                  cloudProvider={cloudProvider}
+                  templateName={packageInfo.name}
+                  iacTemplateUrl={iacTemplateUrl}
+                  accountType="single-account"
+                />
+              </EuiFlexItem>
+            )}
 
             {/* Required vars */}
             {requiredVars.map((varDef) => {
@@ -284,7 +325,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               const value = packagePolicy.vars[varName].value;
               const requiredByVarGroup = isVarRequiredByVarGroup(
                 varName,
-                packageInfo.var_groups,
+                varGroups,
                 varGroupSelections
               );
 
@@ -502,7 +543,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     const value = packagePolicy.vars![varName].value;
                     const requiredByVarGroup = isVarRequiredByVarGroup(
                       varName,
-                      packageInfo.var_groups,
+                      varGroups,
                       varGroupSelections
                     );
                     return (
