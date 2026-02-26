@@ -14,7 +14,10 @@ export const mainPanelStyles = ({ euiTheme }: UseEuiTheme) => {
   const root = null;
   const tabs = css`
     padding-block-start: ${euiTheme.size.s};
-    margin-inline: ${euiTheme.size.base};
+    margin-inline: ${euiTheme.size.s};
+    position: sticky;
+    top: 0;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
   const list = css`
     padding-block: ${euiTheme.size.s};

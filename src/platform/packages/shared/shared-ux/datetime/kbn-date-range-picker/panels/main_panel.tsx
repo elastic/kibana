@@ -26,6 +26,7 @@ import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_na
 import { mainPanelStyles } from './main_panel.styles';
 import { getOptionDisplayLabel, getOptionShorthand, getOptionInputText } from '../utils';
 import { mainPanelTexts } from '../translations';
+import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
 
 interface OptionsListProps {
   /** Options to render as list items. */
@@ -133,7 +134,7 @@ const SubPanelMenu = () => {
 
 export function MainPanel() {
   const { onPresetSave, timeRange, applyRange } = useDateRangePickerContext();
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
 
   const handlePresetSave = useCallback(() => {
     if (timeRange.isInvalid || !onPresetSave) return;
@@ -144,8 +145,9 @@ export function MainPanel() {
     applyRange();
   }, [onPresetSave, applyRange, timeRange]);
 
+  const dividerStyles = panelDividerStyles(euiThemeContext);
   const stickyMenuStyles = css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+    background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
     position: sticky;
     bottom: 0;
   `;
@@ -161,6 +163,7 @@ export function MainPanel() {
           <PresetsRecentTabs />
         </PanelBodySection>
         <PanelBodySection spacingSide="none" css={stickyMenuStyles}>
+          <hr css={dividerStyles.root} />
           <SubPanelMenu />
         </PanelBodySection>
       </PanelBody>

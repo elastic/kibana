@@ -17,7 +17,8 @@ export const panelContainerStyles = ({ euiTheme }: UseEuiTheme) => {
   const root = css`
     display: flex;
     flex-direction: column;
-    block-size: ${CONTAINER_HEIGHT}px;
+    min-block-size: ${CONTAINER_HEIGHT * 0.5}px;
+    max-block-size: ${CONTAINER_HEIGHT}px;
     inline-size: ${euiTheme.components.forms.maxWidth}px;
     max-inline-size: 100%;
   `;
@@ -74,6 +75,7 @@ export const panelBodyStyles = (euiThemeContext: UseEuiTheme) => {
     flex-grow: 1;
     overflow-block: auto;
     ${euiScrollBarStyles(euiThemeContext)}
+    padding-inline: ${euiTheme.size.s};
 
     &:not(:first-child) {
       border-block-start: ${euiTheme.border.thin};
@@ -84,11 +86,7 @@ export const panelBodyStyles = (euiThemeContext: UseEuiTheme) => {
 };
 
 export const panelBodySectionStyles = ({ euiTheme }: UseEuiTheme) => {
-  const root = css`
-    &:not(:first-child) {
-      border-block-start: ${euiTheme.border.thin};
-    }
-  `;
+  const root = null;
 
   return { root };
 };
@@ -98,6 +96,8 @@ export const panelListItemStyles = ({ euiTheme }: UseEuiTheme) => {
     display: flex;
     align-items: center;
     min-block-size: ${euiTheme.size.xl};
+    padding-inline: ${euiTheme.size.xs};
+    border-radius: ${euiTheme.border.radius.medium};
 
     &:hover,
     &:focus-within {
@@ -111,19 +111,13 @@ export const panelListItemStyles = ({ euiTheme }: UseEuiTheme) => {
     justify-content: space-between;
     gap: ${euiTheme.size.s};
     flex-grow: 1;
-    padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.xs};
     font-size: ${euiFontSizeFromScale('s', euiTheme)};
     line-height: ${euiLineHeightFromBaseline('s', euiTheme)};
     font-weight: ${euiTheme.font.weight.regular};
     color: ${euiTheme.colors.textParagraph};
     cursor: pointer;
     outline-offset: -${euiTheme.focus.width};
-
-    /* Adjust spacing when extra actions are present */
-    .css-${root.name}:has(:nth-child(2)):hover > &,
-    .css-${root.name}:has(:nth-child(2)):focus-within > & {
-      padding-inline-end: ${euiTheme.size.s};
-    }
   `;
   const suffix = css`
     font-family: ${euiTheme.font.familyCode};
@@ -135,7 +129,6 @@ export const panelListItemStyles = ({ euiTheme }: UseEuiTheme) => {
   const extraActions = css`
     display: none;
     flex-shrink: 0;
-    padding-inline-end: ${euiTheme.size.base};
 
     .css-${root.name}:hover > &,
     .css-${root.name}:focus-within > & {
@@ -153,6 +146,8 @@ export const panelNavItemStyles = ({ euiTheme }: UseEuiTheme) => {
     justify-content: space-between;
     gap: ${euiTheme.size.s};
     min-block-size: ${euiTheme.size.xl};
+    padding-inline: ${euiTheme.size.xs};
+    border-radius: ${euiTheme.border.radius.medium};
 
     &:hover,
     &:focus-within {
@@ -166,7 +161,7 @@ export const panelNavItemStyles = ({ euiTheme }: UseEuiTheme) => {
     justify-content: space-between;
     gap: ${euiTheme.size.s};
     flex-grow: 1;
-    padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+    padding: ${euiTheme.size.xs};
     font-size: ${euiFontSizeFromScale('s', euiTheme)};
     line-height: ${euiLineHeightFromBaseline('s', euiTheme)};
     font-weight: ${euiTheme.font.weight.regular};
@@ -213,7 +208,7 @@ export const panelFooterStyles = ({ euiTheme }: UseEuiTheme) => {
   return { root, content, primaryAction };
 };
 
-// utils
+// Utils
 
 export const panelSpacingStyles = ({ euiTheme }: UseEuiTheme) => {
   const block = css`
@@ -229,4 +224,14 @@ export const panelSpacingStyles = ({ euiTheme }: UseEuiTheme) => {
   const none = null;
 
   return { block, inline, both, none };
+};
+
+export const panelDividerStyles = ({ euiTheme }: UseEuiTheme) => {
+  const root = css`
+    margin-inline: ${euiTheme.size.s};
+    border: none;
+    border-block-start: ${euiTheme.border.thin};
+  `;
+
+  return { root };
 };
