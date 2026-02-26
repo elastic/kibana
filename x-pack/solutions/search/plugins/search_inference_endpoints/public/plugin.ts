@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_TITLE } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import type {
@@ -38,26 +39,23 @@ export class SearchInferenceEndpointsPlugin
       id: INFERENCE_ENDPOINTS_APP_ID,
       title: PLUGIN_TITLE,
       order: 2,
-      async mount(params) {
+      async mount({ element, history }: ManagementAppMountParams) {
         const { renderInferenceEndpointsMgmtApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
         const startDeps: AppPluginStartDependencies = {
           ...depsStart,
-          history: params.history,
+          history,
           searchNavigation: undefined,
         };
 
-        return renderInferenceEndpointsMgmtApp(coreStart, startDeps, params.element);
+        return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
       },
     });
 
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    deps: AppPluginStartDependencies
-  ): SearchInferenceEndpointsPluginStart {
+  public start(core: CoreStart): SearchInferenceEndpointsPluginStart {
     docLinks.setDocLinks(core.docLinks.links);
     return {};
   }
