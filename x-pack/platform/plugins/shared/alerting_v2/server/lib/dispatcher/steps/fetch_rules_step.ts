@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { inject, injectable } from 'inversify';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
+import { RulesSavedObjectServiceInternalToken } from '../tokens';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -14,10 +16,14 @@ import type {
   RuleId,
 } from '../types';
 
+@injectable()
 export class FetchRulesStep implements DispatcherStep {
   public readonly name = 'fetch_rules';
 
-  constructor(private readonly rulesSavedObjectService: RulesSavedObjectServiceContract) {}
+  constructor(
+    @inject(RulesSavedObjectServiceInternalToken)
+    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
+  ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatchable = [] } = state;

@@ -21,7 +21,10 @@ describe('BuildGroupsStep', () => {
       matched: [
         createMatchedPair({
           episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
-          policy: createNotificationPolicy({ id: 'p1', workflowId: 'w1' }),
+          policy: createNotificationPolicy({
+            id: 'p1',
+            destinations: [{ type: 'workflow', id: 'w1' }],
+          }),
         }),
       ],
     });
@@ -49,7 +52,10 @@ describe('BuildGroupsStep', () => {
 
 describe('buildNotificationGroups', () => {
   it('creates separate groups for different episodes with no groupBy', () => {
-    const policy = createNotificationPolicy({ id: 'p1', workflowId: 'w1' });
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      destinations: [{ type: 'workflow', id: 'w1' }],
+    });
     const matched = [
       createMatchedPair({
         episode: createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' }),
@@ -67,7 +73,10 @@ describe('buildNotificationGroups', () => {
   });
 
   it('groups episodes from same rule+policy+groupKey into same group', () => {
-    const policy = createNotificationPolicy({ id: 'p1', workflowId: 'w1' });
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      destinations: [{ type: 'workflow', id: 'w1' }],
+    });
     const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
     const matched = [
       createMatchedPair({ episode, policy }),
@@ -81,7 +90,10 @@ describe('buildNotificationGroups', () => {
   });
 
   it('assigns deterministic group IDs', () => {
-    const policy = createNotificationPolicy({ id: 'p1', workflowId: 'w1' });
+    const policy = createNotificationPolicy({
+      id: 'p1',
+      destinations: [{ type: 'workflow', id: 'w1' }],
+    });
     const episode = createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' });
 
     const groups1 = buildNotificationGroups([createMatchedPair({ episode, policy })]);

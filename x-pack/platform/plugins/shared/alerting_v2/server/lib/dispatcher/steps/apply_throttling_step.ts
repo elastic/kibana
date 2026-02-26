@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inject, injectable } from 'inversify';
 import type {
   LastNotifiedRecord,
   NotificationGroup,
@@ -14,18 +15,23 @@ import type {
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
-import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
+import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import { getLastNotifiedTimestampsQuery } from '../queries';
 import { parseDurationToMs } from '../../duration';
 
+@injectable()
 export class ApplyThrottlingStep implements DispatcherStep {
   public readonly name = 'apply_throttling';
 
   constructor(
-    private readonly queryService: QueryServiceContract,
-    private readonly logger: LoggerServiceContract
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {

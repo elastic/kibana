@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { injectable } from 'inversify';
 import type {
   AlertEpisode,
   AlertEpisodeSuppression,
@@ -13,6 +14,7 @@ import type {
   DispatcherStepOutput,
 } from '../types';
 
+@injectable()
 export class ApplySuppressionStep implements DispatcherStep {
   public readonly name = 'apply_suppression';
 

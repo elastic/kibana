@@ -29,6 +29,19 @@ import type {
   NotificationPolicySavedObjectAttributes,
 } from '../../../saved_objects';
 import { DispatcherService, type DispatcherServiceContract } from '../dispatcher';
+import { DispatcherPipeline } from '../execution_pipeline';
+import {
+  FetchEpisodesStep,
+  FetchSuppressionsStep,
+  ApplySuppressionStep,
+  FetchRulesStep,
+  FetchPoliciesStep,
+  EvaluateMatchersStep,
+  BuildGroupsStep,
+  ApplyThrottlingStep,
+  DispatchStep,
+  RecordActionsStep,
+} from '../steps';
 import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
 
@@ -367,13 +380,20 @@ describe('DispatcherService integration tests', () => {
 
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
-    dispatcherService = new DispatcherService(
-      queryService,
-      mockLoggerService,
-      storageService,
-      rulesSoService,
-      npSoService
-    );
+
+    const pipeline = new DispatcherPipeline(mockLoggerService, [
+      new FetchEpisodesStep(queryService),
+      new FetchSuppressionsStep(queryService),
+      new ApplySuppressionStep(),
+      new FetchRulesStep(rulesSoService),
+      new FetchPoliciesStep(npSoService),
+      new EvaluateMatchersStep(),
+      new BuildGroupsStep(),
+      new ApplyThrottlingStep(queryService, mockLoggerService),
+      new DispatchStep(mockLoggerService),
+      new RecordActionsStep(storageService),
+    ]);
+    dispatcherService = new DispatcherService(pipeline);
   });
 
   describe('when there are no alert events', () => {
@@ -647,11 +667,11 @@ async function seedRulesAndPolicies(
   const policyAttrs: NotificationPolicySavedObjectAttributes = {
     name: 'Test Policy',
     description: 'Test notification policy',
-    workflow_id: 'test-workflow',
+    destinations: [{ type: 'workflow' as const, id: 'test-workflow' }],
     createdBy: null,
     updatedBy: null,
     createdAt: '2026-01-20T00:00:00.000Z',
-    updatedAt: null,
+    updatedAt: '2026-01-20T00:00:00.000Z',
   };
   await npSoService.create({ attrs: policyAttrs, id: NOTIFICATION_POLICY_ID });
 

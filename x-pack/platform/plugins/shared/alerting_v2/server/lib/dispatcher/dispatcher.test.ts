@@ -20,12 +20,25 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
 import { DispatcherService } from './dispatcher';
+import { DispatcherPipeline } from './execution_pipeline';
 import {
   createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
   createLastNotifiedTimestampsResponse,
 } from './fixtures/dispatcher';
 import { getDispatchableAlertEventsQuery } from './queries';
+import {
+  FetchEpisodesStep,
+  FetchSuppressionsStep,
+  ApplySuppressionStep,
+  FetchRulesStep,
+  FetchPoliciesStep,
+  EvaluateMatchersStep,
+  BuildGroupsStep,
+  ApplyThrottlingStep,
+  DispatchStep,
+  RecordActionsStep,
+} from './steps';
 import type { AlertEpisode, AlertEpisodeSuppression } from './types';
 
 const createMockRuleSoAttributes = (
@@ -71,7 +84,7 @@ const createMockNpSoService = (
       attributes: {
         name: `Policy ${id}`,
         description: `Description for ${id}`,
-        workflow_id: 'workflow-test-id',
+        destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
         createdBy: null,
         updatedBy: null,
         createdAt: '2026-01-01T00:00:00.000Z',
@@ -85,6 +98,28 @@ const createMockNpSoService = (
   delete: jest.fn(),
 });
 
+function buildDispatcherService(deps: {
+  queryService: QueryServiceContract;
+  storageService: StorageServiceContract;
+  rulesSoService: RulesSavedObjectServiceContract;
+  npSoService: NotificationPolicySavedObjectServiceContract;
+}): DispatcherService {
+  const { loggerService } = createLoggerService();
+  const pipeline = new DispatcherPipeline(loggerService, [
+    new FetchEpisodesStep(deps.queryService),
+    new FetchSuppressionsStep(deps.queryService),
+    new ApplySuppressionStep(),
+    new FetchRulesStep(deps.rulesSoService),
+    new FetchPoliciesStep(deps.npSoService),
+    new EvaluateMatchersStep(),
+    new BuildGroupsStep(),
+    new ApplyThrottlingStep(deps.queryService, loggerService),
+    new DispatchStep(loggerService),
+    new RecordActionsStep(deps.storageService),
+  ]);
+  return new DispatcherService(pipeline);
+}
+
 describe('DispatcherService', () => {
   let dispatcherService: DispatcherService;
   let queryService: QueryServiceContract;
@@ -97,16 +132,14 @@ describe('DispatcherService', () => {
   beforeEach(() => {
     ({ queryService, mockEsClient: queryEsClient } = createQueryService());
     ({ storageService, mockEsClient: storageEsClient } = createStorageService());
-    const { loggerService } = createLoggerService();
     rulesSoService = createMockRulesSoService(['rule-1', 'rule-2']);
     npSoService = createMockNpSoService(['policy_456']);
-    dispatcherService = new DispatcherService(
+    dispatcherService = buildDispatcherService({
       queryService,
-      loggerService,
       storageService,
       rulesSoService,
-      npSoService
-    );
+      npSoService,
+    });
   });
 
   afterEach(() => {
@@ -327,14 +360,12 @@ describe('DispatcherService', () => {
         'rule-005',
       ]);
       npSoService = createMockNpSoService(['policy_456']);
-      const { loggerService } = createLoggerService();
-      dispatcherService = new DispatcherService(
+      dispatcherService = buildDispatcherService({
         queryService,
-        loggerService,
         storageService,
         rulesSoService,
-        npSoService
-      );
+        npSoService,
+      });
 
       // Dataset: 5 rules, 9 episodes total
       // rule-001: single series, ack then unack → fire

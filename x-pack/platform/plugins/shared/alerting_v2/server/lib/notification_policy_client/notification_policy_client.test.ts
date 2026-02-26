@@ -215,13 +215,7 @@ describe('NotificationPolicyClient', () => {
       expect(res).toEqual({
         id: 'policy-id-get-1',
         version: 'WzEsMV0=',
-        name: existingAttributes.name,
-        description: existingAttributes.description,
-        workflow_id: existingAttributes.workflow_id,
-        createdBy: existingAttributes.createdBy,
-        createdAt: existingAttributes.createdAt,
-        updatedBy: existingAttributes.updatedBy,
-        updatedAt: existingAttributes.updatedAt,
+        ...existingAttributes,
       });
     });
 

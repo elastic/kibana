@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { inject, injectable } from 'inversify';
 import type {
   AlertEpisode,
   DispatcherStep,
@@ -13,14 +14,18 @@ import type {
   DispatcherStepOutput,
 } from '../types';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
+import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import { LOOKBACK_WINDOW_MINUTES } from '../constants';
 import { getDispatchableAlertEventsQuery } from '../queries';
 
+@injectable()
 export class FetchEpisodesStep implements DispatcherStep {
   public readonly name = 'fetch_episodes';
 
-  constructor(private readonly queryService: QueryServiceContract) {}
+  constructor(
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
+  ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { previousStartedAt } = state.input;

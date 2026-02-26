@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inject, injectable } from 'inversify';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
 import type {
   AlertEpisode,
@@ -13,11 +14,15 @@ import type {
   DispatcherStepOutput,
 } from '../types';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
+import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 
+@injectable()
 export class RecordActionsStep implements DispatcherStep {
   public readonly name = 'record_actions';
 
-  constructor(private readonly storageService: StorageServiceContract) {}
+  constructor(
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
+  ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { suppressed = [], throttled = [], dispatch = [] } = state;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inject, injectable } from 'inversify';
 import type {
   NotificationPolicy,
   NotificationPolicyId,
@@ -13,11 +14,14 @@ import type {
   DispatcherStepOutput,
 } from '../types';
 import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { NotificationPolicySavedObjectServiceInternalToken } from '../tokens';
 
+@injectable()
 export class FetchPoliciesStep implements DispatcherStep {
   public readonly name = 'fetch_policies';
 
   constructor(
+    @inject(NotificationPolicySavedObjectServiceInternalToken)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
   ) {}
 
@@ -43,10 +47,10 @@ export class FetchPoliciesStep implements DispatcherStep {
       policies.set(doc.id, {
         id: doc.id,
         name: doc.attributes.name,
-        workflowId: doc.attributes.workflow_id,
-        matcher: undefined,
-        groupBy: [],
-        throttle: undefined,
+        destinations: doc.attributes.destinations ?? [],
+        matcher: doc.attributes.matcher,
+        groupBy: doc.attributes.group_by ?? [],
+        throttle: doc.attributes.throttle,
       });
     }
 

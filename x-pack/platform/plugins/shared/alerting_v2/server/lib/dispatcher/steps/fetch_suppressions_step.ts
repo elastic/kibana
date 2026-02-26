@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inject, injectable } from 'inversify';
 import type {
   AlertEpisodeSuppression,
   DispatcherStep,
@@ -12,13 +13,17 @@ import type {
   DispatcherStepOutput,
 } from '../types';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
+import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import { getAlertEpisodeSuppressionsQuery } from '../queries';
 
+@injectable()
 export class FetchSuppressionsStep implements DispatcherStep {
   public readonly name = 'fetch_suppressions';
 
-  constructor(private readonly queryService: QueryServiceContract) {}
+  constructor(
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
+  ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { episodes } = state;

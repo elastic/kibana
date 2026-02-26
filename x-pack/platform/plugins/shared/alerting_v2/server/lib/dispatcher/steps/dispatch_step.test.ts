@@ -22,8 +22,14 @@ describe('DispatchStep', () => {
 
     const group1 = createNotificationGroup({ id: 'g1', policyId: 'p1' });
     const group2 = createNotificationGroup({ id: 'g2', policyId: 'p2' });
-    const policy1 = createNotificationPolicy({ id: 'p1', workflowId: 'workflow-1' });
-    const policy2 = createNotificationPolicy({ id: 'p2', workflowId: 'workflow-2' });
+    const policy1 = createNotificationPolicy({
+      id: 'p1',
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+    });
+    const policy2 = createNotificationPolicy({
+      id: 'p2',
+      destinations: [{ type: 'workflow', id: 'workflow-2' }],
+    });
 
     const state = createDispatcherPipelineState({
       dispatch: [group1, group2],

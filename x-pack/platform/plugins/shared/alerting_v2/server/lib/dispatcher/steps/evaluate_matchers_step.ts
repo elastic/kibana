@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { injectable } from 'inversify';
 import { evaluateKql } from '@kbn/eval-kql';
 import type {
   AlertEpisode,
@@ -18,6 +19,7 @@ import type {
   DispatcherStepOutput,
 } from '../types';
 
+@injectable()
 export class EvaluateMatchersStep implements DispatcherStep {
   public readonly name = 'evaluate_matchers';
 

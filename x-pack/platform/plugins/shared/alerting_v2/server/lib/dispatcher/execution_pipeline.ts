@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import { inject, injectable, multiInject } from 'inversify';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import type {
   DispatcherHaltReason,
   DispatcherPipelineInput,
   DispatcherPipelineState,
   DispatcherStep,
 } from './types';
+import { DispatcherExecutionStepsToken } from './tokens';
 import { withDispatcherSpan } from './with_dispatcher_span';
 
 export interface DispatcherPipelineResult {
@@ -24,10 +29,11 @@ export interface DispatcherPipelineContract {
   execute(input: DispatcherPipelineInput): Promise<DispatcherPipelineResult>;
 }
 
+@injectable()
 export class DispatcherPipeline implements DispatcherPipelineContract {
   constructor(
-    private readonly logger: LoggerServiceContract,
-    private readonly steps: DispatcherStep[]
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[]
   ) {}
 
   public async execute(input: DispatcherPipelineInput): Promise<DispatcherPipelineResult> {

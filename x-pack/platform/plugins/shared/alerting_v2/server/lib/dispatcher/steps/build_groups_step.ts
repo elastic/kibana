@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { injectable } from 'inversify';
 import objectHash from 'object-hash';
 import type {
   MatchedPair,
@@ -14,6 +15,7 @@ import type {
   DispatcherStepOutput,
 } from '../types';
 
+@injectable()
 export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
@@ -51,7 +53,7 @@ export function buildNotificationGroups(matched: readonly MatchedPair[]): Notifi
         id: notificationGroupId,
         ruleId: episode.rule_id,
         policyId: policy.id,
-        workflowId: policy.workflowId,
+        destinations: policy.destinations,
         groupKey,
         episodes: [],
       });

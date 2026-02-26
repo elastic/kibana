@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { inject, injectable } from 'inversify';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } from '../types';
 
+@injectable()
 export class DispatchStep implements DispatcherStep {
   public readonly name = 'dispatch';
 
-  constructor(private readonly logger: LoggerServiceContract) {}
+  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatch = [] } = state;
@@ -19,7 +24,7 @@ export class DispatchStep implements DispatcherStep {
     for (const group of dispatch) {
       this.logger.debug({
         message: () =>
-          `Dispatching notification group ${group.id} for policy ${group.policyId} with workflow ${group.workflowId}`,
+          `Dispatching notification group ${group.id} for policy ${group.policyId} with ${group.destinations.length} destination(s)`,
       });
     }
 

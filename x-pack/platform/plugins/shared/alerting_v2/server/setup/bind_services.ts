@@ -17,7 +17,6 @@ import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import {
   DispatcherServiceInternalToken,
-  DispatcherServiceScopedToken,
   NotificationPolicySavedObjectServiceInternalToken,
   RulesSavedObjectServiceInternalToken,
 } from '../lib/dispatcher/tokens';
@@ -135,40 +134,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
-  bind(DispatcherServiceScopedToken)
-    .toDynamicValue(({ get }) => {
-      const queryService = get(QueryServiceScopedToken);
-      const loggerService = get(LoggerServiceToken);
-      const storageService = get(StorageServiceInternalToken);
-      const rulesSoService = get(RulesSavedObjectServiceInternalToken);
-      const npSoService = get(NotificationPolicySavedObjectServiceInternalToken);
-
-      return new DispatcherService(
-        queryService,
-        loggerService,
-        storageService,
-        rulesSoService,
-        npSoService
-      );
-    })
-    .inRequestScope();
-
-  bind(DispatcherServiceInternalToken)
-    .toDynamicValue(({ get }) => {
-      const queryService = get(QueryServiceInternalToken);
-      const loggerService = get(LoggerServiceToken);
-      const storageService = get(StorageServiceInternalToken);
-      const rulesSoService = get(RulesSavedObjectServiceInternalToken);
-      const npSoService = get(NotificationPolicySavedObjectServiceInternalToken);
-      return new DispatcherService(
-        queryService,
-        loggerService,
-        storageService,
-        rulesSoService,
-        npSoService
-      );
-    })
-    .inSingletonScope();
+  bind(DispatcherService).toSelf().inSingletonScope();
+  bind(DispatcherServiceInternalToken).toService(DispatcherService);
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();

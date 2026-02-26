@@ -7,15 +7,17 @@
 
 import type { ServiceIdentifier } from 'inversify';
 import type { DispatcherService } from './dispatcher';
+import type { DispatcherStep } from './types';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 
 /**
- * DispatcherService scoped to the current request
+ * Token for multi-injecting the ordered dispatcher execution steps.
+ * Binding order defines execution order.
  */
-export const DispatcherServiceScopedToken = Symbol.for(
-  'alerting_v2.DispatcherServiceScoped'
-) as ServiceIdentifier<DispatcherService>;
+export const DispatcherExecutionStepsToken = Symbol.for(
+  'alerting_v2.DispatcherExecutionSteps'
+) as ServiceIdentifier<DispatcherStep>;
 
 /**
  * DispatcherService singleton

@@ -79,7 +79,7 @@ export function createNotificationPolicy(
   return {
     id: 'policy-1',
     name: 'Test policy',
-    workflowId: 'workflow-1',
+    destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
     ...overrides,
   };
@@ -100,7 +100,7 @@ export function createNotificationGroup(
     id: 'group-1',
     ruleId: 'rule-1',
     policyId: 'policy-1',
-    workflowId: 'workflow-1',
+    destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupKey: {},
     episodes: [createAlertEpisode()],
     ...overrides,
