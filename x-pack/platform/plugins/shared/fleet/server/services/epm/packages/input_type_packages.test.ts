@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { appContextService } from '../../app_context';
-import { PackageNotFoundError } from '../../../errors';
+import { PackageNotFoundError, PackagePolicyValidationError } from '../../../errors';
 
 import { dataStreamService } from '../../data_streams';
 
@@ -111,8 +111,97 @@ describe('installAssetsForInputPackagePolicy', () => {
     ).rejects.toThrowError(PackageNotFoundError);
   });
 
+  it('should throw when existing data stream is owned by different package even with force true', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: { name: 'filestream', version: '2.0.0' },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
+      {
+        name: 'logs-my_dataset-default',
+        _meta: { package: { name: 'other_package' } },
+      },
+    ] as any);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await expect(() =>
+      installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      })
+    ).rejects.toThrow(PackagePolicyValidationError);
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+  });
+
+  it('should throw when existing index template is owned by different package even with force true', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: { name: 'filestream', version: '2.0.0' },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+      name: 'logs-my_dataset',
+      _meta: { package: { name: 'other_package' } },
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await expect(() =>
+      installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'filestream', version: '2.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      })
+    ).rejects.toThrow(PackagePolicyValidationError);
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+  });
+
   it('should install es index patterns for input package if package is installed', async () => {
     jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
 
     jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {

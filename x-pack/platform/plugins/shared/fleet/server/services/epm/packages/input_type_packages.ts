@@ -156,18 +156,18 @@ async function installAssetsForDataStreamType(opts: {
   if (existingDataStreams.length) {
     const existingDataStreamsAreFromDifferentPackage =
       checkExistingDataStreamsAreFromDifferentPackage(pkgInfo, existingDataStreams);
-    if (existingDataStreamsAreFromDifferentPackage && !force) {
+    if (existingDataStreamsAreFromDifferentPackage) {
       // user has opted to send data to an existing data stream which is managed by another
       // package. This means certain custom setting such as elasticsearch settings
       // defined by the package will not have been applied which could lead
-      // to unforeseen circumstances, so force flag must be used.
+      // to unforeseen circumstances
       const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
         type: dataStream.type,
         dataset: datasetName,
       });
 
       throw new PackagePolicyValidationError(
-        `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
+        `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package`
       );
     }
     if (!force) {
@@ -186,11 +186,11 @@ async function installAssetsForDataStreamType(opts: {
   if (existingIndexTemplate) {
     const indexTemplateOwnedByDifferentPackage =
       existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
-    if (indexTemplateOwnedByDifferentPackage && !force) {
+    if (indexTemplateOwnedByDifferentPackage) {
       // index template already exists but there is no data stream yet
       // we do not want to override the index template
       throw new PackagePolicyValidationError(
-        `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
+        `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package`
       );
     }
     if (!force) {
