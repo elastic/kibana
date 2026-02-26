@@ -75,6 +75,8 @@ export function DateRangePickerControl() {
       const value = parseInt(part.text, 10);
       if (isNaN(value)) return undefined;
       const nextValue = action === 'increase' ? value + 1 : value - 1;
+      // Values below 1 not useful, so return (not ideal but better than nothing)
+      if (nextValue < 1) return undefined;
       const newText =
         currentText.substring(0, part.start) + String(nextValue) + currentText.substring(part.end);
       setText(newText);
