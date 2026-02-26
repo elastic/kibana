@@ -8,11 +8,6 @@
 import type { SloTelemetryEvent } from './types';
 import { SloTelemetryEventTypes } from './types';
 
-const sloDetailsFlyoutViewedEventType: SloTelemetryEvent = {
-  eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_VIEWED,
-  schema: {},
-};
-
 const sloDetailsFlyoutTabChangedEventType: SloTelemetryEvent = {
   eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_TAB_CHANGED,
   schema: {
@@ -23,19 +18,4 @@ const sloDetailsFlyoutTabChangedEventType: SloTelemetryEvent = {
   },
 };
 
-const sloDetailsFlyoutOpenInAppClickedEventType: SloTelemetryEvent = {
-  eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_OPEN_IN_APP_CLICKED,
-  schema: {},
-};
-
-const sloCreateFlyoutViewedEventType: SloTelemetryEvent = {
-  eventType: SloTelemetryEventTypes.SLO_CREATE_FLYOUT_VIEWED,
-  schema: {},
-};
-
-export const sloTelemetryEventBasedTypes = [
-  sloDetailsFlyoutViewedEventType,
-  sloDetailsFlyoutTabChangedEventType,
-  sloDetailsFlyoutOpenInAppClickedEventType,
-  sloCreateFlyoutViewedEventType,
-];
+export const sloTelemetryEventBasedTypes = [sloDetailsFlyoutTabChangedEventType];

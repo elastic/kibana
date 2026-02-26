@@ -12,19 +12,7 @@ import { SloTelemetryEventTypes } from './types';
 export class SloTelemetryClient implements ISloTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceStart) {}
 
-  public reportSloDetailsFlyoutViewed = () => {
-    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_VIEWED, {});
-  };
-
   public reportSloDetailsFlyoutTabChanged = (params: SloDetailsFlyoutTabChangedParams) => {
     this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_TAB_CHANGED, params);
-  };
-
-  public reportSloDetailsFlyoutOpenInAppClicked = () => {
-    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_OPEN_IN_APP_CLICKED, {});
-  };
-
-  public reportSloCreateFlyoutViewed = () => {
-    this.analytics.reportEvent(SloTelemetryEventTypes.SLO_CREATE_FLYOUT_VIEWED, {});
   };
 }

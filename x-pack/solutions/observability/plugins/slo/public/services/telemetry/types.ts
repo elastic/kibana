@@ -14,20 +14,17 @@ export interface SloDetailsFlyoutTabChangedParams {
 export type SloTelemetryEventParams = SloDetailsFlyoutTabChangedParams;
 
 export interface ISloTelemetryClient {
-  reportSloDetailsFlyoutViewed(): void;
   reportSloDetailsFlyoutTabChanged(params: SloDetailsFlyoutTabChangedParams): void;
-  reportSloDetailsFlyoutOpenInAppClicked(): void;
-  reportSloCreateFlyoutViewed(): void;
 }
 
 export enum SloTelemetryEventTypes {
-  SLO_DETAILS_FLYOUT_VIEWED = 'SLO Details Flyout Viewed',
-  SLO_DETAILS_FLYOUT_TAB_CHANGED = 'SLO Details Flyout Tab Changed',
-  SLO_DETAILS_FLYOUT_OPEN_IN_APP_CLICKED = 'SLO Details Flyout Open In App Clicked',
-  SLO_CREATE_FLYOUT_VIEWED = 'SLO Create Flyout Viewed',
+  SLO_DETAILS_FLYOUT_VIEWED = 'slo_details_flyout_viewed',
+  SLO_DETAILS_FLYOUT_TAB_CHANGED = 'slo_details_flyout_tab_changed',
+  SLO_DETAILS_FLYOUT_OPEN_IN_APP_CLICKED = 'slo_details_flyout_open_in_app_clicked',
+  SLO_CREATE_FLYOUT_VIEWED = 'slo_create_flyout_viewed',
 }
 
 export interface SloTelemetryEvent {
   eventType: SloTelemetryEventTypes;
-  schema: RootSchema<SloTelemetryEventParams> | Record<string, never>;
+  schema: RootSchema<SloTelemetryEventParams>;
 }

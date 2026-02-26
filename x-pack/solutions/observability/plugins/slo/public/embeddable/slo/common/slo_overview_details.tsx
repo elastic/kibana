@@ -33,7 +33,7 @@ import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSloFlyoutTelemetry } from '../../../hooks/use_slo_flyout_telemetry';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
@@ -45,15 +45,17 @@ export function SloOverviewDetailsContent({
   initialTabId = OVERVIEW_TAB_ID,
 }: SloOverviewDetailsContentProps) {
   const { agentBuilder } = useKibana().services;
-  const flyoutTelemetry = useSloFlyoutTelemetry();
+  const { telemetry } = usePluginContext();
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
 
   const handleTabChange = useCallback(
     (tabId: SloTabId) => {
       setSelectedTabId(tabId);
-      flyoutTelemetry.reportDetailsFlyoutTabChanged(tabId);
+      if (telemetry) {
+        telemetry.reportSloDetailsFlyoutTabChanged({ tabId });
+      }
     },
-    [flyoutTelemetry]
+    [telemetry]
   );
 
   const { tabs } = useSloDetailsTabs({
