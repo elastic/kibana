@@ -80,13 +80,6 @@ const baseNavItems = [
         items: undefined,
         name: 'Query rules',
       },
-      {
-        'data-test-subj': 'searchSideNav-InferenceEndpoints',
-        href: '/app/management/ml/inference_endpoints',
-        id: 'inference_endpoints',
-        items: undefined,
-        name: 'Inference endpoints',
-      },
     ],
     name: 'Relevance',
   },
@@ -116,11 +109,6 @@ const mockNavLinks = [
     id: 'enterpriseSearchAnalytics',
     title: 'Behavioral Analytics',
     url: '/app/elasticsearch/analytics',
-  },
-  {
-    id: 'management:inference_endpoints',
-    title: 'Inference endpoints',
-    url: '/app/management/ml/inference_endpoints',
   },
   {
     id: 'searchSynonyms:synonyms',
