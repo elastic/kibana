@@ -22,7 +22,10 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
+import {
+  EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
+} from '@kbn/security-solution-plugin/common/constants';
 import { deleteAllRules, deleteAllAlerts, createRule } from '@kbn/detections-response-ftr-services';
 import {
   getPreviewAlerts,
@@ -2609,6 +2612,89 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toEqual([
           { depth: 0, id: '', index: '', type: 'event' },
         ]);
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:00:00.000Z';
+
+        // Create documents with different namespaces
+        const docNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          agent: {
+            name: 'agent-namespace1',
+          },
+        };
+        const docNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          agent: {
+            name: 'agent-namespace2',
+          },
+        };
+        const docNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          agent: {
+            name: 'agent-namespace3',
+          },
+        };
+
+        await indexListOfDocuments([docNamespace1, docNamespace2, docNamespace3]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const ruleQuery = `from ecs_compliant metadata _id, _index ${internalIdPipe(
+          id
+        )} | where agent.name=="agent-namespace1" or agent.name=="agent-namespace2" or agent.name=="agent-namespace3"`;
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: ruleQuery,
+          from: '2020-10-28T06:00:00.000Z',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1 and namespace2, not namespace3
+        expect(previewAlerts.length).toEqual(2);
+        const namespaces = previewAlerts.map((alert) => alert._source?.['data_stream.namespace']);
+        expect(namespaces).toContain('namespace1');
+        expect(namespaces).toContain('namespace2');
+        expect(namespaces).not.toContain('namespace3');
       });
     });
   });
