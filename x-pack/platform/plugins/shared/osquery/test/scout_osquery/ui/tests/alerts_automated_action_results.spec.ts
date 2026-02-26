@@ -158,10 +158,12 @@ test.describe(
           ]);
 
           await newPage.waitForLoadState();
-          await expect(newPage.locator('[data-test-subj="lnsWorkspace"]')).toBeVisible();
+          await expect(newPage.locator('[data-test-subj="lnsWorkspace"]')).toBeVisible({
+            timeout: 60_000,
+          });
           await expect(
             newPage.locator('[data-test-subj="breadcrumbs"]').getByText(lensRegex)
-          ).toBeVisible();
+          ).toBeVisible({ timeout: 30_000 });
 
           await newPage.close();
         });

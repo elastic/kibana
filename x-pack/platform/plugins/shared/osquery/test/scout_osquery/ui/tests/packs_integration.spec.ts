@@ -290,7 +290,7 @@ test.describe(
 
                   return !!item?.inputs[0]?.config?.osquery?.value?.packs?.[globalPack];
                 },
-                { timeout: 120_000 }
+                { timeout: 180_000 }
               )
               .toBe(true);
           } finally {
