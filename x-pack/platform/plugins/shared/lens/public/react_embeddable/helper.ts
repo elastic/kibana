@@ -251,6 +251,9 @@ export function hasAnnotationGroupReference(state: LensRuntimeState, groupId: st
  * Returns updated state with library saved annotation group data for all by-reference
  * annotation layers that reference the given group ID, or undefined if no layers matched.
  *
+ * Handles both hydrated layers (annotationGroupId on the layer) and persisted layers
+ * (annotationGroupRef resolved via the references array).
+ *
  * When `referenceOnly` is true, only the `__lastSaved` snapshot is updated while
  * local annotations are preserved.
  */
@@ -266,21 +269,57 @@ export function updateAttributesWithAnnotation(
   const vizState = attributes.state.visualization as XYState | undefined;
   if (!vizState?.layers) return undefined;
 
+  // In the persisted form, annotation layers use annotationGroupRef (a reference name)
+  // instead of annotationGroupId. Build a lookup to resolve these via the references array.
+  const refNameToGroupId = new Map<string, string>();
+  for (const ref of attributes.references ?? []) {
+    if (ref.type === EVENT_ANNOTATION_GROUP_TYPE) {
+      refNameToGroupId.set(ref.name, ref.id);
+    }
+  }
+
   let changed = false;
   const layers = vizState.layers.map((layer) => {
-    if (!('annotationGroupId' in layer) || layer.annotationGroupId !== groupId) return layer;
-    changed = true;
-    const refLayer = layer as XYByReferenceAnnotationLayerConfig;
-    if (referenceOnly) {
-      return { ...refLayer, __lastSaved: libraryGroup };
+    // Hydrated form: annotationGroupId is directly on the layer (used during inline editing)
+    if ('annotationGroupId' in layer && layer.annotationGroupId === groupId) {
+      changed = true;
+      const refLayer = layer as XYByReferenceAnnotationLayerConfig;
+      if (referenceOnly) {
+        return { ...refLayer, __lastSaved: libraryGroup };
+      }
+      return {
+        ...refLayer,
+        annotations: structuredClone(libraryGroup.annotations),
+        ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
+        indexPatternId: libraryGroup.indexPatternId,
+        __lastSaved: libraryGroup,
+      };
     }
-    return {
-      ...refLayer,
-      annotations: structuredClone(libraryGroup.annotations),
-      ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
-      indexPatternId: libraryGroup.indexPatternId,
-      __lastSaved: libraryGroup,
-    };
+
+    // Persisted form: annotationGroupRef maps to the group ID via the references array.
+    // This is the form stored in attributes$ for non-editing panels (e.g. duplicated panels
+    // on an unsaved dashboard).
+    if (
+      'annotationGroupRef' in layer &&
+      refNameToGroupId.get((layer as { annotationGroupRef: string }).annotationGroupRef) === groupId
+    ) {
+      changed = true;
+      if (referenceOnly) {
+        return { ...layer, __lastSaved: libraryGroup };
+      }
+      // Hydrate into the full runtime form so the attributes$ change triggers a re-render
+      return {
+        layerId: layer.layerId,
+        layerType: layer.layerType,
+        annotationGroupId: groupId,
+        annotations: structuredClone(libraryGroup.annotations),
+        ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
+        indexPatternId: libraryGroup.indexPatternId,
+        __lastSaved: libraryGroup,
+      } as XYByReferenceAnnotationLayerConfig;
+    }
+
+    return layer;
   });
 
   return changed
