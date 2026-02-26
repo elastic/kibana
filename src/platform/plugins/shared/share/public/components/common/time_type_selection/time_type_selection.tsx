@@ -10,7 +10,7 @@
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiCallOut, EuiSpacer, EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +18,7 @@ import {
   convertRelativeTimeStringToAbsoluteTimeDate,
   getRelativeTimeValueAndUnitFromTimeString,
 } from '../../../lib/time_utils';
+import { timeTypeSelectionStyles } from './time_type_selection.styles';
 
 const BoldText = ({ children }: { children: ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -171,6 +172,8 @@ export const TimeTypeSelection = ({
 }: Props) => {
   const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
 
+  const styles = useMemo(timeTypeSelectionStyles, []);
+
   const handleTimeTypeChange = (e: EuiSwitchEvent) => {
     const newIsAbsolute = e.target.checked;
     setIsAbsoluteTime(newIsAbsolute);
@@ -196,7 +199,7 @@ export const TimeTypeSelection = ({
           <EuiSpacer size="m" />
         </>
       )}
-      <EuiText size="s">
+      <EuiText size="s" css={styles.timeInfoText}>
         {isAbsoluteTime ? (
           <div data-test-subj="absoluteTimeInfoText">
             <FormattedMessage
