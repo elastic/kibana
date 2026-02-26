@@ -19936,7 +19936,7 @@ dotenv@16.4.7:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.7.tgz#0e20c5b82950140aa99be360a8a5f52335f53c26"
   integrity sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==
 
-dotenv@17.3.0:
+dotenv@17.3.0, dotenv@^17.2.3:
   version "17.3.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-17.3.0.tgz#5af4a722c2ff39005bf2c0b87c91d392dda85893"
   integrity sha512-i3z5dx/8F45f+Dj0B/qG8oKip9luzyHz6dfJMOKG7zQW/12tT7CrIjs/0J10uNK/Z5O7O0UtfEmx6yFKRQCl4g==
@@ -19945,11 +19945,6 @@ dotenv@^16.0.2, dotenv@^16.5.0:
   version "16.5.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.5.0.tgz#092b49f25f808f020050051d1ff258e404c78692"
   integrity sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==
-
-dotenv@^17.2.3:
-  version "17.2.4"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-17.2.4.tgz#b5a0e2f015e0be287a5330a90bf0e804606504c2"
-  integrity sha512-mudtfb4zRB4bVvdj0xRo+e6duH1csJRM8IukBqfTRvHotn9+LBXB8ynAidP9zHqoRC/fsllXgk4kCKlR21fIhw==
 
 dotignore@^0.1.2:
   version "0.1.2"
