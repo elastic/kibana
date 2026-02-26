@@ -82,7 +82,7 @@ export const makeChecks = async (
   monitorId: string,
   numChecks: number = 1,
   numIps: number = 1,
-  every: number = 10000,
+  every: number = 10000, // number of millis between checks
   fields: { [key: string]: any } = {},
   mogrify: (doc: any) => any = (d) => d,
   refresh: boolean = true,
