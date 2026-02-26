@@ -8,7 +8,7 @@
  */
 
 import Joi from 'joi';
-import type { Root, AnySchema, CustomHelpers } from 'joi';
+import type { JoiRoot, CustomHelpers } from 'joi';
 import { isPlainObject } from 'lodash';
 import { isDuration } from 'moment';
 import { Stream } from 'stream';
@@ -19,36 +19,7 @@ function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;
 }
 
-/**
- * AnySchema extended with an `entries` rule method added by our custom `map` and `record`
- * Joi extensions.
- */
-interface EntriesSchema extends AnySchema {
-  entries(key: AnySchema, value: AnySchema): this;
-}
-
-/**
- * AnySchema extended with `min`/`max` rule methods added by our custom `bytes` and
- * `duration` Joi extensions.
- */
-interface MinMaxSchema extends AnySchema {
-  min(limit: unknown): this;
-  max(limit: unknown): this;
-}
-
-/**
- * Joi.extend() returns `any`, but we know the returned root includes the standard
- * Joi schema factory methods plus our custom-extension methods.
- */
-interface ExtendedRoot extends Root {
-  stream(): AnySchema;
-  bytes(): MinMaxSchema;
-  duration(): MinMaxSchema;
-  map(): EntriesSchema;
-  record(): EntriesSchema;
-}
-
-export const internals = Joi.extend(
+export const internals: JoiRoot = Joi.extend(
   {
     type: 'boolean',
     base: Joi.boolean(),
@@ -450,4 +421,4 @@ export const internals = Joi.extend(
       },
     },
   }
-) as ExtendedRoot;
+);
