@@ -79,7 +79,7 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
             // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
-            // Immediately update the workflow in the list with new data
+            // Immediately remove deleted workflows from the list and update pagination
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
@@ -156,8 +156,10 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
         error: undefined,
       });
 
-      // Refetch to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      queryClient.invalidateQueries({
+        queryKey: ['workflows'],
+        refetchType: variables.skipRefetch ? 'none' : 'active',
+      });
     },
   });
 
@@ -174,10 +176,8 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
-            // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
-            // Immediately remove deleted workflows from the list and update pagination
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.filter((w) => !ids.includes(w.id)),
@@ -311,7 +311,7 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
   });
 
   return {
-    updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
+    updateWorkflow,
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,

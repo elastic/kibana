@@ -18,15 +18,15 @@ export const COMMON_HEADERS = {
  * Entity Store API routes
  */
 export const ENTITY_STORE_ROUTES = {
-  INSTALL: 'internal/security/entity-store/install',
-  START: 'internal/security/entity-store/start',
-  STOP: 'internal/security/entity-store/stop',
-  UNINSTALL: 'internal/security/entity-store/uninstall',
+  INSTALL: 'internal/security/entity_store/install',
+  START: 'internal/security/entity_store/start',
+  STOP: 'internal/security/entity_store/stop',
+  UNINSTALL: 'internal/security/entity_store/uninstall',
   FORCE_LOG_EXTRACTION: (entityType: string) =>
-    `internal/security/entity-store/${entityType}/force-log-extraction`,
-  CRUD_UPSERT: (entityType: string) => `internal/security/entity-store/entities/${entityType}`,
-  CRUD_UPSERT_BULK: 'internal/security/entity-store/entities/bulk',
-  CRUD_DELETE: 'internal/security/entity-store/entities/',
+    `internal/security/entity_store/${entityType}/force_log_extraction`,
+  CRUD_UPSERT: (entityType: string) => `internal/security/entity_store/entities/${entityType}`,
+  CRUD_UPSERT_BULK: 'internal/security/entity_store/entities/bulk',
+  CRUD_DELETE: 'internal/security/entity_store/entities/',
 } as const;
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
