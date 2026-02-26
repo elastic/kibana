@@ -238,7 +238,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     );
   };
 
-  const modalTitleId = useGeneratedHtmlId();
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'editOutputFlyoutTitle' });
 
   return (
     <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={modalTitleId}>
