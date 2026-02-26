@@ -16,8 +16,8 @@ import type { MarkdownAttributes } from '../../markdown_saved_object';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  createParams: MarkdownCreateRequestParams,
-  createBody: MarkdownCreateRequestBody
+  createBody: MarkdownCreateRequestBody,
+  createParams?: MarkdownCreateRequestParams
 ): Promise<MarkdownCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
