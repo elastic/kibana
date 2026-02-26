@@ -6,7 +6,7 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
-import { withAPM } from './with_apm_decorator';
+import { withApm as withApmDecorator } from './with_apm_decorator';
 
 jest.mock('@kbn/apm-utils', () => ({
   withSpan: jest.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb() as Promise<T>),
@@ -14,19 +14,21 @@ jest.mock('@kbn/apm-utils', () => ({
 
 const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
 
+const withApm = withApmDecorator('test_client');
+
 class TestClient {
-  @withAPM
+  @withApm
   async doWork(): Promise<string> {
     return 'done';
   }
 
-  @withAPM
+  @withApm
   async fail(): Promise<never> {
     throw new Error('decorated error');
   }
 }
 
-describe('withAPM decorator', () => {
+describe('withApm decorator', () => {
   let client: TestClient;
 
   beforeEach(() => {
@@ -34,7 +36,7 @@ describe('withAPM decorator', () => {
     client = new TestClient();
   });
 
-  it('wraps an async method in withSpan using class name and method name', async () => {
+  it('wraps an async method in withSpan using the given type and method name', async () => {
     const result = await client.doWork();
 
     expect(result).toBe('done');
@@ -42,7 +44,7 @@ describe('withAPM decorator', () => {
     expect(withSpanMock).toHaveBeenCalledWith(
       {
         name: 'doWork',
-        type: 'TestClient',
+        type: 'test_client',
         labels: { plugin: 'alerting_v2' },
       },
       expect.any(Function)
