@@ -127,14 +127,14 @@ export const RunsListPage: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {error && (
+        {error ? (
           <>
             <EuiText color="danger" size="s">
               <p>{String(error)}</p>
             </EuiText>
             <EuiSpacer size="m" />
           </>
-        )}
+        ) : null}
         <EuiBasicTable<EvaluationRunSummary>
           items={data?.runs ?? []}
           columns={columns}

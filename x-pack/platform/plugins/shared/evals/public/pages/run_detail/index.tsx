@@ -107,14 +107,14 @@ export const RunDetailPage: React.FC = () => {
         ]}
       />
       <EuiPageTemplate.Section>
-        {runError && (
+        {runError ? (
           <>
             <EuiText color="danger" size="s">
               <p>{String(runError)}</p>
             </EuiText>
             <EuiSpacer size="m" />
           </>
-        )}
+        ) : null}
 
         {runDetail && (
           <>

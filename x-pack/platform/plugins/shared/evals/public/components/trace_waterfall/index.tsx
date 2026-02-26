@@ -546,7 +546,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <strong>{i18n.DURATION_LABEL}</strong> {span.duration_ms.toFixed(1)}ms
+            <strong>{i18n.DURATION_LABEL}</strong> {(span.duration_ms ?? 0).toFixed(1)}ms
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

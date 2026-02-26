@@ -116,11 +116,13 @@ export const buildStatsAggregation = () => ({
  * Standard sort order for retrieving individual score documents,
  * grouped by dataset, example, evaluator, then repetition.
  */
-export const SCORES_SORT_ORDER = [
-  { 'example.dataset.name': { order: 'asc' as const } },
-  { 'example.index': { order: 'asc' as const } },
-  { 'evaluator.name': { order: 'asc' as const } },
-  { 'task.repetition_index': { order: 'asc' as const } },
+type SortField = Record<string, { order: 'asc' | 'desc' }>;
+
+export const SCORES_SORT_ORDER: SortField[] = [
+  { 'example.dataset.name': { order: 'asc' } },
+  { 'example.index': { order: 'asc' } },
+  { 'evaluator.name': { order: 'asc' } },
+  { 'task.repetition_index': { order: 'asc' } },
 ];
 
 // ---------------------------------------------------------------------------
