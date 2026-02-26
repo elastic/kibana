@@ -10,12 +10,12 @@
 import type { ActionContext } from '../../connector_spec';
 import { ServicenowSearch } from './servicenow_search';
 
-interface ServiceNowListResponse<T = unknown> {
-  result: T[];
+interface ServiceNowListResponse {
+  result: unknown[];
 }
 
-interface ServiceNowRecordResponse<T = unknown> {
-  result: T;
+interface ServiceNowRecordResponse {
+  result: unknown;
 }
 
 interface TestResult {

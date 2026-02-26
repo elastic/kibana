@@ -11,7 +11,7 @@
  * ServiceNow Search Connector
  *
  * This connector provides integration with ServiceNow via the Table API
- * for federated search in Workplace AI. Features include:
+ * for federated search. Features include:
  * - Full-text search across ServiceNow tables (incidents, knowledge articles, etc.)
  * - Retrieve individual records by sys_id
  * - List records from any ServiceNow table with filtering
@@ -23,6 +23,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import type * as ServiceNow from './types';
 
 /**
  * Common ServiceNow tables and their purpose, for use in field descriptions.
@@ -102,31 +103,22 @@ export const ServicenowSearch: ConnectorSpec = {
         limit: z.number().optional().describe('Maximum number of results to return (default: 20)'),
         offset: z.number().optional().describe('Offset for pagination'),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          table: string;
-          query: string;
-          encodedQuery?: string;
-          fields?: string;
-          limit?: number;
-          offset?: number;
-        };
-
+      handler: async (ctx, input: ServiceNow.SearchInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/${typedInput.table}`;
-        const limit = typedInput.limit ?? 20;
+        const url = `${instanceUrl}/api/now/table/${input.table}`;
+        const limit = input.limit ?? 20;
 
         // GOTO123TEXTQUERY321 is ServiceNow's undocumented full-text search parameter
-        const sysparmQuery = typedInput.encodedQuery
-          ? `GOTO123TEXTQUERY321=${typedInput.query}^${typedInput.encodedQuery}`
-          : `GOTO123TEXTQUERY321=${typedInput.query}`;
+        const sysparmQuery = input.encodedQuery
+          ? `GOTO123TEXTQUERY321=${input.query}^${input.encodedQuery}`
+          : `GOTO123TEXTQUERY321=${input.query}`;
 
         const response = await ctx.client.get(url, {
           params: {
             sysparm_query: sysparmQuery,
             sysparm_limit: limit,
-            ...(typedInput.offset !== undefined && { sysparm_offset: typedInput.offset }),
-            ...(typedInput.fields && { sysparm_fields: typedInput.fields }),
+            ...(input.offset !== undefined && { sysparm_offset: input.offset }),
+            ...(input.fields && { sysparm_fields: input.fields }),
             sysparm_display_value: 'true',
           },
         });
@@ -145,20 +137,14 @@ export const ServicenowSearch: ConnectorSpec = {
         sysId: z.string().describe('The sys_id of the record to retrieve'),
         fields: z.string().optional().describe('Comma-separated list of fields to return'),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          table: string;
-          sysId: string;
-          fields?: string;
-        };
-
+      handler: async (ctx, input: ServiceNow.GetRecordInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/${typedInput.table}/${typedInput.sysId}`;
+        const url = `${instanceUrl}/api/now/table/${input.table}/${input.sysId}`;
 
         const response = await ctx.client.get(url, {
           params: {
             sysparm_display_value: 'true',
-            ...(typedInput.fields && { sysparm_fields: typedInput.fields }),
+            ...(input.fields && { sysparm_fields: input.fields }),
           },
         });
 
@@ -187,28 +173,19 @@ export const ServicenowSearch: ConnectorSpec = {
           .optional()
           .describe('Field to order results by (prefix with - for descending)'),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          table: string;
-          encodedQuery?: string;
-          fields?: string;
-          limit?: number;
-          offset?: number;
-          orderBy?: string;
-        };
-
+      handler: async (ctx, input: ServiceNow.ListRecordsInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
-        const url = `${instanceUrl}/api/now/table/${typedInput.table}`;
-        const limit = typedInput.limit ?? 20;
+        const url = `${instanceUrl}/api/now/table/${input.table}`;
+        const limit = input.limit ?? 20;
 
         const response = await ctx.client.get(url, {
           params: {
             sysparm_limit: limit,
             sysparm_display_value: 'true',
-            ...(typedInput.encodedQuery && { sysparm_query: typedInput.encodedQuery }),
-            ...(typedInput.fields && { sysparm_fields: typedInput.fields }),
-            ...(typedInput.offset !== undefined && { sysparm_offset: typedInput.offset }),
-            ...(typedInput.orderBy && { sysparm_orderby: typedInput.orderBy }),
+            ...(input.encodedQuery && { sysparm_query: input.encodedQuery }),
+            ...(input.fields && { sysparm_fields: input.fields }),
+            ...(input.offset !== undefined && { sysparm_offset: input.offset }),
+            ...(input.orderBy && { sysparm_orderby: input.orderBy }),
           },
         });
 
@@ -228,26 +205,20 @@ export const ServicenowSearch: ConnectorSpec = {
         limit: z.number().optional().describe('Maximum number of tables to return (default: 50)'),
         offset: z.number().optional().describe('Offset for pagination'),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          query?: string;
-          limit?: number;
-          offset?: number;
-        };
-
+      handler: async (ctx, input: ServiceNow.ListTablesInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/sys_db_object`;
-        const limit = typedInput.limit ?? 50;
+        const limit = input.limit ?? 50;
 
         const response = await ctx.client.get(url, {
           params: {
             sysparm_limit: limit,
             sysparm_fields: 'name,label,super_class,sys_package',
             sysparm_display_value: 'true',
-            ...(typedInput.query && {
-              sysparm_query: `nameLIKE${typedInput.query}^ORlabelLIKE${typedInput.query}`,
+            ...(input.query && {
+              sysparm_query: `nameLIKE${input.query}^ORlabelLIKE${input.query}`,
             }),
-            ...(typedInput.offset !== undefined && { sysparm_offset: typedInput.offset }),
+            ...(input.offset !== undefined && { sysparm_offset: input.offset }),
           },
         });
 
@@ -266,15 +237,10 @@ export const ServicenowSearch: ConnectorSpec = {
           .describe('Maximum number of knowledge bases to return (default: 20)'),
         offset: z.number().optional().describe('Offset for pagination'),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          limit?: number;
-          offset?: number;
-        };
-
+      handler: async (ctx, input: ServiceNow.ListKnowledgeBasesInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/kb_knowledge_base`;
-        const limit = typedInput.limit ?? 20;
+        const limit = input.limit ?? 20;
 
         const response = await ctx.client.get(url, {
           params: {
@@ -282,7 +248,7 @@ export const ServicenowSearch: ConnectorSpec = {
             sysparm_fields: 'sys_id,title,description,active,kb_managers',
             sysparm_display_value: 'true',
             sysparm_query: 'active=true',
-            ...(typedInput.offset !== undefined && { sysparm_offset: typedInput.offset }),
+            ...(input.offset !== undefined && { sysparm_offset: input.offset }),
           },
         });
 
@@ -307,25 +273,18 @@ export const ServicenowSearch: ConnectorSpec = {
         limit: z.number().optional().describe('Maximum number of entries to return (default: 20)'),
         offset: z.number().optional().describe('Offset for pagination'),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          tableName: string;
-          recordSysId: string;
-          limit?: number;
-          offset?: number;
-        };
-
+      handler: async (ctx, input: ServiceNow.GetCommentsInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/sys_journal_field`;
-        const limit = typedInput.limit ?? 20;
+        const limit = input.limit ?? 20;
 
         const response = await ctx.client.get(url, {
           params: {
-            sysparm_query: `element_id=${typedInput.recordSysId}^name=${typedInput.tableName}^element=comments^NQelement_id=${typedInput.recordSysId}^name=${typedInput.tableName}^element=work_notes^ORDERBYsys_created_on`,
+            sysparm_query: `element_id=${input.recordSysId}^name=${input.tableName}^element=comments^NQelement_id=${input.recordSysId}^name=${input.tableName}^element=work_notes^ORDERBYsys_created_on`,
             sysparm_limit: limit,
             sysparm_fields: 'sys_id,element,value,sys_created_on,sys_created_by',
             sysparm_display_value: 'true',
-            ...(typedInput.offset !== undefined && { sysparm_offset: typedInput.offset }),
+            ...(input.offset !== undefined && { sysparm_offset: input.offset }),
           },
         });
 
@@ -347,21 +306,19 @@ export const ServicenowSearch: ConnectorSpec = {
         contentType: z.string().describe('MIME type of the attachment'),
         base64: z.string().describe('Base64-encoded attachment content'),
       }),
-      handler: async (ctx, input) => {
-        const typedInput = input as { sysId: string };
-
+      handler: async (ctx, input: ServiceNow.GetAttachmentInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
 
         // First get attachment metadata
         const metaResponse = await ctx.client.get(
-          `${instanceUrl}/api/now/attachment/${typedInput.sysId}`,
+          `${instanceUrl}/api/now/attachment/${input.sysId}`,
           {}
         );
         const { file_name: fileName, content_type: contentType } = metaResponse.data.result;
 
         // Then download the content
         const contentResponse = await ctx.client.get(
-          `${instanceUrl}/api/now/attachment/${typedInput.sysId}/file`,
+          `${instanceUrl}/api/now/attachment/${input.sysId}/file`,
           { responseType: 'arraybuffer' }
         );
         const buffer = Buffer.from(contentResponse.data);
