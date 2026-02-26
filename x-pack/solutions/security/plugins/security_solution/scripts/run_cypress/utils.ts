@@ -16,57 +16,57 @@ import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 
 /**
- * Approximate test counts for shared runner functions that dynamically generate `it()` calls.
- * Files importing these runners show 0 inline `it(` but actually produce many tests at runtime.
+ * Configuration for the config-aware load balancer.
+ * Suite-specific values (e.g. Defend Workflows) live in separate config files
+ * so that utils.ts stays generic and reusable by other Cypress suites.
  */
-const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
-  getArtifactMockedDataTests: 40,
-  getArtifactTabsTests: 12,
-  createRbacPoliciesExistSuite: 27,
-  createRbacHostsExistSuite: 27,
-  createRbacEmptyStateSuite: 27,
-  createNavigationEssSuite: 4,
-};
+export interface LoadBalancerConfig {
+  /** Maps dynamic runner function names to their approximate test counts. */
+  dynamicRunnerWeights: Record<string, number>;
+  /** Reduced weights when a spec filters by a single SIEM version. */
+  filteredRunnerWeights: Record<string, number>;
+  /** Weight penalty for each distinct ftrConfig on an agent (~stack setup cost). */
+  setupCostWeight: number;
+  /** Per-spec overhead in weight units (Cypress boot, browser init). */
+  perSpecOverhead: number;
+  /** Minimum weight floor for any spec file. */
+  minSpecWeight: number;
+}
 
-const FILTERED_RUNNER_WEIGHTS: Record<string, number> = {
-  getArtifactMockedDataTests: 8,
-};
-
-/**
- * Minimum weight for any spec file. Even a 1-test spec incurs Cypress boot,
- * browser init, and test setup overhead that typically takes 30-60s.
- */
-const MIN_SPEC_WEIGHT = 3;
+const DEFAULT_MIN_SPEC_WEIGHT = 1;
 
 /**
  * Estimate spec file weight for load-balanced ordering across parallel CI agents.
- * Weight = inline `it(` count + estimated dynamic tests from shared runners.
- * A minimum floor is applied so single-test specs with heavy setup aren't underweighted.
+ * When a LoadBalancerConfig is provided, dynamic runner weights and minimum floor
+ * are applied. Without config, falls back to counting inline `it()` calls only.
  */
-const getSpecFileWeight = (filePath: string): number => {
+const getSpecFileWeight = (filePath: string, lbConfig?: LoadBalancerConfig): number => {
+  const minWeight = lbConfig?.minSpecWeight ?? DEFAULT_MIN_SPEC_WEIGHT;
   try {
     const content = fs.readFileSync(filePath, { encoding: 'utf8' });
     const itMatches = content.match(/\bit\s*\(/g);
     const itSkipMatches = content.match(/\bit\.skip\s*\(/g);
     let testCount = (itMatches?.length ?? 0) + (itSkipMatches?.length ?? 0);
 
-    const hasSiemVersionFilter = content.includes('siemVersionFilter');
+    if (lbConfig) {
+      const hasSiemVersionFilter = content.includes('siemVersionFilter');
 
-    for (const [runner, weight] of Object.entries(DYNAMIC_RUNNER_WEIGHTS)) {
-      const callPattern = `${runner}(`;
-      const occurrences = content.split(callPattern).length - 1;
-      if (occurrences > 0) {
-        const effectiveWeight =
-          hasSiemVersionFilter && runner in FILTERED_RUNNER_WEIGHTS
-            ? FILTERED_RUNNER_WEIGHTS[runner]
-            : weight;
-        testCount += occurrences * effectiveWeight;
+      for (const [runner, weight] of Object.entries(lbConfig.dynamicRunnerWeights)) {
+        const callPattern = `${runner}(`;
+        const occurrences = content.split(callPattern).length - 1;
+        if (occurrences > 0) {
+          const effectiveWeight =
+            hasSiemVersionFilter && runner in lbConfig.filteredRunnerWeights
+              ? lbConfig.filteredRunnerWeights[runner]
+              : weight;
+          testCount += occurrences * effectiveWeight;
+        }
       }
     }
 
-    return Math.max(testCount, MIN_SPEC_WEIGHT);
+    return Math.max(testCount, minWeight);
   } catch {
-    return MIN_SPEC_WEIGHT;
+    return minWeight;
   }
 };
 
@@ -75,9 +75,12 @@ const getSpecFileWeight = (filePath: string): number => {
  * Sorts by estimated weight (test count) descending, with path as tiebreaker, so that
  * round-robin in retrieveIntegrations() assigns each agent a similar mix of heavy and light specs.
  */
-export const orderSpecFilesForLoadBalance = (filePaths: string[]): string[] => {
+export const orderSpecFilesForLoadBalance = (
+  filePaths: string[],
+  lbConfig?: LoadBalancerConfig
+): string[] => {
   if (filePaths.length <= 1) return filePaths;
-  const withWeight = filePaths.map((p) => ({ path: p, weight: getSpecFileWeight(p) }));
+  const withWeight = filePaths.map((p) => ({ path: p, weight: getSpecFileWeight(p, lbConfig) }));
   withWeight.sort((a, b) => {
     if (b.weight !== a.weight) return b.weight - a.weight;
     return a.path.localeCompare(b.path);
@@ -89,17 +92,18 @@ export const orderSpecFilesForLoadBalance = (filePaths: string[]): string[] => {
  * Retrieve test files using a glob pattern.
  * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
  */
-export const retrieveIntegrations = (integrationsPaths: string[]) => {
-  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
+export const retrieveIntegrations = (
+  integrationsPaths: string[],
+  lbConfig?: LoadBalancerConfig
+) => {
+  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath, lbConfig));
 
   if (process.env.RUN_ALL_TESTS === 'true') {
     return nonSkippedSpecs;
   } else {
-    // The number of instances of this job were created
     const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
       ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
       : 1;
-    // An index which uniquely identifies this instance of the job
     const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
       ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
       : 0;
@@ -115,21 +119,6 @@ export const retrieveIntegrations = (integrationsPaths: string[]) => {
 };
 
 /**
- * Stack setup cost expressed in weight units. Each distinct ftrConfig requires a
- * full ES + Kibana + Fleet stack setup (~4 min). Raising this penalty makes the
- * LB more aggressive about keeping specs with the same config together.
- */
-const SETUP_COST_WEIGHT = 40;
-
-/**
- * Per-spec overhead in weight units. Each additional spec on an agent adds Cypress
- * boot, browser init, and test framework overhead (~20-30s) that isn't captured
- * by the test-count-based weight. This prevents agents from accumulating too many
- * specs even when individual weights are small.
- */
-const PER_SPEC_OVERHEAD = 3;
-
-/**
  * Config-aware spec distribution for parallel CI agents.
  * Instead of naive round-robin, this uses greedy bin-packing that accounts for
  * ftrConfig setup cost: assigning a spec to an agent that already has its config
@@ -137,8 +126,11 @@ const PER_SPEC_OVERHEAD = 3;
  * together on the same agents whenever possible, dramatically reducing total
  * setup time when CYPRESS_SHARE_STACKS is enabled.
  */
-export const retrieveIntegrationsConfigAware = (integrationsPaths: string[]): string[] => {
-  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
+export const retrieveIntegrationsConfigAware = (
+  integrationsPaths: string[],
+  lbConfig: LoadBalancerConfig
+): string[] => {
+  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath, lbConfig));
 
   if (process.env.RUN_ALL_TESTS === 'true') {
     return nonSkippedSpecs;
@@ -157,7 +149,7 @@ export const retrieveIntegrationsConfigAware = (integrationsPaths: string[]): st
 
   const specs = nonSkippedSpecs.map((filePath) => ({
     path: filePath,
-    weight: getSpecFileWeight(filePath),
+    weight: getSpecFileWeight(filePath, lbConfig),
     configKey: ftrConfigToKey(parseTestFileConfig(filePath)),
   }));
 
@@ -174,11 +166,11 @@ export const retrieveIntegrationsConfigAware = (integrationsPaths: string[]): st
   }));
 
   const getAgentCost = (agent: (typeof agents)[number], specConfigKey: string): number => {
-    const newConfigPenalty = agent.configs.has(specConfigKey) ? 0 : SETUP_COST_WEIGHT;
+    const newConfigPenalty = agent.configs.has(specConfigKey) ? 0 : lbConfig.setupCostWeight;
     return (
       agent.totalWeight +
-      agent.paths.length * PER_SPEC_OVERHEAD +
-      agent.configs.size * SETUP_COST_WEIGHT +
+      agent.paths.length * lbConfig.perSpecOverhead +
+      agent.configs.size * lbConfig.setupCostWeight +
       newConfigPenalty
     );
   };
@@ -203,13 +195,7 @@ export const retrieveIntegrationsConfigAware = (integrationsPaths: string[]): st
   return agents[chunkIndex].paths;
 };
 
-/**
- * Dynamic runner function names that generate `it()` calls at runtime.
- * Used by both weight estimation and skip detection.
- */
-const DYNAMIC_RUNNER_NAMES = new Set(Object.keys(DYNAMIC_RUNNER_WEIGHTS));
-
-export const isSkipped = (filePath: string): boolean => {
+export const isSkipped = (filePath: string, lbConfig?: LoadBalancerConfig): boolean => {
   const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
 
   const ast = parser.parse(testFile, {
@@ -228,7 +214,11 @@ export const isSkipped = (filePath: string): boolean => {
     return true;
   }
 
-  return hasAllTestsSkipped(ast);
+  const dynamicRunnerNames = lbConfig
+    ? new Set(Object.keys(lbConfig.dynamicRunnerWeights))
+    : undefined;
+
+  return hasAllTestsSkipped(ast, dynamicRunnerNames);
 };
 
 /**
@@ -239,7 +229,7 @@ export const isSkipped = (filePath: string): boolean => {
  * Returns true when the file would produce zero running tests.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const hasAllTestsSkipped = (ast: any): boolean => {
+const hasAllTestsSkipped = (ast: any, dynamicRunnerNames?: Set<string>): boolean => {
   let totalRunnable = 0;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -259,7 +249,8 @@ const hasAllTestsSkipped = (ast: any): boolean => {
         callee?.type === 'MemberExpression' &&
         callee?.object?.name === 'it' &&
         callee?.property?.name === 'skip';
-      const isDynamicRunner = callee?.name && DYNAMIC_RUNNER_NAMES.has(callee.name);
+      const isDynamicRunner =
+        dynamicRunnerNames && callee?.name && dynamicRunnerNames.has(callee.name);
 
       if ((isItCall || isDynamicRunner) && !insideSkip) {
         totalRunnable++;

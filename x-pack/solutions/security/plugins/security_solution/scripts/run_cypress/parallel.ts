@@ -42,6 +42,7 @@ import {
 } from './utils';
 import type { SpecGroup } from './utils';
 import { getFTRConfig } from './get_ftr_config';
+import { DW_LOAD_BALANCER_CONFIG } from './dw_config';
 
 export const cli = () => {
   run(
@@ -146,10 +147,13 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       let files: string[];
       if (shareStacks) {
-        files = retrieveIntegrationsConfigAware(concreteFilePaths);
+        files = retrieveIntegrationsConfigAware(concreteFilePaths, DW_LOAD_BALANCER_CONFIG);
       } else {
-        const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths);
-        files = retrieveIntegrations(orderedFilePaths);
+        const orderedFilePaths = orderSpecFilesForLoadBalance(
+          concreteFilePaths,
+          DW_LOAD_BALANCER_CONFIG
+        );
+        files = retrieveIntegrations(orderedFilePaths, DW_LOAD_BALANCER_CONFIG);
       }
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
