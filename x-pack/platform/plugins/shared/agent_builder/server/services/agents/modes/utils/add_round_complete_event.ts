@@ -350,6 +350,7 @@ const createToolCallStep = ({
     tool_call_id: toolCall.data.tool_call_id,
     progression: toolProgress.map(({ data: { message } }) => ({ message })),
     results: toolResult?.data.results ?? [],
+    tool_call_group_id: toolCall.data.tool_call_group_id,
   };
 };
 
