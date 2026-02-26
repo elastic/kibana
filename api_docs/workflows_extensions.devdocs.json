@@ -230,7 +230,7 @@
         "tags": [],
         "label": "PublicTriggerDefinition",
         "description": [
-          "\nUser-facing definition for a workflow trigger.\nUsed by the UI to display trigger information (title, description, icon, event schema, examples).\nExtends the server contract (id + eventSchema) with UI-only fields."
+          "\nUser-facing definition for a workflow trigger.\nUsed by the UI to display trigger information (title, description, icon, event schema, documentation).\nExtends the server contract (id + eventSchema) with UI-only fields.\n"
         ],
         "signature": [
           {
@@ -251,7 +251,7 @@
           "<EventSchema>"
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
-        "lineNumber": 13,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -266,7 +266,7 @@
               "\nShort human-readable name for this trigger.\nDisplayed in the UI when selecting or viewing triggers."
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -281,7 +281,7 @@
               "\nUser-facing description of when this trigger is emitted.\nDisplayed as help text or in tooltips."
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -299,7 +299,57 @@
               "React.ComponentType | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicTriggerDefinition.documentation",
+            "type": "Object",
+            "tags": [],
+            "label": "documentation",
+            "description": [
+              "\nDocumentation (details + examples), aligned with step definitions."
+            ],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.TriggerDocumentation",
+                "text": "TriggerDocumentation"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.PublicTriggerDefinition.snippets",
+            "type": "Object",
+            "tags": [],
+            "label": "snippets",
+            "description": [
+              "\nPre-filled values for snippet insertion (e.g. with.condition)."
+            ],
+            "signature": [
+              {
+                "pluginId": "workflowsExtensions",
+                "scope": "public",
+                "docId": "kibWorkflowsExtensionsPluginApi",
+                "section": "def-public.TriggerSnippets",
+                "text": "TriggerSnippets"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -372,6 +422,96 @@
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts",
             "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-public.TriggerDocumentation",
+        "type": "Interface",
+        "tags": [],
+        "label": "TriggerDocumentation",
+        "description": [
+          "\nDocumentation for a trigger (aligned with steps: details + generic examples)."
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.TriggerDocumentation.details",
+            "type": "string",
+            "tags": [],
+            "label": "details",
+            "description": [
+              "\nDetailed description with usage examples (markdown supported)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.TriggerDocumentation.examples",
+            "type": "Array",
+            "tags": [],
+            "label": "examples",
+            "description": [
+              "\nUsage examples as markdown strings (e.g. \"## Title\\n```yaml\\n...\").\nShown in the YAML editor hover."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-public.TriggerSnippets",
+        "type": "Interface",
+        "tags": [],
+        "label": "TriggerSnippets",
+        "description": [
+          "\nPre-filled snippet values when the user adds this trigger from the UI."
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsExtensions",
+            "id": "def-public.TriggerSnippets.condition",
+            "type": "string",
+            "tags": [],
+            "label": "condition",
+            "description": [
+              "\nKQL condition pre-filled in the trigger's `with.condition` when the user adds this\ntrigger from the UI (actions menu or YAML autocomplete).\nMust be valid KQL and only reference properties from the event schema (validated at registration)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/types.ts",
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1662,7 +1802,7 @@
             "tags": [],
             "label": "eventSchema",
             "description": [
-              "Payload contract (Zod object schema; must reject unknown fields by default)"
+              "\nPayload contract (Zod object schema; must reject unknown fields by default).\nAdding descriptions to properties (e.g. with .describe()) is recommended so they will\nhelp users to understand the data they will receive with the event."
             ],
             "signature": [
               "EventSchema"
@@ -1691,6 +1831,25 @@
         ],
         "path": "src/platform/plugins/shared/workflows_extensions/common/steps/data/data_map_step.ts",
         "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "workflowsExtensions",
+        "id": "def-common.EVENT_FIELD_PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_FIELD_PREFIX",
+        "description": [
+          "\nField prefix used in trigger condition KQL (e.g. \"event.severity\").\nUse this when calling validateKqlAgainstSchema for trigger conditions so paths and error messages stay consistent."
+        ],
+        "signature": [
+          "\"event.\""
+        ],
+        "path": "src/platform/plugins/shared/workflows_extensions/common/trigger_registry/constants.ts",
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

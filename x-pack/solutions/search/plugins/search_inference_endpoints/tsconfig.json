@@ -7,8 +7,7 @@
     "__mocks__/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -31,6 +30,7 @@
     "@kbn/ui-theme",
     "@kbn/deeplinks-search",
     "@kbn/deeplinks-management",
+    "@kbn/management-plugin",
     "@kbn/serverless",
     "@kbn/utility-types",
     "@kbn/search-navigation",
@@ -40,9 +40,9 @@
     "@kbn/object-utils",
     "@kbn/react-query",
     "@kbn/search-api-panels",
-    "@kbn/cloud-plugin",
+    "@kbn/cloud-plugin"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }
