@@ -23,23 +23,24 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import type * as ServiceNow from './types';
-
-/**
- * Common ServiceNow tables and their purpose, for use in field descriptions.
- * Keep this in sync with the table descriptions in workflow YAML files.
- */
-const TABLE_DESCRIPTION =
-  'The ServiceNow table to query. Common tables: ' +
-  'incident (IT incidents and service disruptions), ' +
-  'kb_knowledge (knowledge base articles — use fields sys_id,number,short_description,text,topic,category,author,sys_created_on,sys_updated_on,workflow_state,kb_knowledge_base,kb_category to get full content), ' +
-  'sc_req_item (service catalog requests), ' +
-  'change_request (change management records), ' +
-  'problem (problem records linked to incidents), ' +
-  'sc_task (service catalog tasks), ' +
-  'cmdb_ci (CMDB configuration items — servers, apps, etc.), ' +
-  'sys_user (ServiceNow users). ' +
-  'Custom tables are also supported.';
+import {
+  SearchInputSchema,
+  GetRecordInputSchema,
+  ListRecordsInputSchema,
+  ListTablesInputSchema,
+  ListKnowledgeBasesInputSchema,
+  GetCommentsInputSchema,
+  GetAttachmentInputSchema,
+} from './types';
+import type {
+  SearchInput,
+  GetRecordInput,
+  ListRecordsInput,
+  ListTablesInput,
+  ListKnowledgeBasesInput,
+  GetCommentsInput,
+  GetAttachmentInput,
+} from './types';
 
 export const ServicenowSearch: ConnectorSpec = {
   metadata: {
@@ -85,25 +86,8 @@ export const ServicenowSearch: ConnectorSpec = {
     search: {
       isTool: true,
       description: 'Search ServiceNow records using full-text search across a given table',
-      input: z.object({
-        table: z.string().describe(TABLE_DESCRIPTION),
-        query: z.string().describe('Full-text search query string'),
-        encodedQuery: z
-          .string()
-          .optional()
-          .describe(
-            'Optional ServiceNow encoded query to combine with the full-text search for additional filtering (e.g., active=true^priority=1). Uses the same syntax as listRecords.'
-          ),
-        fields: z
-          .string()
-          .optional()
-          .describe(
-            'Comma-separated list of fields to return (e.g., sys_id,number,short_description,description)'
-          ),
-        limit: z.number().optional().describe('Maximum number of results to return (default: 20)'),
-        offset: z.number().optional().describe('Offset for pagination'),
-      }),
-      handler: async (ctx, input: ServiceNow.SearchInput) => {
+      input: SearchInputSchema,
+      handler: async (ctx, input: SearchInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/${input.table}`;
         const limit = input.limit ?? 20;
@@ -132,12 +116,8 @@ export const ServicenowSearch: ConnectorSpec = {
       description:
         'Retrieve a specific ServiceNow record by its sys_id. Works for any table. ' +
         'For knowledge articles (kb_knowledge table), request fields: sys_id,number,short_description,text,topic,category,author,sys_created_on,sys_updated_on,workflow_state,kb_knowledge_base,kb_category',
-      input: z.object({
-        table: z.string().describe(TABLE_DESCRIPTION),
-        sysId: z.string().describe('The sys_id of the record to retrieve'),
-        fields: z.string().optional().describe('Comma-separated list of fields to return'),
-      }),
-      handler: async (ctx, input: ServiceNow.GetRecordInput) => {
+      input: GetRecordInputSchema,
+      handler: async (ctx, input: GetRecordInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/${input.table}/${input.sysId}`;
 
@@ -155,25 +135,8 @@ export const ServicenowSearch: ConnectorSpec = {
     listRecords: {
       isTool: true,
       description: 'List records from a ServiceNow table with optional encoded query filter',
-      input: z.object({
-        table: z.string().describe(TABLE_DESCRIPTION),
-        encodedQuery: z
-          .string()
-          .optional()
-          .describe(
-            'ServiceNow encoded query string for filtering (e.g., active=true^priority=1). ' +
-              'Use ^ to AND conditions, ^OR for OR. ' +
-              'Examples: number=INC0010023 | active=true^priority=1 | assignment_group.nameLIKEnetwork^state!=6'
-          ),
-        fields: z.string().optional().describe('Comma-separated list of fields to return'),
-        limit: z.number().optional().describe('Maximum number of results to return (default: 20)'),
-        offset: z.number().optional().describe('Offset for pagination'),
-        orderBy: z
-          .string()
-          .optional()
-          .describe('Field to order results by (prefix with - for descending)'),
-      }),
-      handler: async (ctx, input: ServiceNow.ListRecordsInput) => {
+      input: ListRecordsInputSchema,
+      handler: async (ctx, input: ListRecordsInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/${input.table}`;
         const limit = input.limit ?? 20;
@@ -197,15 +160,8 @@ export const ServicenowSearch: ConnectorSpec = {
       isTool: true,
       description:
         'List available ServiceNow tables with their labels and descriptions. Use this to discover what tables exist in the instance before querying them.',
-      input: z.object({
-        query: z
-          .string()
-          .optional()
-          .describe('Optional filter to search table names or labels (e.g., "incident", "CMDB")'),
-        limit: z.number().optional().describe('Maximum number of tables to return (default: 50)'),
-        offset: z.number().optional().describe('Offset for pagination'),
-      }),
-      handler: async (ctx, input: ServiceNow.ListTablesInput) => {
+      input: ListTablesInputSchema,
+      handler: async (ctx, input: ListTablesInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/sys_db_object`;
         const limit = input.limit ?? 50;
@@ -230,14 +186,8 @@ export const ServicenowSearch: ConnectorSpec = {
       isTool: true,
       description:
         'List available ServiceNow knowledge bases with their titles and descriptions. Use this to discover what knowledge bases exist before searching for articles.',
-      input: z.object({
-        limit: z
-          .number()
-          .optional()
-          .describe('Maximum number of knowledge bases to return (default: 20)'),
-        offset: z.number().optional().describe('Offset for pagination'),
-      }),
-      handler: async (ctx, input: ServiceNow.ListKnowledgeBasesInput) => {
+      input: ListKnowledgeBasesInputSchema,
+      handler: async (ctx, input: ListKnowledgeBasesInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/kb_knowledge_base`;
         const limit = input.limit ?? 20;
@@ -261,19 +211,8 @@ export const ServicenowSearch: ConnectorSpec = {
       description:
         'Retrieve comments and work notes for a ServiceNow record (e.g., an incident or change request). ' +
         'Returns journal entries in chronological order. Call this after retrieving a record to understand its history.',
-      input: z.object({
-        tableName: z
-          .string()
-          .describe(
-            'The ServiceNow table the record belongs to (e.g., incident, change_request, problem)'
-          ),
-        recordSysId: z
-          .string()
-          .describe('The sys_id of the record whose comments/work notes to retrieve'),
-        limit: z.number().optional().describe('Maximum number of entries to return (default: 20)'),
-        offset: z.number().optional().describe('Offset for pagination'),
-      }),
-      handler: async (ctx, input: ServiceNow.GetCommentsInput) => {
+      input: GetCommentsInputSchema,
+      handler: async (ctx, input: GetCommentsInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const url = `${instanceUrl}/api/now/table/sys_journal_field`;
         const limit = input.limit ?? 20;
@@ -298,15 +237,13 @@ export const ServicenowSearch: ConnectorSpec = {
         'Download a ServiceNow attachment as base64-encoded content by its attachment sys_id. ' +
         'Attachment sys_ids can be found by querying the sys_attachment table: ' +
         'use listRecords with table=sys_attachment and encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>.',
-      input: z.object({
-        sysId: z.string().describe('The sys_id of the attachment (from the sys_attachment table)'),
-      }),
+      input: GetAttachmentInputSchema,
       output: z.object({
         fileName: z.string().describe('Name of the attachment file'),
         contentType: z.string().describe('MIME type of the attachment'),
         base64: z.string().describe('Base64-encoded attachment content'),
       }),
-      handler: async (ctx, input: ServiceNow.GetAttachmentInput) => {
+      handler: async (ctx, input: GetAttachmentInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
 
         // First get attachment metadata
