@@ -252,7 +252,7 @@ describe('getPlanningTools', () => {
       });
     });
 
-    it('returns error when plan already exists', async () => {
+    it('replaces existing plan when creating a new one', async () => {
       const tools = getPlanningTools({
         eventEmitter,
         planState,
@@ -268,15 +268,17 @@ describe('getPlanningTools', () => {
         action_items: [{ description: 'Step' }],
       });
 
+      expect(planState.current!.title).toBe('First');
+
       const result = await executeTool(createPlanTool, {
         title: 'Second',
         action_items: [{ description: 'Another' }],
       });
 
-      expect(result.results[0].type).toBe(ToolResultType.error);
-      expect((result.results[0] as any).data.message).toContain(
-        'A plan already exists. Use update_plan to modify it'
-      );
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      expect(planState.current!.title).toBe('Second');
+      expect(planState.current!.action_items).toHaveLength(1);
+      expect(planState.current!.action_items[0].description).toBe('Another');
     });
 
     it('preserves related_skills and related_tools on items', async () => {
