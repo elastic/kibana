@@ -10,15 +10,12 @@ import {
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
-  type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { BehaviorSubject } from 'rxjs';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp, enableSkillsDeepLink } from './register';
+import { registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -29,7 +26,6 @@ import {
   DocLinksService,
   NavigationService,
   ToolsService,
-  SkillsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -44,16 +40,11 @@ import type {
   AgentBuilderPluginStart,
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
-  ConversationSidebarRef,
+  ConversationFlyoutRef,
 } from './types';
+import { openConversationFlyout } from './flyout/open_conversation_flyout';
 import type { EmbeddableConversationProps } from './embeddable/types';
-import type { OpenConversationSidebarOptions } from './sidebar/types';
-import {
-  setSidebarServices,
-  setSidebarRuntimeContext,
-  clearSidebarRuntimeContext,
-} from './sidebar';
-import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
+import type { OpenConversationFlyoutOptions } from './flyout/types';
 
 export class AgentBuilderPlugin
   implements
@@ -65,14 +56,13 @@ export class AgentBuilderPlugin
     >
 {
   logger: Logger;
-  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private conversationActiveConfig: EmbeddableConversationProps = {};
+  private conversationFlyoutActiveConfig: EmbeddableConversationProps = {};
   private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
     navigationService: NavigationService;
   };
-  private activeSidebarRef: ConversationSidebarRef | null = null;
-  private sidebarCallbacks: {
+  private activeFlyoutRef: ConversationFlyoutRef | null = null;
+  private flyoutCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
   } | null = null;
@@ -99,22 +89,12 @@ export class AgentBuilderPlugin
         }
         return this.internalServices;
       },
-      appUpdater$: this.appUpdater$,
     });
 
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
     registerWorkflowSteps(deps.workflowsExtensions);
-
-    core.chrome.sidebar.registerApp({
-      appId: 'agentBuilder',
-      restoreOnReload: false,
-      loadComponent: async () => {
-        const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
-        return SidebarConversation;
-      },
-    });
 
     return {};
   }
@@ -128,18 +108,11 @@ export class AgentBuilderPlugin
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService();
-
-    attachmentsService.addAttachmentType(
-      'visualization',
-      createVisualizationAttachmentDefinition({ startDependencies })
-    );
-
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
-    const skillsService = new SkillsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -156,7 +129,6 @@ export class AgentBuilderPlugin
       docLinksService,
       navigationService,
       toolsService,
-      skillsService,
       startDependencies,
       accessChecker,
       eventsService,
@@ -164,53 +136,33 @@ export class AgentBuilderPlugin
 
     this.internalServices = internalServices;
 
-    const isExperimentalFeaturesEnabled = core.uiSettings.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-    );
-    if (isExperimentalFeaturesEnabled) {
-      enableSkillsDeepLink(this.appUpdater$);
-    }
-
-    setSidebarServices(core, internalServices);
-
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
-    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
 
-    const openSidebarInternal = (options?: OpenConversationSidebarOptions) => {
-      const config = options ?? this.conversationActiveConfig;
+    const openFlyoutInternal = (options?: OpenConversationFlyoutOptions) => {
+      const config = options ?? this.conversationFlyoutActiveConfig;
 
-      // If already open, update props instead of creating new
-      if (this.activeSidebarRef && this.sidebarCallbacks) {
-        this.sidebarCallbacks.updateProps(config);
-        return { flyoutRef: this.activeSidebarRef };
+      // If a flyout is already open, update its props instead of creating a new one
+      if (this.activeFlyoutRef && this.flyoutCallbacks) {
+        this.flyoutCallbacks.updateProps(config);
+        return { flyoutRef: this.activeFlyoutRef };
       }
 
-      // Set runtime context before opening
-      setSidebarRuntimeContext({
-        options: config,
+      // Create new flyout and set up prop updates
+      const { flyoutRef } = openConversationFlyout(config, {
+        coreStart: core,
+        services: internalServices,
         onRegisterCallbacks: (callbacks) => {
-          this.sidebarCallbacks = callbacks;
+          this.flyoutCallbacks = callbacks;
         },
         onClose: () => {
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
+          this.activeFlyoutRef = null;
+          this.flyoutCallbacks = null;
         },
       });
 
-      sidebar.open();
+      this.activeFlyoutRef = flyoutRef;
 
-      const sidebarRef: ConversationSidebarRef = {
-        close: () => {
-          sidebar.close();
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
-      };
-
-      this.activeSidebarRef = sidebarRef;
-      return { flyoutRef: sidebarRef };
+      return { flyoutRef };
     };
 
     const agentBuilderService: AgentBuilderPluginStart = {
@@ -219,36 +171,36 @@ export class AgentBuilderPlugin
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
-        // Set config until sidebar is next opened
-        this.conversationActiveConfig = config;
-        // If there is already an active sidebar, update its props
-        if (this.activeSidebarRef && this.sidebarCallbacks) {
-          this.sidebarCallbacks.updateProps(config);
-          return { flyoutRef: this.activeSidebarRef };
+        // set config until flyout is next opened
+        this.conversationFlyoutActiveConfig = config;
+        // if there is already an active flyout, update its props
+        if (this.activeFlyoutRef && this.flyoutCallbacks) {
+          this.flyoutCallbacks.updateProps(config);
+          return { flyoutRef: this.activeFlyoutRef };
         }
       },
       clearConversationFlyoutActiveConfig: () => {
-        this.conversationActiveConfig = {};
-        if (this.activeSidebarRef && this.sidebarCallbacks) {
-          // Removes stale browserApiTools from the sidebar
-          this.sidebarCallbacks.resetBrowserApiTools();
+        this.conversationFlyoutActiveConfig = {};
+        if (this.activeFlyoutRef && this.flyoutCallbacks) {
+          // Removes stale browserApiTools from the flyout
+          this.flyoutCallbacks.resetBrowserApiTools();
         }
       },
-      openConversationFlyout: (options?: OpenConversationSidebarOptions) => {
-        return openSidebarInternal(options);
+      openConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
+        return openFlyoutInternal(options);
       },
-      toggleConversationFlyout: (options?: OpenConversationSidebarOptions) => {
-        if (this.activeSidebarRef) {
-          const sidebarRef = this.activeSidebarRef;
-          // Be defensive: clear local references immediately in case the sidebar doesn't
+      toggleConversationFlyout: (options?: OpenConversationFlyoutOptions) => {
+        if (this.activeFlyoutRef) {
+          const flyoutRef = this.activeFlyoutRef;
+          // Be defensive: clear local references immediately in case the underlying overlay doesn't
           // synchronously invoke our onClose callback.
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          sidebarRef.close();
+          this.activeFlyoutRef = null;
+          this.flyoutCallbacks = null;
+          flyoutRef.close();
           return;
         }
 
-        openSidebarInternal(options);
+        openFlyoutInternal(options);
       },
     };
 

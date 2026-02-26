@@ -14,8 +14,6 @@ export interface ClientExperimentalFeatures {
   planning: boolean;
   /** Whether the filestore feature is enabled */
   filestore: boolean;
-  /** Whether the skills feature is enabled */
-  skills: boolean;
 }
 
 /**
@@ -34,7 +32,6 @@ export const useExperimentalFeatures = (): ClientExperimentalFeatures => {
     return {
       planning: !!enabled,
       filestore: !!enabled,
-      skills: !!enabled,
     };
   }, [services.uiSettings]);
 };
