@@ -92,7 +92,7 @@ export const legacyMetricStateSchemaNoESQL = schema.object(
      */
     metric: mergeAllMetricsWithChartDimensionSchema(legacyMetricStateMetricOptionsSchema),
   },
-  { meta: { id: 'legacyMetricNoESQL' } }
+  { meta: { id: 'legacyMetricNoESQL', title: 'Legacy Metric Chart (DSL)' } }
 );
 
 const esqlLegacyMetricState = schema.object(
@@ -108,13 +108,13 @@ const esqlLegacyMetricState = schema.object(
       legacyMetricStateMetricOptionsSchema
     ),
   },
-  { meta: { id: 'legacyMetricESQL' } }
+  { meta: { id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' } }
 );
 
 export const legacyMetricStateSchema = schema.oneOf(
   [legacyMetricStateSchemaNoESQL, esqlLegacyMetricState],
   {
-    meta: { id: 'legacyMetricChartSchema' },
+    meta: { id: 'legacyMetricChart', title: 'Legacy Metric Chart' },
   }
 );
 
