@@ -29,6 +29,7 @@
  *   meeting:read:list_past_participants:admin
  *   cloud_recording:read:list_recording_files:admin
  *   cloud_recording:read:list_user_recordings:admin
+ *   meeting:read:list_registrants:admin
  */
 
 import { i18n } from '@kbn/i18n';
@@ -44,10 +45,12 @@ const ZOOM_API_BASE = 'https://api.zoom.us/v2';
  * when used as path parameters. Plain numeric meeting IDs pass through unchanged.
  * See https://developers.zoom.us/docs/api/rest/using-zoom-apis/#meeting-id-and-uuid
  */
-const encodeZoomId = (id: string): string =>
-  id.startsWith('/') || id.includes('//')
-    ? encodeURIComponent(encodeURIComponent(id))
-    : encodeURIComponent(id);
+const encodeZoomId = (id: string): string => {
+  const stripped = id.replace(/\s/g, '');
+  return stripped.startsWith('/') || stripped.includes('//')
+    ? encodeURIComponent(encodeURIComponent(stripped))
+    : encodeURIComponent(stripped);
+};
 
 const ZoomPaginationOutputSchema = z.object({
   page_size: z.number().optional().describe('Number of records per page'),
@@ -311,6 +314,57 @@ export const Zoom: ConnectorSpec = {
           `${ZOOM_API_BASE}/past_meetings/${encodedId}/participants`,
           {
             params: {
+              ...(typedInput.pageSize !== undefined && { page_size: typedInput.pageSize }),
+              ...(typedInput.nextPageToken && { next_page_token: typedInput.nextPageToken }),
+            },
+          }
+        );
+        return response.data;
+      },
+    },
+
+    getMeetingRegistrants: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.zoom.actions.getMeetingRegistrants.description',
+        {
+          defaultMessage:
+            'List registrants of a meeting. Works for future and past meetings that have registration enabled. Returns registrant name, email, and registration status.',
+        }
+      ),
+      input: z.object({
+        meetingId: z.string().describe('Meeting ID'),
+        status: z
+          .enum(['pending', 'approved', 'denied'])
+          .optional()
+          .describe('Filter by registration status. Defaults to approved.'),
+        pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
+        nextPageToken: z
+          .string()
+          .optional()
+          .describe('Pagination token from a previous response'),
+      }),
+      output: ZoomPaginationOutputSchema.extend({
+        registrants: z
+          .array(z.any())
+          .describe(
+            'Array of registrant objects with id, email, first_name, last_name, status, create_time, join_url'
+          ),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          meetingId: string;
+          status?: string;
+          pageSize?: number;
+          nextPageToken?: string;
+        };
+        ctx.log.debug(`Zoom listing registrants for meeting ${typedInput.meetingId}`);
+
+        const response = await ctx.client.get(
+          `${ZOOM_API_BASE}/meetings/${encodeZoomId(typedInput.meetingId)}/registrants`,
+          {
+            params: {
+              ...(typedInput.status && { status: typedInput.status }),
               ...(typedInput.pageSize !== undefined && { page_size: typedInput.pageSize }),
               ...(typedInput.nextPageToken && { next_page_token: typedInput.nextPageToken }),
             },

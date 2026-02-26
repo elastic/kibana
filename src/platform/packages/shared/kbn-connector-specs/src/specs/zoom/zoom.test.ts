@@ -16,6 +16,7 @@ interface ZoomPaginatedResponse<T = unknown> {
   total_records?: number;
   meetings?: T[];
   participants?: T[];
+  registrants?: T[];
 }
 
 interface TestResult {
@@ -141,6 +142,19 @@ describe('Zoom', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/meetings/111/recordings');
       expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should strip whitespace from a meeting ID copied from Zoom UI', async () => {
+      const mockResponse = { data: { recording_files: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Zoom.actions.getMeetingRecordings.handler(mockContext, {
+        meetingId: '847 3703 8563',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.zoom.us/v2/meetings/84737038563/recordings'
+      );
     });
 
     it('should double-encode a UUID that starts with /', async () => {
@@ -364,6 +378,69 @@ describe('Zoom', () => {
       await expect(
         Zoom.actions.getMeetingParticipants.handler(mockContext, { meetingId: '999' })
       ).rejects.toThrow('Meeting does not exist');
+    });
+  });
+
+  describe('getMeetingRegistrants action', () => {
+    it('should list registrants of a meeting', async () => {
+      const mockResponse = {
+        data: {
+          total_records: 2,
+          registrants: [
+            {
+              id: 'r-1',
+              email: 'alice@example.com',
+              first_name: 'Alice',
+              last_name: 'Smith',
+              status: 'approved',
+              create_time: '2026-02-20T10:00:00Z',
+            },
+            {
+              id: 'r-2',
+              email: 'bob@example.com',
+              first_name: 'Bob',
+              last_name: 'Jones',
+              status: 'approved',
+              create_time: '2026-02-21T11:00:00Z',
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await Zoom.actions.getMeetingRegistrants.handler(mockContext, {
+        meetingId: '111',
+      })) as ZoomPaginatedResponse;
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.zoom.us/v2/meetings/111/registrants',
+        { params: {} }
+      );
+      expect(result.registrants).toHaveLength(2);
+    });
+
+    it('should filter by registration status', async () => {
+      const mockResponse = { data: { registrants: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Zoom.actions.getMeetingRegistrants.handler(mockContext, {
+        meetingId: '111',
+        status: 'pending',
+        pageSize: 50,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.zoom.us/v2/meetings/111/registrants',
+        { params: { status: 'pending', page_size: 50 } }
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Registration not enabled'));
+
+      await expect(
+        Zoom.actions.getMeetingRegistrants.handler(mockContext, { meetingId: '111' })
+      ).rejects.toThrow('Registration not enabled');
     });
   });
 
