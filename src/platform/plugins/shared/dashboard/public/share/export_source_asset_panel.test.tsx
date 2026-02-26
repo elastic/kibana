@@ -95,24 +95,46 @@ describe('ExportSourceAssetPanel', () => {
     expect(screen.getByText('Dropped panel panel1')).toBeInTheDocument();
   });
 
-  it('renders an error callout when sanitization fails and still shows JSON', async () => {
+  it('renders an error callout when sanitization fails and hides sanitized JSON', async () => {
     const user = userEvent.setup();
     (getSanitizedExportSource as jest.Mock).mockRejectedValue(new Error('boom'));
 
     render(<ExportSourceAssetPanel title="my dashboard" dashboardState={dashboardState} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('dashboardExportSourceSanitizeError')).toBeInTheDocument();
+      expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
     });
 
     expect(screen.getByText(/boom/)).toBeInTheDocument();
-    expect(screen.getByTestId('exportAssetValue')).toBeInTheDocument();
-    expect(screen.getByText(/\"title\": \"my dashboard\"/)).toBeInTheDocument();
+    expect(screen.queryByTestId('exportAssetValue')).not.toBeInTheDocument();
 
-    const callout = screen.getByTestId('dashboardExportSourceSanitizeError');
-    await user.click(within(callout).getByTestId('euiDismissCalloutButton'));
-    expect(screen.queryByTestId('dashboardExportSourceSanitizeError')).not.toBeInTheDocument();
-    expect(screen.getByTestId('exportAssetValue')).toBeInTheDocument();
+    expect(screen.queryByTestId('exportAssetValue')).not.toBeInTheDocument();
+  });
+
+  it('retries sanitization when the user clicks Retry', async () => {
+    const user = userEvent.setup();
+    (getSanitizedExportSource as jest.Mock)
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValueOnce({
+        data: { title: 'my dashboard (sanitized)', panels: [] },
+        warnings: [],
+      });
+
+    render(<ExportSourceAssetPanel title="my dashboard" dashboardState={dashboardState} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dashboardExportSourceSanitizeErrorPrompt')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTestId('dashboardExportSourceRetryButton'));
+    await waitFor(() => {
+      expect(getSanitizedExportSource).toHaveBeenCalledTimes(2);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('exportAssetValue')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/my dashboard \(sanitized\)/)).toBeInTheDocument();
   });
 });
 
