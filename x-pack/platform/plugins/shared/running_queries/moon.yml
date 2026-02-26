@@ -23,6 +23,11 @@ dependsOn:
   - '@kbn/management-plugin'
   - '@kbn/i18n-react'
   - '@kbn/es-ui-shared-plugin'
+  - '@kbn/router-utils'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/discover-plugin'
+  - '@kbn/share-plugin'
+  - '@kbn/config-schema'
 tags:
   - plugin
   - prod
