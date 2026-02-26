@@ -75,7 +75,6 @@ import {
   getDataBoundsForAccessor,
   getFixedColorConfiguration,
   resolveColorDefaults,
-  isActiveDataStale,
 } from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
@@ -170,19 +169,24 @@ export const getDatatableVisualization = ({
         const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
 
         if (!showColorByTerms && newColumn.colorMapping) {
-          // switched from terms to values
           delete newColumn.colorMapping;
-          const { palette } = getColorByValuePalette(
-            paletteService,
-            dataBounds ?? getFallbackDataBounds()
-          );
-          newColumn.palette = palette;
+          if (!newColumn.palette) {
+            const { palette } = getColorByValuePalette(
+              paletteService,
+              dataBounds ?? getFallbackDataBounds()
+            );
+            newColumn.palette = palette;
+          }
         }
 
         if (showColorByTerms && newColumn.palette) {
-          // switched from values to terms
-          delete newColumn.palette;
-          newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+          const isValueBasedPalette = Boolean(newColumn.palette?.params?.stops?.length);
+          if (isValueBasedPalette || newColumn.colorMapping) {
+            delete newColumn.palette;
+            if (!newColumn.colorMapping) {
+              newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+            }
+          }
         }
 
         // Handle palettes that don't support dynamic coloring (categorical-only palettes)
@@ -317,12 +321,7 @@ export const getDatatableVisualization = ({
     const getResolvedDisplayColors = (accessor: string) => {
       const { palette, colorMapping } = columnMap[accessor] ?? {};
       const columnMeta = getDatatableColumn(currentData, accessor)?.meta;
-      const dataStale = datasource ? isActiveDataStale(datasource, accessor, currentData) : true;
-      const { isCategory: isBucketable } = getAccessorType(
-        datasource,
-        accessor,
-        dataStale ? undefined : columnMeta?.type
-      );
+      const { isCategory: isBucketable } = getAccessorType(datasource, accessor, columnMeta?.type);
       const dataBounds =
         getDataBoundsForAccessor(accessor, currentData, state.columns) ?? getFallbackDataBounds();
       const { palette: resolvedPalette, colorMapping: resolvedColorMapping } = resolveColorDefaults(
@@ -858,11 +857,10 @@ export const getDatatableVisualization = ({
       }
 
       const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
-      const dataStale = isActiveDataStale(datasource, column.columnId, currentData);
       const { isCategory: isBucketable } = getAccessorType(
         datasource,
         column.columnId,
-        dataStale ? undefined : columnMeta?.type
+        columnMeta?.type
       );
 
       if (
