@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -26,7 +26,7 @@ const attachmentDiffSchema = z.object({
 export const createAttachmentDiffTool = ({
   attachmentManager,
 }: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentDiffSchema> => ({
-  id: platformCoreTools.attachmentDiff,
+  id: attachmentTools.diff,
   type: ToolType.builtin,
   description:
     'Compare two versions of an attachment to see what changed. Use this to understand the history of modifications.',

@@ -3,13 +3,9 @@ steps:
     key: security-solution-gen-ai
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     steps:
       - command: .buildkite/scripts/steps/test/ftr_configs.sh
+        cancel_on_build_failing: true
         env:
           FTR_CONFIG: 'x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts'
           FTR_CONFIG_GROUP_KEY: 'ftr-security-solution-gen-ai-evaluations'

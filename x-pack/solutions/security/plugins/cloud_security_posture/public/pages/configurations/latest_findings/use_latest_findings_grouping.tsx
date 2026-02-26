@@ -99,6 +99,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
     case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return [
         ...aggMetrics,
+        getTermAggregation('cloudProvider', 'cloud.provider'),
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
         getTermAggregation('accountName', 'cloud.account.name'),

@@ -10,7 +10,7 @@
 import { once } from 'lodash';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { createOpenAiChunk, createOpenAIResponse } from './create_response';
+import { createOpenAiChunk, createOpenAiFinalChunk, createOpenAIResponse } from './create_response';
 import type { HttpResponse, LLMMessage, ToolMessage } from './types';
 
 /**
@@ -38,6 +38,10 @@ export class LlmSimulator {
   async complete(): Promise<void> {
     this.log.debug(`Completed intercept for "${this.name}"`);
     if (this.stream) {
+      // Emit a final chunk with a stop finish reason before [DONE].
+      // Some clients rely on this to finalize the aggregated assistant message.
+      this.status(200);
+      await this.write(sseEvent(createOpenAiFinalChunk()));
       await this.write('data: [DONE]\n\n');
     }
     await this.end();

@@ -42,7 +42,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           numFilters={
             userActionsStats && userActionsStats.total > 0
               ? userActionsStats.total -
-                userActionsStats.totalDeletions -
+                userActionsStats.totalCommentDeletions -
                 userActionsStats.totalHiddenCommentUpdates
               : 0
           }
@@ -76,7 +76,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           hasActiveFilters={type === 'action'}
           numFilters={
             userActionsStats && userActionsStats.totalOtherActions > 0
-              ? userActionsStats.totalOtherActions - userActionsStats.totalOtherActionDeletions
+              ? userActionsStats.totalOtherActions
               : 0
           }
           onClick={() => handleFilterChange('action')}

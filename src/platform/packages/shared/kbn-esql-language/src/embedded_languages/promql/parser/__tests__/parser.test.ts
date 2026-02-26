@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  PromQLBinaryExpression,
+  PromQLFunction,
+  PromQLLiteral,
+  PromQLParens,
+  PromQLSelector,
+  PromQLStringLiteral,
+  PromQLUnaryExpression,
+} from '../../types';
 import { PromQLParser } from '../parser';
 
 describe('PromQL Parser', () => {
@@ -27,7 +36,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('selector');
 
-      const selector = result.root.expression as any;
+      const selector = result.root.expression as PromQLSelector;
       expect(selector.metric?.name).toBe('http_requests_total');
       expect(selector.labelMap?.args).toHaveLength(2);
       expect(selector.labelMap?.args[0].labelName.name).toBe('job');
@@ -40,7 +49,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('selector');
 
-      const selector = result.root.expression as any;
+      const selector = result.root.expression as PromQLSelector;
       expect(selector.duration).toBeDefined();
     });
 
@@ -50,7 +59,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('function');
 
-      const func = result.root.expression as any;
+      const func = result.root.expression as PromQLSelector;
       expect(func.name).toBe('rate');
       expect(func.args).toHaveLength(1);
     });
@@ -61,11 +70,11 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('function');
 
-      const func = result.root.expression as any;
+      const func = result.root.expression as PromQLFunction;
       expect(func.name).toBe('sum');
       expect(func.grouping).toBeDefined();
-      expect(func.grouping.name).toBe('by');
-      expect(func.grouping.args).toHaveLength(1);
+      expect(func.grouping?.name).toBe('by');
+      expect(func.grouping?.args).toHaveLength(1);
     });
 
     it('parses a binary expression', () => {
@@ -74,7 +83,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('binary-expression');
 
-      const binary = result.root.expression as any;
+      const binary = result.root.expression as PromQLBinaryExpression;
       expect(binary.name).toBe('/');
       expect(binary.left.type).toBe('selector');
       expect(binary.right.type).toBe('selector');
@@ -86,7 +95,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('binary-expression');
 
-      const binary = result.root.expression as any;
+      const binary = result.root.expression as PromQLBinaryExpression;
       expect(binary.name).toBe('>');
       expect(binary.bool).toBe(true);
     });
@@ -97,7 +106,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('unary-expression');
 
-      const unary = result.root.expression as any;
+      const unary = result.root.expression as PromQLUnaryExpression;
       expect(unary.name).toBe('-');
     });
 
@@ -107,7 +116,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('parens');
 
-      const parens = result.root.expression as any;
+      const parens = result.root.expression as PromQLParens;
       expect(parens.child.type).toBe('binary-expression');
     });
 
@@ -117,9 +126,9 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('selector');
 
-      const selector = result.root.expression as any;
+      const selector = result.root.expression as PromQLSelector;
       expect(selector.evaluation).toBeDefined();
-      expect(selector.evaluation.offset).toBeDefined();
+      expect(selector.evaluation?.offset).toBeDefined();
     });
 
     it('parses numeric literals', () => {
@@ -128,7 +137,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('literal');
 
-      const literal = result.root.expression as any;
+      const literal = result.root.expression as PromQLLiteral;
       expect(literal.literalType).toBe('integer');
       expect(literal.value).toBe(42);
     });
@@ -139,7 +148,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('literal');
 
-      const literal = result.root.expression as any;
+      const literal = result.root.expression as PromQLLiteral;
       expect(literal.literalType).toBe('decimal');
       expect(literal.value).toBe(3.14);
     });
@@ -150,7 +159,7 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('literal');
 
-      const literal = result.root.expression as any;
+      const literal = result.root.expression as PromQLStringLiteral;
       expect(literal.literalType).toBe('string');
       expect(literal.valueUnquoted).toBe('hello world');
     });
@@ -172,9 +181,9 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('binary-expression');
 
-      const binary = result.root.expression as any;
+      const binary = result.root.expression as PromQLBinaryExpression;
       expect(binary.modifier).toBeDefined();
-      expect(binary.modifier.name).toBe('on');
+      expect(binary.modifier?.name).toBe('on');
     });
 
     it('parses group_left modifier', () => {
@@ -184,9 +193,9 @@ describe('PromQL Parser', () => {
       expect(result.errors).toHaveLength(0);
       expect(result.root.expression?.type).toBe('binary-expression');
 
-      const binary = result.root.expression as any;
-      expect(binary.modifier.groupModifier).toBeDefined();
-      expect(binary.modifier.groupModifier.name).toBe('group_left');
+      const binary = result.root.expression as PromQLBinaryExpression;
+      expect(binary.modifier?.groupModifier).toBeDefined();
+      expect(binary.modifier?.groupModifier?.name).toBe('group_left');
     });
   });
 

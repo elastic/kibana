@@ -18,8 +18,13 @@ The query tracks data from the following <code>@kbn/discover-utils</code> functi
 <li><code>getMessageFieldWithFallbacks</code> — extracts message field values from ES documents</li>
 <li><code>getLogFieldWithFallback</code> — extracts log field values with fallback logic</li>
 <li><code>formatHit</code> — formats an ES hit for display</li>
-<li><code>formatFieldValue</code> — formats individual field values from ES documents</li>
 </ul>
+<p>
+Note: <code>formatFieldValue</code> is intentionally excluded. It delegates to Kibana's field
+format converters which HTML-escape all output via <code>lodash/escape</code> (in both the
+default <code>html_content_type</code> fallback and the <code>StringFormat.htmlConvert</code>
+implementation), making its return value safe for use with <code>dangerouslySetInnerHTML</code>.
+</p>
 <p>
 The query catches both direct usage of <code>dangerouslySetInnerHTML</code> as a JSX attribute
 and indirect usage via object literals that are later spread into JSX elements. The latter

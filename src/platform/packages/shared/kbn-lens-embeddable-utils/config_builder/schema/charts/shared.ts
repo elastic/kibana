@@ -41,7 +41,11 @@ export const legendSizeSchema = schema.maybe(
       schema.literal('xlarge'),
     ],
     {
-      meta: { id: 'legendSize', description: 'Legend size: auto, small, medium, large, or xlarge' },
+      meta: {
+        id: 'legendSize',
+        title: 'Legend Size',
+        description: 'Legend size: auto, small, medium, large, or xlarge',
+      },
     }
   )
 );

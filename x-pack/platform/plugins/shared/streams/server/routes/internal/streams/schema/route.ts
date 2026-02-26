@@ -6,7 +6,12 @@
  */
 import { getFlattenedObject } from '@kbn/std';
 import type { SampleDocument } from '@kbn/streams-schema';
-import { fieldDefinitionConfigSchema, isDescendantOf, Streams } from '@kbn/streams-schema';
+import {
+  fieldDefinitionConfigSchema,
+  isDescendantOf,
+  Streams,
+  LOGS_ROOT_STREAM_NAME,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
@@ -14,7 +19,6 @@ import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
-import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -213,32 +217,15 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
-    let sampleResults: SearchResponse<unknown, Record<string, AggregationsAggregate>> | undefined;
-    try {
-      sampleResults = await scopedClusterClient.asCurrentUser.search({
-        index: params.path.name,
-        // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
-        runtime_mappings: propertiesForSample,
-        ...documentSamplesSearchBody,
-      });
-    } catch (error) {
-      /**
-       * If the error is due to time_series_dimension shadowing, we need to retry the request for sample documents without runtime_mappings
-       * because the runtime_mappings collides for time_series_dimension.
-       * See https://github.com/elastic/elasticsearch/issues/140882
-       *
-       * N.B. THIS IS A BANDAID FIX THAT SHOULD BE REMOVED AS QUICKLY AS POSSIBLE WHEN THE ISSUE IS FIXED.
-       *
-       */
-      if (error.message.includes('time_series_dimension')) {
-        sampleResults = await scopedClusterClient.asCurrentUser.search({
-          index: params.path.name,
-          ...documentSamplesSearchBody,
-        });
-      } else {
-        throw error;
-      }
-    }
+    const sampleResults: SearchResponse<
+      unknown,
+      Record<string, AggregationsAggregate>
+    > = await scopedClusterClient.asCurrentUser.search({
+      index: params.path.name,
+      // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
+      runtime_mappings: propertiesForSample,
+      ...documentSamplesSearchBody,
+    });
 
     if (sampleResults?.hits.hits.length === 0) {
       return {
@@ -270,7 +257,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
       return {
         _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-          ? LOGS_ROOT_STREAM_NAME
+          ? getRoot(params.path.name)
           : params.path.name,
         _id: hit._id,
         _source: sourceWithGeoPoints,
@@ -474,13 +461,14 @@ async function simulateIngest(
   };
   const isWiredStream = Streams.WiredStream.Definition.is(streamDefinition);
 
-  let pipelineSubstitutions: Record<string, { processors: any[] }>;
+  let pipelineSubstitutions: Record<string, { processors: Array<Record<string, unknown>> }>;
   let simulatePath: string;
 
   if (isWiredStream) {
     // For wired streams: override root logs processing pipeline to reroute, then noop child stream processing
+    const rootStream = getRoot(dataStreamName);
     pipelineSubstitutions = {
-      [getProcessingPipelineName(LOGS_ROOT_STREAM_NAME)]: {
+      [getProcessingPipelineName(rootStream)]: {
         processors: [
           {
             reroute: {

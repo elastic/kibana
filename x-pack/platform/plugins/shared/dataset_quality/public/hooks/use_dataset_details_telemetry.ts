@@ -41,8 +41,8 @@ export function useDatasetDetailsTelemetry() {
         canUserViewIntegrations,
         canUserAccessDashboards,
         breakdownField,
-        isNonAggregatable,
-        isBreakdownFieldEcs,
+        isNonAggregatable: isNonAggregatable ?? false,
+        isBreakdownFieldEcs: isBreakdownFieldEcs ?? false,
         integration: integrationDetails.integration?.integration,
       });
     }

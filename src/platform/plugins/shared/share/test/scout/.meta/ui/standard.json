@@ -1,0 +1,19 @@
+{
+  "sha1": "a4969b223543b7d38833cf0ac7723b4e08cef3e5",
+  "tests": [
+    {
+      "id": "7b7f796111b9b5f-f3bf9deeeb29aa8",
+      "title": "Short URLs shows Page for missing short URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/ui/tests/short_urls.spec.ts",
+        "line": 15,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -10,7 +10,7 @@ import {
   UnifiedAttachmentPayloadRt,
   UnifiedAttachmentAttributesRt,
   UnifiedAttachmentRt,
-  CombinedAttachmentRt,
+  AttachmentRtV2,
 } from './v2';
 import { AttachmentType } from './v1';
 
@@ -462,7 +462,7 @@ describe('Unified Attachments', () => {
     });
   });
 
-  describe('CombinedAttachmentRt', () => {
+  describe('AttachmentRtV2', () => {
     it('accepts UnifiedAttachmentRt', () => {
       const unifiedAttachment = {
         type: 'lens',
@@ -481,7 +481,7 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = CombinedAttachmentRt.decode(unifiedAttachment);
+      const query = AttachmentRtV2.decode(unifiedAttachment);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -508,7 +508,7 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = CombinedAttachmentRt.decode(v1Attachment);
+      const query = AttachmentRtV2.decode(v1Attachment);
 
       expect(query).toStrictEqual({
         _tag: 'Right',

@@ -37,6 +37,7 @@ export async function topNElasticSearchQuery({
   highCardinality,
   kuery,
   showErrorFrames,
+  preFilterShardSize,
 }: {
   client: ProfilingESClient;
   logger: Logger;
@@ -46,6 +47,7 @@ export async function topNElasticSearchQuery({
   highCardinality: boolean;
   kuery: string;
   showErrorFrames: boolean;
+  preFilterShardSize?: number;
 }): Promise<TopNResponse> {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -71,7 +73,8 @@ export async function topNElasticSearchQuery({
     }),
     // Adrien and Dario found out this is a work-around for some bug in 8.1.
     // It reduces the query time by avoiding unneeded searches.
-    pre_filter_shard_size: 1,
+    // This is not supported in serverless, so we don't set it.
+    pre_filter_shard_size: preFilterShardSize,
   });
 
   const { aggregations } = resEvents;
@@ -165,11 +168,13 @@ export function queryTopNCommon({
   pathName,
   searchField,
   highCardinality,
+  dependencies,
 }: RouteRegisterParameters & {
   pathName: string;
   searchField: string;
   highCardinality: boolean;
 }) {
+  const isServerless = dependencies.esCapabilities.serverless;
   router.get(
     {
       path: pathName,
@@ -204,6 +209,7 @@ export function queryTopNCommon({
             highCardinality,
             kuery,
             showErrorFrames,
+            preFilterShardSize: isServerless ? undefined : 1,
           }),
         });
       } catch (error) {

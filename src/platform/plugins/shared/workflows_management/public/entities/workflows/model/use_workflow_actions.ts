@@ -16,6 +16,7 @@ import type {
   WorkflowDetailDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
@@ -26,6 +27,11 @@ export interface UpdateWorkflowParams {
   workflow: Partial<WorkflowDetailDto>;
   isBulkAction?: boolean;
   bulkActionCount?: number;
+  /**
+   * When true, the mutation will not refetch queries after a successful update.
+   * Useful for bulk operations where the caller handles a single refetch at the end.
+   */
+  skipRefetch?: boolean;
 }
 
 // Context type for storing previous query data to enable rollback on mutation errors
@@ -64,7 +70,7 @@ export function useWorkflowActions() {
             // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
-            // Immediately update the workflow in the list with new data
+            // Immediately remove deleted workflows from the list and update pagination
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.map((w) => (w.id === id ? { ...w, ...workflow } : w)),
@@ -141,8 +147,10 @@ export function useWorkflowActions() {
         error: undefined,
       });
 
-      // Refetch to ensure data is in sync with server
-      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      queryClient.invalidateQueries({
+        queryKey: ['workflows'],
+        refetchType: variables.skipRefetch ? 'none' : 'active',
+      });
     },
   });
 
@@ -166,10 +174,8 @@ export function useWorkflowActions() {
         .forEach(([queryKey, data]) => {
           if (data && data.results) {
             const queryKeyString = JSON.stringify(queryKey);
-            // Store previous data for rollback on error
             previousData.set(queryKeyString, data);
 
-            // Immediately remove deleted workflows from the list and update pagination
             const optimisticData: WorkflowListDto = {
               ...data,
               results: data.results.filter((w) => !ids.includes(w.id)),
@@ -223,7 +229,7 @@ export function useWorkflowActions() {
   const runWorkflow = useMutation<
     RunWorkflowResponseDto,
     HttpError,
-    RunWorkflowCommand & { id: string; triggerTab?: 'manual' | 'alert' | 'index' }
+    RunWorkflowCommand & { id: string; triggerTab?: WorkflowTriggerTab }
   >({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
@@ -323,7 +329,7 @@ export function useWorkflowActions() {
   });
 
   return {
-    updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
+    updateWorkflow,
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,

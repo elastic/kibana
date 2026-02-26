@@ -15,20 +15,22 @@ import type {
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import type {
-  AutomaticImportPluginSetup,
-  AutomaticImportPluginStart,
+  AutomaticImportV2PluginSetup,
+  AutomaticImportV2PluginStart,
   AutomaticImportPluginStartDependencies,
 } from './types';
-import { useGetIntegrationById } from './common';
+import { useGetAllIntegrations, useGetIntegrationById } from './common';
+import { getCreateIntegrationLazy } from './components/create_integration';
+import { getCreateIntegrationSideCardButtonLazy } from './components/create_integration_card_button';
 
-export class AutomaticImportPlugin
-  implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>
+export class AutomaticImportV2Plugin
+  implements Plugin<AutomaticImportV2PluginSetup, AutomaticImportV2PluginStart>
 {
   constructor(_: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
-  ): AutomaticImportPluginSetup {
+    core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportV2PluginStart>
+  ): AutomaticImportV2PluginSetup {
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -44,12 +46,22 @@ export class AutomaticImportPlugin
   }
 
   public start(
-    _core: CoreStart,
-    _dependencies: AutomaticImportPluginStartDependencies
-  ): AutomaticImportPluginStart {
+    core: CoreStart,
+    dependencies: AutomaticImportPluginStartDependencies
+  ): AutomaticImportV2PluginStart {
+    const services = {
+      ...core,
+      ...dependencies,
+    };
+
     return {
       hooks: {
         useGetIntegrationById,
+        useGetAllIntegrations,
+      },
+      components: {
+        CreateIntegration: getCreateIntegrationLazy(services),
+        CreateIntegrationSideCardButton: getCreateIntegrationSideCardButtonLazy(),
       },
     };
   }

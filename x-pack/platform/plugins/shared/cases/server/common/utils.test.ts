@@ -77,7 +77,7 @@ function createCommentFindResponse(
           attributes: transformNewComment({
             ...comment,
             createdDate: '',
-          }),
+          }) as AttachmentAttributes,
         });
       }
     }

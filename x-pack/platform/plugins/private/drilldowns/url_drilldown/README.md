@@ -1,6 +1,6 @@
 ## URL drilldown
 
-> NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to `ui_actions_enhanced` plugin.
+> NOTE: This plugin contains implementation of URL drilldown.
 
 Url drilldown allows navigating to external URL or to internal kibana URL.
 By using variables in url template result url can be dynamic and depend on user's interaction.
@@ -21,6 +21,3 @@ In current implementation url drilldown has to be used inside the embeddable and
 
 In future this basic url drilldown implementation would allow injecting more variables into `context` (e.g. `dashboard` app specific variables) and would allow providing support for new trigger types from outside.
 This extensibility improvements are tracked here: https://github.com/elastic/kibana/issues/55324
-
-In case a solution app has a use case for url drilldown that has to be different from current basic implementation and
-just extending variables list is not enough, then recommendation is to create own custom url drilldown and reuse building blocks from `ui_actions_enhanced`.

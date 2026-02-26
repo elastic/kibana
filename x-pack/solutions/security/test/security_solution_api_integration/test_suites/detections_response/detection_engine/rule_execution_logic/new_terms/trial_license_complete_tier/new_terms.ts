@@ -14,6 +14,7 @@ import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 
 import { createRule, deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import {
@@ -26,6 +27,7 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -1482,6 +1484,110 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(requests[2].description).toBe('Find documents associated with new values');
         expect(requests[2].request_type).toBe('findDocuments');
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const id = uuidv4();
+        const timestamp = new Date().toISOString();
+
+        // Historical documents with different namespaces
+        const historicalDocNamespace1 = {
+          id,
+          '@timestamp': moment(timestamp).subtract(2, 'days').toISOString(),
+          data_stream: { namespace: 'namespace1' },
+          host: { name: 'host-historical-1' },
+        };
+        const historicalDocNamespace2 = {
+          id,
+          '@timestamp': moment(timestamp).subtract(2, 'days').toISOString(),
+          data_stream: { namespace: 'namespace2' },
+          host: { name: 'host-historical-2' },
+        };
+
+        // Rule execution documents with different namespaces
+        const ruleExecutionDocNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          host: { name: 'host-new-1' },
+        };
+        const ruleExecutionDocNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          host: { name: 'host-new-2' },
+        };
+        const ruleExecutionDocNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          host: { name: 'host-new-3' },
+        };
+
+        await indexEnhancedDocuments({
+          interval: [moment(timestamp).subtract(2, 'days').toISOString(), timestamp],
+          id,
+          documents: [historicalDocNamespace1, historicalDocNamespace2],
+        });
+
+        await indexEnhancedDocuments({
+          id,
+          documents: [
+            ruleExecutionDocNamespace1,
+            ruleExecutionDocNamespace2,
+            ruleExecutionDocNamespace3,
+          ],
+        });
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          query: `id: "${id}"`,
+          index: ['new_terms'],
+          new_terms_fields: ['host.name'],
+          from: 'now-2d',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1 and namespace2, not namespace3
+        expect(previewAlerts.length).toEqual(4);
+        // @ts-expect-error namespace does not exist on type
+        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
+        expect(namespaces).toContain('namespace1');
+        expect(namespaces).toContain('namespace2');
+        expect(namespaces).not.toContain('namespace3');
       });
     });
   });

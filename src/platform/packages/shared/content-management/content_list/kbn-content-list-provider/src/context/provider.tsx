@@ -54,11 +54,12 @@ export type ContentListProviderProps = ContentListConfig & {
 
 /**
  * Main provider component for content list functionality, including data fetching
- * (via React Query) and sorting.
+ * (via React Query), sorting, and search.
  *
  * Props like `dataSource` and `features` should be stable references to avoid
- * unnecessary re-renders. Configuration from `features.sorting` is read once at
- * mount; use a `key` prop to remount if you need to change initial sort dynamically.
+ * unnecessary re-renders. Configuration from `features.sorting` and `features.search`
+ * is read once at mount; use a `key` prop to remount if you need to change initial
+ * state dynamically.
  */
 export const ContentListProvider = ({
   children,
@@ -75,11 +76,15 @@ export const ContentListProvider = ({
   const queryKeyScope = queryKeyScopeProp ?? `${id}-listing`;
 
   // Resolve feature support flags.
+  // Selection is disabled when explicitly set to `false` or when the list is read-only.
   const supports: ContentListSupports = useMemo(
     () => ({
       sorting: features.sorting !== false,
+      pagination: features.pagination !== false,
+      search: features.search !== false,
+      selection: features.selection !== false && !isReadOnly,
     }),
-    [features.sorting]
+    [features.sorting, features.pagination, features.search, features.selection, isReadOnly]
   );
 
   // Create context value.

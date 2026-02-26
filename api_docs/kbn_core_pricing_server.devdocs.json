@@ -191,7 +191,7 @@
               },
               {
                 "plugin": "@kbn/esql-editor",
-                "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx"
+                "path": "src/platform/packages/private/kbn-esql-editor/src/use_esql_callbacks.ts"
               }
             ],
             "returnComment": [],

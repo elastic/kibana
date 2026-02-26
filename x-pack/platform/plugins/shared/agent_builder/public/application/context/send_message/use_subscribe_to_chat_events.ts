@@ -80,6 +80,7 @@ export const useSubscribeToChatEvents = ({
           results: [],
           tool_call_id: event.data.tool_call_id,
           tool_id: event.data.tool_id,
+          tool_call_group_id: event.data.tool_call_group_id,
         }),
       });
     } else if (isBrowserToolCallEvent(event)) {

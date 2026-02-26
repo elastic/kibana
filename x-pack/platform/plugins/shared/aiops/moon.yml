@@ -66,7 +66,6 @@ dependsOn:
   - '@kbn/ml-time-buckets'
   - '@kbn/ml-ui-actions'
   - '@kbn/ml-url-state'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-util-plugin'
   - '@kbn/react-kibana-mount'

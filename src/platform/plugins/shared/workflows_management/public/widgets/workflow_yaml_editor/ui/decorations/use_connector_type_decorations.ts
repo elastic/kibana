@@ -12,9 +12,32 @@ import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { isBuiltInStepType } from '@kbn/workflows';
+import type { ConnectorContractUnion } from '@kbn/workflows';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml';
 import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getBaseConnectorType } from '../../../../shared/ui/step_icons/get_base_connector_type';
+
+const isTechPreviewConnector = (connector: ConnectorContractUnion | undefined): boolean =>
+  connector !== undefined && connector.stability === 'tech_preview';
+
+function buildConnectorDecoration(
+  connectorType: string,
+  baseConnectorType: string,
+  lineNumber: number,
+  startColumn: number,
+  endColumn: number
+): monaco.editor.IModelDeltaDecoration {
+  const connector = getCachedAllConnectorsMap()?.get(connectorType);
+  const techPreviewClass = isTechPreviewConnector(connector) ? ' type-tech-preview' : '';
+
+  return {
+    range: { startLineNumber: lineNumber, startColumn, endLineNumber: lineNumber, endColumn },
+    options: {
+      inlineClassName: `type-inline-highlight type-${baseConnectorType}${techPreviewClass}`,
+      stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+    },
+  };
+}
 
 interface UseConnectorTypeDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
@@ -146,24 +169,15 @@ export const useConnectorTypeDecorations = ({
             actualEndColumn = endPosition.column;
           }
 
-          // Background highlighting and after content (working version)
-          const decorationsToAdd = [
-            // Background highlighting on the connector type text
-            {
-              range: {
-                startLineNumber: targetLineNumber,
-                startColumn: actualStartColumn,
-                endLineNumber: targetLineNumber,
-                endColumn: actualEndColumn,
-              },
-              options: {
-                inlineClassName: `type-inline-highlight type-${baseConnectorType}`,
-                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-              },
-            },
-          ];
-
-          decorations.push(...decorationsToAdd);
+          decorations.push(
+            buildConnectorDecoration(
+              connectorType,
+              baseConnectorType,
+              targetLineNumber,
+              actualStartColumn,
+              actualEndColumn
+            )
+          );
         }
       }
 

@@ -15,8 +15,17 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  getSelectedOption,
+  isInputCompatibleWithVarGroupSelections,
+  isInputVisibleForVarGroupSelections,
 } from './var_group_helpers';
 export type { VarGroupSelection } from './var_group_helpers';
+export {
+  buildVarGroupPolicyUpdates,
+  registerPolicyUpdateHandler,
+  updateCloudConnectorPolicy,
+} from './var_group_policy_effects';
+export type { PolicyUpdateHandler } from './var_group_policy_effects';
 export type {
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,

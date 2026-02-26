@@ -43,32 +43,44 @@ export function useTraceWaterfall({
   isFiltered = false,
   errors,
   onErrorClick,
+  entryTransactionId,
 }: {
   traceItems: TraceItem[];
   isFiltered?: boolean;
   errors?: Error[];
   onErrorClick?: OnErrorClick;
+  entryTransactionId?: string;
 }) {
   const waterfall = useMemo(() => {
     try {
-      const legends = getLegends(traceItems);
-      const colorBy = getColorByType(legends);
-      const colorMap = createColorLookupMap(legends);
       const traceParentChildrenMap = getTraceParentChildrenMap(traceItems, isFiltered);
       const { rootItem, traceState, orphans } = getRootItemOrFallback(
         traceParentChildrenMap,
-        traceItems
+        traceItems,
+        entryTransactionId
       );
 
-      const traceWaterfall = rootItem
+      // Why this strategy? Build the filtered subtree first, then use it to derive legends and colors.
+      // This ensures legends only contain services/types from the visible subtree,
+      // not from the entire trace (which may include unrelated roots or excluded items).
+      const rawWaterfall = rootItem
         ? getTraceWaterfall({
             rootItem,
             parentChildMap: traceParentChildrenMap,
             orphans,
-            colorMap,
-            colorBy,
           })
         : [];
+
+      const legends = getLegends(rawWaterfall);
+      const colorBy = getColorByType(legends);
+      const colorMap = createColorLookupMap(legends);
+      const traceWaterfall: TraceWaterfallItem[] = rawWaterfall.map((item) => ({
+        ...item,
+        color:
+          colorBy === WaterfallLegendType.ServiceName
+            ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`) ?? ''
+            : colorMap.get(`${WaterfallLegendType.Type}:${item.type ?? ''}`) ?? '',
+      }));
 
       const errorMarks =
         rootItem && errors
@@ -103,7 +115,7 @@ export function useTraceWaterfall({
         errorMarks: [],
       };
     }
-  }, [traceItems, isFiltered, errors, onErrorClick]);
+  }, [traceItems, isFiltered, errors, onErrorClick, entryTransactionId]);
 
   return waterfall;
 }
@@ -231,7 +243,8 @@ export enum TraceDataState {
 
 export function getRootItemOrFallback(
   traceParentChildrenMap: Record<string, TraceItem[]>,
-  traceItems: TraceItem[]
+  traceItems: TraceItem[],
+  entryTransactionId?: string
 ) {
   if (traceItems.length === 0) {
     return {
@@ -239,7 +252,13 @@ export function getRootItemOrFallback(
     };
   }
 
-  const rootItem = traceParentChildrenMap.root?.[0];
+  const entryTransactionRootItem = entryTransactionId
+    ? traceItems.find((item) => item.id === entryTransactionId)
+    : undefined;
+
+  const rootItem = entryTransactionRootItem
+    ? entryTransactionRootItem
+    : traceParentChildrenMap.root?.[0];
 
   const parentIds = new Set(traceItems.map(({ id }) => id));
   // TODO: Reuse waterfall util methods where possible or if logic is the same
@@ -280,47 +299,56 @@ function reparentOrphansToRoot(
   children.push(...orphans.map((orphan) => ({ ...orphan, parentId: rootItem.id, isOrphan: true })));
 }
 
+type RawTraceWaterfallItem = Omit<TraceWaterfallItem, 'color'>;
+
+interface TraversalFrame {
+  item: TraceItem;
+  depth: number;
+  parent?: RawTraceWaterfallItem;
+}
+
 export function getTraceWaterfall({
   rootItem,
   parentChildMap,
   orphans,
-  colorMap,
-  colorBy,
 }: {
   rootItem: TraceItem;
   parentChildMap: Record<string, TraceItem[]>;
   orphans: TraceItem[];
-  colorMap: Map<string, string>;
-  colorBy: WaterfallLegendType;
-}): TraceWaterfallItem[] {
+}): RawTraceWaterfallItem[] {
   const rootStartMicroseconds = rootItem.timestampUs;
 
   const visitor = new Set<string>([rootItem.id]);
 
   reparentOrphansToRoot(rootItem, parentChildMap, orphans);
 
-  function getTraceWaterfallItem(
-    item: TraceItem,
-    depth: number,
-    parent?: TraceWaterfallItem
-  ): TraceWaterfallItem[] {
+  const flattenedTraceWaterfall: RawTraceWaterfallItem[] = [];
+  const stack: TraversalFrame[] = [{ item: rootItem, depth: 0 }];
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (!frame) {
+      continue;
+    }
+
+    const { item, depth, parent } = frame;
     const startMicroseconds = item.timestampUs;
-    const color =
-      colorBy === WaterfallLegendType.ServiceName && item.serviceName
-        ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`)!
-        : colorMap.get(`${WaterfallLegendType.Type}:${item.type ?? ''}`)!;
-    const traceWaterfallItem: TraceWaterfallItem = {
+    const traceWaterfallItem: RawTraceWaterfallItem = {
       ...item,
       depth,
       offset: startMicroseconds - rootStartMicroseconds,
       skew: getClockSkew({ itemTimestamp: startMicroseconds, itemDuration: item.duration, parent }),
-      color,
     };
 
-    const sortedChildren =
-      parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) || [];
+    flattenedTraceWaterfall.push(traceWaterfallItem);
 
-    const flattenedChildren = sortedChildren.flatMap((child) => {
+    const sortedChildren =
+      parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) ?? [];
+
+    // Push children in reverse so pop order matches recursive ascending traversal.
+    for (let i = sortedChildren.length - 1; i >= 0; i--) {
+      const child = sortedChildren[i];
+
       // Check if we have encountered the trace item before.
       // If we have visited the trace item before, then the child waterfall items are already
       // present in the flattened list, so we throw an error to alert the user of duplicated
@@ -331,13 +359,11 @@ export function getTraceWaterfall({
 
       // If we haven't visited it before, then we can process the waterfall item.
       visitor.add(child.id);
-      return getTraceWaterfallItem(child, depth + 1, traceWaterfallItem);
-    });
-
-    return [traceWaterfallItem, ...flattenedChildren];
+      stack.push({ item: child, depth: depth + 1, parent: traceWaterfallItem });
+    }
   }
 
-  return getTraceWaterfallItem(rootItem, 0);
+  return flattenedTraceWaterfall;
 }
 
 export function getClockSkew({
@@ -347,7 +373,7 @@ export function getClockSkew({
 }: {
   itemTimestamp: number;
   itemDuration: number;
-  parent?: TraceWaterfallItem;
+  parent?: RawTraceWaterfallItem;
 }) {
   let skew = 0;
   if (parent) {

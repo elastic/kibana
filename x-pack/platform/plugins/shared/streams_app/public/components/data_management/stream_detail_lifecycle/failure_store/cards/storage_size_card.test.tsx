@@ -65,6 +65,7 @@ describe('StorageSizeCard', () => {
   });
 
   it('shows dash if size present but count missing', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     render(<StorageSizeCard hasPrivileges={true} stats={{ size: 512 } as any} />);
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toBeInTheDocument();
     expect(screen.getByTestId('failureStoreStorageSize-metric')).toHaveTextContent(/512(\.0)?\s?B/);

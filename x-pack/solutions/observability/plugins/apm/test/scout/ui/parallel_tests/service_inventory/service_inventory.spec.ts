@@ -37,7 +37,7 @@ test.describe(
 
       await test.step('shows a list of environments', async () => {
         const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
-        await expect(environmentEntrySelector).toHaveCount(10);
+        await expect(environmentEntrySelector).toHaveCount(11);
       });
     });
 

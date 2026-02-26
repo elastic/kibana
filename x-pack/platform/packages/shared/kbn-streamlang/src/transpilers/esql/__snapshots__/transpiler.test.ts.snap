@@ -21,7 +21,9 @@ Object {
 `;
 
 exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of processor steps and where blocks 1`] = `
-"  | EVAL my_joined_field = CONCAT(field1, \\", \\", field2, \\", \\", field3)
+"  | WHERE NOT(source_ip IS NULL) AND NOT(destination_ip IS NULL)
+  | EVAL \`network.direction\` = NETWORK_DIRECTION(TO_IP(source_ip), TO_IP(destination_ip), [\\"private\\"])
+  | EVAL my_joined_field = CONCAT(field1, \\", \\", field2, \\", \\", field3)
   | EVAL full_name = CASE(first_name IS NULL OR last_name IS NULL, NULL, CONCAT(first_name, \\" \\", last_name))
   | WHERE NOT(message IS NULL)
   | EVAL message_uppercase = TO_UPPER(message)

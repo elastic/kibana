@@ -130,13 +130,26 @@ export class ESQLExtensionsRegistry {
     availableDatasources: ResolveIndexResponse,
     activeSolutionId: SolutionId
   ): RecommendedQuery[] {
-    return this.getRecommendedItems(
+    const matchedQueries = this.getRecommendedItems(
       this.recommendedQueries,
       queryString,
       availableDatasources,
       activeSolutionId,
       'query'
     );
+
+    const solutionPrefix = `${activeSolutionId}>`;
+    for (const [key, queries] of this.recommendedQueries) {
+      if (key.startsWith(solutionPrefix)) {
+        for (const q of queries) {
+          if (q.isStandalone) {
+            matchedQueries.push(q);
+          }
+        }
+      }
+    }
+
+    return uniqBy(matchedQueries, 'query');
   }
 
   unsetRecommendedQueries(

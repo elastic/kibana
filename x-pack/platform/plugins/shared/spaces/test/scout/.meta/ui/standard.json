@@ -1,0 +1,77 @@
+{
+  "sha1": "fcf527bdc8e997bdf9a4d08beedbdecff527d08a",
+  "tests": [
+    {
+      "id": "bd1c362b1516eb7-559491c63e7c12d",
+      "title": "Spaces selection as Viewer - displays the space selection menu in header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
+        "line": 23,
+        "column": 9
+      }
+    },
+    {
+      "id": "bd1c362b1516eb7-bb10b6d31ed048b",
+      "title": "Spaces selection as Viewer - does not display the manage button in the space selection menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
+        "line": 37,
+        "column": 9
+      }
+    },
+    {
+      "id": "bd1c362b1516eb7-cd734578c5fd5b7",
+      "title": "Spaces selection as Admin - displays the space selection menu in header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "bd1c362b1516eb7-91246ff5dfa23db",
+      "title": "Spaces selection as Admin - displays the manage button in the space selection menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
+        "line": 67,
+        "column": 9
+      }
+    }
+  ]
+}

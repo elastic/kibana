@@ -130,6 +130,7 @@ const existingDecryptedRule: SavedObject<RawRule> = {
     ...existingRule.attributes,
     apiKey: MOCK_API_KEY_1,
     apiKeyCreatedByUser: false,
+    uiamApiKey: 'uiam-key',
   },
 };
 
@@ -314,13 +315,13 @@ describe('bulkEditRules', () => {
     ).rejects.toThrow('More than 10000 rules matched for bulk edit');
   });
 
-  test('should throw error if no aggregation buckets found', async () => {
+  test('throws error if no aggregation buckets found', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       aggregations: { alertTypeId: {} },
       saved_objects: [],
       per_page: 0,
       page: 0,
-      total: 1,
+      total: 0,
     });
     await expect(
       bulkEditRules(rulesClientContext, {
@@ -349,7 +350,7 @@ describe('bulkEditRules', () => {
   });
 
   test('should throw error if rule type is not authorized for user', async () => {
-    authorization.ensureAuthorized.mockImplementationOnce(() => {
+    authorization.bulkEnsureAuthorized.mockImplementationOnce(() => {
       throw new Error('Unauthorized');
     });
     await expect(
@@ -362,15 +363,14 @@ describe('bulkEditRules', () => {
       })
     ).rejects.toThrow('Unauthorized');
 
-    expect(authorization.ensureAuthorized).toHaveBeenLastCalledWith({
-      consumer: 'myApp',
-      entity: 'rule',
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenLastCalledWith({
+      ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
       operation: 'bulkEdit',
-      ruleTypeId: 'myType',
+      entity: 'rule',
     });
   });
 
-  test('should call ensureAuthorized once for each unique rule type and with the required permission from the method call', async () => {
+  test('should call bulkEnsureAuthorized once with all rule type consumer pairs and with the required permission from the method call', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       aggregations: {
         alertTypeId: {
@@ -393,18 +393,14 @@ describe('bulkEditRules', () => {
       auditAction: RuleAuditAction.BULK_EDIT,
     });
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
-    expect(authorization.ensureAuthorized).toHaveBeenNthCalledWith(1, {
-      consumer: 'myApp',
-      entity: 'rule',
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs: [
+        { ruleTypeId: 'myType', consumers: ['myApp'] },
+        { ruleTypeId: 'myOtherType', consumers: ['myApp'] },
+      ],
       operation: 'bulkEditParams',
-      ruleTypeId: 'myType',
-    });
-    expect(authorization.ensureAuthorized).toHaveBeenNthCalledWith(2, {
-      consumer: 'myApp',
       entity: 'rule',
-      operation: 'bulkEditParams',
-      ruleTypeId: 'myOtherType',
     });
   });
 
@@ -467,6 +463,66 @@ describe('bulkEditRules', () => {
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: [MOCK_API_KEY_1] },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+  });
+
+  test('should call bulkMarkApiKeysForInvalidation with UIAM API keys if there are any', async () => {
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEdit`,
+      updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+        rules.push(existingDecryptedRule);
+        apiKeysMap.set('1', {
+          oldApiKey: MOCK_API_KEY_1,
+          oldApiKeyCreatedByUser: false,
+          oldUiamApiKey: '111:essu_old-uia-key',
+        });
+      }),
+      shouldInvalidateApiKeys: true,
+      requiredAuthOperation: ReadOperations.BulkEditParams,
+      auditAction: RuleAuditAction.BULK_EDIT,
+    });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: [MOCK_API_KEY_1, '111:essu_old-uia-key'],
+      },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+  });
+
+  test('should invalidate the new keys when creation fails', async () => {
+    unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Failed to save'));
+
+    try {
+      await bulkEditRules(rulesClientContext, {
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+          rules.push(existingDecryptedRule);
+          apiKeysMap.set('1', {
+            oldApiKey: MOCK_API_KEY_1,
+            oldApiKeyCreatedByUser: false,
+            oldUiamApiKey: '111:essu_old-uia-key',
+            newApiKey: 'new-api-key',
+            newUiamApiKey: '333:essu_new-uia-key',
+          });
+        }),
+        shouldInvalidateApiKeys: true,
+        requiredAuthOperation: ReadOperations.BulkEditParams,
+        auditAction: RuleAuditAction.BULK_EDIT,
+      });
+    } catch (e) {
+      /* expected */
+    }
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: ['333:essu_new-uia-key', 'new-api-key'],
+      },
       logger,
       unsecuredSavedObjectsClient
     );

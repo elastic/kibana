@@ -20,13 +20,14 @@ export const runAgentStepDefinition = createPublicStepDefinition({
     defaultMessage: 'Run Agent',
   }),
   description: i18n.translate('xpack.agentBuilder.runAgentStep.description', {
-    defaultMessage: 'Execute an AgentBuilder AI agent to process input and generate responses',
+    defaultMessage:
+      'Execute an AgentBuilder AI agent to process input and generate responses. Optionally provide a JSON schema to receive structured output.',
   }),
   actionsMenuGroup: ActionsMenuGroup.ai,
   documentation: {
     details: i18n.translate('xpack.agentBuilder.runAgentStep.documentation.details', {
       defaultMessage:
-        'The agentBuilder.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context.',
+        'The agentBuilder.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context. To receive structured output, provide a JSON schema that defines the expected response format.',
     }),
     examples: [
       `## Basic agent invocation
@@ -61,6 +62,61 @@ export const runAgentStepDefinition = createPublicStepDefinition({
   with:
     conversation_id: "{{ steps.initial_analysis.output.conversation_id }}"
     message: "Continue from the previous analysis and complete any missing steps."
+\`\`\``,
+
+      `## Get structured output using a JSON schema
+\`\`\`yaml
+- name: extract_person_data
+  type: ${RunAgentStepTypeId}
+  with:
+    message: "Extract information about famous scientists from the text"
+    schema:
+      title: Person Array
+      type: array
+      items:
+        title: Person
+        type: object
+        properties:
+          name:
+            type: string
+            description: The person's first name
+          surname:
+            type: string
+            description: The person's last name
+          field:
+            type: string
+            description: Their field of study
+        required:
+          - name
+          - surname
+\`\`\`
+
+When a schema is provided, the agent's response will be available in \`output.structured_output\` as a typed object, while \`output.message\` will contain a string representation of the structured output.`,
+
+      `## Structured output with simple object schema
+\`\`\`yaml
+- name: analyze_sentiment
+  type: ${RunAgentStepTypeId}
+  with:
+    message: "Analyze the sentiment of this customer feedback: {{ feedback }}"
+    schema:
+      type: object
+      properties:
+        sentiment:
+          type: string
+          enum: [positive, negative, neutral]
+          description: Overall sentiment classification
+        confidence:
+          type: number
+          description: Confidence score between 0 and 1
+        key_phrases:
+          type: array
+          items:
+            type: string
+          description: Important phrases that influenced the sentiment
+      required:
+        - sentiment
+        - confidence
 \`\`\``,
     ],
   },

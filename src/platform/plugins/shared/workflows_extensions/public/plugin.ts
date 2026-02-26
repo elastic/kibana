@@ -10,6 +10,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
+import { PublicTriggerRegistry } from './trigger_registry';
 import type {
   WorkflowsExtensionsPublicPluginSetup,
   WorkflowsExtensionsPublicPluginSetupDeps,
@@ -27,9 +28,11 @@ export class WorkflowsExtensionsPublicPlugin
     >
 {
   private readonly stepRegistry: PublicStepRegistry;
+  private readonly triggerRegistry: PublicTriggerRegistry;
 
   constructor(_initializerContext: PluginInitializerContext) {
     this.stepRegistry = new PublicStepRegistry();
+    this.triggerRegistry = new PublicTriggerRegistry();
   }
 
   public setup(
@@ -40,6 +43,7 @@ export class WorkflowsExtensionsPublicPlugin
 
     return {
       registerStepDefinition: (definition) => this.stepRegistry.register(definition),
+      registerTriggerDefinition: (definition) => this.triggerRegistry.register(definition),
     };
   }
 
@@ -56,6 +60,15 @@ export class WorkflowsExtensionsPublicPlugin
       },
       hasStepDefinition: (stepTypeId: string) => {
         return this.stepRegistry.has(stepTypeId);
+      },
+      getAllTriggerDefinitions: () => {
+        return this.triggerRegistry.getAll();
+      },
+      getTriggerDefinition: (triggerId: string) => {
+        return this.triggerRegistry.get(triggerId);
+      },
+      hasTriggerDefinition: (triggerId: string) => {
+        return this.triggerRegistry.has(triggerId);
       },
     };
   }

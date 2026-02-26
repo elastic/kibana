@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { render, act, waitFor } from '@testing-library/react';
 import { useAbortableAsync } from './use_abortable_async';
 
@@ -167,6 +167,40 @@ describe('useAbortableAsync', () => {
       />
     );
     await waitFor(() => expect(aborted).toBe(true));
+  });
+
+  it('should maintain stable refresh identity across state transitions', async () => {
+    const refreshRefs: Array<() => void> = [];
+
+    function RefStabilityComponent({
+      hookFn,
+    }: {
+      hookFn: ({ signal }: { signal: AbortSignal }) => Promise<string>;
+    }) {
+      const state = useAbortableAsync(hookFn, []);
+      const prevRefreshRef = useRef(state.refresh);
+
+      useEffect(() => {
+        refreshRefs.push(state.refresh);
+        prevRefreshRef.current = state.refresh;
+      }, [state]);
+
+      return null;
+    }
+
+    const asyncFn = () =>
+      new Promise<string>((resolve) => {
+        setTimeout(() => resolve('done'), 10);
+      });
+
+    render(<RefStabilityComponent hookFn={asyncFn} />);
+
+    await waitFor(() => expect(refreshRefs.length).toBeGreaterThanOrEqual(2));
+
+    const firstRefresh = refreshRefs[0];
+    for (const ref of refreshRefs) {
+      expect(ref).toBe(firstRefresh);
+    }
   });
 
   it('should not abort running promise when rerendered without dependency change', async () => {

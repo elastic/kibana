@@ -1,0 +1,223 @@
+openapi: 3.0.0
+info:
+  title: Evals Common Attributes
+  version: "1"
+paths: {}
+components:
+  schemas:
+    Model:
+      type: object
+      properties:
+        id:
+          type: string
+        family:
+          type: string
+        provider:
+          type: string
+      required:
+        - id
+
+    EvaluationScoreDocument:
+      type: object
+      properties:
+        '@timestamp':
+          type: string
+        run_id:
+          type: string
+        experiment_id:
+          type: string
+        suite:
+          type: object
+          properties:
+            id:
+              type: string
+        ci:
+          type: object
+          properties:
+            buildkite:
+              $ref: '#/components/schemas/BuildkiteMetadata'
+        example:
+          $ref: '#/components/schemas/ExampleInfo'
+        task:
+          $ref: '#/components/schemas/TaskInfo'
+        evaluator:
+          $ref: '#/components/schemas/EvaluatorInfo'
+        run_metadata:
+          $ref: '#/components/schemas/RunMetadata'
+        environment:
+          type: object
+          properties:
+            hostname:
+              type: string
+      required:
+        - '@timestamp'
+        - run_id
+        - experiment_id
+        - example
+        - task
+        - evaluator
+        - run_metadata
+        - environment
+
+    BuildkiteMetadata:
+      type: object
+      properties:
+        build_id:
+          type: string
+        job_id:
+          type: string
+        build_url:
+          type: string
+        pipeline_slug:
+          type: string
+        pull_request:
+          type: string
+        branch:
+          type: string
+        commit:
+          type: string
+
+    ExampleInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        index:
+          type: integer
+        dataset:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+          required:
+            - id
+            - name
+      required:
+        - id
+        - index
+        - dataset
+
+    TaskInfo:
+      type: object
+      properties:
+        trace_id:
+          type: string
+          nullable: true
+        repetition_index:
+          type: integer
+        model:
+          $ref: '#/components/schemas/Model'
+      required:
+        - repetition_index
+        - model
+
+    EvaluatorInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        score:
+          type: number
+          nullable: true
+        label:
+          type: string
+          nullable: true
+        explanation:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+        trace_id:
+          type: string
+          nullable: true
+        model:
+          $ref: '#/components/schemas/Model'
+      required:
+        - name
+        - model
+
+    RunMetadata:
+      type: object
+      properties:
+        git_branch:
+          type: string
+          nullable: true
+        git_commit_sha:
+          type: string
+          nullable: true
+        total_repetitions:
+          type: integer
+      required:
+        - total_repetitions
+
+    EvaluatorStats:
+      type: object
+      properties:
+        dataset_id:
+          type: string
+        dataset_name:
+          type: string
+        evaluator_name:
+          type: string
+        stats:
+          type: object
+          properties:
+            mean:
+              type: number
+            median:
+              type: number
+            std_dev:
+              type: number
+            min:
+              type: number
+            max:
+              type: number
+            count:
+              type: integer
+          required:
+            - mean
+            - median
+            - std_dev
+            - min
+            - max
+            - count
+      required:
+        - dataset_id
+        - dataset_name
+        - evaluator_name
+        - stats
+
+    TraceSpan:
+      type: object
+      properties:
+        span_id:
+          type: string
+        trace_id:
+          type: string
+        parent_span_id:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+        status:
+          type: string
+        start_time:
+          type: string
+        end_time:
+          type: string
+        duration_ms:
+          type: number
+        attributes:
+          type: object
+          additionalProperties: true
+      required:
+        - span_id
+        - trace_id
+        - name
+        - start_time
+        - duration_ms

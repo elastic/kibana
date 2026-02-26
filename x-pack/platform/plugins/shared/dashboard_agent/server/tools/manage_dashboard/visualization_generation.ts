@@ -6,20 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import {
-  createVisualizationGraph,
-  guessChartType,
-  getSchemaForChartType,
-} from '@kbn/agent-builder-platform-plugin/server';
-import {
-  DASHBOARD_PANEL_ADDED_EVENT,
-  type AttachmentPanel,
-  type DashboardUiEvent,
-  type LensAttachmentPanel,
-} from '@kbn/dashboard-agent-common';
+import { buildVisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { type LensAttachmentPanel } from '@kbn/dashboard-agent-common';
 import { getErrorMessage, type VisualizationFailure } from './utils';
 
 export interface VisualizationQueryInput {
@@ -34,7 +25,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
   modelProvider,
   esClient,
   events,
-  sendIncrementalEvents,
+  onPanelCreated,
   logger,
 }: {
   queries?: VisualizationQueryInput[];
@@ -42,10 +33,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
   esClient: IScopedClusterClient;
   modelProvider: ModelProvider;
   events: ToolEventEmitter;
-  sendIncrementalEvents: (
-    panels: AttachmentPanel[],
-    eventType: DashboardUiEvent['data']['custom_event']
-  ) => void;
+  onPanelCreated?: (panel: LensAttachmentPanel) => void;
 }): Promise<{
   panels: LensAttachmentPanel[];
   failures: VisualizationFailure[];
@@ -57,46 +45,22 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
   const panels: LensAttachmentPanel[] = [];
   const failures: VisualizationFailure[] = [];
 
-  const model = await modelProvider.getDefaultModel();
-  const graph = createVisualizationGraph(model, logger, events, esClient);
-
   for (let i = 0; i < queries.length; i++) {
     const { query: nlQuery, index, chartType, esql } = queries[i];
 
-    events.reportProgress?.(`Creating visualization ${i + 1} of ${queries.length}: "${nlQuery}"`);
+    events.reportProgress(`Creating visualization ${i + 1} of ${queries.length}: "${nlQuery}"`);
 
     try {
-      let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
-      if (!chartType) {
-        logger.debug('Chart type not provided, using LLM to suggest one');
-        selectedChartType = await guessChartType(modelProvider, nlQuery);
-      }
-
-      const schema = getSchemaForChartType(selectedChartType);
-
-      const finalState = await graph.invoke({
+      const { validatedConfig, esqlQuery } = await buildVisualizationConfig({
         nlQuery,
         index,
-        chartType: selectedChartType,
-        schema,
-        existingConfig: undefined,
-        parsedExistingConfig: null,
-        esqlQuery: esql || '',
-        currentAttempt: 0,
-        actions: [],
-        validatedConfig: null,
-        error: null,
+        chartType,
+        esql,
+        modelProvider,
+        logger,
+        events,
+        esClient,
       });
-
-      const { validatedConfig, error, currentAttempt, esqlQuery } = finalState;
-
-      if (!validatedConfig) {
-        throw new Error(
-          `Failed to generate valid configuration after ${currentAttempt} attempts. Last error: ${
-            error || 'Unknown error'
-          }`
-        );
-      }
 
       const panelEntry: LensAttachmentPanel = {
         type: 'lens',
@@ -108,7 +72,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
       };
 
       panels.push(panelEntry);
-      sendIncrementalEvents([panelEntry], DASHBOARD_PANEL_ADDED_EVENT);
+      onPanelCreated?.(panelEntry);
 
       logger.debug(`Created lens visualization: ${panelEntry.panelId}`);
     } catch (error) {

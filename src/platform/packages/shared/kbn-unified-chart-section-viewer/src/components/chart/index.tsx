@@ -13,6 +13,7 @@ import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder'
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useRef } from 'react';
 import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
@@ -34,6 +35,7 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     yBounds?: LensYBoundsConfig;
     isLoading?: boolean;
     error?: Error;
+    userMessages?: EmbeddableComponentProps['userMessages'];
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -56,6 +58,7 @@ export const Chart = ({
   extraDisabledActions,
   isLoading = false,
   error,
+  userMessages,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -73,6 +76,7 @@ export const Chart = ({
     chartLayers,
     yBounds,
     error,
+    userMessages,
   });
 
   return (

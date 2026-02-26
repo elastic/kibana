@@ -10,6 +10,7 @@ import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
 import contentPromptTemplate from './content_prompt.text';
+import { partitionStreamFeaturesTool } from './features_tool';
 
 export const SuggestStreamPartitionsPrompt = createPrompt({
   name: 'suggest_stream_partitions_prompt',
@@ -32,6 +33,7 @@ export const SuggestStreamPartitionsPrompt = createPrompt({
       },
     },
     tools: {
+      get_stream_features: partitionStreamFeaturesTool,
       partition_logs: {
         description: `Simulates the partioning conditions specified, and clusters documents within each partition.`,
         schema: {

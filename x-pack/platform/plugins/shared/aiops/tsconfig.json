@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../../../typings/**/*",
@@ -60,7 +60,6 @@
     "@kbn/ml-time-buckets",
     "@kbn/ml-ui-actions",
     "@kbn/ml-url-state",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-mount",
@@ -82,9 +81,7 @@
     "@kbn/presentation-util",
     "@kbn/licensing-types",
     "@kbn/unified-data-table",
-    "@kbn/presentation-publishing-schemas",
+    "@kbn/presentation-publishing-schemas"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -17,10 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
-import React, { createRef, useState, useMemo } from 'react';
+import React, { createRef, useState } from 'react';
 import type { Observable } from 'rxjs';
-import { map, EMPTY } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
@@ -49,6 +48,7 @@ import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_me
 import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions';
 import { HeaderMenuButton } from './header_menu_button';
 import { HeaderPageAnnouncer } from './header_page_announcer';
+import { useHasAppMenuConfig } from '../use_has_app_menu_config';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -95,14 +95,7 @@ export function Header({
   const [navId] = useState(htmlIdGenerator()());
   const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
 
-  const hasBeta$ = useMemo(
-    () =>
-      observables.appMenu$?.pipe(
-        map((config) => !!config && !!config.items && config.items.length > 0)
-      ) ?? EMPTY,
-    [observables.appMenu$]
-  );
-  const hasBetaConfig = useObservable(hasBeta$, false);
+  const hasBetaConfig = useHasAppMenuConfig(observables.appMenu$);
 
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');

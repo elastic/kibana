@@ -3,18 +3,17 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*",],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/css-utils",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/visualizations-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-containers",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/config-schema",
-    "@kbn/presentation-publishing-schemas",
+    "@kbn/presentation-publishing-schemas"
   ],
   "exclude": ["target/**/*"]
 }

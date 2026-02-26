@@ -45,7 +45,12 @@ export function SystemIdentificationControl({
   useEffect(() => {
     getTask();
   }, [getTask]);
-  useTaskPolling(task, getSystemIdentificationStatus, getTask);
+  const { cancelTask, isCancellingTask } = useTaskPolling({
+    task,
+    onPoll: getSystemIdentificationStatus,
+    onRefresh: getTask,
+    onCancel: cancelSystemIdentificationTask,
+  });
 
   const flyout = isFlyoutVisible && (
     <StreamSystemsFlyout
@@ -119,7 +124,7 @@ export function SystemIdentificationControl({
     return triggerButton;
   }
 
-  if (task.status === 'in_progress') {
+  if (task.status === 'in_progress' && !isCancellingTask) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -140,11 +145,7 @@ export function SystemIdentificationControl({
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj="system_identification_cancel_system_identification_button"
-            onClick={() => {
-              cancelSystemIdentificationTask().then(() => {
-                getTask();
-              });
-            }}
+            onClick={cancelTask}
           >
             {i18n.translate(
               'xpack.streams.streamDetailView.cancelSystemIdentificationButtonLabel',
@@ -158,7 +159,7 @@ export function SystemIdentificationControl({
     );
   }
 
-  if (task.status === 'being_canceled') {
+  if (isCancellingTask) {
     return (
       <ConnectorListButtonBase
         aiFeatures={aiFeatures}

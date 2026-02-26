@@ -45,7 +45,7 @@ export const OptionsListPopover = ({
       className={'optionsList__popover'}
       data-test-subj={`optionsList-control-popover`}
     >
-      {field?.type !== 'boolean' && !displaySettings.hideActionBar && (
+      {field?.type !== 'boolean' && !displaySettings.hide_action_bar && (
         <OptionsListPopoverActionBar
           showOnlySelected={showOnlySelected}
           setShowOnlySelected={setShowOnlySelected}
@@ -62,7 +62,7 @@ export const OptionsListPopover = ({
           <OptionsListPopoverInvalidSelections />
         )}
       </div>
-      {!displaySettings.hideExclude && <OptionsListPopoverFooter />}
+      {!displaySettings.hide_exclude && <OptionsListPopoverFooter />}
     </div>
   );
 };

@@ -18,6 +18,7 @@ project:
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-workflows
 dependsOn:
+  - '@kbn/i18n'
   - '@kbn/zod'
   - '@kbn/es-query'
   - '@kbn/utility-types'

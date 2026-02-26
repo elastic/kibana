@@ -52,4 +52,24 @@ describe('DownsamplingPhase', () => {
 
     expect(screen.getByTestId('downsamplingPopover-step2-title')).toBeInTheDocument();
   });
+
+  it('should navigate to the step when edit flyout is open (no popover)', () => {
+    const onEditStep = jest.fn();
+
+    render(
+      <DownsamplingPhase
+        downsample={downsample}
+        stepNumber={1}
+        phaseName="hot"
+        onEditStep={onEditStep}
+        canManageLifecycle
+        isEditLifecycleFlyoutOpen
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
+
+    expect(onEditStep).toHaveBeenCalledWith(1, 'hot');
+    expect(screen.queryByTestId('downsamplingPopover-step1-title')).not.toBeInTheDocument();
+  });
 });

@@ -10,6 +10,7 @@
 import type { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
 import Fsp from 'fs/promises';
 import inquirer from 'inquirer';
 import Path from 'path';
@@ -28,6 +29,10 @@ import {
   getCopyrightHeader,
   getScoutPackageImport,
 } from '../generator_content';
+import {
+  getScoutCiConfigModuleFromPath,
+  upsertEnabledModuleInScoutCiConfigYml,
+} from './scout_ci_config';
 
 const TEST_TYPES = ['ui', 'api', 'both'] as const;
 type TestType = (typeof TEST_TYPES)[number];
@@ -76,9 +81,21 @@ async function validatePath(input: string): Promise<boolean | string> {
 
   try {
     getScoutPackageImport(normalizedPath);
-    return true;
   } catch (error) {
     return error instanceof Error ? error.message : 'Path does not match supported patterns';
+  }
+
+  // Ensure the user is pointing at a module root (not a subdirectory).
+  try {
+    const kibanaJsoncPath = Path.resolve(fullPath, 'kibana.jsonc');
+    const stat = await Fsp.stat(kibanaJsoncPath);
+    if (!stat.isFile()) {
+      return 'Path must contain a kibana.jsonc file';
+    }
+
+    return true;
+  } catch (error) {
+    return 'Path must point at a Kibana plugin/package root containing kibana.jsonc';
   }
 }
 
@@ -224,6 +241,28 @@ async function createDirectoryStructure(
   }
 }
 
+async function enableModuleInScoutCiConfig(relativePath: string, log: ToolingLog): Promise<void> {
+  const module = getScoutCiConfigModuleFromPath(relativePath);
+  const scoutCiConfigPath = Path.resolve(REPO_ROOT, '.buildkite', 'scout_ci_config.yml');
+
+  const existing = await Fsp.readFile(scoutCiConfigPath, 'utf8');
+  const result = upsertEnabledModuleInScoutCiConfigYml(existing, module);
+
+  if (!result.didChange) {
+    log.info(
+      `Scout CI config already enabled: ${module.kind} / ${module.name} in .buildkite/scout_ci_config.yml`
+    );
+    return;
+  }
+
+  await Fsp.writeFile(scoutCiConfigPath, result.updatedYml);
+
+  const action = result.movedFromDisabled ? 'moved to enabled' : 'added to enabled';
+  log.success(
+    `Updated .buildkite/scout_ci_config.yml (${action}): ${module.kind} / ${module.name}`
+  );
+}
+
 export const generateCmd: Command<void> = {
   name: 'generate',
   description: `
@@ -233,6 +272,8 @@ export const generateCmd: Command<void> = {
   (and optionally --type / --scout-root / --no-ui-parallel / --force).
 
   It creates the appropriate directory structure and Playwright config files.
+  It also registers the module under "enabled" in .buildkite/scout_ci_config.yml so the
+  generated configs can run in CI.
   `,
   flags: {
     string: ['path', 'type', 'scout-root'],
@@ -456,8 +497,7 @@ export const generateCmd: Command<void> = {
       )}`
     );
     log.write('\n');
-    log.warning(
-      '⚠️ CI setup required: to run these tests in CI, you must add your plugin or package to .buildkite/scout_ci_config.yml.'
-    );
+
+    await enableModuleInScoutCiConfig(relativePath, log);
   },
 };

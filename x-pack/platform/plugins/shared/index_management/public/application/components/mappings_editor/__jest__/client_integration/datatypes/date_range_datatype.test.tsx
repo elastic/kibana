@@ -24,7 +24,8 @@ interface Mappings {
   properties: Record<string, Record<string, unknown>>;
 }
 
-describe('Mappings editor: date range datatype', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253541
+describe.skip('Mappings editor: date range datatype', () => {
   test('should require a scaling factor to be provided', async () => {
     const defaultMappings: Mappings = {
       properties: {

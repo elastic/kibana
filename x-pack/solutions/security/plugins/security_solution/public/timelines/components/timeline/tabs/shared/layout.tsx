@@ -20,6 +20,7 @@ export const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   display: flex;
   flex-direction: column;
   padding: 0;
+  overflow: scroll;
 
   &.euiFlyoutHeader {
     ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}

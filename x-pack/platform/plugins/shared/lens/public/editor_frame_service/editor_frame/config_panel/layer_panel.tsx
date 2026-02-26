@@ -259,17 +259,13 @@ export function LayerPanel(props: LayerPanelProps) {
           props.onRemoveDimension({ layerId, columnId: openColumnId });
         }
       } else if (isDimensionComplete) {
-        updateAll(
+        updateAll({
           datasourceId,
-          newState,
-          activeVisualization.setDimension({
-            layerId,
-            groupId: openColumnGroup.groupId,
-            columnId: openColumnId,
-            prevState: visualizationState,
-            frame: framePublicAPI,
-          })
-        );
+          newDatasourceState: newState,
+          layerId,
+          groupId: openColumnGroup.groupId,
+          columnId: openColumnId,
+        });
       } else {
         if (forceRender) {
           updateDatasource(datasourceId, newState);
@@ -288,8 +284,6 @@ export function LayerPanel(props: LayerPanelProps) {
       layerId,
       updateAll,
       updateDatasourceAsync,
-      visualizationState,
-      framePublicAPI,
     ]
   );
 

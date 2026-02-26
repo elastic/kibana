@@ -55,7 +55,6 @@ dependsOn:
   - '@kbn/content-packs-schema'
   - '@kbn/dashboard-plugin'
   - '@kbn/deeplinks-analytics'
-  - '@kbn/visualization-utils'
   - '@kbn/calculate-auto'
   - '@kbn/deeplinks-observability'
   - '@kbn/ui-theme'

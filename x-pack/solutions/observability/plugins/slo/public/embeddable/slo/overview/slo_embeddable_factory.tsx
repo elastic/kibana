@@ -24,7 +24,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
@@ -63,17 +63,17 @@ export const getOverviewEmbeddableFactory = ({
   sloClient: SLORepositoryClient;
 }): EmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> => ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
-  buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+  buildEmbeddable: async ({
+    initializeDrilldownsManager,
+    initialState,
+    finalizeApi,
+    uuid,
+    parentApi,
+  }) => {
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
 
-    const dynamicActionsManager = await deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-      uuid,
-      () => titleManager.api.title$.getValue(),
-      initialState
-    );
-
-    const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
+    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
     const titleManager = initializeTitleManager(state);
     const sloStateManager = initializeStateManager(state, defaultSloEmbeddableState);
@@ -81,11 +81,10 @@ export const getOverviewEmbeddableFactory = ({
     const reload$ = new Subject<boolean>();
 
     function serializeState() {
-      const dynamicActionsState = dynamicActionsManager?.getLatestState() ?? {};
       return {
         ...titleManager.getLatestState(),
         ...sloStateManager.getLatestState(),
-        ...dynamicActionsState,
+        ...drilldownsManager.getLatestState(),
       };
     }
 
@@ -94,7 +93,7 @@ export const getOverviewEmbeddableFactory = ({
       parentApi,
       serializeState,
       anyStateChange$: merge(
-        ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+        drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
         sloStateManager.anyStateChange$
       ),
@@ -106,10 +105,10 @@ export const getOverviewEmbeddableFactory = ({
         remoteName: 'referenceEquality',
         overviewMode: 'referenceEquality',
         ...titleComparators,
-        ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
+        ...drilldownsManager.comparators,
       }),
       onReset: (lastSaved) => {
-        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        drilldownsManager.reinitializeState(lastSaved ?? {});
         titleManager.reinitializeState(lastSaved);
         sloStateManager.reinitializeState(lastSaved);
       },
@@ -118,7 +117,7 @@ export const getOverviewEmbeddableFactory = ({
     const api = finalizeApi({
       ...unsavedChangesApi,
       ...titleManager.api,
-      ...(dynamicActionsManager?.api ?? {}),
+      ...drilldownsManager.api,
       ...sloStateManager.api,
       defaultTitle$,
       hideTitle$: titleManager.api.hideTitle$,
@@ -182,8 +181,8 @@ export const getOverviewEmbeddableFactory = ({
 
         useEffect(() => {
           return () => {
+            drilldownsManager.cleanup();
             fetchSubscription.unsubscribe();
-            maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);
         const renderOverview = () => {

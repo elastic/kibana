@@ -78,7 +78,8 @@ export function taskRunner(
       async run() {
         let totalInvalidated = 0;
         try {
-          const [{ savedObjects }, { encryptedSavedObjects, security }] = await coreStartServices;
+          const [{ savedObjects, security: securityCore }, { encryptedSavedObjects, security }] =
+            await coreStartServices;
           const savedObjectsClient = savedObjects.createInternalRepository([
             API_KEY_PENDING_INVALIDATION_TYPE,
             AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -91,6 +92,7 @@ export function taskRunner(
           totalInvalidated = await runInvalidate({
             encryptedSavedObjectsClient,
             invalidateApiKeyFn: security?.authc.apiKeys.invalidateAsInternalUser,
+            invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
             logger,
             removalDelay: config.invalidateApiKeysTask.removalDelay,
             savedObjectsClient,

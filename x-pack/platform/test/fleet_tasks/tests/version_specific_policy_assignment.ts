@@ -275,6 +275,30 @@ export default function (providerContext: FtrProviderContextWithServices) {
       }
     });
 
+    it('should reassign a new agent to an already-compiled version without recompiling', async () => {
+      // First enrollment: creates the inputs_for_versions["8.18"] entry
+      await createAgentDoc(providerContext, 'agent1', policyId, '8.18.0');
+      await waitForTask();
+
+      await retry.tryForTime(30000, async () => {
+        const agent = await getAgent('agent1');
+        expect(agent.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+      });
+
+      // Second enrollment: same version, inputs_for_versions["8.18"] now exists.
+      // The task should skip recompilation but still deploy and reassign.
+      await createAgentDoc(providerContext, 'agent2', policyId, '8.18.0');
+      await waitForTask();
+
+      await retry.tryForTime(30000, async () => {
+        const agent = await getAgent('agent2');
+        expect(agent.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+      });
+
+      const agent2 = await getAgent('agent2');
+      expect(agent2.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+    });
+
     it('should not process agent policies without version conditions', async () => {
       // Create an agent policy without version conditions
       // Use unique name to avoid conflicts from previous failed runs

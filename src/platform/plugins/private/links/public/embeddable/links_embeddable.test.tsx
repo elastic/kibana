@@ -120,6 +120,7 @@ async function buildLinksEmbeddable(state: LinksEmbeddableState) {
   const parentApi = getMockLinksParentApi(state);
   const uuid = '1234';
   return await factory.buildEmbeddable({
+    initializeDrilldownsManager: jest.fn(),
     initialState: state,
     finalizeApi: (api) => {
       return {

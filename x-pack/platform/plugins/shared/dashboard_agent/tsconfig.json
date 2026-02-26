@@ -15,15 +15,15 @@
     "@kbn/dashboard-plugin",
     "@kbn/dashboard-agent-common",
     "@kbn/zod",
-    "@kbn/management-settings-ids",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-common-2",
+    "@kbn/agent-builder-genai-utils",
     "@kbn/share-plugin",
-    "@kbn/agent-builder-platform-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/deeplinks-analytics",
-    "@kbn/dashboard-markdown"
+    "@kbn/dashboard-markdown",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

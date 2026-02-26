@@ -123,7 +123,11 @@ import {
 
 import { bulkInstallPackages } from './epm/packages';
 import { getAgentsByKuery } from './agents';
-import { getPackagePolicySavedObjectType, packagePolicyService } from './package_policy';
+import {
+  getPackagePolicySavedObjectType,
+  packagePolicyService,
+  getCompiledVersionsForAgentPolicy,
+} from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -143,7 +147,10 @@ import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
-import { getVersionSpecificPolicies } from './utils/version_specific_policies';
+import {
+  getVersionSpecificPolicies,
+  getAgentVersionsForVersionSpecificPolicies,
+} from './utils/version_specific_policies';
 import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
@@ -1650,7 +1657,11 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyIds: string[],
     agentPolicies?: AgentPolicy[],
-    options?: { throwOnAgentlessError?: boolean; agentVersions?: string[] }
+    options?: {
+      throwOnAgentlessError?: boolean;
+      throwOnAnyError?: boolean;
+      agentVersions?: string[];
+    }
   ) {
     const t = apm.startTransaction('deploy-policies', 'fleet');
     const logger = this.getLogger('deployPolicies');
@@ -1666,7 +1677,11 @@ class AgentPolicyService {
     const defaultOutputId = await outputService.getDefaultDataOutputId();
 
     if (!defaultOutputId) {
-      logger.debug(`Deployment canceled!! Default output ID is not defined.`);
+      const message = 'Deployment canceled!! Default output ID is not defined.';
+      logger.debug(message);
+      if (options?.throwOnAnyError) {
+        throw new Error(message);
+      }
       return;
     }
 
@@ -1693,12 +1708,24 @@ class AgentPolicyService {
           })
           .then((response) => {
             if (!response) {
-              logger.debug(
-                `Unable to retrieve FULL agent policy for [${agentPolicyId}] - Deployment will not be done for this policy`
+              // Do not manually throw an error here even when throwOnAnyError is set — a null full policy
+              // indicates a data inconsistency (e.g. missing package) that retrying
+              // setup will not resolve. The policy is skipped silently.
+              logger.warn(
+                `Unable to retrieve full agent policy for [${agentPolicyId}] - policy will not be deployed`
               );
             }
 
             return response;
+          })
+          .catch((err: Error) => {
+            // An exception from getFullAgentPolicy is a data inconsistency (e.g. a
+            // missing package or broken reference) that a retry will not fix. Log it
+            // as a warning and skip this policy rather than failing the whole deployment.
+            logger.warn(
+              `Error retrieving full agent policy for [${agentPolicyId}], skipping deployment: ${err.message}`
+            );
+            return null;
           }),
       {
         concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
@@ -1733,11 +1760,23 @@ class AgentPolicyService {
         appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
         policy.has_agent_version_conditions
       ) {
+        let agentVersionsToUse = options?.agentVersions;
+        if (!agentVersionsToUse) {
+          // Create/update path: merge default common versions with any extra versions already
+          // compiled in inputs_for_versions (e.g. 9.1 from an enrolled agent). Without this,
+          // agents on non-default versions would not receive a new .fleet-policies document
+          // when the agent policy is updated, and would be stuck on the old revision.
+          const [defaultVersions, extraVersions] = await Promise.all([
+            getAgentVersionsForVersionSpecificPolicies(),
+            getCompiledVersionsForAgentPolicy(soClient, policy.id),
+          ]);
+          agentVersionsToUse = [...new Set([...defaultVersions, ...extraVersions])];
+        }
         const versionSpecificPolicies = await getVersionSpecificPolicies(
           soClient,
           fleetServerPolicy,
           fullPolicy,
-          options?.agentVersions
+          agentVersionsToUse
         );
         fleetServerPolicies.push(...versionSpecificPolicies);
       }
@@ -1762,34 +1801,44 @@ class AgentPolicyService {
       fleetServerPolicy,
     ]);
 
-    const bulkResponse = await esClient
-      .bulk({
-        index: AGENT_POLICY_INDEX,
-        operations: fleetServerPoliciesBulkBody,
-        refresh: 'wait_for',
-      })
-      .catch(catchAndSetErrorStackTrace.withMessage('ES bulk operation failed'));
+    // Skip the bulk write if there is nothing to index — an empty bulk request
+    // is rejected by Elasticsearch with a 400. Agentless handling below still runs.
+    if (fleetServerPoliciesBulkBody.length > 0) {
+      const bulkResponse = await esClient
+        .bulk({
+          index: AGENT_POLICY_INDEX,
+          operations: fleetServerPoliciesBulkBody,
+          refresh: 'wait_for',
+        })
+        .catch(catchAndSetErrorStackTrace.withMessage('ES bulk operation failed'));
 
-    logger.debug(`Bulk update against index [${AGENT_POLICY_INDEX}] with deployment updates done`);
+      logger.debug(
+        `Bulk update against index [${AGENT_POLICY_INDEX}] with deployment updates done`
+      );
 
-    if (bulkResponse.errors) {
-      const erroredDocuments = bulkResponse.items.reduce((acc, item) => {
-        const value: BulkResponseItem | undefined = item.index;
-        if (!value || !value.error) {
+      if (bulkResponse.errors) {
+        const erroredDocuments = bulkResponse.items.reduce((acc, item) => {
+          const value: BulkResponseItem | undefined = item.index;
+          if (!value || !value.error) {
+            return acc;
+          }
+
+          acc.push(value);
           return acc;
-        }
+        }, [] as BulkResponseItem[]);
 
-        acc.push(value);
-        return acc;
-      }, [] as BulkResponseItem[]);
-
-      logger.warn(
-        `Failed to index documents with ids ${erroredDocuments
+        const errorMessage = `Failed to index documents with ids ${erroredDocuments
           .map((doc) => doc._id)
           .join(', ')} during policy deployment: ${erroredDocuments
           .map((doc) => doc.error?.reason)
-          .join(', ')}`
-      );
+          .join(', ')}`;
+
+        logger.error(errorMessage);
+
+        if (options?.throwOnAnyError) {
+          throw new Error(errorMessage);
+        }
+      }
     }
 
     for (const agentPolicy of policies) {
@@ -1894,6 +1943,30 @@ class AgentPolicyService {
       },
       size: 1,
       sort: [{ revision_idx: { order: 'desc' } }],
+    });
+
+    if ((res.hits.total as number) === 0) {
+      return null;
+    }
+
+    return res.hits.hits[0]._source;
+  }
+
+  public async getFleetServerPolicy(
+    esClient: ElasticsearchClient,
+    agentPolicyId: string,
+    revision: number
+  ) {
+    const res = await esClient.search<FleetServerPolicy>({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      rest_total_hits_as_int: true,
+      query: {
+        bool: {
+          filter: [{ term: { policy_id: agentPolicyId } }, { term: { revision_idx: revision } }],
+        },
+      },
+      size: 1,
     });
 
     if ((res.hits.total as number) === 0) {

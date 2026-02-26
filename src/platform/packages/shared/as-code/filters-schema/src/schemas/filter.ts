@@ -121,43 +121,75 @@ const baseConditionSchema = schema.object({
 /**
  * Schema for 'is' operator with single value
  */
-const singleConditionSchema = baseConditionSchema.extends({
-  operator: schema.literal(ASCODE_FILTER_OPERATOR.IS),
-  value: schema.oneOf([schema.string(), schema.number(), schema.boolean()], {
-    meta: { description: 'Single value for comparison' },
-  }),
-});
+const singleConditionSchema = baseConditionSchema.extends(
+  {
+    operator: schema.literal(ASCODE_FILTER_OPERATOR.IS),
+    value: schema.oneOf([schema.string(), schema.number(), schema.boolean()], {
+      meta: { description: 'Single value for comparison' },
+    }),
+  },
+  {
+    meta: {
+      description: 'Condition: is',
+      id: '@kbn/as-code-filters-schema_condition_is',
+    },
+  }
+);
 
 /**
  * Schema for 'is_one_of' operator with array values
  */
-const oneOfConditionSchema = baseConditionSchema.extends({
-  operator: schema.literal(ASCODE_FILTER_OPERATOR.IS_ONE_OF),
-  value: schema.oneOf(
-    [
-      schema.arrayOf(schema.string()),
-      schema.arrayOf(schema.number()),
-      schema.arrayOf(schema.boolean()),
-    ],
-    { meta: { description: 'Homogeneous array of values' } }
-  ),
-});
+const oneOfConditionSchema = baseConditionSchema.extends(
+  {
+    operator: schema.literal(ASCODE_FILTER_OPERATOR.IS_ONE_OF),
+    value: schema.oneOf(
+      [
+        schema.arrayOf(schema.string(), { maxSize: 10000 }),
+        schema.arrayOf(schema.number(), { maxSize: 10000 }),
+        schema.arrayOf(schema.boolean(), { maxSize: 10000 }),
+      ],
+      { meta: { description: 'Homogeneous array of values' } }
+    ),
+  },
+  {
+    meta: {
+      description: 'Condition: is one of',
+      id: '@kbn/as-code-filters-schema_condition_is_one_of',
+    },
+  }
+);
 
 /**
  * Schema for 'range' operator with range value
  */
-const rangeConditionSchema = baseConditionSchema.extends({
-  operator: schema.literal(ASCODE_FILTER_OPERATOR.RANGE),
-  value: rangeSchema,
-});
+const rangeConditionSchema = baseConditionSchema.extends(
+  {
+    operator: schema.literal(ASCODE_FILTER_OPERATOR.RANGE),
+    value: rangeSchema,
+  },
+  {
+    meta: {
+      description: 'Condition: range',
+      id: '@kbn/as-code-filters-schema_condition_range',
+    },
+  }
+);
 
 /**
  * Schema for 'exists' operator without value
  */
-const existsConditionSchema = baseConditionSchema.extends({
-  operator: schema.literal(ASCODE_FILTER_OPERATOR.EXISTS),
-  // value is intentionally omitted for exists operator
-});
+const existsConditionSchema = baseConditionSchema.extends(
+  {
+    operator: schema.literal(ASCODE_FILTER_OPERATOR.EXISTS),
+    // value is intentionally omitted for exists operator
+  },
+  {
+    meta: {
+      description: 'Condition: exists',
+      id: '@kbn/as-code-filters-schema_condition_exists',
+    },
+  }
+);
 
 /**
  * Discriminated union schema for filter conditions
@@ -165,17 +197,22 @@ const existsConditionSchema = baseConditionSchema.extends({
 const conditionSchema = schema.discriminatedUnion(
   'operator',
   [singleConditionSchema, oneOfConditionSchema, rangeConditionSchema, existsConditionSchema],
-  { meta: { description: 'A filter condition with strict operator/value type matching' } }
+  {
+    meta: {
+      description: 'A filter condition with strict operator/value type matching',
+      id: '@kbn/as-code-filters-schema_conditionSchema',
+    },
+  }
 );
 
 // ====================================================================
 // FILTER DISCRIMINATED UNION SCHEMA
 // ====================================================================
 
-interface RecursiveType {
+export interface AsCodeGroupFilterRecursive {
   group: {
     operator: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
-    conditions: Array<TypeOf<typeof conditionSchema> | RecursiveType>;
+    conditions: Array<TypeOf<typeof conditionSchema> | AsCodeGroupFilterRecursive>;
   };
 }
 
@@ -187,14 +224,19 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
     type: schema.literal(ASCODE_FILTER_TYPE.CONDITION),
     condition: conditionSchema,
   },
-  { meta: { description: 'Condition filter' } }
+  {
+    meta: {
+      description: 'Condition filter',
+      id: '@kbn/as-code-filters-schema_asCodeConditionFilterSchema',
+    },
+  }
 );
 
 /**
  * Schema for logical filter groups with recursive structure
  * Uses lazy schema to handle recursive references
  */
-const GROUP_FILTER_ID = '@kbn/as-code-filters-schema_groupFilter'; // package prefix for global uniqueness in OAS specs
+const GROUP_FILTER_ID = '@kbn/as-code-filters-schema_groupFilter';
 export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   {
     type: schema.literal(ASCODE_FILTER_TYPE.GROUP),
@@ -207,52 +249,74 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
         conditions: schema.arrayOf(
           schema.oneOf([
             conditionSchema,
-            schema.lazy<RecursiveType>(GROUP_FILTER_ID), // Recursive reference for nested groups
+            schema.lazy<AsCodeGroupFilterRecursive>(GROUP_FILTER_ID), // Recursive reference for nested groups
           ])
         ),
       },
       { meta: { description: 'Condition or nested group filter', id: GROUP_FILTER_ID } }
     ),
   },
-  { meta: { description: 'Grouped condition filter' } }
+  {
+    meta: {
+      description: 'Grouped condition filter',
+      id: '@kbn/as-code-filters-schema_asCodeGroupFilterSchema',
+    },
+  }
 );
 
 /**
  * Schema for DSL filters
  * Includes field and params properties specific to DSL filters for preserving metadata
  */
-export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends({
-  type: schema.literal(ASCODE_FILTER_TYPE.DSL),
-  dsl: schema.recordOf(schema.string(), schema.any(), {
-    meta: { description: 'Elasticsearch Query DSL object' },
-  }),
-  field: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Field name for scripted filters where field cannot be extracted from query.',
-      },
-    })
-  ),
-  params: schema.maybe(
-    schema.any({
-      meta: {
-        description:
-          'Filter parameters metadata. May contain display values, formats, and parameters for scripted filters.',
-      },
-    })
-  ),
-});
+export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends(
+  {
+    type: schema.literal(ASCODE_FILTER_TYPE.DSL),
+    dsl: schema.recordOf(schema.string(), schema.any(), {
+      meta: { description: 'Elasticsearch Query DSL object' },
+    }),
+    field: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Field name for scripted filters where field cannot be extracted from query.',
+        },
+      })
+    ),
+    params: schema.maybe(
+      schema.any({
+        meta: {
+          description:
+            'Filter parameters metadata. May contain display values, formats, and parameters for scripted filters.',
+        },
+      })
+    ),
+  },
+  {
+    meta: {
+      description: 'DSL filter',
+      id: '@kbn/as-code-filters-schema_asCodeDSLFilterSchema',
+    },
+  }
+);
 
 /**
  * Schema for spatial filters
  * Similar to DSL filters but with type='spatial' to preserve spatial_filter meta.type
  */
-export const asCodeSpatialFilterSchema = commonBasePropertiesSchema.extends({
-  type: schema.literal(ASCODE_FILTER_TYPE.SPATIAL),
-  dsl: schema.recordOf(schema.string(), schema.any(), {
-    meta: { description: 'Elasticsearch geo query DSL object' },
-  }),
-});
+export const asCodeSpatialFilterSchema = commonBasePropertiesSchema.extends(
+  {
+    type: schema.literal(ASCODE_FILTER_TYPE.SPATIAL),
+    dsl: schema.recordOf(schema.string(), schema.any(), {
+      meta: { description: 'Elasticsearch geo query DSL object' },
+    }),
+  },
+  {
+    meta: {
+      description: 'Spatial filter',
+      id: '@kbn/as-code-filters-schema_asCodeSpatialFilterSchema',
+    },
+  }
+);
 
 /**
  * Main discriminated union schema for Filter
@@ -266,5 +330,10 @@ export const asCodeFilterSchema = schema.discriminatedUnion(
     asCodeDSLFilterSchema,
     asCodeSpatialFilterSchema,
   ],
-  { meta: { description: 'A filter which can be a condition, group, DSL, or spatial' } }
+  {
+    meta: {
+      description: 'A filter which can be a condition, group, DSL, or spatial',
+      id: '@kbn/as-code-filters-schema_asCodeFilterSchema',
+    },
+  }
 );

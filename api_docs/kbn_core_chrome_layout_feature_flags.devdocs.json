@@ -16,7 +16,7 @@
           ") => boolean"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-        "lineNumber": 29,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,48 +32,8 @@
               "FeatureFlagsStart"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-            "lineNumber": 29,
+            "lineNumber": 14,
             "columnNumber": 36,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
-        "id": "def-public.getLayoutVersion",
-        "type": "Function",
-        "tags": [],
-        "label": "getLayoutVersion",
-        "description": [],
-        "signature": [
-          "(featureFlags: ",
-          "FeatureFlagsStart",
-          ") => ",
-          "LayoutFeatureFlag"
-        ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-        "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
-            "id": "def-public.getLayoutVersion.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "featureFlags",
-            "description": [],
-            "signature": [
-              "FeatureFlagsStart"
-            ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-            "lineNumber": 16,
-            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -97,42 +57,8 @@
           "\"core.chrome.layoutDebug\""
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-        "lineNumber": 14,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
-        "id": "def-public.LAYOUT_FEATURE_FLAG_KEY",
-        "type": "string",
-        "tags": [],
-        "label": "LAYOUT_FEATURE_FLAG_KEY",
-        "description": [],
-        "signature": [
-          "\"core.chrome.layoutType\""
-        ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
-        "lineNumber": 13,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-layout-feature-flags",
-        "id": "def-public.LayoutFeatureFlag",
-        "type": "Type",
-        "tags": [],
-        "label": "LayoutFeatureFlag",
-        "description": [],
-        "signature": [
-          "\"grid\" | \"legacy-fixed\""
-        ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-feature-flags/index.ts",
         "lineNumber": 12,
-        "columnNumber": 1,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

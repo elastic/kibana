@@ -23,6 +23,7 @@
       "_aliases"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-update-aliases",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-update-aliases",
     "availability": {
       "stack": true,
       "serverless": true

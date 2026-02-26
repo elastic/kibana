@@ -12,8 +12,8 @@ import {
   type HasParentApi,
   type PublishesSavedObjectId,
   type PublishesUnifiedSearch,
+  apiIsPresentationContainer,
 } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { getEsqlControls } from '@kbn/esql-utils';

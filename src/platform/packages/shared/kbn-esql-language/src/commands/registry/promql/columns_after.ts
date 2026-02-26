@@ -67,11 +67,14 @@ function getUserDefinedColumn(command: ESQLAstPromqlCommand): ESQLUserDefinedCol
 }
 
 function getStepColumn(command: ESQLAstPromqlCommand): ESQLColumnData | undefined {
-  const hasStep = command.params?.entries?.some(
-    ({ key }) => isIdentifier(key) && key.name.toLowerCase() === PromqlParamName.Step
+  const hasStepOrBuckets = command.params?.entries?.some(
+    ({ key }) =>
+      isIdentifier(key) &&
+      (key.name.toLowerCase() === PromqlParamName.Step ||
+        key.name.toLowerCase() === PromqlParamName.Buckets)
   );
 
-  if (!hasStep) {
+  if (!hasStepOrBuckets) {
     return undefined;
   }
 

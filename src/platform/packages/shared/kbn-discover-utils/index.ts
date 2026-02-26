@@ -26,6 +26,7 @@ export {
   SHOW_FIELD_STATISTICS,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
+  DataGridDensity,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
@@ -44,6 +45,7 @@ export {
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getAvailableResourceFields,
+  getAvailableTraceFields,
   getLogLevelFieldWithFallback,
   getLogEventTypeFieldWithFallback,
   getLogExceptionTypeFieldWithFallback,
@@ -70,6 +72,7 @@ export {
   getSortForSearchSource,
   getEsQuerySort,
   getTieBreakerFieldName,
+  escapeAndPreserveHighlightTags,
   severityOrder,
 } from './src';
 

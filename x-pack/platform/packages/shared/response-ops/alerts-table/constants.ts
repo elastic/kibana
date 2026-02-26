@@ -124,6 +124,7 @@ export const mutationKeys = {
   bulkUntrackAlerts: () => [mutationKeys.root, 'bulkUntrackAlerts'] as const,
   bulkUntrackAlertsByQuery: () => [mutationKeys.root, 'bulkUntrackAlertsByQuery'] as const,
   bulkUpdateAlertTags: () => [mutationKeys.root, 'bulkUpdateAlertTags'] as const,
+  bulkUpdateWorkflowStatus: () => [mutationKeys.root, 'bulkUpdateWorkflowStatus'] as const,
 };
 
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;

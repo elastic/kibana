@@ -65,6 +65,8 @@ export function FeaturesTable() {
       }),
       truncateText: true,
       render: (_name: string, feature: Feature) => {
+        const displayTitle = feature.title ?? feature.id;
+        const secondaryText = feature.subtype ?? feature.type ?? '';
         return (
           <EuiLink
             onClick={() => handleSelectFeature(feature)}
@@ -72,11 +74,11 @@ export function FeaturesTable() {
           >
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{feature.title}</EuiText>
+                <EuiText size="s">{displayTitle}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  {feature.title}
+                  {secondaryText}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -90,7 +92,7 @@ export function FeaturesTable() {
         defaultMessage: 'Type',
       }),
       width: '15%',
-      render: (type: string) => <EuiBadge color="hollow">{upperFirst(type)}</EuiBadge>,
+      render: (type: string) => <EuiBadge color="hollow">{upperFirst(type ?? '–')}</EuiBadge>,
     },
     {
       field: 'confidence',
@@ -102,7 +104,7 @@ export function FeaturesTable() {
       ),
       width: '12%',
       render: (confidence: number) => (
-        <EuiHealth color={getConfidenceColor(confidence)}>{confidence}</EuiHealth>
+        <EuiHealth color={getConfidenceColor(confidence ?? 0)}>{confidence ?? '–'}</EuiHealth>
       ),
     },
     {

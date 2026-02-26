@@ -139,7 +139,7 @@ describe('kuery functions', () => {
         ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern);
 
-        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
+        expect((result!.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
           'script'
         );
       });

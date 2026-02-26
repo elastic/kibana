@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { findRuleTemplatesSo } from '../../../../data/rule_template';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -22,8 +22,11 @@ import {
   combineFilterWithAuthorizationFilter,
 } from '../../../../rules_client/common/filters';
 import { mapSortField } from '../../../../rules_client/common';
-import { AlertingAuthorizationEntity } from '../../../../authorization';
-import { ensureFieldIsSafeForQuery } from '../../../../authorization/alerting_authorization_kuery';
+import { AlertingAuthorizationFilterType } from '../../../../authorization/alerting_authorization_kuery';
+import {
+  RuleTemplateAuditAction,
+  ruleTemplateAuditEvent,
+} from '../../../../rules_client/common/audit_events';
 
 export interface FindResult {
   page: number;
@@ -42,28 +45,17 @@ export async function findRuleTemplates(
     throw Boom.badRequest(`Error validating find template data - ${error.message}`);
   }
 
-  // we follow the same auth patterns as in the find rules API, however the implementation is slightly
-  // different because rule templates do not have consumers. If the user has access to a rule type for
-  // at least one consumer, then all the templates of that rule type should be returned.
-  const authorizedRuleTypes = await context.authorization.getAllAuthorizedRuleTypesFindOperation({
-    authorizationEntity: AlertingAuthorizationEntity.Rule,
-  });
-
-  // user has no access to any rule types
-  if (!authorizedRuleTypes.size) {
-    throw Boom.forbidden(
-      `Unauthorized to find ${AlertingAuthorizationEntity.Rule}s for any rule types`
-    );
-  }
-
-  // build the filter which applies the rule type constraints for the authorized user.
-  const authorizedRuleTypeIds = Array.from(authorizedRuleTypes.keys());
-  const authorizationFilter = nodeBuilder.or(
-    authorizedRuleTypeIds.map((ruleTypeId) => {
-      ensureFieldIsSafeForQuery('ruleTypeId', ruleTypeId);
-      return nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.ruleTypeId`, ruleTypeId);
-    })
-  );
+  const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } =
+    await context.authorization.getByRuleTypeAuthorizationFilter({
+      authorizationEntity: AlertingAuthorizationEntity.Rule,
+      filterOpts: {
+        type: AlertingAuthorizationFilterType.KQL,
+        fieldNames: {
+          ruleTypeId: `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.ruleTypeId`,
+        },
+      },
+      operation: ReadOperations.Find,
+    });
 
   const { ruleTypeId, tags, perPage, page, search, defaultSearchOperator, sortField, sortOrder } =
     params;
@@ -74,14 +66,10 @@ export async function findRuleTemplates(
   const tagsFilter = tags ? buildTagsFilter(tags, RULE_TEMPLATE_SAVED_OBJECT_TYPE) : undefined;
   const combinedFilters = combineFilters([ruleTypeFilter, tagsFilter], 'and');
 
-  const finalFilter = combineFilterWithAuthorizationFilter(
-    combinedFilters,
-    authorizationFilter as KueryNode
-  );
+  const finalFilter = authorizationFilter
+    ? combineFilterWithAuthorizationFilter(combinedFilters, authorizationFilter as KueryNode)
+    : combinedFilters;
 
-  // aside from rule type, these are the only mapped fields.
-  // it doesn't make much sense to expose a param to customize this yet.
-  // we should add 'description' here when it's available.
   const searchFields = ['name', 'tags', 'description'];
 
   const {
@@ -103,16 +91,23 @@ export async function findRuleTemplates(
     },
   });
 
-  // this is a second layer of defence which validates the auth filter was applied correctly
-  const ensureRuleTypeIsAuthorized = (returnedRuleTypeId: string) => {
-    if (!authorizedRuleTypes.has(returnedRuleTypeId)) {
-      throw Boom.forbidden(
-        `Unauthorized to find ${AlertingAuthorizationEntity.Rule} for rule type "${returnedRuleTypeId}"`
-      );
-    }
-  };
   const authorizedData = data.map((so) => {
-    ensureRuleTypeIsAuthorized(so.attributes.ruleTypeId);
+    try {
+      ensureRuleTypeIsAuthorized(so.attributes.ruleTypeId, AlertingAuthorizationEntity.Rule);
+    } catch (error) {
+      context.auditLogger?.log(
+        ruleTemplateAuditEvent({
+          action: RuleTemplateAuditAction.FIND,
+          savedObject: {
+            type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+            id: so.id,
+            name: so.attributes.name,
+          },
+          error,
+        })
+      );
+      throw error;
+    }
     return so;
   });
 
@@ -121,6 +116,15 @@ export async function findRuleTemplates(
       id: so.id,
       attributes: so.attributes,
     })
+  );
+
+  transformedData.forEach(({ id, name }) =>
+    context.auditLogger?.log(
+      ruleTemplateAuditEvent({
+        action: RuleTemplateAuditAction.FIND,
+        savedObject: { type: RULE_TEMPLATE_SAVED_OBJECT_TYPE, id, name },
+      })
+    )
   );
 
   return {

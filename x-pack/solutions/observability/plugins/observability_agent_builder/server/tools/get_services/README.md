@@ -14,7 +14,7 @@ Each service in the response includes a `sources` array indicating which data so
 
 ## Filters
 
-- **environment**: Filter services by environment (e.g., `production`, `staging`)
+- **kqlFilter**: KQL filter to narrow down services (e.g., `service.environment: "production"`, `host.name: "web-server-01"`)
 - **healthStatus**: Filter by health status (`healthy`, `warning`, `critical`, `unknown`). Note: This filter only applies to APM services. Services found only in logs or metrics will not have health status information and will be excluded when this filter is used.
 
 ## Example

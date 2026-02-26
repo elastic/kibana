@@ -29,8 +29,10 @@ export const INTERNAL_INFERENCE_CONNECTORS = [
   'Elastic-Managed-LLM',
   'Anthropic-Claude-Sonnet-3-7',
   'Anthropic-Claude-Sonnet-4-5',
+  'Anthropic-Claude-Sonnet-4-6',
   'Anthropic-Claude-Opus-4-5',
   'Anthropic-Claude-Opus-4-6',
+  'Anthropic-Claude-Haiku-4-5',
   'OpenAI-GPT-OSS-120B',
   'OpenAI-GPT-4-1',
   'OpenAI-GPT-4-1-Mini',
@@ -40,6 +42,7 @@ export const INTERNAL_INFERENCE_CONNECTORS = [
   'OpenAI-o4-Mini',
   'Google-Gemini-2-5-Pro',
   'Google-Gemini-2-5-Flash',
+  'Google-Gemini-2-5-Flash-Lite',
   'Google-Gemini-3-0-Pro',
   'Google-Gemini-3-0-Flash',
 ];

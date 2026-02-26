@@ -13,10 +13,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import dedent from 'dedent';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID } from '../../common/constants';
 import type { ObservabilityAgentBuilderCoreSetup } from '../types';
+import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
-const alertDataSchema = z.object({
+const GET_ALERT_DETAILS_TOOL_ID = 'get_alert_details';
+
+const alertDataSchema = observabilityAttachmentDataSchema.extend({
   alertId: z.string(),
-  attachmentLabel: z.string().optional(),
 });
 
 export type AlertAttachmentData = z.infer<typeof alertDataSchema>;
@@ -43,11 +45,11 @@ export function createAlertAttachmentType({
       return {
         getRepresentation: () => ({
           type: 'text',
-          value: `Observability Alert ID: ${alertId}. Use the get_alert_details tool to fetch full alert information.`,
+          value: `Observability Alert ID: ${alertId}. Use the ${GET_ALERT_DETAILS_TOOL_ID} tool to fetch full alert information.`,
         }),
         getBoundedTools: () => [
           {
-            id: `get_alert_details`,
+            id: GET_ALERT_DETAILS_TOOL_ID,
             type: ToolType.builtin,
             description: `Fetch full details for alert ${alertId} including rule info, status, reason, and related entities.`,
             schema: z.object({}),
@@ -59,6 +61,19 @@ export function createAlertAttachmentType({
                 );
 
                 const alertDoc = await alertsClient.get({ id: alertId });
+
+                if (!alertDoc) {
+                  return {
+                    results: [
+                      {
+                        type: ToolResultType.error,
+                        data: {
+                          message: `Alert document not found for ${alertId}`,
+                        },
+                      },
+                    ],
+                  };
+                }
 
                 return {
                   results: [
@@ -95,7 +110,7 @@ export function createAlertAttachmentType({
     getTools: () => [],
     getAgentDescription: () =>
       dedent(
-        `An Observability alert attachment. The alert ID is provided - use the get_alert_details tool to fetch full alert information including rule name, status, reason, and related entities.`
+        `An Observability alert attachment. The alert ID is provided - use the ${GET_ALERT_DETAILS_TOOL_ID} tool to fetch full alert information including rule name, status, reason, and related entities.`
       ),
   };
 }

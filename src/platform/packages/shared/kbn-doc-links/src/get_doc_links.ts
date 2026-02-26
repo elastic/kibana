@@ -634,6 +634,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       elasticManagedLlm: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
       elasticManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing`,
       elasticServerlessSearchManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing/serverless-search`,
+      downsamplingConcepts: `${ELASTIC_DOCS}manage-data/data-store/data-streams/downsampling-concepts`,
     },
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,

@@ -24,7 +24,7 @@
           "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -42,7 +42,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -61,7 +61,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -80,7 +80,7 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -99,7 +99,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -146,7 +146,7 @@
             "tags": [],
             "label": "logger",
             "description": [
-              "{@link Logger }"
+              "{@link Logger}"
             ],
             "signature": [
               {
@@ -171,7 +171,7 @@
             "tags": [],
             "label": "logLevel",
             "description": [
-              "The {@link LogLevelId } to set the Diag logger to."
+              "The {@link LogLevelId} to set the Diag logger to."
             ],
             "signature": [
               "LogLevelId",

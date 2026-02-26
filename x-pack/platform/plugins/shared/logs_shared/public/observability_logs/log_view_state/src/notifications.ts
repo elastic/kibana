@@ -33,14 +33,14 @@ export const createLogViewNotificationChannel = () =>
   createNotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>();
 
 export const logViewNotificationEventSelectors = {
-  loadingLogViewStarted: (context: LogViewContext) =>
+  loadingLogViewStarted: ({ context }: { context: LogViewContext; event: LogViewEvent }) =>
     'logViewReference' in context
       ? ({
           type: 'LOADING_LOG_VIEW_STARTED',
           logViewReference: context.logViewReference,
         } as LogViewNotificationEvent)
       : undefined,
-  loadingLogViewSucceeded: (context: LogViewContext) =>
+  loadingLogViewSucceeded: ({ context }: { context: LogViewContext; event: LogViewEvent }) =>
     'resolvedLogView' in context && 'status' in context
       ? ({
           type: 'LOADING_LOG_VIEW_SUCCEEDED',
@@ -48,7 +48,7 @@ export const logViewNotificationEventSelectors = {
           status: context.status,
         } as LogViewNotificationEvent)
       : undefined,
-  loadingLogViewFailed: (context: LogViewContext) =>
+  loadingLogViewFailed: ({ context }: { context: LogViewContext; event: LogViewEvent }) =>
     'error' in context
       ? ({
           type: 'LOADING_LOG_VIEW_FAILED',

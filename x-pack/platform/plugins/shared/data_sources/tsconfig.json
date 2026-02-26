@@ -9,7 +9,6 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../../../typings/emotion.d.ts"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [

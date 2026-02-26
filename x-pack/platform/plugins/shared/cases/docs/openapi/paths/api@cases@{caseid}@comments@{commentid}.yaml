@@ -9,7 +9,7 @@ delete:
     - cases
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
-    - $ref: '../components/parameters/case_id.yaml' 
+    - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/comment_id.yaml'
   responses:
     '204':
@@ -19,7 +19,7 @@ delete:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'
 
 get:
   summary: Get a case comment or alert
@@ -50,4 +50,4 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'

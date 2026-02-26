@@ -13,6 +13,8 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { table } from '../assembly';
 import type { ColumnBuilderContext } from './types';
 import type { NameColumnProps } from './name/name_builder';
+import type { UpdatedAtColumnProps } from './updated_at/updated_at_builder';
+import type { ActionsColumnProps } from './actions/actions_builder';
 
 /**
  * Props for the `Column` component (custom columns).
@@ -46,16 +48,20 @@ export interface ColumnProps {
  * Namespace interface for `Column` sub-components.
  *
  * The base `Column` accepts {@link ColumnProps}; pre-built columns
- * are properties (e.g., `Column.Name`).
+ * are properties (e.g., `Column.Name`, `Column.Actions`).
  */
 export interface ColumnNamespace {
   (props: ColumnProps): ReactNode;
   Name: (props: NameColumnProps) => ReactNode;
+  UpdatedAt: (props: UpdatedAtColumnProps) => ReactNode;
+  Actions: (props: ActionsColumnProps) => ReactNode;
 }
 
 /** Preset-to-props mapping for table columns. */
 export interface ColumnPresets {
   name: NameColumnProps;
+  updatedAt: UpdatedAtColumnProps;
+  actions: ActionsColumnProps;
 }
 
 /** Part factory for table columns. */

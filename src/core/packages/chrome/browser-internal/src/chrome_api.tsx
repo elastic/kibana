@@ -8,7 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { map } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
@@ -65,13 +65,18 @@ export function createChromeApi({
     }
   };
 
+  const hasHeaderBanner$ = state.headerBanner.$.pipe(
+    map((banner) => Boolean(banner)),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
   const project: InternalChromeStart['project'] = {
     setHome: (homeHref) => {
       validateProjectStyle();
       projectNavigation.setProjectHome(homeHref);
     },
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
-    setFeedbackUrlParams: projectNavigation.setFeedbackUrlParams.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
     initNavigation: (id, navigationTree$, config) => {
       validateProjectStyle();
@@ -119,6 +124,7 @@ export function createChromeApi({
 
     // Breadcrumbs
     getBreadcrumbs$: () => state.breadcrumbs.classic.$,
+    getBreadcrumbs: () => state.breadcrumbs.classic.get(),
     setBreadcrumbs: (newBreadcrumbs, params = {}) => {
       state.breadcrumbs.classic.set(newBreadcrumbs);
       if (params.project) {
@@ -157,7 +163,7 @@ export function createChromeApi({
 
     // Header Banner
     setHeaderBanner: state.headerBanner.set,
-    hasHeaderBanner$: () => state.headerBanner.$.pipe(map((banner) => Boolean(banner))),
+    hasHeaderBanner$: () => hasHeaderBanner$,
 
     // Chrome Style
     setChromeStyle: state.style.setChromeStyle,
@@ -167,8 +173,6 @@ export function createChromeApi({
     sideNav: {
       getIsCollapsed$: () => state.sideNav.collapsed.$,
       setIsCollapsed: state.sideNav.collapsed.set,
-      getIsFeedbackBtnVisible$: () => state.feedback.isBtnVisible$,
-      setIsFeedbackBtnVisible: state.feedback.setIsBtnVisible,
     },
 
     // Project Navigation

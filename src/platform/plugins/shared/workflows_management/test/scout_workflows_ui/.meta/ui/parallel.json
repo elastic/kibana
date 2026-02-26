@@ -1,0 +1,435 @@
+{
+  "sha1": "e7ddc17a5fc05109ca09d3969cddb585cb0889a9",
+  "tests": [
+    {
+      "id": "a8dc0a71dd65d42-65fd9c357892a20",
+      "title": "InternalActions/Cases should run create_get_update_case workflow successfully",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/internal_actions/create_get_update_case.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "b95282f37eebdc1-5f188557aa71c91",
+      "title": "InternalActions/Elasticsearch should run national park workflow successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/internal_actions/national_parks.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "7f7258df8a1cda5-773061bd6f9afcd",
+      "title": "Event autocomplete should be dynamic based on triggers manual trigger: event.* should only suggest spaceId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_event_autocomplete.spec.ts",
+        "line": 33,
+        "column": 9
+      }
+    },
+    {
+      "id": "7f7258df8a1cda5-e10677c4ab18791",
+      "title": "Event autocomplete should be dynamic based on triggers alert trigger: event.* should suggest alerts, rule, params, and spaceId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_event_autocomplete.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "02966260206ed5b-1eaf3f4c5859ccb",
+      "title": "Sanity tests for workflows Create, save, run and view a dummy workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "02966260206ed5b-e6122565b6ea818",
+      "title": "Sanity tests for workflows should show validation errors for invalid workflow YAML and clear them when fixed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 70,
+        "column": 9
+      }
+    },
+    {
+      "id": "02966260206ed5b-459fd6ac3eccef8",
+      "title": "Sanity tests for workflows should show step type autocompletion suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor.spec.ts",
+        "line": 93,
+        "column": 9
+      }
+    },
+    {
+      "id": "8a478a8cadc4edc-063497b8c9edff4",
+      "title": "Workflow execution - Alert triggers should trigger workflow from alert",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "8a478a8cadc4edc-c4010c12909cde8",
+      "title": "Workflow execution - Alert triggers should not trigger a disabled workflow when alert fires",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
+        "line": 207,
+        "column": 9
+      }
+    },
+    {
+      "id": "daf2b965294bd38-4971c41c22e284c",
+      "title": "Workflow execution - Foreach iterations should display execution tree with foreach loops showing multiple iterations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/foreach_iterations.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "daf2b965294bd38-a5ca930aaeec5bb",
+      "title": "Workflow execution - Foreach iterations should display post-foreach steps below all iterations after collapsing and re-expanding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/foreach_iterations.spec.ts",
+        "line": 93,
+        "column": 9
+      }
+    },
+    {
+      "id": "83eb75963c3c731-4a99ff2edf7a25b",
+      "title": "Workflow execution - Test runs should run unsaved workflow as test run with isTestRun: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "83eb75963c3c731-296812a7a4fcbda",
+      "title": "Workflow execution - Test runs should run saved workflow from editor as test run with isTestRun: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "83eb75963c3c731-70c62d6d98f1350",
+      "title": "Workflow execution - Test runs should not allow running a disabled workflow, then enable and run it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
+        "line": 71,
+        "column": 7
+      }
+    },
+    {
+      "id": "83eb75963c3c731-b4376d9720aea17",
+      "title": "Workflow execution - Test runs should run individual step with custom context override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
+        "line": 114,
+        "column": 7
+      }
+    },
+    {
+      "id": "611939e87af9d3e-ec8bf7897a8036c",
+      "title": "WorkflowsList/BulkActions should enable disabled workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "611939e87af9d3e-2fa309b19ed98e8",
+      "title": "WorkflowsList/BulkActions should disable enabled workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "611939e87af9d3e-339604897d68425",
+      "title": "WorkflowsList/BulkActions should delete workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
+        "line": 81,
+        "column": 7
+      }
+    },
+    {
+      "id": "611939e87af9d3e-80de18da7957c9c",
+      "title": "WorkflowsList/BulkActions should clear selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
+        "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeae3e58d5fa42-3e9a84b6df05b24",
+      "title": "WorkflowsList/FilterSortSearch should filter workflows by enabling state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeae3e58d5fa42-49df984d6fc1b0a",
+      "title": "WorkflowsList/FilterSortSearch should filter workflows by disabling state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "7aeae3e58d5fa42-7ffd365afdc103e",
+      "title": "WorkflowsList/FilterSortSearch should search by name and description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdab4a325e28891-56a4c4afb7d71f1",
+      "title": "WorkflowsList/SingleActions should run enabled workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdab4a325e28891-0eab26e057be6a4",
+      "title": "WorkflowsList/SingleActions should not run disabled workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdab4a325e28891-7ec92a0a3f0adc8",
+      "title": "WorkflowsList/SingleActions should enable disabled workflow via toggle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
+        "line": 74,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdab4a325e28891-8658309a41442e2",
+      "title": "WorkflowsList/SingleActions should disable enabled workflow via toggle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdab4a325e28891-aaa4b68f1a7dc6b",
+      "title": "WorkflowsList/SingleActions should open workflow for editing via edit action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
+        "line": 122,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdab4a325e28891-c8becd78b95d5ff",
+      "title": "WorkflowsList/SingleActions should clone workflow via three dots menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
+        "line": 149,
+        "column": 7
+      }
+    },
+    {
+      "id": "cdab4a325e28891-d99ea2e0aaa0b0d",
+      "title": "WorkflowsList/SingleActions should delete workflow via three dots menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
+        "line": 173,
+        "column": 7
+      }
+    }
+  ]
+}

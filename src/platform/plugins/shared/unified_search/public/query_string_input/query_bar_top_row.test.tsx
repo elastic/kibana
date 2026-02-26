@@ -109,6 +109,7 @@ function wrapQueryBarTopRowInContext(
 
   const services = {
     ...startMock,
+    core: startMock,
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     kql: kqlPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),

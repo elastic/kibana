@@ -106,6 +106,7 @@ import { visit } from '../../../../tasks/navigation';
 import {
   getDetails,
   goBackToRulesTable,
+  goToAlertsTab,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../tasks/rule_details';
@@ -489,6 +490,7 @@ describe(
               .should('have.text', `${rule.interval}`);
           });
 
+          goToAlertsTab();
           waitForTheRuleToBeExecuted();
           waitForAlertsToPopulate();
 
@@ -501,7 +503,7 @@ describe(
         it('Investigate alert in timeline', () => {
           loadPrepackagedTimelineTemplates();
           createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true })).then(
-            (rule) => visitRuleDetailsPage(rule.body.id)
+            (rule) => visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
           );
 
           waitForAlertsToPopulate();

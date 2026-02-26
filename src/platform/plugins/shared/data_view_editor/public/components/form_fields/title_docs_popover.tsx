@@ -11,12 +11,12 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButtonIcon,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
   EuiCode,
+  EuiFormAppend,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -24,9 +24,10 @@ export const TitleDocsPopover: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const helpButton = (
-    <EuiButtonIcon
+    <EuiFormAppend
+      element="button"
+      iconLeft="documentation"
       onClick={() => setIsOpen((prev) => !prev)}
-      iconType="documentation"
       data-test-subj="indexPatternDocsButton"
       aria-label={i18n.translate('indexPatternEditor.titleDocsPopover.ariaLabel', {
         defaultMessage: 'Index pattern examples',

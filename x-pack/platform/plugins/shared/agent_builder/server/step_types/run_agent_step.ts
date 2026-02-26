@@ -25,7 +25,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     ...runAgentStepCommonDefinition,
     handler: async (context) => {
       try {
-        const { schema, message, conversation_id: conversationId } = context.input;
+        const { schema, message, conversation_id: conversationId, attachments } = context.input;
 
         const {
           'agent-id': agentId,
@@ -66,6 +66,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             outputSchema: schema,
             nextInput: {
               message,
+              attachments,
             },
           },
           // workflows already run as scheduled tasks

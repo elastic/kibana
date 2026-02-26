@@ -8,18 +8,8 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReplayConfig, LoadResult } from '../types';
-import {
-  extractDataStreamName,
-  getMissingDataStreams,
-  validateFileSnapshotUrl,
-  getErrorMessage,
-} from '../utils';
-import {
-  registerUrlRepository,
-  getSnapshotMetadata,
-  deleteRepository,
-  generateRepoName,
-} from '../restore/repository';
+import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '../utils';
+import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../restore/repository';
 import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
 import { reindexAllIndices } from './reindex';
@@ -62,7 +52,7 @@ export async function getMaxTimestampFromData({
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, log, snapshotUrl, snapshotName, patterns, concurrency } = config;
+  const { esClient, log, repository, snapshotName, patterns, concurrency } = config;
 
   const result: LoadResult = {
     success: false,
@@ -77,10 +67,10 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
   const pipelineName = `snapshot-loader-timestamp-pipeline-${repoName}`;
 
   try {
-    validateFileSnapshotUrl(snapshotUrl);
+    repository.validate();
 
     log.info('Step 1/4: Registering snapshot repository...');
-    await registerUrlRepository({ esClient, log, repoName, snapshotUrl });
+    await repository.register({ esClient, log, repoName });
 
     log.info('Step 2/4: Retrieving snapshot metadata...');
     const snapshotInfo = await getSnapshotMetadata({

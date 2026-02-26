@@ -15,7 +15,7 @@ exports[`<AddFromLibraryButton /> is rendered 1`] = `
       data-euiicon-type="folderOpen"
     />
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Add from library
     </span>

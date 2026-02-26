@@ -41,7 +41,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - .storybook/**/*.tsx
-    - emotion.d.ts
     - '!target/**/*'
 tasks:
   jest:

@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/ui-theme'
   - '@kbn/deeplinks-search'
   - '@kbn/deeplinks-management'
+  - '@kbn/management-plugin'
   - '@kbn/serverless'
   - '@kbn/utility-types'
   - '@kbn/search-navigation'

@@ -6,6 +6,7 @@
  */
 import { conditionSchema } from '@kbn/streamlang';
 import {
+  getStreamTypeFromDefinition,
   systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
@@ -199,15 +200,16 @@ const generateSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    telemetry,
   }): Promise<SignificantEventsGenerateResponse> => {
     const {
       streamsClient,
-      scopedClusterClient,
       licensing,
       inferenceClient,
       uiSettingsClient,
       soClient,
       featureClient,
+      scopedClusterClient,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -220,13 +222,11 @@ const generateSignificantEventsRoute = createServerRoute({
     });
 
     // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }, { hits: features }] =
-      await Promise.all([
-        inferenceClient.getConnectorById(connectorId),
-        streamsClient.getStream(params.path.name),
-        new PromptsConfigService({ soClient, logger }).getPrompt(),
-        featureClient.getFeatures(params.path.name),
-      ]);
+    const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
+      inferenceClient.getConnectorById(connectorId),
+      streamsClient.getStream(params.path.name),
+      new PromptsConfigService({ soClient, logger }).getPrompt(),
+    ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
@@ -238,21 +238,33 @@ const generateSignificantEventsRoute = createServerRoute({
           end: params.query.to.valueOf(),
           sampleDocsSize: params.query.sampleDocsSize,
           systemPrompt: significantEventsPromptOverride,
-          features,
         },
         {
           inferenceClient,
-          esClient: scopedClusterClient.asCurrentUser,
+          featureClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
+          esClient: scopedClusterClient.asCurrentUser,
         }
       )
     ).pipe(
-      map(({ queries, tokensUsed }) => ({
-        type: 'generated_queries' as const,
-        queries,
-        tokensUsed,
-      })),
+      map(({ queries, tokensUsed, toolUsage }) => {
+        telemetry.trackSignificantEventsQueriesGenerated({
+          count: queries.length,
+          systems_count: params.body?.system ? 1 : 0,
+          stream_name: definition.name,
+          stream_type: getStreamTypeFromDefinition(definition),
+          input_tokens_used: tokensUsed.prompt,
+          output_tokens_used: tokensUsed.completion,
+          tool_usage: toolUsage,
+        });
+
+        return {
+          type: 'generated_queries' as const,
+          queries,
+          tokensUsed,
+        };
+      }),
       catchError((error: Error) => {
         throw createConnectorSSEError(error, connector);
       })

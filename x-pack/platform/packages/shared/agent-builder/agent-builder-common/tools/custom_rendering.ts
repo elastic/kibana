@@ -30,3 +30,16 @@ export const dashboardElement = {
     toolResultId: 'tool-result-id',
   },
 };
+
+export interface RenderAttachmentElementAttributes {
+  attachmentId?: string;
+  version?: number | string;
+}
+
+export const renderAttachmentElement = {
+  tagName: 'render_attachment',
+  attributes: {
+    attachmentId: 'id',
+    version: 'version',
+  },
+};

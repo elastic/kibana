@@ -27,8 +27,9 @@ import { Direction } from '../../../../common/search_strategy';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
-import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
+import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../../../common/use_persisted_page_size';
 import { SavedQueryRowActions } from './saved_query_row_actions';
 
 export interface SavedQuerySO {
@@ -45,6 +46,13 @@ export interface SavedQuerySO {
   prebuilt?: boolean;
 }
 
+const RUN_QUERY_PERMISSION_DENIED = i18n.translate(
+  'xpack.osquery.savedQueryList.permissionDeniedRunTooltip',
+  {
+    defaultMessage: 'You do not have sufficient permissions to run this query.',
+  }
+);
+
 interface PlayButtonProps {
   disabled: boolean;
   savedQuery: SavedQuerySO;
@@ -52,11 +60,12 @@ interface PlayButtonProps {
 
 const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, savedQuery }) => {
   const { push } = useHistory();
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
 
-  // TODO: Add href
   const handlePlayClick = useCallback(
     () =>
-      push('/live_queries/new', {
+      push(newQueryPath, {
         form: {
           savedQueryId: savedQuery.id,
           query: savedQuery.query,
@@ -64,7 +73,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
           timeout: savedQuery.timeout ?? QUERY_TIMEOUT.DEFAULT,
         },
       }),
-    [push, savedQuery]
+    [push, newQueryPath, savedQuery]
   );
 
   const playText = useMemo(
@@ -78,8 +87,10 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
     [savedQuery]
   );
 
+  const tooltipContent = disabled ? RUN_QUERY_PERMISSION_DENIED : playText;
+
   return (
-    <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
+    <EuiToolTip position="top" content={tooltipContent}>
       <EuiButtonIcon
         color="primary"
         iconType="play"
@@ -139,7 +150,7 @@ const SavedQueriesPageComponent = () => {
   useBreadcrumbs('saved_queries');
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
   const [sortField, setSortField] = useState('updated_at');
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.desc);
 
@@ -153,13 +164,10 @@ const SavedQueriesPageComponent = () => {
   );
 
   const renderPlayAction = useCallback(
-    (item: SavedQuerySO) =>
-      permissions.runSavedQueries || permissions.writeLiveQueries ? (
-        <PlayButton savedQuery={item} disabled={false} />
-      ) : (
-        <></>
-      ),
-    [permissions.runSavedQueries, permissions.writeLiveQueries]
+    (item: SavedQuerySO) => (
+      <PlayButton savedQuery={item} disabled={!permissions.runSavedQueries} />
+    ),
+    [permissions.runSavedQueries]
   );
 
   const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {
@@ -242,19 +250,22 @@ const SavedQueriesPageComponent = () => {
     ]
   );
 
-  const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
-    setSortField(sort.field);
-    setSortDirection(sort.direction);
-  }, []);
+  const onTableChange = useCallback(
+    ({ page = {}, sort = {} }: any) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+      setSortField(sort.field);
+      setSortDirection(sort.direction);
+    },
+    [setPageSize]
+  );
 
   const pagination = useMemo(
     () => ({
       pageIndex,
       pageSize,
       totalItemCount: data?.total ?? 0,
-      pageSizeOptions: [10, 20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [pageIndex, pageSize, data?.total]
   );

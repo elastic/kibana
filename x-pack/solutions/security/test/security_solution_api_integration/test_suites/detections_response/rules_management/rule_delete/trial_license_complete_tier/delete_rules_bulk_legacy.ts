@@ -80,6 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+            uuid: expect.any(String),
           },
         ]);
       });
@@ -135,6 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+          uuid: expect.any(String),
         });
         expect(actions).toContainEqual({
           id: hookAction2.id,
@@ -144,6 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+          uuid: expect.any(String),
         });
       });
 

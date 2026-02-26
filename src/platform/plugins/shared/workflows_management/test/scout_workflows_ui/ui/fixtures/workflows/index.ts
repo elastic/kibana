@@ -18,6 +18,8 @@ export {
   getDummyWorkflowYaml,
   getInvalidWorkflowYaml,
   getIncompleteStepTypeYaml,
+  getManualTriggerEventAutocompleteYaml,
+  getAlertTriggerEventAutocompleteYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,

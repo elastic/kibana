@@ -10,6 +10,13 @@ import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { EuiCode, EuiCodeBlock, EuiText, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+/**
+ * ## IMPORTANT TODO ##
+ * This file imports @elastic/ecs directly, which imports all ECS fields into the bundle.
+ * This should be migrated to using the unified fields metadata plugin instead.
+ * See https://github.com/elastic/kibana/tree/main/x-pack/platform/plugins/shared/fields_metadata for more details.
+ */
+// eslint-disable-next-line no-restricted-imports
 import { EcsFlat } from '@elastic/ecs';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';

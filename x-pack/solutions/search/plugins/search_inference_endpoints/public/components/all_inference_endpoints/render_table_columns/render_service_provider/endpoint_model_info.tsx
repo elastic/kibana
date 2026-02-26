@@ -9,21 +9,15 @@ import React from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-
-import * as i18n from './translations';
+import { SERVICE_PROVIDER_DESCRIPTIONS } from '../../constants';
 
 export interface EndpointModelInfoProps {
   endpointInfo: InferenceInferenceEndpointInfo;
 }
 
-const descriptions: Record<string, string> = {
-  [ServiceProviderKeys.elastic]: i18n.TOKEN_BASED_BILLING_DESCRIPTION,
-  [ServiceProviderKeys.elasticsearch]: i18n.RESOURCE_BASED_BILLING_DESCRIPTION,
-};
-
 export const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointInfo }) => {
   const description = endpointInfo?.inference_id.startsWith('.')
-    ? descriptions[endpointInfo?.service ?? '']
+    ? SERVICE_PROVIDER_DESCRIPTIONS[endpointInfo?.service ?? '']
     : undefined;
 
   const attributes = endpointModelAtrributes(endpointInfo);

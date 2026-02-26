@@ -101,6 +101,20 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   }
 );
 
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.visualizationActions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.visualizationActions.addToExistingCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
 export const ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
   'xpack.securitySolution.detections.hooks.attacks.bulkActions.alertTagsContextMenuItemTitle',
   {

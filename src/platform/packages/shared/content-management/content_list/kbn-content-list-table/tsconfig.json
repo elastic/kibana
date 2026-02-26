@@ -10,10 +10,8 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
       "@testing-library/react",
-      "../../../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [
@@ -25,6 +23,8 @@
     "@kbn/content-list-provider",
     "@kbn/content-list-mock-data",
     "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/content-list-toolbar",
   ],
   "exclude": [
     "target/**/*"

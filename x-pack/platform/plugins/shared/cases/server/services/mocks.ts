@@ -226,6 +226,8 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
     createTemplate: jest.fn(),
     updateTemplate: jest.fn(),
     deleteTemplate: jest.fn(),
+    getTags: jest.fn(),
+    getAuthors: jest.fn(),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

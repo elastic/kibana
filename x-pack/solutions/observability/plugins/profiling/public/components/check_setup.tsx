@@ -76,6 +76,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   const displaySetupScreen =
     (status === AsyncStatus.Settled &&
+      data?.type !== 'serverless' &&
       data?.has_setup !== true &&
       data?.pre_8_9_1_data === false) ||
     !!error;
@@ -142,12 +143,26 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     );
   }
 
+  if (
+    status === AsyncStatus.Settled &&
+    data?.type === 'serverless' &&
+    data?.profiling_enabled === false &&
+    history.location.pathname !== '/profiling-not-enabled'
+  ) {
+    router.push('/profiling-not-enabled', {
+      path: {},
+      query: {},
+    });
+    return null;
+  }
+
   const displayUi =
-    // Display UI if there's data or if the user is opening the add data instruction page.
+    // Display UI if there's data or if the user is opening one of the setup/disabled pages.
     // does not use profiling router because that breaks as at this point the route might not have all required params
     (data?.has_data === true && data?.pre_8_9_1_data === false) ||
     history.location.pathname === '/add-data-instructions' ||
-    history.location.pathname === '/delete_data_instructions';
+    history.location.pathname === '/delete_data_instructions' ||
+    history.location.pathname === '/profiling-not-enabled';
 
   if (displayUi) {
     return children;

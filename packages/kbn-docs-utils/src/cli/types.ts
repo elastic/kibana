@@ -17,6 +17,7 @@ import type {
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
   AdoptionTrackedAPIsByPlugin,
+  UnnamedExportsByPlugin,
   ApiStats,
   PluginMetaInfo,
 } from '../types';
@@ -95,6 +96,8 @@ export interface BuildApiMapResult {
   unreferencedDeprecations: UnreferencedDeprecationsByPlugin;
   /** Adoption-tracked APIs. */
   adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  /** Unnamed exports found during API collection. */
+  unnamedExports: UnnamedExportsByPlugin;
 }
 
 /**

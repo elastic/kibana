@@ -7,7 +7,7 @@
 
 import type { MouseEventHandler } from 'react';
 import React from 'react';
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SloStatus } from '../../../../common/service_inventory';
 
@@ -22,7 +22,7 @@ interface SloStatusConfig {
 
 export const SLO_COUNT_CAP = 50;
 
-const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
+const SLO_STATUS_CONFIG: Record<SloStatus | 'noSLOs', SloStatusConfig> = {
   violated: {
     id: 'Violated',
     color: 'danger',
@@ -93,6 +93,23 @@ const SLO_STATUS_CONFIG: Record<SloStatus, SloStatusConfig> = {
         defaultMessage: 'Healthy',
       }),
   },
+  noSLOs: {
+    id: 'NoSLOs',
+    color: 'hollow',
+    showCount: false,
+    tooltipContent: i18n.translate('xpack.apm.servicesTable.tooltip.noSLOs', {
+      defaultMessage: 'No SLOs are defined for this service. Click to create a new SLO.',
+    }),
+    ariaLabel: (serviceName: string) =>
+      i18n.translate('xpack.apm.servicesTable.noSLOsAriaLabel', {
+        defaultMessage: 'Create a new SLO for {serviceName}',
+        values: { serviceName },
+      }),
+    badgeLabel: () =>
+      i18n.translate('xpack.apm.servicesTable.noSLOs', {
+        defaultMessage: 'No SLOs',
+      }),
+  },
 };
 
 export function SloStatusBadge({
@@ -101,7 +118,7 @@ export function SloStatusBadge({
   serviceName,
   onClick,
 }: {
-  sloStatus: SloStatus;
+  sloStatus: SloStatus | 'noSLOs';
   sloCount?: number;
   serviceName: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
@@ -122,7 +139,14 @@ export function SloStatusBadge({
         onClick={onClick}
         onClickAriaLabel={config.ariaLabel(serviceName)}
       >
-        {config.badgeLabel(cappedCount)}
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="visGauge" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiBadge>
     </EuiToolTip>
   );

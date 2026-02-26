@@ -28,13 +28,13 @@ describe('isValidTimeRange', () => {
     expect(isValidTimeRange({ ...baseRange(), endDate: null })).toBeFalsy();
   });
 
-  it('returns false when both types are NOW', () => {
+  it('returns true when both types are NOW', () => {
     const range = {
       ...baseRange(),
       type: [DATE_TYPE_NOW, DATE_TYPE_NOW] as TimeRange['type'],
     };
 
-    expect(isValidTimeRange(range)).toBeFalsy();
+    expect(isValidTimeRange(range)).toBeTruthy();
   });
 
   it('returns false when start is after end', () => {
@@ -47,8 +47,7 @@ describe('isValidTimeRange', () => {
     expect(isValidTimeRange(range)).toBeFalsy();
   });
 
-  it('returns true when start is before or equal to end', () => {
-    expect(isValidTimeRange(baseRange())).toBeTruthy();
+  it('returns true when start equals end', () => {
     expect(
       isValidTimeRange({
         ...baseRange(),

@@ -12,10 +12,17 @@ import { transformSearchSourceIn } from './transform_search_source_in';
 describe('transformSearchSourceIn', () => {
   test('should extract references from filters', () => {
     const { searchSourceJSON, references } = transformSearchSourceIn([
-      { meta: { index: 'fizzle-1234' } },
+      {
+        data_view_id: 'fizzle-1234',
+        type: 'condition',
+        condition: {
+          operator: 'exists',
+          field: 'foo',
+        },
+      },
     ]);
     expect(searchSourceJSON).toMatchInlineSnapshot(
-      `"{\\"filter\\":[{\\"meta\\":{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}"`
+      `"{\\"filter\\":[{\\"meta\\":{\\"key\\":\\"foo\\",\\"field\\":\\"foo\\",\\"type\\":\\"exists\\",\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"},\\"query\\":{\\"exists\\":{\\"field\\":\\"foo\\"}}}]}"`
     );
     expect(references).toMatchInlineSnapshot(`
       Array [

@@ -24,7 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
+import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/public';
 
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
@@ -34,13 +34,11 @@ import {
 } from '@kbn/presentation-publishing';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { Subscription, switchMap } from 'rxjs';
-import { uiActions } from '../../kibana_services';
 import {
-  CONTEXT_MENU_TRIGGER,
-  contextMenuTrigger,
+  ON_OPEN_PANEL_MENU,
   PANEL_NOTIFICATION_TRIGGER,
-  panelNotificationTrigger,
-} from '../../panel_actions';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { uiActions } from '../../kibana_services';
 import type { AnyApiAction } from '../../panel_actions/types';
 import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelQuickActionContext } from './presentation_panel_quick_action_context';
@@ -173,7 +171,7 @@ export const PresentationPanelHoverActions = ({
     (async () => {
       // subscribe to any frequently changing context menu actions
       const frequentlyChangingActions = await uiActions.getFrequentlyChangingActionsForTrigger(
-        CONTEXT_MENU_TRIGGER,
+        ON_OPEN_PANEL_MENU,
         apiContext
       );
       if (canceled) return;
@@ -186,7 +184,7 @@ export const PresentationPanelHoverActions = ({
               switchMap(async () => {
                 return await frequentlyChangingAction.isCompatible({
                   ...apiContext,
-                  trigger: contextMenuTrigger,
+                  trigger: triggers[ON_OPEN_PANEL_MENU],
                 });
               })
             )
@@ -219,7 +217,7 @@ export const PresentationPanelHoverActions = ({
               switchMap(async () => {
                 return await frequentlyChangingNotification.isCompatible({
                   ...apiContext,
-                  trigger: panelNotificationTrigger,
+                  trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
                 });
               })
             )
@@ -249,9 +247,9 @@ export const PresentationPanelHoverActions = ({
 
     (async () => {
       let compatibleActions = (await (async () => {
-        if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, apiContext);
+        if (getActions) return await getActions(ON_OPEN_PANEL_MENU, apiContext);
         return (
-          (await uiActions.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
+          (await uiActions.getTriggerCompatibleActions(ON_OPEN_PANEL_MENU, {
             embeddable: api,
           })) ?? []
         );
@@ -280,7 +278,7 @@ export const PresentationPanelHoverActions = ({
         actions: contextMenuActions.map((action) => ({
           action,
           context: apiContext,
-          trigger: contextMenuTrigger,
+          trigger: triggers[ON_OPEN_PANEL_MENU],
         })) as ActionWithContext[],
         closeMenu: onClose,
       });
@@ -308,7 +306,7 @@ export const PresentationPanelHoverActions = ({
   const quickActionElements = useMemo(() => {
     if (!api || quickActions.length < 1) return [];
 
-    const apiContext = { embeddable: api, trigger: contextMenuTrigger };
+    const apiContext = { embeddable: api, trigger: triggers[ON_OPEN_PANEL_MENU] };
 
     return quickActions
       .sort(({ order: orderA }, { order: orderB }) => {
@@ -338,7 +336,7 @@ export const PresentationPanelHoverActions = ({
           key: notification.id,
           context: {
             embeddable: api,
-            trigger: panelNotificationTrigger,
+            trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
           },
         })
       ) : (
@@ -347,17 +345,20 @@ export const PresentationPanelHoverActions = ({
           key={notification.id}
           css={{ marginTop: euiTheme.size.xs, marginRight: euiTheme.size.xs }}
           onClick={() =>
-            notification.execute({ embeddable: api, trigger: panelNotificationTrigger })
+            notification.execute({ embeddable: api, trigger: triggers[PANEL_NOTIFICATION_TRIGGER] })
           }
         >
-          {notification.getDisplayName({ embeddable: api, trigger: panelNotificationTrigger })}
+          {notification.getDisplayName({
+            embeddable: api,
+            trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
+          })}
         </EuiNotificationBadge>
       );
 
       if (notification.getDisplayNameTooltip) {
         const tooltip = notification.getDisplayNameTooltip({
           embeddable: api,
-          trigger: panelNotificationTrigger,
+          trigger: triggers[PANEL_NOTIFICATION_TRIGGER],
         });
 
         if (tooltip) {

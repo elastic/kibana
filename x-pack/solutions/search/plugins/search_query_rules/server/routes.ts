@@ -139,7 +139,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
                       schema.object({
                         _id: schema.string(),
                         _index: schema.string(),
-                      })
+                      }),
+                      { maxSize: 10000 }
                     )
                   ),
                 }),

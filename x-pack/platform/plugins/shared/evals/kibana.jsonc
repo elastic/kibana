@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/evals-plugin",
+  "owner": [
+    "@elastic/obs-ai-team",
+    "@elastic/security-generative-ai"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "evals",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "evals"
+    ],
+    "requiredPlugins": [
+      "features"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

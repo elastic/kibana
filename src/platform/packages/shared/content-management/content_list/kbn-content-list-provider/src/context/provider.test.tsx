@@ -151,6 +151,32 @@ describe('ContentListProvider', () => {
 
       expect(result.current.supports.sorting).toBe(true);
     });
+
+    it('enables search by default', () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.supports.search).toBe(true);
+    });
+
+    it('respects search: false in features', () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ features: { search: false } }),
+      });
+
+      expect(result.current.supports.search).toBe(false);
+    });
+
+    it('enables search when search config is provided', () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          features: { search: { initialSearch: 'hello' } },
+        }),
+      });
+
+      expect(result.current.supports.search).toBe(true);
+    });
   });
 
   describe('features pass-through', () => {

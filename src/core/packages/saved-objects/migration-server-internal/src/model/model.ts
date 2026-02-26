@@ -795,7 +795,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
       excludeOnUpgradeQuery = addMustClausesToBoolQuery(
         [{ exists: { field: 'type' } }],
-        excludeOnUpgradeQuery.bool
+        excludeOnUpgradeQuery?.bool
       );
     }
 

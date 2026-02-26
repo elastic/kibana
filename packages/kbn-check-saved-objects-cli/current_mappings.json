@@ -290,6 +290,9 @@
       "throttle": {
         "type": "keyword"
       },
+      "uiamApiKey": {
+        "type": "binary"
+      },
       "updatedAt": {
         "type": "date"
       },
@@ -328,6 +331,9 @@
       },
       "createdAt": {
         "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
@@ -1218,12 +1224,39 @@
       "integrationName": {
         "type": "keyword"
       },
+      "integrations": {
+        "dynamic": false,
+        "properties": {
+          "syncData": {
+            "dynamic": false,
+            "properties": {
+              "lastFullSync": {
+                "type": "date"
+              },
+              "lastUpdateProcessed": {
+                "type": "date"
+              }
+            },
+            "type": "object"
+          },
+          "syncMarkerIndex": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "managed": {
         "type": "boolean"
+      },
+      "managedVersion": {
+        "type": "integer"
       },
       "matchers": {
         "dynamic": false,
         "type": "object"
+      },
+      "matchersModifiedByUser": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -1300,6 +1333,9 @@
           "additionalIndexPattern": {
             "type": "keyword"
           },
+          "additionalIndexPatterns": {
+            "type": "keyword"
+          },
           "delay": {
             "type": "keyword"
           },
@@ -1319,6 +1355,9 @@
             "type": "date"
           },
           "lookbackPeriod": {
+            "type": "keyword"
+          },
+          "paginationId": {
             "type": "keyword"
           },
           "paginationTimestamp": {
@@ -2828,6 +2867,9 @@
     "dynamic": false,
     "properties": {
       "created_by": {
+        "type": "keyword"
+      },
+      "created_by_profile_uid": {
         "type": "keyword"
       },
       "data_stream_count": {
@@ -4512,6 +4554,23 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "watchlist-config": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "riskModifier": {
+        "type": "float"
       }
     }
   },

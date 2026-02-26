@@ -205,16 +205,11 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
         '*.mappings.properties.data_stream.properties.dataset.value',
       ],
     };
-    const indicesStatsParams: {
-      index: string | string[] | undefined;
-      level: 'cluster' | 'indices' | 'shards' | undefined;
-      metric: string[];
-      filter_path: string[];
-    } = {
+    const indicesStatsParams = {
       // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
       index,
-      level: 'indices',
-      metric: ['docs', 'store'],
+      level: 'indices' as const,
+      metric: ['docs', 'store'] as ('docs' | 'store')[],
       filter_path: ['indices.*.total'],
     };
     const [indexMappings, indexStats] = await Promise.all([
@@ -240,7 +235,7 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
           indexMappings[name]?.mappings?.properties?.data_stream?.properties?.type?.value,
       };
 
-      const stats = (indexStats?.indices || {})[name];
+      const stats = (indexStats?.indices ?? {})[name];
       if (stats) {
         return {
           ...baseIndexInfo,

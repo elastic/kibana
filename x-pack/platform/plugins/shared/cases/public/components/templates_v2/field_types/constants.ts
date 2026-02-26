@@ -17,7 +17,13 @@ export type FieldType = (typeof FieldType)[keyof typeof FieldType];
 export const fieldTypesArray = Object.keys(FieldType) as FieldType[];
 
 export const exampleTemplateDefinition = `
+# name is required
 name: Example template
+# description is optional
+description: A short description of the template
+# tags are optional
+tags:
+  - example
 fields:
   - name: severity
     control: SELECT_BASIC

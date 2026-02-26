@@ -212,13 +212,13 @@ const updateFieldsActionRouteFactory = (path: string, serviceKey: string, descri
   };
 };
 
-export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
+export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(
   `${SPECIFIC_DATA_VIEW_PATH}/fields`,
   SERVICE_KEY,
   UPDATE_DATA_VIEW_FIELDS_DESCRIPTION
 );
 
-export const registerUpdateFieldsRoute = updateFieldsActionRouteFactory(
+export const registerUpdateFieldsRouteLegacy = updateFieldsActionRouteFactory(
   `${SPECIFIC_DATA_VIEW_PATH_LEGACY}/fields`,
   SERVICE_KEY_LEGACY
 );

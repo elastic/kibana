@@ -59,9 +59,9 @@ export const DashboardWithControlsExample = ({
             await controlGroupStateBuilder.addDataControlFromField(
               controlGroupState,
               {
-                dataViewId: dataView.id ?? '',
+                data_view_id: dataView.id ?? '',
                 title: 'Destination country',
-                fieldName: 'geo.dest',
+                field_name: 'geo.dest',
                 width: 'medium',
                 grow: false,
               },
@@ -70,8 +70,8 @@ export const DashboardWithControlsExample = ({
             await controlGroupStateBuilder.addDataControlFromField(
               controlGroupState,
               {
-                dataViewId: dataView.id ?? '',
-                fieldName: 'bytes',
+                data_view_id: dataView.id ?? '',
+                field_name: 'bytes',
                 width: 'medium',
                 grow: true,
                 title: 'Bytes',

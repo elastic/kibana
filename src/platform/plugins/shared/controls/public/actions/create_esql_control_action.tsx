@@ -8,17 +8,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-containers';
-import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  type EmbeddableApiContext,
+  apiCanAddNewPanel,
+  apiCanPinPanels,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import type { ESQLControlState } from '@kbn/esql-types';
 import {
   ControlTriggerSource,
   ESQLVariableType,
   EsqlControlType,
   apiPublishesESQLVariables,
 } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { ACTION_CREATE_ESQL_CONTROL } from '@kbn/controls-constants';
 import { ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';
@@ -43,7 +46,7 @@ export const createESQLControlAction = (): ActionDefinition<
         variableType: ESQLVariableType.VALUES,
         controlType: EsqlControlType.VALUES_FROM_QUERY,
         esqlVariables: variablesInParent,
-        onSaveControl: async (controlState: ESQLControlState) => {
+        onSaveControl: async (controlState: OptionsListESQLControlState) => {
           const newControl = {
             panelType: 'esqlControl',
             serializedState: {

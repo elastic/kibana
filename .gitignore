@@ -21,6 +21,7 @@ target
 .idea
 .claude/*.local.json
 .cursor
+!x-pack/solutions/security/.cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
 *.iml
@@ -96,6 +97,9 @@ npm-debug.log*
 .gradle
 .vagrant
 .envrc
+
+# @kbn/evals vault config (local-only; never commit real secrets)
+/x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json
 
 ## Snyk
 .dccache

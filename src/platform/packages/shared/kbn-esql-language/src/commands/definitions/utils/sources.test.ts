@@ -169,6 +169,7 @@ describe('buildSourcesDefinitions with timeseries', () => {
 
     // Timeseries suggestion should have TS prefix and range replacement
     expect(timeseriesSuggestion?.text).toBe('TS my_timeseries_index');
+    expect(timeseriesSuggestion?.filterText).toBe('FROM my_timeseries_index');
     expect(timeseriesSuggestion?.rangeToReplace).toBeDefined();
     expect(timeseriesSuggestion?.rangeToReplace?.start).toBe(0); // FROM starts at position 0
 

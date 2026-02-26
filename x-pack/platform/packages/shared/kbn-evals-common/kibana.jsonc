@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/evals-common",
+  "owner": [
+    "@elastic/obs-ai-team",
+    "@elastic/security-generative-ai"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

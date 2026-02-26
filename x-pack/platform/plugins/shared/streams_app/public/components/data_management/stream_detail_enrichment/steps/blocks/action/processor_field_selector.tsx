@@ -85,12 +85,7 @@ export const ProcessorFieldSelector = ({
 
   const defaultLabel = i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorSourceLabel',
-    { defaultMessage: 'Source Field' }
-  );
-
-  const defaultHelpText = i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorSourceHelpText',
-    { defaultMessage: 'Select or enter a field name' }
+    { defaultMessage: 'Field' }
   );
 
   const defaultPlaceholder = i18n.translate(
@@ -103,7 +98,7 @@ export const ProcessorFieldSelector = ({
       value={field.value}
       onChange={handleChange}
       label={label ?? defaultLabel}
-      helpText={helpText ?? defaultHelpText}
+      helpText={helpText}
       placeholder={placeholder ?? defaultPlaceholder}
       suggestions={suggestions}
       fullWidth

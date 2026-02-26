@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 
 interface Metric {
   data: React.ReactNode;
@@ -29,10 +29,11 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const metric = metrics[0];
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel hasShadow={false} hasBorder grow color="subdued">
-      <EuiFlexGroup direction="column" justifyContent="spaceBetween" css={{ height: '100%' }}>
+    <EuiPanel hasShadow={false} hasBorder grow color="subdued" css={{ height: '100%' }}>
+      <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             direction="row"
@@ -40,7 +41,7 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
             alignItems="center"
             justifyContent="spaceBetween"
             responsive={false}
-            css={{ minHeight: '32px' }}
+            css={{ minHeight: euiTheme.size.xxl }}
           >
             <EuiFlexItem>
               <EuiText size="s">
@@ -57,6 +58,9 @@ export const BaseMetricCard: React.FC<BaseMetricCardProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
           <EuiText size="m">
             <h2 data-test-subj={metric['data-test-subj'] && `${metric['data-test-subj']}-metric`}>
               {metric.data}

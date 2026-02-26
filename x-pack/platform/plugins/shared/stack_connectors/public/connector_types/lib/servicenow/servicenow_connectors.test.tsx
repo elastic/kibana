@@ -24,7 +24,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getAppInfoMock = getAppInfo as jest.Mock;
 const updateActionConnectorMock = updateActionConnector as jest.Mock;
 
-describe('ServiceNowActionConnectorFields renders', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253539
+describe.skip('ServiceNowActionConnectorFields renders', () => {
   const usesTableApiConnector = {
     id: 'test',
     actionTypeId: '.servicenow',

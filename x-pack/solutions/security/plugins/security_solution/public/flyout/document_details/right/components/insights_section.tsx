@@ -8,13 +8,13 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { INSIGHTS_TEST_ID } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
-import { ExpandableSection } from '../../../shared/components/expandable_section';
+import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';

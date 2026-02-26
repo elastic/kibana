@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { ThemeProvider } from '@emotion/react';
 import {
   ReactFlowProvider,
   ReactFlow,
@@ -111,11 +110,7 @@ export default {
     },
   },
   decorators: [
-    (Story) => (
-      <ThemeProvider theme={{ darkMode: false }}>
-        <ReactFlowProvider>{Story()}</ReactFlowProvider>
-      </ThemeProvider>
-    ),
+    (Story) => <ReactFlowProvider>{Story()}</ReactFlowProvider>,
     GlobalStylesStorybookDecorator,
   ],
 } satisfies Meta<typeof WrappedMinimap>;

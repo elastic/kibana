@@ -56,7 +56,7 @@ export const PresentationPanelTitle = ({
 
     const titleStyles = css`
       ${euiTextTruncate()};
-      font-weight: ${euiTheme.font.weight.bold};
+      font-weight: ${euiTheme.font.weight.medium};
 
       .kbnGridPanel--active & {
         pointer-events: none; // prevent drag event from triggering onClick

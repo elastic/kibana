@@ -351,6 +351,31 @@ describe('getNormalizedDataStreams', () => {
       },
     ]);
   });
+
+  it('should add use_apm var with default true for otel traces input', () => {
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          type: 'traces',
+          name: 'otel-traces',
+          template_path: 'some/path.hbl',
+          title: 'OTel Traces',
+          description: 'OTel Traces',
+          vars: [],
+        },
+      ],
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].streams).toHaveLength(1);
+    const vars = result[0].streams![0].vars;
+    const useApmVar = vars?.find((v) => v.name === 'use_apm');
+    expect(useApmVar).toBeDefined();
+    expect(useApmVar?.default).toEqual(true);
+    expect(useApmVar?.title).toEqual('Use Elastic APM');
+  });
 });
 
 describe('filterPolicyTemplatesTiles', () => {

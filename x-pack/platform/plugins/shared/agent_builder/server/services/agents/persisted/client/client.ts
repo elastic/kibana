@@ -27,11 +27,12 @@ import type {
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import type { PersistedAgentDefinition } from '../types';
+import type { AgentsUsingToolsResult, PersistedAgentDefinition } from '../types';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { validateToolSelection } from './utils';
+import { runToolRefCleanup } from '../tool_reference_cleanup';
 
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
@@ -40,6 +41,8 @@ export interface AgentClient {
   update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
+  getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
+  removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
 }
 
 export const createClient = async ({
@@ -66,7 +69,7 @@ export const createClient = async ({
   const esClient = scopedClient.asInternalUser;
   const storage = createStorage({ logger, esClient });
 
-  return new AgentClientImpl({ storage, user, request, space, toolsService });
+  return new AgentClientImpl({ storage, user, request, space, toolsService, logger });
 };
 
 class AgentClientImpl implements AgentClient {
@@ -75,6 +78,7 @@ class AgentClientImpl implements AgentClient {
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
   private readonly user: UserIdAndName;
+  private readonly logger: Logger;
 
   constructor({
     storage,
@@ -82,18 +86,40 @@ class AgentClientImpl implements AgentClient {
     user,
     request,
     space,
+    logger,
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
     request: KibanaRequest;
     space: string;
+    logger: Logger;
   }) {
     this.storage = storage;
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
     this.space = space;
+    this.logger = logger;
+  }
+
+  async getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult> {
+    return runToolRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      toolIds: params.toolIds,
+      logger: this.logger,
+      checkOnly: true,
+    });
+  }
+
+  async removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult> {
+    return runToolRefCleanup({
+      storage: this.storage,
+      spaceId: this.space,
+      toolIds: params.toolIds,
+      logger: this.logger,
+    });
   }
 
   async get(agentId: string): Promise<PersistedAgentDefinition> {

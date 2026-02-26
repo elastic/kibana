@@ -29,7 +29,7 @@ export class ESQLService extends FtrService {
 
   public async isQueryPresentInTable(query: string, items: string[][]) {
     const queryAdded = items.some((item) => {
-      return item[2] === query;
+      return item.some((cell) => cell === query);
     });
 
     expect(queryAdded).to.be(true);
@@ -41,7 +41,7 @@ export class ESQLService extends FtrService {
 
   public async toggleHistoryPanel() {
     const isHistoryOpen = await this.isHistoryPanelOpen();
-    await this.testSubjects.click('ESQLEditor-toggle-query-history-button');
+    await this.testSubjects.click('ESQLEditor-toggle-query-history-icon');
     await this.retry.waitFor('history queries to toggle', async () => {
       const isHistoryOpenAfterToggle = await this.isHistoryPanelOpen();
       return isHistoryOpen !== isHistoryOpenAfterToggle;
@@ -122,7 +122,7 @@ export class ESQLService extends FtrService {
   }
 
   public async openHelpMenu() {
-    await this.testSubjects.click('esql-menu-button');
+    await this.testSubjects.click('esql-help-popover-button');
     await this.retry.waitFor('popover to appear', async () => {
       return await this.testSubjects.exists('esql-quick-reference');
     });

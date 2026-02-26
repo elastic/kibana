@@ -6,32 +6,145 @@
  */
 
 import { tags } from '@kbn/scout-oblt';
+import type { ObltWorkerFixtures } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { faker } from '@faker-js/faker';
 import { test } from '../../fixtures';
-import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import type { ExtendedScoutTestFixtures } from '../../fixtures';
 
 const SERVICE_NAME = 'unstable-java';
 const START_DATE = 'now-15m';
 const END_DATE = 'now';
-const RULE_NAME = 'Error count threshold';
+const RULE_NAME = `Error count threshold ${faker.string.uuid()}`;
+const APM_ALERTS_INDEX_PATTERN = '.alerts-observability.apm.alerts-*';
+const RULE_TYPE_ID = 'apm.error_rate';
+// Stateful uses rollover index with .internal prefix
+const STATEFUL_ALERTS_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
+// Serverless uses data stream without .internal prefix or numeric suffix
+const SERVERLESS_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 
-test.describe(
-  'Alerts',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
-    test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+function createAlertDisplayTest(alertIndex: string) {
+  return async ({
+    pageObjects: { serviceDetailsPage },
+    apiServices,
+    esClient,
+  }: ExtendedScoutTestFixtures & ObltWorkerFixtures) => {
+    let ruleId: string;
+
+    await test.step('create rule via API', async () => {
+      const response = await apiServices.alerting.rules.create({
+        ruleTypeId: RULE_TYPE_ID,
+        name: RULE_NAME,
+        consumer: 'apm',
+        schedule: { interval: '1m' },
+        enabled: false,
+        params: {
+          environment: 'production',
+          threshold: 0,
+          windowSize: 1,
+          windowUnit: 'h',
+        },
+        tags: ['apm'],
+      });
+      ruleId = response.data.id;
     });
 
-    test.afterEach(async ({ apiServices }) => {
-      await apiServices.alerting.cleanup.deleteAllRules();
+    await test.step('index alert document', async () => {
+      const now = new Date().toISOString();
+
+      await esClient.index({
+        index: alertIndex,
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': now,
+          'kibana.alert.uuid': faker.string.uuid(),
+          'kibana.alert.start': now,
+          'kibana.alert.status': 'active',
+          'kibana.alert.workflow_status': 'open',
+          'kibana.alert.rule.name': RULE_NAME,
+          'kibana.alert.rule.uuid': ruleId,
+          'kibana.alert.rule.rule_type_id': RULE_TYPE_ID,
+          'kibana.alert.rule.category': RULE_NAME,
+          'kibana.alert.rule.consumer': 'apm',
+          'kibana.alert.reason': `Error count is 15 in the last 1 hr for service: ${SERVICE_NAME}, env: production. Alert when > 0.`,
+          'kibana.alert.evaluation.threshold': 0,
+          'kibana.alert.evaluation.value': 15,
+          'kibana.alert.duration.us': 0,
+          'kibana.alert.time_range': {
+            gte: now,
+          },
+          'kibana.alert.instance.id': '*',
+          'service.name': SERVICE_NAME,
+          'service.environment': 'production',
+          'processor.event': 'error',
+          'kibana.space_ids': ['default'],
+          'event.kind': 'signal',
+          'event.action': 'open',
+          tags: ['apm'],
+        },
+      });
     });
 
-    test("Can create, trigger and view an 'Error count' alert from service inventory", async ({
-      page,
-      pageObjects: { serviceInventoryPage, alertsControls, serviceDetailsPage },
-      apiServices,
-    }) => {
+    await test.step('navigate to service alerts tab', async () => {
+      await serviceDetailsPage.alertsTab.goToTab({
+        serviceName: SERVICE_NAME,
+        rangeFrom: START_DATE,
+        rangeTo: END_DATE,
+      });
+    });
+
+    await test.step('verify alert is visible', async () => {
+      const ruleCell = serviceDetailsPage.alertsTab.alertsTable
+        .getAllCellLocatorByColId('kibana.alert.rule.name')
+        .filter({ hasText: RULE_NAME });
+      await expect(ruleCell).toBeVisible();
+    });
+  };
+}
+
+test.describe('Alerts', () => {
+  test.beforeEach(async ({ browserAuth }) => {
+    await browserAuth.loginAsAdmin();
+  });
+
+  test.afterEach(async ({ apiServices, esClient }) => {
+    const findResponse = await apiServices.alerting.rules.find({
+      search: RULE_NAME,
+      search_fields: ['name'],
+      per_page: 1,
+    });
+    const rules = findResponse.data.data;
+
+    for (const rule of rules) {
+      const ruleId = rule.id;
+
+      // Delete alert documents
+      try {
+        await esClient.deleteByQuery({
+          index: APM_ALERTS_INDEX_PATTERN,
+          query: {
+            term: { 'kibana.alert.rule.uuid': ruleId },
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      } catch {
+        // Continue cleanup even if alert deletion fails
+      }
+
+      // Delete the rule
+      try {
+        await apiServices.alerting.rules.delete(ruleId);
+      } catch {
+        // Continue cleanup even if rule deletion fails
+      }
+    }
+  });
+
+  test(
+    'Can create an error count rule from service inventory',
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+    async ({ page, pageObjects: { serviceInventoryPage, alertsControls } }) => {
       await test.step('land on service inventory and opens alerts context menu', async () => {
         await serviceInventoryPage.gotoServiceInventory({
           rangeFrom: START_DATE,
@@ -47,56 +160,39 @@ test.describe(
 
       await test.step('fill rule definition step', async () => {
         await expect(
-          alertsControls.addRuleFlyout.flyout.getByRole('heading', { name: RULE_NAME })
+          alertsControls.addRuleFlyout.flyout.getByRole('heading', {
+            name: 'Error count threshold',
+          })
         ).toBeVisible();
-        await alertsControls.addRuleFlyout.fillIsAbove(0);
+        // Ensure the rule doesn't trigger alerts to avoid polluting the test environment with active alerts that could interfere with other tests
+        await alertsControls.addRuleFlyout.fillIsAbove(1000000);
         await expect(alertsControls.addRuleFlyout.isAboveExpression).toHaveText(
-          'is above 0 errors'
+          'is above 1000000 errors'
         );
+      });
+
+      await test.step('navigates to details step and set custom rule name', async () => {
+        await alertsControls.addRuleFlyout.jumpToStep('details');
+        await alertsControls.addRuleFlyout.fillName(RULE_NAME);
+        await expect(alertsControls.addRuleFlyout.nameInput).toHaveValue(RULE_NAME);
       });
 
       await test.step('create the rule', async () => {
-        await alertsControls.addRuleFlyout.jumpToStep('details');
         await alertsControls.addRuleFlyout.saveRule({ saveEmptyActions: true });
         await expect(page.getByTestId('euiToastHeader')).toHaveText(`Created rule "${RULE_NAME}"`);
       });
+    }
+  );
 
-      await test.step('wait for the rule to be executed', async () => {
-        const foundResponse = await apiServices.alerting.rules.find({
-          search: RULE_NAME,
-          search_fields: ['name'],
-          per_page: 1,
-          page: 1,
-        });
-        const alert = foundResponse.data.data.find((obj: any) => obj.name === RULE_NAME);
-        expect(alert).toBeDefined();
-        const runDate = new Date();
-        await apiServices.alerting.rules.runSoon(alert!.id);
-        await apiServices.alerting.waiting.waitForExecutionCount(
-          alert!.id,
-          1,
-          undefined,
-          EXTENDED_TIMEOUT,
-          runDate
-        );
-      });
+  test(
+    'Stateful - Displays an alert in the service details alerts tab',
+    { tag: tags.stateful.classic },
+    createAlertDisplayTest(STATEFUL_ALERTS_INDEX)
+  );
 
-      await test.step('see alert in service alerts tab', async () => {
-        await serviceDetailsPage.alertsTab.goToTab({
-          serviceName: SERVICE_NAME,
-          rangeFrom: START_DATE,
-          rangeTo: END_DATE,
-        });
-        // Enter full screen mode to ensure reason cell is fully rendered
-        await serviceDetailsPage.alertsTab.alertsTable.openFullScreenMode();
-        const reasonCell = serviceDetailsPage.alertsTab.alertsTable.getCellLocatorByColId(
-          0,
-          'kibana.alert.reason'
-        );
-        await expect(reasonCell).toBeVisible();
-        await reasonCell.getByRole('button').click();
-        await expect(page.getByRole('dialog').getByText(`Rule: ${RULE_NAME}`)).toBeVisible();
-      });
-    });
-  }
-);
+  test(
+    'Serverless - Displays an alert in the service details alerts tab',
+    { tag: tags.serverless.observability.complete },
+    createAlertDisplayTest(SERVERLESS_ALERTS_INDEX)
+  );
+});

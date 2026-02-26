@@ -44,6 +44,7 @@ const defaultRootProfileState: RootProfileState = {
   rootProfileLoading: false,
   AppWrapper: ({ children }: { children?: ReactNode }) => <>{children}</>,
   getDefaultAdHocDataViews: () => [],
+  getDefaultEsqlQuery: () => undefined,
 };
 let mockRootProfileState: RootProfileState = defaultRootProfileState;
 

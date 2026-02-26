@@ -31,12 +31,6 @@ export const ValueField = ({ toggleCustom }: { toggleCustom: () => void }) => {
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.setValueFieldLabel',
         { defaultMessage: 'Value' }
       )}
-      helpText={
-        <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setValueFieldHelpText"
-          defaultMessage="The value to be set for the field."
-        />
-      }
       labelAppend={
         <EuiText size="xs">
           <EuiLink onClick={toggleCustom} data-test-subj="toggleCopyFromField">

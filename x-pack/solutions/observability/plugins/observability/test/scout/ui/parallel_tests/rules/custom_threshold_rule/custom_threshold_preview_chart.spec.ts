@@ -8,7 +8,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 
-test.describe(
+// FLAKY: https://github.com/elastic/kibana/issues/247632
+test.describe.skip(
   'Custom threshold preview chart',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

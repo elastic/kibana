@@ -161,6 +161,7 @@ export type {
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   CloudConnectorSecretReference,
+  ComponentHealth,
 } from '../../common/types';
 export {
   entries,

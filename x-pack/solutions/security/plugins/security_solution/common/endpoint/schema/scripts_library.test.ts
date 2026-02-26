@@ -305,6 +305,20 @@ describe('Scripts library schemas', () => {
       ).toBeTruthy();
     });
 
+    it.each([
+      { field: 'description', value: '' },
+      { field: 'instructions', value: '' },
+      { field: 'example', value: '' },
+      { field: 'pathToExecutable', value: '' },
+      { field: 'tags', value: [] },
+    ])('should accept `$field` field with `$value` value', ({ field, value }) => {
+      expect(
+        PatchUpdateScriptRequestSchema.body.validate({
+          [field]: value,
+        })
+      ).toBeTruthy();
+    });
+
     it.each`
       title                 | bodyPayload
       ----------             -------------

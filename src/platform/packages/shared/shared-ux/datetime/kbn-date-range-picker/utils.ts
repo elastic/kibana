@@ -7,22 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DATE_TYPE_NOW } from './constants';
-import type { TimeRange } from './types';
+import type { TimeRange, InitialFocus } from './types';
 
 /**
  * Check a time range is valid
  */
 export function isValidTimeRange(range: TimeRange): boolean {
-  const { startDate, endDate, type } = range;
+  const { startDate, endDate } = range;
   // both dates are valid
   if (startDate === null || endDate === null) {
     return false;
   }
-  // [NOW, NOW] is not a valid range (zero duration)
-  if (type[0] === DATE_TYPE_NOW && type[1] === DATE_TYPE_NOW) {
-    return false;
-  }
   // start must be before or equal to end
   return startDate.getTime() <= endDate.getTime();
+}
+
+/**
+ * Resolve the `initialFocus` target within the panel.
+ * A string is treated as a CSS selector; a ref as a direct element handle.
+ * Falls back to the panel div itself when unset.
+ */
+export function resolveInitialFocus(
+  panelRef: React.RefObject<HTMLDivElement>,
+  initialFocus?: InitialFocus
+): HTMLElement | null {
+  if (typeof initialFocus === 'string') {
+    return panelRef.current?.querySelector<HTMLElement>(initialFocus) ?? null;
+  }
+  if (initialFocus && 'current' in initialFocus) {
+    return initialFocus.current;
+  }
+  return panelRef.current;
 }

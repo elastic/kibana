@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFieldNumber, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexItem, EuiFormPrepend } from '@elastic/eui';
 import type { ColorMapping } from '../../config';
 
 export const Range: React.FC<{
@@ -24,12 +24,12 @@ export const Range: React.FC<{
         <EuiFieldNumber
           compressed
           prepend={
-            <EuiButtonEmpty
-              size="xs"
+            <EuiFormPrepend
+              element="button"
+              compressed
+              label={rule.minInclusive ? 'GTE' : 'GT'}
               onClick={() => updateValue(rule.min, rule.max, !rule.minInclusive, rule.maxInclusive)}
-            >
-              {rule.minInclusive ? 'GTE' : 'GT'}
-            </EuiButtonEmpty>
+            />
           }
           placeholder="min"
           value={rule.min}
@@ -45,12 +45,12 @@ export const Range: React.FC<{
           compressed
           isInvalid={!maxValid}
           prepend={
-            <EuiButtonEmpty
-              size="xs"
+            <EuiFormPrepend
+              element="button"
+              compressed
+              label={rule.maxInclusive ? 'LTE' : 'LT'}
               onClick={() => updateValue(rule.min, rule.max, rule.minInclusive, !rule.maxInclusive)}
-            >
-              {rule.maxInclusive ? 'LTE' : 'LT'}
-            </EuiButtonEmpty>
+            />
           }
           placeholder="max"
           value={rule.max}

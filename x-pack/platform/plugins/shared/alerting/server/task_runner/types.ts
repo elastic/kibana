@@ -81,6 +81,7 @@ export interface RunRuleResult {
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
+  uiamApiKey?: RawRule['uiamApiKey'];
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params>;
   validatedParams: Params;
@@ -158,6 +159,7 @@ export interface RuleTypeRunnerContext {
   ruleRunMetricsStore: RuleRunMetricsStore;
   spaceId: string;
   isServerless: boolean;
+  shouldGrantUiam?: boolean;
 }
 
 export interface RuleRunnerErrorStackTraceLog {
@@ -198,6 +200,7 @@ export interface TaskRunnerContext {
   usageCounter?: UsageCounter;
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
+  shouldGrantUiam?: boolean;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

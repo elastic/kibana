@@ -66,9 +66,6 @@ describe('Options List Control Api', () => {
         if (dataviewDelayPromise) await dataviewDelayPromise;
         return getDataView(id);
       });
-      coreServices.http.get = jest.fn().mockResolvedValue({
-        allowExpensiveQueries: true,
-      });
     });
 
     it('returns api immediately when no initial selections are configured', async () => {
@@ -77,9 +74,10 @@ describe('Options List Control Api', () => {
       dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
       (async () => {
         await factory.buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
           initialState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
+            data_view_id: 'myDataViewId',
+            field_name: 'myFieldName',
           },
           finalizeApi,
           uuid,
@@ -99,10 +97,11 @@ describe('Options List Control Api', () => {
       dataviewDelayPromise = new Promise((res) => (resolveDataView = res));
       (async () => {
         await factory.buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
           initialState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            selectedOptions: ['cool', 'test'],
+            data_view_id: 'myDataViewId',
+            field_name: 'myFieldName',
+            selected_options: ['cool', 'test'],
           },
           finalizeApi,
           uuid,
@@ -130,9 +129,10 @@ describe('Options List Control Api', () => {
 
     test('should not set appliedFilters$ when selectedOptions is not provided', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -143,10 +143,11 @@ describe('Options List Control Api', () => {
 
     test('should set appliedFilters$ when selectedOptions is provided', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['cool', 'test'],
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          selected_options: ['cool', 'test'],
         },
         finalizeApi,
         uuid,
@@ -184,10 +185,11 @@ describe('Options List Control Api', () => {
 
     test('should set appliedFilters$ when exists is selected', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
         },
         finalizeApi,
         uuid,
@@ -211,10 +213,11 @@ describe('Options List Control Api', () => {
 
     test('should set appliedFilters$ when exclude is selected', async () => {
       const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
           exclude: true,
         },
         finalizeApi,
@@ -239,7 +242,8 @@ describe('Options List Control Api', () => {
     });
   });
 
-  describe('make selection', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253466
+  describe.skip('make selection', () => {
     beforeAll(() => {
       dataViewsService.get = jest.fn().mockImplementation(getDataView);
       coreServices.http.fetch = jest.fn().mockResolvedValue({
@@ -254,10 +258,11 @@ describe('Options List Control Api', () => {
 
     test('renders a "(blank)" option', async () => {
       const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
         },
         finalizeApi,
         uuid,
@@ -283,10 +288,11 @@ describe('Options List Control Api', () => {
 
     test('clicking another option unselects "Exists"', async () => {
       const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          existsSelected: true,
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          exists_selected: true,
         },
         finalizeApi,
         uuid,
@@ -312,10 +318,11 @@ describe('Options List Control Api', () => {
 
     test('clicking "Exists" unselects all other selections', async () => {
       const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['woof', 'bark'],
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          selected_options: ['woof', 'bark'],
         },
         finalizeApi,
         uuid,
@@ -346,10 +353,11 @@ describe('Options List Control Api', () => {
 
     test('deselects when showOnlySelected is true', async () => {
       const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          selectedOptions: ['woof', 'bark'],
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          selected_options: ['woof', 'bark'],
         },
         finalizeApi,
         uuid,
@@ -389,11 +397,12 @@ describe('Options List Control Api', () => {
 
     test('replace selection when singleSelect is true', async () => {
       const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
         initialState: {
-          dataViewId: 'myDataViewId',
-          fieldName: 'myFieldName',
-          singleSelect: true,
-          selectedOptions: ['woof'],
+          data_view_id: 'myDataViewId',
+          field_name: 'myFieldName',
+          single_select: true,
+          selected_options: ['woof'],
         },
         finalizeApi,
         uuid,

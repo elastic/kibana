@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-09T18:23:19.836Z",
-  "sha1": "692320d7f4f4dc96c4238fccc51866e0d02bca7b",
+  "sha1": "4669447614e389696e77c8c4e1c6a4b95b9d4f20",
   "tests": [
     {
       "id": "0cdf5c38d17a5a2-75de561f5a0ef9b",
@@ -14,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 63,
+        "line": 60,
         "column": 10
       }
     },
@@ -30,7 +29,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 83,
+        "line": 80,
         "column": 10
       }
     },
@@ -46,7 +45,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 106,
+        "line": 103,
         "column": 10
       }
     },
@@ -62,7 +61,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 127,
+        "line": 124,
         "column": 10
       }
     },
@@ -78,7 +77,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 148,
+        "line": 145,
         "column": 10
       }
     },
@@ -94,7 +93,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 173,
+        "line": 170,
         "column": 10
       }
     },
@@ -110,13 +109,29 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/dsl_translation.spec.ts",
-        "line": 194,
+        "line": 191,
         "column": 10
       }
     },
     {
-      "id": "aad38721f43b8af-5bfc4f716888c3b",
-      "title": "Entity Store Logs Extraction Should extract properly generate euid for host",
+      "id": "5674044b3969a63-e635b79048cc29b",
+      "title": "Entity Store Logs Extraction with pagination (max 5 docs per page) Should extract properly extract host with pagination",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction_paginated.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "aad38721f43b8af-01476c159898b87",
+      "title": "Entity Store Logs Extraction Should extract properly extract host",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -126,13 +141,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 10
       }
     },
     {
-      "id": "aad38721f43b8af-048c71aa3be391b",
-      "title": "Entity Store Logs Extraction Should extract properly generate euid for user",
+      "id": "aad38721f43b8af-47aeaa90d58b3fc",
+      "title": "Entity Store Logs Extraction Should extract properly extract user",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -142,13 +157,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
-        "line": 92,
+        "line": 95,
         "column": 10
       }
     },
     {
-      "id": "aad38721f43b8af-8bb4848d40f00d1",
-      "title": "Entity Store Logs Extraction Should extract properly generate euid for service",
+      "id": "aad38721f43b8af-5a3f40022e3e5a3",
+      "title": "Entity Store Logs Extraction Should extract properly extract service",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -158,13 +173,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
-        "line": 126,
+        "line": 131,
         "column": 10
       }
     },
     {
-      "id": "aad38721f43b8af-02c64c4a69bbebf",
-      "title": "Entity Store Logs Extraction Should extract properly generate euid for generic",
+      "id": "aad38721f43b8af-c0ef57416fddf15",
+      "title": "Entity Store Logs Extraction Should extract properly extract generic",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -174,7 +189,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
-        "line": 160,
+        "line": 167,
+        "column": 10
+      }
+    },
+    {
+      "id": "aad38721f43b8af-6c364c704ea9cc4",
+      "title": "Entity Store Logs Extraction Should properly handle field retention strategies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_extraction.spec.ts",
+        "line": 203,
         "column": 10
       }
     },
@@ -190,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 57,
+        "line": 54,
         "column": 10
       }
     },
@@ -206,7 +237,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 78,
+        "line": 75,
         "column": 10
       }
     },
@@ -222,7 +253,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 102,
+        "line": 99,
         "column": 10
       }
     },
@@ -238,7 +269,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 123,
+        "line": 120,
         "column": 10
       }
     },
@@ -254,7 +285,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 144,
+        "line": 141,
         "column": 10
       }
     },
@@ -270,7 +301,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 171,
+        "line": 168,
         "column": 10
       }
     },
@@ -286,7 +317,55 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/esql_translation.spec.ts",
-        "line": 192,
+        "line": 189,
+        "column": 10
+      }
+    },
+    {
+      "id": "66e498dbff280b4-e1ef6b799a84fce",
+      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for source index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "66e498dbff280b4-62ddc6b33c80984",
+      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
+        "line": 117,
+        "column": 10
+      }
+    },
+    {
+      "id": "66e498dbff280b4-625d2f2ef49120d",
+      "title": "Entity Store install - privilege checks Should fail when user lacks permissions for entity store saved object descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_privileges.spec.ts",
+        "line": 145,
         "column": 10
       }
     },
@@ -323,8 +402,8 @@
       }
     },
     {
-      "id": "519a3ae85face73-c3cbdcbfd207383",
-      "title": "Painless runtime field translation user: runtime field from getEuidPainlessEvaluation matches expected euid for all documents",
+      "id": "519a3ae85face73-8b7bdf39eb18b15",
+      "title": "Painless runtime field translation user: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -334,13 +413,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
-        "line": 67,
+        "line": 57,
         "column": 12
       }
     },
     {
-      "id": "519a3ae85face73-773b923ee6c2f0b",
-      "title": "Painless runtime field translation host: runtime field from getEuidPainlessEvaluation matches expected euid for all documents",
+      "id": "519a3ae85face73-ad3a8d357a613b4",
+      "title": "Painless runtime field translation host: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -350,13 +429,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
-        "line": 67,
+        "line": 57,
         "column": 12
       }
     },
     {
-      "id": "519a3ae85face73-6e42ad0c8fa3c72",
-      "title": "Painless runtime field translation service: runtime field from getEuidPainlessEvaluation matches expected euid for all documents",
+      "id": "519a3ae85face73-5add9fc2b06f046",
+      "title": "Painless runtime field translation service: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -366,13 +445,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
-        "line": 67,
+        "line": 57,
         "column": 12
       }
     },
     {
-      "id": "519a3ae85face73-8122dc2f482158b",
-      "title": "Painless runtime field translation generic: runtime field from getEuidPainlessEvaluation matches expected euid for all documents",
+      "id": "519a3ae85face73-ccc70f24e03541e",
+      "title": "Painless runtime field translation generic: runtime field from getEuidPainlessRuntimeMapping matches expected euid for all documents",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -382,7 +461,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/painless_translation.spec.ts",
-        "line": 67,
+        "line": 57,
         "column": 12
       }
     },

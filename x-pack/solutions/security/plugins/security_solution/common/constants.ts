@@ -155,6 +155,7 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
   '/entity_analytics_privileged_user_monitoring' as const;
 export const ENTITY_ANALYTICS_OVERVIEW_PATH = `/entity_analytics_overview` as const;
 export const ENTITY_ANALYTICS_THREAT_HUNTING_PATH = '/entity_analytics_threat_hunting' as const;
+export const ENTITY_ANALYTICS_WATCHLISTS_PATH = '/entity_analytics_watchlists' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -252,10 +253,6 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 export const SHOW_RELATED_INTEGRATIONS_SETTING =
   'securitySolution:showRelatedIntegrations' as const;
 
-/** This Kibana Advanced Setting enables extended rule execution logging to Event Log */
-export const EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING =
-  'securitySolution:extendedRuleExecutionLoggingEnabled' as const;
-
 /** This Kibana Advanced Setting sets minimum log level starting from which execution logs will be written to Event Log */
 export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
   'securitySolution:extendedRuleExecutionLoggingMinLevel' as const;
@@ -263,6 +260,13 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 /** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
+
+/** This Kibana Advanced Setting allows users to include only selected data stream namespaces in search during rule execution */
+export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
+  'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
+
+/** The default value for the included data stream namespaces setting (empty = no filter) */
+export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 
 /** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
 export const ENABLE_GRAPH_VISUALIZATION_SETTING =

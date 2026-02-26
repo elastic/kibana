@@ -75,40 +75,6 @@
       },
       {
         "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.CONTROL_HOVER_TRIGGER_ID",
-        "type": "string",
-        "tags": [],
-        "label": "CONTROL_HOVER_TRIGGER_ID",
-        "description": [],
-        "signature": [
-          "\"CONTROL_HOVER_TRIGGER\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 15,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.CONTROL_MENU_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "CONTROL_MENU_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"CONTROL_MENU_TRIGGER\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
         "id": "def-common.CONTROL_WIDTH_LARGE",
         "type": "string",
         "tags": [],
@@ -255,7 +221,7 @@
         "label": "DEFAULT_SEARCH_TECHNIQUE",
         "description": [],
         "signature": [
-          "\"prefix\""
+          "\"wildcard\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
         "lineNumber": 15,

@@ -230,6 +230,7 @@ export const withDynamicColors: LensAttributes = {
         isVisible: true,
         position: 'right',
         type: 'heatmap_legend',
+        shouldTruncate: false,
       },
       gridConfig: {
         type: 'heatmap_grid',

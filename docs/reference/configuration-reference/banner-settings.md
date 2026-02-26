@@ -20,21 +20,21 @@ Banners are a [subscription feature](https://www.elastic.co/subscriptions).
 ::::
 
 
-`xpack.banners.placement`
+`xpack.banners.placement` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `top` to display a banner above the Elastic header. Defaults to `disabled`.
 
-`xpack.banners.textContent`
+`xpack.banners.textContent` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The text to display inside the banner, either plain text or Markdown.
 
-`xpack.banners.textColor`
+`xpack.banners.textColor` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The color for the banner text. Defaults to `#8A6A0A`.
 
-`xpack.banners.linkColor` {applies_to}`stack: ga 9.1`
+`xpack.banners.linkColor` {applies_to}`stack: ga 9.1` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The color for the banner link text. Defaults to `#0B64DD`.
 
-`xpack.banners.backgroundColor`
+`xpack.banners.backgroundColor` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The color of the banner background. Defaults to `#FFF9E8`.
 
-`xpack.banners.disableSpaceBanners`
+`xpack.banners.disableSpaceBanners` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   If true, per-space banner overrides will be disabled. Defaults to `false`.
 

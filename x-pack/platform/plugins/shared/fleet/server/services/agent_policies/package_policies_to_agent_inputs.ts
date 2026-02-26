@@ -28,6 +28,7 @@ import {
   DATA_STREAM_TYPE_VAR_NAME,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
 } from '../../../common/constants/epm';
 import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
@@ -170,6 +171,11 @@ export const getFullInputStreams = (
                   ...(dsTypeVar ? { type: dsTypeVar } : {}),
                   ...(datasetVar ? { dataset: datasetVar } : {}),
                 };
+
+                const useAPMVar = stream.vars?.[USE_APM_VAR_NAME]?.value;
+                if (useAPMVar !== undefined) {
+                  fullStream[USE_APM_VAR_NAME] = useAPMVar;
+                }
               }
 
               streamsOriginalIdsMap?.set(fullStream.id, streamId);

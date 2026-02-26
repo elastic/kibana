@@ -203,7 +203,7 @@
               "A description of the field."
             ],
             "signature": [
-              "string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "string | React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/types/field_definition.ts",
             "lineNumber": 50,

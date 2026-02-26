@@ -55,7 +55,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "pathToOpenAPI",
-                "description": [],
+                "description": [
+                  "// By default assume that openapi file is in the next to Kibana folder"
+                ],
                 "signature": [
                   "string"
                 ],

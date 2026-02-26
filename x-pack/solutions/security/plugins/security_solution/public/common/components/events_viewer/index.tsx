@@ -288,7 +288,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     [sort]
   );
 
-  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+  const [loading, { events, rawEvents, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
     useTimelineEvents({
       // We rely on entityType to determine Events vs Alerts
       alertConsumers: SECURITY_ALERTS_CONSUMERS,
@@ -345,6 +345,11 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
   );
+  const nonDeletedRawEvents = useMemo(
+    () => rawEvents.filter((e) => !deletedEventIds.includes(e._id as string)),
+    [deletedEventIds, rawEvents]
+  );
+
   useEffect(() => {
     setQuery({ id: tableId, inspect, loading, refetch });
   }, [inspect, loading, refetch, setQuery, tableId]);
@@ -437,6 +442,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         columnHeaders,
         controlColumns,
         data: nonDeletedEvents,
+        rawEvents: nonDeletedRawEvents,
         fieldBrowserOptions,
         loadingEventIds,
         onRowSelected,
@@ -460,6 +466,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     leadingControlColumns,
     columnHeaders,
     nonDeletedEvents,
+    nonDeletedRawEvents,
     fieldBrowserOptions,
     loadingEventIds,
     onRowSelected,

@@ -15,13 +15,11 @@ import {
 } from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type {
-  AlertsTableProps,
-  AlertsTableImperativeApi,
-} from '@kbn/response-ops-alerts-table/types';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SloItem } from '../types';
 import type { SloEmbeddableDeps } from '../types';
 
@@ -116,7 +114,7 @@ export const useSloAlertsQuery = (
   showAllGroupByInstances?: boolean
 ) => {
   return useMemo(() => {
-    const query: AlertsTableProps['query'] = {
+    const query: NonNullable<QueryDslQueryContainer> = {
       bool: {
         filter: [
           {

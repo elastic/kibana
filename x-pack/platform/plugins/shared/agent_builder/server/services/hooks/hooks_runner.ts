@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { createBadRequestError, createRequestAbortedError } from '@kbn/agent-builder-common';
+import { createHooksExecutionError, createRequestAbortedError } from '@kbn/agent-builder-common';
 import { withTimeout } from '@kbn/std';
 import type { HookContext, HookRegistration, HooksServiceStart } from '@kbn/agent-builder-server';
 import {
@@ -15,8 +15,9 @@ import {
   HookLifecycle,
 } from '@kbn/agent-builder-server';
 import {
-  createHooksExecutionError,
   isHooksExecutionError,
+  isWorkflowAbortedError,
+  isWorkflowExecutionError,
 } from '@kbn/agent-builder-common/base/errors';
 import { orderBy } from 'lodash';
 
@@ -33,7 +34,7 @@ const normalizeHookError = <E extends HookLifecycle>(
   hook: Pick<HookRegistration<E>, 'id' | 'mode'>,
   err: unknown
 ) => {
-  if (isHooksExecutionError(err)) {
+  if (isHooksExecutionError(err) || isWorkflowAbortedError(err) || isWorkflowExecutionError(err)) {
     return err;
   }
 
@@ -100,10 +101,12 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
           timeoutMs,
         });
         if (timed.timedout) {
-          throw createBadRequestError(`Hook "${hook.id}" timed out after ${timeoutMs}ms`, {
-            hookLifecycle: lifecycle,
-            hookId: hook.id,
-          });
+          throw createHooksExecutionError(
+            `Hook execution timed out after ${timeoutMs}ms`,
+            lifecycle,
+            hook.id,
+            hook.mode
+          );
         }
         currentContext = applyHookResultByLifecycle[lifecycle](currentContext, timed.value);
       } catch (err) {

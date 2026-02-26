@@ -23,6 +23,7 @@ const createBaseDefinition = (name: string): Partial<Streams.ingest.all.GetRespo
       processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       failure_store: { inherit: {} },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
   },
 });
@@ -48,6 +49,7 @@ const createClassicDefinition = (
     read_failure_store: true,
     manage_failure_store: true,
     view_index_metadata: true,
+    create_snapshot_repository: true,
   },
   effective_lifecycle: { dsl: {} },
   effective_settings: {},
@@ -83,6 +85,7 @@ const createWiredDefinition = (
     read_failure_store: true,
     manage_failure_store: true,
     view_index_metadata: true,
+    create_snapshot_repository: true,
   },
   effective_lifecycle: {
     dsl: {},
@@ -243,7 +246,7 @@ describe('useFailureStoreConfig', () => {
 
   describe('Wired Stream (child)', () => {
     it('should return config for enabled failure store with custom retention', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '5d',
@@ -268,7 +271,7 @@ describe('useFailureStoreConfig', () => {
     });
 
     it('should return config when inheriting from parent', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '30d',
@@ -284,7 +287,7 @@ describe('useFailureStoreConfig', () => {
     });
 
     it('should detect when overriding parent', () => {
-      const definition = createWiredDefinition('logs.nginx', {
+      const definition = createWiredDefinition('logs.otel.nginx', {
         lifecycle: {
           enabled: {
             data_retention: '10d',

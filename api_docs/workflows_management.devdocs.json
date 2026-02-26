@@ -31,7 +31,7 @@
       "label": "WorkflowsPublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 34,
+      "lineNumber": 36,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

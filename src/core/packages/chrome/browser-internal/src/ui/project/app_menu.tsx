@@ -8,15 +8,15 @@
  */
 
 import type { Observable } from 'rxjs';
-import { map, EMPTY } from 'rxjs';
+import { EMPTY } from 'rxjs';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import React, { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { HeaderAppMenu } from '../header/header_app_menu';
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
+import { useHasAppMenuConfig } from '../use_has_app_menu_config';
 
 interface AppMenuBarProps {
   // TODO: get rid of observable
@@ -47,13 +47,7 @@ export const AppMenuBar = ({ appMenuActions$, appMenu$ }: AppMenuBarProps) => {
 
   const styles = useAppMenuBarStyles(euiTheme);
 
-  const hasBeta$ = useMemo(
-    () =>
-      appMenu$?.pipe(map((config) => !!config && !!config.items && config.items.length > 0)) ??
-      EMPTY,
-    [appMenu$]
-  );
-  const hasBetaConfig = useObservable(hasBeta$, false);
+  const hasBetaConfig = useHasAppMenuConfig(appMenu$);
 
   if (!headerActionMenuMounter.mount && !hasBetaConfig) return null;
 

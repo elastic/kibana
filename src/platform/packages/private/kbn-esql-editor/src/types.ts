@@ -50,8 +50,6 @@ export interface ESQLEditorProps {
   /** Disables the editor */
   isDisabled?: boolean;
   dataTestSubj?: string;
-  /** Hide the Run query information which appears on the footer*/
-  hideRunQueryText?: boolean;
   /** Hide the Run query button which appears when editor is inlined*/
   hideRunQueryButton?: boolean;
   /** This is used for applications (such as the inline editing flyout in dashboards)
@@ -84,7 +82,6 @@ export interface ESQLEditorProps {
   /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
   dataErrorsControl?: DataErrorsControl;
   /** Optional form field label to show above the query editor */
-  formLabel?: string;
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
   /** Enable data source browser suggestion & command integration */

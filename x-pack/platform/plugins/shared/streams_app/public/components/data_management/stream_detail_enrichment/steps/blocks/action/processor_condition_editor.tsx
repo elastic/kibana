@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useController } from 'react-hook-form';
+import React, { useCallback } from 'react';
+import { useController, useFormContext } from 'react-hook-form';
 import { isConditionComplete } from '@kbn/streamlang';
+import { i18n } from '@kbn/i18n';
 import type { ProcessorFormState } from '../../../types';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
 
@@ -18,12 +19,35 @@ export const ProcessorConditionEditor = () => {
       validate: isConditionComplete,
     },
   });
+  const { setError, clearErrors } = useFormContext<ProcessorFormState>();
+
+  const handleValidityChange = useCallback(
+    (isValid: boolean) => {
+      if (isValid) {
+        clearErrors('where');
+        return;
+      }
+
+      setError('where', {
+        type: 'manual',
+        message: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.invalidProcessorWhereJsonError',
+          { defaultMessage: 'Invalid JSON' }
+        ),
+      });
+    },
+    [clearErrors, setError]
+  );
 
   if (field.value === undefined) {
     return null;
   }
 
   return (
-    <ProcessorConditionEditorWrapper condition={field.value} onConditionChange={field.onChange} />
+    <ProcessorConditionEditorWrapper
+      condition={field.value}
+      onConditionChange={field.onChange}
+      onValidityChange={handleValidityChange}
+    />
   );
 };

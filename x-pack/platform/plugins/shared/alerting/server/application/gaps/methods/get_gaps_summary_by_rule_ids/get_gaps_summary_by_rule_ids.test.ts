@@ -304,7 +304,9 @@ describe('getGapsSummaryByRuleIds', () => {
         total: 1,
       });
 
-      authorization.ensureAuthorized.mockRejectedValue(new Error('Not authorized for rule type'));
+      authorization.bulkEnsureAuthorized.mockRejectedValue(
+        new Error('Not authorized for rule type')
+      );
 
       await expect(
         rulesClient.getGapsSummaryByRuleIds({

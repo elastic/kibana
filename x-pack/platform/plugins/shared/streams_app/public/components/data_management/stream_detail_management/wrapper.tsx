@@ -23,6 +23,7 @@ import {
   ClassicStreamBadge,
   DiscoverBadgeButton,
   LifecycleBadge,
+  TimeSeriesBadge,
   WiredStreamBadge,
 } from '../../stream_badges';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -144,6 +145,8 @@ export function Wrapper({
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
+                    {Streams.ingest.all.GetResponse.is(definition) &&
+                      definition.index_mode === 'time_series' && <TimeSeriesBadge />}
                     {Streams.ingest.all.GetResponse.is(definition) && (
                       <LifecycleBadge
                         lifecycle={definition.effective_lifecycle}

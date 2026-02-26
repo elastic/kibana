@@ -16,6 +16,7 @@ export { HookLifecycle, HookExecutionMode };
 interface AgentHookContextBase {
   request: KibanaRequest;
   abortSignal?: AbortSignal;
+  agentId?: string;
 }
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {

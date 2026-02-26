@@ -12,7 +12,7 @@ import { EuiProvider } from '@elastic/eui';
 import { AttackDetailsContext } from '../context';
 import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 import { InsightsSection } from './insights_section';
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('@kbn/i18n-react', () => ({
@@ -21,7 +21,7 @@ jest.mock('@kbn/i18n-react', () => ({
   ),
 }));
 
-jest.mock('../../shared/hooks/use_expand_section', () => ({
+jest.mock('../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
 
@@ -38,7 +38,7 @@ jest.mock('../hooks/use_attack_entities_counts', () => ({
   }),
 }));
 
-jest.mock('../../shared/components/expandable_section', () => ({
+jest.mock('../../../flyout_v2/shared/components/expandable_section', () => ({
   ExpandableSection: ({
     children,
     'data-test-subj': dataTestSubj,

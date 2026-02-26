@@ -13,11 +13,17 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 // Mock the imports
 jest.mock('../../workflow_context/lib/get_context_for_path');
 jest.mock('./validate_variable');
+jest.mock('../../../../common/lib/yaml/get_scalar_value_at_offset');
 
 import { validateVariable } from './validate_variable';
 import { validateVariables } from './validate_variables';
+import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
 import { getContextSchemaForPath } from '../../workflow_context/lib/get_context_for_path';
 import type { VariableItem, YamlValidationResult } from '../model/types';
+
+const mockGetScalarValueAtOffset = getScalarValueAtOffset as jest.MockedFunction<
+  typeof getScalarValueAtOffset
+>;
 
 const mockGetContextSchemaForPath = getContextSchemaForPath as jest.MockedFunction<
   typeof getContextSchemaForPath
@@ -38,6 +44,7 @@ describe('validateVariables', () => {
     endLineNumber: 1,
     endColumn: 10,
     yamlPath: ['steps', 0, 'params', 'value'],
+    offset: 0,
     ...overrides,
   });
 
@@ -254,7 +261,8 @@ describe('validateVariables', () => {
       mockWorkflowDefinition,
       mockWorkflowGraph,
       ['steps', 0, 'params', 'value'],
-      undefined
+      undefined,
+      0
     );
     expect(mockValidateVariable).toHaveBeenCalledWith(variable, mockContext);
   });
@@ -286,6 +294,60 @@ describe('validateVariables', () => {
     expect(result[0].message).toContain('Foreach parameter');
   });
 
+  it('should extend context with template-local assign so x is valid', () => {
+    const templateString = '{% assign x = 1 %}{{ x }}';
+    const scalarStart = 100;
+    const variableOffsetInDoc = scalarStart + templateString.indexOf('{{ x }}') + 4;
+    const variableItem = createVariableItem({
+      key: 'x',
+      startLineNumber: 1,
+      startColumn: 1,
+      endLineNumber: 1,
+      endColumn: 10,
+      yamlPath: ['steps', 0, 'with', 'message'],
+      offset: variableOffsetInDoc,
+    });
+    const mockModel = {
+      getOffsetAt: jest.fn((pos: { lineNumber: number; column: number }) => {
+        if (pos.lineNumber === 1 && pos.column === 1) return variableOffsetInDoc;
+        return 0;
+      }),
+    } as any;
+    const mockYamlDocument = {} as any;
+    mockGetScalarValueAtOffset.mockReturnValue({
+      value: templateString,
+      range: [
+        scalarStart,
+        scalarStart + templateString.length,
+        scalarStart + templateString.length,
+      ],
+    } as any);
+    // Use real getContextSchemaForPath so it applies template locals via getContextSchemaWithTemplateLocals
+    const { getContextSchemaForPath: realGetContextSchemaForPath } = jest.requireActual<
+      typeof import('../../workflow_context/lib/get_context_for_path')
+    >('../../workflow_context/lib/get_context_for_path');
+    mockGetContextSchemaForPath.mockImplementation(realGetContextSchemaForPath);
+    mockValidateVariable.mockReturnValue({
+      ...variableItem,
+      message: null,
+      severity: null,
+      owner: 'variable-validation',
+      hoverMessage: null,
+    });
+
+    const result = validateVariables(
+      [variableItem],
+      mockWorkflowGraph,
+      mockWorkflowDefinition,
+      mockYamlDocument,
+      mockModel
+    );
+
+    expect(mockGetScalarValueAtOffset).toHaveBeenCalledWith(mockYamlDocument, variableOffsetInDoc);
+    expect(result).toHaveLength(1);
+    expect(result[0].message).toBe(null);
+  });
+
   it('should preserve all properties from validation errors', () => {
     const variable = createVariableItem({
       key: 'test.var',
@@ -293,6 +355,7 @@ describe('validateVariables', () => {
       startColumn: 10,
       endLineNumber: 5,
       endColumn: 20,
+      offset: 0,
     });
 
     mockGetContextSchemaForPath.mockReturnValue({} as any);

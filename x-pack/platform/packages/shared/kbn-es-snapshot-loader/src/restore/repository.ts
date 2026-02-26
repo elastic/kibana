@@ -13,25 +13,6 @@ export function generateRepoName(): string {
   return `snapshot-loader-repo-${Date.now()}`;
 }
 
-export async function registerUrlRepository({
-  esClient,
-  log,
-  repoName,
-  snapshotUrl,
-}: {
-  esClient: Client;
-  log: ToolingLog;
-  repoName: string;
-  snapshotUrl: string;
-}): Promise<void> {
-  log.debug(`Connecting to snapshot at ${snapshotUrl}`);
-
-  await esClient.snapshot.createRepository({
-    name: repoName,
-    body: { type: 'url', settings: { url: snapshotUrl } },
-  });
-}
-
 export async function getSnapshotMetadata({
   esClient,
   log,

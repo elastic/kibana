@@ -7,15 +7,11 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import {
-  ScriptDescriptionSchema,
-  ScriptExampleSchema,
   ScriptFileSchema,
-  ScriptInstructionsSchema,
   ScriptNameSchema,
-  ScriptPathToExecutableSchema,
   ScriptPlatformSchema,
   ScriptRequiresInputSchema,
-  ScriptTagsSchema,
+  getScriptsTagSchema,
 } from './common';
 import type { DeepMutable } from '../../../endpoint/types';
 import { validateNonEmptyString } from '../schema_utils';
@@ -27,11 +23,11 @@ export const PatchUpdateScriptRequestSchema = {
       platform: schema.maybe(ScriptPlatformSchema),
       file: schema.maybe(ScriptFileSchema),
       requiresInput: schema.maybe(ScriptRequiresInputSchema),
-      description: schema.maybe(ScriptDescriptionSchema),
-      instructions: schema.maybe(ScriptInstructionsSchema),
-      example: schema.maybe(ScriptExampleSchema),
-      pathToExecutable: schema.maybe(ScriptPathToExecutableSchema),
-      tags: schema.maybe(ScriptTagsSchema),
+      description: schema.maybe(schema.string()),
+      instructions: schema.maybe(schema.string()),
+      example: schema.maybe(schema.string()),
+      pathToExecutable: schema.maybe(schema.string()),
+      tags: schema.maybe(getScriptsTagSchema('patch')),
       version: schema.maybe(schema.string({ minLength: 1, validate: validateNonEmptyString })),
     },
     {

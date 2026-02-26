@@ -24,14 +24,14 @@ export interface GenerationContext {
   info: OpenAPIV3.InfoObject;
   imports: ImportsMap;
   circularRefs: Set<string>;
-  config: Pick<GeneratorConfig, 'schemaNameTransform'>;
+  config: Pick<GeneratorConfig, 'schemaNameTransform' | 'experimentallyImportZodV4'>;
 }
 
 export interface BundleGenerationContext {
   operations: NormalizedOperation[];
   sources: ParsedSource[];
   info: OpenAPIV3.InfoObject;
-  config: Pick<GeneratorConfig, 'schemaNameTransform'>;
+  config: Pick<GeneratorConfig, 'schemaNameTransform' | 'experimentallyImportZodV4'>;
 }
 
 export function getGenerationContext(

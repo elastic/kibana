@@ -8,8 +8,8 @@
  */
 
 import { KQLSyntaxError } from '@kbn/es-query';
+import { evaluateKql } from '@kbn/eval-kql';
 import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
-import { evaluateKql } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -52,7 +52,12 @@ export class EnterIfNodeImpl implements NodeImplementation {
       this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
     const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
     this.stepExecutionRuntime.setInput({
+      rawCondition: thenNode.condition as string,
       condition: renderedCondition,
+      conditionResult: evaluatedConditionResult,
+    });
+    // set the condition result to the step state so that it can be used in the exit node
+    this.stepExecutionRuntime.setCurrentStepState({
       conditionResult: evaluatedConditionResult,
     });
 

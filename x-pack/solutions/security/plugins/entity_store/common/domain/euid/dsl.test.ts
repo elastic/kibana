@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEuidDslFilterBasedOnDocument } from './dsl';
+import { getEuidDslFilterBasedOnDocument, getEuidDslDocumentsContainsIdFilter } from './dsl';
 
 describe('getEuidDslFilterBasedOnDocument', () => {
   it('returns undefined when doc is falsy', () => {
@@ -220,6 +220,62 @@ describe('getEuidDslFilterBasedOnDocument', () => {
           filter: [{ term: { 'service.entity.id': 'svc-e1' } }],
         },
       });
+    });
+  });
+});
+
+describe('getEuidDslDocumentsContainsIdFilter', () => {
+  it('user: returns should with all user identity fields', () => {
+    const result = getEuidDslDocumentsContainsIdFilter('user');
+
+    expect(result).toEqual({
+      bool: {
+        should: [
+          { exists: { field: 'user.entity.id' } },
+          { exists: { field: 'user.id' } },
+          { exists: { field: 'user.name' } },
+          { exists: { field: 'user.email' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('host: returns should with all host identity fields', () => {
+    const result = getEuidDslDocumentsContainsIdFilter('host');
+
+    expect(result).toEqual({
+      bool: {
+        should: [
+          { exists: { field: 'host.entity.id' } },
+          { exists: { field: 'host.id' } },
+          { exists: { field: 'host.name' } },
+          { exists: { field: 'host.hostname' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('service: returns should with all service identity fields', () => {
+    const result = getEuidDslDocumentsContainsIdFilter('service');
+
+    expect(result).toEqual({
+      bool: {
+        should: [{ exists: { field: 'service.entity.id' } }, { exists: { field: 'service.name' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('generic: returns should with entity.id', () => {
+    const result = getEuidDslDocumentsContainsIdFilter('generic');
+
+    expect(result).toEqual({
+      bool: {
+        should: [{ exists: { field: 'entity.id' } }],
+        minimum_should_match: 1,
+      },
     });
   });
 });

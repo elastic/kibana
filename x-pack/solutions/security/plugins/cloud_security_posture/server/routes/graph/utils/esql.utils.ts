@@ -83,18 +83,18 @@ export const formatJsonProperty = (propertyName: string, valueVar: string): stri
  * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
  * This is the preferred method for enriching actor and target entities with entity store data.
  *
- * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_generic_default')
+ * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_default')
  * @returns ESQL statements for LOOKUP JOIN enrichment
  *
  * @example
  * ```typescript
- * buildLookupJoinEsql('.entities.v2.latest.security_generic_default')
+ * buildLookupJoinEsql('.entities.v2.latest.security_default')
  * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
  * ```
  */
 export const buildLookupJoinEsql = (lookupIndexName: string): string => {
   return `| DROP entity.id
-| DROP entity.target.id  
+| DROP entity.target.id
 // rename entity.*fields before next pipeline to avoid name collisions
 | EVAL entity.id = actorEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id
@@ -102,7 +102,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntityType    = entity.type
 | RENAME actorEntitySubType = entity.sub_type
 | RENAME actorHostIp        = host.ip
-| RENAME actorLookupEntityId = entity.id 
+| RENAME actorLookupEntityId = entity.id
 
 | EVAL entity.id = targetEntityId
 | LOOKUP JOIN ${lookupIndexName} ON entity.id

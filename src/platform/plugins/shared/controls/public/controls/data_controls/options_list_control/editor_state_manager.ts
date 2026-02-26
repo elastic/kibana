@@ -14,19 +14,19 @@ import { initializeStateManager } from '@kbn/presentation-publishing/state_manag
 
 export type EditorState = Pick<
   OptionsListDSLControlState,
-  'searchTechnique' | 'singleSelect' | 'runPastTimeout'
+  'search_technique' | 'single_select' | 'run_past_timeout'
 >;
 
 export const editorComparators: StateComparators<EditorState> = {
-  runPastTimeout: 'referenceEquality',
-  searchTechnique: 'referenceEquality',
-  singleSelect: 'referenceEquality',
+  run_past_timeout: 'referenceEquality',
+  search_technique: 'referenceEquality',
+  single_select: 'referenceEquality',
 };
 
 const defaultEditorState = {
-  searchTechnique: DEFAULT_SEARCH_TECHNIQUE as OptionsListSearchTechnique,
-  singleSelect: undefined,
-  runPastTimeout: undefined,
+  search_technique: DEFAULT_SEARCH_TECHNIQUE as OptionsListSearchTechnique,
+  single_select: undefined,
+  run_past_timeout: undefined,
 };
 
 export const initializeEditorStateManager = (initialState: EditorState) => {

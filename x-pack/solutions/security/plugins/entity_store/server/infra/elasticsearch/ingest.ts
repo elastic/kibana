@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
 const BATCH_SIZE = 5 * 1024 * 1024; // 5MB
+const RETRY_ON_CONFLICT = 3;
 
 interface IngestEntitiesParams {
   esClient: ElasticsearchClient;
@@ -17,6 +18,7 @@ interface IngestEntitiesParams {
   targetIndex: string;
   logger: Logger;
   abortController?: AbortController;
+  fieldsToIgnore?: string[];
 }
 
 /**
@@ -36,6 +38,7 @@ export async function ingestEntities({
   targetIndex,
   logger,
   abortController,
+  fieldsToIgnore,
 }: IngestEntitiesParams) {
   const options: TransportRequestOptions = {};
   if (abortController?.signal) {
@@ -58,9 +61,11 @@ export async function ingestEntities({
       const doc: Record<string, unknown> = {};
       for (let i = 0; i < row.length; i++) {
         if (
-          // ignore esIdField, no need to be in the document
+          // It's not the id field
           columns[i].name !== esIdField &&
-          // ignore null fields
+          // It's not in the ignored fields list
+          !(fieldsToIgnore || []).includes(columns[i].name) &&
+          // It's not null
           row[i] !== null
         ) {
           doc[columns[i].name] = row[i];
@@ -82,7 +87,16 @@ export async function ingestEntities({
       retries: 2,
       onDocument: (doc) => {
         const { _id, ...document } = doc;
-        return [{ index: { _index: targetIndex, _id: _id as string } }, document];
+        return [
+          {
+            update: {
+              _index: targetIndex,
+              _id: _id as string,
+              retry_on_conflict: RETRY_ON_CONFLICT,
+            },
+          },
+          { doc: document, doc_as_upsert: true },
+        ];
       },
       onDrop: (dropped) => {
         // Log dropped documents but don't throw - allows bulk operation to continue

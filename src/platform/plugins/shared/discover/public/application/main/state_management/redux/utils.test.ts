@@ -115,16 +115,16 @@ describe('extractEsqlVariables', () => {
   ): ControlPanelState<OptionsListESQLControlState> => ({
     type: ESQL_CONTROL,
     order,
-    variableName,
-    variableType,
-    selectedOptions,
-    singleSelect,
-    availableOptions: selectedOptions,
+    variable_name: variableName,
+    variable_type: variableType,
+    selected_options: selectedOptions,
+    single_select: singleSelect,
+    available_options: selectedOptions,
     title: `Control for ${variableName}`,
     width: 'medium',
     grow: false,
-    controlType: EsqlControlType.STATIC_VALUES,
-    esqlQuery: '',
+    control_type: EsqlControlType.STATIC_VALUES,
+    esql_query: '',
   });
 
   it('should extract single-select string variable', () => {

@@ -134,3 +134,77 @@ describe('#alertAuditEvent', () => {
     `);
   });
 });
+
+describe('#alertAuditEvent - acknowledge/unacknowledge', () => {
+  test('creates acknowledge event with `success` outcome', () => {
+    expect(
+      alertAuditEvent({
+        action: AlertAuditAction.ACKNOWLEDGE,
+        id: '123',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "alert_acknowledge",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "message": "User has acknowledged alert [id=123]",
+      }
+    `);
+  });
+
+  test('creates unacknowledge event with `success` outcome', () => {
+    expect(
+      alertAuditEvent({
+        action: AlertAuditAction.UNACKNOWLEDGE,
+        id: '456',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "alert_unacknowledge",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "message": "User has unacknowledged alert [id=456]",
+      }
+    `);
+  });
+
+  test('creates bulk acknowledge event', () => {
+    expect(
+      alertAuditEvent({
+        action: AlertAuditAction.ACKNOWLEDGE,
+        bulk: true,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "alert_acknowledge",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "message": "User has acknowledged alerts",
+      }
+    `);
+  });
+});

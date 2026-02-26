@@ -18,7 +18,9 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
-  const { common, console, dashboard, dashboardControls, header, timePicker } = getPageObjects([
+  const esArchiver = getService('esArchiver');
+  const es = getService('es');
+  const { dashboard, dashboardControls, timePicker } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -28,31 +30,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('Dashboard controls hierarchical chaining', () => {
-    const newDocuments: Array<{ index: string; id: string }> = [];
     let controlIds: string[];
-
-    const addDocument = async (index: string, document: string) => {
-      await console.enterText('\nPOST ' + index + '/_doc/\n{\n ' + document + '\n}');
-      await console.clickPlay();
-      await header.waitUntilLoadingHasFinished();
-      const response = JSON.parse(await console.getOutputText());
-      newDocuments.push({ index, id: response._id });
-    };
 
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
 
       /* start by adding some incomplete data so that we can test `exists` query */
-      await common.navigateToApp('console');
-      await console.skipTourIfExists();
-      await console.clearEditorText();
-      await addDocument(
-        'animals-cats-2018-01-01',
-        '"@timestamp": "2018-01-01T16:00:00.000Z", \n"animal": "cat"'
-      );
-      await addDocument(
-        'animals-dogs-2018-01-01',
-        '"@timestamp": "2018-01-01T16:00:00.000Z", \n"name": "Max", \n"sound": "woof"'
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard_elements/controls'
       );
 
       /* then, create our testing dashboard */
@@ -87,13 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await common.navigateToApp('console');
-      await console.clearEditorText();
-      for (const { index, id } of newDocuments) {
-        await console.enterText(`\nDELETE /${index}/_doc/${id}`);
-        await console.clickPlay();
-        await header.waitUntilLoadingHasFinished();
-      }
+      await es.delete({ index: 'animals-cats-2018-01-01', id: 'control-chaining-cat' });
+      await es.delete({ index: 'animals-dogs-2018-01-01', id: 'control-chaining-dog' });
       await security.testUser.restoreDefaults();
     });
 

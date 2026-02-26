@@ -12,6 +12,7 @@ export const VALID_FEATURE_TYPES = [
   'infrastructure',
   'technology',
   'dependency',
+  'schema',
 ] as const;
 export type ValidFeatureType = (typeof VALID_FEATURE_TYPES)[number];
 

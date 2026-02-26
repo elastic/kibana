@@ -15,7 +15,7 @@ const INGESTION_RATE = 20;
 
 const NEW_DOCUMENTS_STREAM = 'logs-new-documents';
 const OLD_DOCUMENTS_STREAM = 'logs-old-documents';
-const EMPTY_STREAM = 'logs.empty';
+const EMPTY_STREAM = 'logs.otel.empty';
 
 test.describe(
   'Stream data processing - outdated documents',
@@ -86,7 +86,7 @@ test.describe(
         ],
       });
 
-      await apiServices.streams.forkStream('logs', EMPTY_STREAM, { always: {} });
+      await apiServices.streams.forkStream('logs.otel', EMPTY_STREAM, { always: {} });
     });
 
     test.beforeEach(async ({ browserAuth }) => {
@@ -95,7 +95,7 @@ test.describe(
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.clean();
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('with outdated documents - should display warning tip for latest samples datasource', async ({

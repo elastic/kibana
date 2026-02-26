@@ -34,6 +34,7 @@ describe('useGetTemplates', () => {
         lastUsedAt: '2024-01-01T00:00:00.000Z',
         usageCount: 10,
         isDefault: false,
+        fieldSearchMatches: false,
       },
     ],
     page: 1,

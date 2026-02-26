@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
-import type { FilterOptions } from '../types';
+import type { FilterOptions } from '../../../types';
 import type { MultiSelectFilterOption } from './multi_select_filter';
 import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';

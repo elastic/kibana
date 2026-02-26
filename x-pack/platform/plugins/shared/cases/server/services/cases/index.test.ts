@@ -56,6 +56,7 @@ import {
   CasePersistedStatus,
   CaseTransformedAttributesRt,
 } from '../../common/types/case';
+import type { ConfigType } from '../../config';
 
 const createUpdateSOResponse = ({
   connector,
@@ -168,6 +169,7 @@ describe('CasesService', () => {
     log: mockLogger,
     persistableStateAttachmentTypeRegistry,
     unsecuredSavedObjectsClient,
+    config: {} as ConfigType,
   });
 
   let service: CasesService;

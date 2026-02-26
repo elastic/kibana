@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/config-schema'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/content-management-utils'
   - '@kbn/field-formats-plugin'

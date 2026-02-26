@@ -20,12 +20,14 @@ interface UseSourcesBadgeParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   openIndicesBrowser: (options?: { openedFrom?: IndicesBrowserOpenMode }) => void;
+  suppressSuggestionsRef: MutableRefObject<boolean>;
 }
 
 export const useSourcesBadge = ({
   editorRef,
   editorModel,
   openIndicesBrowser,
+  suppressSuggestionsRef,
 }: UseSourcesBadgeParams) => {
   const { euiTheme } = useEuiTheme();
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
@@ -49,6 +51,19 @@ export const useSourcesBadge = ({
       color: ${euiTheme.colors.primary} !important;
       background-color: ${euiTheme.colors.backgroundBasePrimary} !important;
       box-sizing: border-box;
+      transition: background-color ${euiTheme.animation.fast} ease-in-out,
+        box-shadow ${euiTheme.animation.fast} ease-in-out;
+    }
+
+    .${sourcesBadgeClassName}:hover {
+      background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
+    }
+
+    /* Monaco decorations aren't keyboard-focusable DOM nodes, so we use the editor's
+   * focus state to provide a "focus" treatment for the badge.
+   */
+    .monaco-editor:focus-within .${sourcesBadgeClassName} {
+      background-color: ${euiTheme.colors.backgroundLightPrimary} !important;
     }
   `;
 
@@ -114,11 +129,17 @@ export const useSourcesBadge = ({
           firstSupportedCommand.range.endColumn + 1
         );
         editor.setPosition(positionAfterCommand);
-        editor.revealPosition(positionAfterCommand);
+
+        suppressSuggestionsRef.current = true;
+
         openIndicesBrowser({ openedFrom: IndicesBrowserOpenMode.Badge });
+
+        // Remove focus from the editor immediately so there is no visible
+        // focus state while the popover mounts and takes over.
+        (editor.getDomNode()?.ownerDocument.activeElement as HTMLElement)?.blur();
       }
     },
-    [editorModel, editorRef, openIndicesBrowser]
+    [editorModel, editorRef, openIndicesBrowser, suppressSuggestionsRef]
   );
 
   return {

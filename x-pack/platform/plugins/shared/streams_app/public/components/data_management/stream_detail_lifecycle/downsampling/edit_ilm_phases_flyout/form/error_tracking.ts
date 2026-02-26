@@ -46,6 +46,8 @@ export const useIlmPhasesFlyoutTabErrors = (formData: IlmPhasesFlyoutFormInterna
       if (phaseName !== 'hot' && hasErrorAt(`_meta.${phaseName}.minAgeValue`)) return true;
 
       // Downsample validations live on the fixedIntervalValue field.
+      // Downsampling is only available for hot/warm/cold phases; using dynamic access requires cast.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const downsampleEnabled = Boolean((formData as any)?._meta?.[phaseName]?.downsampleEnabled);
       if (
         (phaseName === 'hot' || phaseName === 'warm' || phaseName === 'cold') &&
@@ -58,9 +60,7 @@ export const useIlmPhasesFlyoutTabErrors = (formData: IlmPhasesFlyoutFormInterna
       // Searchable snapshot repository is a shared field, but should surface per-phase.
       const repositoryHasError = hasErrorAt('_meta.searchableSnapshot.repository');
       if (repositoryHasError) {
-        const coldSnapshotEnabled = Boolean(
-          (formData as any)?._meta?.cold?.searchableSnapshotEnabled
-        );
+        const coldSnapshotEnabled = Boolean(formData?._meta?.cold?.searchableSnapshotEnabled);
         if (phaseName === 'cold' && coldSnapshotEnabled) return true;
         if (phaseName === 'frozen') return true; // Frozen always requires searchable snapshots.
       }

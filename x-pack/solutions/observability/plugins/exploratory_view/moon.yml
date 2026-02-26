@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/ebt-tools'
   - '@kbn/config-schema'
   - '@kbn/chart-expressions-common'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -71,6 +72,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - public/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

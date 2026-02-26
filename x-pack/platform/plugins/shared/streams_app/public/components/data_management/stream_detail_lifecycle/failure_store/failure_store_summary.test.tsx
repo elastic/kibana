@@ -50,6 +50,7 @@ describe('FailureStoreSummary', () => {
 
   describe('Failure Store - Serverless', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
     });
 
@@ -57,7 +58,13 @@ describe('FailureStoreSummary', () => {
       const stats = createMockStats(100000);
       const failureStoreConfig = createMockFailureStoreConfig();
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(
         screen.getByTestId('failureStore-lifecyclePhase-Failed ingest-name')
@@ -68,7 +75,13 @@ describe('FailureStoreSummary', () => {
       const stats = createMockStats(100000);
       const failureStoreConfig = createMockFailureStoreConfig();
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(
         screen.getByTestId('failureStore-lifecyclePhase-Failed ingest-size')
@@ -79,7 +92,13 @@ describe('FailureStoreSummary', () => {
       const stats = createMockStats(100000);
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '7d' });
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
     });
@@ -91,7 +110,13 @@ describe('FailureStoreSummary', () => {
         defaultRetentionPeriod: '7d',
       });
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
     });
@@ -99,6 +124,7 @@ describe('FailureStoreSummary', () => {
 
   describe('Failure Store - Non-Serverless', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUseKibana.mockReturnValue({ isServerless: false } as any);
     });
 
@@ -106,7 +132,13 @@ describe('FailureStoreSummary', () => {
       const stats = createMockStats(250000);
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(screen.getByTestId('failureStore-lifecyclePhase-Hot-name')).toBeInTheDocument();
     });
@@ -115,7 +147,13 @@ describe('FailureStoreSummary', () => {
       const stats = createMockStats(250000);
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(screen.getByTestId('failureStore-lifecyclePhase-Hot-size')).toHaveTextContent(
         /250\.0\s?KB/
@@ -126,7 +164,13 @@ describe('FailureStoreSummary', () => {
       const stats = createMockStats(250000);
       const failureStoreConfig = createMockFailureStoreConfig({ defaultRetentionPeriod: '30d' });
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(screen.getByTestId('failureStore-dataLifecycle-delete-icon')).toBeInTheDocument();
     });
@@ -134,6 +178,7 @@ describe('FailureStoreSummary', () => {
 
   describe('Infinite Retention', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
     });
 
@@ -141,7 +186,13 @@ describe('FailureStoreSummary', () => {
       const stats = createMockStats(50000);
       const failureStoreConfig = createMockFailureStoreConfig({ retentionDisabled: true });
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(
         screen.queryByTestId('failureStore-dataLifecycle-delete-icon')
@@ -152,7 +203,13 @@ describe('FailureStoreSummary', () => {
       const stats = createMockStats(50000);
       const failureStoreConfig = createMockFailureStoreConfig({ retentionDisabled: true });
 
-      render(<FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />);
+      render(
+        <FailureStoreSummary
+          stats={stats}
+          failureStoreConfig={failureStoreConfig}
+          canManageLifecycle
+        />
+      );
 
       expect(screen.getByText('∞')).toBeInTheDocument();
     });

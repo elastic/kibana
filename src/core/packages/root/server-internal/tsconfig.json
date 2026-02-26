@@ -84,6 +84,7 @@
     "@kbn/core-di-mocks",
     "@kbn/core-di-server-internal",
     "@kbn/core-data-streams-server-internal",
+    "@kbn/core-user-activity-server-internal",
   ],
   "exclude": [
     "target/**/*",

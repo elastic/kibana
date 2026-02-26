@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { transformEnhancementsOut } from './transform_enhancements_out';
 
 describe('transformEnhancementsOut', () => {
@@ -47,6 +48,31 @@ describe('transformEnhancementsOut', () => {
         ],
       }
     `);
+  });
+
+  test('should convert dashboard drilldown event with VALUE_CLICK_TRIGGER', () => {
+    const state = {
+      enhancements: {
+        dynamicActions: {
+          events: [
+            {
+              action: {
+                config: {
+                  openInNewTab: false,
+                  useCurrentDateRange: true,
+                  useCurrentFilters: true,
+                },
+                factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
+                name: 'Go to Dashboard',
+              },
+              eventId: '8aeddba7-a7ed-42e2-988e-794c8435028d',
+              triggers: ['VALUE_CLICK_TRIGGER'],
+            },
+          ],
+        },
+      },
+    };
+    expect(transformEnhancementsOut(state).drilldowns?.[0].trigger).toBe(ON_APPLY_FILTER);
   });
 
   test('should convert discover drilldown event', () => {
@@ -137,7 +163,7 @@ describe('transformEnhancementsOut', () => {
                 name: 'I am an unknown event',
               },
               eventId: '8b3b25b4-1691-4826-82c4-fb6c0478f669',
-              triggers: ['FILTER_TRIGGER'],
+              triggers: [ON_APPLY_FILTER],
             },
           ],
         },

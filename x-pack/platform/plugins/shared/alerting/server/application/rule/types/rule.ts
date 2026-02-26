@@ -108,6 +108,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   apiKey: RuleDomainSchemaType['apiKey'];
   apiKeyOwner: RuleDomainSchemaType['apiKeyOwner'];
   apiKeyCreatedByUser?: RuleDomainSchemaType['apiKeyCreatedByUser'];
+  uiamApiKey?: RuleDomainSchemaType['uiamApiKey'];
   throttle?: RuleDomainSchemaType['throttle'];
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];

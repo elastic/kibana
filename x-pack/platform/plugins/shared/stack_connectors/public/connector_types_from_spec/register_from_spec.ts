@@ -79,7 +79,7 @@ const createConnectorTypeFromSpec = (
         spec.metadata.supportedFeatureIds[0] === WorkflowsConnectorFeatureId
       ) {
         // @ts-expect-error upgrade typescript v5.9.3
-        return !ref.uiSettings?.get<boolean>('workflows:ui:enabled') ?? false;
+        return !ref.uiSettings?.get<boolean>('workflows:ui:enabled', false) ?? false;
       }
       return false;
     },

@@ -47,7 +47,16 @@
             "description": [],
             "signature": [
               "() => ",
-              "InternalChromeSetup"
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
+              "<",
+              "ChromeSetup",
+              ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
             "lineNumber": 128,

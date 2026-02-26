@@ -12,13 +12,13 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ObservabilityAgentBuilderCoreSetup } from '../types';
-import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 import { OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID } from '../../common';
 import { getLogDocumentById } from '../routes/ai_insights/get_log_document_by_id';
+import { observabilityAttachmentDataSchema } from './observability_attachment_data_schema';
 
 const GET_LOG_DOCUMENT_TOOL_ID = 'get_log_document';
 
-const logDataSchema = z.object({
+const logDataSchema = observabilityAttachmentDataSchema.extend({
   id: z.string(),
   index: z.string(),
 });
@@ -28,11 +28,9 @@ export type LogAttachmentData = z.infer<typeof logDataSchema>;
 export function createLogAttachmentType({
   core,
   logger,
-  dataRegistry,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
-  dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): AttachmentTypeDefinition<typeof OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID, LogAttachmentData> {
   return {
     id: OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,

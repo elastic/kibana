@@ -151,7 +151,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
     },
 
     logExecutionMetrics: (args: ExecutionMetricsArgs): void => {
-      const logLevel = LogLevelEnum.debug;
+      const logLevel = LogLevelEnum.info;
       eventLogger.logEvent({
         '@timestamp': nowISO(),
         rule: {

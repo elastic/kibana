@@ -240,13 +240,21 @@ function convertReferenceLinesDecorationsToAPIFormat(
   yConfig: Omit<YConfig, 'forAccessor'>
 ): Pick<
   ReferenceLineDef,
-  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'fill' | 'axis' | 'text'
+  | 'color'
+  | 'stroke_dash'
+  | 'stroke_width'
+  | 'icon'
+  | 'decoration_position'
+  | 'fill'
+  | 'axis'
+  | 'text'
 > {
   return stripUndefined({
     color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
     icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
+    decoration_position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
     axis: yConfig.axisMode && yConfig.axisMode !== 'auto' ? yConfig.axisMode : undefined,
     text: yConfig.textVisibility != null ? (yConfig.textVisibility ? 'label' : 'none') : undefined,

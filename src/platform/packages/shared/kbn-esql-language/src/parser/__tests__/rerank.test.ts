@@ -8,7 +8,13 @@
  */
 
 import { EsqlQuery } from '../../composer/query';
-import type { ESQLAstRerankCommand, ESQLCommandOption } from '../../types';
+import type {
+  ESQLAstRerankCommand,
+  ESQLCommandOption,
+  ESQLLiteral,
+  ESQLMap,
+  ESQLMapEntry,
+} from '../../types';
 
 describe('RERANK', () => {
   describe('basic parsing', () => {
@@ -282,17 +288,19 @@ describe('RERANK', () => {
       expect(withOption).toBeDefined();
 
       if (withOption) {
-        const mapArg = withOption.args[0] as any;
+        const mapArg = withOption.args[0] as ESQLMap;
         expect(mapArg.type).toBe('map');
         expect(mapArg.entries).toHaveLength(2);
 
         // Check that all three keys are present
-        const keys = mapArg.entries.map((entry: any) => entry.key.value);
+        const keys = mapArg.entries.map((entry: ESQLMapEntry) => (entry.key as ESQLLiteral).value);
         expect(keys).toContain('"inferenceId"');
         expect(keys).toContain('"scoreColumn"');
 
         // Check that all three values are correct
-        const values = mapArg.entries.map((entry: any) => entry.value.value);
+        const values = mapArg.entries.map(
+          (entry: ESQLMapEntry) => (entry.value as ESQLLiteral).value
+        );
         expect(values).toContain('"rerankerInferenceId"');
         expect(values).toContain('"rerank_score"');
       }

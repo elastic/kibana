@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getFunctionDefinition } from '../../../commands/definitions/utils';
+import { getPromqlFunctionDefinition } from '../../../commands/definitions/utils/promql';
+
 import { modeDescription, ENRICH_MODES } from '../../../commands/registry/enrich/util';
 import { getHoverItem } from '..';
 import { policies, setupTestbed } from './fixtures';
@@ -144,5 +146,51 @@ ROUND(
         []
       );
     });
+  });
+});
+
+describe('PromQL functions', () => {
+  test('hover on PromQL function name', async () => {
+    await assertGetHoverItem('PROMQL step="5m" rate(http_requests[5m])', 'rate', [
+      getPromqlFunctionDefinition('rate')!.description,
+      `\`\`\`none
+rate(v: range_vector) → instant_vector
+\`\`\``,
+    ]);
+  });
+
+  test('hover on nested PromQL function', async () => {
+    await assertGetHoverItem('PROMQL step="5m" sum(rate(http_requests[5m]))', 'rate', [
+      getPromqlFunctionDefinition('rate')!.description,
+      `\`\`\`none
+rate(v: range_vector) → instant_vector
+\`\`\``,
+    ]);
+  });
+});
+
+describe('PromQL selectors', () => {
+  test('hover on metric shows instant vector when no duration', async () => {
+    await assertGetHoverItem('PROMQL step="5m" avg(bytes + 10)', 'bytes', [
+      '**bytes**: instant vector',
+    ]);
+  });
+
+  test('hover on metric shows range vector when duration present', async () => {
+    await assertGetHoverItem('PROMQL step="5m" rate(http_requests[5m])', 'http_requests', [
+      '**http_requests**: range vector',
+    ]);
+  });
+});
+
+describe('PromQL literals', () => {
+  test('hover on numeric literal shows scalar', async () => {
+    await assertGetHoverItem('PROMQL step="5m" quantile(0.9, bytes)', '0.9', ['**0.9**: scalar']);
+  });
+
+  test('hover on duration literal shows duration', async () => {
+    await assertGetHoverItem('PROMQL step="5m" rate(http_requests[5m])', '5m]', [
+      '**5m**: duration',
+    ]);
   });
 });

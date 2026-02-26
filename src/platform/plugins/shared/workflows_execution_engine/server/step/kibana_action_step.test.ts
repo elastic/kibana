@@ -391,8 +391,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
   });
 
-  describe('forceServerInfo option', () => {
-    it('should use server info URL when forceServerInfo is true', async () => {
+  describe('use_server_info option', () => {
+    it('should use server info URL when use_server_info is true', async () => {
       mockContextManager.getCoreStart.mockReturnValue({
         http: {
           basePath: {
@@ -414,7 +414,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         with: {
           method: 'GET',
           path: '/api/status',
-          forceServerInfo: true,
+          use_server_info: true,
         },
       };
 
@@ -434,8 +434,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
   });
 
-  describe('forceLocalhost option', () => {
-    it('should use localhost URL when forceLocalhost is true', async () => {
+  describe('use_localhost option', () => {
+    it('should use localhost URL when use_localhost is true', async () => {
       const step: KibanaActionStep = {
         name: 'test_step',
         type: 'kibana.request',
@@ -443,7 +443,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         with: {
           method: 'GET',
           path: '/api/status',
-          forceLocalhost: true,
+          use_localhost: true,
         },
       };
 
@@ -462,8 +462,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     });
   });
 
-  describe('forceServerInfo and forceLocalhost mutual exclusion', () => {
-    it('should throw an error when both forceServerInfo and forceLocalhost are true', async () => {
+  describe('use_server_info and use_localhost mutual exclusion', () => {
+    it('should throw an error when both use_server_info and use_localhost are true', async () => {
       const step: KibanaActionStep = {
         name: 'test_step',
         type: 'kibana.request',
@@ -471,8 +471,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
         with: {
           method: 'GET',
           path: '/api/status',
-          forceServerInfo: true,
-          forceLocalhost: true,
+          use_server_info: true,
+          use_localhost: true,
         },
       };
 
@@ -484,7 +484,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       );
 
       await expect((kibanaStep as any)._run(step.with)).rejects.toThrow(
-        'Cannot set both forceServerInfo and forceLocalhost'
+        'Cannot set both use_server_info and use_localhost'
       );
       expect(mockedFetch).not.toHaveBeenCalled();
     });
@@ -603,7 +603,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
   });
 
   describe('meta params not forwarded to HTTP request', () => {
-    it('should not include forceServerInfo, forceLocalhost, or debug in request body', async () => {
+    it('should not include use_server_info, use_localhost, or debug in request body', async () => {
       const step: KibanaActionStep = {
         name: 'test_step',
         type: 'kibana.createCase',
@@ -612,8 +612,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
           title: 'Test Case',
           description: 'Test Description',
           owner: 'securitySolution',
-          forceServerInfo: false,
-          forceLocalhost: false,
+          use_server_info: false,
+          use_localhost: false,
           debug: true,
         },
       };
@@ -631,8 +631,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const fetchOptions = fetchCall[1] as RequestInit;
       const requestBody = fetchOptions.body ? JSON.parse(fetchOptions.body as string) : {};
 
-      expect(requestBody.forceServerInfo).toBeUndefined();
-      expect(requestBody.forceLocalhost).toBeUndefined();
+      expect(requestBody.use_server_info).toBeUndefined();
+      expect(requestBody.use_localhost).toBeUndefined();
       expect(requestBody.debug).toBeUndefined();
       expect(requestBody.title).toBe('Test Case');
     });

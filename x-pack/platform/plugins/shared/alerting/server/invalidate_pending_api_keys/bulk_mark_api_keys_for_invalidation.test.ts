@@ -35,6 +35,42 @@ describe('bulkMarkApiKeysForInvalidation', () => {
     expect(savedObjects[1]).toHaveProperty('attributes.createdAt', expect.any(String));
   });
 
+  test('should invalidate UIAM API keys when provided', async () => {
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+
+    await bulkMarkApiKeysForInvalidation(
+      {
+        apiKeys: [
+          Buffer.from('123').toString('base64'),
+          Buffer.from('456').toString('base64'),
+          Buffer.from('111:essu_uiam_key_value_1').toString('base64'),
+          Buffer.from('222:essu_uiam_key_value_2').toString('base64'),
+        ],
+      },
+      loggingSystemMock.create().get(),
+      unsecuredSavedObjectsClient
+    );
+    const bulkCreateCallMock = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0];
+    const savedObjects = bulkCreateCallMock[0];
+
+    expect(savedObjects).toHaveLength(4);
+    expect(savedObjects[0]).toHaveProperty('type', API_KEY_PENDING_INVALIDATION_TYPE);
+    expect(savedObjects[0]).toHaveProperty('attributes.apiKeyId', '123');
+    expect(savedObjects[0]).toHaveProperty('attributes.createdAt', expect.any(String));
+    expect(savedObjects[1]).toHaveProperty('type', API_KEY_PENDING_INVALIDATION_TYPE);
+    expect(savedObjects[1]).toHaveProperty('attributes.apiKeyId', '456');
+    expect(savedObjects[1]).toHaveProperty('attributes.createdAt', expect.any(String));
+    expect(savedObjects[2]).toHaveProperty('type', API_KEY_PENDING_INVALIDATION_TYPE);
+    expect(savedObjects[2]).toHaveProperty('attributes.apiKeyId', '111');
+    expect(savedObjects[2]).toHaveProperty('attributes.uiamApiKey', 'essu_uiam_key_value_1');
+    expect(savedObjects[2]).toHaveProperty('attributes.createdAt', expect.any(String));
+    expect(savedObjects[3]).toHaveProperty('type', API_KEY_PENDING_INVALIDATION_TYPE);
+    expect(savedObjects[3]).toHaveProperty('attributes.apiKeyId', '222');
+    expect(savedObjects[3]).toHaveProperty('attributes.uiamApiKey', 'essu_uiam_key_value_2');
+    expect(savedObjects[3]).toHaveProperty('attributes.createdAt', expect.any(String));
+  });
+
   test('should log the proper error when savedObjectsClient create failed', async () => {
     const e = new Error('Fail');
     const logger = loggingSystemMock.create().get();

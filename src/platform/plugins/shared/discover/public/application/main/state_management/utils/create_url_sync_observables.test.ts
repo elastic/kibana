@@ -55,7 +55,6 @@ describe('createUrlSyncObservables', () => {
     expect(result).toBeDefined();
     expect(result.appState$).toBeDefined();
     expect(result.appStateContainer).toBeDefined();
-    expect(result.globalState$).toBeDefined();
     expect(result.globalStateContainer).toBeDefined();
   });
 

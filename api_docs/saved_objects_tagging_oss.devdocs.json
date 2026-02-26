@@ -718,7 +718,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "see {@link ParseSearchQueryOptions }"
+                  "see {@link ParseSearchQueryOptions}"
                 ],
                 "signature": [
                   {
@@ -1390,7 +1390,7 @@
             "section": "def-common.Tag",
             "text": "Tag"
           },
-          " | { type: \"__create_option__\"; }>, \"options\" | \"async\" | \"prepend\" | \"append\" | \"selectedOptions\" | \"fullWidth\" | \"compressed\" | \"isClearable\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
+          " | { type: \"__create_option__\"; }>, \"options\" | \"async\" | \"prepend\" | \"append\" | \"fullWidth\" | \"compressed\" | \"isClearable\" | \"selectedOptions\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
           {
             "pluginId": "savedObjectsTaggingOss",
             "scope": "common",

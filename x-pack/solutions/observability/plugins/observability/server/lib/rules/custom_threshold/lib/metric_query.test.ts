@@ -70,12 +70,12 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
+        searchBody.query!.bool!.filter!.find((filter) => Object.hasOwn(filter!, 'range'))
       ).toBeTruthy();
     });
 
     test('includes a metric field filter', () => {
-      expect(searchBody.aggs.groupings.aggs.currentPeriod).toMatchObject(
+      expect(searchBody.aggs!.groupings!.aggs!.currentPeriod).toMatchObject(
         expect.objectContaining({
           aggs: {
             // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -128,12 +128,12 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
+        searchBody.query!.bool!.filter!.find((filter) => Object.hasOwn(filter!, 'range'))
       ).toBeTruthy();
     });
 
     test('includes a metric field filter', () => {
-      expect(searchBody.query.bool.filter).toMatchObject(
+      expect(searchBody.query!.bool!.filter).toMatchObject(
         expect.arrayContaining([
           { range: { mockedTimeFieldName: expect.any(Object) } },
           {
@@ -164,7 +164,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
           },
         ])
       );
-      expect(searchBody.aggs.groupings.aggs).toMatchObject(
+      expect(searchBody.aggs!.groupings!.aggs).toMatchObject(
         expect.objectContaining({
           currentPeriod: {
             filters: {
@@ -241,12 +241,12 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
+        searchBody.query!.bool!.filter!.find((filter) => Object.hasOwn(filter!, 'range'))
       ).toBeTruthy();
     });
 
     test('includes a metric field filter', () => {
-      expect(searchBody.query.bool.filter).toMatchObject(
+      expect(searchBody.query!.bool!.filter!).toMatchObject(
         expect.arrayContaining([
           { range: { mockedTimeFieldName: expect.any(Object) } },
           { match_phrase: { 'service.name': 'synth-node-2' } },

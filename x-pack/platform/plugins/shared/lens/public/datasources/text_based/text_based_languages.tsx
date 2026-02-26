@@ -20,7 +20,6 @@ import memoizeOne from 'memoize-one';
 import { flatten, isEqual } from 'lodash';
 import type {
   DatasourceDimensionEditorProps,
-  DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
   DataType,
@@ -36,7 +35,6 @@ import type {
   Datasource,
   DatasourceSuggestion,
 } from '@kbn/lens-common';
-import { TextBasedDataPanel } from './components/datapanel';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
@@ -473,18 +471,7 @@ export function getTextBasedDatasource({
       );
     },
 
-    DataPanelComponent(props: DatasourceDataPanelProps<TextBasedPrivateState>) {
-      const layerFields = TextBasedDatasource?.getSelectedFields?.(props.state);
-      return (
-        <TextBasedDataPanel
-          data={data}
-          dataViews={dataViews}
-          expressions={expressions}
-          layerFields={layerFields}
-          {...props}
-        />
-      );
-    },
+    DataPanelComponent: () => null,
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
@@ -540,12 +527,14 @@ export function getTextBasedDatasource({
         datasourceId: 'textBased',
 
         getTableSpec: () => {
-          return (
-            state.layers[layerId]?.columns.map((column) => ({
-              columnId: column.columnId,
-              fields: [column.fieldName],
-            })) || []
-          );
+          const layerColumns = state.layers[layerId]?.columns ?? [];
+          // Column ordering: non-metric columns (rows) before metric columns
+          const nonMetric = layerColumns.filter((col) => !(col.inMetricDimension ?? false));
+          const metric = layerColumns.filter((col) => col.inMetricDimension ?? false);
+          return [...nonMetric, ...metric].map((column) => ({
+            columnId: column.columnId,
+            fields: [column.fieldName],
+          }));
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];

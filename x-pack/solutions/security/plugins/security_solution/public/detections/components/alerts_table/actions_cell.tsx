@@ -8,8 +8,9 @@
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { TableId, getTableByIdSelector } from '@kbn/securitysolution-data-table';
+import { getTableByIdSelector, TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import type { SetEventsLoading } from '../../../../common/types';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -29,7 +30,8 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   isExpandable,
   colIndex,
   setCellProps,
-  ecsAlert: alert,
+  alert,
+  ecsAlert,
   legacyAlert,
   setIsActionLoading,
   refresh: alertsTableRefresh,
@@ -49,12 +51,23 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
 
   const timelineItem = useMemo<TimelineItem>(
     () => ({
-      _id: (alert as Ecs)._id,
-      _index: (alert as Ecs)._index,
-      ecs: alert as Ecs,
+      _id: (ecsAlert as Ecs)._id,
+      _index: (ecsAlert as Ecs)._index,
+      ecs: ecsAlert as Ecs,
       data: legacyAlert as TimelineItem['data'],
     }),
-    [alert, legacyAlert]
+    [ecsAlert, legacyAlert]
+  );
+
+  // We are creating this object here so we can pass it to the cell action, which will then pass it to the flyout.
+  // This way we can use the same flyout content code between Security Solution and Discover.
+  const esHitRecord: EsHitRecord = useMemo(
+    () => ({
+      _id: ecsAlert._id,
+      _index: ecsAlert._index,
+      _source: alert,
+    }),
+    [alert, ecsAlert]
   );
 
   const setEventsLoading = useCallback<SetEventsLoading>(
@@ -73,6 +86,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       columnId={`actions-${rowIndex}`}
       columnHeaders={columnHeaders}
       controlColumn={leadingControlColumn}
+      esHitRecord={esHitRecord}
       data={timelineItem}
       disabled={false}
       index={rowIndex}

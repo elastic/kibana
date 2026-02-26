@@ -6,6 +6,7 @@
   },
   "include": ["**/*.ts"],
   "kbn_references": [
+    "@kbn/i18n",
     "@kbn/zod",
     "@kbn/es-query",
     "@kbn/utility-types",

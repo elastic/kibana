@@ -726,7 +726,7 @@
                 " | undefined; refreshDefinition?: (() => void) | undefined; }"
               ],
               "path": "x-pack/platform/plugins/shared/dataset_quality/public/controller/dataset_quality_details/create_controller.ts",
-              "lineNumber": 33,
+              "lineNumber": 31,
               "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false

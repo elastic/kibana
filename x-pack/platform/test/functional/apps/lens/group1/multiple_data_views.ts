@@ -111,13 +111,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('fieldToggle-DistanceKilometers');
 
       const data = await lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
+      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData], 'lines');
     });
 
     it('ignores global filters on layers using a data view without the filter field', async () => {
       await filterBar.addFilter({ field: 'Carrier', operation: 'exists' });
       const data = await lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData]);
+      assertMatchesExpectedData(data, [expectedLogstashData, expectedFlightsData], 'lines');
       await lens.save(visTitle);
     });
 
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visualize.openSavedVisualization(visTitle);
       const data = await lens.getCurrentChartDebugState('xyVisChart');
-      assertMatchesExpectedData(data, [expectedFlightsData]);
+      assertMatchesExpectedData(data, [expectedFlightsData], 'lines');
     });
   });
 }

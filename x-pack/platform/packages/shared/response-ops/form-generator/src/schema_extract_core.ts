@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { getMeta, setMeta } from './schema_connector_metadata';
+import type { ResolvedMetaFunctions } from './form';
 
 interface HasUnwrap {
   unwrap(): z.ZodType;
@@ -25,9 +25,11 @@ const isUnwrappable = (schema: z.ZodType): schema is z.ZodType & HasUnwrap => {
 /* Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
  * In the process, we also extract the default value if any
  * @param schema - The Zod schema to extract from
+ * @param meta - Meta functions for reading/writing schema metadata
  * @returns An object containing the unwrapped schema and any default value
  */
-export const extractSchemaCore = (schema: z.ZodType) => {
+export const extractSchemaCore = (schema: z.ZodType, meta: ResolvedMetaFunctions) => {
+  const { getMeta, setMeta } = meta;
   let current = schema;
   let defaultValue: unknown;
   let isOptional = false;

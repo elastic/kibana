@@ -43,7 +43,7 @@ import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
 import { getParentContext, getRenderMode } from './helper';
 import { addLog } from './logger';
-import { apiHasLensComponentCallbacks } from './type_guards';
+import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
 import { buildUserMessagesHelpers } from './user_messages/api';
 
@@ -105,6 +105,9 @@ export function loadEmbeddableData(
     ? parentApi
     : ({} as LensPublicCallbacks);
 
+  const getConsumerMessages = () =>
+    apiHasUserMessages(parentApi) ? parentApi.userMessages ?? [] : [];
+
   // Some convenience api for the user messaging
   const {
     getUserMessages,
@@ -114,7 +117,14 @@ export function loadEmbeddableData(
     updateWarnings,
     resetMessages,
     updateMessages,
-  } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
+  } = buildUserMessagesHelpers(
+    api,
+    internalApi,
+    services,
+    onBeforeBadgesRender,
+    metaInfo,
+    getConsumerMessages
+  );
 
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
@@ -313,7 +323,7 @@ export function loadEmbeddableData(
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
-      if (getState().enhancements?.dynamicActions?.events.length) {
+      if (getState().drilldowns?.length) {
         reload('viewMode');
       }
     }),

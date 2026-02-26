@@ -159,6 +159,130 @@ steps:
         });
       });
     });
+
+    it('should resolve steps.outerForeachStep.item in inner foreach child step', async () => {
+      const yaml = `
+consts:
+  outerForeachArray: '${outerArrayExpression}'
+steps:
+  - name: outerForeachStep
+    foreach: '{{consts.outerForeachArray}}'
+    type: foreach
+    steps:
+      - name: innerForeachStep
+        foreach: '{{inputs.innerArray}}'
+        type: foreach
+        steps:
+          - name: innerForeachChildConnectorStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'OuterItem: {{steps.outerForeachStep.item}}; InnerItem: {{foreach.item}}'
+`;
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: yaml,
+        inputs: { innerArray },
+      });
+
+      outerArray.forEach((outerItem) => {
+        innerArray.forEach((innerItem) => {
+          expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: FakeConnectors.slack2.id,
+              params: {
+                message: `OuterItem: ${outerItem}; InnerItem: ${innerItem}`,
+              },
+            })
+          );
+        });
+      });
+    });
+
+    it('should resolve steps.outerForeachStep.index and total in inner foreach child step', async () => {
+      const yaml = `
+consts:
+  outerForeachArray: '${outerArrayExpression}'
+steps:
+  - name: outerForeachStep
+    foreach: '{{consts.outerForeachArray}}'
+    type: foreach
+    steps:
+      - name: innerForeachStep
+        foreach: '{{inputs.innerArray}}'
+        type: foreach
+        steps:
+          - name: innerForeachChildConnectorStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'idx:{{steps.outerForeachStep.index}};total:{{steps.outerForeachStep.total}}'
+`;
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: yaml,
+        inputs: { innerArray },
+      });
+
+      outerArray.forEach((_, outerIndex) => {
+        innerArray.forEach(() => {
+          expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: FakeConnectors.slack2.id,
+              params: {
+                message: `idx:${outerIndex};total:${outerArray.length}`,
+              },
+            })
+          );
+        });
+      });
+    });
+  });
+
+  describe('triple-nested foreach', () => {
+    it('should resolve outer and middle foreach context from the innermost step', async () => {
+      const outerItems = ['A', 'B'];
+      const middleItems = ['x', 'y'];
+      const innerItems = ['1', '2'];
+      const yaml = `
+consts:
+  outerArray: '${JSON.stringify(outerItems)}'
+  middleArray: '${JSON.stringify(middleItems)}'
+  innerArray: '${JSON.stringify(innerItems)}'
+steps:
+  - name: outerLoop
+    foreach: '{{consts.outerArray}}'
+    type: foreach
+    steps:
+      - name: middleLoop
+        foreach: '{{consts.middleArray}}'
+        type: foreach
+        steps:
+          - name: innerLoop
+            foreach: '{{consts.innerArray}}'
+            type: foreach
+            steps:
+              - name: leafStep
+                type: slack
+                connector-id: ${FakeConnectors.slack1.name}
+                with:
+                  message: 'o:{{steps.outerLoop.item}};m:{{steps.middleLoop.item}};i:{{foreach.item}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+      outerItems.forEach((outerItem) => {
+        middleItems.forEach((middleItem) => {
+          innerItems.forEach((innerItem) => {
+            expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: FakeConnectors.slack1.id,
+                params: {
+                  message: `o:${outerItem};m:${middleItem};i:${innerItem}`,
+                },
+              })
+            );
+          });
+        });
+      });
+    });
   });
 
   describe.each(['${{inputs.notExistingInput}}', 'not array', '["broken", json]'])(

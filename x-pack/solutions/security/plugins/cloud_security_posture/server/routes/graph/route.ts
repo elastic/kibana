@@ -43,8 +43,8 @@ export const defineGraphRoute = (router: CspRouter) =>
       async (context: CspRequestHandlerContext, request, response) => {
         const cspContext = await context.csp;
         const { nodesLimit, showUnknownTarget = false } = request.body;
-        const { originEventIds, start, end, indexPatterns, esQuery } = request.body
-          .query as GraphRequest['query'];
+        const { originEventIds, start, end, indexPatterns, esQuery, entityIds, pinnedIds } = request
+          .body.query as GraphRequest['query'];
         const spaceId = await cspContext.spacesService?.getSpaceId(request);
         const isGraphEnabled = await (
           await context.core
@@ -69,6 +69,8 @@ export const defineGraphRoute = (router: CspRouter) =>
               start,
               end,
               esQuery,
+              entityIds,
+              pinnedIds,
             },
             showUnknownTarget,
             nodesLimit,

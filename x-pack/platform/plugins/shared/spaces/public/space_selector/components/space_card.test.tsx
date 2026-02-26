@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiCard } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 
 import { SpaceCard } from './space_card';
@@ -19,7 +18,8 @@ test('it renders without crashing', () => {
     disabledFeatures: [],
   };
 
-  shallow(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  render(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  expect(screen.getByTestId('space-card-')).toBeInTheDocument();
 });
 
 test('links to the indicated space', () => {
@@ -30,10 +30,11 @@ test('links to the indicated space', () => {
     disabledFeatures: [],
   };
 
-  const wrapper = mount(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
-  expect(wrapper.find(EuiCard).props()).toMatchObject({
-    href: '/server-base-path/s/some-space/spaces/enter',
-  });
+  render(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  const card = screen.getByTestId('space-card-some-space');
+  const link = within(card).getByRole('link');
+  expect(link).toHaveAttribute('href', '/server-base-path/s/some-space/spaces/enter');
+  expect(card).toHaveTextContent('space name');
 });
 
 test('links to the default space too', () => {
@@ -44,8 +45,9 @@ test('links to the default space too', () => {
     disabledFeatures: [],
   };
 
-  const wrapper = mount(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
-  expect(wrapper.find(EuiCard).props()).toMatchObject({
-    href: '/server-base-path/spaces/enter',
-  });
+  render(<SpaceCard space={space} serverBasePath={'/server-base-path'} />);
+  const card = screen.getByTestId('space-card-default');
+  const link = within(card).getByRole('link');
+  expect(link).toHaveAttribute('href', '/server-base-path/spaces/enter');
+  expect(card).toHaveTextContent('default space');
 });

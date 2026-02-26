@@ -7,9 +7,7 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop",
-      "../../../../../../typings/emotion.d.ts"
+      "@kbn/ambient-storybook-types"
     ]
   },
   "include": [

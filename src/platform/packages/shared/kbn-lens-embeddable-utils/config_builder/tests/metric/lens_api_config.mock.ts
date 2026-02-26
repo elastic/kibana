@@ -55,12 +55,14 @@ export const complexMetricAPIAttributes = {
       },
       background_chart: {
         type: 'bar',
-        goal_value: {
+        max_value: {
           operation: 'percentile',
           field: 'bytes',
           percentile: 95,
         },
       },
+      position: 'top',
+      title_weight: 'normal',
     },
     {
       type: 'secondary',
@@ -71,6 +73,9 @@ export const complexMetricAPIAttributes = {
         baseline: 100,
         palette: 'status',
         value: false,
+      },
+      alignments: {
+        value: 'left',
       },
     },
   ],
@@ -113,7 +118,7 @@ export const complexESQLMetricAPIAttributes = {
       },
       background_chart: {
         type: 'bar',
-        goal_value: {
+        max_value: {
           operation: 'value',
           column: 'bytes',
         },

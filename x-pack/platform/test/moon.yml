@@ -169,6 +169,7 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/dev-cli-runner'
+  - '@kbn/ui-actions-plugin'
 tags:
   - test-helper
   - package

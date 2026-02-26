@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-09T18:40:19.390Z",
-  "sha1": "4b500cbbebb18d28d562eed10fcfb5492d58f97c",
+  "sha1": "d9adb39d43a613275404451bd50b87eb8872392b",
   "tests": [
     {
       "id": "dc6084aa7695e8a-26220f9b20676c1",
@@ -25,7 +24,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 98,
+        "line": 105,
         "column": 12
       }
     },
@@ -41,7 +40,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 119,
+        "line": 126,
         "column": 12
       }
     },
@@ -57,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 140,
+        "line": 147,
         "column": 12
       }
     },
@@ -73,7 +72,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 181,
+        "line": 188,
         "column": 12
       }
     },
@@ -89,7 +88,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 220,
+        "line": 227,
         "column": 12
       }
     },
@@ -105,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 255,
+        "line": 262,
         "column": 12
       }
     },
@@ -121,7 +120,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 290,
+        "line": 297,
         "column": 12
       }
     },
@@ -137,7 +136,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 329,
+        "line": 336,
         "column": 12
       }
     },
@@ -153,7 +152,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 389,
+        "line": 396,
         "column": 12
       }
     },
@@ -169,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 447,
+        "line": 454,
         "column": 12
       }
     },
@@ -185,7 +184,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 470,
+        "line": 477,
         "column": 12
       }
     },
@@ -201,7 +200,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 514,
+        "line": 521,
         "column": 12
       }
     },
@@ -217,7 +216,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 530,
+        "line": 537,
         "column": 12
       }
     },
@@ -233,7 +232,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 559,
+        "line": 566,
         "column": 12
       }
     },
@@ -249,7 +248,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
-        "line": 589,
+        "line": 596,
         "column": 12
       }
     },
@@ -265,7 +264,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 76,
+        "line": 83,
         "column": 12
       }
     },
@@ -281,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 123,
+        "line": 130,
         "column": 12
       }
     },
@@ -297,7 +296,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 166,
+        "line": 173,
         "column": 12
       }
     },
@@ -313,7 +312,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 221,
+        "line": 228,
         "column": 12
       }
     },
@@ -329,7 +328,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 293,
+        "line": 300,
         "column": 12
       }
     },
@@ -345,7 +344,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 357,
+        "line": 364,
         "column": 12
       }
     },
@@ -361,7 +360,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 409,
+        "line": 416,
         "column": 12
       }
     },
@@ -377,7 +376,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 476,
+        "line": 483,
         "column": 12
       }
     },
@@ -393,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 545,
+        "line": 552,
         "column": 12
       }
     },
@@ -409,7 +408,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 604,
+        "line": 611,
         "column": 12
       }
     },
@@ -425,7 +424,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
-        "line": 638,
+        "line": 645,
         "column": 12
       }
     },
@@ -905,7 +904,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 27,
+        "line": 30,
         "column": 12
       }
     },
@@ -921,7 +920,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 60,
+        "line": 63,
         "column": 12
       }
     },
@@ -937,7 +936,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 78,
+        "line": 81,
         "column": 12
       }
     },
@@ -953,7 +952,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 99,
+        "line": 102,
         "column": 12
       }
     },
@@ -969,7 +968,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 120,
+        "line": 123,
         "column": 12
       }
     },
@@ -985,7 +984,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 141,
+        "line": 144,
         "column": 12
       }
     },
@@ -1001,7 +1000,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 162,
+        "line": 165,
         "column": 12
       }
     },
@@ -1017,7 +1016,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 184,
+        "line": 187,
         "column": 12
       }
     },
@@ -1033,7 +1032,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 213,
+        "line": 216,
         "column": 12
       }
     },
@@ -1049,7 +1048,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 246,
+        "line": 249,
         "column": 12
       }
     },
@@ -1065,7 +1064,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 292,
+        "line": 295,
         "column": 12
       }
     },
@@ -1081,7 +1080,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 331,
+        "line": 334,
         "column": 12
       }
     },
@@ -1097,7 +1096,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 364,
+        "line": 367,
         "column": 12
       }
     },
@@ -1113,7 +1112,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 387,
+        "line": 390,
         "column": 12
       }
     },
@@ -1129,7 +1128,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 410,
+        "line": 413,
         "column": 12
       }
     },
@@ -1145,7 +1144,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 430,
+        "line": 433,
         "column": 12
       }
     },
@@ -1161,7 +1160,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 458,
+        "line": 461,
         "column": 12
       }
     },
@@ -1177,7 +1176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 476,
+        "line": 479,
         "column": 12
       }
     },
@@ -1193,7 +1192,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 505,
+        "line": 508,
         "column": 12
       }
     },
@@ -1209,7 +1208,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 527,
+        "line": 530,
         "column": 12
       }
     },
@@ -1225,7 +1224,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 543,
+        "line": 546,
         "column": 12
       }
     },
@@ -1241,7 +1240,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 573,
+        "line": 576,
         "column": 12
       }
     },
@@ -1257,7 +1256,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 593,
+        "line": 596,
         "column": 12
       }
     },
@@ -1273,7 +1272,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 609,
+        "line": 612,
         "column": 12
       }
     },
@@ -1289,7 +1288,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 626,
+        "line": 629,
         "column": 12
       }
     },
@@ -1305,7 +1304,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 694,
+        "line": 697,
         "column": 12
       }
     },
@@ -1321,7 +1320,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 759,
+        "line": 762,
         "column": 12
       }
     },
@@ -1337,439 +1336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
-        "line": 853,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-2d81909c8010534",
-      "title": "Stream schema - field mapping API should get unmapped fields for a stream",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 18,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-0be104fbd03fbf8",
-      "title": "Stream schema - field mapping API should return error for non-existent stream unmapped fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 34,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-83b1ecc4fdfe407",
-      "title": "Stream schema - field mapping API should simulate field mapping with keyword type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 53,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-fb6c04b25e0ba43",
-      "title": "Stream schema - field mapping API should simulate single keyword field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 75,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-05ac03a7fb45010",
-      "title": "Stream schema - field mapping API should simulate field mapping with match_only_text type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 94,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-184338feb2495d9",
-      "title": "Stream schema - field mapping API should simulate field mapping with long type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 116,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-8c2d43ffdfbc4ba",
-      "title": "Stream schema - field mapping API should simulate single long field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 137,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-3c25de221d638fe",
-      "title": "Stream schema - field mapping API should simulate field mapping with double type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 156,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-fa8c1f744093729",
-      "title": "Stream schema - field mapping API should simulate single double field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 177,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-7d31f8801130a27",
-      "title": "Stream schema - field mapping API should simulate field mapping with boolean type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 196,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-74cacc695f4601f",
-      "title": "Stream schema - field mapping API should simulate multiple boolean fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 214,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-671af81b51cdb3a",
-      "title": "Stream schema - field mapping API should simulate field mapping with date type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 237,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-eb119f8dd624a2d",
-      "title": "Stream schema - field mapping API should simulate multiple date fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 255,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-6728fa1703813b2",
-      "title": "Stream schema - field mapping API should simulate field mapping with ip type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 278,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-cceb01b877ea4be",
-      "title": "Stream schema - field mapping API should simulate single ip field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 299,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-6a4486f044d1ede",
-      "title": "Stream schema - field mapping API should simulate field mapping with geo_point type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 318,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-fad83f4b17b3e65",
-      "title": "Stream schema - field mapping API should simulate multiple geo_point fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 339,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-67c61df9e5b530a",
-      "title": "Stream schema - field mapping API should simulate multiple field definitions of different types",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 361,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-f8ce8ce1b03da5f",
-      "title": "Stream schema - field mapping API should handle deeply nested field names",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 391,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-c841dfc0d7c672c",
-      "title": "Stream schema - field mapping API should handle ECS-style field names",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 412,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-2cd6d3f29db291e",
-      "title": "Stream schema - field mapping API should return error for invalid field type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 437,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-860b828f66428c7",
-      "title": "Stream schema - field mapping API should handle empty field definitions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 454,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-e9db9fadbe3e671",
-      "title": "Stream schema - field mapping API should return error for non-existent stream",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 473,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-fde1a7bced25313",
-      "title": "Stream schema - field mapping API should handle missing field name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 491,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-e450695e5f203af",
-      "title": "Stream schema - field mapping API should handle missing field type",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 508,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-15396eb1c1f45d8",
-      "title": "Stream schema - field mapping API should return simulation error for incompatible mapping",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 526,
-        "column": 12
-      }
-    },
-    {
-      "id": "f3127db8132e066-9dd7d64d44a032b",
-      "title": "Stream schema - field mapping API should provide simulation details in response",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
-        "line": 553,
+        "line": 856,
         "column": 12
       }
     },
@@ -1785,7 +1352,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 76,
+        "line": 83,
         "column": 12
       }
     },
@@ -1801,7 +1368,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 119,
+        "line": 126,
         "column": 12
       }
     },
@@ -1817,7 +1384,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 158,
+        "line": 165,
         "column": 12
       }
     },
@@ -1833,7 +1400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 197,
+        "line": 204,
         "column": 12
       }
     },
@@ -1849,7 +1416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 236,
+        "line": 243,
         "column": 12
       }
     },
@@ -1865,7 +1432,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 275,
+        "line": 282,
         "column": 12
       }
     },
@@ -1881,7 +1448,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 314,
+        "line": 321,
         "column": 12
       }
     },
@@ -1897,7 +1464,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 360,
+        "line": 367,
         "column": 12
       }
     },
@@ -1913,7 +1480,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 432,
+        "line": 439,
         "column": 12
       }
     },
@@ -1929,7 +1496,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 498,
+        "line": 505,
         "column": 12
       }
     },
@@ -1945,7 +1512,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 564,
+        "line": 571,
         "column": 12
       }
     },
@@ -1961,7 +1528,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 606,
+        "line": 613,
         "column": 12
       }
     },
@@ -1977,7 +1544,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
-        "line": 638,
+        "line": 645,
         "column": 12
       }
     }

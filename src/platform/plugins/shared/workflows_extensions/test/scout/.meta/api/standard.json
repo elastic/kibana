@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-09T13:22:23.604Z",
-  "sha1": "15adbf56ba2dd9dfc9c8838a03e8e2616cd551d6",
+  "sha1": "ee41e2603dd078e69ea3280c7c4b609a077d7dd4",
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
@@ -21,6 +20,23 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
         "line": 34,
+        "column": 12
+      }
+    },
+    {
+      "id": "e9644e578f7a84b-ea81a422591a428",
+      "title": "Workflows Extensions - Custom Trigger Definitions Approval should validate that all registered custom trigger definitions are approved by workflows-eng team",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSearch",
+        "@svlSecurity",
+        "@svlOblt",
+        "@svlWorkplaceAI"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/trigger_definitions_approval.spec.ts",
+        "line": 26,
         "column": 12
       }
     }

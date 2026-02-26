@@ -32,7 +32,7 @@ describe('ESQL routes', () => {
 
     expect(item1).toMatchObject({
       name: 'lookup_index1',
-      mode: 'lookup',
+      mode: 'Lookup',
       aliases: [],
     });
 
@@ -40,7 +40,7 @@ describe('ESQL routes', () => {
 
     expect(item2).toMatchObject({
       name: 'lookup_index2',
-      mode: 'lookup',
+      mode: 'Lookup',
       aliases: ['lookup_index2_alias1', 'lookup_index2_alias2'],
     });
   });
@@ -54,7 +54,7 @@ describe('ESQL routes', () => {
 
     expect(item1).toMatchObject({
       name: 'ts_index1',
-      mode: 'time_series',
+      mode: 'Timeseries',
       aliases: [],
     });
 
@@ -62,7 +62,7 @@ describe('ESQL routes', () => {
 
     expect(item2).toMatchObject({
       name: 'ts_index2',
-      mode: 'time_series',
+      mode: 'Timeseries',
       aliases: ['ts_index2_alias1', 'ts_index2_alias2'],
     });
   });
@@ -219,6 +219,80 @@ describe('ESQL routes', () => {
       // Cleanup
       await client.indices.delete({ index: index1 });
       await client.indices.delete({ index: index2 });
+    });
+
+    it('should return @timestamp when ES|QL source is a view that returns @timestamp', async () => {
+      const indexName = 'test_timefield_view_index';
+      const viewName = 'test-timefield-view';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: indexName,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'text' },
+          },
+        },
+      });
+
+      await client.transport.request({
+        method: 'PUT',
+        path: `/_query/view/${encodeURIComponent(viewName)}`,
+        body: {
+          query: `FROM ${indexName}`,
+        },
+      });
+
+      const query = `FROM ${viewName}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('@timestamp');
+
+      // Cleanup
+      await client.transport.request({
+        method: 'DELETE',
+        path: `/_query/view/${encodeURIComponent(viewName)}`,
+      });
+      await client.indices.delete({ index: indexName });
+    });
+
+    it('should return undefined when ES|QL source is a view that does not return @timestamp', async () => {
+      const indexName = 'test_no_timefield_view_index';
+      const viewName = 'test-no-timefield-view';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: indexName,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'text' },
+          },
+        },
+      });
+
+      await client.transport.request({
+        method: 'PUT',
+        path: `/_query/view/${encodeURIComponent(viewName)}`,
+        body: {
+          query: `FROM ${indexName} | KEEP message`,
+        },
+      });
+
+      const query = `FROM ${viewName}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe(undefined);
+
+      // Cleanup
+      await client.transport.request({
+        method: 'DELETE',
+        path: `/_query/view/${encodeURIComponent(viewName)}`,
+      });
+      await client.indices.delete({ index: indexName });
     });
   });
 

@@ -10,7 +10,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 
 export const useESQLVariables = ({
   parentApi,

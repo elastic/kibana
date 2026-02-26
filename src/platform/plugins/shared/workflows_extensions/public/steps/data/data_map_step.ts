@@ -29,10 +29,20 @@ export const dataMapStepDefinition: PublicStepDefinition = {
   actionsMenuGroup: ActionsMenuGroup.data,
   documentation: {
     details: i18n.translate('workflowsExtensions.dataMapStep.documentation.details', {
-      defaultMessage: `The ${DataMapStepTypeId} step transforms arrays or single objects by applying a mapping configuration. For arrays, it maps each item and returns an array. For objects, it maps the single object and returns an object. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. The output is accessible via {outputSyntax}.`,
+      defaultMessage: `The ${DataMapStepTypeId} step transforms arrays or single objects by applying a mapping configuration. For arrays, it maps each item and returns an array. For objects, it maps the single object and returns an object. Use {itemSyntax} to reference the current item and {indexSyntax} to access the item's position. The output is accessible via {outputSyntax}.
+
+To map nested arrays, add a {mapDirective} key inside a nested field object with the form {mapDirectiveShape}. The {mapItems} value is a Liquid template expression rendered using the current context (the same rendering applied to all other fields), and each element is bound to the name given by {mapItemProp} (defaults to {mapItemDefault}). The iteration index is bound to the name given by {mapIndexProp} (defaults to {mapIndexDefault}), and parent variables remain in scope. Nested objects without {mapDirective} produce literal object output. 
+If nested {mapItems} value in the source data resolves to any non-array value (including \`null\` or \`undefined\`), an empty array (\`[]\`) is going to be returned to guarantee output consistency. Nested recursion depth is limited to 10 levels.`,
       values: {
         itemSyntax: '`{{ item.field }}`',
         indexSyntax: '`{{ index }}`',
+        mapDirective: '`$map`',
+        mapDirectiveShape: '`$map: { items: "${{ ... }}", item?: "...", index?: "..." }`',
+        mapItems: '`items`',
+        mapItemProp: '`item`',
+        mapItemDefault: '`"item"`',
+        mapIndexProp: '`index`',
+        mapIndexDefault: '`"index"`',
         outputSyntax: '`{{ steps.stepName.output }}`',
       },
     }),
@@ -130,6 +140,71 @@ export const dataMapStepDefinition: PublicStepDefinition = {
   type: log
   with:
     message: "User: \${{ steps.reshape-user-profile.output.full_name }}"
+\`\`\``,
+
+      `## Recursive array mapping with $map
+\`\`\`yaml
+- name: prune-nested-data
+  type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_data.output }}"
+  with:
+    fields:
+      id: "\${{ item.id }}"
+      name: "\${{ item.name }}"
+      tags:
+        $map: { items: "\${{ item.tags }}", item: "tag" }
+        label: "\${{ tag.label }}"
+        color: "\${{ tag.color }}"
+        owner: "\${{ item.name }}"
+\`\`\``,
+
+      `## Multi-level recursion with $map
+\`\`\`yaml
+- name: reshape-org
+  type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_org.output }}"
+  with:
+    fields:
+      org_name: "\${{ item.name }}"
+      departments:
+        $map: { items: "\${{ item.departments }}", item: "dept" }
+        dept_name: "\${{ dept.name }}"
+        employees:
+          $map: { items: "\${{ dept.employees }}", item: "emp" }
+          name: "\${{ emp.name }}"
+          department: "\${{ dept.name }}"
+          org: "\${{ item.name }}"
+\`\`\``,
+
+      `## Nested $map with defaults (item/index omitted)
+\`\`\`yaml
+- name: flatten-tags
+  type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_data.output }}"
+  with:
+    fields:
+      id: "\${{ item.id }}"
+      tags:
+        $map: { items: "\${{ item.tags }}" }
+        label: "\${{ item.label }}"
+        position: "\${{ index }}"
+\`\`\``,
+
+      `## Nested literal objects inside $map
+\`\`\`yaml
+- name: enrich-tags
+  type: ${DataMapStepTypeId}
+  items: "\${{ steps.fetch_data.output }}"
+  with:
+    fields:
+      id: "\${{ item.id }}"
+      tags:
+        $map: { items: "\${{ item.tags }}", item: "tag" }
+        label: "\${{ tag.label }}"
+        color: "\${{ tag.color }}"
+        owner:
+          id: "\${{ tag.user.id }}"
+          name: "\${{ tag.user.name }}"
 \`\`\``,
     ],
   },

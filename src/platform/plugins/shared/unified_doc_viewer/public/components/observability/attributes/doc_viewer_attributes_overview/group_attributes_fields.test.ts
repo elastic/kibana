@@ -27,7 +27,6 @@ describe('groupAttributesFields', () => {
       flattened,
       searchTerm: '',
       shouldShowFieldHandler: alwaysShow,
-      isEsqlMode: false,
       areNullValuesHidden: false,
     });
 
@@ -46,7 +45,6 @@ describe('groupAttributesFields', () => {
       flattened,
       searchTerm: 'env',
       shouldShowFieldHandler: alwaysShow,
-      isEsqlMode: false,
       areNullValuesHidden: false,
     });
 
@@ -57,7 +55,7 @@ describe('groupAttributesFields', () => {
     expect(result.scopeAttributesFields).toEqual([]);
   });
 
-  it('filters out null values in ES|QL mode', () => {
+  it('filters out null values when areNullValuesHidden is true', () => {
     const flattenedWithNull = { ...flattened, 'attributes.null': null };
     const allFieldsWithNull = Object.keys(flattenedWithNull);
 
@@ -66,7 +64,6 @@ describe('groupAttributesFields', () => {
       flattened: flattenedWithNull,
       searchTerm: '',
       shouldShowFieldHandler: alwaysShow,
-      isEsqlMode: true,
       areNullValuesHidden: true,
     });
 

@@ -23,13 +23,9 @@ import {
   isRowClickTriggerContext,
 } from '@kbn/embeddable-plugin/public';
 import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_CLICK_ROW } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import {
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { ActionFactoryContext } from '../url_drilldown';
+import { ON_CLICK_VALUE, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Primitive } from './util';
 import { deleteUndefinedKeys, toPrimitiveOrUndefined } from './util';
 
@@ -70,7 +66,7 @@ const getEventScopeFromRangeSelectTriggerContext = (
   const { table, column: columnIndex, range } = eventScopeInput.data;
   const column = table.columns[columnIndex];
   return deleteUndefinedKeys({
-    key: toPrimitiveOrUndefined(column?.meta.field) as string,
+    key: toPrimitiveOrUndefined(column?.meta?.field ?? column?.name) as string,
     from: toPrimitiveOrUndefined(range[0]) as string | number | undefined,
     to: toPrimitiveOrUndefined(range[range.length - 1]) as string | number | undefined,
   });
@@ -84,7 +80,8 @@ const getEventScopeFromValueClickTriggerContext = (
     const column = table.columns[columnIndex];
     return {
       value: toPrimitiveOrUndefined(value) as Primitive,
-      key: column?.meta?.field,
+      // `meta.field` is not always available (e.g. ES|QL result tables).
+      key: column?.meta?.field ?? column?.name,
     };
   });
 
@@ -283,17 +280,13 @@ const selectRangeVariables: readonly UrlTemplateEditorVariable[] = [
   },
 ];
 
-export const getEventVariableList = (
-  context: ActionFactoryContext
-): UrlTemplateEditorVariable[] => {
-  const [trigger] = context.triggers;
-
+export const getEventVariableList = (trigger?: string): UrlTemplateEditorVariable[] => {
   switch (trigger) {
-    case VALUE_CLICK_TRIGGER:
+    case ON_CLICK_VALUE:
       return [...valueClickVariables];
-    case ROW_CLICK_TRIGGER:
+    case ON_CLICK_ROW:
       return [...rowClickVariables];
-    case SELECT_RANGE_TRIGGER:
+    case ON_SELECT_RANGE:
       return [...selectRangeVariables];
   }
 

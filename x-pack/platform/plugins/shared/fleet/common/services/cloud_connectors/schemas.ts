@@ -59,7 +59,7 @@ export const AZURE_CREDENTIAL_SCHEMA: CloudConnectorCredentialSchema = {
       aliases: [AZURE_CLIENT_ID_VAR_NAME], // 'azure.credentials.client_id'
       isSecret: true,
     },
-    azureCredentialsCloudConnectorId: {
+    azure_credentials_cloud_connector_id: {
       primary: AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID, // 'azure_credentials_cloud_connector_id'
       aliases: [AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME], // 'azure.credentials.azure_credentials_cloud_connector_id'
       isSecret: false,
@@ -131,4 +131,35 @@ export function getAllSupportedVarNames(): string[] {
   }
 
   return allVarNames;
+}
+
+/**
+ * Gets the credential property name for a given var key name.
+ * Handles both primary keys and aliases, mapping them back to the logical credential field name.
+ *
+ * @param provider - The cloud provider (e.g., 'aws', 'azure')
+ * @param varName - The var key name (e.g., 'role_arn' or 'aws.role_arn')
+ * @returns The credential property name (e.g., 'roleArn') or undefined if not found
+ *
+ * @example
+ * getCredentialKeyFromVarName('aws', 'role_arn') // → 'roleArn'
+ * getCredentialKeyFromVarName('aws', 'aws.role_arn') // → 'roleArn'
+ * getCredentialKeyFromVarName('azure', 'tenant_id') // → 'tenantId'
+ */
+export function getCredentialKeyFromVarName(
+  provider: CloudProvider,
+  varName: string
+): string | undefined {
+  const schema = CREDENTIAL_SCHEMAS[provider];
+  if (!schema) {
+    return undefined;
+  }
+
+  for (const [credentialKey, mapping] of Object.entries(schema.fields)) {
+    if (mapping.primary === varName || mapping.aliases.includes(varName)) {
+      return credentialKey;
+    }
+  }
+
+  return undefined;
 }

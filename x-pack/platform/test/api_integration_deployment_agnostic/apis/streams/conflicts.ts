@@ -32,7 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not allow multiple requests manipulating streams state at once', async () => {
         const stream1 = {
           stream: {
-            name: 'logs.nginx',
+            name: 'logs.otel.nginx',
           },
           where: {
             field: 'resource.attributes.host.name',
@@ -42,7 +42,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         const stream2 = {
           stream: {
-            name: 'logs.apache',
+            name: 'logs.otel.apache',
           },
           where: {
             field: 'resource.attributes.host.name',
@@ -51,8 +51,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           status,
         };
         const responses = await Promise.allSettled([
-          forkStream(apiClient, 'logs', stream1),
-          forkStream(apiClient, 'logs', stream2),
+          forkStream(apiClient, 'logs.otel', stream1),
+          forkStream(apiClient, 'logs.otel', stream2),
         ]);
         // Assert than one of the requests failed with a conflict error and the other succeeded
         // It needs to check either way (success or failure) because the order of execution is not guaranteed
@@ -85,7 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not treat a half-created wired stream as conflict', async () => {
         await putStream(
           apiClient,
-          'logs.child',
+          'logs.otel.child',
           {
             stream: {
               description: '',
@@ -107,7 +107,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // delete the tracking document so streams doesn't know anymore about the wired stream
         await esClient.delete({
           index: '.kibana_streams-000001',
-          id: 'logs.child',
+          id: 'logs.otel.child',
           refresh: 'wait_for',
         });
 
@@ -115,19 +115,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamsResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.child',
+              name: 'logs.otel.child',
             },
           },
         });
         expect(Streams.WiredStream.GetResponse.is(streamsResponse.body)).to.be(false);
 
         // Assert that the data stream was created
-        const response = await esClient.indices.getDataStream({ name: 'logs.child' });
+        const response = await esClient.indices.getDataStream({ name: 'logs.otel.child' });
         expect(response.data_streams).to.have.length(1);
         // put stream again to fix the problem
         await putStream(
           apiClient,
-          'logs.child',
+          'logs.otel.child',
           {
             stream: {
               description: '',
@@ -151,7 +151,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamsResponse2 = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.child',
+              name: 'logs.otel.child',
             },
           },
         });

@@ -54,6 +54,7 @@ const mockUseFetchIndices = useFetchIndices as jest.Mock;
 const mockUseValidateIndex = useValidateIndex as jest.Mock;
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 const mockUseCreateUpdateIntegration = useCreateUpdateIntegration as jest.Mock;
+const mockRefetch = jest.fn();
 
 const mockServices = coreMock.createStart();
 
@@ -108,12 +109,13 @@ describe('CreateDataStreamFlyout', () => {
       clearValidationError: mockClearValidationError,
     });
 
+    mockRefetch.mockClear();
     mockUseGetIntegrationById.mockReturnValue({
       integration: undefined,
       isLoading: false,
       isError: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: mockRefetch,
     });
 
     mockUseCreateUpdateIntegration.mockReturnValue({
@@ -357,6 +359,118 @@ describe('CreateDataStreamFlyout', () => {
       // The combobox should show loading state
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    });
+  });
+
+  describe('refetch after creation', () => {
+    it('should get refetch function from useGetIntegrationById hook', () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      expect(mockUseGetIntegrationById).toHaveBeenCalled();
+    });
+  });
+
+  describe('duplicate data stream name validation', () => {
+    it('should disable analyze button when entering a duplicate data stream name', async () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: {
+          integrationId: 'test-integration',
+          title: 'Test Integration',
+          description: 'Test description',
+          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing Data Stream', inputTypes: [] }],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('dataStreamTitleInput')).toBeInTheDocument();
+      });
+
+      fireEvent.change(getByTestId('dataStreamTitleInput'), {
+        target: { value: 'existing data stream' },
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('should disable analyze button for case-insensitive duplicate names', async () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: {
+          integrationId: 'test-integration',
+          title: 'Test Integration',
+          description: 'Test description',
+          dataStreams: [{ dataStreamId: 'ds-1', title: 'My Data Stream', inputTypes: [] }],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('dataStreamTitleInput')).toBeInTheDocument();
+      });
+
+      fireEvent.change(getByTestId('dataStreamTitleInput'), {
+        target: { value: 'MY DATA STREAM' },
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('should allow unique data stream names', async () => {
+      mockUseGetIntegrationById.mockReturnValue({
+        integration: {
+          integrationId: 'test-integration',
+          title: 'Test Integration',
+          description: 'Test description',
+          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing Stream', inputTypes: [] }],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+
+      const Wrapper = createWrapper();
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('dataStreamTitleInput')).toBeInTheDocument();
+      });
+
+      fireEvent.change(getByTestId('dataStreamTitleInput'), {
+        target: { value: 'New Unique Stream' },
+      });
+
+      const titleInput = getByTestId('dataStreamTitleInput');
+      expect(titleInput.getAttribute('aria-invalid')).not.toBe('true');
     });
   });
 });

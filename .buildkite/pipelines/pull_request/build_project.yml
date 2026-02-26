@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
+    cancel_on_build_failing: true
     label: 'Build Project Image'
     agents:
       machineType: n2-standard-16

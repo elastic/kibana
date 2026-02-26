@@ -75,6 +75,31 @@ export function timeRangeToDisplayText(
 }
 
 /**
+ * Converts a parsed TimeRange into a fully formatted date string,
+ * always rendering both start and end as absolute dates in the given format.
+ */
+export function timeRangeToFullFormattedText(
+  timeRange: TimeRange,
+  options?: TimeRangeTransformOptions
+): string {
+  const { delimiter = DATE_RANGE_DISPLAY_DELIMITER, dateFormat = DEFAULT_DATE_FORMAT } =
+    options ?? {};
+
+  if (timeRange.isInvalid) {
+    return timeRange.value;
+  }
+
+  const formattedStart = timeRange.startDate
+    ? formatAbsoluteInstant(timeRange.startDate, dateFormat)
+    : timeRange.start;
+  const formattedEnd = timeRange.endDate
+    ? formatAbsoluteInstant(timeRange.endDate, dateFormat)
+    : timeRange.end;
+
+  return `${formattedStart} ${delimiter.trim()} ${formattedEnd}`;
+}
+
+/**
  * Formats a single date instant for display.
  * Converts date math to natural language where possible.
  */

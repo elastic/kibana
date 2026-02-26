@@ -6,16 +6,20 @@
  */
 
 import { createSkillsStore, SkillsStoreImpl } from './skills_store';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 
 describe('SkillsStore', () => {
-  const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
+  const createMockSkill = (
+    overrides: Partial<InternalSkillDefinition> = {}
+  ): InternalSkillDefinition => ({
     id: 'test-skill-1',
     name: 'test-skill',
     basePath: 'skills/platform',
     description: 'A test skill',
     content: 'Skill body content',
+    readonly: true,
+    getRegistryTools: () => [],
     ...overrides,
   });
 

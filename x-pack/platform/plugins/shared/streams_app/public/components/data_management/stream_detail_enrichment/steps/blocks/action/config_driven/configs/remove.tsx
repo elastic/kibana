@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 import { ALWAYS_CONDITION, type RemoveProcessor } from '@kbn/streamlang';
@@ -30,12 +29,6 @@ const defaultFormState: RemoveProcessorFormState = {
 
 const fieldOptions: FieldOptions = {
   fieldKey: 'from',
-  fieldHelpText: i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeFieldHelpText',
-    {
-      defaultMessage: 'The field to be removed.',
-    }
-  ),
   includeCondition: true,
   includeIgnoreFailures: true,
   includeIgnoreMissing: true,
@@ -56,24 +49,16 @@ export const removeProcessorConfig: ConfigDrivenProcessorConfiguration<
   ),
   getDocUrl: (docLinks: DocLinksStart) => {
     return (
-      <FormattedMessage
-        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.removeHelpText"
-        defaultMessage="{removeLink} The processor removes the specified field."
-        values={{
-          removeLink: (
-            <EuiLink
-              data-test-subj="streamsAppAvailableProcessorsRemoveLink"
-              external
-              target="_blank"
-              href={docLinks.links.ingest.remove}
-            >
-              {i18n.translate('xpack.streams.availableProcessors.removeLinkLabel', {
-                defaultMessage: 'Removes a field.',
-              })}
-            </EuiLink>
-          ),
-        }}
-      />
+      <EuiLink
+        data-test-subj="streamsAppAvailableProcessorsRemoveLink"
+        external
+        target="_blank"
+        href={docLinks.links.ingest.remove}
+      >
+        {i18n.translate('xpack.streams.availableProcessors.removeLinkLabel', {
+          defaultMessage: 'Remove a specific field.',
+        })}
+      </EuiLink>
     );
   },
   defaultFormState,

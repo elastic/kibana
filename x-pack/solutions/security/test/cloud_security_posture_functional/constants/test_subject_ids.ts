@@ -26,6 +26,8 @@ export const testSubjectIds = {
     'cloudSecurityGraphGraphInvestigationShowActionsOnEntity',
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEntityDetails',
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID:
+    'cloudSecurityGraphGraphInvestigationShowEntityRelationships',
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphLabelExpandPopover',
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEventsWithThisAction',
@@ -47,6 +49,7 @@ export const testSubjectIds = {
   GRAPH_CALLOUT_TEST_ID: 'cloudSecurityGraphGraphInvestigationCallout',
   GRAPH_NODE_ENTITY_DETAILS_ID: 'cloudSecurityGraphGraphInvestigationEntityNodeDetails',
   GRAPH_NODE_ENTITY_TAG_TEXT_ID: 'cloudSecurityGraphGraphInvestigationTagText',
+  GRAPH_NODE_ENTITY_TAG_COUNT_ID: 'cloudSecurityGraphGraphInvestigationTagCount',
   GROUPED_ITEM_TITLE_TEST_ID_LINK: 'GraphGroupedNodePreviewPanelGroupedItemTitleLink',
   GROUPED_ITEM_TITLE_TEST_ID_TEXT: 'GraphGroupedNodePreviewPanelGroupedItemTitleText',
   GROUPED_ITEM_ACTOR_TEST_ID: 'GraphGroupedNodePreviewPanelGroupedItemActor',

@@ -167,6 +167,11 @@ export const ACTIONS_COLUMN_TITLE = i18n.translate(
   { defaultMessage: 'Actions' }
 );
 
+export const DETAILS_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.detailsButtonAriaLabel',
+  { defaultMessage: 'View details' }
+);
+
 export const OPEN_IN_DISCOVER_ACTION_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.openInDiscoverActionTitle',
   { defaultMessage: 'Open in Discover' }
@@ -194,3 +199,13 @@ export const getPromoteQuerySuccessToast = (queryTitle: string) =>
     defaultMessage: 'Promoted "{queryTitle}". It moved to the Scanning section.',
     values: { queryTitle },
   });
+
+export const SAVE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.saveQueryErrorToastTitle',
+  { defaultMessage: 'Failed to save query' }
+);
+
+export const DELETE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.deleteQueryErrorToastTitle',
+  { defaultMessage: 'Failed to delete query' }
+);

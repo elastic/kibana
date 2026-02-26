@@ -73,7 +73,7 @@ export class ComposerQuery {
     ((templateOrQueryOrParamValues, ...rest: unknown[]) => {
       const tagOrGeneratorWithParams =
         (initialParamValues: Record<string, unknown>): QueryCommandTagParametrized =>
-        (templateOrQuery: any, ...holes: unknown[]) => {
+        (templateOrQuery: string | TemplateStringsArray, ...holes: unknown[]) => {
           const params: Record<string, unknown> = { ...initialParamValues };
           let command: ESQLCommand | ESQLAstHeaderCommand;
 

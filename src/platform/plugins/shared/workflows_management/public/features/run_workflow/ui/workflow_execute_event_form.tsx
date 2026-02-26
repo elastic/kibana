@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -325,29 +326,31 @@ export const WorkflowExecuteEventForm = ({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <AlertsSearchBar
-          appName="workflow_management"
-          showDatePicker
-          onQueryChange={handleQueryChange}
-          onQuerySubmit={handleQuerySubmit}
-          onFiltersUpdated={handleFiltersUpdated}
-          query={query}
-          filters={filters}
-          rangeFrom={timeRange.from}
-          rangeTo={timeRange.to}
-          showFilterBar={false}
-          showSubmitButton={true}
-          placeholder={i18n.translate('workflows.workflowExecuteEventForm.searchPlaceholder', {
-            defaultMessage:
-              'Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)',
-          })}
-          ruleTypeIds={[]}
-          http={http}
-          toasts={notifications.toasts}
-          unifiedSearchBar={unifiedSearch.ui.SearchBar}
-          dataService={dataService}
-          fetchUnifiedAlertsFields={true}
-        />
+        <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
+          <AlertsSearchBar
+            appName="workflow_management"
+            showDatePicker
+            onQueryChange={handleQueryChange}
+            onQuerySubmit={handleQuerySubmit}
+            onFiltersUpdated={handleFiltersUpdated}
+            query={query}
+            filters={filters}
+            rangeFrom={timeRange.from}
+            rangeTo={timeRange.to}
+            showFilterBar={false}
+            showSubmitButton={true}
+            placeholder={i18n.translate('workflows.workflowExecuteEventForm.searchPlaceholder', {
+              defaultMessage:
+                'Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)',
+            })}
+            ruleTypeIds={[]}
+            http={http}
+            toasts={notifications.toasts}
+            unifiedSearchBar={unifiedSearch.ui.SearchBar}
+            dataService={dataService}
+            fetchUnifiedAlertsFields={true}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         {alertsLoading ? (

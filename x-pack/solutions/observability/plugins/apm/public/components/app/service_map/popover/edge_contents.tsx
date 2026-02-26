@@ -7,10 +7,10 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import type { EdgeDataDefinition } from 'cytoscape';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import type { ContentsProps } from '.';
+import { isEdge } from './utils';
+import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
@@ -23,19 +23,22 @@ const INITIAL_STATE: Partial<EdgeReturn> = {
   previousPeriod: undefined,
 };
 
-export function EdgeContents({ elementData, environment, start, end }: ContentsProps) {
-  const edgeData = elementData as EdgeDataDefinition;
-
+export function EdgeContents({ selection, environment, start, end }: ContentsProps) {
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
-
   const { offset, comparisonEnabled } = query;
 
-  const sourceServiceName = edgeData.sourceData[SERVICE_NAME] as string | undefined;
-  const dependencies = edgeData.resources;
+  const isEdgeSelection = isEdge(selection);
+  const sourceData = isEdgeSelection
+    ? selection.data?.sourceData ?? { id: selection.source }
+    : null;
+  const resources = isEdgeSelection ? selection.data?.resources ?? [] : [];
+  const sourceServiceName =
+    sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
+  const dependencies = resources;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -58,6 +61,10 @@ export function EdgeContents({ elementData, environment, start, end }: ContentsP
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
+
+  if (!isEdgeSelection) {
+    return null;
+  }
 
   return (
     <EuiFlexItem>

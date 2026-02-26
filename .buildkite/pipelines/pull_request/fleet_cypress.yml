@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/fleet_cypress.sh
+    cancel_on_build_failing: true
     label: 'Fleet Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -7,11 +8,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 50
     parallelism: 6
     retry:

@@ -32,6 +32,7 @@ describe('helpers', () => {
   describe('detectProcessorContext', () => {
     const createFakeModel = (lines: string[]): monaco.editor.ITextModel => {
       return {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getValueInRange: ({ startLineNumber, startColumn, endLineNumber, endColumn }: any) => {
           if (startLineNumber === endLineNumber) {
             const s = lines[startLineNumber - 1] || '';

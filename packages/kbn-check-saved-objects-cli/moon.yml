@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/migrator-test-kit'
   - '@kbn/config-schema'
   - '@kbn/repo-info'
+  - '@kbn/encrypted-saved-objects-plugin'
 tags:
   - shared-common
   - package

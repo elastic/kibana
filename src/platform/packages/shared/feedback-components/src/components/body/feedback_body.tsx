@@ -30,6 +30,7 @@ export interface FeedbackBodyProps {
   handleChangeEmail: (email: string) => void;
   onEmailValidationChange: (isValid: boolean) => void;
   getCurrentUserEmail: () => Promise<string | undefined>;
+  forceShowEmailError?: boolean;
 }
 
 export const FeedbackBody = ({
@@ -45,6 +46,7 @@ export const FeedbackBody = ({
   handleChangeEmail,
   onEmailValidationChange,
   getCurrentUserEmail,
+  forceShowEmailError = false,
 }: FeedbackBodyProps) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -92,6 +94,7 @@ export const FeedbackBody = ({
             handleChangeEmail={handleChangeEmail}
             onEmailValidationChange={onEmailValidationChange}
             getCurrentUserEmail={getCurrentUserEmail}
+            forceShowEmailError={forceShowEmailError}
           />
         </EuiForm>
       </EuiFlexItem>

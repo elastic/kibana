@@ -20,7 +20,7 @@ import type { LogExtractionState } from '../../domain/definitions/saved_objects'
  */
 type LogExtractionStateForV1 = Omit<
   LogExtractionState,
-  'additionalIndexPattern' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
+  'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
 >;
 interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
   docsPerSecond: -1;

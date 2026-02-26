@@ -16,6 +16,36 @@ import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 
 /**
+ * Estimate spec file weight by counting `it(` and `it.skip(` occurrences (proxy for test count / duration).
+ * Used for load-balanced ordering so round-robin chunking gives each CI agent a similar mix of heavy/light specs.
+ */
+const getSpecFileWeight = (filePath: string): number => {
+  try {
+    const content = fs.readFileSync(filePath, { encoding: 'utf8' });
+    const itMatches = content.match(/\bit\s*\(/g);
+    const itSkipMatches = content.match(/\bit\.skip\s*\(/g);
+    return (itMatches?.length ?? 0) + (itSkipMatches?.length ?? 0);
+  } catch {
+    return 0;
+  }
+};
+
+/**
+ * Order spec file paths for load-balanced distribution across parallel CI jobs.
+ * Sorts by estimated weight (test count) descending, with path as tiebreaker, so that
+ * round-robin in retrieveIntegrations() assigns each agent a similar mix of heavy and light specs.
+ */
+export const orderSpecFilesForLoadBalance = (filePaths: string[]): string[] => {
+  if (filePaths.length <= 1) return filePaths;
+  const withWeight = filePaths.map((p) => ({ path: p, weight: getSpecFileWeight(p) }));
+  withWeight.sort((a, b) => {
+    if (b.weight !== a.weight) return b.weight - a.weight;
+    return a.path.localeCompare(b.path);
+  });
+  return withWeight.map(({ path }) => path);
+};
+
+/**
  * Retrieve test files using a glob pattern.
  * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
  */

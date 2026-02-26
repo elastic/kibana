@@ -17,7 +17,11 @@ import {
   configureClient,
   AgentManager,
 } from '@kbn/core-elasticsearch-client-server-internal';
-import { configSchema, ElasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
+import {
+  configSchema,
+  ElasticsearchConfig,
+  getRequestHandlerFactory,
+} from '@kbn/core-elasticsearch-server-internal';
 
 function createFakeElasticsearchServer(hook: (req: http.IncomingMessage) => void) {
   const server = http.createServer((req, res) => {
@@ -64,6 +68,7 @@ describe('ES Client - custom user-agent', () => {
       logger,
       kibanaVersion,
       agentFactoryProvider,
+      onRequest: getRequestHandlerFactory(false)({ projectRouting: 'origin-only' }),
     });
 
     let userAgentHeader: string | undefined;

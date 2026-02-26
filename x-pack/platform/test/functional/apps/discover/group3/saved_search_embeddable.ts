@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -142,11 +143,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         "{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{context.panel.timeRange.from}}',to:'{{context.panel.timeRange.to}}'))" +
         "&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto," +
         "query:(language:{{context.panel.query.language}},query:'clientip:239.190.189.77'),sort:!())";
-      await testSubjects.click('actionFactoryItem-URL_DRILLDOWN');
+      await testSubjects.click('drilldownFactoryItem-url_drilldown');
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName,
         destinationURLTemplate: urlTemplate,
-        trigger: 'CONTEXT_MENU_TRIGGER',
+        trigger: ON_OPEN_PANEL_MENU,
       });
       await testSubjects.click('urlDrilldownAdditionalOptions');
       await testSubjects.click('urlDrilldownOpenInNewTab');

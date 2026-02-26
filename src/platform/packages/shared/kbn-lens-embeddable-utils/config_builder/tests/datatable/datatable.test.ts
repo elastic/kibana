@@ -29,14 +29,14 @@ import {
   multiMetricRowSplitByDatatableWithAdhocDataView,
   fullConfigDatatableWithAdhocDataView,
   fullConfigDatatableWithDataView,
-  sortedByTransposedMetricColumnDatatable,
+  sortedByPivotedMetricColumnDatatable,
   sortedByRowDatatable,
 } from './lens_api_config_dsl.mock';
 import {
   singleMetricESQLDatatable,
   multipleMetricRowSplitESQLDatatable,
   fullConfigESQLDatatable,
-  sortedByTransposedMetricColumnESQLDatatable,
+  sortedByPivotedMetricColumnESQLDatatable,
   sortedByRowColumnESQLDatatable,
 } from './lens_api_config_esql.mock';
 
@@ -107,7 +107,7 @@ describe('Datatable', () => {
     });
 
     it('should convert a datatable chart sorted by a transposed column', () => {
-      validateAPIConverter(sortedByTransposedMetricColumnDatatable, datatableStateSchema);
+      validateAPIConverter(sortedByPivotedMetricColumnDatatable, datatableStateSchema);
     });
 
     it('should convert a datatable chart sorted by a row column', () => {
@@ -127,7 +127,7 @@ describe('Datatable', () => {
     });
 
     it('should convert an ESQL datatable chart sorted by a transposed column', () => {
-      validateAPIConverter(sortedByTransposedMetricColumnESQLDatatable, datatableStateSchema);
+      validateAPIConverter(sortedByPivotedMetricColumnESQLDatatable, datatableStateSchema);
     });
 
     it('should convert an ESQL datatable chart sorted by a row column', () => {

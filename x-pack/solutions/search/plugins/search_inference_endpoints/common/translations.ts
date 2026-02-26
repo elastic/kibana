@@ -110,3 +110,45 @@ export const INFERENCE_ENDPOINTS_TABLE_CAPTION = i18n.translate(
     defaultMessage: 'Inference endpoints table',
   }
 );
+
+export const EMPTY_FILTER_MESSAGE = i18n.translate(
+  'xpack.searchInferenceEndpoints.filter.emptyMessage',
+  {
+    defaultMessage: 'No options',
+  }
+);
+
+export const GROUP_BY_NONE = i18n.translate(
+  'xpack.searchInferenceEndpoints.groupBy.options.none.label',
+  {
+    defaultMessage: 'None',
+  }
+);
+
+export const GROUP_BY_MODELS = i18n.translate(
+  'xpack.searchInferenceEndpoints.groupBy.options.models.label',
+  {
+    defaultMessage: 'Models',
+  }
+);
+
+export const GROUP_BY_SERVICE = i18n.translate(
+  'xpack.searchInferenceEndpoints.groupBy.options.service.label',
+  {
+    defaultMessage: 'Service',
+  }
+);
+
+export const TOKEN_BASED_BILLING_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.elastic.description',
+  {
+    defaultMessage: 'Runs on GPUs (token-based billing)',
+  }
+);
+
+export const RESOURCE_BASED_BILLING_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.description',
+  {
+    defaultMessage: 'Runs on ML Nodes (resource-based billing)',
+  }
+);

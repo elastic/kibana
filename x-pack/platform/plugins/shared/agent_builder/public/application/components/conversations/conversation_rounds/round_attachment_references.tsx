@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, type EuiFlexGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   Attachment,
@@ -21,7 +21,7 @@ import {
   estimateTokens,
   hashContent,
 } from '@kbn/agent-builder-common/attachments';
-import { AttachmentReferencePill } from './round_attachment_reference_pill';
+import { css } from '@emotion/react';
 
 export interface RoundAttachmentReferencesProps {
   attachmentRefs?: AttachmentVersionRef[];
@@ -42,7 +42,19 @@ const labels = {
   attachments: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachments', {
     defaultMessage: 'Attachments',
   }),
+  attachmentAdded: (description: string) =>
+    i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachmentAdded', {
+      defaultMessage: 'Attachment added: {description}',
+      values: { description },
+    }),
 };
+
+const attachmentItemStyles = css`
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 const resolveOperation = (
   refOperation: AttachmentRefOperation | undefined,
@@ -164,12 +176,13 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       data-test-subj="agentBuilderRoundAttachmentReferences"
     >
       {resolvedReferences.map((ref) => (
-        <EuiFlexItem key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`} grow={false}>
-          <AttachmentReferencePill
-            attachment={ref.attachment}
-            version={ref.version}
-            operation={ref.operation}
-          />
+        <EuiFlexItem
+          css={attachmentItemStyles}
+          key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}
+        >
+          <EuiText color="subdued" size="xs">
+            {labels.attachmentAdded(ref.attachment.description ?? '')}
+          </EuiText>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

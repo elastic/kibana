@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   findInventoryFields,
   type DataSchemaFormat,
@@ -117,6 +118,12 @@ export const MetadataExplanationMessage = ({
           iconColor="subdued"
           icon="info"
           data-test-subj="infraAssetDetailsMetadataPopoverButton"
+          aria-label={i18n.translate(
+            'xpack.infra.assetDetails.metadata.showingMetadataInfoButton',
+            {
+              defaultMessage: 'Showing metadata information',
+            }
+          )}
         >
           <MetadataExplanationTooltipContent docsLink={docsLink} metadataField={metadataField} />
         </Popover>

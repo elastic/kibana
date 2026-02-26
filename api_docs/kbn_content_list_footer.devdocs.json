@@ -1,0 +1,346 @@
+{
+  "id": "@kbn/content-list-footer",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-list-footer",
+        "id": "def-public.ContentListFooter",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentListFooter",
+        "description": [
+          "\nFooter component for content lists.\n\nRenders pagination controls that match the layout of `EuiBasicTable`'s\n`PaginationBar` (\"Rows per page\" on the left, page buttons on the right).\n\nWhen pagination is not enabled in the provider, renders nothing.\n"
+        ],
+        "signature": [
+          "({ \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/content-list-footer",
+            "scope": "public",
+            "docId": "kibKbnContentListFooterPluginApi",
+            "section": "def-public.ContentListFooterProps",
+            "text": "ContentListFooterProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.ContentListFooter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  'data-test-subj': dataTestSubj = 'contentListFooter',\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-footer",
+                "scope": "public",
+                "docId": "kibKbnContentListFooterPluginApi",
+                "section": "def-public.ContentListFooterProps",
+                "text": "ContentListFooterProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
+            "lineNumber": 38,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-footer",
+        "id": "def-public.PaginationComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "PaginationComponent",
+        "description": [
+          "\nPure presentational pagination component wrapping `EuiTablePagination`.\n\nAll data is provided via props -- no provider hooks.\nThis component is suitable for unit testing without a provider."
+        ],
+        "signature": [
+          "({ pageIndex, pageSize, totalItems, pageSizeOptions, onPageChange, onPageSizeChange, \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/content-list-footer",
+            "scope": "public",
+            "docId": "kibKbnContentListFooterPluginApi",
+            "section": "def-public.PaginationComponentProps",
+            "text": "PaginationComponentProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+        "lineNumber": 39,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.PaginationComponent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  pageIndex,\n  pageSize,\n  totalItems,\n  pageSizeOptions,\n  onPageChange,\n  onPageSizeChange,\n  'data-test-subj': dataTestSubj = 'contentListFooter-pagination',\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-footer",
+                "scope": "public",
+                "docId": "kibKbnContentListFooterPluginApi",
+                "section": "def-public.PaginationComponentProps",
+                "text": "PaginationComponentProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+            "lineNumber": 39,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-list-footer",
+        "id": "def-public.ContentListFooterProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListFooterProps",
+        "description": [
+          "\nProps for the {@link ContentListFooter} component."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.ContentListFooterProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Optional `data-test-subj` attribute for testing."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/content_list_footer.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-footer",
+        "id": "def-public.PaginationComponentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaginationComponentProps",
+        "description": [
+          "\nProps for the pure {@link PaginationComponent}."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.PaginationComponentProps.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [
+              "Current page index (0-based)."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.PaginationComponentProps.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [
+              "Current number of items per page."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.PaginationComponentProps.totalItems",
+            "type": "number",
+            "tags": [],
+            "label": "totalItems",
+            "description": [
+              "Total number of items matching the current query."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.PaginationComponentProps.pageSizeOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "pageSizeOptions",
+            "description": [
+              "Available page size options for the dropdown."
+            ],
+            "signature": [
+              "number[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.PaginationComponentProps.onPageChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onPageChange",
+            "description": [
+              "Called when the user navigates to a different page."
+            ],
+            "signature": [
+              "(index: number) => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-footer",
+                "id": "def-public.PaginationComponentProps.onPageChange.$1",
+                "type": "number",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+                "lineNumber": 26,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.PaginationComponentProps.onPageSizeChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onPageSizeChange",
+            "description": [
+              "Called when the user changes the items-per-page setting."
+            ],
+            "signature": [
+              "(size: number) => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-footer",
+                "id": "def-public.PaginationComponentProps.onPageSizeChange.$1",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+                "lineNumber": 28,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-footer",
+            "id": "def-public.PaginationComponentProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Optional `data-test-subj` attribute for testing."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-footer/src/pagination_component.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

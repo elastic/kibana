@@ -49,10 +49,10 @@ describe('kuery functions', () => {
         const result = nested.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('nested');
-        expect(Object.keys(result).length).toBe(1);
+        expect(Object.keys(result!).length).toBe(1);
 
-        expect(result.nested?.path).toBe('nestedField');
-        expect(result.nested?.score_mode).toBe('none');
+        expect(result!.nested?.path).toBe('nestedField');
+        expect(result!.nested?.score_mode).toBe('none');
       });
 
       test('should pass the nested path to subqueries so the full field name can be used', () => {
@@ -66,7 +66,7 @@ describe('kuery functions', () => {
           nodeTypes.function.buildNode('is', 'nestedField.child', 'foo')
         );
 
-        expect(result.nested!.query).toEqual(expectedSubQuery);
+        expect(result!.nested!.query).toEqual(expectedSubQuery);
       });
     });
 

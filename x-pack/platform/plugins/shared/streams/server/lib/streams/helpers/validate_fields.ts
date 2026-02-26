@@ -8,7 +8,13 @@
 import type { IngestSimulateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { transpileIngestPipeline } from '@kbn/streamlang';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
-import { isRoot, keepFields, namespacePrefixes } from '@kbn/streams-schema';
+import {
+  getRoot,
+  isRoot,
+  keepFields,
+  LOGS_ECS_STREAM_NAME,
+  namespacePrefixes,
+} from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { executePipelineSimulation } from '../../../routes/internal/streams/processing/simulation_handler';
 import { baseMappings } from '../component_templates/logs_layer';
@@ -17,10 +23,14 @@ import { MalformedFieldsError } from '../errors/malformed_fields_error';
 export function validateAncestorFields({
   ancestors,
   fields,
+  streamName,
 }: {
   ancestors: Streams.WiredStream.Definition[];
   fields: FieldDefinition;
+  streamName: string;
 }) {
+  const isEcsStream = getRoot(streamName) === LOGS_ECS_STREAM_NAME;
+
   for (const ancestor of ancestors) {
     for (const fieldName in fields) {
       if (!Object.hasOwn(fields, fieldName)) {
@@ -36,30 +46,33 @@ export function validateAncestorFields({
           `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
         );
       }
-      if (
-        !namespacePrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
-        !keepFields.includes(fieldName)
-      ) {
-        throw new MalformedFieldsError(
-          `Field ${fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.`
-        );
-      }
-      for (const prefix of namespacePrefixes) {
-        const prefixedName = `${prefix}${fieldName}`;
+      // Skip OTEL namespace validation for logs.ecs streams which use ECS field conventions
+      if (!isEcsStream) {
         if (
-          Object.hasOwn(fields, prefixedName) ||
-          Object.hasOwn(ancestor.ingest.wired.fields, prefixedName)
+          !namespacePrefixes.some((prefix) => fieldName.startsWith(prefix)) &&
+          !keepFields.includes(fieldName)
         ) {
           throw new MalformedFieldsError(
-            `Field ${fieldName} is an automatic alias of ${prefixedName} because of otel compat mode`
+            `Field ${fieldName} is not allowed to be defined as it doesn't match the namespaced ECS or OTel schema.`
           );
         }
-      }
-      // check the otelMappings - they are aliases and are not allowed to have the same name as a field
-      if (fieldName in baseMappings) {
-        throw new MalformedFieldsError(
-          `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
-        );
+        for (const prefix of namespacePrefixes) {
+          const prefixedName = `${prefix}${fieldName}`;
+          if (
+            Object.hasOwn(fields, prefixedName) ||
+            Object.hasOwn(ancestor.ingest.wired.fields, prefixedName)
+          ) {
+            throw new MalformedFieldsError(
+              `Field ${fieldName} is an automatic alias of ${prefixedName} because of otel compat mode`
+            );
+          }
+        }
+        // check the otelMappings - they are aliases and are not allowed to have the same name as a field
+        if (fieldName in baseMappings) {
+          throw new MalformedFieldsError(
+            `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
+          );
+        }
       }
     }
   }

@@ -21,26 +21,26 @@ test.describe(
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs', 'logs.info', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.info', {
         field: 'severity_text',
         eq: 'info',
       });
 
-      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
+      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
     });
 
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing mappings before each test
-      await apiServices.streams.clearStreamMappings('logs.info');
+      await apiServices.streams.clearStreamMappings('logs.otel.info');
 
-      await pageObjects.streams.gotoSchemaEditorTab('logs.info');
+      await pageObjects.streams.gotoSchemaEditorTab('logs.otel.info');
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       await logsSynthtraceEsClient.clean();
     });
 

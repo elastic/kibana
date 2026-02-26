@@ -23,6 +23,8 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../test_ids';
 import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
@@ -282,6 +284,51 @@ describe('GraphInvestigation Component', () => {
         expect(tooltip).toBeInTheDocument();
         expect(tooltip).toHaveTextContent('Details not available');
       });
+    });
+
+    it('shows the option `Show entity relationships` as enabled when entity node is enriched', async () => {
+      const { container, getByTestId } = renderStory();
+
+      await expandNode(container, 'projects/your-project-id/roles/customRole');
+
+      const showRelationshipsItem = getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).not.toHaveAttribute('disabled');
+    });
+
+    it('shows the option `Show entity relationships` as disabled when entity node is not enriched', async () => {
+      const { container, getByTestId, queryByTestId } = renderStory();
+
+      await expandNode(container, 'admin@example.com');
+      const showRelationshipsItem = getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).toHaveAttribute('disabled');
+
+      // can't use userEvent.hover since we get the following error:
+      // 'Unable to perform pointer interaction as the element has pointer-events: none:'
+      fireEvent.mouseOver(showRelationshipsItem);
+
+      // Wait for tooltip and execute validation
+      await waitAndExecute(() => {
+        const tooltip = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID);
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent('Entity relationships not available');
+      });
+    });
+
+    it('does not show `Show entity relationships` option for grouped entities', async () => {
+      const { container, queryByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      const showRelationshipsItem = queryByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).not.toBeInTheDocument();
     });
   });
 

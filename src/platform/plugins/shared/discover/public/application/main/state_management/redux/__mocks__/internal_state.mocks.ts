@@ -9,10 +9,10 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
-import { DataSourceType } from '../../../../../../common/data_sources';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppState, RecentlyClosedTabState, TabState } from '../types';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
+import { getInitialAppState } from '../../utils/get_initial_app_state';
 
 export const getTabStateMock = (
   partial: Partial<Omit<TabState, 'attributes'>> & {
@@ -40,6 +40,7 @@ export const getRecentlyClosedTabStateMock = (
 export const getPersistedTabMock = ({
   tabId = 'test-tab',
   dataView,
+  attributesOverrides,
   appStateOverrides = {},
   globalStateOverrides = {},
   initialInternalStateOverrides = {},
@@ -55,34 +56,35 @@ export const getPersistedTabMock = ({
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
 }) => {
-  const defaultQuery = { query: '', language: 'kuery' };
-  const query = appStateOverrides.query || defaultQuery;
-
+  const appState = {
+    ...getInitialAppState({
+      initialUrlState: undefined,
+      hasGlobalState: false,
+      persistedTab: undefined,
+      dataView,
+      services,
+    }),
+    ...appStateOverrides,
+  };
   return fromTabStateToSavedObjectTab({
     tab: getTabStateMock({
       id: tabId,
       initialInternalState: {
         serializedSearchSource: {
           index: dataView.id,
-          query,
+          query: appState.query,
         },
         ...initialInternalStateOverrides,
       },
-      appState: {
-        query,
-        columns: [],
-        dataSource: {
-          type: DataSourceType.DataView,
-          dataViewId: dataView.id!,
-        },
-        sort: [['@timestamp', 'desc']],
-        interval: 'auto',
-        hideChart: false,
-        ...appStateOverrides,
-      },
+      appState,
       globalState: globalStateOverrides,
+      attributes: {
+        ...DEFAULT_TAB_STATE.attributes,
+        ...attributesOverrides,
+      },
     }),
     overridenTimeRestore,
     services,
+    currentDataView: dataView,
   });
 };

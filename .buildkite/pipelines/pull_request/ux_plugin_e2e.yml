@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/ux_synthetics_e2e.sh
+    cancel_on_build_failing: true
     label: 'UX Plugin @elastic/synthetics Tests'
     agents:
       machineType: n2-standard-4
@@ -7,11 +8,6 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
     artifact_paths:
       - 'x-pack/solutions/observability/plugins/ux/e2e/.journeys/**/*'

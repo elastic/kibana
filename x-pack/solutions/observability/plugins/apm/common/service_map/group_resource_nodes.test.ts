@@ -5,538 +5,552 @@
  * 2.0.
  */
 
-import type {
-  ConnectionElement,
-  GroupedEdge,
-  GroupedNode,
-  ServiceMapExitSpan,
-  ServiceMapService,
-} from './types';
+import { MarkerType } from '@xyflow/react';
 import { groupResourceNodes } from './group_resource_nodes';
-import { getEdgeId, getExternalConnectionNode, getServiceConnectionNode } from './utils';
+import type { ServiceMapNode, ServiceMapEdge, DependencyNodeData, GroupedNodeData } from './types';
+import { DEFAULT_EDGE_COLOR, GROUPABLE_SPAN_SUBTYPE, GROUPABLE_SPAN_TYPE } from './constants';
 
-type ResultElement = ConnectionElement | GroupedNode | GroupedEdge;
+function createServiceNode(id: string, label?: string): ServiceMapNode {
+  return {
+    id,
+    type: 'service',
+    position: { x: 0, y: 0 },
+    data: {
+      id,
+      label: label || id,
+      isService: true,
+    },
+  };
+}
 
-const isEdge = (
-  el: ResultElement
-): el is { data: { id: string; source: string; target: string } } =>
-  'source' in el.data && 'target' in el.data;
+function createDependencyNode(id: string, spanType: string, spanSubtype?: string): ServiceMapNode {
+  return {
+    id,
+    type: 'dependency',
+    position: { x: 0, y: 0 },
+    data: {
+      id,
+      label: id,
+      isService: false,
+      spanType,
+      spanSubtype,
+    } as DependencyNodeData,
+  };
+}
+
+function createEdge(source: string, target: string): ServiceMapEdge {
+  return {
+    id: `${source}->${target}`,
+    source,
+    target,
+    type: 'default',
+    style: { stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      width: 12,
+      height: 12,
+      color: DEFAULT_EDGE_COLOR,
+    },
+    data: { isBidirectional: false },
+  };
+}
+
+function createBidirectionalEdge(source: string, target: string): ServiceMapEdge {
+  const marker = {
+    type: MarkerType.ArrowClosed,
+    width: 12,
+    height: 12,
+    color: DEFAULT_EDGE_COLOR,
+  };
+  return {
+    id: `${source}->${target}`,
+    source,
+    target,
+    type: 'default',
+    style: { stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 },
+    markerEnd: marker,
+    markerStart: marker,
+    data: { isBidirectional: true },
+  };
+}
 
 describe('groupResourceNodes', () => {
-  const createService = (service: { serviceName: string; agentName: string }) =>
-    ({
-      ...service,
-      serviceEnvironment: 'production',
-    } as ServiceMapService);
+  describe('when there are no groupable nodes', () => {
+    it('returns nodes and edges unchanged', () => {
+      const nodes = [
+        createServiceNode('service-a'),
+        createServiceNode('service-b'),
+        createServiceNode('service-c'),
+      ];
+      const edges = [createEdge('service-a', 'service-b'), createEdge('service-b', 'service-c')];
 
-  /**
-   * Helper function to generate an external connection node.
-   */
-  const createExitSpan = (exitSpan: {
-    agentName?: string;
-    serviceName?: string;
-    spanType: string;
-    spanSubtype: string;
-    spanDestinationServiceResource: string;
-  }) =>
-    ({
-      ...exitSpan,
-      serviceEnvironment: 'production',
-    } as ServiceMapExitSpan);
+      const result = groupResourceNodes(nodes, edges);
 
-  const nodejsService = createService({ serviceName: 'opbeans-node', agentName: 'nodejs' });
-
-  const mockServiceNode = (service: ServiceMapService): ConnectionElement => ({
-    data: getServiceConnectionNode(service),
+      expect({ ...result, nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 3,
+        edges: 2,
+        nodesCount: 3,
+      });
+    });
   });
 
-  const mockExitSpanNode = (exitSpan: ServiceMapExitSpan): ConnectionElement => ({
-    data: getExternalConnectionNode(exitSpan),
+  describe('when there are less than 4 groupable nodes', () => {
+    it('does NOT group 3 external nodes from the same source', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createEdge('api-service', 'resource1'),
+        createEdge('api-service', 'resource2'),
+        createEdge('api-service', 'resource3'),
+      ];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 4,
+        edges: 3,
+      });
+
+      const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
+      expect(groupedNodes).toHaveLength(0);
+    });
   });
 
-  const nodeJsServiceNode = mockServiceNode(nodejsService);
-  const nodeJsExitSpanQuora = mockExitSpanNode(
-    createExitSpan({
-      ...nodejsService,
-      spanType: 'http',
-      spanSubtype: 'external',
-      spanDestinationServiceResource: 'a.quora.com:443',
-    })
-  );
-  const nodeJsExitSpanReddit = mockExitSpanNode(
-    createExitSpan({
-      ...nodejsService,
-      spanType: 'http',
-      spanSubtype: 'external',
-      spanDestinationServiceResource: 'alb.reddit.com:443',
-    })
-  );
-  const nodeJsExitSpanDoubleClick = mockExitSpanNode(
-    createExitSpan({
-      ...nodejsService,
-      spanType: 'http',
-      spanSubtype: 'external',
-      spanDestinationServiceResource: 'ad.doubleclick.net:443',
-    })
-  );
-  const nodeJsExitSpanOptimizely = mockExitSpanNode(
-    createExitSpan({
-      ...nodejsService,
-      spanType: 'http',
-      spanSubtype: 'external',
-      spanDestinationServiceResource: 'tapi.optimizely.com:443',
-    })
-  );
+  describe('when there are 4+ groupable nodes from the same source', () => {
+    it('groups 4 external nodes into a single grouped node', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createEdge('api-service', 'resource1'),
+        createEdge('api-service', 'resource2'),
+        createEdge('api-service', 'resource3'),
+        createEdge('api-service', 'resource4'),
+      ];
 
-  const createMockEdge = (source: string, target: string): ConnectionElement => ({
-    data: {
-      id: getEdgeId(source, target),
-      source,
-      target,
-    },
+      const result = groupResourceNodes(nodes, edges);
+
+      // Should have: api-service + 1 grouped node = 2 nodes
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 2,
+        edges: 1,
+      });
+
+      const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
+      expect(groupedNode).toBeDefined();
+      expect(groupedNode!.data).toEqual(
+        expect.objectContaining({
+          isService: false,
+          isGrouped: true,
+          count: 4,
+          groupedConnections: expect.arrayContaining([expect.anything()]),
+        })
+      );
+      expect((groupedNode!.data as GroupedNodeData).groupedConnections).toHaveLength(4);
+    });
+
+    it('groups 5+ external nodes', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource5', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createEdge('api-service', 'resource1'),
+        createEdge('api-service', 'resource2'),
+        createEdge('api-service', 'resource3'),
+        createEdge('api-service', 'resource4'),
+        createEdge('api-service', 'resource5'),
+      ];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
+      expect(groupedNode).toBeDefined();
+
+      const groupedData = groupedNode!.data as GroupedNodeData;
+      expect(groupedData.count).toBe(5);
+    });
   });
 
-  describe('basic grouping', () => {
-    it('should group external nodes', () => {
-      const elements: ConnectionElement[] = [
-        nodeJsServiceNode,
-        nodeJsExitSpanQuora,
-        nodeJsExitSpanReddit,
-        nodeJsExitSpanDoubleClick,
-        nodeJsExitSpanOptimizely,
-        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanQuora.data.id),
-        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanReddit.data.id),
-        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanDoubleClick.data.id),
-        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanOptimizely.data.id),
+  describe('when nodes have different sources', () => {
+    it('does NOT group nodes from different sources', () => {
+      const nodes = [
+        createServiceNode('service-a'),
+        createServiceNode('service-b'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      // 2 from service-a, 2 from service-b
+      const edges = [
+        createEdge('service-a', 'resource1'),
+        createEdge('service-a', 'resource2'),
+        createEdge('service-b', 'resource3'),
+        createEdge('service-b', 'resource4'),
       ];
 
-      const result = groupResourceNodes({ elements });
+      const result = groupResourceNodes(nodes, edges);
 
-      const groupedNodes = result.elements.filter(
-        (p): p is GroupedNode => 'groupedConnections' in p.data
+      // No grouping should occur (less than 4 from each source)
+      const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
+      expect(groupedNodes).toHaveLength(0);
+    });
+  });
+
+  describe('when nodes share the same sources', () => {
+    it('groups nodes that share the same sources', () => {
+      const nodes = [
+        createServiceNode('service-a'),
+        createServiceNode('service-b'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      // All 4 resources connected from BOTH service-a AND service-b
+      const edges = [
+        createEdge('service-a', 'resource1'),
+        createEdge('service-a', 'resource2'),
+        createEdge('service-a', 'resource3'),
+        createEdge('service-a', 'resource4'),
+        createEdge('service-b', 'resource1'),
+        createEdge('service-b', 'resource2'),
+        createEdge('service-b', 'resource3'),
+        createEdge('service-b', 'resource4'),
+      ];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      // Should have: 2 services + 1 grouped node
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 3,
+        edges: 2,
+      });
+      expect(result.nodes.find((n) => n.type === 'groupedResources')).toBeDefined();
+    });
+  });
+
+  describe('edge styling', () => {
+    it('styles grouped edges correctly', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createEdge('api-service', 'resource1'),
+        createEdge('api-service', 'resource2'),
+        createEdge('api-service', 'resource3'),
+        createEdge('api-service', 'resource4'),
+      ];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      expect(result.edges).toHaveLength(1);
+      expect(result.edges[0]).toEqual(
+        expect.objectContaining({
+          type: 'default',
+          style: { stroke: DEFAULT_EDGE_COLOR, strokeWidth: 1 },
+          markerEnd: expect.objectContaining({
+            type: MarkerType.ArrowClosed,
+            color: DEFAULT_EDGE_COLOR,
+          }),
+        })
       );
+    });
+  });
 
-      const groupedNode = groupedNodes.find(
-        (el: any) => el.data.id && el.data.id.startsWith('resourceGroup')
-      );
+  describe('node data preservation', () => {
+    it('preserves spanType and spanSubtype in grouped node', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createEdge('api-service', 'resource1'),
+        createEdge('api-service', 'resource2'),
+        createEdge('api-service', 'resource3'),
+        createEdge('api-service', 'resource4'),
+      ];
 
+      const result = groupResourceNodes(nodes, edges);
+
+      const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
       expect(groupedNode).toBeDefined();
-      expect(groupedNode?.data.id).toBe(`resourceGroup{opbeans-node}`);
-      expect(groupedNode?.data.groupedConnections.length).toBe(4);
-      expect(groupedNode?.data.label).toBe('4 resources');
-
-      expect(result.elements.length).toBeLessThan(elements.length);
-      expect(result.nodesCount).toBe(1);
+      expect(groupedNode!.data).toEqual(
+        expect.objectContaining({
+          spanType: GROUPABLE_SPAN_TYPE,
+          spanSubtype: GROUPABLE_SPAN_SUBTYPE,
+        })
+      );
     });
 
-    it('should not group nodes when below minimum group size', () => {
-      const elements: ConnectionElement[] = [
-        nodeJsServiceNode,
-        nodeJsExitSpanQuora,
-        nodeJsExitSpanReddit,
-        nodeJsExitSpanDoubleClick,
-        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanQuora.data.id),
-        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanReddit.data.id),
-        createMockEdge(nodeJsServiceNode.data.id, nodeJsExitSpanDoubleClick.data.id),
+    it('includes original node data in groupedConnections', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createEdge('api-service', 'resource1'),
+        createEdge('api-service', 'resource2'),
+        createEdge('api-service', 'resource3'),
+        createEdge('api-service', 'resource4'),
       ];
 
-      const result = groupResourceNodes({ elements });
+      const result = groupResourceNodes(nodes, edges);
 
-      expect(result.elements.length).toBe(elements.length);
-      expect(result.nodesCount).toBe(4);
-    });
-
-    it('should group Kafka topics', () => {
-      const javaService = createService({ serviceName: 'kafka-consumer', agentName: 'java' });
-      const javaServiceNode = mockServiceNode(javaService);
-
-      const kafkaOrders = mockExitSpanNode(
-        createExitSpan({
-          ...javaService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/orders',
-        })
-      );
-      const kafkaPayments = mockExitSpanNode(
-        createExitSpan({
-          ...javaService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/payments',
-        })
-      );
-      const kafkaNotifications = mockExitSpanNode(
-        createExitSpan({
-          ...javaService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/notifications',
-        })
-      );
-      const kafkaAnalytics = mockExitSpanNode(
-        createExitSpan({
-          ...javaService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/analytics',
-        })
-      );
-      const kafkaEvents = mockExitSpanNode(
-        createExitSpan({
-          ...javaService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/events',
-        })
-      );
-
-      const elements: ConnectionElement[] = [
-        javaServiceNode,
-        kafkaOrders,
-        kafkaPayments,
-        kafkaNotifications,
-        kafkaAnalytics,
-        kafkaEvents,
-        createMockEdge(javaServiceNode.data.id, kafkaOrders.data.id),
-        createMockEdge(javaServiceNode.data.id, kafkaPayments.data.id),
-        createMockEdge(javaServiceNode.data.id, kafkaNotifications.data.id),
-        createMockEdge(javaServiceNode.data.id, kafkaAnalytics.data.id),
-        createMockEdge(javaServiceNode.data.id, kafkaEvents.data.id),
-      ];
-
-      const result = groupResourceNodes({ elements });
-
-      const groupedNodes = result.elements.filter(
-        (p): p is GroupedNode => 'groupedConnections' in p.data
-      );
-
-      const groupedNode = groupedNodes.find(
-        (el: any) => el.data.id && el.data.id.startsWith('resourceGroup')
-      );
-
+      const groupedNode = result.nodes.find((n) => n.type === 'groupedResources');
       expect(groupedNode).toBeDefined();
-      expect(groupedNode?.data.id).toBe(`resourceGroup{kafka-consumer}`);
-      expect(groupedNode?.data.groupedConnections.length).toBe(5);
-      expect(groupedNode?.data.label).toBe('5 resources');
 
-      expect(result.elements.length).toBeLessThan(elements.length);
-      expect(result.nodesCount).toBe(1);
-    });
-
-    it('should test mixed messaging systems grouping behavior', () => {
-      const service = createService({ serviceName: 'messaging-producer', agentName: 'nodejs' });
-      const serviceNode = mockServiceNode(service);
-
-      // Kafka topics (4 resources)
-      const kafkaOrders = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/orders',
-        })
+      const groupedData = groupedNode!.data as GroupedNodeData;
+      expect(groupedData.groupedConnections).toHaveLength(4);
+      expect(groupedData.groupedConnections).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'resource1',
+            label: 'resource1',
+            spanType: GROUPABLE_SPAN_TYPE,
+            spanSubtype: GROUPABLE_SPAN_SUBTYPE,
+          }),
+        ])
       );
-      const kafkaPayments = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/payments',
-        })
-      );
-      const kafkaNotifications = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/notifications',
-        })
-      );
-      const kafkaAnalytics = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/analytics',
-        })
-      );
-
-      // RabbitMQ queues (4 resources)
-      const rabbitmqQueue1 = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'rabbitmq',
-          spanDestinationServiceResource: 'rabbitmq/queue1',
-        })
-      );
-      const rabbitmqQueue2 = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'rabbitmq',
-          spanDestinationServiceResource: 'rabbitmq/queue2',
-        })
-      );
-      const rabbitmqQueue3 = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'rabbitmq',
-          spanDestinationServiceResource: 'rabbitmq/queue3',
-        })
-      );
-      const rabbitmqQueue4 = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'rabbitmq',
-          spanDestinationServiceResource: 'rabbitmq/queue4',
-        })
-      );
-
-      // SQS queues (4 resources)
-      const sqsNotifications = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'sqs',
-          spanDestinationServiceResource: 'sqs/notifications',
-        })
-      );
-      const sqsEvents = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'sqs',
-          spanDestinationServiceResource: 'sqs/events',
-        })
-      );
-      const sqsAlerts = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'sqs',
-          spanDestinationServiceResource: 'sqs/alerts',
-        })
-      );
-      const sqsLogs = mockExitSpanNode(
-        createExitSpan({
-          ...service,
-          spanType: 'messaging',
-          spanSubtype: 'sqs',
-          spanDestinationServiceResource: 'sqs/logs',
-        })
-      );
-
-      const elements: ConnectionElement[] = [
-        serviceNode,
-        kafkaOrders,
-        kafkaPayments,
-        kafkaNotifications,
-        kafkaAnalytics,
-        rabbitmqQueue1,
-        rabbitmqQueue2,
-        rabbitmqQueue3,
-        rabbitmqQueue4,
-        sqsNotifications,
-        sqsEvents,
-        sqsAlerts,
-        sqsLogs,
-        createMockEdge(serviceNode.data.id, kafkaOrders.data.id),
-        createMockEdge(serviceNode.data.id, kafkaPayments.data.id),
-        createMockEdge(serviceNode.data.id, kafkaNotifications.data.id),
-        createMockEdge(serviceNode.data.id, kafkaAnalytics.data.id),
-        createMockEdge(serviceNode.data.id, rabbitmqQueue1.data.id),
-        createMockEdge(serviceNode.data.id, rabbitmqQueue2.data.id),
-        createMockEdge(serviceNode.data.id, rabbitmqQueue3.data.id),
-        createMockEdge(serviceNode.data.id, rabbitmqQueue4.data.id),
-        createMockEdge(serviceNode.data.id, sqsNotifications.data.id),
-        createMockEdge(serviceNode.data.id, sqsEvents.data.id),
-        createMockEdge(serviceNode.data.id, sqsAlerts.data.id),
-        createMockEdge(serviceNode.data.id, sqsLogs.data.id),
-      ];
-
-      const result = groupResourceNodes({ elements });
-
-      const groupedNodes = result.elements.filter(
-        (p): p is GroupedNode => 'groupedConnections' in p.data
-      );
-
-      // Should have 1 group containing all 12 resources (4 kafka + 4 rabbitmq + 4 sqs)
-      expect(groupedNodes.length).toBe(1);
-
-      const groupedNode = groupedNodes[0];
-      expect(groupedNode).toBeDefined();
-      expect(groupedNode.data.id).toBe(`resourceGroup{messaging-producer}`);
-      expect(groupedNode.data.groupedConnections.length).toBe(12);
-      expect(groupedNode.data.label).toBe('12 resources');
-
-      // Verify the group contains mixed subtypes
-      const subtypes = groupedNode.data.groupedConnections.map((conn: any) => conn['span.subtype']);
-      const uniqueSubtypes = new Set(subtypes);
-      expect(uniqueSubtypes.size).toBe(3); // kafka, rabbitmq, sqs
-      expect(uniqueSubtypes).toEqual(new Set(['kafka', 'rabbitmq', 'sqs']));
     });
   });
 
   describe('outgoing edges from grouped nodes', () => {
-    it('should remove outgoing edges from grouped messaging exit span nodes', () => {
-      const producerService = createService({
-        serviceName: 'order-service',
-        agentName: 'java',
-      });
-      const consumerService = createService({
-        serviceName: 'opentelemetry-demo',
-        agentName: 'nodejs',
-      });
-      const producerNode = mockServiceNode(producerService);
-      const consumerNode = mockServiceNode(consumerService);
-
-      // 4 kafka topics (enough to trigger grouping)
-      const kafkaOrders = mockExitSpanNode(
-        createExitSpan({
-          ...producerService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/orders',
-        })
-      );
-      const kafkaPayments = mockExitSpanNode(
-        createExitSpan({
-          ...producerService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/payments',
-        })
-      );
-      const kafkaNotifications = mockExitSpanNode(
-        createExitSpan({
-          ...producerService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/notifications',
-        })
-      );
-      const kafkaAnalytics = mockExitSpanNode(
-        createExitSpan({
-          ...producerService,
-          spanType: 'messaging',
-          spanSubtype: 'kafka',
-          spanDestinationServiceResource: 'kafka/analytics',
-        })
-      );
-
-      const elements: ConnectionElement[] = [
-        producerNode,
-        consumerNode,
-        kafkaOrders,
-        kafkaPayments,
-        kafkaNotifications,
-        kafkaAnalytics,
-        // Incoming edges: producer -> kafka topics
-        createMockEdge(producerNode.data.id, kafkaOrders.data.id),
-        createMockEdge(producerNode.data.id, kafkaPayments.data.id),
-        createMockEdge(producerNode.data.id, kafkaNotifications.data.id),
-        createMockEdge(producerNode.data.id, kafkaAnalytics.data.id),
-        // Outgoing messaging edges: kafka topics -> consumer service
-        createMockEdge(kafkaOrders.data.id, consumerNode.data.id),
-        createMockEdge(kafkaPayments.data.id, consumerNode.data.id),
+    it('replaces outgoing edges from grouped nodes with edges from the group node', () => {
+      const nodes = [
+        createServiceNode('order-service'),
+        createServiceNode('consumer-service'),
+        createDependencyNode('kafka/orders', 'messaging', 'kafka'),
+        createDependencyNode('kafka/payments', 'messaging', 'kafka'),
+        createDependencyNode('kafka/notifications', 'messaging', 'kafka'),
+        createDependencyNode('kafka/analytics', 'messaging', 'kafka'),
+      ];
+      const edges = [
+        // Incoming edges: service -> kafka topics (these trigger grouping)
+        createEdge('order-service', 'kafka/orders'),
+        createEdge('order-service', 'kafka/payments'),
+        createEdge('order-service', 'kafka/notifications'),
+        createEdge('order-service', 'kafka/analytics'),
+        // Outgoing messaging edges: kafka topics -> downstream consumer
+        createEdge('kafka/orders', 'consumer-service'),
+        createEdge('kafka/payments', 'consumer-service'),
       ];
 
-      const result = groupResourceNodes({ elements });
+      const result = groupResourceNodes(nodes, edges);
 
       // The kafka topics should be grouped
-      const groupedNodes = result.elements.filter(
-        (p): p is GroupedNode => 'groupedConnections' in p.data
-      );
-      expect(groupedNodes.length).toBe(1);
+      const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
+      expect(groupedNodes).toHaveLength(1);
 
       // No edge should reference a non-existent node
-      const nodeIds = new Set(result.elements.filter((el) => !isEdge(el)).map((el) => el.data.id));
-      const edges = result.elements.filter(isEdge);
-
-      for (const edge of edges) {
-        expect(nodeIds.has(edge.data.source)).toBe(true);
-        expect(nodeIds.has(edge.data.target)).toBe(true);
+      const nodeIds = new Set(result.nodes.map((n) => n.id));
+      for (const edge of result.edges) {
+        expect(nodeIds.has(edge.source)).toBe(true);
+        expect(nodeIds.has(edge.target)).toBe(true);
       }
 
       // The group node should have an outgoing edge to consumer-service
-      const groupId = groupedNodes[0].data.id;
-      const outgoingFromGroup = edges.filter((e) => e.data.source === groupId);
+      const groupId = groupedNodes[0].id;
+      const outgoingFromGroup = result.edges.filter(
+        (e) => e.source === groupId && e.target === 'consumer-service'
+      );
       expect(outgoingFromGroup).toHaveLength(1);
-      expect(outgoingFromGroup[0].data.target).toBe(consumerNode.data.id);
     });
 
-    it('should not leave orphaned edges when a grouped node is the source of an edge', () => {
-      const service = createService({ serviceName: 'api-service', agentName: 'nodejs' });
-      const downstream = createService({ serviceName: 'downstream', agentName: 'nodejs' });
-      const serviceNode = mockServiceNode(service);
-      const downstreamNode = mockServiceNode(downstream);
-
-      const exitSpans = Array.from({ length: 4 }, (_, i) =>
-        mockExitSpanNode(
-          createExitSpan({
-            ...service,
-            spanType: 'messaging',
-            spanSubtype: 'kafka',
-            spanDestinationServiceResource: `kafka/topic-${i}`,
-          })
-        )
-      );
-
-      const elements: ConnectionElement[] = [
-        serviceNode,
-        downstreamNode,
-        ...exitSpans,
-        // Incoming edges (will be grouped)
-        ...exitSpans.map((span) => createMockEdge(serviceNode.data.id, span.data.id)),
-        // Outgoing edge from one grouped node to downstream
-        createMockEdge(exitSpans[0].data.id, downstreamNode.data.id),
+    it('creates outgoing edges from group node when a grouped node has downstream connections', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createServiceNode('downstream'),
+        createDependencyNode('resource-0', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        // Incoming edges (will trigger grouping)
+        createEdge('api-service', 'resource-0'),
+        createEdge('api-service', 'resource-1'),
+        createEdge('api-service', 'resource-2'),
+        createEdge('api-service', 'resource-3'),
+        // Outgoing edge from a node that will be grouped
+        createEdge('resource-0', 'downstream'),
       ];
 
-      const result = groupResourceNodes({ elements });
+      const result = groupResourceNodes(nodes, edges);
 
-      // No orphaned edges
-      const allNodeIds = new Set(result.elements.filter((e) => !isEdge(e)).map((e) => e.data.id));
-      const orphanedEdges = result.elements
-        .filter(isEdge)
-        .filter((el) => !allNodeIds.has(el.data.source) || !allNodeIds.has(el.data.target));
+      // Verify no orphaned edges exist
+      const nodeIds = new Set(result.nodes.map((n) => n.id));
+      const orphanedEdges = result.edges.filter(
+        (e) => !nodeIds.has(e.source) || !nodeIds.has(e.target)
+      );
       expect(orphanedEdges).toHaveLength(0);
 
-      // The group node should have an outgoing edge to the downstream service
-      const groupedNodes = result.elements.filter(
-        (p): p is GroupedNode => 'groupedConnections' in p.data
-      );
+      // The group node should connect to downstream
+      const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
       expect(groupedNodes).toHaveLength(1);
-      const groupId = groupedNodes[0].data.id;
-      const outgoingFromGroup = result.elements
-        .filter(isEdge)
-        .filter((e) => e.data.source === groupId && e.data.target === downstreamNode.data.id);
+      const outgoingFromGroup = result.edges.filter(
+        (e) => e.source === groupedNodes[0].id && e.target === 'downstream'
+      );
       expect(outgoingFromGroup).toHaveLength(1);
+    });
+
+    it('preserves outgoing edges from non-grouped nodes', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createServiceNode('downstream'),
+        createDependencyNode('resource-0', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource-3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        // Incoming edges (trigger grouping for resource-*)
+        createEdge('api-service', 'resource-0'),
+        createEdge('api-service', 'resource-1'),
+        createEdge('api-service', 'resource-2'),
+        createEdge('api-service', 'resource-3'),
+        // Edge between two non-grouped nodes should be preserved
+        createEdge('api-service', 'downstream'),
+      ];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      // The api-service -> downstream edge should survive
+      const serviceToDownstream = result.edges.find(
+        (e) => e.source === 'api-service' && e.target === 'downstream'
+      );
+      expect(serviceToDownstream).toBeDefined();
     });
   });
 
-  describe('edge cases', () => {
-    it('should handle empty input', () => {
-      const result = groupResourceNodes({ elements: [] });
-      expect(result.elements).toEqual([]);
-      expect(result.nodesCount).toBe(0);
-    });
-
-    it('should handle input with no groupable nodes', () => {
-      const svc1 = mockServiceNode(createService({ serviceName: 'service1', agentName: 'nodejs' }));
-      const svc2 = mockServiceNode(createService({ serviceName: 'service2', agentName: 'nodejs' }));
-      const elements: ConnectionElement[] = [
-        svc1,
-        svc2,
-        createMockEdge(svc1.data.id, svc2.data.id),
+  describe('mixed groupable and non-groupable nodes', () => {
+    it('only groups eligible external nodes', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        createServiceNode('backend-service'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createEdge('api-service', 'backend-service'),
+        createEdge('api-service', 'resource1'),
+        createEdge('api-service', 'resource2'),
+        createEdge('api-service', 'resource3'),
+        createEdge('api-service', 'resource4'),
       ];
 
-      const result = groupResourceNodes({ elements });
-      expect(result.elements.length).toBe(elements.length);
-      expect(result.nodesCount).toBe(2);
+      const result = groupResourceNodes(nodes, edges);
+
+      // Should have: api-service + backend-service + grouped node = 3 nodes
+      expect({ nodes: result.nodes.length, edges: result.edges.length }).toEqual({
+        nodes: 3,
+        edges: 2,
+      });
+      expect(result.nodes.map((n) => n.id)).toEqual(
+        expect.arrayContaining(['api-service', 'backend-service'])
+      );
+    });
+
+    it('does NOT group non-groupable span types like db', () => {
+      const nodes = [
+        createServiceNode('api-service'),
+        // db spans are NOT groupable (NONGROUPED_SPANS has db: ['all'])
+        createDependencyNode('db1:5432', 'db', 'postgresql'),
+        createDependencyNode('db2:5432', 'db', 'postgresql'),
+        createDependencyNode('db3:5432', 'db', 'postgresql'),
+        createDependencyNode('db4:5432', 'db', 'postgresql'),
+      ];
+      const edges = [
+        createEdge('api-service', 'db1:5432'),
+        createEdge('api-service', 'db2:5432'),
+        createEdge('api-service', 'db3:5432'),
+        createEdge('api-service', 'db4:5432'),
+      ];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      // Should NOT group db nodes - all 5 nodes should remain
+      expect({
+        nodes: result.nodes.length,
+        edges: result.edges.length,
+        groupedNodes: result.nodes.filter((n) => n.type === 'groupedResources').length,
+      }).toEqual({
+        nodes: 5,
+        edges: 4,
+        groupedNodes: 0,
+      });
+    });
+  });
+
+  describe('bidirectional edges', () => {
+    it('preserves bidirectional edge (markerStart and markerEnd) when no grouping applies', () => {
+      const nodes = [createServiceNode('service-a'), createServiceNode('service-b')];
+      const edges = [createBidirectionalEdge('service-a', 'service-b')];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      expect(result.edges).toHaveLength(1);
+      const edge = result.edges[0];
+      expect(edge.source).toBe('service-a');
+      expect(edge.target).toBe('service-b');
+      expect(edge.data?.isBidirectional).toBe(true);
+      expect(edge.markerEnd).toBeDefined();
+      expect(edge.markerStart).toBeDefined();
+      expect(edge.markerStart).toEqual(edge.markerEnd);
+    });
+
+    it('preserves bidirectional edge when grouping other nodes', () => {
+      const nodes = [
+        createServiceNode('service-a'),
+        createServiceNode('service-b'),
+        createDependencyNode('resource1', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource2', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource3', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+        createDependencyNode('resource4', GROUPABLE_SPAN_TYPE, GROUPABLE_SPAN_SUBTYPE),
+      ];
+      const edges = [
+        createBidirectionalEdge('service-a', 'service-b'),
+        createEdge('service-a', 'resource1'),
+        createEdge('service-a', 'resource2'),
+        createEdge('service-a', 'resource3'),
+        createEdge('service-a', 'resource4'),
+      ];
+
+      const result = groupResourceNodes(nodes, edges);
+
+      // service-a <-> service-b bidirectional edge must still be present with both markers
+      const bidirectionalEdge = result.edges.find(
+        (e) => e.source === 'service-a' && e.target === 'service-b'
+      );
+      expect(bidirectionalEdge).toBeDefined();
+      expect(bidirectionalEdge!.data?.isBidirectional).toBe(true);
+      expect(bidirectionalEdge!.markerStart).toBeDefined();
+      expect(bidirectionalEdge!.markerEnd).toBeDefined();
     });
   });
 });

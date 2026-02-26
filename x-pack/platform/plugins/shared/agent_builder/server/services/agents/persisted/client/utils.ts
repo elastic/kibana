@@ -40,3 +40,16 @@ export async function validateToolSelection({
   }
   return errors;
 }
+
+export function removeToolIdsFromToolSelection(
+  tools: ToolSelection[],
+  toolIdsToRemove: string[]
+): ToolSelection[] {
+  const removeSet = new Set(toolIdsToRemove);
+  return (tools ?? [])
+    .map((selection) => ({
+      ...selection,
+      tool_ids: (selection.tool_ids ?? []).filter((id) => !removeSet.has(id)),
+    }))
+    .filter((selection) => selection.tool_ids.length > 0);
+}

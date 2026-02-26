@@ -11,7 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SloOverviewFlyout } from '.';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
@@ -25,6 +25,11 @@ jest.mock('../../../hooks/use_apm_router', () => ({
 
 jest.mock('../../../hooks/use_apm_params', () => ({
   useApmParams: jest.fn(),
+  useAnyOfApmParams: jest.fn(),
+}));
+
+jest.mock('../../../hooks/use_manage_slos_url', () => ({
+  useManageSlosUrl: () => '/app/slo',
 }));
 
 const mockUseFetcher = jest.fn();
@@ -50,6 +55,7 @@ jest.mock('@elastic/eui', () => {
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseApmRouter = useApmRouter as jest.Mock;
 const mockUseApmParams = useApmParams as jest.Mock;
+const mockUseAnyOfApmParams = useAnyOfApmParams as jest.Mock;
 
 const createMockSlo = (overrides: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse =>
   ({
@@ -107,6 +113,14 @@ describe('SloOverviewFlyout', () => {
     });
 
     mockUseApmParams.mockReturnValue({
+      query: {
+        environment: 'production',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
+    });
+
+    mockUseAnyOfApmParams.mockReturnValue({
       query: {
         environment: 'production',
         rangeFrom: 'now-15m',
@@ -205,7 +219,7 @@ describe('SloOverviewFlyout', () => {
     expect(screen.getByText('Error Rate SLO')).toBeInTheDocument();
   });
 
-  it('displays "No SLOs found" when no data', async () => {
+  it('displays empty state when no SLOs exist', async () => {
     mockUseFetcher.mockReturnValue({
       data: {
         results: [],
@@ -221,7 +235,9 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByText('No SLOs found for this service')).toBeInTheDocument();
+    expect(screen.getByTestId('sloOverviewFlyoutEmptyState')).toBeInTheDocument();
+    expect(screen.getByText('No SLOs (APM)')).toBeInTheDocument();
+    expect(screen.getByTestId('sloOverviewFlyoutCreateSloButton')).toBeInTheDocument();
   });
 
   it('displays status stats panel', async () => {
@@ -415,6 +431,6 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByText('No SLOs found for this service')).toBeInTheDocument();
+    expect(screen.getByTestId('sloOverviewFlyoutEmptyState')).toBeInTheDocument();
   });
 });

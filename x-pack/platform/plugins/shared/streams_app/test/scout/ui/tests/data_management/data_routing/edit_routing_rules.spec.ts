@@ -22,23 +22,23 @@ test.describe(
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs', 'logs.edit-test', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.edit-test', {
         field: 'service.name',
         eq: 'test-service',
       });
 
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
     });
 
     test.afterAll(async ({ apiServices }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('should edit an existing routing rule', async ({ page, pageObjects }) => {
-      const rountingRuleName = 'logs.edit-test';
+      const rountingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
       // Update condition
@@ -46,7 +46,7 @@ test.describe(
       await pageObjects.streams.updateRoutingRule();
 
       // Verify success
-      const routingRule = page.getByTestId('routingRule-logs.edit-test');
+      const routingRule = page.getByTestId('routingRule-logs.otel.edit-test');
       await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
         'service.name'
       );
@@ -58,8 +58,31 @@ test.describe(
       );
     });
 
+    test('should disable update when syntax editor JSON is invalid', async ({
+      page,
+      pageObjects,
+    }) => {
+      const rountingRuleName = 'logs.otel.edit-test';
+      await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
+
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+      await pageObjects.streams.fillConditionEditorWithSyntax(
+        '{"field":"service.name","eq":"updated-service"}'
+      );
+      await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeEnabled();
+
+      await pageObjects.streams.fillConditionEditorWithSyntax('{');
+      await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeDisabled();
+
+      await pageObjects.streams.fillConditionEditorWithSyntax(
+        '{"field":"service.name","eq":"updated-service"}'
+      );
+      await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeEnabled();
+    });
+
     test('should cancel editing routing rule', async ({ page, pageObjects }) => {
-      const rountingRuleName = 'logs.edit-test';
+      const rountingRuleName = 'logs.otel.edit-test';
       await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
       // Update and cancel changes
@@ -67,7 +90,7 @@ test.describe(
       await pageObjects.streams.cancelRoutingRule();
 
       // Verify success
-      const routingRule = page.getByTestId('routingRule-logs.edit-test');
+      const routingRule = page.getByTestId('routingRule-logs.otel.edit-test');
       await expect(routingRule.getByTestId('streamsAppConditionDisplayField')).toContainText(
         'service.name'
       );
@@ -91,38 +114,109 @@ test.describe(
       await pageObjects.streams.saveRoutingRule();
 
       // Edit first rule
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
 
       // Switch to edit second rule without saving
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test-2');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test-2');
 
       // Should now be editing the second rule
       expect(await pageObjects.streams.conditionEditorValueComboBox.getSelectedValue()).toBe(
         'info'
       );
+
+      // Verify rule still exists
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.edit-test');
+    });
+
+    test('should disable Update button when syntax editor has empty condition', async ({
+      page,
+      pageObjects,
+    }) => {
+      const routingRuleName = 'logs.otel.edit-test';
+      await pageObjects.streams.clickEditRoutingRule(routingRuleName);
+
+      // Switch to syntax editor
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+      // Clear the condition (empty JSON)
+      await pageObjects.streams.fillConditionEditorWithSyntax('');
+
+      // Verify Update button is disabled (condition stays at last valid value, no changes made)
+      const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
+      await expect(updateButton).toBeDisabled();
+
+      // Note: Error message is NOT shown because invalid JSON is silently ignored
+      // and the condition remains at its last valid value. This allows users to type
+      // partial JSON without the state being overridden.
+    });
+
+    test('should disable Update button when syntax editor has invalid JSON', async ({
+      page,
+      pageObjects,
+    }) => {
+      const routingRuleName = 'logs.otel.edit-test';
+      await pageObjects.streams.clickEditRoutingRule(routingRuleName);
+
+      // Switch to syntax editor
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+      // Enter invalid JSON
+      await pageObjects.streams.fillConditionEditorWithSyntax('{ invalid json }');
+
+      // Verify Update button is disabled (condition stays at last valid value, no changes made)
+      const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
+      await expect(updateButton).toBeDisabled();
+
+      // Note: Error message is NOT shown because invalid JSON is silently ignored
+      // and the condition remains at its last valid value. This allows users to type
+      // partial JSON without the state being overridden.
+    });
+
+    test('should disable Update button when no changes have been made', async ({
+      page,
+      pageObjects,
+    }) => {
+      const routingRuleName = 'logs.otel.edit-test';
+      await pageObjects.streams.clickEditRoutingRule(routingRuleName);
+
+      // Without making any changes, verify Update button is disabled
+      const updateButton = page.getByTestId('streamsAppStreamDetailRoutingUpdateButton');
+      await expect(updateButton).toBeDisabled();
+
+      // Make a change
+      await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
+
+      // Now the Update button should be enabled
+      await expect(updateButton).toBeEnabled();
+
+      // Revert the change back to original value
+      await pageObjects.streams.fillConditionEditor({ value: 'test-service' });
+
+      // Update button should be disabled again since we're back to original state
+      await expect(updateButton).toBeDisabled();
     });
 
     test('should remove routing rule with confirmation', async ({ pageObjects }) => {
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
 
       await pageObjects.streams.removeRoutingRule();
 
       // Confirm deletion in modal
-      await pageObjects.streams.confirmStreamDeleteInModal('logs.edit-test');
+      await pageObjects.streams.confirmStreamDeleteInModal('logs.otel.edit-test');
 
-      await pageObjects.streams.expectRoutingRuleHidden('logs.edit-test');
+      await pageObjects.streams.expectRoutingRuleHidden('logs.otel.edit-test');
       await pageObjects.toasts.waitFor();
     });
 
     test('should cancel rule removal', async ({ pageObjects }) => {
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
       await pageObjects.streams.removeRoutingRule();
 
       // Cancel deletion
       await pageObjects.streams.cancelDeleteInModal();
 
       // Verify rule still exists
-      await pageObjects.streams.expectRoutingRuleVisible('logs.edit-test');
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.edit-test');
     });
   }
 );

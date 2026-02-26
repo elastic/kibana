@@ -102,6 +102,66 @@ export class WorkflowEditorPage {
     );
   }
 
+  /**
+   * Set the Monaco cursor to the Nth occurrence of `searchText` in the YAML
+   * editor and scroll it into view.
+   */
+  async setCursorToText(searchText: string, occurrence: number = 1): Promise<void> {
+    const uri = await this.yamlEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error('Editor data-uri not found');
+    }
+
+    await this.page.evaluate(
+      ({ modelUri, text, occ }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = monacoEnv.monaco.editor.getModel(modelUri);
+        if (!model) {
+          throw new Error('Editor model not found');
+        }
+
+        const fullText = model.getValue();
+        let matchIndex = -1;
+        let found = 0;
+        let searchFrom = 0;
+        while (found < occ) {
+          matchIndex = fullText.indexOf(text, searchFrom);
+          if (matchIndex === -1) {
+            break;
+          }
+          found++;
+          searchFrom = matchIndex + 1;
+        }
+
+        if (matchIndex === -1) {
+          throw new Error(`Text "${text}" not found in editor (occurrence ${occ})`);
+        }
+
+        const position = model.getPositionAt(matchIndex);
+
+        const editors = monacoEnv.monaco.editor.getEditors();
+        const editorInstance = editors.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
+          (e: any) => e.getModel()?.uri?.toString() === model.uri.toString()
+        );
+
+        if (editorInstance) {
+          editorInstance.setPosition(position);
+          editorInstance.revealLineInCenter(position.lineNumber);
+          editorInstance.focus();
+        } else {
+          throw new Error('No editor instance found for the YAML model');
+        }
+      },
+      { modelUri: uri, text: searchText, occ: occurrence }
+    );
+  }
+
   public getYamlEditorSuggestWidget() {
     return this.page.locator(
       '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
@@ -170,6 +230,60 @@ export class WorkflowEditorPage {
     const executeModalInputsEditor = this.page.testSubj.locator('workflow-manual-json-editor');
     await executeModalInputsEditor.waitFor({ state: 'visible' });
     await this.setEditorValue(executeModalInputsEditor, JSON.stringify(inputs, null, 2));
+  }
+
+  /**
+   * Trigger autocomplete at a specific text position using the Monaco API.
+   * Finds the first occurrence of `searchText` in the editor and places the cursor
+   * at the end of it, then triggers autocomplete via Ctrl+Space.
+   */
+  async triggerAutocompleteAfter(yamlContent: string, searchText: string) {
+    await this.setYamlEditorValue(yamlContent);
+
+    // Wait for the workflow definition to be parsed after setting the YAML.
+    // The autocomplete context schema depends on the parsed definition (e.g., triggers).
+    await this.page.waitForTimeout(1000);
+
+    // Use Monaco API to find the text and position cursor right after it
+    const uri = await this.yamlEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error('Editor data-uri not found');
+    }
+    await this.page.evaluate(
+      ({ modelUri, text }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+        const model = monacoEnv.monaco.editor.getModel(modelUri);
+        if (!model) {
+          throw new Error('Editor model not found');
+        }
+
+        // Find the text in the model
+        const content = model.getValue();
+        const offset = content.indexOf(text);
+        if (offset === -1) {
+          throw new Error(`Text "${text}" not found in editor`);
+        }
+
+        // Position cursor right after the search text
+        const endOffset = offset + text.length;
+        const position = model.getPositionAt(endOffset);
+
+        // Get the editor instance and set cursor position + focus
+        const editors = monacoEnv.monaco.editor.getEditors();
+        if (editors.length > 0) {
+          const editor = editors[0];
+          editor.setPosition(position);
+          editor.focus();
+          // Trigger suggest directly via the editor command
+          editor.trigger('autocomplete-test', 'editor.action.triggerSuggest', {});
+        }
+      },
+      { modelUri: uri, text: searchText }
+    );
   }
 
   /**

@@ -12,6 +12,7 @@ import { within } from '../../ast/location';
 import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../types';
 import { Walker } from '../../ast/walker';
 import { Location } from './types';
+import { isTimeseriesSourceCommand } from '../definitions/utils/timeseries_check';
 
 const commandOptionNameToLocation: Record<string, Location> = {
   eval: Location.EVAL,
@@ -67,7 +68,7 @@ export function getLocationInfo(
   ast: ESQLAst,
   withinAggFunction: boolean
 ): { id: Location; displayName: string } {
-  if (withinAggFunction && ast[0].name === 'ts') {
+  if (withinAggFunction && isTimeseriesSourceCommand(ast)) {
     return {
       id: Location.STATS_TIMESERIES,
       displayName: 'agg_function_in_timeseries_context',

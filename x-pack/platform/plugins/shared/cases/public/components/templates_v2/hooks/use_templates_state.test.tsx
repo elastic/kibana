@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import type { Template } from '../../../../common/types/domain/template/v1';
+import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { TestProviders } from '../../../common/mock';
 import { useTemplatesState } from './use_templates_state';
 
@@ -109,7 +109,7 @@ describe('useTemplatesState', () => {
   it('clears selected templates when query params change', () => {
     const { result } = renderHook(() => useTemplatesState(), { wrapper });
 
-    const mockTemplate: Template = {
+    const mockTemplate: TemplateListItem = {
       templateId: 'template-1',
       name: 'Template 1',
       owner: 'securitySolution',
@@ -123,6 +123,7 @@ describe('useTemplatesState', () => {
       lastUsedAt: '2024-01-01T00:00:00.000Z',
       usageCount: 10,
       isDefault: false,
+      fieldSearchMatches: false,
     };
 
     // Simulate selecting a template via the selection callback
@@ -143,7 +144,7 @@ describe('useTemplatesState', () => {
   it('deselects templates correctly', () => {
     const { result } = renderHook(() => useTemplatesState(), { wrapper });
 
-    const mockTemplate: Template = {
+    const mockTemplate: TemplateListItem = {
       templateId: 'template-1',
       name: 'Template 1',
       owner: 'securitySolution',
@@ -157,6 +158,7 @@ describe('useTemplatesState', () => {
       lastUsedAt: '2024-01-01T00:00:00.000Z',
       usageCount: 10,
       isDefault: false,
+      fieldSearchMatches: false,
     };
 
     act(() => {

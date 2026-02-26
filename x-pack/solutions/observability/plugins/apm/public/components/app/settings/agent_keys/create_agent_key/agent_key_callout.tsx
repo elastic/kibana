@@ -49,8 +49,6 @@ export function AgentKeyCallOut({ name, token }: Props) {
                   data-test-subj="apmAgentKeyCallOutButton"
                   iconType="copyClipboard"
                   onClick={copy}
-                  color="success"
-                  style={{ backgroundColor: 'transparent' }}
                   aria-label={i18n.translate(
                     'xpack.apm.settings.agentKeys.copyAgentKeyField.copyButton',
                     {

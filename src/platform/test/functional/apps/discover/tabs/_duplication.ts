@@ -80,9 +80,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should restore the previous app and global states', async () => {
-      const initialHitCount = await discover.getHitCount();
+      let initialHitCount: string;
+
+      await retry.try(async () => {
+        initialHitCount = await discover.getHitCount();
+        expect(initialHitCount).to.be('14,004');
+      });
+
       const updatedHitCount = '270';
-      expect(initialHitCount).to.be('14,004');
       await discover.chooseBreakdownField('geo.src');
       await queryBar.setQuery('geo.dest: "US"');
       await discover.waitUntilTabIsLoaded();

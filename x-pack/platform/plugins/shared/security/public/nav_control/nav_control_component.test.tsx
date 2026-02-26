@@ -64,7 +64,6 @@ describe('SecurityNavControl', () => {
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(wrapper.prop<ReactElement>('button')).toMatchInlineSnapshot(`
       <EuiHeaderSectionItemButton
-        aria-controls="headerUserMenu"
         aria-expanded={false}
         aria-haspopup="true"
         aria-label="Account menu"
@@ -113,7 +112,6 @@ describe('SecurityNavControl', () => {
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(wrapper.prop<ReactElement>('button')).toMatchInlineSnapshot(`
       <EuiHeaderSectionItemButton
-        aria-controls="headerUserMenu"
         aria-expanded={false}
         aria-haspopup="true"
         aria-label="Account menu"

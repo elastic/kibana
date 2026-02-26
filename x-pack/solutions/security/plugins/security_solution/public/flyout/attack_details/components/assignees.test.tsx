@@ -10,39 +10,89 @@ import { render, screen } from '@testing-library/react';
 
 import { Assignees } from './assignees';
 import { TestProviders } from '../../../common/mock';
-import { useAttackDetailsAssignees } from '../hooks/use_attack_details_assignees';
+import { useAttackDetailsContext } from '../context';
+import { useHeaderData } from '../hooks/use_header_data';
+import { useAttackAssigneesContextMenuItems } from '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items';
+import { useInvalidateFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useAttacksPrivileges } from '../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges';
+import { useLicense } from '../../../common/hooks/use_license';
+import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
 import { HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID } from '../constants/test_ids';
 
 import {
-  USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
   USER_AVATAR_ITEM_TEST_ID,
 } from '../../../common/components/user_profiles/test_ids';
 
-jest.mock('../hooks/use_attack_details_assignees');
+jest.mock('../context');
+jest.mock('../hooks/use_header_data');
+jest.mock(
+  '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_assignees_context_menu_items'
+);
+jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries');
+jest.mock('../../../detections/hooks/attacks/bulk_actions/use_attacks_privileges');
+jest.mock('../../../common/hooks/use_license');
+jest.mock('../../../common/hooks/use_upselling');
+jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
+  useBulkGetUserProfiles: ({ uids }: { uids: Set<string> }) => ({
+    data:
+      uids.size > 0
+        ? [
+            {
+              uid: 'uid-1',
+              enabled: true,
+              user: { username: 'user1', full_name: 'User 1' },
+              data: {},
+            },
+          ]
+        : undefined,
+  }),
+}));
 jest.mock('../../../common/components/empty_value', () => ({
   getEmptyTagValue: () => '—',
 }));
 
-const mockUseAttackDetailsAssignees = useAttackDetailsAssignees as jest.MockedFunction<
-  typeof useAttackDetailsAssignees
+const mockUseAttackDetailsContext = useAttackDetailsContext as jest.MockedFunction<
+  typeof useAttackDetailsContext
+>;
+const mockUseHeaderData = useHeaderData as jest.MockedFunction<typeof useHeaderData>;
+const mockUseAttackAssigneesContextMenuItems =
+  useAttackAssigneesContextMenuItems as jest.MockedFunction<
+    typeof useAttackAssigneesContextMenuItems
+  >;
+const mockUseInvalidateFindAttackDiscoveries =
+  useInvalidateFindAttackDiscoveries as jest.MockedFunction<
+    typeof useInvalidateFindAttackDiscoveries
+  >;
+const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
+  typeof useAttacksPrivileges
+>;
+const mockUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockUseUpsellingMessage = useUpsellingMessage as jest.MockedFunction<
+  typeof useUpsellingMessage
 >;
 
-const defaultHookReturn = {
-  assignedUserIds: ['uid-1'],
-  assignedUsers: [
-    {
-      uid: 'uid-1',
-      enabled: true,
-      user: { username: 'user1', full_name: 'User 1' },
-      data: {},
-    },
-  ],
-  onApplyAssignees: jest.fn().mockResolvedValue(undefined),
-  hasPermission: true,
-  isPlatinumPlus: true,
-  upsellingMessage: undefined,
-  isLoading: false,
+const mockRefetch = jest.fn();
+const mockInvalidateFindAttackDiscoveries = jest.fn();
+
+const defaultContext = {
+  attackId: 'attack-123',
+  refetch: mockRefetch,
+  indexName: 'test-index',
+  searchHit: { _index: 'test-index' },
+  browserFields: {},
+  getFieldsData: jest.fn(),
+  dataFormattedForFieldBrowser: [],
+} as ReturnType<typeof useAttackDetailsContext>;
+
+const defaultHeaderData = {
+  alertIds: ['alert-1', 'alert-2'],
+  assignees: ['uid-1'],
+} as ReturnType<typeof useHeaderData>;
+
+const defaultMenuItems = {
+  items: [{ name: 'Manage assignees', panel: 2, key: 'manage' }],
+  panels: [{ id: 2, title: 'Assignees', content: <div data-test-subj="assignees-panel" /> }],
 };
 
 const renderAssignees = () =>
@@ -55,90 +105,123 @@ const renderAssignees = () =>
 describe('Assignees', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAttackDetailsAssignees.mockReturnValue(
-      defaultHookReturn as ReturnType<typeof useAttackDetailsAssignees>
+    mockUseAttackDetailsContext.mockReturnValue(defaultContext);
+    mockUseHeaderData.mockReturnValue(defaultHeaderData);
+    mockUseAttackAssigneesContextMenuItems.mockReturnValue(defaultMenuItems);
+    mockUseInvalidateFindAttackDiscoveries.mockReturnValue(mockInvalidateFindAttackDiscoveries);
+    mockUseAttacksPrivileges.mockReturnValue({
+      hasIndexWrite: true,
+      hasAttackIndexWrite: true,
+      loading: false,
+    });
+    mockUseLicense.mockReturnValue({
+      isPlatinumPlus: () => true,
+    } as ReturnType<typeof useLicense>);
+    mockUseUpsellingMessage.mockReturnValue(undefined);
+  });
+
+  it('passes attacksWithAssignees and onSuccess to useAttackAssigneesContextMenuItems', () => {
+    renderAssignees();
+
+    expect(mockUseAttackAssigneesContextMenuItems).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attacksWithAssignees: [
+          {
+            attackId: 'attack-123',
+            relatedAlertIds: ['alert-1', 'alert-2'],
+            assignees: ['uid-1'],
+          },
+        ],
+      })
     );
+    const call = mockUseAttackAssigneesContextMenuItems.mock.calls[0][0];
+    expect(call.onSuccess).toBeDefined();
+    expect(typeof call.closePopover).toBe('function');
+  });
+
+  it('onSuccess calls refetch and invalidateFindAttackDiscoveries', () => {
+    let capturedOnSuccess: (() => void) | undefined;
+    mockUseAttackAssigneesContextMenuItems.mockImplementation((args) => {
+      capturedOnSuccess = args.onSuccess;
+      return defaultMenuItems;
+    });
+
+    renderAssignees();
+    expect(capturedOnSuccess).toBeDefined();
+
+    capturedOnSuccess!();
+
+    expect(mockRefetch).toHaveBeenCalled();
+    expect(mockInvalidateFindAttackDiscoveries).toHaveBeenCalled();
   });
 
   it('renders empty state when user has no permission', () => {
-    mockUseAttackDetailsAssignees.mockReturnValue({
-      ...defaultHookReturn,
-      hasPermission: false,
-    } as ReturnType<typeof useAttackDetailsAssignees>);
+    mockUseAttacksPrivileges.mockReturnValue({
+      hasIndexWrite: false,
+      hasAttackIndexWrite: true,
+      loading: false,
+    });
 
     renderAssignees();
 
-    expect(screen.getByTestId('attackDetailsFlyoutHeaderAssigneesEmpty')).toBeInTheDocument();
-    expect(screen.getByTestId('attackDetailsFlyoutHeaderAssigneesEmpty')).toHaveTextContent('—');
-    expect(screen.queryByTestId('attackDetailsFlyoutHeaderAssignees')).not.toBeInTheDocument();
+    expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toBeInTheDocument();
+    expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toHaveTextContent(
+      '—'
+    );
+    expect(screen.queryByTestId('attack-details-flyout-header-assignees')).not.toBeInTheDocument();
   });
 
   it('renders empty state when not platinum plus', () => {
-    mockUseAttackDetailsAssignees.mockReturnValue({
-      ...defaultHookReturn,
-      isPlatinumPlus: false,
-    } as ReturnType<typeof useAttackDetailsAssignees>);
+    mockUseLicense.mockReturnValue({
+      isPlatinumPlus: () => false,
+    } as ReturnType<typeof useLicense>);
 
     renderAssignees();
 
-    expect(screen.getByTestId('attackDetailsFlyoutHeaderAssigneesEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('attackDetailsFlyoutHeaderAssignees')).not.toBeInTheDocument();
+    expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toBeInTheDocument();
+    expect(screen.queryByTestId('attack-details-flyout-header-assignees')).not.toBeInTheDocument();
   });
 
-  it('renders assignees block with add button when has permission and platinum', () => {
+  it('renders assignees block with add button and popover when has permission', () => {
     renderAssignees();
 
-    expect(screen.getByTestId('attackDetailsFlyoutHeaderAssignees')).toBeInTheDocument();
+    expect(screen.getByTestId('attack-details-flyout-header-assignees')).toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).not.toBeDisabled();
+    expect(
+      screen.getByTestId('attack-details-flyout-header-assignees-popover')
+    ).toBeInTheDocument();
   });
 
-  it('renders avatars when assignedUsers is provided', () => {
+  it('renders avatars when assignees are provided and user profiles loaded', () => {
     renderAssignees();
 
     expect(screen.getByTestId(USERS_AVATARS_PANEL_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
   });
 
-  it('renders count badge when more than two assignees', () => {
-    mockUseAttackDetailsAssignees.mockReturnValue({
-      ...defaultHookReturn,
-      assignedUserIds: ['uid-1', 'uid-2', 'uid-3'],
-      assignedUsers: [
-        { uid: 'uid-1', enabled: true, user: { username: 'u1', full_name: 'U1' }, data: {} },
-        { uid: 'uid-2', enabled: true, user: { username: 'u2', full_name: 'U2' }, data: {} },
-        { uid: 'uid-3', enabled: true, user: { username: 'u3', full_name: 'U3' }, data: {} },
-      ],
-    } as ReturnType<typeof useAttackDetailsAssignees>);
+  it('does not render avatars when assignees is empty', () => {
+    mockUseHeaderData.mockReturnValue({
+      ...defaultHeaderData,
+      assignees: [],
+    });
 
     renderAssignees();
 
-    expect(screen.getByTestId(USERS_AVATARS_COUNT_BADGE_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(USERS_AVATARS_COUNT_BADGE_TEST_ID)).toHaveTextContent('3');
-  });
-
-  it('disables add button when loading', () => {
-    mockUseAttackDetailsAssignees.mockReturnValue({
-      ...defaultHookReturn,
-      isLoading: true,
-    } as ReturnType<typeof useAttackDetailsAssignees>);
-
-    renderAssignees();
-
-    expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
-  });
-
-  it('does not render avatars when assignedUsers is empty', () => {
-    mockUseAttackDetailsAssignees.mockReturnValue({
-      ...defaultHookReturn,
-      assignedUserIds: [],
-      assignedUsers: undefined,
-    } as ReturnType<typeof useAttackDetailsAssignees>);
-
-    renderAssignees();
-
-    expect(screen.getByTestId('attackDetailsFlyoutHeaderAssignees')).toBeInTheDocument();
+    expect(screen.getByTestId('attack-details-flyout-header-assignees')).toBeInTheDocument();
     expect(screen.queryByTestId(USERS_AVATARS_PANEL_TEST_ID)).not.toBeInTheDocument();
     expect(screen.getByTestId(HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders empty state when privileges are loading', () => {
+    mockUseAttacksPrivileges.mockReturnValue({
+      hasIndexWrite: true,
+      hasAttackIndexWrite: true,
+      loading: true,
+    });
+
+    renderAssignees();
+
+    expect(screen.getByTestId('attack-details-flyout-header-assignees-empty')).toBeInTheDocument();
   });
 });

@@ -130,6 +130,85 @@ describe('Card utils', () => {
         isUpdateAvailable: true,
       });
     });
+
+    it('should set isDeprecated to false when item is not deprecated', () => {
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          name: 'test',
+          title: 'Test Package',
+          version: '1.0.0',
+          type: 'integration',
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        isDeprecated: false,
+        deprecationInfo: undefined,
+      });
+    });
+
+    it('should extract deprecation info when item is deprecated', () => {
+      const deprecationInfo = {
+        description: 'This integration is deprecated',
+      };
+
+      const cardItem = mapToCard({
+        item: {
+          id: 'test',
+          name: 'test',
+          title: 'Test Package',
+          version: '1.0.0',
+          type: 'integration',
+          deprecated: deprecationInfo,
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        isDeprecated: true,
+        deprecationInfo,
+      });
+    });
+
+    it('should extract full deprecation info including since and replaced_by', () => {
+      const deprecationInfo = {
+        description: 'This integration is deprecated, use new-package instead',
+        since: '8.0.0',
+        replaced_by: {
+          package: 'new-package',
+          policyTemplate: 'default',
+        },
+      };
+
+      const cardItem = mapToCard({
+        item: {
+          id: 'old-package',
+          name: 'old-package',
+          title: 'Old Package',
+          version: '1.0.0',
+          type: 'integration',
+          deprecated: deprecationInfo,
+        },
+        addBasePath,
+        getHref,
+      } as any);
+
+      expect(cardItem).toMatchObject({
+        isDeprecated: true,
+        deprecationInfo: {
+          description: 'This integration is deprecated, use new-package instead',
+          since: '8.0.0',
+          replaced_by: {
+            package: 'new-package',
+            policyTemplate: 'default',
+          },
+        },
+      });
+    });
   });
   describe('getIntegrationLabels', () => {
     it('should return an empty list for an integration without errors', () => {

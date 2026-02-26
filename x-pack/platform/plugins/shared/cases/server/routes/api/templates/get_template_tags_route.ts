@@ -9,8 +9,6 @@ import { INTERNAL_TEMPLATE_TAGS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTemplates } from './mock_data';
 
 /**
  * GET /internal/cases/templates/tags
@@ -27,15 +25,11 @@ export const getTemplateTagsRoute = createCasesRoute({
   handler: async ({ context, response }) => {
     try {
       const caseContext = await context.cases;
-      await caseContext.getCasesClient();
+      const casesClient = await caseContext.getCasesClient();
 
-      const allTags = mockTemplates
-        .filter((t) => t.deletedAt === null)
-        .flatMap((template) => template.tags ?? []);
+      const tags = await casesClient.templates.getTags();
 
-      const uniqueTags = [...new Set(allTags)].sort();
-
-      return response.ok({ body: uniqueTags });
+      return response.ok({ body: tags });
     } catch (error) {
       throw createCaseError({
         message: `Failed to retrieve template tags: ${error}`,

@@ -171,9 +171,14 @@ module.exports = (_, argv) => {
       hints: false,
     },
 
-    cache: {
-      type: 'filesystem',
+    // make Webpack listen to `node_modules/@elastic/eui*` changes
+    watchOptions: {
+      ignored: /[\\/]node_modules[\\/](?!@elastic[\\/]eui)/,
     },
+
+    // disabling cache doesn't impact performance for regular Kibana users
+    // but it's needed for when running the watcher to watch for changes in `node_modules/@elastic/eui*`
+    cache: false,
 
     plugins: [
       new NodeLibsBrowserPlugin(),
@@ -192,6 +197,11 @@ module.exports = (_, argv) => {
         entryOnly: false,
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
+      }),
+      // adds a useful comment at the top of the DLL for debugging
+      new webpack.BannerPlugin({
+        banner: `/* Build: ${new Date().toLocaleString()} */`,
+        raw: true,
       }),
     ],
   };

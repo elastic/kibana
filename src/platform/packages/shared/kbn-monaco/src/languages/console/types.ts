@@ -24,7 +24,7 @@ export interface ConsoleParserResult {
 export interface ConsoleOutputParsedResponse {
   startOffset: number;
   endOffset?: number;
-  data?: Array<Record<string, unknown>>;
+  data?: unknown[];
 }
 export interface ConsoleOutputParserResult {
   errors: ErrorAnnotation[];
@@ -34,4 +34,15 @@ export interface ConsoleOutputParserResult {
 export interface ConsoleWorkerDefinition {
   getParserResult: (modelUri: string) => ConsoleParserResult | undefined;
 }
-export type ConsoleParser = (source: string) => ConsoleParserResult | undefined;
+
+export type ConsoleParserReviver = (this: unknown, key: string, value: unknown) => unknown;
+
+export interface ConsoleParser {
+  (source: string): ConsoleParserResult | undefined;
+  (source: string, reviver: ConsoleParserReviver): unknown;
+}
+
+export interface ConsoleOutputParser {
+  (source: string): ConsoleOutputParserResult | undefined;
+  (source: string, reviver: ConsoleParserReviver): unknown;
+}

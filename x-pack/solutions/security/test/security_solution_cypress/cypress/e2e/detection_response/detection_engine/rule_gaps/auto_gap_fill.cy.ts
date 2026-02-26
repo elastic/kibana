@@ -73,7 +73,8 @@ const ensureAutoGapFillEnabledViaUi = () => {
     });
 };
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/246571
+describe.skip(
   'Rule gaps auto fill status',
   {
     tags: ['@ess'],

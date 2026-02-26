@@ -75,7 +75,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
-    - emotion.d.ts
     - '!target/**/*'
 tasks:
   jest:

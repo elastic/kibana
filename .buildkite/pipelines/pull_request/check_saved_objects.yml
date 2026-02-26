@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/check_saved_objects.sh
+    cancel_on_build_failing: true
     label: 'Check changes in Saved Objects'
     agents:
       machineType: n2-standard-2
@@ -7,7 +8,9 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
     timeout_in_minutes: 10
     soft_fail: true # Can be removed when we are confident that this check is not too disruptive
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

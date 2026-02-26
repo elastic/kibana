@@ -5,32 +5,38 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DefendInsight } from '@kbn/elastic-assistant-common';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { InvalidDefendInsightTypeError } from '@kbn/elastic-assistant-plugin/server/lib/defend_insights/errors';
 
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
-
 import type { EndpointMetadataService } from '../../metadata';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
-import { buildPolicyResponseFailureWorkflowInsights } from './policy_response_failure';
+import { buildCustomWorkflowInsights } from './custom';
 
 export interface BuildWorkflowInsightParams {
   defendInsights: DefendInsight[];
-  request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
   endpointMetadataService: EndpointMetadataService;
   esClient: ElasticsearchClient;
+  options: {
+    insightType: DefendInsightType;
+    endpointIds: string[];
+    connectorId?: string;
+    model?: string;
+  };
 }
 
 export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): Promise<SecurityWorkflowInsight[]> {
-  switch (params.request.body.insightType) {
+  switch (params.options.insightType) {
     case DefendInsightType.Enum.incompatible_antivirus:
       return buildIncompatibleAntivirusWorkflowInsights(params);
     case DefendInsightType.Enum.policy_response_failure:
-      return buildPolicyResponseFailureWorkflowInsights(params);
+      return buildCustomWorkflowInsights(params);
+    case DefendInsightType.Enum.custom:
+      return buildCustomWorkflowInsights(params);
     default:
       throw new InvalidDefendInsightTypeError();
   }

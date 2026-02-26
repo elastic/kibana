@@ -23,6 +23,8 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/config-schema'
   - '@kbn/security-plugin-types-server'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-server-utils'
 tags:
   - plugin
   - prod

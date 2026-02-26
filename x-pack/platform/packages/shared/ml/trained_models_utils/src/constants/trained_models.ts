@@ -327,6 +327,12 @@ export type InferenceServiceSettings =
         provider: string;
         model: string;
       };
+    }
+  | {
+      service: 'elastic';
+      service_settings: {
+        model_id: string;
+      };
     };
 
 export type InferenceAPIConfigResponse = InferenceInferenceEndpointInfo & InferenceServiceSettings;

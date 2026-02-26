@@ -33,7 +33,6 @@ import {
 import { createBreadcrumbsState } from './breadcrumbs_state';
 import { createVisibilityState, type VisibilityState } from './visibility_state';
 import { createChromeStyleState, type ChromeStyleState } from './chrome_style_state';
-import { createFeedbackState, type FeedbackState, type FeedbackStateDeps } from './feedback_state';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 
@@ -48,9 +47,6 @@ export interface ChromeState {
   sideNav: {
     collapsed: State<boolean>;
   };
-
-  /** Feedback state */
-  feedback: FeedbackState;
 
   /** Breadcrumbs state */
   breadcrumbs: {
@@ -78,15 +74,10 @@ export interface ChromeState {
 export interface ChromeStateDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
-  feedbackDeps: Pick<FeedbackStateDeps, 'isEnabled$' | 'urlParams$'>;
 }
 
 /** Creates all chrome state in one place */
-export function createChromeState({
-  application,
-  docLinks,
-  feedbackDeps,
-}: ChromeStateDeps): ChromeState {
+export function createChromeState({ application, docLinks }: ChromeStateDeps): ChromeState {
   // Create headerBanner first (needed by body classes)
   const headerBanner = createState<ChromeUserBanner | undefined>(undefined);
 
@@ -98,12 +89,6 @@ export function createChromeState({
 
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
-
-  // Feedback
-  const feedback = createFeedbackState({
-    ...feedbackDeps,
-    isSideNavCollapsed$: sideNavCollapsed.$,
-  });
 
   // Breadcrumbs
   const {
@@ -132,7 +117,6 @@ export function createChromeState({
     sideNav: {
       collapsed: sideNavCollapsed,
     },
-    feedback,
     breadcrumbs: {
       classic: breadcrumbs,
       appendExtensions: breadcrumbsAppendExtensions,

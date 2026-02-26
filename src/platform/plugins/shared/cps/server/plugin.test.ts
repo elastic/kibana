@@ -35,11 +35,6 @@ describe('CPSServerPlugin', () => {
       const setup = plugin.setup(mockCoreSetup);
       expect(setup.getCpsEnabled()).toBe(true);
     });
-
-    it('should call setCpsFeatureFlag with true', () => {
-      plugin.setup(mockCoreSetup);
-      expect(mockCoreSetup.elasticsearch.setCpsFeatureFlag).toHaveBeenCalledWith(true);
-    });
   });
 
   describe('when cpsEnabled is false', () => {
@@ -52,11 +47,6 @@ describe('CPSServerPlugin', () => {
     it('should return false from getCpsEnabled', () => {
       const setup = plugin.setup(mockCoreSetup);
       expect(setup.getCpsEnabled()).toBe(false);
-    });
-
-    it('should call setCpsFeatureFlag with false', () => {
-      plugin.setup(mockCoreSetup);
-      expect(mockCoreSetup.elasticsearch.setCpsFeatureFlag).toHaveBeenCalledWith(false);
     });
   });
 

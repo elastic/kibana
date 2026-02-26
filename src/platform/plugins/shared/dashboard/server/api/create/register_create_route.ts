@@ -9,18 +9,21 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
+import {
+  createRequestParamsSchema,
+  createRequestQuerySchema,
+  getCreateRequestBodySchema,
+  getCreateResponseBodySchema,
+} from './schemas';
 import { create } from './create';
-import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
 import { throwOnUnmappedKeys } from '../scope_tooling';
 import { DASHBOARD_API_PATH } from '../../../common/constants';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
-    path: DASHBOARD_API_PATH,
-    summary: 'Create a dashboard',
+    path: `${DASHBOARD_API_PATH}/{id?}`,
+    summary: 'Create a dashboard with an auto-generated ID or a specified ID',
     ...commonRouteConfig,
   });
 
@@ -29,11 +32,8 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: () => ({
         request: {
-          query: schema.maybe(
-            schema.object({
-              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
-            })
-          ),
+          params: createRequestParamsSchema,
+          query: createRequestQuerySchema,
           body: getCreateRequestBodySchema(),
         },
         response: {
@@ -46,15 +46,15 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     async (ctx, req, res) => {
       try {
         const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
-        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body.data);
+        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body);
 
-        const result = await create(ctx, req.body);
+        const result = await create(ctx, req.body, req.params);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({
             body: {
-              message: `A dashboard with ID ${req.body.id} already exists.`,
+              message: `A dashboard with ID ${req?.params?.id} already exists.`,
             },
           });
         }

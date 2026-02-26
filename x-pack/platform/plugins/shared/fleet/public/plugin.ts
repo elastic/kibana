@@ -54,6 +54,7 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { Subject } from 'rxjs';
 
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
+import type { AutomaticImportV2PluginStart } from '@kbn/automatic-import-v2-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ReportingStart } from '@kbn/reporting-plugin/public';
@@ -141,6 +142,7 @@ export interface FleetStartDeps {
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
   automaticImport?: AutomaticImportPluginStart;
+  automaticImportVTwo?: AutomaticImportV2PluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   embeddable: EmbeddableStart;
@@ -153,6 +155,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   share: SharePluginStart;
   dashboard: DashboardStart;
   automaticImport?: AutomaticImportPluginStart;
+  automaticImportVTwo?: AutomaticImportV2PluginStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;

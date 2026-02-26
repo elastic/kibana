@@ -60,7 +60,6 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
-import { managementRoutes } from './routes/management';
 import {
   setupSavedObjects,
   jobSavedObjectsInitializationFactory,
@@ -270,7 +269,6 @@ export class MlServerPlugin
     modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    managementRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
       resolveMlCapabilities,

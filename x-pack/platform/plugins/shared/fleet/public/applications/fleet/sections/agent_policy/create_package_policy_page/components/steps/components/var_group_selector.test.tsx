@@ -18,6 +18,11 @@ import {
   computeDefaultVarGroupSelections,
   isVarRequiredByVarGroup,
 } from '../../../services/var_group_helpers';
+import {
+  getSelectedOption,
+  getCloudConnectorOption,
+  getIacTemplateUrlFromVarGroupSelection,
+} from '../../../../../../../../../common/services/cloud_connectors';
 
 import { VarGroupSelector } from './var_group_selector';
 
@@ -331,6 +336,37 @@ describe('VarGroupSelector', () => {
       // assume_role should be visible in default mode
       expect(options.find((o) => o.value === 'assume_role')).toBeDefined();
     });
+
+    it('should render the selector as disabled when disabled prop is true', () => {
+      render(<VarGroupSelector {...defaultProps} disabled={true} />);
+
+      const select = screen.getByTestId('varGroupSelector-credential_type');
+      expect(select).toBeDisabled();
+    });
+
+    it('should render the selector as enabled when disabled prop is false', () => {
+      render(<VarGroupSelector {...defaultProps} disabled={false} />);
+
+      const select = screen.getByTestId('varGroupSelector-credential_type');
+      expect(select).not.toBeDisabled();
+    });
+
+    it('should render the selector as enabled when disabled prop is not provided', () => {
+      render(<VarGroupSelector {...defaultProps} />);
+
+      const select = screen.getByTestId('varGroupSelector-credential_type');
+      expect(select).not.toBeDisabled();
+    });
+
+    it('should not call onSelectionChange when disabled and user tries to change', () => {
+      render(<VarGroupSelector {...defaultProps} disabled={true} />);
+
+      const select = screen.getByTestId('varGroupSelector-credential_type');
+      fireEvent.change(select, { target: { value: 'temporary_access_key' } });
+
+      // EuiSelect with disabled will prevent the change event from firing
+      expect(select).toBeDisabled();
+    });
   });
 
   describe('isVarRequiredByVarGroup', () => {
@@ -445,6 +481,175 @@ describe('VarGroupSelector', () => {
 
       const selections = { test: 'opt1' };
       expect(isVarRequiredByVarGroup('var1', [varGroupWithoutRequired], selections)).toBe(false);
+    });
+  });
+
+  describe('getSelectedOption', () => {
+    it('should return the selected option', () => {
+      const result = getSelectedOption(mockVarGroup, 'direct_access_key');
+      expect(result).toBeDefined();
+      expect(result?.name).toBe('direct_access_key');
+      expect(result?.vars).toEqual(['access_key_id', 'secret_access_key']);
+    });
+
+    it('should return undefined for unknown option name', () => {
+      const result = getSelectedOption(mockVarGroup, 'unknown');
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when selectedOptionName is undefined', () => {
+      const result = getSelectedOption(mockVarGroup, undefined);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return option with provider field', () => {
+      const varGroupWithProvider: RegistryVarGroup = {
+        name: 'auth',
+        title: 'Auth',
+        selector_title: 'Select',
+        options: [
+          { name: 'manual', title: 'Manual', vars: ['key'] },
+          { name: 'aws_connector', title: 'AWS Connector', vars: ['role'], provider: 'aws' },
+        ],
+      };
+
+      const result = getSelectedOption(varGroupWithProvider, 'aws_connector');
+      expect(result?.provider).toBe('aws');
+    });
+  });
+
+  describe('getCloudConnectorOption', () => {
+    const varGroupWithProvider: RegistryVarGroup = {
+      name: 'auth',
+      title: 'Auth',
+      selector_title: 'Select',
+      options: [
+        { name: 'manual', title: 'Manual', vars: ['key'] },
+        { name: 'aws_connector', title: 'AWS Connector', vars: ['role'], provider: 'aws' },
+        { name: 'azure_connector', title: 'Azure Connector', vars: ['tenant'], provider: 'azure' },
+      ],
+    };
+
+    it('should return isSelected: true with provider when cloud connector is selected', () => {
+      const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'aws_connector' });
+      expect(result.isSelected).toBe(true);
+      expect(result.provider).toBe('aws');
+    });
+
+    it('should return azure provider when azure connector is selected', () => {
+      const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'azure_connector' });
+      expect(result.isSelected).toBe(true);
+      expect(result.provider).toBe('azure');
+    });
+
+    it('should return isSelected: false when non-cloud-connector option is selected', () => {
+      const result = getCloudConnectorOption([varGroupWithProvider], { auth: 'manual' });
+      expect(result.isSelected).toBe(false);
+      expect(result.provider).toBeUndefined();
+    });
+
+    it('should return isSelected: false when varGroups is undefined', () => {
+      const result = getCloudConnectorOption(undefined, { auth: 'aws_connector' });
+      expect(result.isSelected).toBe(false);
+    });
+
+    it('should return isSelected: false when varGroups is empty', () => {
+      const result = getCloudConnectorOption([], { auth: 'aws_connector' });
+      expect(result.isSelected).toBe(false);
+    });
+
+    it('should return isSelected: false when no selection matches', () => {
+      const result = getCloudConnectorOption([varGroupWithProvider], { other_group: 'value' });
+      expect(result.isSelected).toBe(false);
+    });
+  });
+
+  describe('getIacTemplateUrlFromVarGroupSelection', () => {
+    const varGroupWithIacTemplateUrl: RegistryVarGroup = {
+      name: 'credential_type',
+      title: 'Credential Type',
+      selector_title: 'Select credential type',
+      options: [
+        { name: 'manual', title: 'Manual', vars: ['access_key'] },
+        {
+          name: 'cloud_connectors',
+          title: 'Cloud Connectors',
+          vars: ['role_arn'],
+          provider: 'aws',
+          iac_template_url: 'https://example.com/cloudformation-template.yaml',
+        },
+        {
+          name: 'azure_connector',
+          title: 'Azure Connector',
+          vars: ['tenant_id'],
+          provider: 'azure',
+          iac_template_url: 'https://example.com/arm-template.json',
+        },
+      ],
+    };
+
+    it('should return iac_template_url when cloud connector option with template is selected', () => {
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {
+        credential_type: 'cloud_connectors',
+      });
+      expect(result).toBe('https://example.com/cloudformation-template.yaml');
+    });
+
+    it('should return azure iac_template_url when azure connector is selected', () => {
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {
+        credential_type: 'azure_connector',
+      });
+      expect(result).toBe('https://example.com/arm-template.json');
+    });
+
+    it('should return undefined when selected option has no iac_template_url', () => {
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {
+        credential_type: 'manual',
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when varGroups is undefined', () => {
+      const result = getIacTemplateUrlFromVarGroupSelection(undefined, {
+        credential_type: 'cloud_connectors',
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when varGroups is empty', () => {
+      const result = getIacTemplateUrlFromVarGroupSelection([], {
+        credential_type: 'cloud_connectors',
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when no selection matches any var_group', () => {
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {
+        other_group: 'some_value',
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when varGroupSelections is empty', () => {
+      const result = getIacTemplateUrlFromVarGroupSelection([varGroupWithIacTemplateUrl], {});
+      expect(result).toBeUndefined();
+    });
+
+    it('should search across multiple var_groups and return first match', () => {
+      const multipleVarGroups: RegistryVarGroup[] = [
+        {
+          name: 'auth_method',
+          title: 'Auth Method',
+          selector_title: 'Select auth',
+          options: [{ name: 'api_key', title: 'API Key', vars: ['key'] }],
+        },
+        varGroupWithIacTemplateUrl,
+      ];
+
+      const result = getIacTemplateUrlFromVarGroupSelection(multipleVarGroups, {
+        credential_type: 'cloud_connectors',
+      });
+      expect(result).toBe('https://example.com/cloudformation-template.yaml');
     });
   });
 });

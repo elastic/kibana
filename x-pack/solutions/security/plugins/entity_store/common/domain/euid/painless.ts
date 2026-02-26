@@ -10,9 +10,31 @@ import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, isEuidSeparator } from './commons';
 
 /**
- * Constructs a Painless evaluation for the provided entity type to generate the entity id.
+ * Returns an Elasticsearch runtime keyword field mapping whose Painless script
+ * computes the typed EUID for the given entity type.
  *
- * To use in a runtime field, you can wrap the generation around a function and emit the value.
+ * Example usage:
+ * ```ts
+ * runtime_mappings: { 'user_id': getEuidPainlessRuntimeMapping('user') }
+ * ```
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
+ */
+export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
+  type: 'keyword';
+  script: { source: string };
+} {
+  const returnScript = getEuidPainlessEvaluation(entityType);
+  const emitScript = `String euid_eval(def doc) { ${returnScript} } def result = euid_eval(doc); if (result != null) { emit(result); }`;
+  return {
+    type: 'keyword',
+    script: { source: emitScript },
+  };
+}
+
+/**
+ * Constructs a Painless evaluation for the provided entity type to generate the entity id.
  *
  * Example usage:
  * ```ts

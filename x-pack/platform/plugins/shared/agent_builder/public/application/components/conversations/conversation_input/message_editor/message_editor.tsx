@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme, keys, useGeneratedHtmlId, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
+import { InlineActionsContainer } from './inline_actions';
 
 const EDITOR_MAX_HEIGHT = 240;
 
@@ -50,7 +51,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
-  const { ref, onChange } = messageEditor._internal;
+  const { ref, onChange, triggerMatch } = messageEditor._internal;
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const { euiTheme } = useEuiTheme();
   const placeholderStyles = css`
@@ -78,27 +79,38 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   };
 
   return (
-    <div
-      ref={ref}
-      id={editorId}
-      contentEditable={disabled ? 'false' : 'plaintext-only'}
-      role="textbox"
-      aria-multiline="true"
-      aria-label={editorAriaLabel}
-      aria-disabled={disabled}
-      tabIndex={0}
-      data-placeholder={placeholder}
-      data-test-subj={dataTestSubj}
-      css={editorStyles}
-      onInput={onChange}
-      onCompositionStart={handleCompositionStart}
-      onCompositionEnd={handleCompositionEnd}
-      onKeyDown={(event) => {
-        if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
-          event.preventDefault();
-          onSubmit();
-        }
-      }}
-    />
+    <InlineActionsContainer
+      triggerMatch={triggerMatch}
+      onClose={messageEditor.dismissTrigger}
+      editorRef={ref}
+      data-test-subj={`${dataTestSubj}-container`}
+    >
+      <div
+        ref={ref}
+        id={editorId}
+        contentEditable={disabled ? 'false' : 'plaintext-only'}
+        role="textbox"
+        aria-multiline="true"
+        aria-label={editorAriaLabel}
+        aria-disabled={disabled}
+        aria-haspopup="dialog"
+        tabIndex={0}
+        data-placeholder={placeholder}
+        data-test-subj={dataTestSubj}
+        css={editorStyles}
+        onInput={onChange}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        onKeyDown={(event) => {
+          if (event.key === keys.ESCAPE) {
+            event.stopPropagation();
+            messageEditor.dismissTrigger();
+          } else if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
+            event.preventDefault();
+            onSubmit();
+          }
+        }}
+      />
+    </InlineActionsContainer>
   );
 };

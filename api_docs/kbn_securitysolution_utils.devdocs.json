@@ -518,7 +518,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"wildcard\" | \"match\" | \"match_any\""
+                  "\"match\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "lineNumber": 180,
@@ -710,7 +710,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"wildcard\" | \"match\" | \"match_any\""
+                  "\"match\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "lineNumber": 202,
@@ -1015,7 +1015,7 @@
         "label": "validateHasWildcardWithWrongOperator",
         "description": [],
         "signature": [
-          "({ operator, value, }: { operator: \"exists\" | \"wildcard\" | \"match\" | \"nested\" | \"match_any\"; value: string | string[]; }) => boolean"
+          "({ operator, value, }: { operator: \"exists\" | \"match\" | \"nested\" | \"wildcard\" | \"match_any\"; value: string | string[]; }) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "lineNumber": 160,
@@ -1044,7 +1044,7 @@
                 "label": "operator",
                 "description": [],
                 "signature": [
-                  "\"exists\" | \"wildcard\" | \"match\" | \"nested\" | \"match_any\""
+                  "\"exists\" | \"match\" | \"nested\" | \"wildcard\" | \"match_any\""
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "lineNumber": 164,
@@ -1392,7 +1392,7 @@
         "label": "EntryTypes",
         "description": [],
         "signature": [
-          "\"wildcard\" | \"match\" | \"match_any\""
+          "\"match\" | \"wildcard\" | \"match_any\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "lineNumber": 65,
@@ -1464,7 +1464,7 @@
         "label": "TrustedAppEntryTypes",
         "description": [],
         "signature": [
-          "\"wildcard\" | \"match\""
+          "\"match\" | \"wildcard\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "lineNumber": 66,

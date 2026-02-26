@@ -95,7 +95,7 @@ evaluate.describe('Alert AI Insights', { tag: tags.serverless.observability.comp
     -   Errors: "Payment request failed. Invalid token. app.loyalty.level=gold" (apmErrors, last seen within alert window, Direct)---handled error, likely user input or session issue.
     -   Anomalies: None detected (apmServiceSummary, alert window, Unrelated)---no evidence of systemic or performance issues.
     -   Change points: None observed (apmServiceSummary, alert window, Unrelated)---no throughput or latency shifts.
-    -   Downstream: Only checkout:5050 referenced in error trace; no evidence of propagation to flagd or other services (apmDownstreamDependencies, Indirect).
+    -   Downstream: Only checkout:5050 referenced in error trace; no evidence of propagation to flagd or other services (apmServiceTopology, Indirect).
 -   Immediate actions:
 
     -   Review recent traces for the affected error group to confirm scope and verify if the error is isolated to specific users or requests.

@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/250420
-  describe.skip('dashboard add ES|QL chart', function () {
+  describe('dashboard add ES|QL chart', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -111,13 +110,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
-
-      await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
-      await testSubjects.click('ESQLEditor-run-query-button');
       await header.waitUntilLoadingHasFinished();
 
+      await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
+      const editorValue = await monacoEditor.getCodeEditorValue();
+      expect(editorValue).to.be('from logstash-* | stats maxB = max(bytes)');
+      await testSubjects.click('ESQLEditor-run-query-button');
+      await header.waitUntilLoadingHasFinished();
+      // wait for Lens to re-render the suggestion with the new query results
+      await retry.try(async () => {
+        expect(await testSubjects.exists('mtrVis')).to.be(true);
+      });
+
       await testSubjects.click('applyFlyoutButton');
-      expect(await testSubjects.exists('mtrVis')).to.be(true);
+      await dashboard.waitForRenderComplete();
+      await retry.try(async () => {
+        expect(await testSubjects.exists('mtrVis')).to.be(true);
+      });
     });
 
     it('should add a second panel and remove when hitting cancel', async () => {

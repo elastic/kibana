@@ -49,6 +49,7 @@ describe('createTransport', () => {
     return createTransport({
       getUnauthorizedErrorHandler,
       getExecutionContext,
+      onRequest: jest.fn(),
     });
   };
 

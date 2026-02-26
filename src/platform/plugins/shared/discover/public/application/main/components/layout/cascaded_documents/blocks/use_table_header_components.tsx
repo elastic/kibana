@@ -103,7 +103,7 @@ function CascadeGroupingSelectionPopover({
             data-test-subj="discoverEnableCascadeLayoutSwitch"
           >
             <FormattedMessage
-              id="discover.cascade.header.layoutSwitchLabel"
+              id="discover.dataCascade.header.layoutSwitchLabel"
               defaultMessage="Group by"
             />
           </EuiDataGridToolbarControl>

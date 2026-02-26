@@ -24,6 +24,7 @@
       "{index}/_aliases/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-delete-alias",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-delete-alias",
     "availability": {
       "stack": true,
       "serverless": true

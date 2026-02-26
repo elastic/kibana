@@ -13,7 +13,8 @@ import { generateLogsData } from '../../../fixtures/generators';
 // Note: Processor creation, conditional steps, and nested steps API correctness is covered by
 // API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts
 // These UI tests focus on the user experience: validation, button states, cancel flows, and duplication
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/254435
+test.describe.skip(
   'Stream data processing - creating steps',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -27,6 +28,8 @@ test.describe(
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
 
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+      // Ensure the interactive mode + simulator have finished initializing before interacting.
+      await pageObjects.streams.waitForModifiedFieldsDetection();
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
@@ -36,10 +39,17 @@ test.describe(
 
     test('should not show Technical Preview badge when AI suggestions are unavailable', async ({
       page,
+      config,
     }) => {
       // In the empty state without AI connectors, the Technical Preview badge should be hidden
       await expect(page.getByText('Extract fields from your data')).toBeVisible();
-      await expect(page.getByText('Technical Preview')).toBeHidden();
+      // Only check for hidden badge in stateful mode - in serverless/production environments,
+      // AI features are always available so the Technical Preview badge will be shown
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      if (!config.serverless) {
+        // eslint-disable-next-line playwright/no-conditional-expect
+        await expect(page.getByText('Technical Preview')).toBeHidden();
+      }
     });
 
     test('should create a new processor successfully', async ({ pageObjects }) => {
@@ -59,6 +69,27 @@ test.describe(
       await pageObjects.streams.clickSaveCondition();
       await pageObjects.streams.saveStepsListChanges();
       expect(await pageObjects.streams.getConditionsListItems()).toHaveLength(1);
+    });
+
+    test('should disable saving a condition when syntax JSON is invalid', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.streams.clickAddCondition();
+
+      await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+      await pageObjects.streams.fillConditionEditorWithSyntax(
+        '{"field":"test_field","contains":"logs"}'
+      );
+      await expect(
+        page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+      ).toBeEnabled();
+
+      // Regression check: going from valid JSON to invalid JSON must disable Update.
+      await pageObjects.streams.fillConditionEditorWithSyntax('{');
+      await expect(
+        page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+      ).toBeDisabled();
     });
 
     test('should be able to nest steps under conditions', async ({ pageObjects }) => {

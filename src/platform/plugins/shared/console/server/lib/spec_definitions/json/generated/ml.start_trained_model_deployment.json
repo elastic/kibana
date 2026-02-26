@@ -38,6 +38,7 @@
       "_ml/trained_models/{model_id}/deployment/_start"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-start-trained-model-deployment",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-start-trained-model-deployment",
     "availability": {
       "stack": true,
       "serverless": true

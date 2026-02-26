@@ -7,7 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isAssignment } from '../../ast';
+import type {
+  ESQLAstExpression,
+  ESQLBinaryExpression,
+  ESQLIntegerLiteral,
+  ESQLSingleAstItem,
+  ESQLStringLiteral,
+} from '../../types';
 import { Parser } from '../core/parser';
+
+const getSetAssignment = (setInstruction: { args?: unknown[] }): ESQLBinaryExpression => {
+  const [firstArg] = setInstruction.args ?? [];
+  if (!firstArg) {
+    throw new Error('Expected SET instruction to have an assignment argument');
+  }
+
+  if (!isAssignment(firstArg as ESQLAstExpression)) {
+    throw new Error('Expected a binary expression for the SET instruction');
+  }
+
+  return firstArg as ESQLBinaryExpression;
+};
+
+const expectSetIntegerAssignment = (
+  setInstruction: { args?: unknown[] },
+  expectedSettingName: string,
+  expectedValue: number
+) => {
+  const assignment = getSetAssignment(setInstruction);
+  expect((assignment.args[0] as ESQLSingleAstItem).name).toBe(expectedSettingName);
+  expect((assignment.args[1] as ESQLIntegerLiteral).value).toBe(expectedValue);
+};
+
+const expectSetStringAssignment = (
+  setInstruction: { args?: unknown[] },
+  expectedSettingName: string,
+  expectedValue: string
+) => {
+  const assignment = getSetAssignment(setInstruction);
+  expect((assignment.args[0] as ESQLSingleAstItem).name).toBe(expectedSettingName);
+  expect((assignment.args[1] as ESQLStringLiteral).valueUnquoted).toBe(expectedValue);
+};
 
 describe('SET instruction parsing', () => {
   describe('single SET instruction', () => {
@@ -335,8 +376,7 @@ describe('SET instruction parsing', () => {
 
       const setInstruction = root.header![0];
       expect(setInstruction.name).toBe('set');
-      expect((setInstruction.args[0] as any).args[0].name).toBe('max_memory');
-      expect((setInstruction.args[0] as any).args[1].value).toBe(1073741824);
+      expectSetIntegerAssignment(setInstruction, 'max_memory', 1073741824);
     });
   });
 
@@ -348,9 +388,7 @@ describe('SET instruction parsing', () => {
       expect(root.header).toHaveLength(1);
 
       const setInstruction = root.header![0];
-      expect(setInstruction.name).toBe('set');
-      expect((setInstruction.args[0] as any).args[0].name).toBe('`elasticsearch.timeout`');
-      expect((setInstruction.args[0] as any).args[1].valueUnquoted).toBe('30s');
+      expectSetStringAssignment(setInstruction, '`elasticsearch.timeout`', '30s');
     });
 
     test('SET with identifier containing numbers', () => {
@@ -361,8 +399,7 @@ describe('SET instruction parsing', () => {
 
       const setInstruction = root.header![0];
       expect(setInstruction.name).toBe('set');
-      expect((setInstruction.args[0] as any).args[0].name).toBe('setting123');
-      expect((setInstruction.args[0] as any).args[1].valueUnquoted).toBe('value');
+      expectSetStringAssignment(setInstruction, 'setting123', 'value');
     });
 
     test('SET with identifier containing underscores', () => {
@@ -372,9 +409,7 @@ describe('SET instruction parsing', () => {
       expect(root.header).toHaveLength(1);
 
       const setInstruction = root.header![0];
-      expect(setInstruction.name).toBe('set');
-      expect((setInstruction.args[0] as any).args[0].name).toBe('max_field_length');
-      expect((setInstruction.args[0] as any).args[1].value).toBe(1000);
+      expectSetIntegerAssignment(setInstruction, 'max_field_length', 1000);
     });
   });
 
@@ -388,13 +423,9 @@ describe('SET instruction parsing', () => {
 
       const setInstruction = root.header![0];
       expect(setInstruction.name).toBe('set');
-      expect((setInstruction.args[0] as any).args[0].name).toBe('config');
-      expect((setInstruction.args[0] as any).args[1].valueUnquoted).toBe('{"key": "value"}');
+      expectSetStringAssignment(setInstruction, 'config', '{"key": "value"}');
       const setInstruction2 = root.header![1];
-      expect((setInstruction2.args[0] as any).args[0].name).toBe('endpoint');
-      expect((setInstruction2.args[0] as any).args[1].valueUnquoted).toBe(
-        'https://example.com/api/v1'
-      );
+      expectSetStringAssignment(setInstruction2, 'endpoint', 'https://example.com/api/v1');
     });
   });
 

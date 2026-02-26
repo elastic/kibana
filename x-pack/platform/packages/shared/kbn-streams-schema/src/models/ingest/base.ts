@@ -37,6 +37,8 @@ interface IngestStreamPrivileges {
   read_failure_store: boolean;
   // User can manage failure store information
   manage_failure_store: boolean;
+  // User can create snapshot repositories (needed for frozen phase searchable snapshots)
+  create_snapshot_repository: boolean;
 }
 
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
@@ -48,6 +50,7 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
   text_structure: z.boolean(),
   read_failure_store: z.boolean(),
   manage_failure_store: z.boolean(),
+  create_snapshot_repository: z.boolean(),
 });
 
 export interface IngestBase {

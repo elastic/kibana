@@ -41,4 +41,4 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/response_4xx.yaml'

@@ -11,7 +11,6 @@ import type {
   AtomicGraphNode,
   DataSetGraphNode,
   ElasticsearchGraphNode,
-  HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
 } from './nodes/base';
@@ -43,8 +42,6 @@ export const isElasticsearch = (node: GraphNodeUnion): node is ElasticsearchGrap
 
 export const isKibana = (node: GraphNodeUnion): node is KibanaGraphNode =>
   node.type.startsWith('kibana.');
-
-export const isHttp = (node: GraphNodeUnion): node is HttpGraphNode => node.type === 'http';
 
 export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type === 'wait';
 

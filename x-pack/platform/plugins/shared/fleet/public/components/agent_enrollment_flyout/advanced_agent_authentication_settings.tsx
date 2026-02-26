@@ -9,7 +9,14 @@ import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiButton, EuiCallOut, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiCallOut,
+  EuiSelect,
+  EuiSpacer,
+  EuiFormPrepend,
+} from '@elastic/eui';
 
 import { SO_SEARCH_LIMIT } from '../../applications/fleet/constants';
 import type {
@@ -205,12 +212,14 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
               }))}
               value={selectedApiKeyId || undefined}
               prepend={
-                <EuiText>
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel"
-                    defaultMessage="Enrollment token"
-                  />
-                </EuiText>
+                <EuiFormPrepend
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel"
+                      defaultMessage="Enrollment token"
+                    />
+                  }
+                />
               }
               aria-label={i18n.translate(
                 'xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel',

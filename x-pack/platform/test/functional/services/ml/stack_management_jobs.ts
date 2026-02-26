@@ -476,8 +476,8 @@ export function MachineLearningStackManagementJobsProvider(
           expectedJob.id,
           `Expected job id to be '${expectedJob.id}' (got '${sortedActualJobs[i].id}')`
         );
-        const expectedType = Object.keys(expectedJob.analysis)[0];
-        const actualType = Object.keys(sortedActualJobs[i].analysis)[0];
+        const expectedType = Object.keys(expectedJob.analysis!)[0];
+        const actualType = Object.keys(sortedActualJobs[i].analysis!)[0];
         expect(actualType).to.eql(
           expectedType,
           `Expected job type to be '${expectedType}' (got '${actualType}')`

@@ -35,9 +35,28 @@ const mockDeleteDataStreamMutation = {
   variables: undefined as { dataStreamId: string } | undefined,
 };
 
+const mockReanalyzeMutate = jest.fn();
+const mockReanalyzeDataStreamMutation = {
+  mutate: mockReanalyzeMutate,
+  isLoading: false,
+  variables: undefined as
+    | { dataStreamId: string; integrationId: string; connectorId: string }
+    | undefined,
+};
+
 jest.mock('../../../../../common', () => ({
   useDeleteDataStream: () => ({
     deleteDataStreamMutation: mockDeleteDataStreamMutation,
+  }),
+  useReanalyzeDataStream: () => ({
+    reanalyzeDataStreamMutation: mockReanalyzeDataStreamMutation,
+  }),
+}));
+
+// Mock useIntegrationForm hook
+jest.mock('../../../forms/integration_form', () => ({
+  useIntegrationForm: () => ({
+    formData: { connectorId: 'test-connector-id' },
   }),
 }));
 
@@ -80,6 +99,8 @@ describe('DataStreamsTable', () => {
     jest.clearAllMocks();
     mockDeleteDataStreamMutation.isLoading = false;
     mockDeleteDataStreamMutation.variables = undefined;
+    mockReanalyzeDataStreamMutation.isLoading = false;
+    mockReanalyzeDataStreamMutation.variables = undefined;
   });
 
   describe('rendering', () => {
@@ -121,20 +142,37 @@ describe('DataStreamsTable', () => {
   });
 
   describe('sorting', () => {
-    it('should sort items by title ascending by default', () => {
+    it('should preserve original order by default (no sorting applied)', () => {
       const items = [
-        createMockDataStream({ dataStreamId: 'ds-2', title: 'Zebra Stream' }),
-        createMockDataStream({ dataStreamId: 'ds-1', title: 'Alpha Stream' }),
+        createMockDataStream({ dataStreamId: 'ds-1', title: 'Zebra Stream' }),
+        createMockDataStream({ dataStreamId: 'ds-2', title: 'Alpha Stream' }),
       ];
 
       renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const rows = screen.getAllByRole('row');
-      // Second row should be Alpha (sorted ascending)
-      expect(within(rows[1]).getByText('Alpha Stream')).toBeInTheDocument();
+
+      expect(within(rows[1]).getByText('Zebra Stream')).toBeInTheDocument();
+      expect(within(rows[2]).getByText('Alpha Stream')).toBeInTheDocument();
     });
 
-    it('should allow sorting by clicking column header', async () => {
+    it('should sort alphabetically ascending when column header is clicked', async () => {
+      const items = [
+        createMockDataStream({ dataStreamId: 'ds-1', title: 'Zebra Stream' }),
+        createMockDataStream({ dataStreamId: 'ds-2', title: 'Alpha Stream' }),
+      ];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const titleHeader = screen.getByRole('button', { name: /title/i });
+      await userEvent.click(titleHeader);
+
+      const rows = screen.getAllByRole('row');
+      expect(within(rows[1]).getByText('Alpha Stream')).toBeInTheDocument();
+      expect(within(rows[2]).getByText('Zebra Stream')).toBeInTheDocument();
+    });
+
+    it('should toggle to descending when column header is clicked twice', async () => {
       const items = [
         createMockDataStream({ dataStreamId: 'ds-1', title: 'Alpha Stream' }),
         createMockDataStream({ dataStreamId: 'ds-2', title: 'Zebra Stream' }),
@@ -142,11 +180,10 @@ describe('DataStreamsTable', () => {
 
       renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
-      // Click title column header to toggle sort
       const titleHeader = screen.getByRole('button', { name: /title/i });
       await userEvent.click(titleHeader);
+      await userEvent.click(titleHeader);
 
-      // After clicking, should be descending (Zebra first)
       const rows = screen.getAllByRole('row');
       expect(within(rows[1]).getByText('Zebra Stream')).toBeInTheDocument();
     });
@@ -192,23 +229,135 @@ describe('DataStreamsTable', () => {
       });
     });
 
-    it('should pass isDeleting to Status when deletion in progress', () => {
-      mockDeleteDataStreamMutation.isLoading = true;
-      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+    it('should show deleting status when item status is deleting (set via optimistic update)', () => {
+      // With optimistic updates, the useDeleteDataStream hook updates the cache
+      // to set status='deleting' before the API call completes. The table component
+      // now simply checks item.status === 'deleting' rather than tracking isLoading.
+      const items = [createMockDataStream({ status: 'deleting' })];
 
-      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       expect(screen.getByText('Deleting...')).toBeInTheDocument();
     });
 
-    it('should disable delete button while deleting that item', () => {
-      mockDeleteDataStreamMutation.isLoading = true;
-      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+    it('should disable delete button when item status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
 
-      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
       expect(deleteButton).toBeDisabled();
+    });
+
+    it('should pass isDeleting to Status when server status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      expect(screen.getByText('Deleting...')).toBeInTheDocument();
+    });
+
+    it('should disable delete button when server status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const deleteButton = screen.getByTestId('deleteDataStreamButton');
+      expect(deleteButton).toBeDisabled();
+    });
+
+    it('should disable refresh button when server status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).toBeDisabled();
+    });
+
+    it('should disable expand button when server status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const expandButton = screen.getByTestId('expandDataStreamButton');
+      expect(expandButton).toBeDisabled();
+    });
+  });
+
+  describe('reanalyze functionality', () => {
+    it('should show reanalyze confirmation modal when refresh action clicked', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      await userEvent.click(refreshButton);
+
+      expect(screen.getByText(/Re-analyze data stream "Test Data Stream"/i)).toBeInTheDocument();
+    });
+
+    it('should show explanation text in reanalyze modal', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      await userEvent.click(refreshButton);
+
+      expect(screen.getByText(/re-run the AI analysis on this data stream/i)).toBeInTheDocument();
+    });
+
+    it('should close modal when cancel is clicked', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      await userEvent.click(refreshButton);
+
+      const cancelButton = screen.getByText('Cancel');
+      await userEvent.click(cancelButton);
+
+      expect(screen.queryByText(/Re-analyze "Test Data Stream"/i)).not.toBeInTheDocument();
+    });
+
+    it('should call reanalyze mutation when confirm is clicked', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      await userEvent.click(refreshButton);
+
+      const confirmButton = screen.getByRole('button', { name: /Re-Analyze/i });
+      await userEvent.click(confirmButton);
+
+      expect(mockReanalyzeMutate).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
+        connectorId: 'test-connector-id',
+      });
+    });
+
+    it('should disable refresh button when reanalyze is in progress for that item', () => {
+      mockReanalyzeDataStreamMutation.isLoading = true;
+      mockReanalyzeDataStreamMutation.variables = {
+        dataStreamId: 'ds-1',
+        integrationId: 'integration-123',
+        connectorId: 'test-connector-id',
+      };
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).toBeDisabled();
+    });
+
+    it('should not disable refresh button for other items when reanalyze is in progress', () => {
+      mockReanalyzeDataStreamMutation.isLoading = true;
+      mockReanalyzeDataStreamMutation.variables = {
+        dataStreamId: 'ds-other',
+        integrationId: 'integration-123',
+        connectorId: 'test-connector-id',
+      };
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).not.toBeDisabled();
     });
   });
 

@@ -99,6 +99,7 @@ const privileges = {
   text_structure: true,
   read_failure_store: true,
   manage_failure_store: true,
+  create_snapshot_repository: true,
 };
 
 const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({

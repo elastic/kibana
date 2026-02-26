@@ -14,6 +14,7 @@
       "_scripts/painless/_execute"
     ],
     "documentation": "https://www.elastic.co/docs/reference/scripting-languages/painless/painless-api-examples",
+    "documentation_serverless": "https://www.elastic.co/docs/reference/scripting-languages/painless/painless-api-examples",
     "availability": {
       "stack": true,
       "serverless": true

@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
 import {
   DEFAULT_STALE_SLO_THRESHOLD_HOURS,
@@ -239,7 +240,11 @@ async function hasDocumentsToDelete(
 ): Promise<boolean> {
   const { esClient, abortController } = dependencies;
   const response = await esClient.count(
-    { index: SUMMARY_DESTINATION_INDEX_PATTERN, terminate_after: 1, query },
+    {
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      terminate_after: 1,
+      query: query as QueryDslQueryContainer,
+    },
     { signal: abortController.signal }
   );
 
@@ -259,7 +264,7 @@ async function executeDeleteByQuery(
       slices: 'auto',
       max_docs: MAX_DOCS_PER_DELETE,
       requests_per_second: REQUESTS_PER_SECOND,
-      query,
+      query: query as QueryDslQueryContainer,
     },
     { signal: abortController.signal }
   );

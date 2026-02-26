@@ -2555,6 +2555,17 @@ const medianDefinition: FunctionDefinition = {
       ],
       returnType: 'double',
     },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'tdigest',
+          optional: false,
+          description: 'Expression that outputs values to calculate the median of.',
+        },
+      ],
+      returnType: 'double',
+    },
   ],
   locationsAvailable: [Location.STATS],
   examples: [

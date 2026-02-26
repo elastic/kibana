@@ -1,13 +1,22 @@
-Create an ingest pipeline for this data stream. Use an **iterative eval/dev loop**: design, simulate, fix errors, repeat.
+Analyze this data stream and determine if an ingest pipeline is needed. Use an **iterative eval/dev loop**: analyze, decide, design (if needed), simulate, fix errors, repeat.
 
 ## Your Workflow
 
 1. **Analyze** the dataset analysis below to understand the data structure
-2. **Design** a pipeline with appropriate processors
-3. **Call `simulate_pipeline`** to test it against sample data
-4. **Read the errors** carefully and fix the issues
-5. **Repeat** steps 3-4 until simulation passes
-6. **Call `commit_pipeline`** when done
+2. **Decide** if processing is actually needed:
+   - If data already has proper `@timestamp`, `severity_text`, `body.text`, etc. → **commit an empty pipeline** `{ "steps": [] }`
+   - If there's no `event.original` or raw text to parse → **commit an empty pipeline**
+   - If `body.text` is a simple message (not a structured log line) → **do NOT parse it**
+   - Only design processors if the data actually needs transformation
+   - **Never create no-op grok/dissect patterns** that extract a field's entire content unchanged (e.g., `%{body.text}` from `body.text`)
+   - Note: `date` processors to reformat timestamps or `convert` processors to change types ARE valid transformations
+3. **Design** a pipeline with appropriate processors (only if processing is needed)
+4. **Call `simulate_pipeline`** to test it against sample data
+5. **Read the errors** carefully and fix the issues
+6. **Repeat** steps 4-5 until simulation passes
+7. **Call `commit_pipeline`** when done - this can be `{ "steps": [] }` if no processing is needed
+
+**Not all data needs processing.** If the data is already well-structured with schema-compliant fields, commit an empty pipeline. Don't add unnecessary processors.
 
 **Expect multiple iterations.** The first attempt rarely works perfectly. Read error messages - they tell you exactly what to fix.
 
@@ -25,7 +34,7 @@ Create an ingest pipeline for this data stream. Use an **iterative eval/dev loop
 ```
 {{{parsing_processor}}}
 ```
-**Important:** The dataset analysis below shows documents AFTER this processor runs. But `simulate_pipeline` runs against ORIGINAL raw documents - so you MUST include this processor (or a modified version) as the first step in your pipeline to get the extracted fields. Add processors after it for date normalization, type conversions, and cleanup.
+**Important:** When a parsing processor is provided, the system has already determined that this data needs parsing. You MUST NOT commit an empty pipeline — use this processor (or a modified version) as the first step, then add date normalization, type conversions, and cleanup. The dataset analysis below shows documents AFTER this processor runs; `simulate_pipeline` runs against ORIGINAL raw documents, so include the parsing step to get the extracted fields.
 {{/parsing_processor}}
 
 {{^parsing_processor}}

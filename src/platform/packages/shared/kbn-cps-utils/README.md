@@ -4,7 +4,7 @@ Shared utilities and components for Cross-Project Search (CPS) functionality in 
 
 ## Overview
 
-This package provides reusable components for managing cross-project search functionality across Kibana applications.
+This package provides reusable components for managing Cross-project search functionality across Kibana applications.
 
 ## Components
 

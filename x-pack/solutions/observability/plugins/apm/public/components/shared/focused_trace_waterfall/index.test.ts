@@ -106,6 +106,7 @@ describe('flattenChildren', () => {
           serviceName: 'service-a',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span' as const,
         },
         children: [],
       },
@@ -119,6 +120,7 @@ describe('flattenChildren', () => {
           serviceName: 'service-b',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span' as const,
         },
         children: [],
       },
@@ -133,6 +135,7 @@ describe('flattenChildren', () => {
         serviceName: 'service-a',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: 'b',
@@ -143,6 +146,7 @@ describe('flattenChildren', () => {
         serviceName: 'service-b',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ]);
   });
@@ -159,6 +163,7 @@ describe('flattenChildren', () => {
           serviceName: 'service-a',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span' as const,
         },
         children: [
           {
@@ -171,6 +176,7 @@ describe('flattenChildren', () => {
               serviceName: 'service-b',
               errors: [],
               spanLinksCount: { incoming: 0, outgoing: 0 },
+              docType: 'span' as const,
             },
             children: [
               {
@@ -183,6 +189,7 @@ describe('flattenChildren', () => {
                   serviceName: 'service-c',
                   errors: [],
                   spanLinksCount: { incoming: 0, outgoing: 0 },
+                  docType: 'span' as const,
                 },
                 children: [],
               },
@@ -200,6 +207,7 @@ describe('flattenChildren', () => {
           serviceName: 'service-d',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span' as const,
         },
         children: [],
       },
@@ -214,6 +222,7 @@ describe('flattenChildren', () => {
         serviceName: 'service-a',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: 'b',
@@ -224,6 +233,7 @@ describe('flattenChildren', () => {
         serviceName: 'service-b',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: 'c',
@@ -234,6 +244,7 @@ describe('flattenChildren', () => {
         serviceName: 'service-c',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: 'd',
@@ -244,6 +255,7 @@ describe('flattenChildren', () => {
         serviceName: 'service-d',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ]);
   });
@@ -260,6 +272,7 @@ describe('flattenChildren', () => {
           serviceName: 'service-a',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span' as const,
         },
       },
       {
@@ -272,6 +285,7 @@ describe('flattenChildren', () => {
           serviceName: 'service-b',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span' as const,
         },
         children: [],
       },
@@ -286,6 +300,7 @@ describe('flattenChildren', () => {
         serviceName: 'service-a',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: 'b',
@@ -296,6 +311,7 @@ describe('flattenChildren', () => {
         serviceName: 'service-b',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ]);
   });

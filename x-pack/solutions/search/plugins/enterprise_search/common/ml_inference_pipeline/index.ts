@@ -166,8 +166,8 @@ export const parseMlInferenceParametersFromPipeline = (
   pipeline: IngestPipeline
 ): CreateMLInferencePipeline | null => {
   const inferenceProcessors = pipeline?.processors
-    ?.filter((p) => p.inference)
-    .map((p) => p.inference) as IngestInferenceProcessor[];
+    ?.filter((p) => p?.inference)
+    .map((p) => p!.inference) as IngestInferenceProcessor[];
   if (!inferenceProcessors || inferenceProcessors.length === 0) {
     return null;
   }

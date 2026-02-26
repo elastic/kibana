@@ -6,7 +6,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/ui-actions-enhanced-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/expressions-plugin",
     "@kbn/kibana-react-plugin",
@@ -16,11 +15,12 @@
     "@kbn/es-query",
     "@kbn/monaco",
     "@kbn/std",
-    "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
-    "@kbn/core-theme-browser-mocks",
     "@kbn/presentation-publishing",
     "@kbn/config-schema",
+    "@kbn/handlebars",
+    "@kbn/rison",
+    "@kbn/datemath",
   ],
   "exclude": [
     "target/**/*",

@@ -8,6 +8,7 @@
  */
 
 import type { HttpSetup, HttpResponse } from '@kbn/core/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import { DataViewMissingIndices } from '../../common/lib';
 import type { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import type { FieldsForWildcardResponse } from '../../common/types';
@@ -35,15 +36,16 @@ async function sha1(str: string) {
  * @returns string | undefined
  */
 export function getFieldsForWildcardRequestBody(options: GetFieldsOptions): string | undefined {
-  const { indexFilter, runtimeMappings } = options;
+  const { indexFilter, runtimeMappings, projectRouting } = options;
 
-  if (!indexFilter && !runtimeMappings) {
+  if (!indexFilter && !runtimeMappings && !projectRouting) {
     return;
   }
 
   return JSON.stringify({
     ...(indexFilter && { index_filter: indexFilter }),
     ...(runtimeMappings && { runtime_mappings: runtimeMappings }),
+    ...(projectRouting && { project_routing: projectRouting }),
   });
 }
 
@@ -53,14 +55,22 @@ export function getFieldsForWildcardRequestBody(options: GetFieldsOptions): stri
 export class DataViewsApiClient implements IDataViewsApiClient {
   private http: HttpSetup;
   private getCurrentUserId: () => Promise<string | undefined>;
+  private getGlobalProjectRouting?: () => ProjectRouting;
 
   /**
    * constructor
    * @param http http dependency
+   * @param getCurrentUserId function that returns the current user id
+   * @param getGlobalProjectRouting function that returns the global project routing, used if override is not provided in the options of a request
    */
-  constructor(http: HttpSetup, getCurrentUserId: () => Promise<string | undefined>) {
+  constructor(
+    http: HttpSetup,
+    getCurrentUserId: () => Promise<string | undefined>,
+    getGlobalProjectRouting?: () => ProjectRouting
+  ) {
     this.http = http;
     this.getCurrentUserId = getCurrentUserId;
+    this.getGlobalProjectRouting = getGlobalProjectRouting;
   }
 
   private async _request<T = unknown>(
@@ -123,7 +133,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       type,
       rollupIndex,
       allowNoIndex,
-      indexFilter,
       includeUnmapped,
       fields,
       forceRefresh,
@@ -132,8 +141,12 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       includeEmptyFields,
       abortSignal,
     } = options;
-    const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
-    const versionQueryParam = indexFilter ? {} : { apiVersion: version };
+    const projectRouting = options.projectRouting || this.getGlobalProjectRouting?.();
+    const body = getFieldsForWildcardRequestBody({ projectRouting, ...options });
+    // Use internal path when we have a body (indexFilter, runtimeMappings, or projectRouting)
+    const hasBody = Boolean(body);
+    const path = hasBody ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
+    const versionQueryParam = hasBody ? {} : { apiVersion: version };
 
     return this._request<FieldsForWildcardResponse>(
       path,
@@ -151,7 +164,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         include_empty_fields: includeEmptyFields,
         ...versionQueryParam,
       },
-      getFieldsForWildcardRequestBody(options),
+      body,
       forceRefresh,
       abortSignal
     ).then((response) => {

@@ -49,7 +49,11 @@ import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { isEmpty, partition } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from 'io-ts';
-import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
+import {
+  alertAuditEvent,
+  operationAlertAuditActionMap,
+  workflowStatusAuditActionMap,
+} from '@kbn/alerting-plugin/server/lib';
 import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -853,11 +857,20 @@ export class AlertsClient {
     // rejects at the route level if more than 1000 id's are passed in
     if (ids != null) {
       const alerts = ids.map((id) => ({ id, index }));
-      return this.mgetAlertsAuditOperateStatus({
+      const result = await this.mgetAlertsAuditOperateStatus({
         alerts,
         status,
         operation: WriteOperations.Update,
       });
+
+      const auditAction = workflowStatusAuditActionMap[status];
+      if (auditAction) {
+        for (const id of ids) {
+          this.auditLogger?.log(alertAuditEvent({ action: auditAction, id }));
+        }
+      }
+
+      return result;
     } else if (query != null) {
       try {
         // execute search after with query + authorization filter
@@ -889,6 +902,11 @@ export class AlertsClient {
           query: fetchAndAuditResponse.authorizedQuery as Omit<QueryDslQueryContainer, 'script'>,
           ignore_unavailable: true,
         });
+        const auditAction = workflowStatusAuditActionMap[status];
+        if (auditAction) {
+          this.auditLogger?.log(alertAuditEvent({ action: auditAction, bulk: true }));
+        }
+
         return result;
       } catch (err) {
         this.logger.error(`bulkUpdate threw an error: ${err}`);

@@ -7,15 +7,20 @@
 
 import type { DynamicSettings } from '../runtime_types';
 
-export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
-  certAgeThreshold: 730,
-  certExpirationThreshold: 30,
-  defaultConnectors: [],
-  defaultEmail: {
-    to: [],
-    cc: [],
-    bcc: [],
-  },
-  defaultTLSRuleEnabled: true,
-  defaultStatusRuleEnabled: true,
-};
+export const MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL = 5;
+export const MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL = 1440;
+
+export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings & { privateLocationsSyncInterval: number } =
+  {
+    certAgeThreshold: 730,
+    certExpirationThreshold: 30,
+    defaultConnectors: [],
+    defaultEmail: {
+      to: [],
+      cc: [],
+      bcc: [],
+    },
+    defaultTLSRuleEnabled: true,
+    defaultStatusRuleEnabled: true,
+    privateLocationsSyncInterval: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+  };

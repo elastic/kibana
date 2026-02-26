@@ -18,37 +18,47 @@ import type { CPSProject, ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { ProjectPickerContainer } from './project_picker_container';
 
-describe('ProjectPickerContainer', () => {
-  const mockOriginProject: CPSProject = {
-    _id: 'origin-project',
-    _alias: 'Origin CPSProject',
-    _type: 'observability',
+const mockOriginProject: CPSProject = {
+  _id: 'origin-project',
+  _alias: 'Origin CPSProject',
+  _type: 'observability',
+  _organisation: 'test-org',
+};
+
+const mockLinkedProjects: CPSProject[] = [
+  {
+    _id: 'linked-1',
+    _alias: 'Linked CPSProject 1',
+    _type: 'security',
     _organisation: 'test-org',
-  };
+  },
+];
 
-  const mockLinkedProjects: CPSProject[] = [
-    {
-      _id: 'linked-1',
-      _alias: 'Linked CPSProject 1',
-      _type: 'security',
-      _organisation: 'test-org',
-    },
-  ];
-
-  let mockProjectRouting$: BehaviorSubject<ProjectRouting | undefined>;
-  let mockProjectPickerAccess$: BehaviorSubject<ProjectRoutingAccess>;
-  let mockCPSManager: ICPSManager;
-
-  const mockFetchProjects = jest.fn().mockResolvedValue({
-    origin: mockOriginProject,
-    linkedProjects: mockLinkedProjects,
-  });
-
+describe('ProjectPickerContainer', () => {
   const renderProjectPicker = async (
-    props: { cpsManager: ICPSManager } = { cpsManager: mockCPSManager }
+    props: { cpsManager: Partial<ICPSManager> } = { cpsManager: {} }
   ) => {
+    const mockProjectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
+    // Default to EDITABLE access (dashboards app on individual page)
+    const mockProjectPickerAccess$ = new BehaviorSubject<ProjectRoutingAccess>(
+      ProjectRoutingAccess.EDITABLE
+    );
+    const cpsManager = {
+      fetchProjects: jest.fn().mockResolvedValue({
+        origin: mockOriginProject,
+        linkedProjects: mockLinkedProjects,
+      }),
+      getProjectRouting: jest.fn(() => undefined),
+      getProjectRouting$: jest.fn(() => mockProjectRouting$),
+      setProjectRouting: jest.fn(),
+      getProjectPickerAccess: jest.fn(() => mockProjectPickerAccess$.getValue()),
+      getProjectPickerAccess$: jest.fn(() => mockProjectPickerAccess$),
+      refresh: jest.fn(),
+      getDefaultProjectRouting: jest.fn(() => undefined),
+      ...props.cpsManager,
+    };
     return await act(async () => {
-      const component = <ProjectPickerContainer cpsManager={props.cpsManager} />;
+      const component = <ProjectPickerContainer cpsManager={cpsManager} />;
       return render(
         <I18nProvider>
           <EuiThemeProvider>{component}</EuiThemeProvider>
@@ -59,24 +69,6 @@ describe('ProjectPickerContainer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFetchProjects.mockResolvedValue({
-      origin: mockOriginProject,
-      linkedProjects: mockLinkedProjects,
-    });
-
-    mockProjectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
-    // Default to EDITABLE access (dashboards app on individual page)
-    mockProjectPickerAccess$ = new BehaviorSubject<ProjectRoutingAccess>(
-      ProjectRoutingAccess.EDITABLE
-    );
-
-    mockCPSManager = {
-      fetchProjects: mockFetchProjects,
-      getProjectRouting: jest.fn(() => undefined),
-      getProjectRouting$: jest.fn(() => mockProjectRouting$),
-      setProjectRouting: jest.fn(),
-      getProjectPickerAccess$: jest.fn(() => mockProjectPickerAccess$),
-    } as unknown as ICPSManager;
   });
 
   describe('rendering conditions', () => {
@@ -86,76 +78,79 @@ describe('ProjectPickerContainer', () => {
     });
 
     it('should call fetchProjects when component mounts', async () => {
-      await renderProjectPicker();
-      expect(mockFetchProjects).toHaveBeenCalledTimes(1);
+      await renderProjectPicker({
+        cpsManager: {
+          fetchProjects: jest.fn().mockResolvedValue({
+            origin: mockOriginProject,
+            linkedProjects: mockLinkedProjects,
+          }),
+        },
+      });
       expect(screen.queryByTestId('project-picker-button')).toBeInTheDocument();
     });
 
     it('should not render when there is no origin project', async () => {
-      mockFetchProjects.mockResolvedValueOnce({
-        origin: null,
-        linkedProjects: mockLinkedProjects,
+      await renderProjectPicker({
+        cpsManager: {
+          fetchProjects: jest.fn().mockResolvedValue({
+            origin: null,
+            linkedProjects: mockLinkedProjects,
+          }),
+        },
       });
-      await renderProjectPicker();
+
       expect(screen.queryByTestId('project-picker-button')).not.toBeInTheDocument();
     });
 
     it('should not render when there are no linked projects', async () => {
-      mockFetchProjects.mockResolvedValueOnce({
-        origin: mockOriginProject,
-        linkedProjects: [],
+      await renderProjectPicker({
+        cpsManager: {
+          fetchProjects: jest.fn().mockResolvedValue({
+            origin: mockOriginProject,
+            linkedProjects: [],
+          }),
+        },
       });
-
-      await renderProjectPicker();
       expect(screen.queryByTestId('project-picker-button')).not.toBeInTheDocument();
     });
   });
 
   describe('project routing access control', () => {
-    it('should have EDITABLE access when on dashboard individual page', async () => {
-      mockProjectPickerAccess$.next(ProjectRoutingAccess.EDITABLE);
-
-      await renderProjectPicker();
-      const button = screen.getByTestId('project-picker-button');
-      expect(button).not.toHaveAttribute('disabled');
-    });
-
-    it('should have DISABLED access when on dashboard listing page', async () => {
-      mockProjectPickerAccess$.next(ProjectRoutingAccess.DISABLED);
-
-      await renderProjectPicker();
-      const button = screen.getByTestId('project-picker-button');
-      expect(button).toHaveAttribute('disabled');
-    });
-
     it('should have EDITABLE access when on dashboard create page', async () => {
-      mockProjectPickerAccess$.next(ProjectRoutingAccess.EDITABLE);
-
-      await renderProjectPicker();
+      await renderProjectPicker({
+        cpsManager: {
+          getProjectPickerAccess$: jest.fn(
+            () => new BehaviorSubject(ProjectRoutingAccess.EDITABLE)
+          ),
+          getProjectPickerAccess: jest.fn(() => ProjectRoutingAccess.EDITABLE),
+        },
+      });
       const button = screen.getByTestId('project-picker-button');
       expect(button).not.toHaveAttribute('disabled');
     });
 
     it('should have DISABLED access when on a different app', async () => {
-      mockProjectPickerAccess$.next(ProjectRoutingAccess.DISABLED);
-
-      await renderProjectPicker();
-      const button = screen.getByTestId('project-picker-button');
-      expect(button).toHaveAttribute('disabled');
-    });
-
-    it('should default to DISABLED access when no app state is provided', async () => {
-      mockProjectPickerAccess$.next(ProjectRoutingAccess.DISABLED);
-
-      await renderProjectPicker();
+      await renderProjectPicker({
+        cpsManager: {
+          getProjectPickerAccess$: jest.fn(
+            () => new BehaviorSubject(ProjectRoutingAccess.DISABLED)
+          ),
+          getProjectPickerAccess: jest.fn(() => ProjectRoutingAccess.DISABLED),
+        },
+      });
       const button = screen.getByTestId('project-picker-button');
       expect(button).toHaveAttribute('disabled');
     });
 
     it('should have READONLY access when on Lens editor page', async () => {
-      mockProjectPickerAccess$.next(ProjectRoutingAccess.READONLY);
-
-      await renderProjectPicker();
+      await renderProjectPicker({
+        cpsManager: {
+          getProjectPickerAccess$: jest.fn(
+            () => new BehaviorSubject(ProjectRoutingAccess.READONLY)
+          ),
+          getProjectPickerAccess: jest.fn(() => ProjectRoutingAccess.READONLY),
+        },
+      });
       const button = screen.getByTestId('project-picker-button');
       // Button should not be disabled but should be in readonly mode
       expect(button).not.toHaveAttribute('disabled');

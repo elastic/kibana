@@ -39,7 +39,7 @@ export async function listMcpTools({
   });
 
   if (result.status === 'error') {
-    throw new Error(result.message || 'Failed to list MCP tools');
+    throw new Error(result.serviceMessage ?? result.message ?? 'Failed to list MCP tools');
   }
 
   return result.data as ListToolsResponse;
@@ -86,16 +86,15 @@ export async function getNamedMcpTools({
   connectorId: string;
   toolNames: string[];
   logger: Logger;
-}): Promise<Array<{ name: string; description?: string }> | undefined> {
+}): Promise<Array<{ name: string; description?: string }>> {
   try {
     const { tools } = await listMcpTools({ actions, request, connectorId });
     return tools
       .filter((t) => toolNames.includes(t.name))
       .map((tool) => ({ name: tool.name, description: tool.description }));
   } catch (error) {
-    // Connector not found or other error - return undefined
     logger.error('Error getting named MCP tools: ', error.message ? error.message : String(error));
-    return undefined;
+    throw error;
   }
 }
 

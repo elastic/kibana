@@ -6,10 +6,10 @@
  */
 
 import { AttachmentType } from '../../domain/attachment/v1';
-import { CombinedAttachmentRequestRt, CombinedBulkCreateAttachmentsRequestRt } from './v2';
+import { AttachmentRequestRtV2, BulkCreateAttachmentsRequestRtV2 } from './v2';
 
 describe('Unified Attachments', () => {
-  describe('CombinedAttachmentRequestRt', () => {
+  describe('AttachmentRequestRtV2', () => {
     it('accepts v1 user comment attachment request', () => {
       const v1Request = {
         comment: 'This is a comment',
@@ -17,7 +17,7 @@ describe('Unified Attachments', () => {
         owner: 'cases',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v1Request);
+      const query = AttachmentRequestRtV2.decode(v1Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -44,7 +44,7 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -58,7 +58,7 @@ describe('Unified Attachments', () => {
         attachmentId: 'attachment-123',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -76,7 +76,7 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -89,7 +89,7 @@ describe('Unified Attachments', () => {
         type: 'lens',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query._tag).toBe('Left');
     });
@@ -102,7 +102,7 @@ describe('Unified Attachments', () => {
         foo: 'bar',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v1Request);
+      const query = AttachmentRequestRtV2.decode(v1Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -129,7 +129,7 @@ describe('Unified Attachments', () => {
         foo: 'bar',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -159,7 +159,7 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = CombinedAttachmentRequestRt.decode(requestWithExtraFields);
+      const query = AttachmentRequestRtV2.decode(requestWithExtraFields);
 
       expect(query._tag).toBe('Right');
       if (query._tag === 'Right') {
@@ -175,9 +175,9 @@ describe('Unified Attachments', () => {
     });
   });
 
-  describe('CombinedBulkCreateAttachmentsRequestRt', () => {
+  describe('BulkCreateAttachmentsRequestRtV2', () => {
     it('accepts empty array', () => {
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode([]);
+      const query = BulkCreateAttachmentsRequestRtV2.decode([]);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -199,7 +199,7 @@ describe('Unified Attachments', () => {
         },
       ];
 
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode(v1Requests);
+      const query = BulkCreateAttachmentsRequestRtV2.decode(v1Requests);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -229,7 +229,7 @@ describe('Unified Attachments', () => {
         },
       ];
 
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode(v2Requests);
+      const query = BulkCreateAttachmentsRequestRtV2.decode(v2Requests);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -258,7 +258,7 @@ describe('Unified Attachments', () => {
         },
       ];
 
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode(mixedRequests);
+      const query = BulkCreateAttachmentsRequestRtV2.decode(mixedRequests);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -284,7 +284,7 @@ describe('Unified Attachments', () => {
         },
       ];
 
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode(requestsWithExtraFields);
+      const query = BulkCreateAttachmentsRequestRtV2.decode(requestsWithExtraFields);
 
       expect(query).toStrictEqual({
         _tag: 'Right',

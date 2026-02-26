@@ -18,7 +18,8 @@ import type {
   IndexSearchSource,
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
-import { flattenMapping, getDataStreamMappings, getIndexMappings } from './utils/mappings';
+import { flattenMapping, getDataStreamMappings } from './utils/mappings';
+import { getIndexFields, partitionByCcs, getBatchedFieldsFromFieldCaps } from './utils/ccs';
 import { generateXmlTree } from './utils/formatting/xml';
 
 export interface RelevantResource {
@@ -38,6 +39,10 @@ export interface ResourceDescriptor {
   fields?: string[];
 }
 
+/**
+ * Builds resource descriptors for a list of indices by delegating
+ * the local-vs-CCS field resolution to {@link getIndexFields}.
+ */
 const createIndexSummaries = async ({
   indices,
   esClient,
@@ -45,20 +50,18 @@ const createIndexSummaries = async ({
   indices: IndexSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
-  const allMappings = await getIndexMappings({
-    indices: indices.map((index) => index.name),
-    cleanup: true,
+  const indexFields = await getIndexFields({
+    indices: indices.map((i) => i.name),
     esClient,
   });
 
-  return indices.map<ResourceDescriptor>(({ name: indexName }) => {
-    const indexMappings = allMappings[indexName];
-    const flattened = flattenMapping(indexMappings.mappings);
+  return indices.map(({ name }) => {
+    const entry = indexFields[name];
     return {
       type: EsResourceType.index,
-      name: indexName,
-      description: indexMappings?.mappings._meta?.description,
-      fields: flattened.map((field) => field.path),
+      name,
+      description: entry?.rawMapping?._meta?.description,
+      fields: (entry?.fields ?? []).map((f) => f.path),
     };
   });
 };
@@ -85,22 +88,46 @@ const createDatastreamSummaries = async ({
   datastreams: DataStreamSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
-  const allMappings = await getDataStreamMappings({
-    datastreams: datastreams.map((stream) => stream.name),
-    cleanup: true,
-    esClient,
-  });
+  const { local, remote } = partitionByCcs(datastreams);
+  const descriptors: ResourceDescriptor[] = [];
 
-  return datastreams.map<ResourceDescriptor>(({ name }) => {
-    const mappings = allMappings[name];
-    const flattened = flattenMapping(mappings.mappings);
-    return {
-      type: EsResourceType.dataStream,
-      name,
-      description: mappings?.mappings._meta?.description,
-      fields: flattened.map((field) => field.path),
-    };
-  });
+  // Local data streams: use _data_stream/_mappings API (full mapping tree + _meta.description)
+  if (local.length > 0) {
+    const allMappings = await getDataStreamMappings({
+      datastreams: local.map((stream) => stream.name),
+      cleanup: true,
+      esClient,
+    });
+
+    for (const { name } of local) {
+      const mappings = allMappings[name];
+      const flattened = flattenMapping(mappings.mappings);
+      descriptors.push({
+        type: EsResourceType.dataStream,
+        name,
+        description: mappings?.mappings._meta?.description,
+        fields: flattened.map((field) => field.path),
+      });
+    }
+  }
+
+  // Remote (CCS) data streams: single batched _field_caps request, then split per data stream
+  if (remote.length > 0) {
+    const fieldsByDs = await getBatchedFieldsFromFieldCaps({
+      resources: remote.map((r) => r.name),
+      esClient,
+    });
+
+    for (const { name } of remote) {
+      descriptors.push({
+        type: EsResourceType.dataStream,
+        name,
+        fields: (fieldsByDs[name] ?? []).map((f) => f.path),
+      });
+    }
+  }
+
+  return descriptors;
 };
 
 export const indexExplorer = async ({

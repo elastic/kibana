@@ -1,0 +1,43 @@
+# List Watchlists API Schema
+# Modeled after users/monitoring/list.schema.yaml
+
+openapi: 3.0.0
+info:
+  title: Watchlist Management API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/watchlists/list:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview
+      operationId: ListWatchlists
+      summary: List all watchlists
+      responses:
+        "200":
+          description: List of watchlists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "./common.schema.yaml#/components/schemas/WatchlistObject"
+              examples:
+                ListWatchlistsResponse:
+                  summary: List of watchlists
+                  value:
+                    - id: watchlist-123
+                      name: High Risk Vendors
+                      description: High risk vendor watchlist
+                      riskModifier: 1.5
+                      managed: false
+                      createdAt: "2026-01-28T12:00:00.000Z"
+                      updatedAt: "2026-02-18T12:00:00.000Z"
+                    - id: watchlist-456
+                      name: Privileged Accounts
+                      description: Privileged user monitoring watchlist
+                      riskModifier: 2
+                      managed: true
+                      createdAt: "2026-01-10T09:30:00.000Z"
+                      updatedAt: "2026-02-01T15:45:00.000Z"

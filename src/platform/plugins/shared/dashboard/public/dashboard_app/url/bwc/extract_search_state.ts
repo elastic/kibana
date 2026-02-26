@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { fromStoredFilter, isAsCodeFilter } from '@kbn/as-code-filters-transforms';
 import type { DashboardState } from '../../../../common';
 import { migrateLegacyQuery } from '../../../../common';
 
@@ -21,7 +23,15 @@ export function extractSearchState(state: {
   const searchState: Partial<DashboardSearchState> = {};
 
   if (Array.isArray(state.filters)) {
-    searchState.filters = state.filters;
+    // Convert filters from legacy format to AsCodeFilter format if necessary.
+    searchState.filters = state.filters
+      .map((filter) => {
+        if (isAsCodeFilter(filter)) {
+          return filter;
+        }
+        return fromStoredFilter(filter);
+      })
+      .filter((filter): filter is AsCodeFilter => Boolean(filter));
   }
 
   if (state.query && typeof state.query === 'object') {

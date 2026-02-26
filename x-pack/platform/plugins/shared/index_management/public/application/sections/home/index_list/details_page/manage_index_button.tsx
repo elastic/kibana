@@ -42,6 +42,7 @@ interface Props {
   index: Index;
   reloadIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
+  fill?: boolean;
 }
 
 /**
@@ -54,6 +55,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
   index,
   reloadIndexDetails,
   navigateToIndicesList,
+  fill = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -223,7 +225,7 @@ export const ManageIndexButton: FunctionComponent<Props> = ({
       indexNames={indexNames}
       indices={indices}
       indexStatusByName={indexStatusByName}
-      fill={false}
+      fill={fill}
       isLoading={isLoading}
       // index actions
       closeIndices={closeIndices}

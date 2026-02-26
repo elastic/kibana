@@ -157,6 +157,7 @@ export const configSchema = schema.object({
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({
     delay: schema.duration({ defaultValue: 2500 }),
+    onFailureDelay: schema.maybe(schema.duration()),
     startupDelay: schema.duration({ defaultValue: 500 }),
     retry: schema.number({ defaultValue: DEFAULT_HEALTH_CHECK_RETRY, min: 1 }),
   }),
@@ -353,6 +354,10 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly healthCheckDelay: Duration;
   /**
+   * The interval between health check requests Kibana sends to the Elasticsearch during failure.
+   */
+  public readonly healthCheckFailureInterval: Duration | undefined;
+  /**
    * The number of times to retry the health check request
    */
   public readonly healthCheckRetry: number;
@@ -499,6 +504,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.healthCheckFailureInterval = rawConfig.healthCheck.onFailureDelay;
     this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
     this.healthCheckRetry = rawConfig.healthCheck.retry;
     this.username = rawConfig.username;

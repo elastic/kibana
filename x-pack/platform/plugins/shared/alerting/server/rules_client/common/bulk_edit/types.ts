@@ -28,6 +28,8 @@ export type ApiKeysMap = Map<
   {
     oldApiKey?: string;
     newApiKey?: string;
+    oldUiamApiKey?: string | null;
+    newUiamApiKey?: string | null;
     oldApiKeyCreatedByUser?: boolean | null;
     newApiKeyCreatedByUser?: boolean | null;
   }

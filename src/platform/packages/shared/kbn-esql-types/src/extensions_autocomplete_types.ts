@@ -14,6 +14,9 @@ export interface RecommendedQuery {
   query: string;
   // Optional description of the query, can be used to provide more context, appears at the right side of the suggestion popover
   description?: string;
+  // When true, the query is shown in the recommended queries menu regardless of the active editor query.
+  // The query string is treated as a complete query (not prepended with the current dataview).
+  isStandalone?: boolean;
 }
 
 export interface RecommendedField {

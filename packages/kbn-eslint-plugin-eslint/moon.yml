@@ -24,6 +24,13 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+fileGroups:
+  src:
+    - rules/**/*
+    - helpers/**/*
+    - index.js
+    - jest.config.js
+    - lib.js
 tasks:
   jest:
     args:

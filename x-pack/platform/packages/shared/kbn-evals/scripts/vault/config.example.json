@@ -1,0 +1,42 @@
+{
+  "description": "kbn-evals CI config",
+  "contact": "#evals",
+  "owner": "@elastic/obs-ai-team",
+  "environment": "CI",
+  "refresh_interval": "168h",
+  "litellm": {
+    "baseUrl": "https://litellm.example.com",
+    "virtualKey": "REDACTED",
+    "teamId": "exampleTeamId",
+    "teamName": "kibana-ci-evals"
+  },
+  "evaluationConnectorId": "litellm-llm-gateway-gpt-4o",
+  "evaluationsEs": {
+    "url": "https://example.es.evaluations.elastic-cloud.com",
+    "apiKey": "REDACTED"
+  },
+  "tracingEs": {
+    "url": "https://example.es.tracing.elastic-cloud.com",
+    "apiKey": "REDACTED"
+  },
+  "tracingExporters": [
+    {
+      "http": {
+        "url": "https://example.ingest.elastic-cloud.com:443/v1/traces",
+        "headers": {
+          "Authorization": "ApiKey REDACTED"
+        }
+      }
+    }
+  ],
+  "gcsDatasetAccessCredentials": {
+    "type": "service_account",
+    "project_id": "REDACTED",
+    "private_key_id": "REDACTED",
+    "private_key": "REDACTED",
+    "client_email": "REDACTED",
+    "client_id": "REDACTED",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token"
+  }
+}

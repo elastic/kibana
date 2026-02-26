@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-09T18:40:14.213Z",
-  "sha1": "cbe4c2cb0a79c005b5ce58e20a384593ed038d36",
+  "sha1": "25d4fbc2b145a5dcb8ccd57e5ae68dff8196f317",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -1447,6 +1446,76 @@
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/multi_step.spec.ts",
         "line": 29,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d93383f52ae0de-bcecfef60fd5284",
+      "title": "Cross-compatibility - Network Direction Processor should set network direction with internal networks in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d93383f52ae0de-ff78a9d6f09012c",
+      "title": "Cross-compatibility - Network Direction Processor should set network direction with target field in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
+        "line": 54,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d93383f52ae0de-7147ed6095709b7",
+      "title": "Cross-compatibility - Network Direction Processor should set network direction with internal networks field in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
+        "line": 91,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d93383f52ae0de-c6be35e884ea86d",
+      "title": "Cross-compatibility - Network Direction Processor should set network direction with ignore_missing option in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
+        "line": 138,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d93383f52ae0de-be5142196ccdc2b",
+      "title": "Cross-compatibility - Network Direction Processor should set network direction with where condition in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
+        "line": 181,
         "column": 12
       }
     },
@@ -3302,6 +3371,62 @@
       }
     },
     {
+      "id": "7c898b905192c9f-02610830a165f86",
+      "title": "Streamlang to ES|QL - Network Direction Processor should set network direction with internal networks",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/network_direction.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "7c898b905192c9f-81f943a72d77176",
+      "title": "Streamlang to ES|QL - Network Direction Processor should set network direction with internal networks field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/network_direction.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "7c898b905192c9f-468d64363578bd6",
+      "title": "Streamlang to ES|QL - Network Direction Processor should set network direction with ignore_missing option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/network_direction.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "7c898b905192c9f-abcbf8c851de067",
+      "title": "Streamlang to ES|QL - Network Direction Processor should set network direction with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/network_direction.spec.ts",
+        "line": 106,
+        "column": 12
+      }
+    },
+    {
       "id": "c8c1438f4c7dcb1-91255b70d88bd6b",
       "title": "Streamlang to ES|QL - Redact Processor should redact IP address with EVAL replace() and default delimiters",
       "expectedStatus": "passed",
@@ -5137,6 +5262,76 @@
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/math.spec.ts",
         "line": 330,
+        "column": 12
+      }
+    },
+    {
+      "id": "7c5b9235216285d-03fce1c0e8aa750",
+      "title": "Streamlang to Ingest Pipeline - Network Direction Processor should set network direction with internal networks",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "7c5b9235216285d-bac285eed8582ab",
+      "title": "Streamlang to Ingest Pipeline - Network Direction Processor should set network direction with internal networks field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "7c5b9235216285d-edc8521cef04cd8",
+      "title": "Streamlang to Ingest Pipeline - Network Direction Processor should set network direction with target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "7c5b9235216285d-4164505bf353dac",
+      "title": "Streamlang to Ingest Pipeline - Network Direction Processor should set network direction conditionally with where condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
+        "line": 96,
+        "column": 12
+      }
+    },
+    {
+      "id": "7c5b9235216285d-5046d31c92994d0",
+      "title": "Streamlang to Ingest Pipeline - Network Direction Processor should omit network direction if any fields are missing with ignore_missing option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
+        "line": 135,
         "column": 12
       }
     },

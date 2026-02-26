@@ -21,6 +21,7 @@ import {
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
+import { triggerSchemas } from './trigger_schemas';
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -101,8 +102,9 @@ export class WorkflowsPlugin
     _core: CoreStart,
     plugins: WorkflowsPublicPluginStartDependencies
   ): WorkflowsPublicPluginStart {
-    // Initialize StepSchemas singleton with workflowExtensions
+    // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions);
 
     // License check to set app status
     plugins.licensing.license$.subscribe((license) => {

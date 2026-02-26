@@ -9,13 +9,18 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { AccountType } from '../../../types';
+import { ORGANIZATION_ACCOUNT } from '../constants';
+
 export interface CloudFormationCloudCredentialsGuideProps {
-  isOrganization?: boolean;
+  accountType?: AccountType;
 }
 
 export const CloudFormationCloudCredentialsGuide: React.FC<
   CloudFormationCloudCredentialsGuideProps
-> = ({ isOrganization = false }) => {
+> = ({ accountType = ORGANIZATION_ACCOUNT }) => {
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
+
   return (
     <div>
       <EuiText size="s" color="subdued">

@@ -2,6 +2,12 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "types": [
+      "jest",
+      "react",
+      "@testing-library/jest-dom",
+      "@kbn/ambient-ui-types",
+    ]
   },
   "include": [
     "**/*.ts",
@@ -11,6 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/i18n",
     "@kbn/test-jest-helpers",
   ]
 }

@@ -396,7 +396,10 @@ export type TrainedModelItem = ExistingModelBase & { stats: Stats };
 /** Trained DFA model */
 export type DFAModelItem = Omit<TrainedModelItem, 'inference_config'> & {
   origin_job_exists?: boolean;
-  inference_config?: Pick<MlInferenceConfigCreateContainer, 'classification' | 'regression'>;
+  inference_config?: Pick<
+    NonNullable<MlInferenceConfigCreateContainer>,
+    'classification' | 'regression'
+  >;
   metadata?: estypes.MlTrainedModelConfig['metadata'] & {
     analytics_config: DataFrameAnalyticsConfig;
     input: unknown;

@@ -115,7 +115,7 @@
             "signature": [
               "{ id: string; name: string; order?: number | undefined; alerting?: ",
               "AlertingKibanaPrivilege",
-              " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
+              " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; category: ",
               "AppCategory",
               "; app: readonly string[]; privileges: { all: ",
               {
@@ -133,7 +133,7 @@
                 "section": "def-common.FeatureKibanaPrivileges",
                 "text": "FeatureKibanaPrivileges"
               },
-              "; } | null; management?: { [sectionId: string]: readonly string[]; } | undefined; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
+              "; } | null; management?: { [sectionId: string]: readonly string[]; } | undefined; catalogue?: readonly string[] | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
               "ReservedKibanaPrivilege",
               "[]; } | undefined; }"
             ],
@@ -421,7 +421,7 @@
         "signature": [
           "{ id: string; name: string; order?: number | undefined; alerting?: ",
           "AlertingKibanaPrivilege",
-          " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; category: ",
+          " | undefined; cases?: readonly string[] | undefined; description?: string | null | undefined; hidden?: boolean | undefined; category: ",
           "AppCategory",
           "; app: readonly string[]; privileges: { all: ",
           {
@@ -439,7 +439,7 @@
             "section": "def-common.FeatureKibanaPrivileges",
             "text": "FeatureKibanaPrivileges"
           },
-          "; } | null; management?: { [sectionId: string]: readonly string[]; } | undefined; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
+          "; } | null; management?: { [sectionId: string]: readonly string[]; } | undefined; catalogue?: readonly string[] | undefined; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
           "ReservedKibanaPrivilege",
           "[]; } | undefined; }"
         ],
@@ -994,7 +994,7 @@
           "ProductFeatureRulesKey"
         ],
         "path": "x-pack/solutions/security/packages/features/src/product_features_keys.ts",
-        "lineNumber": 196,
+        "lineNumber": 201,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1283,6 +1283,14 @@
             "text": "ProductFeatureKibanaConfig"
           },
           "<string> | undefined; prebuilt_rule_customization?: ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<string> | undefined; exceptions?: ",
           {
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",
@@ -1643,7 +1651,7 @@
         "label": "SubFeaturesPrivileges",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; name?: string | undefined; includeIn?: \"none\" | \"all\" | \"read\" | undefined; minimumLicense?: ",
+          "{ id?: string | undefined; name?: string | undefined; includeIn?: \"none\" | \"read\" | \"all\" | undefined; minimumLicense?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

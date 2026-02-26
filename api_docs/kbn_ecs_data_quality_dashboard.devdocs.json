@@ -190,7 +190,7 @@
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
-        "lineNumber": 63,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -209,7 +209,7 @@
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
-        "lineNumber": 67,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -258,7 +258,7 @@
           "\"https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html\""
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
-        "lineNumber": 68,
+        "lineNumber": 75,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

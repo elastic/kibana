@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   createMockVisualization,
@@ -258,8 +258,13 @@ describe('chart_switch', () => {
       }
     );
 
+    const user = userEvent.setup();
+
     const openChartSwitch = async () => {
-      await userEvent.click(screen.getByTestId('lnsChartSwitchPopover'));
+      await user.click(screen.getByTestId('lnsChartSwitchPopover'));
+      await waitFor(() => {
+        expect(screen.getByTestId('lnsChartSwitchList')).toBeInTheDocument();
+      });
     };
 
     const queryWarningNode = (subType: string) =>
@@ -269,8 +274,9 @@ describe('chart_switch', () => {
       return screen.getByTestId(`lnsChartSwitchPopover_${subType}`);
     };
 
-    const switchToVis = (subType: string) => {
-      fireEvent.click(getMenuItem(subType));
+    const switchToVis = async (subType: string) => {
+      await user.click(getMenuItem(subType));
+      await waitForChartSwitchClosed();
     };
 
     const waitForChartSwitchClosed = async () => {
@@ -405,14 +411,14 @@ describe('chart_switch', () => {
   it('should initialize other visualization on switch', async () => {
     const { openChartSwitch, switchToVis } = renderChartSwitch();
     await openChartSwitch();
-    switchToVis('testVis2');
+    await switchToVis('testVis2');
     expect(visualizationMap.testVis2.initialize).toHaveBeenCalled();
   });
 
   it('should use suggested state if there is a suggestion from the target visualization', async () => {
     const { store, openChartSwitch, switchToVis } = renderChartSwitch();
     await openChartSwitch();
-    switchToVis('testVis2');
+    await switchToVis('testVis2');
 
     expect(store.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
@@ -444,7 +450,7 @@ describe('chart_switch', () => {
       },
     ]);
     await openChartSwitch();
-    switchToVis('testVis2');
+    await switchToVis('testVis2');
     expect(visualizationMap.testVis2.getSuggestions).toHaveBeenCalled();
     expect(visualizationMap.testVis2.initialize).toHaveBeenCalledWith(
       expect.anything(),
@@ -457,7 +463,7 @@ describe('chart_switch', () => {
     visualizationMap.testVis2.getSuggestions.mockReturnValueOnce([]);
     const { openChartSwitch, switchToVis, waitForChartSwitchClosed } = renderChartSwitch();
     await openChartSwitch();
-    switchToVis('testVis2');
+    await switchToVis('testVis2');
 
     expect(visualizationMap.testVis2.getSuggestions).toHaveBeenCalled();
     expect(visualizationMap.testVis2.initialize).toHaveBeenCalledWith(
@@ -473,7 +479,7 @@ describe('chart_switch', () => {
     (frame.datasourceLayers.a?.getTableSpec as jest.Mock).mockReturnValue([]);
     const { store, switchToVis, openChartSwitch } = renderChartSwitch();
     await openChartSwitch();
-    switchToVis('testVis2');
+    await switchToVis('testVis2');
 
     expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'a'); // from preloaded state
     expect(store.dispatch).toHaveBeenCalledWith({
@@ -504,7 +510,7 @@ describe('chart_switch', () => {
 
     const { openChartSwitch, switchToVis } = renderChartSwitch();
     await openChartSwitch();
-    switchToVis('testVis2');
+    await switchToVis('testVis2');
 
     expect(visualizationMap.testVis.getMainPalette).toHaveBeenCalledWith('state from a');
 
@@ -522,7 +528,7 @@ describe('chart_switch', () => {
     );
     const { openChartSwitch, switchToVis, store } = renderChartSwitch();
     await openChartSwitch();
-    switchToVis('testVis2');
+    await switchToVis('testVis2');
 
     expect(store.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
@@ -549,7 +555,7 @@ describe('chart_switch', () => {
       },
     });
     await openChartSwitch();
-    switchToVis('subvisC1');
+    await switchToVis('subvisC1');
     expect(visualizationMap.testVis3.switchVisualizationType).toHaveBeenCalledWith(
       'subvisC1',
       {
@@ -578,7 +584,7 @@ describe('chart_switch', () => {
 
       const { store, openChartSwitch, switchToVis } = renderChartSwitch({ layerId: 'b' });
       await openChartSwitch();
-      switchToVis('testVis2');
+      await switchToVis('testVis2');
 
       expect(store.dispatch).toHaveBeenCalledWith({
         type: 'lens/switchVisualization',
@@ -610,7 +616,7 @@ describe('chart_switch', () => {
       });
 
       await openChartSwitch();
-      switchToVis('subvisC3');
+      await switchToVis('subvisC3');
       expect(visualizationMap.testVis3.switchVisualizationType).toHaveBeenCalledWith(
         'subvisC3',
         {
@@ -651,7 +657,7 @@ describe('chart_switch', () => {
         },
       });
       await openChartSwitch();
-      switchToVis('subvisC3');
+      await switchToVis('subvisC3');
 
       expect(visualizationMap.testVis3.switchVisualizationType).toHaveBeenCalledWith(
         'subvisC3',
@@ -672,7 +678,7 @@ describe('chart_switch', () => {
 
       const { openChartSwitch, switchToVis, store } = renderChartSwitch();
       await openChartSwitch();
-      switchToVis('testVis2');
+      await switchToVis('testVis2');
 
       expect(store.dispatch).toHaveBeenCalledWith({
         type: 'lens/switchVisualization',
@@ -728,7 +734,7 @@ describe('chart_switch', () => {
 
       const { openChartSwitch, switchToVis, store } = renderChartSwitch();
       await openChartSwitch();
-      switchToVis('testVis2');
+      await switchToVis('testVis2');
 
       expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'a');
       expect(datasourceMap.formBased.removeLayer).toHaveBeenCalledWith({}, 'b');

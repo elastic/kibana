@@ -11,8 +11,8 @@ import { css } from '@emotion/react';
 
 export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
-const gradientPadding = '1px';
-const gradient =
+const visorGradientPadding = '1px';
+const visorGradient =
   'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);';
 
 export const visorStyles = (
@@ -26,11 +26,11 @@ export const visorStyles = (
     ? '0px 6px 14px 0px rgba(137, 157, 170, 0.2)'
     : '0px 6px 14px 0px rgba(11, 14, 22, 0.05)';
 
-  const totalHeight = `calc(${euiTheme.size.xl} + 2*${gradientPadding})`;
+  const totalHeight = `calc(${euiTheme.size.xl} + 2*${visorGradientPadding})`;
 
   const gradientBoxStyles = {
-    background: gradient,
-    padding: gradientPadding,
+    background: visorGradient,
+    padding: visorGradientPadding,
     borderRadius: `calc(${euiTheme.size.s} + 1px)`,
     boxShadow: visorBoxShadow,
   };

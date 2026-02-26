@@ -87,7 +87,7 @@ echo "--- Jest [$TEST_TYPE] configs complete"
 printf "%s\n" "${results[@]}"
 
 # Scout reporter
-source .buildkite/scripts/steps/test/scout_upload_report_events.sh
+source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 # Force exit 0 to ensure the next build step starts.
 exit 0

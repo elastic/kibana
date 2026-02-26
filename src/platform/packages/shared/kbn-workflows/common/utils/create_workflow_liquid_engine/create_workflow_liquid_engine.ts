@@ -82,6 +82,8 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
     ownPropertyOnly: true,
     // Use a no-op filesystem as files are not supported in workflow templates
     fs: noopFs,
+    // Disable relative references since file operations are not supported
+    relativeReference: false,
     // Use an empty in-memory template store
     templates: {},
     // Max total characters allowed in a single parse() call (150k)

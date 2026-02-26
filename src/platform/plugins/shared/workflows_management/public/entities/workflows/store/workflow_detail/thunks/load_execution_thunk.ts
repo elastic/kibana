@@ -32,8 +32,10 @@ export const loadExecutionThunk = createAsyncThunk<
     try {
       const previousExecution = getState().detail.execution;
 
-      // Make the API call to load the execution
-      const response = await http.get<WorkflowExecutionDto>(`/api/workflowExecutions/${id}`);
+      // Make the API call to load the execution (without input/output to reduce payload during polling)
+      const response = await http.get<WorkflowExecutionDto>(`/api/workflowExecutions/${id}`, {
+        query: { includeInput: false, includeOutput: false },
+      });
       dispatch(setExecution(response));
 
       if (id !== previousExecution?.id) {

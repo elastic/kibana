@@ -7,16 +7,21 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ServiceProvider } from './service_provider';
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { EuiThemeProvider } from '@elastic/eui';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { ServiceProvider } from './service_provider';
 
 describe('ServiceProvider component', () => {
   const renderComponent = (
     service: ServiceProviderKeys,
     endpointInfo: InferenceInferenceEndpointInfo
   ) => {
-    render(<ServiceProvider service={service} endpointInfo={endpointInfo} />);
+    render(
+      <EuiThemeProvider>
+        <ServiceProvider service={service} endpointInfo={endpointInfo} />
+      </EuiThemeProvider>
+    );
   };
   describe('with HuggingFace service', () => {
     const mockEndpoint: InferenceInferenceEndpointInfo = {

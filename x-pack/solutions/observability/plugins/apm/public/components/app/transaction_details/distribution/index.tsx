@@ -16,6 +16,7 @@ import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
+import { useUnifiedWaterfallFetcher } from '../use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -45,17 +46,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      showCriticalPath,
-      environment,
-      kuery,
-      transactionName,
-      transactionType,
-      sampleRangeFrom,
-      sampleRangeTo,
-    },
+    query: { rangeFrom, rangeTo, showCriticalPath, environment },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -64,6 +55,7 @@ export function TransactionDistribution({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const history = useHistory();
+
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId,
@@ -74,8 +66,16 @@ export function TransactionDistribution({
 
   const { serviceName } = useApmServiceContext();
 
-  const markerCurrentEvent =
-    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+  const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
+    start,
+    end,
+    traceId,
+    entryTransactionId: transactionId,
+  });
+
+  const markerCurrentEvent = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us
+    : waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();
@@ -182,17 +182,6 @@ export function TransactionDistribution({
     [history]
   );
 
-  const queryParams = useMemo(
-    () => ({
-      kuery,
-      transactionName,
-      transactionType,
-      sampleRangeFrom,
-      sampleRangeTo,
-    }),
-    [kuery, transactionName, transactionType, sampleRangeFrom, sampleRangeTo]
-  );
-
   return (
     <ResettingHeightRetainer reset={!traceId}>
       <div data-test-subj="apmTransactionDistributionTabContent">
@@ -225,9 +214,12 @@ export function TransactionDistribution({
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
           onLogsTableConfigChange={onLogsTableConfigChange}
+          useUnified={waterfallFetchResult.useUnified}
+          unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+          entryTransactionId={transactionId}
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
-          queryParams={queryParams}
+          traceId={traceId}
         />
       </div>
     </ResettingHeightRetainer>

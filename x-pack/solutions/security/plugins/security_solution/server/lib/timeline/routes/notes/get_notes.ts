@@ -14,7 +14,7 @@ import type {
   SavedObjectsFindOptionsReference,
 } from '@kbn/core-saved-objects-api-server';
 import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-server';
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import type { StartPlugins } from '../../../../plugin_contract';
@@ -135,9 +135,12 @@ export const getNotesRoute = (
           };
 
           // we need to combine the associatedFilter with the filter query
-          // we have to type case here because the filter is a string (from the schema) and that cannot be changed as it would be a breaking change
-          const filterAsKueryNode: KueryNode = (filter || '') as unknown as KueryNode;
-          const filterKueryNodeArray = [filterAsKueryNode];
+          // we have to type cast here because the filter is a string (from the schema) and that cannot be changed as it would be a breaking change
+          // only add the filter to the array if it's provided (non-empty), otherwise the nodeBuilder.and will not work correctly
+          const filterKueryNodeArray: KueryNode[] = [];
+          if (filter) {
+            filterKueryNodeArray.push(filter as unknown as KueryNode);
+          }
 
           // retrieve all the notes created by a specific user
           // the createdByFilter value is the uuid of the user
@@ -179,14 +182,16 @@ export const getNotesRoute = (
 
           const associatedFilter = queryParams?.associatedFilter;
           if (associatedFilter) {
-            // select documents that have or don't have a reference to an empty value
-            // used in combination with hasReference (not associated with a timeline) or hasNoReference (associated with a timeline)
+            // Reference filter: empty id means "not associated with a timeline"
+            // hasReference = referenceToATimeline means note is NOT attached to any timeline
+            // hasNoReference = referenceToATimeline means note IS attached to a timeline
             const referenceToATimeline: SavedObjectsFindOptionsReference = {
               type: timelineSavedObjectType,
               id: '',
             };
 
-            // select documents that don't have a value in the eventId field (not associated with a document)
+            // Filter for notes without eventId (eventId is empty string)
+            // Note: This only matches empty strings, not undefined/missing eventId fields
             const emptyDocumentIdFilter: KueryNode = nodeBuilder.is(
               `${noteSavedObjectType}.attributes.eventId`,
               ''
@@ -196,39 +201,57 @@ export const getNotesRoute = (
               case AssociatedFilter.documentOnly:
                 // select documents that have a reference to an empty saved object id (not associated with a timeline)
                 // and have a value in the eventId field (associated with a document)
+                // Note: eventId filtering is done post-query because some notes have undefined eventId (not empty string)
                 options.hasReference = referenceToATimeline;
-                filterKueryNodeArray.push(
-                  nodeTypes.function.buildNode('not', emptyDocumentIdFilter)
-                );
                 break;
               case AssociatedFilter.savedObjectOnly:
                 // select documents that don't have a reference to an empty saved object id (associated with a timeline)
                 // and don't have a value in the eventId field (not associated with a document)
                 options.hasNoReference = referenceToATimeline;
-                filterKueryNodeArray.push(emptyDocumentIdFilter);
+                // Note: eventId filtering is done post-query because some notes (like investigation guides)
+                // have undefined eventId field, which cannot be matched by query-time `eventId === ''` checks.
                 break;
               case AssociatedFilter.documentAndSavedObject:
                 // select documents that don't have a reference to an empty saved object id (associated with a timeline)
                 // and have a value in the eventId field (associated with a document)
+                // Note: eventId filtering is done post-query because some notes (like investigation guides)
+                // have undefined eventId field, which the query filter `not (eventId === '')` cannot exclude
                 options.hasNoReference = referenceToATimeline;
-                filterKueryNodeArray.push(
-                  nodeTypes.function.buildNode('not', emptyDocumentIdFilter)
-                );
                 break;
               case AssociatedFilter.orphan:
                 // select documents that have a reference to an empty saved object id (not associated with a timeline)
                 // and don't have a value in the eventId field (not associated with a document)
                 options.hasReference = referenceToATimeline;
-                // TODO we might want to also check for the existence of the eventId field, on top of getting eventId having empty values
                 filterKueryNodeArray.push(emptyDocumentIdFilter);
                 break;
             }
           }
 
-          // combine all filters
-          options.filter = nodeBuilder.and(filterKueryNodeArray);
+          // combine all filters (only if there are filters to apply)
+          if (filterKueryNodeArray.length > 0) {
+            options.filter =
+              filterKueryNodeArray.length === 1
+                ? filterKueryNodeArray[0]
+                : nodeBuilder.and(filterKueryNodeArray);
+          }
 
           const res = await getAllSavedNote(frameworkRequest, options);
+
+          // For documentOnly and documentAndSavedObject, filter to notes with a valid eventId.
+          // We can't do this at query level because the saved objects API can only check
+          // if eventId equals empty string, not if the field exists/is undefined.
+          if (
+            associatedFilter === AssociatedFilter.documentOnly ||
+            associatedFilter === AssociatedFilter.documentAndSavedObject
+          ) {
+            res.notes = res.notes.filter((note) => note.eventId && note.eventId !== '');
+            res.totalCount = res.notes.length;
+          } else if (associatedFilter === AssociatedFilter.savedObjectOnly) {
+            // Timeline-only notes should include both empty and missing eventId.
+            res.notes = res.notes.filter((note) => !note.eventId || note.eventId === '');
+            res.totalCount = res.notes.length;
+          }
+
           return response.ok({ body: res });
         } catch (err) {
           const error = transformError(err);

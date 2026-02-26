@@ -127,6 +127,40 @@ describe('MetricsGrid', () => {
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
   });
 
+  it('passes getUserMessages(metric) result to each chart when getUserMessages is provided', () => {
+    const messagesForCpu = [
+      {
+        uniqueId: 'cpu-message',
+        severity: 'warning' as const,
+        shortMessage: 'CPU',
+        longMessage: 'CPU message',
+        fixableInEditor: false,
+        displayLocations: [{ id: 'embeddableBadge' as const }],
+      },
+    ];
+
+    const getUserMessages = jest.fn((metric: (typeof fields)[0]) =>
+      metric.name === 'system.cpu.utilization' ? messagesForCpu : undefined
+    );
+
+    renderMetricsGrid({ getUserMessages });
+
+    expect(getUserMessages).toHaveBeenCalledTimes(fields.length);
+    expect(getUserMessages).toHaveBeenNthCalledWith(1, fields[0]);
+    expect(getUserMessages).toHaveBeenNthCalledWith(2, fields[1]);
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ userMessages: messagesForCpu }),
+      expect.anything()
+    );
+    expect(Chart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ userMessages: undefined }),
+      expect.anything()
+    );
+  });
+
   it('handles multiple dimensions correctly in ESQL query and chart layers', () => {
     const multipleDimensions = [
       { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
@@ -147,7 +181,7 @@ describe('MetricsGrid', () => {
       expect.objectContaining({
         chartLayers: expect.arrayContaining([
           expect.objectContaining({
-            breakdown: 'host.name',
+            breakdown: ['host.name', 'service.name', 'container.id'],
           }),
         ]),
       }),

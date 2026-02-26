@@ -46,7 +46,10 @@ export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>(
       return response.ok({
         body: {
           ...pagination,
-          templates: templates.map((template) => parseTemplate(template)),
+          templates: templates.map((template) => ({
+            ...parseTemplate(template),
+            fieldSearchMatches: template.fieldSearchMatches,
+          })),
         },
       });
     } catch (error) {

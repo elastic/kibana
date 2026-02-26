@@ -10,10 +10,18 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { getMockAttackDiscoveryAlerts } from '../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
+import { useViewInAiAssistant } from '../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
 import { useAttacksPrivileges } from '../../../hooks/attacks/bulk_actions/use_attacks_privileges';
+import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
+jest.mock(
+  '../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+);
 jest.mock('../../../hooks/attacks/bulk_actions/use_attacks_privileges');
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
+);
 jest.mock('../../../../common/components/user_privileges', () => ({
   useUserPrivileges: () => ({
     timelinePrivileges: { read: true },
@@ -29,6 +37,13 @@ jest.mock('../../../../common/hooks/use_license', () => ({
 const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
   typeof useAttacksPrivileges
 >;
+const mockUseViewInAiAssistant = useViewInAiAssistant as jest.MockedFunction<
+  typeof useViewInAiAssistant
+>;
+const mockUseAttackViewInAiAssistantContextMenuItems =
+  useAttackViewInAiAssistantContextMenuItems as jest.MockedFunction<
+    typeof useAttackViewInAiAssistantContextMenuItems
+  >;
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
 function renderAttack(attack: AttackDiscoveryAlert) {
@@ -46,6 +61,20 @@ describe('AttacksGroupTakeActionItems', () => {
       hasIndexWrite: true,
       hasAttackIndexWrite: true,
       loading: false,
+    });
+    mockUseViewInAiAssistant.mockReturnValue({
+      showAssistantOverlay: jest.fn(),
+      disabled: false,
+      promptContextId: 'prompt-context-id',
+    });
+    mockUseAttackViewInAiAssistantContextMenuItems.mockReturnValue({
+      items: [
+        {
+          name: 'View in AI Assistant',
+          key: 'viewInAiAssistant',
+          'data-test-subj': 'viewInAiAssistant',
+        },
+      ],
     });
   });
 
@@ -122,6 +151,22 @@ describe('AttacksGroupTakeActionItems', () => {
     it('should render the `Investigate in timeline` action item', async () => {
       const { findByText } = renderAttack(mockAttack);
       expect(await findByText('Investigate in timeline')).toBeInTheDocument();
+    });
+  });
+
+  describe('view in ai assistant', () => {
+    it('should render the `View in AI Assistant` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('View in AI Assistant')).toBeInTheDocument();
+    });
+
+    it('should not render the action item when hook returns no items', async () => {
+      mockUseAttackViewInAiAssistantContextMenuItems.mockReturnValue({
+        items: [],
+      });
+
+      const { queryByText } = renderAttack(mockAttack);
+      expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
     });
   });
 });

@@ -74,10 +74,9 @@ export function AttributesOverview({
         flattened,
         searchTerm,
         shouldShowFieldHandler,
-        isEsqlMode,
         areNullValuesHidden,
       }),
-    [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden]
+    [allFields, flattened, searchTerm, shouldShowFieldHandler, areNullValuesHidden]
   );
 
   const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;
@@ -195,20 +194,18 @@ export function AttributesOverview({
           alignItems="center"
           gutterSize="m"
         >
-          {isEsqlMode && (
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
-                  defaultMessage: 'Hide null fields',
-                  description: 'Switch label to hide fields with null values in the table',
-                })}
-                checked={areNullValuesHidden ?? false}
-                onChange={onHideNullValuesChange}
-                compressed
-                data-test-subj="unifiedDocViewerHideNullValuesSwitch"
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                defaultMessage: 'Hide null fields',
+                description: 'Switch label to hide fields with null values in the table',
+              })}
+              checked={areNullValuesHidden ?? false}
+              onChange={onHideNullValuesChange}
+              compressed
+              data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

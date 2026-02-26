@@ -9,7 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod';
 import moment from 'moment';
-import { convertTimestamp } from '../../common/utils';
+import { convertTimestamp, Coerced } from '../../common/utils';
+
 import {
   EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY,
   EVENT_ACTION_ACKNOWLEDGE,
@@ -36,7 +37,7 @@ const EventActionSchema = z.enum([
 
 const PayloadSeveritySchema = z.enum(['critical', 'error', 'warning', 'info']);
 const LinksSchema = z.array(z.object({ href: z.string(), text: z.string() }).strict());
-const customDetailsSchema = z.record(z.string(), z.any());
+const customDetailsSchema = Coerced(z.record(z.string(), z.any()));
 
 export const ParamsSchema = z
   .object({

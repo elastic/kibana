@@ -29,6 +29,8 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/actions-plugin'
   - '@kbn/utility-types'
+  - '@kbn/eval-kql'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod

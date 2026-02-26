@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
@@ -51,6 +52,7 @@ export interface AgentExecutionDeps {
   inference: InferenceServerStart;
   conversationService: ConversationService;
   agentService: AgentsServiceStart;
+  runAgent: RunAgentFn;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   spaces?: SpacesPluginStart;
@@ -90,7 +92,7 @@ export const handleAgentExecution = async ({
     action,
   } = execution.agentParams;
 
-  const { logger, agentService, trackingService, analyticsService } = deps;
+  const { logger, runAgent, trackingService, analyticsService } = deps;
 
   // Resolve scoped services
   const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
@@ -125,7 +127,7 @@ export const handleAgentExecution = async ({
     abortSignal,
     conversation,
     defaultConnectorId: selectedConnectorId,
-    agentService,
+    runAgent,
     browserApiTools,
     configurationOverrides,
     action,

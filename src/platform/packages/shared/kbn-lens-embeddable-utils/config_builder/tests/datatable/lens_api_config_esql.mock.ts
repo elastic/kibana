@@ -172,10 +172,10 @@ export const fullConfigESQLDatatable: DatatableState = {
 };
 
 /**
- * ESQL datatable sorted by a transposed metric column
+ * ESQL datatable sorted by a pivoted metric column (split_metrics_by)
  */
-export const sortedByTransposedMetricColumnESQLDatatable: DatatableState = {
-  title: 'Sorted by transposed metric column',
+export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
+  title: 'Sorted by pivoted metric column',
   type: 'datatable',
   dataset: {
     type: 'esql',
@@ -268,8 +268,8 @@ export const sortedByTransposedMetricColumnESQLDatatable: DatatableState = {
   },
   paging: 10,
   sort_by: {
-    column_type: 'split_metrics_by',
-    metric_index: 0,
+    column_type: 'pivoted_metric',
+    index: 0,
     values: ['US', 'MM'],
     direction: 'desc',
   },

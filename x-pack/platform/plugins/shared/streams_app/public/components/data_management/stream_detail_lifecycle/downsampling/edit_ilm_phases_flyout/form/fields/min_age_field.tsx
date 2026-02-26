@@ -16,8 +16,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { getTimeUnitLabel } from '../../../../helpers/format_size_units';
-import { formatMillisecondsInUnit, getRelativeBoundsInMs, toMilliseconds } from '../utils';
+import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
+import { getRelativeBoundsInMs, toMilliseconds } from '../utils';
 import { useOnFieldErrorsChange } from '../error_tracking';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
 import type { PreservedTimeUnit, TimeUnit } from '../types';
@@ -74,6 +74,14 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
         defaultMessage: 'Move after data stored',
       });
 
+  const fieldAriaLabel = isDeletePhase
+    ? i18n.translate('xpack.streams.editIlmPhasesFlyout.deleteAfterAriaLabel', {
+        defaultMessage: 'Delete after value',
+      })
+    : i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterAriaLabel', {
+        defaultMessage: 'Move after value',
+      });
+
   return (
     <UseField
       path={minAgeValuePath}
@@ -90,18 +98,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
                 const currentValue = String(minAgeValueField.value ?? '');
                 const currentUnit = String(minAgeUnitField.value ?? 'd') as PreservedTimeUnit;
 
-                let unitOptions: Array<{ value: PreservedTimeUnit; text: string }> =
-                  timeUnitOptions.map((o) => ({ value: o.value, text: o.text }));
-                const canShowNonDefaultUnit =
-                  currentUnit === 'ms' || currentUnit === 'micros' || currentUnit === 'nanos';
-                if (canShowNonDefaultUnit) {
-                  // Preserve and display known non-default units that can appear in ILM policies.
-                  // We still only *offer* `d/h/m/s` by default.
-                  unitOptions = [
-                    ...unitOptions,
-                    { value: currentUnit, text: getTimeUnitLabel(currentUnit) },
-                  ];
-                }
+                const unitOptions = getUnitSelectOptions(timeUnitOptions, currentUnit);
 
                 const minAgePhases = ['warm', 'cold', 'frozen', 'delete'] as const;
                 type MinAgePhase = (typeof minAgePhases)[number];
@@ -110,19 +107,24 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
                   phaseName as MinAgePhase,
                   getPhaseMinAgeMs
                 );
+                const { min, max } = getBoundsHelpTextValues({
+                  lowerBoundMs,
+                  upperBoundMs,
+                  unit: currentUnit,
+                });
 
                 const helpText =
                   upperBoundMs === undefined
                     ? i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpLowerBound', {
                         defaultMessage: 'Must be larger than {min} based on current configuration.',
-                        values: { min: formatMillisecondsInUnit(lowerBoundMs, currentUnit) },
+                        values: { min },
                       })
                     : i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpRange', {
                         defaultMessage:
                           'Must be larger than {min} and smaller than {max} based on current configuration.',
                         values: {
-                          min: formatMillisecondsInUnit(lowerBoundMs, currentUnit),
-                          max: formatMillisecondsInUnit(upperBoundMs, currentUnit),
+                          min,
+                          max,
                         },
                       });
 
@@ -139,6 +141,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
                           compressed
                           min={0}
                           fullWidth
+                          aria-label={fieldAriaLabel}
                           value={currentValue}
                           isInvalid={isInvalid}
                           data-test-subj={`${dataTestSubj}MoveAfterValue`}

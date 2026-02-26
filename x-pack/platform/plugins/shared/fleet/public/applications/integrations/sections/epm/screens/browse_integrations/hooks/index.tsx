@@ -72,10 +72,24 @@ export function useBrowseIntegrationHook({
         ) ?? []
       : [];
 
-    return searchTerm
+    let cards = searchTerm
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
-  }, [localSearch, searchTerm, sortedCards]);
+
+    // Apply status filters
+    const statusFilters = urlFilters.status;
+    if (statusFilters && statusFilters.length > 0) {
+      const filterDeprecated = statusFilters.includes('deprecated');
+
+      if (filterDeprecated) {
+        cards = cards.filter((card) => {
+          return 'isDeprecated' in card && card.isDeprecated === true;
+        });
+      }
+    }
+
+    return cards;
+  }, [localSearch, searchTerm, sortedCards, urlFilters.status]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {

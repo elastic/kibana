@@ -1,0 +1,265 @@
+{
+  "id": "@kbn/content-list-toolbar",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.ContentListToolbar",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentListToolbar",
+        "description": [],
+        "signature": [
+          "(({ children, \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.ContentListToolbarProps",
+            "text": "ContentListToolbarProps"
+          },
+          ") => React.JSX.Element) & { Filters: any; SelectionBar: ({ \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/content-list-toolbar",
+            "scope": "public",
+            "docId": "kibKbnContentListToolbarPluginApi",
+            "section": "def-public.SelectionBarProps",
+            "text": "SelectionBarProps"
+          },
+          ") => React.JSX.Element | null; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
+        "lineNumber": 117,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.ContentListToolbar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-toolbar",
+                "scope": "public",
+                "docId": "kibKbnContentListToolbarPluginApi",
+                "section": "def-public.ContentListToolbarProps",
+                "text": "ContentListToolbarProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
+            "lineNumber": 69,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.ContentListToolbarProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListToolbarProps",
+        "description": [
+          "\nProps for the {@link ContentListToolbar} component."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.ContentListToolbarProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "Optional children for declarative configuration via {@link Filters}."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.ContentListToolbarProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Optional `data-test-subj` attribute for testing."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/content_list_toolbar.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.FiltersProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FiltersProps",
+        "description": [
+          "\nProps for the {@link Filters} container component."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.FiltersProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "Filter declarative components as children."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.SelectionBarProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SelectionBarProps",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/selection_bar/selection_bar.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-toolbar",
+            "id": "def-public.SelectionBarProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Optional `data-test-subj` attribute for testing."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/selection_bar/selection_bar.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.SortFilterProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SortFilterProps",
+        "description": [
+          "\nProps for the {@link SortFilter} declarative component.\n\nNote: `SortFilter` is a non-rendering declarative component whose props are\nparsed as attributes during filter resolution. Because `EuiSearchBar`\ninstantiates `custom_component` filters itself, attributes cannot be\nforwarded to the underlying {@link SortRenderer}. Extend this interface\nonly with props the `resolve` callback can act on directly."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/part.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.Filters",
+        "type": "Any",
+        "tags": [],
+        "label": "Filters",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/filters.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-toolbar",
+        "id": "def-public.SortFilter",
+        "type": "Any",
+        "tags": [],
+        "label": "SortFilter",
+        "description": [
+          "\n`SortFilter` declarative component (non-rendering).\n\nThis is a declarative component that doesn't render anything.\nIt specifies that a sort dropdown should appear in the toolbar filters.\nThe `resolve` callback checks whether sorting is available and returns\na `SearchFilterConfig` wrapping {@link SortRenderer}, or `undefined`\nto skip the filter entirely.\n\nSort options are configured via the provider's `sorting` config.\n"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar/src/filters/sort/sort.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -32,7 +32,7 @@
           ") => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
-        "lineNumber": 334,
+        "lineNumber": 340,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
               "InferenceServiceSettings"
             ],
             "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
-            "lineNumber": 335,
+            "lineNumber": 341,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -611,7 +611,7 @@
           "InferenceServiceSettings"
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
-        "lineNumber": 332,
+        "lineNumber": 338,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

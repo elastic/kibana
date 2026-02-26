@@ -24,10 +24,10 @@ import {
 } from '../shared/components/left_panel/left_panel_header';
 import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
-import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import { FieldsTable, usePinnedFields } from './components/fields_table';
-import { ExpandableSection } from '../../shared/components/expandable_section';
+import { ExpandableSection } from '../../../flyout_v2/shared/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';

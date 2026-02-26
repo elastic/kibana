@@ -182,11 +182,12 @@ export const useSchemaFields = ({
 
       refreshFields();
     } catch (error) {
-      toasts.addError(new Error(error.body.message), {
+      const formattedError = getFormattedError(error);
+      toasts.addError(formattedError, {
         title: i18n.translate('xpack.streams.streamDetailSchemaEditorEditErrorToast', {
           defaultMessage: 'Something went wrong when modifying the schema',
         }),
-        toastMessage: getFormattedError(error).message,
+        toastMessage: formattedError.message,
         toastLifeTimeMs: 5000,
       });
     }

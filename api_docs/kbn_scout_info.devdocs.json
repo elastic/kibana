@@ -17,9 +17,387 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTestTarget",
+        "type": "Class",
+        "tags": [],
+        "label": "ScoutTestTarget",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.tagPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "tagPattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.location",
+            "type": "Any",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "signature": [
+              "z.infer<any>"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.arch",
+            "type": "Any",
+            "tags": [],
+            "label": "arch",
+            "description": [],
+            "signature": [
+              "z.infer<any>"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.domain",
+            "type": "Any",
+            "tags": [],
+            "label": "domain",
+            "description": [],
+            "signature": [
+              "z.infer<any>"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-info",
+                "id": "def-common.ScoutTestTarget.Unnamed.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-info",
+                "id": "def-common.ScoutTestTarget.Unnamed.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "arch",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-info",
+                "id": "def-common.ScoutTestTarget.Unnamed.$3",
+                "type": "Any",
+                "tags": [],
+                "label": "domain",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+                "lineNumber": 53,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.tagWithoutLocation",
+            "type": "string",
+            "tags": [],
+            "label": "tagWithoutLocation",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.tag",
+            "type": "string",
+            "tags": [],
+            "label": "tag",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.playwrightTag",
+            "type": "string",
+            "tags": [],
+            "label": "playwrightTag",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.fromTag",
+            "type": "Function",
+            "tags": [],
+            "label": "fromTag",
+            "description": [],
+            "signature": [
+              "(tag: string) => ",
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestTarget",
+                "text": "ScoutTestTarget"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-info",
+                "id": "def-common.ScoutTestTarget.fromTag.$1",
+                "type": "string",
+                "tags": [],
+                "label": "tag",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+                "lineNumber": 82,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.fromPlaywrightTag",
+            "type": "Function",
+            "tags": [],
+            "label": "fromPlaywrightTag",
+            "description": [],
+            "signature": [
+              "(playwrightTag: string) => ",
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestTarget",
+                "text": "ScoutTestTarget"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-info",
+                "id": "def-common.ScoutTestTarget.fromPlaywrightTag.$1",
+                "type": "string",
+                "tags": [],
+                "label": "playwrightTag",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+                "lineNumber": 96,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.fromEnv",
+            "type": "Function",
+            "tags": [],
+            "label": "fromEnv",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestTarget",
+                "text": "ScoutTestTarget"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTestTarget.tryFromEnv",
+            "type": "Function",
+            "tags": [],
+            "label": "tryFromEnv",
+            "description": [
+              "\nLike fromEnv() but suppresses errors and returns undefined when Scout target env vars are missing or invalid."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestTarget",
+                "text": "ScoutTestTarget"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTargetDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScoutTargetDefinition",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTargetDefinition.locations",
+            "type": "Array",
+            "tags": [],
+            "label": "locations",
+            "description": [],
+            "signature": [
+              "z.infer<any>[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.ScoutTargetDefinition.architectures",
+            "type": "Array",
+            "tags": [],
+            "label": "architectures",
+            "description": [],
+            "signature": [
+              "z.infer<any>[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [
       {
         "parentPluginId": "@kbn/scout-info",
@@ -39,13 +417,27 @@
     "misc": [
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_CONFIG_MANIFEST_PATH_GLOB",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_CONFIG_MANIFEST_PATH_GLOB",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.SCOUT_CONFIG_PATH_GLOB",
         "type": "string",
         "tags": [],
         "label": "SCOUT_CONFIG_PATH_GLOB",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 46,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -171,13 +563,13 @@
       },
       {
         "parentPluginId": "@kbn/scout-info",
-        "id": "def-common.SCOUT_TARGET_MODE",
+        "id": "def-common.SCOUT_TARGET_ARCH",
         "type": "string",
         "tags": [],
-        "label": "SCOUT_TARGET_MODE",
+        "label": "SCOUT_TARGET_ARCH",
         "description": [],
-        "path": "src/platform/packages/private/kbn-scout-info/src/runtime.ts",
-        "lineNumber": 11,
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -185,13 +577,44 @@
       },
       {
         "parentPluginId": "@kbn/scout-info",
-        "id": "def-common.SCOUT_TARGET_TYPE",
+        "id": "def-common.SCOUT_TARGET_DOMAIN",
         "type": "string",
         "tags": [],
-        "label": "SCOUT_TARGET_TYPE",
+        "label": "SCOUT_TARGET_DOMAIN",
         "description": [],
-        "path": "src/platform/packages/private/kbn-scout-info/src/runtime.ts",
-        "lineNumber": 10,
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TARGET_LOCATION",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_TARGET_LOCATION",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TEST_CATEGORIES",
+        "type": "Array",
+        "tags": [],
+        "label": "SCOUT_TEST_CATEGORIES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
+        "lineNumber": 47,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -255,16 +678,160 @@
       },
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTargetArch",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTargetArch",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTargetArchSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ScoutTargetArchSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTargetDomain",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTargetDomain",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTargetDomainSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ScoutTargetDomainSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTargetLocation",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTargetLocation",
+        "description": [],
+        "signature": [
+          "z.infer<any>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTargetLocationSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ScoutTargetLocationSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTestTargetSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "ScoutTestTargetSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB",
         "type": "string",
         "tags": [],
         "label": "TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB",
         "description": [],
         "signature": [
-          "\"{src/platform,x-pack/**}/{plugins,packages}/**/test/scout\""
+          "\"{src/platform,x-pack/**}/{plugins,packages}/**/test/scout{_*,}\""
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
         "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.VALID_SCOUT_TEST_TARGET_DEFINITIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "VALID_SCOUT_TEST_TARGET_DEFINITIONS",
+        "description": [],
+        "signature": [
+          "[z.infer<any>, ",
+          {
+            "pluginId": "@kbn/scout-info",
+            "scope": "common",
+            "docId": "kibKbnScoutInfoPluginApi",
+            "section": "def-common.ScoutTargetDefinition",
+            "text": "ScoutTargetDefinition"
+          },
+          "][]"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 123,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -283,7 +850,7 @@
           "RegExp"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
-        "lineNumber": 49,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -304,6 +871,135 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.testTargets",
+        "type": "Object",
+        "tags": [],
+        "label": "testTargets",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+        "lineNumber": 182,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.testTargets.all",
+            "type": "Array",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestTarget",
+                "text": "ScoutTestTarget"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 183,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.testTargets.forLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "forLocation",
+            "description": [],
+            "signature": [
+              "(location: z.infer<any>) => ",
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestTarget",
+                "text": "ScoutTestTarget"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 191,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-info",
+                "id": "def-common.testTargets.forLocation.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "z.infer<any>"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+                "lineNumber": 191,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.testTargets.local",
+            "type": "Array",
+            "tags": [],
+            "label": "local",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestTarget",
+                "text": "ScoutTestTarget"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 195,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-info",
+            "id": "def-common.testTargets.cloud",
+            "type": "Array",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-info",
+                "scope": "common",
+                "docId": "kibKbnScoutInfoPluginApi",
+                "section": "def-common.ScoutTestTarget",
+                "text": "ScoutTestTarget"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
+            "lineNumber": 199,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]

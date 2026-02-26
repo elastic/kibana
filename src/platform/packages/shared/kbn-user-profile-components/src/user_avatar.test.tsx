@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { UserAvatar } from './user_avatar';
 
 describe('UserAvatar', () => {
-  it('should render `EuiAvatar` correctly with image avatar', () => {
-    const wrapper = shallow(
+  it('should render EuiAvatar correctly with image avatar', () => {
+    const { container } = render(
       <UserAvatar
         user={{
           username: 'delighted_nightingale',
@@ -28,17 +28,19 @@ describe('UserAvatar', () => {
         }}
       />
     );
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiAvatar
-        color="plain"
-        imageUrl="https://source.unsplash.com/64x64/?cat"
-        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        aria-label="Delighted Nightingale (delighted_nightingale@elastic.co)"
+        class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase-plain"
+        role="img"
+        style="background-image: url(https://source.unsplash.com/64x64/?cat);"
+        title="Delighted Nightingale (delighted_nightingale@elastic.co)"
       />
     `);
   });
 
-  it('should render `EuiAvatar` correctly with initials avatar', () => {
-    const wrapper = shallow(
+  it('should render EuiAvatar correctly with initials avatar', () => {
+    const { container } = render(
       <UserAvatar
         user={{
           username: 'delighted_nightingale',
@@ -52,18 +54,25 @@ describe('UserAvatar', () => {
         }}
       />
     );
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiAvatar
-        color="#09e8ca"
-        initials="DN"
-        initialsLength={2}
-        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
-      />
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        aria-label="Delighted Nightingale (delighted_nightingale@elastic.co)"
+        class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase"
+        role="img"
+        style="background-color: rgb(9, 232, 202); color: rgb(0, 0, 0);"
+        title="Delighted Nightingale (delighted_nightingale@elastic.co)"
+      >
+        <span
+          aria-hidden="true"
+        >
+          DN
+        </span>
+      </div>
     `);
   });
 
-  it('should render `EuiAvatar` correctly without avatar data', () => {
-    const wrapper = shallow(
+  it('should render EuiAvatar correctly without avatar data', () => {
+    const { container } = render(
       <UserAvatar
         user={{
           username: 'delighted_nightingale',
@@ -72,24 +81,39 @@ describe('UserAvatar', () => {
         }}
       />
     );
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiAvatar
-        color="#EAAE01"
-        initials="DN"
-        initialsLength={2}
-        name="Delighted Nightingale (delighted_nightingale@elastic.co)"
-      />
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        aria-label="Delighted Nightingale (delighted_nightingale@elastic.co)"
+        class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase"
+        role="img"
+        style="background-color: rgb(234, 174, 1); color: rgb(0, 0, 0);"
+        title="Delighted Nightingale (delighted_nightingale@elastic.co)"
+      >
+        <span
+          aria-hidden="true"
+        >
+          DN
+        </span>
+      </div>
     `);
   });
 
-  it('should render `EuiAvatar` correctly without user data', () => {
-    const wrapper = shallow(<UserAvatar />);
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiAvatar
-        color="#ECF1F9"
-        initials="?"
-        name=""
-      />
+  it('should render EuiAvatar correctly without user data', () => {
+    const { container } = render(<UserAvatar />);
+    expect(container.children[0]).toMatchInlineSnapshot(`
+      <div
+        aria-label=""
+        class="euiAvatar euiAvatar--m euiAvatar--user emotion-euiAvatar-user-m-uppercase"
+        role="img"
+        style="background-color: rgb(236, 241, 249); color: rgb(0, 0, 0);"
+        title=""
+      >
+        <span
+          aria-hidden="true"
+        >
+          ?
+        </span>
+      </div>
     `);
   });
 });

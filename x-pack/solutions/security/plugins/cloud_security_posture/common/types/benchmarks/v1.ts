@@ -14,7 +14,7 @@ export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: num
 
 export const benchmarkScoreSchema = schema.object({
   postureScore: schema.number({ defaultValue: 0, min: 0 }),
-  resourcesEvaluated: schema.number({ defaultValue: 0, min: 0 }),
+  resourcesEvaluated: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
   totalFailed: schema.number({ defaultValue: 0, min: 0 }),
   totalFindings: schema.number({ defaultValue: 0, min: 0 }),
   totalPassed: schema.number({ defaultValue: 0, min: 0 }),

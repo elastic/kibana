@@ -23,6 +23,7 @@ import type { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type {
   RequestHandlerContextBase,
   IContextContainer,
@@ -63,6 +64,7 @@ export interface PrebootDeps {
 export interface SetupDeps {
   context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
+  userActivity: InternalUserActivityServiceSetup;
 }
 
 /** @internal */
@@ -193,6 +195,7 @@ export class HttpService
     const { registerRouter, ...serverContract } = await this.httpServer.setup({
       config$: this.config$,
       executionContext: deps.executionContext,
+      userActivity: deps.userActivity,
     });
 
     registerCoreHandlers(serverContract, config, this.env, this.log);
@@ -239,6 +242,9 @@ export class HttpService
       ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
+      setRedactedSessionIdGetter: (getter) => {
+        this.httpServer.setRedactedSessionIdGetter(getter);
+      },
     };
   }
 

@@ -42,7 +42,7 @@ import {
   Subscription,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AnomalySwimlaneEmbeddableServices } from '..';

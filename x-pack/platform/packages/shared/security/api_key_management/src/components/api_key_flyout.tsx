@@ -286,9 +286,11 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   // autofocus first field when loaded
   const inputRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
-    if (inputRef?.current) {
-      inputRef?.current.focus();
-    }
+    requestAnimationFrame(() => {
+      if (inputRef?.current) {
+        inputRef?.current.focus();
+      }
+    });
   }, [isLoading]);
 
   const titleId = htmlIdGenerator('formFlyout')('title');

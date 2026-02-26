@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node"]
+  },
+  "include": [
+    "**/*",
+    "../../../../../typings/**/*",
+    "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/evals",
+    "@kbn/tooling-log",
+    "@kbn/core",
+    "@kbn/test-suites-security-solution-apis",
+    "@kbn/security-solution-plugin",
+    "@kbn/detections-response-ftr-services",
+    "@kbn/es-archiver",
+    "@kbn/scout-security",
+  ]
+}
+

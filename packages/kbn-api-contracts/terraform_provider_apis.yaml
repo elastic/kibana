@@ -1,0 +1,92 @@
+# APIs used by Terraform Provider (elastic/terraform-provider-elasticstack)
+# Extracted from provider source code - this is the source of truth
+#
+# To update this list:
+# 1. Clone terraform-provider-elasticstack
+# 2. Search for Kibana API paths: grep -R '"/api/' --include="*.go" -h | sort -u
+# 3. Map paths to Terraform resources
+#
+# Last updated: 2026-02-09
+
+terraform_provider_apis:
+  # Action Connectors
+  - path: /api/actions/connector
+    methods: [GET, POST]
+    resource: elasticstack_kibana_action_connector
+  - path: /api/actions/connector/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_action_connector
+
+  # Alerting Rules
+  - path: /api/alerting/rule
+    methods: [GET, POST]
+    resource: elasticstack_kibana_alerting_rule
+  - path: /api/alerting/rule/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_alerting_rule
+
+  # Spaces
+  - path: /api/spaces/space
+    methods: [GET, POST]
+    resource: elasticstack_kibana_space
+  - path: /api/spaces/space/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_space
+
+  # Fleet - Agent Policies
+  - path: /api/fleet/agent_policies
+    methods: [GET, POST]
+    resource: elasticstack_fleet_agent_policy
+  - path: /api/fleet/agent_policies/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_fleet_agent_policy
+
+  # Fleet - Package Policies
+  - path: /api/fleet/package_policies
+    methods: [GET, POST]
+    resource: elasticstack_fleet_integration_policy
+  - path: /api/fleet/package_policies/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_fleet_integration_policy
+
+  # Fleet - Outputs
+  - path: /api/fleet/outputs
+    methods: [GET, POST]
+    resource: elasticstack_fleet_output
+  - path: /api/fleet/outputs/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_fleet_output
+
+  # Fleet - Server Hosts
+  - path: /api/fleet/fleet_server_hosts
+    methods: [GET, POST]
+    resource: elasticstack_fleet_server_host
+  - path: /api/fleet/fleet_server_hosts/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_fleet_server_host
+
+  # SLOs
+  - path: /api/observability/slos
+    methods: [GET, POST]
+    resource: elasticstack_kibana_slo
+  - path: /api/observability/slos/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_slo
+
+  # Data Views
+  - path: /api/data_views/data_view
+    methods: [GET, POST]
+    resource: elasticstack_kibana_data_view
+  - path: /api/data_views/data_view/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_data_view
+
+  # Security - Roles
+  - path: /api/security/role/{name}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_security_role
+
+  # Import/Export (Saved Objects)
+  - path: /api/saved_objects/_import
+    methods: [POST]
+    resource: elasticstack_kibana_import_saved_objects

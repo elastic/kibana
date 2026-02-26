@@ -10,7 +10,7 @@
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { Parser } from '../../parser';
 import { within, Walker } from '../../ast';
-import type { ESQLAstPromqlCommand, ESQLFunction } from '../../types';
+import type { ESQLFunction } from '../../types';
 import {
   getFormattedFunctionSignature,
   getFunctionDefinition,
@@ -53,12 +53,9 @@ export async function getSignatureHelp(
   const correctedQuery = correctQuerySyntax(fullText, offset);
   const { root } = Parser.parse(correctedQuery);
 
-  // Check if cursor is inside a PROMQL command
-  const promqlCommand = root.commands.find(
-    (cmd): cmd is ESQLAstPromqlCommand => cmd.name === 'promql' && offset >= cmd.location.min
-  );
+  const commandAtOffset = [...root.commands].reverse().find((cmd) => offset >= cmd.location.min);
 
-  if (promqlCommand) {
+  if (commandAtOffset?.name === 'promql') {
     return getPromqlSignatureHelp(root, fullText, offset);
   }
 

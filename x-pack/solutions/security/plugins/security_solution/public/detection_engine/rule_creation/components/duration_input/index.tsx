@@ -62,6 +62,10 @@ export const DurationInput = memo(function DurationInputComponent({
 
     .euiFormControlLayout__append {
       padding-inline: 0 !important;
+
+      &:has(.euiSelect:focus) {
+        z-index: 1; // ensure focus outline is layered correctly in nested form layout
+      }
     }
 
     .euiFormControlLayoutIcons {
@@ -71,13 +75,17 @@ export const DurationInput = memo(function DurationInputComponent({
   const durationUnitSelectStyle = css`
     min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
     box-shadow: none !important; // Override disabled state
-    background: ${euiTheme.colors.backgroundBasePrimary} !important;
+    background: transparent;
     color: ${euiTheme.colors.primary};
 
     &:disabled {
       border-left: ${euiTheme.border.thin};
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
+    }
+
+    &:hover:not(:focus) {
+      outline: none !important;
     }
   `;
   const durationInputStyle = css`

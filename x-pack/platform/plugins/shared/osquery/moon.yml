@@ -79,6 +79,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/react-kibana-mount'
   - '@kbn/tooling-log'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod

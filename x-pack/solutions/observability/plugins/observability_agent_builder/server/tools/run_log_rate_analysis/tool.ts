@@ -61,7 +61,7 @@ How it works:
 Compares a baseline time window to a deviation window and performs statistical correlation analysis to find fields/patterns associated with the change.
 
 Do NOT use for:
-- Understanding the sequence of events for a specific error (use get_correlated_logs)
+- Understanding the sequence of events for a specific error (use get_traces)
 - Getting a general overview of log types (use get_log_groups)
 - Investigating individual log entries or transactions`,
     schema: logRateAnalysisSchema,

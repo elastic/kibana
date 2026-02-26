@@ -22,6 +22,7 @@ export type RootProfileState =
       rootProfileLoading: false;
       AppWrapper: Profile['getRenderAppWrapper'];
       getDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'];
+      getDefaultEsqlQuery: Profile['getDefaultEsqlQuery'];
     };
 
 /**
@@ -43,13 +44,15 @@ export const useRootProfile = () => {
         filter((id) => id !== undefined),
         tap(() => setRootProfileState({ rootProfileLoading: true })),
         switchMap((solutionNavId) => profilesManager.resolveRootProfile({ solutionNavId })),
-        tap(({ getRenderAppWrapper, getDefaultAdHocDataViews }) =>
+        tap(({ getRenderAppWrapper, getDefaultAdHocDataViews, getDefaultEsqlQuery }) =>
           setRootProfileState({
             rootProfileLoading: false,
             AppWrapper: getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper,
             getDefaultAdHocDataViews:
               getDefaultAdHocDataViews?.(baseGetDefaultAdHocDataViews) ??
               baseGetDefaultAdHocDataViews,
+            getDefaultEsqlQuery:
+              getDefaultEsqlQuery?.(baseGetDefaultEsqlQuery) ?? baseGetDefaultEsqlQuery,
           })
         )
       )
@@ -66,3 +69,5 @@ export const useRootProfile = () => {
 export const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;
 
 const baseGetDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'] = () => [];
+
+const baseGetDefaultEsqlQuery: Profile['getDefaultEsqlQuery'] = () => undefined;

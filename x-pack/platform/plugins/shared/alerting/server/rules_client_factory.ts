@@ -14,12 +14,16 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  GrantAPIKeyResult,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -58,6 +62,7 @@ export interface RulesClientFactoryOpts {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
+  shouldGrantUiam: boolean;
 }
 
 export class RulesClientFactory {
@@ -84,6 +89,7 @@ export class RulesClientFactory {
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
+  private shouldGrantUiam: boolean = false;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -112,6 +118,7 @@ export class RulesClientFactory {
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
+    this.shouldGrantUiam = options.shouldGrantUiam;
   }
 
   /**
@@ -198,6 +205,7 @@ export class RulesClientFactory {
       backfillClient: this.backfillClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
+      shouldGrantUiam: this.shouldGrantUiam,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
@@ -210,21 +218,60 @@ export class RulesClientFactory {
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
-        const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
-          request,
-          {
+        let createUiamApiKeyResult: GrantAPIKeyResult | null | undefined;
+        const shouldCreateUiamApiKey = this.shouldGrantUiam;
+
+        const invalidateUiamApiKey = async (id?: string) => {
+          if (!id) return;
+          const invalidateUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.invalidate(
+            request,
+            { id }
+          );
+          if (invalidateUiamApiKeyResult && invalidateUiamApiKeyResult.error_count > 0) {
+            this.logger.error(
+              `Failed to invalidate UIAM API key for alerting rule : ${name}: ${invalidateUiamApiKeyResult.error_details
+                ?.map((error) => error.reason)
+                .join(', ')}  `
+            );
+          }
+        };
+
+        if (shouldCreateUiamApiKey) {
+          // if this throws we return bad request where this function is called from
+          createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
+            name: `uiam-${name}`,
+          });
+
+          if (!createUiamApiKeyResult) {
+            this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`);
+            return { apiKeysEnabled: false };
+          }
+        }
+
+        let createEsAPIKeyResult;
+        try {
+          createEsAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(request, {
             name,
             role_descriptors: {},
             metadata: { managed: true, kibana: { type: 'alerting_rule' } },
-          }
-        );
-        if (!createAPIKeyResult) {
+          });
+        } catch (err) {
+          // if the ES API key creation failed, we need to invalidate the UIAM API key
+          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
+          // rethrow the error to be handled by the caller
+          throw err;
+        }
+
+        // if we created a UIAM API key but the ES API key creation failed, we need to invalidate the UIAM API key
+        if (!createEsAPIKeyResult) {
+          await invalidateUiamApiKey(createUiamApiKeyResult?.id);
           return { apiKeysEnabled: false };
         }
 
         return {
           apiKeysEnabled: true,
-          result: createAPIKeyResult,
+          result: createEsAPIKeyResult,
+          ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
         };
       },
       async getActionsClient() {
@@ -250,15 +297,37 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
-          const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
+          const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');
+
+          if (!apiKeyId || !apiKey) {
+            throw new Error(
+              `Failed to parse API key credentials from authorization header for alerting rule : ${name}`
+            );
+          }
+
+          if (isUiamCredential(apiKey) && !this.shouldGrantUiam) {
+            throw new Error('UIAM API keys should only be used in serverless environments');
+          }
+
+          if (isUiamCredential(apiKey)) {
+            return {
+              apiKeysEnabled: true,
+              uiamResult: {
+                name: `uiam-${name}`,
+                id: apiKeyId,
+                api_key: apiKey,
+              },
+            };
+          }
+
           return {
             apiKeysEnabled: true,
             result: {
               name,
-              id: apiKey[0],
-              api_key: apiKey[1],
+              id: apiKeyId,
+              api_key: apiKey,
             },
           };
         }

@@ -11,8 +11,8 @@ import { ApmRuleType } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
-import { APM_SLO_INDICATOR_TYPES } from '../../../../../common/slo_indicator_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import type { TableActions } from '../../../shared/managed_table';
 import type { IndexType } from '../../../shared/links/discover_links/get_esql_query';
@@ -148,42 +148,7 @@ export function useServiceActions({
               defaultMessage: 'Manage SLOs',
             }),
             icon: 'tableOfContents',
-            href: (item) =>
-              sloListLocator?.getRedirectUrl({
-                filters: [
-                  {
-                    meta: {
-                      alias: null,
-                      disabled: false,
-                      key: 'service.name',
-                      negate: false,
-                      params: { query: item.serviceName },
-                      type: 'phrase',
-                    },
-                    query: {
-                      match_phrase: { 'service.name': item.serviceName },
-                    },
-                  },
-                  {
-                    meta: {
-                      alias: null,
-                      disabled: false,
-                      key: 'slo.indicator.type',
-                      negate: false,
-                      params: [...APM_SLO_INDICATOR_TYPES],
-                      type: 'phrases',
-                    },
-                    query: {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: APM_SLO_INDICATOR_TYPES.map((type) => ({
-                          match_phrase: { 'slo.indicator.type': type },
-                        })),
-                      },
-                    },
-                  },
-                ],
-              }),
+            href: (item) => getManageSlosUrl(sloListLocator, { serviceName: item.serviceName }),
           },
         ],
       });

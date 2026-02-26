@@ -26,6 +26,7 @@ import type {
   LowercaseProcessor,
   JoinProcessor,
   ConcatProcessor,
+  NetworkDirectionProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -141,6 +142,12 @@ export type IngestPipelineConcatProcessor = RenameFieldsAndRemoveAction<
   { to: 'field'; where: 'if' }
 >;
 
+// Network Direction
+export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveAction<
+  NetworkDirectionProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -166,4 +173,5 @@ export type IngestPipelineProcessor =
   | IngestPipelineTrimProcessor
   | IngestPipelineJoinProcessor
   | IngestPipelineConcatProcessor
+  | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineManualIngestPipelineProcessor;

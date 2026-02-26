@@ -50,6 +50,7 @@ export interface StartPlugins {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   fleet?: FleetStartContract;
+  security: SecurityPluginStart;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;

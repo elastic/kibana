@@ -5,67 +5,53 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
-import { buildAlertsKqlFilter } from '../../../../components/alerts_table/actions';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../components/alerts_table/translations';
+import { useMemo } from 'react';
+import { useBulkAttackInvestigateInTimelineItems } from '../bulk_action_items/use_bulk_attack_investigate_in_timeline_items';
+import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
+import { transformBulkActionsToContextMenuItems } from '../utils/transform_bulk_actions_to_context_menu_items';
+import type {
+  AttackWithTimelineAlerts,
+  BaseAttackContextMenuItemsProps,
+  BulkAttackContextMenuItems,
+} from '../types';
 
-export interface UseAttackInvestigateInTimelineContextMenuItemsProps {
-  /**
-   *  The attack discovery object
-   */
-  attack: AttackDiscoveryAlert;
-  /**
-   * Optional callback to close the containing popover menu
-   */
-  closePopover?: () => void;
+export interface UseAttackInvestigateInTimelineContextMenuItemsProps
+  extends BaseAttackContextMenuItemsProps {
+  /** Array of attacks with alert ids used to investigate in Timeline */
+  attacksWithTimelineAlerts: AttackWithTimelineAlerts[];
 }
 
 export const useAttackInvestigateInTimelineContextMenuItems = ({
-  attack,
+  attacksWithTimelineAlerts,
   closePopover,
-}: UseAttackInvestigateInTimelineContextMenuItemsProps): {
-  items: EuiContextMenuPanelItemDescriptorEntry[];
-} => {
-  const { investigateInTimeline } = useInvestigateInTimeline();
-  const {
-    timelinePrivileges: { read: canUseTimeline },
-  } = useUserPrivileges();
+  clearSelection,
+  setIsLoading,
+  refresh,
+}: UseAttackInvestigateInTimelineContextMenuItemsProps): BulkAttackContextMenuItems => {
+  const bulkActionItems = useBulkAttackInvestigateInTimelineItems({ closePopover });
 
-  const originalAlertIds = useMemo(
-    () => attack.alertIds.map((id) => attack.replacements?.[id] ?? id),
-    [attack.alertIds, attack.replacements]
-  );
-
-  const attackAlertIdFilters = useMemo(
-    () => buildAlertsKqlFilter('_id', originalAlertIds),
-    [originalAlertIds]
-  );
-
-  const onInvestigateInTimelineClick = useCallback(() => {
-    investigateInTimeline({
-      filters: attackAlertIdFilters,
-    });
-    closePopover?.();
-  }, [attackAlertIdFilters, closePopover, investigateInTimeline]);
-
-  const items = useMemo<EuiContextMenuPanelItemDescriptorEntry[]>(
+  const alertItems = useMemo(
     () =>
-      canUseTimeline
-        ? [
-            {
-              name: ACTION_INVESTIGATE_IN_TIMELINE,
-              key: 'attack-investigate-in-timeline-action-item',
-              'data-test-subj': 'attack-investigate-in-timeline-action-item',
-              onClick: onInvestigateInTimelineClick,
-            },
-          ]
-        : [],
-    [canUseTimeline, onInvestigateInTimelineClick]
+      attacksWithTimelineAlerts.map((attack) => ({
+        _id: attack.attackId,
+        data: [{ field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: attack.relatedAlertIds }],
+        ecs: { _id: attack.attackId },
+      })),
+    [attacksWithTimelineAlerts]
   );
 
-  return { items };
+  const contextMenuItems = useMemo(
+    () =>
+      transformBulkActionsToContextMenuItems({
+        bulkActionItems,
+        alertItems,
+        closePopover,
+        clearSelection,
+        setIsLoading,
+        refresh,
+      }),
+    [bulkActionItems, alertItems, closePopover, clearSelection, setIsLoading, refresh]
+  );
+
+  return contextMenuItems;
 };

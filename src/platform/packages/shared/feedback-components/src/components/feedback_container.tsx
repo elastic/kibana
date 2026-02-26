@@ -41,6 +41,7 @@ export const FeedbackContainer = ({
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
+  const [forceShowEmailError, setForceShowEmailError] = useState(false);
 
   const { title: appTitle, id: appId, url: appUrl } = getAppDetails();
   const questions = getQuestions(appId);
@@ -49,9 +50,7 @@ export const FeedbackContainer = ({
     selectedCsatOptionId ||
     Object.values(questionAnswers).some((answer) => answer.trim().length > 0);
 
-  const isEmailFilled = !allowEmailContact || isEmailValid;
-
-  const isSendFeedbackButtonDisabled = !isFormFilled || !isEmailFilled;
+  const isSendFeedbackButtonDisabled = !isFormFilled;
 
   const handleChangeCsatOptionId = (optionId: string) => {
     setSelectedCsatOptionId(optionId);
@@ -77,6 +76,12 @@ export const FeedbackContainer = ({
   };
 
   const submitFeedback = async () => {
+    // Check if email is required but invalid
+    if (allowEmailContact && !isEmailValid) {
+      setForceShowEmailError(true);
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -144,6 +149,7 @@ export const FeedbackContainer = ({
         handleChangeEmail={handleChangeEmail}
         onEmailValidationChange={handleEmailValidationChange}
         getCurrentUserEmail={getCurrentUserEmail}
+        forceShowEmailError={forceShowEmailError}
       />
       <FeedbackFooter
         isSendFeedbackButtonDisabled={isSendFeedbackButtonDisabled}

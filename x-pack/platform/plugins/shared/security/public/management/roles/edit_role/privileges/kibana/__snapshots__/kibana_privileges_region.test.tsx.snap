@@ -1,78 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<KibanaPrivileges> renders without crashing 1`] = `
-<CollapsiblePanel
-  iconType="logoKibana"
-  title="Kibana"
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
 >
-  <SpaceAwarePrivilegeSection
-    canCustomizeSubFeaturePrivileges={true}
-    editable={true}
-    kibanaPrivileges={
-      KibanaPrivileges {
-        "feature": Map {},
-        "global": Map {},
-        "spaces": Map {},
-      }
-    }
-    onChange={[MockFunction]}
-    role={
-      Object {
-        "elasticsearch": Object {
-          "cluster": Array [],
-          "indices": Array [],
-          "run_as": Array [],
-        },
-        "kibana": Array [],
-        "name": "",
-      }
-    }
-    spaces={
-      Array [
-        Object {
-          "_reserved": true,
-          "disabledFeatures": Array [],
-          "id": "default",
-          "name": "Default Space",
-        },
-        Object {
-          "disabledFeatures": Array [],
-          "id": "marketing",
-          "name": "Marketing",
-        },
-      ]
-    }
-    spacesApiUi={
-      Object {
-        "components": Object {
-          "getCopyToSpaceFlyout": [Function],
-          "getEmbeddableLegacyUrlConflict": [Function],
-          "getLegacyUrlConflict": [Function],
-          "getShareToSpaceFlyout": [Function],
-          "getSpaceAvatar": [Function],
-          "getSpaceList": [Function],
-          "getSpacesContextProvider": [Function],
-        },
-        "redirectLegacyUrl": [Function],
-        "useSpaces": [Function],
-      }
-    }
-    uiCapabilities={
-      Object {
-        "catalogue": Object {},
-        "management": Object {},
-        "navLinks": Object {},
-        "spaces": Object {
-          "manage": true,
-        },
-      }
-    }
-    validator={
-      RoleValidator {
-        "buildFlavor": undefined,
-        "shouldValidate": undefined,
-      }
-    }
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-baseline-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <h2
+        class="euiTitle emotion-euiTitle-m"
+      >
+        <span
+          class="css-t0tl5b-CollapsiblePanelTitle"
+          data-euiicon-type="logoKibana"
+        />
+         
+        Kibana
+      </h2>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiLink emotion-euiLink-primary"
+        data-test-subj="showHidePrivilege"
+        type="button"
+      >
+        hide
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
-</CollapsiblePanel>
+  <div
+    data-test-subj="spaceAwarePrivilegeSection"
+  />
+</div>
 `;

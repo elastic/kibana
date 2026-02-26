@@ -100,7 +100,8 @@ const workflowTestRunInitiatedSchema: RootSchema<ReportWorkflowTestRunInitiatedA
   triggerTab: {
     type: 'keyword',
     _meta: {
-      description: 'The trigger tab selected in the Test Workflow modal: manual, alert, or index',
+      description:
+        'The trigger tab selected in the Test Workflow modal: manual, alert, index, or historical',
       optional: true,
     },
   },

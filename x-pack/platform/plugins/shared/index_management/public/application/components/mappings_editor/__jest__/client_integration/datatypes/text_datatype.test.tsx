@@ -82,7 +82,8 @@ describe('Mappings editor: text datatype', () => {
     expect(getLatestMappings()).toEqual(updatedMappings);
   });
 
-  describe('analyzer parameter', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253348
+  describe.skip('analyzer parameter', () => {
     const defaultMappingsWithAnalyzer = {
       _meta: {},
       _source: {},

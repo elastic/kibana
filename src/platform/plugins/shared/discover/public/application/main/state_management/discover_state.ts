@@ -8,29 +8,19 @@
  */
 
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { from, type Observable } from 'rxjs';
 import type { DiscoverServices } from '../../..';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
 import { getDataStateContainer } from './discover_data_state_container';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
-import type { DiscoverAppState } from './redux';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { createTabActionInjector, internalStateActions, selectTab } from './redux';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import { getSavedSearchContainer } from './discover_saved_search_container';
-import { createTabAppStateObservable } from './utils/create_tab_app_state_observable';
 
 export interface DiscoverStateContainerParams {
   /**
    * The ID of the tab associated with this state container
    */
   tabId: string;
-  /**
-   * The current savedSearch
-   */
-  savedSearch?: string | SavedSearch;
   /**
    * core ui settings service
    */
@@ -59,10 +49,6 @@ export interface DiscoverStateContainerParams {
 
 export interface DiscoverStateContainer {
   /**
-   * An observable of the current tab's app state
-   */
-  createAppStateObservable: () => Observable<DiscoverAppState>;
-  /**
    * Data fetching related state
    **/
   dataState: DiscoverDataStateContainer;
@@ -87,10 +73,6 @@ export interface DiscoverStateContainer {
    * State manager for runtime state that can't be stored in Redux
    */
   runtimeStateManager: RuntimeStateManager;
-  /**
-   * State of saved search, the saved object of Discover
-   */
-  savedSearchState: DiscoverSavedSearchContainer;
   /**
    * State of url, allows updating and subscribing to url changes
    */
@@ -121,38 +103,22 @@ export function getDiscoverStateContainer({
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
-  /**
-   * Saved Search State Container, the persisted saved object of Discover
-   */
-  const savedSearchContainer = getSavedSearchContainer({
-    services,
-    getCurrentTab,
-  });
-
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
     internalState,
     runtimeStateManager,
-    savedSearchContainer,
     injectCurrentTab,
     getCurrentTab,
   });
 
   return {
-    createAppStateObservable: () =>
-      createTabAppStateObservable({
-        tabId,
-        internalState$: from(internalState),
-        getState: internalState.getState,
-      }),
     internalState,
     internalStateActions,
     injectCurrentTab,
     getCurrentTab,
     runtimeStateManager,
     dataState: dataStateContainer,
-    savedSearchState: savedSearchContainer,
     stateStorage,
     searchSessionManager,
     customizationContext,

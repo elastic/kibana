@@ -6,6 +6,7 @@
  */
 
 import { parse as parseCookie } from 'tough-cookie';
+import { Agent } from 'undici';
 
 import {
   createSAMLResponse,
@@ -188,4 +189,6 @@ const grantUiamApiKey = async (accessToken: string) =>
       internal: true,
       role_assignments: { limit: { access: ['application'], resource: ['project'] } },
     }),
+    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+    dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
   });

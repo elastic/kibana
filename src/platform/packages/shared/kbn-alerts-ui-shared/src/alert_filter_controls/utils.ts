@@ -10,26 +10,27 @@
 import { isEmpty, isEqual, pick } from 'lodash';
 import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import type { FilterControlConfig } from './types';
 
 export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRuntimeState) => {
-  const panels = controlState.initialChildControlState ?? {};
+  const panels = convertCamelCasedKeysToSnakeCase(controlState.initialChildControlState) ?? {};
   return Object.values(panels).sort((a, b) => a.order - b.order);
 };
 
 export const getFilterItemObjListFromControlState = (controlState: ControlGroupRuntimeState) => {
   const panels = getPanelsInOrderFromControlsState(controlState);
   return panels.map((panel) => {
-    const { fieldName, selectedOptions, title, existsSelected, exclude, displaySettings } =
+    const { field_name, selected_options, title, exists_selected, exclude, display_settings } =
       panel as OptionsListDSLControlState;
     return {
-      fieldName: fieldName as string,
-      selectedOptions: selectedOptions ?? [],
+      field_name: field_name as string,
+      selected_options: selected_options ?? [],
       title,
-      existsSelected: existsSelected ?? false,
+      exists_selected: exists_selected ?? false,
       exclude: exclude ?? false,
-      displaySettings: {
-        hideActionBar: displaySettings?.hideActionBar ?? false,
+      display_settings: {
+        hide_action_bar: display_settings?.hide_action_bar ?? false,
       },
     };
   });
@@ -59,9 +60,9 @@ export const mergeControls = ({
   const highestPriorityControlSet = controlsWithPriority.find((control) => !isEmpty(control));
 
   return highestPriorityControlSet?.map((singleControl) => {
-    if (singleControl.fieldName in defaultControlsObj) {
+    if (singleControl.field_name in defaultControlsObj) {
       return {
-        ...defaultControlsObj[singleControl.fieldName],
+        ...defaultControlsObj[singleControl.field_name],
         ...singleControl,
       };
     }
@@ -89,12 +90,12 @@ interface ReorderControlsArgs {
 export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) => {
   const { controls, defaultControls } = args;
   const controlsObject = controls.reduce((prev, current) => {
-    prev[current.fieldName] = current;
+    prev[current.field_name] = current;
     return prev;
   }, {} as Record<string, FilterControlConfig>);
 
   const defaultControlsObj = defaultControls.reduce((prev, current) => {
-    prev[current.fieldName] = current;
+    prev[current.field_name] = current;
     return prev;
   }, {} as Record<string, FilterControlConfig>);
 
@@ -103,7 +104,7 @@ export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) =>
     .map((defaultControl) => {
       return {
         ...defaultControl,
-        ...(controlsObject[defaultControl.fieldName] ?? {}),
+        ...(controlsObject[defaultControl.field_name] ?? {}),
       };
     });
 
@@ -111,12 +112,12 @@ export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) =>
     .filter(
       // filter out persisting controls since we have already taken
       // in account above
-      (control) => !defaultControlsObj[control.fieldName]?.persist
+      (control) => !defaultControlsObj[control.field_name]?.persist
     )
     .map((control) => ({
       // insert some default properties from default controls
       // irrespective of whether they are persistent or not.
-      ...(defaultControlsObj[control.fieldName] ?? {}),
+      ...(defaultControlsObj[control.field_name] ?? {}),
       ...control,
     }));
 

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import minimatch from 'minimatch';
+
 export const IGNORE_PATTERNS = [
   // the gitignore: true option makes sure that we don't
   // include files from node_modules in the result, but it still
@@ -71,3 +73,22 @@ export const IGNORE_PATTERNS = [
 ];
 
 export const KEBAB_CASE_PATTERNS = ['docs/**/*'];
+
+/**
+ * Contains the logic that decides what is the expected casing for each Kibana resource (folders, files)
+ * @param relativePath string the relative path to the resource
+ * @param packageRootDirs set of relative paths that represent the root of Kibana packages (not plugins)
+ * @returns the expected casing (kebab-case | snake_case) for the given resource
+ */
+export function getExpectedCasing(relativePath, packageRootDirs) {
+  if (packageRootDirs.has(relativePath)) {
+    // it is a Kibana module of type package (not a plugin)
+    return 'kebab-case';
+  } else if (KEBAB_CASE_PATTERNS.some((pattern) => minimatch(relativePath, pattern))) {
+    // the resource matches one of the KEBAB_CASE_PATTERNS from the config
+    return 'kebab-case';
+  } else {
+    // everything else is snake_case by default
+    return 'snake_case';
+  }
+}

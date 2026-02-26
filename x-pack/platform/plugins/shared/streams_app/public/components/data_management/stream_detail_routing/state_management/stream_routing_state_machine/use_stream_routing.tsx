@@ -8,10 +8,10 @@
 import type { Condition } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { createActorContext, useSelector } from '@xstate5/react';
+import { createActorContext, useSelector } from '@xstate/react';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
-import { waitFor } from 'xstate5';
+import { waitFor } from 'xstate';
 import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type {
@@ -104,6 +104,9 @@ export const useStreamRoutingEvents = () => {
       },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
+      },
+      setConditionEditorValidity: (isValid: boolean) => {
+        service.send({ type: 'routingRule.setConditionEditorValidity', isValid });
       },
       setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
         service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });

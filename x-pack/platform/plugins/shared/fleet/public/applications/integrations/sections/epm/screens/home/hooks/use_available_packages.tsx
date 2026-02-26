@@ -52,6 +52,7 @@ export interface IntegrationsURLParameters {
   categoryId?: string;
   subCategoryId?: string;
   onlyAgentless?: boolean;
+  showDeprecated?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
@@ -104,6 +105,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             description,
             icons: icons || restOfPackage.icons,
             categories: uniq(allCategories),
+            ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
           };
         })
       : [];

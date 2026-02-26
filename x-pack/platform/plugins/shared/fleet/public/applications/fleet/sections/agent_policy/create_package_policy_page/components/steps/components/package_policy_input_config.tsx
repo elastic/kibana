@@ -45,11 +45,14 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
-    // Split vars into required and advanced
+    // Split vars into required and advanced, filtering out deprecated vars on new installations
     const [requiredVars, advancedVars] = useMemo(() => {
       const _advancedVars: RegistryVarsEntry[] = [];
       const _requiredVars: RegistryVarsEntry[] = [];
       (packageInputVars || []).forEach((varDef) => {
+        if (!isEditPage && !!varDef.deprecated) {
+          return;
+        }
         if (isAdvancedVar(varDef)) {
           _advancedVars.push(varDef);
         } else {
@@ -57,7 +60,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
         }
       });
       return [_requiredVars, _advancedVars];
-    }, [packageInputVars]);
+    }, [packageInputVars, isEditPage]);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputValidationResults);

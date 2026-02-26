@@ -28,17 +28,19 @@ export const ObjectWidget: React.FC<ObjectWidgetProps> = ({
   path: rootPath,
   schema,
   formConfig,
+  meta,
 }) => {
   const fields = getFieldsFromSchema({
     schema,
     rootPath,
     formConfig,
+    meta,
   });
 
   return fields.map((field) => {
     return (
       <>
-        {renderField({ field })}
+        {renderField({ field, meta })}
         <EuiSpacer size="m" />
       </>
     );

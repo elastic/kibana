@@ -217,7 +217,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   /**
    * A boolean expression or list of ids to refine the alerts search query
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   /**
    * The sort configuration.
    *
@@ -592,7 +592,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   showInspectButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**

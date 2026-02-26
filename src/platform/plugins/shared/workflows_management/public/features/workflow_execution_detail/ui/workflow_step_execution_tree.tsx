@@ -371,6 +371,15 @@ const componentStyles = {
     & .euiTreeView__node {
       position: relative;
 
+      /*
+       * Override EUI's max-block-size: 100vh on expanded tree nodes.
+       * Without this, expanded foreach nodes with many iterations get clipped
+       * to the viewport height, causing sibling nodes after them to overlap
+       * and appear interleaved between the last children.
+       * See: https://github.com/elastic/eui/issues/9395
+       */
+      ${logicalCSS('max-height', 'none')}
+
       /* Draw the vertical line to group an expanded item's child items together. */
       &::after {
         position: absolute;

@@ -101,13 +101,7 @@ describe('resetDiscoverSession', () => {
     jest.mocked(services.data.search.searchSource.create).mockClear();
 
     const tab1RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab1.id);
-    const tab1StateContainer = tab1RuntimeState.stateContainer$.getValue()!;
-    const tab1SavedSearchSetSpy = jest.spyOn(tab1StateContainer.savedSearchState, 'set');
-
     const tab2RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab2.id);
-    const tab2StateContainer = tab2RuntimeState.stateContainer$.getValue()!;
-    const tab2SavedSearchSetSpy = jest.spyOn(tab2StateContainer.savedSearchState, 'set');
-
     const tab3RuntimeState = selectTabRuntimeState(runtimeStateManager, persistedTab3.id);
 
     expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
@@ -129,19 +123,14 @@ describe('resetDiscoverSession', () => {
     expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab2.id });
     expect(resetOnSavedSearchChangeSpy).toHaveBeenCalledWith({ tabId: persistedTab3.id });
 
-    expect(tab1SavedSearchSetSpy).toHaveBeenLastCalledWith(
-      expect.objectContaining({ columns: persistedTab1.columns })
-    );
-
-    expect(tab2SavedSearchSetSpy).toHaveBeenLastCalledWith(
-      expect.objectContaining({ columns: persistedTab2.columns })
-    );
-
     expect(tab3RuntimeState.stateContainer$.getValue()).toBeUndefined();
 
     const tab1 = selectTab(internalState.getState(), persistedTab1.id);
     const tab2 = selectTab(internalState.getState(), persistedTab2.id);
     const tab3 = selectTab(internalState.getState(), persistedTab3.id);
+
+    expect(tab1.appState.columns).toEqual(persistedTab1.columns);
+    expect(tab2.appState.columns).toEqual(persistedTab2.columns);
 
     expect(tab1.forceFetchOnSelect).toBe(false);
     expect(tab2.forceFetchOnSelect).toBe(true);

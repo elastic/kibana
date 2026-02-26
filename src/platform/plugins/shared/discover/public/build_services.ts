@@ -63,7 +63,6 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -155,7 +154,6 @@ export interface DiscoverServices {
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
 }
@@ -257,7 +255,6 @@ export const buildServices = ({
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
-    embeddableEnhanced: plugins.embeddableEnhanced,
     cps: plugins.cps,
     embeddableEditor: new EmbeddableEditorService(
       core.application,

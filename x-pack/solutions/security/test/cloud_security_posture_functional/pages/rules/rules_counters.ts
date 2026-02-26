@@ -135,6 +135,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect((await disabledRulesCounter.getVisibleText()).includes('0')).to.be(true);
 
         // disable rule 1.1.1 (k8s findings mock contains a findings from that rule)
+        await rule.rulePage.closeToasts();
         await rule.rulePage.clickEnableRulesRowSwitchButton(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await disabledRulesCounter.getVisibleText()).includes('1')).to.be(true);
@@ -143,10 +144,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect((await postureScoreCounter.getVisibleText()).includes('0%')).to.be(true);
 
         // enable rule back
+        await rule.rulePage.closeToasts();
         await rule.rulePage.clickEnableRulesRowSwitchButton(0);
       });
 
       it('Clicking the disabled rules button shows enables the disabled filter', async () => {
+        await rule.rulePage.closeToasts();
         await rule.rulePage.clickEnableRulesRowSwitchButton(0);
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -162,6 +165,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
         expect(isEmptyStateVisible).to.be(true);
+        await rule.rulePage.closeToasts();
         await rule.rulePage.clickEnableRulesRowSwitchButton(0);
       });
     });

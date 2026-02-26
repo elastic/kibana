@@ -12,9 +12,9 @@ import type {
 } from '@kbn/core/server';
 import { isEqual, uniqWith } from 'lodash';
 import type {
-  AttachmentAttributes,
+  AttachmentAttributesV2,
   AttachmentAttributesNoSO,
-  AttachmentPatchAttributes,
+  AttachmentPatchAttributesV2,
 } from '../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
@@ -27,7 +27,7 @@ import type {
   AttachmentRequestAttributes,
   AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
-} from '../common/types/attachments';
+} from '../common/types/attachments_v1';
 import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
 import { SOReferenceExtractor } from './so_reference_extractor';
 import type { OptionalAttributes } from './types';
@@ -84,7 +84,7 @@ export const injectAttachmentSOAttributesFromRefs = (
 };
 
 export const injectAttachmentSOAttributesFromRefsForPatch = (
-  updatedAttributes: AttachmentPatchAttributes,
+  updatedAttributes: AttachmentPatchAttributesV2,
   savedObject: SavedObjectsUpdateResponse<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObjectsUpdateResponse<AttachmentTransformedAttributes> => {
@@ -115,7 +115,7 @@ interface ExtractionResults {
 }
 
 export const extractAttachmentSORefsFromAttributes = (
-  attributes: AttachmentAttributes | AttachmentPatchAttributes,
+  attributes: AttachmentAttributesV2 | AttachmentPatchAttributesV2,
   references: SavedObjectReference[],
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): ExtractionResults => {

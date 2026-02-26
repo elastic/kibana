@@ -19,7 +19,6 @@ import type { PlaygroundsListEmptyStateProps } from './types';
 
 // Override styling for empty state to allow it to grow wider for content we provide
 const EmptyStateStyle = css`
-  min-inline-size: 64rem;
   .euiEmptyPrompt__content {
     max-inline-size: 60em;
   }

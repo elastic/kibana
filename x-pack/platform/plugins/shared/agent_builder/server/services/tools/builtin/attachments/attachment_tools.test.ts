@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/agent-builder-common';
+import { ToolResultType, attachmentTools } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
@@ -56,7 +56,7 @@ describe('attachment tools', () => {
 
   describe('attachment_add', () => {
     it('creates a new attachment', async () => {
-      const tool = getTool('platform.core.attachment_add');
+      const tool = getTool(attachmentTools.add);
       const result = (await tool.handler(
         { type: 'text', data: 'hello world', description: 'Test' },
         {} as any
@@ -82,7 +82,7 @@ describe('attachment tools', () => {
         attachmentManager,
         attachmentsService: readonlyAttachmentsService,
         formatContext,
-      }).find((t) => t.id === 'platform.core.attachment_add')!;
+      }).find((t) => t.id === attachmentTools.add)!;
 
       const result = (await tool.handler(
         { type: 'text', data: 'hello world', description: 'Test' },
@@ -94,7 +94,7 @@ describe('attachment tools', () => {
     });
 
     it('creates an attachment with a custom ID', async () => {
-      const tool = getTool('platform.core.attachment_add');
+      const tool = getTool(attachmentTools.add);
       const result = (await tool.handler(
         {
           id: 'custom-id',
@@ -111,6 +111,38 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.type).toBe('text');
     });
 
+    it('returns error for unknown attachment type with list of valid types', async () => {
+      const typedAttachmentsService = {
+        getTypeDefinition: (type: string) =>
+          type === 'text'
+            ? {
+                id: 'text',
+                validate: (input: unknown) => ({ valid: true, data: input }),
+                format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+                isReadonly: false,
+              }
+            : undefined,
+        getRegisteredTypeIds: () => ['text', 'esql', 'screen_context'],
+      } as any;
+
+      const tool = createAttachmentTools({
+        attachmentManager,
+        attachmentsService: typedAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === attachmentTools.add)!;
+
+      const result = (await tool.handler(
+        { type: 'image', data: 'binary data', description: 'A photo' },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0] as any).data.message).toContain("Unknown attachment type 'image'");
+      expect((result.results[0] as any).data.message).toContain('text');
+      expect((result.results[0] as any).data.message).toContain('esql');
+      expect((result.results[0] as any).data.message).toContain('screen_context');
+    });
+
     it('returns error for duplicate ID', async () => {
       // First, create an attachment with a specific ID
       await attachmentManager.add({
@@ -121,7 +153,7 @@ describe('attachment tools', () => {
       });
 
       // Try to create another attachment with the same ID
-      const tool = getTool('platform.core.attachment_add');
+      const tool = getTool(attachmentTools.add);
       const result = (await tool.handler(
         {
           id: 'duplicate-id',
@@ -145,7 +177,7 @@ describe('attachment tools', () => {
         data: 'hello',
         description: 'Test',
       });
-      const tool = getTool('platform.core.attachment_read');
+      const tool = getTool(attachmentTools.read);
       const result = (await tool.handler(
         { attachment_id: attachment.id },
         {} as any
@@ -207,7 +239,7 @@ describe('attachment tools', () => {
         attachmentManager: resolveAttachmentManager,
         attachmentsService: customAttachmentsService,
         formatContext,
-      }).find((t) => t.id === 'platform.core.attachment_read')!;
+      }).find((t) => t.id === attachmentTools.read)!;
 
       const result = (await tool.handler(
         { attachment_id: attachment.id },
@@ -229,7 +261,7 @@ describe('attachment tools', () => {
       });
       await attachmentManager.update(attachment.id, { data: 'v2' });
 
-      const tool = getTool('platform.core.attachment_read');
+      const tool = getTool(attachmentTools.read);
       const result = (await tool.handler(
         { attachment_id: attachment.id, version: 1 },
         {} as any
@@ -240,7 +272,7 @@ describe('attachment tools', () => {
     });
 
     it('returns error for non-existent attachment', async () => {
-      const tool = getTool('platform.core.attachment_read');
+      const tool = getTool(attachmentTools.read);
       const result = (await tool.handler(
         { attachment_id: 'non-existent' },
         {} as any
@@ -258,7 +290,7 @@ describe('attachment tools', () => {
         data: 'v1',
         description: 'Test',
       });
-      const tool = getTool('platform.core.attachment_update');
+      const tool = getTool(attachmentTools.update);
       const result = (await tool.handler(
         { attachment_id: attachment.id, data: 'v2' },
         {} as any
@@ -277,7 +309,7 @@ describe('attachment tools', () => {
       });
       attachmentManager.delete(attachment.id);
 
-      const tool = getTool('platform.core.attachment_update');
+      const tool = getTool(attachmentTools.update);
       const result = (await tool.handler(
         { attachment_id: attachment.id, data: 'v2' },
         {} as any
@@ -300,7 +332,7 @@ describe('attachment tools', () => {
         attachmentManager,
         attachmentsService: readonlyAttachmentsService,
         formatContext,
-      }).find((t) => t.id === 'platform.core.attachment_update')!;
+      }).find((t) => t.id === attachmentTools.update)!;
 
       const attachment = await attachmentManager.add({
         type: 'text',
@@ -327,7 +359,7 @@ describe('attachment tools', () => {
         description: 'Attachment 2',
       });
 
-      const tool = getTool('platform.core.attachment_list');
+      const tool = getTool(attachmentTools.list);
       const result = (await tool.handler({}, {} as any)) as ToolHandlerStandardReturn;
 
       expect((result.results[0] as any).data.count).toBe(2);
@@ -343,7 +375,7 @@ describe('attachment tools', () => {
       await attachmentManager.add({ type: 'text', data: 'a2', description: 'Attachment 2' });
       attachmentManager.delete(a1.id);
 
-      const tool = getTool('platform.core.attachment_list');
+      const tool = getTool(attachmentTools.list);
       const resultActive = (await tool.handler({}, {} as any)) as ToolHandlerStandardReturn;
       const resultAll = (await tool.handler(
         { include_deleted: true },
@@ -364,7 +396,7 @@ describe('attachment tools', () => {
       });
       await attachmentManager.update(attachment.id, { data: 'version 2' });
 
-      const tool = getTool('platform.core.attachment_diff');
+      const tool = getTool(attachmentTools.diff);
       const result = (await tool.handler(
         {
           attachment_id: attachment.id,
@@ -382,7 +414,7 @@ describe('attachment tools', () => {
     });
 
     it('returns error for non-existent attachment', async () => {
-      const tool = getTool('platform.core.attachment_diff');
+      const tool = getTool(attachmentTools.diff);
       const result = (await tool.handler(
         {
           attachment_id: 'non-existent',

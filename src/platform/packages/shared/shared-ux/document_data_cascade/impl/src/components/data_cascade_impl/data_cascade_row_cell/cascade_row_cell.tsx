@@ -118,11 +118,6 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   // Keep a reference to the virtualizer for cleanup and scroll-to operations
   const rootVirtualizer = useMemo(() => getVirtualizer(), [getVirtualizer]);
 
-  const virtualRow = useMemo(
-    () => rootVirtualizer.getVirtualItems().find((v) => v.index === row.index),
-    [rootVirtualizer, row]
-  );
-
   const getScrollElement = useCallback(() => rootVirtualizer.scrollElement, [rootVirtualizer]);
 
   /**
@@ -132,26 +127,6 @@ export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>
   const preventSizeChangePropagation = useCallback(() => {
     return rootVirtualizer.preventRowSizeChangePropagation(row.index);
   }, [rootVirtualizer, row.index]);
-
-  useEffect(
-    () => () => {
-      // ensure that for a row that's been scrolled,
-      // if said row is technically still in view because it's cell is being rendered,
-      // when we are unmounting because the expand action from the cell's row was clicked,
-      // we want to ensure said row is the top most item in our list
-      if (
-        virtualRow?.index &&
-        !rootVirtualizer.isScrolling &&
-        getScrollOffset() > getScrollMargin()
-      ) {
-        rootVirtualizer.scrollToVirtualizedIndex(virtualRow.index, {
-          align: 'start',
-          behavior: 'auto',
-        });
-      }
-    },
-    [rootVirtualizer, virtualRow?.index, getScrollOffset, getScrollMargin]
-  );
 
   const memoizedChild = useMemo(() => {
     return React.createElement(children, {

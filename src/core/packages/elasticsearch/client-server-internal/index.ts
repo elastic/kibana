@@ -8,7 +8,7 @@
  */
 
 export { ScopedClusterClient } from './src/scoped_cluster_client';
-export { ClusterClient } from './src/cluster_client';
+export { ClusterClient, type OnRequestHandlerFactory } from './src/cluster_client';
 export { configureClient } from './src/configure_client';
 export { type AgentStatsProvider, AgentManager, type NetworkAgent } from './src/agent_manager';
 export {

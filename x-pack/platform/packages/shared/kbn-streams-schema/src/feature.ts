@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { isEqual } from 'lodash';
 
 const featureStatus = ['active', 'stale', 'expired'] as const;
 export const featureStatusSchema = z.enum(featureStatus);
@@ -16,7 +17,7 @@ export const LOG_SAMPLES_FEATURE_TYPE = 'log_samples' as const;
 export const LOG_PATTERNS_FEATURE_TYPE = 'log_patterns' as const;
 export const ERROR_LOGS_FEATURE_TYPE = 'error_logs' as const;
 
-const COMPUTED_FEATURE_TYPES = [
+export const COMPUTED_FEATURE_TYPES = [
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
@@ -56,4 +57,16 @@ export function isFeature(feature: unknown): feature is Feature {
 
 export function isComputedFeature(feature: BaseFeature): boolean {
   return (COMPUTED_FEATURE_TYPES as unknown as string[]).includes(feature.type);
+}
+
+export function hasSameFingerprint(feature: BaseFeature, other: BaseFeature): boolean {
+  return (
+    feature.type === other.type &&
+    feature.subtype === other.subtype &&
+    isEqual(feature.properties, other.properties)
+  );
+}
+
+export function isDuplicateFeature(feature: BaseFeature, other: BaseFeature): boolean {
+  return feature.id.toLowerCase() === other.id.toLowerCase() || hasSameFingerprint(feature, other);
 }

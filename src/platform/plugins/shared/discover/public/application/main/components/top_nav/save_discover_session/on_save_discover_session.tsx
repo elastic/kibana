@@ -22,6 +22,7 @@ import {
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
+  selectTabSavedSearch,
 } from '../../../state_management/redux';
 import type { DiscoverSessionSaveModalOnSaveCallback } from './save_modal';
 import { DiscoverSessionSaveModal } from './save_modal';
@@ -42,7 +43,13 @@ export const onSaveDiscoverSession = async ({
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
   if (services.embeddableEditor.isByValueEditor()) {
-    const savedSearch = state.savedSearchState.getState();
+    const savedSearch = await selectTabSavedSearch({
+      tabId: state.getCurrentTab().id,
+      getState: state.internalState.getState,
+      runtimeStateManager: state.runtimeStateManager,
+      services,
+    });
+
     const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
     const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 

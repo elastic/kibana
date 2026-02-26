@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Watchlists Common Schema
+  description: Common schema for Watchlists
+  version: "1"
+paths: {}
+components:
+  schemas:
+    WatchlistObject:
+      type: object
+      required:
+        - name
+        - riskModifier
+        - managed
+
+      example:
+        id: watchlist-123
+        name: High Risk Vendors
+        description: High risk vendor watchlist
+        riskModifier: 1.5
+        managed: false
+        createdAt: "2026-01-28T12:00:00.000Z"
+        updatedAt: "2026-02-18T12:00:00.000Z"
+
+      properties:
+        id: 
+          type: string
+          description: The unique ID of the watchlist
+        name:
+          type: string
+          description: The name of the watchlist
+        description:
+          type: string
+          description: Description of the watchlist
+        managed:
+          type: boolean
+          description: Indicates if the watchlist is managed by the system
+        riskModifier:
+          type: number
+          description: Risk score modifier associated with the watchlist
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp indicating when the watchlist was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp indicating when the watchlist was last updated

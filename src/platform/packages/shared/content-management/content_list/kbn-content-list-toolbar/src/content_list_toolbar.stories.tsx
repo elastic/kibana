@@ -25,6 +25,8 @@ import {
   ContentListProvider,
   useContentListItems,
   useContentListSort,
+  useContentListSearch,
+  useContentListPagination,
   useContentListConfig,
 } from '@kbn/content-list-provider';
 import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
@@ -93,8 +95,10 @@ const StateDiagnosticPanel = ({
   useDeclarativeConfig = false,
 }: StateDiagnosticPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const { items, totalItems, isLoading } = useContentListItems();
+  const { items, totalItems, isLoading, isFetching } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
+  const { search } = useContentListSearch();
+  const pagination = useContentListPagination();
   const config = useContentListConfig();
 
   // Generate JSX code based on current configuration.
@@ -139,6 +143,11 @@ const StateDiagnosticPanel = ({
                   <EuiBadge color="primary">Loading...</EuiBadge>
                 </EuiFlexItem>
               )}
+              {isFetching && !isLoading && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="accent">Fetching...</EuiBadge>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -163,6 +172,32 @@ const StateDiagnosticPanel = ({
                   {JSON.stringify(config.features.sorting, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Search</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify({ search, isFetching }, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              {pagination.isSupported && (
+                <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                  <EuiTitle size="xxs">
+                    <h3>Pagination</h3>
+                  </EuiTitle>
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                    {JSON.stringify(
+                      {
+                        pageIndex: pagination.pageIndex,
+                        pageSize: pagination.pageSize,
+                        totalItems,
+                      },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                 <EuiTitle size="xxs">
                   <h3>Toolbar JSX</h3>
@@ -230,6 +265,7 @@ interface PlaygroundArgs {
   entityNamePlural: string;
   searchPlaceholder: string;
   hasSorting: boolean;
+  hasPagination: boolean;
   useDeclarativeConfig: boolean;
   showDiagnostics: boolean;
 }
@@ -252,28 +288,28 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
   const dataSource = useMemo(() => ({ findItems: createStoryFindItems() }), []);
 
   const features = useMemo(
-    () =>
-      args.hasSorting
+    () => ({
+      sorting: args.hasSorting
         ? {
-            sorting: {
-              initialSort: { field: 'title', direction: 'asc' as const },
-              fields: [
-                { field: 'title', name: 'Name' },
-                {
-                  field: 'updatedAt',
-                  name: 'Last updated',
-                  ascLabel: 'Old-Recent',
-                  descLabel: 'Recent-Old',
-                },
-              ],
-            },
+            initialSort: { field: 'title', direction: 'asc' as const },
+            fields: [
+              { field: 'title', name: 'Name' },
+              {
+                field: 'updatedAt',
+                name: 'Last updated',
+                ascLabel: 'Old-Recent',
+                descLabel: 'Recent-Old',
+              },
+            ],
           }
-        : {},
-    [args.hasSorting]
+        : (false as const),
+      pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
+    }),
+    [args.hasSorting, args.hasPagination]
   );
 
   // Key forces re-mount when configuration changes.
-  const key = `${args.hasSorting}-${args.useDeclarativeConfig}`;
+  const key = `${args.hasSorting}-${args.hasPagination}-${args.useDeclarativeConfig}`;
 
   // Destructure Filters from ContentListToolbar for compound component usage.
   const { Filters } = ContentListToolbar;
@@ -349,6 +385,7 @@ export const Toolbar: PlaygroundStory = {
   args: {
     useDeclarativeConfig: false,
     hasSorting: true,
+    hasPagination: true,
     showDiagnostics: true,
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
@@ -378,6 +415,11 @@ export const Toolbar: PlaygroundStory = {
     hasSorting: {
       control: 'boolean',
       description: 'Enable sorting in provider config.',
+      table: { category: 'Features' },
+    },
+    hasPagination: {
+      control: 'boolean',
+      description: 'Enable pagination in provider config.',
       table: { category: 'Features' },
     },
     showDiagnostics: {

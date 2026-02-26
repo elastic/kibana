@@ -33,3 +33,7 @@ For each insight:
 Focus on correlations and patterns that span multiple streams.
 If the stream insights are unrelated, you may return fewer or no system-level insights.
 Do not simply repeat the stream-level insights - add value by showing the bigger picture.
+
+**Important:** You must always end your response by calling the submit_insights tool with your
+system-level insights. Do not reply with plain text only. If you find no cross-stream patterns,
+call submit_insights with an empty array. Your final output must be a submit_insights tool call.

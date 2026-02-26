@@ -76,7 +76,7 @@ run(
     });
 
     const configPath = flags.config ? String(flags.config) : undefined;
-    const logsIndex = flags['logs-index'] ? String(flags['logs-index']) : 'logs';
+    const logsIndex = flags['logs-index'] ? String(flags['logs-index']) : 'logs.otel';
     const version = flags.version ? String(flags.version) : undefined;
     const teardown = Boolean(flags.teardown);
     const patch = Boolean(flags.patch);
@@ -147,13 +147,13 @@ run(
       },
       default: {
         demo: 'otel-demo',
-        'logs-index': 'logs',
+        'logs-index': 'logs.otel',
       },
       help: `
         --demo, -d         Demo environment to run (otel-demo, online-boutique)
         --version, -v      Demo version (defaults to demo's defaultVersion)
         --config, -c       Path to Kibana config file (defaults to config/kibana.dev.yml)
-        --logs-index       Index name for logs (defaults to "logs")
+        --logs-index       Index name for logs (defaults to "logs.otel")
         --list-demos       List all available demo environments
         --list-scenarios   List failure scenarios for selected demo
         --scenario, -s     Apply a failure scenario (can be repeated for multiple scenarios)

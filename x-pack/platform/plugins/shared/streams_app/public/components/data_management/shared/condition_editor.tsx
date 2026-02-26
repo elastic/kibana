@@ -49,12 +49,19 @@ export interface ConditionEditorProps {
   condition: Condition;
   status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
+  onValidityChange: (isValid: boolean) => void;
   fieldSuggestions?: Suggestion[];
   valueSuggestions?: Suggestion[];
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = [] } = props;
+  const {
+    status,
+    onConditionChange,
+    onValidityChange,
+    fieldSuggestions = [],
+    valueSuggestions = [],
+  } = props;
   const { core } = useKibana();
 
   const isInvalidCondition = !isCondition(props.condition);
@@ -64,6 +71,58 @@ export function ConditionEditor(props: ConditionEditorProps) {
   const conditionEditableInUi = useMemo(() => isConditionEditableInUi(condition), [condition]);
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
+
+  const serializedCondition = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
+  const [syntaxEditorValue, setSyntaxEditorValue] = useState(serializedCondition);
+  const syntaxEditorValueRef = useRef(syntaxEditorValue);
+  const lastSyncedSerializedConditionRef = useRef(serializedCondition);
+  const prevUsingSyntaxEditorRef = useRef(usingSyntaxEditor);
+  const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
+  const onValidityChangeRef = useRef(onValidityChange ?? (() => {}));
+
+  const reportValidityChange = useCallback((isValid: boolean) => {
+    if (lastReportedValidityRef.current === isValid) {
+      return;
+    }
+    lastReportedValidityRef.current = isValid;
+    onValidityChangeRef.current(isValid);
+  }, []);
+
+  useEffect(() => {
+    onValidityChangeRef.current = onValidityChange ?? (() => {});
+  }, [onValidityChange]);
+
+  useEffect(() => {
+    // Ensure consumers start in a valid state.
+    reportValidityChange(true);
+  }, [reportValidityChange]);
+
+  useEffect(() => {
+    // When switching modes, reset validity and ensure the editor starts from the canonical condition.
+    if (prevUsingSyntaxEditorRef.current !== usingSyntaxEditor) {
+      reportValidityChange(true);
+      prevUsingSyntaxEditorRef.current = usingSyntaxEditor;
+    }
+  }, [reportValidityChange, usingSyntaxEditor]);
+
+  useEffect(() => {
+    if (!usingSyntaxEditor) {
+      // Keep syntax editor text in sync while in UI mode so switching to syntax starts
+      // from the current canonical condition.
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
+      lastSyncedSerializedConditionRef.current = serializedCondition;
+      return;
+    }
+
+    // If the parent updates the condition while the user hasn't edited the syntax editor,
+    // sync the text. If the user has edited locally, keep their text to avoid clobbering.
+    if (syntaxEditorValueRef.current === lastSyncedSerializedConditionRef.current) {
+      setSyntaxEditorValue(serializedCondition);
+      syntaxEditorValueRef.current = serializedCondition;
+    }
+    lastSyncedSerializedConditionRef.current = serializedCondition;
+  }, [serializedCondition, usingSyntaxEditor]);
 
   // Check if the selected field is a date type AND the operator is "in range"
   const isDateFieldWithRange = useMemo(() => {
@@ -89,11 +148,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
     [onConditionChange]
   );
 
-  const serializedCondition = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
-  const [syntaxEditorValue, setSyntaxEditorValue] = useState(serializedCondition);
-  const syntaxEditorValueRef = useRef(syntaxEditorValue);
-  const lastSyncedSerializedConditionRef = useRef(serializedCondition);
-
   const debouncedEmitConditionChange = useMemo(() => {
     return debounce(
       (nextCondition: Condition) => {
@@ -111,16 +165,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
       debouncedEmitConditionChange.cancel();
     };
   }, [debouncedEmitConditionChange]);
-
-  useEffect(() => {
-    // Keep the syntax editor in sync with external condition updates, but only when the user
-    // hasn't diverged from the last serialized value (so we don't clobber in-progress edits).
-    if (syntaxEditorValueRef.current === lastSyncedSerializedConditionRef.current) {
-      setSyntaxEditorValue(serializedCondition);
-      syntaxEditorValueRef.current = serializedCondition;
-    }
-    lastSyncedSerializedConditionRef.current = serializedCondition;
-  }, [serializedCondition]);
 
   const flushSyntaxEditorCondition = useCallback(() => {
     const currentValue = syntaxEditorValueRef.current;
@@ -205,8 +249,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
             setSyntaxEditorValue(value);
             try {
               const parsed = JSON.parse(value) as Condition;
+              reportValidityChange(true);
               debouncedEmitConditionChange(parsed);
             } catch (error: unknown) {
+              reportValidityChange(false);
               debouncedEmitConditionChange.cancel();
             }
           }}

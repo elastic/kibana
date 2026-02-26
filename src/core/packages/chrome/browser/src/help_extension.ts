@@ -22,7 +22,7 @@ export interface ChromeHelpExtension {
    */
   appName: string;
   /**
-   * Creates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button
+   * Creates unified links for sending users to documentation or a custom link/button
    */
   links?: ChromeHelpExtensionMenuLink[];
   /**
@@ -36,35 +36,6 @@ export type ChromeHelpExtensionLinkBase = Pick<
   EuiButtonEmptyProps,
   'iconType' | 'target' | 'rel' | 'data-test-subj'
 >;
-
-/** @public */
-export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLinkBase {
-  /**
-   * Creates a link to a new github issue in the Kibana repo
-   */
-  linkType: 'github';
-  /**
-   * Include at least one app-specific label to be applied to the new github issue
-   */
-  labels: string[];
-  /**
-   * Provides initial text for the title of the issue
-   */
-  title?: string;
-}
-
-/** @public */
-export interface ChromeHelpExtensionMenuDiscussLink extends ChromeHelpExtensionLinkBase {
-  /**
-   * Creates a generic give feedback link with comment icon
-   */
-  linkType: 'discuss';
-  /**
-   * URL to discuss page.
-   * i.e. `https://discuss.elastic.co/c/${appName}`
-   */
-  href: string;
-}
 
 /** @public */
 export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExtensionLinkBase {
@@ -109,7 +80,5 @@ export interface ChromeGlobalHelpExtensionMenuLink extends ChromeHelpExtensionMe
 
 /** @public */
 export type ChromeHelpExtensionMenuLink =
-  | ChromeHelpExtensionMenuGitHubLink
-  | ChromeHelpExtensionMenuDiscussLink
   | ChromeHelpExtensionMenuDocumentationLink
   | ChromeHelpExtensionMenuCustomLink;

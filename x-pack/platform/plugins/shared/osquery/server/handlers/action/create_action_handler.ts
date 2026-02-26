@@ -24,6 +24,7 @@ import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_interna
 
 interface Metadata {
   currentUser: string | undefined;
+  userProfileUid: string | undefined;
 }
 
 interface CreateActionHandlerOptions {
@@ -95,6 +96,7 @@ export const createActionHandler = async (
     agent_policy_ids: params.agent_policy_ids,
     agents: selectedAgents,
     user_id: metadata?.currentUser,
+    user_profile_uid: metadata?.userProfileUid,
     metadata: params.metadata,
     pack_id: params.pack_id,
     pack_name: packSO?.attributes?.name,
@@ -165,7 +167,7 @@ export const createActionHandler = async (
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
+    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'user_profile_uid', 'error']),
     agents: osqueryAction.agents.length,
   });
 

@@ -18,10 +18,10 @@ project:
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-visualizations-common
 dependsOn:
-  - '@kbn/expressions-plugin'
-  - '@kbn/chart-expressions-common'
-  - '@kbn/css-utils'
   - '@kbn/i18n'
+  - '@kbn/expressions-plugin'
+  - '@kbn/css-utils'
+  - '@kbn/chart-expressions-common'
   - '@kbn/core'
   - '@kbn/safer-lodash-set'
 tags:
@@ -35,7 +35,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
-    - '**/*.js'
     - '!target/**/*'
 tasks:
   jest:

@@ -84,7 +84,7 @@
           "\nThe `KibanaRootContextProvider` provides the necessary context at the root of Kibana, including\ninitialization and the theme and i18n contexts.  This context should only be used _once_, and\nat the _very top_ of the application root, rendered by the `RenderingService`.\n\nWhile this context is exposed for edge cases and tooling, (e.g. Storybook, Jest, etc.), it should\n_not_ be used in applications.  Instead, applications should choose the context that makes the\nmost sense for the problem they are trying to solve:\n\n- Consider `KibanaRenderContextProvider` for rendering components outside the current tree, (e.g.\nwith `ReactDOM.render`).\n- Consider `KibanaThemeContextProvider` for altering the theme of a component or tree of components.\n"
         ],
         "signature": [
-          "({ children, i18n, executionContext, ...props }: React.PropsWithChildren<",
+          "({ children, i18n, executionContext, chrome, ...props }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-context-root",
             "scope": "common",
@@ -95,7 +95,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
-        "lineNumber": 54,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -105,7 +105,7 @@
             "id": "def-common.KibanaRootContextProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  i18n,\n  executionContext,\n  ...props\n}",
+            "label": "{\n  children,\n  i18n,\n  executionContext,\n  chrome,\n  ...props\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -119,7 +119,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
-            "lineNumber": 54,
+            "lineNumber": 57,
             "columnNumber": 98,
             "deprecated": false,
             "trackAdoption": false,
@@ -244,7 +244,7 @@
           }
         ],
         "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -262,7 +262,7 @@
               "I18nStart"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -282,7 +282,7 @@
               ", \"reportEvent\"> | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -301,7 +301,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -320,7 +320,27 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
-            "lineNumber": 36,
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-root",
+            "id": "def-common.KibanaRootContextProviderProps.chrome",
+            "type": "Object",
+            "tags": [],
+            "label": "chrome",
+            "description": [
+              "Chrome service for wrapping children in Chrome context providers"
+            ],
+            "signature": [
+              "Pick<",
+              "ChromeStart",
+              ", \"withProvider\"> | undefined"
+            ],
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

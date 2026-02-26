@@ -147,6 +147,7 @@ export const Default: Story = {
               onSave={(next) => {
                 action('onSave')(next);
               }}
+              isMetricsStream
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -171,6 +172,7 @@ export const PreserveMsUnits: Story = {
           min_age: '1500ms',
           downsample: { after: '1500ms', fixed_interval: '1500ms' },
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any;
 
       const [selectedPhase, setSelectedPhase] = useState<PhaseName | undefined>('warm');
@@ -196,6 +198,7 @@ export const PreserveMsUnits: Story = {
               onSave={(next) => {
                 action('onSave')(next);
               }}
+              isMetricsStream
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -247,6 +250,7 @@ export const WarmAndDeletePhases: Story = {
               onSave={(next) => {
                 action('onSave')(next);
               }}
+              isMetricsStream
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -291,6 +295,58 @@ export const OnlyDeletePhase: Story = {
               onSave={(next) => {
                 action('onSave')(next);
               }}
+              isMetricsStream
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    };
+    return <StoryComponent />;
+  },
+};
+
+export const NoMetricsStream: Story = {
+  render: () => {
+    const StoryComponent = () => {
+      const initialPhases: IlmPolicyPhases = {
+        hot: {
+          name: 'hot',
+          size_in_bytes: 0,
+          rollover: {},
+        },
+        warm: {
+          name: 'warm',
+          size_in_bytes: 0,
+          min_age: '1500ms',
+          downsample: { after: '1500ms', fixed_interval: '1500ms' },
+        },
+      };
+      const [selectedPhase, setSelectedPhase] = useState<PhaseName | undefined>(() =>
+        getInitialSelectedPhase(initialPhases)
+      );
+
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+          <EuiFlexItem grow={false}>
+            <EditIlmPhasesFlyout
+              initialPhases={initialPhases}
+              selectedPhase={selectedPhase}
+              setSelectedPhase={setSelectedPhase}
+              searchableSnapshotRepositories={['found-snapshots', 'another-repo']}
+              onRefreshSearchableSnapshotRepositories={() =>
+                action('onRefreshSearchableSnapshots')()
+              }
+              onCreateSnapshotRepository={() => action('onCreateSnapshotRepository')()}
+              onClose={() => {
+                action('onClose')();
+              }}
+              onChange={(next) => {
+                action('onChange')(next);
+              }}
+              onSave={(next) => {
+                action('onSave')(next);
+              }}
+              isMetricsStream={false}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -393,6 +449,7 @@ export const PhaseSyncing: Story = {
                   setPhases(next);
                   setIsOpen(false);
                 }}
+                isMetricsStream
               />
             ) : null}
           </EuiFlexItem>

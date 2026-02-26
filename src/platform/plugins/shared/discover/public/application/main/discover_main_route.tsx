@@ -123,7 +123,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         hasESData,
         hasUserDataView: hasUserDataView && defaultDataViewExists,
       };
+      const defaultProfileEsqlQuery = loadedRootProfileState.getDefaultEsqlQuery();
 
+      dispatch(internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery));
       dispatch(internalStateActions.setInitializationState(initializationState));
 
       return initializationState;

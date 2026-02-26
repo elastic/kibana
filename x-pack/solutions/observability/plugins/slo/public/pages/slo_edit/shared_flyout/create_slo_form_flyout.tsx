@@ -30,7 +30,14 @@ export default function CreateSLOFormFlyout({
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
   return (
-    <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" size="l" maxWidth={620} ownFocus>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="flyoutTitle"
+      size="l"
+      maxWidth={620}
+      ownFocus
+      session="start"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
           <h3 id="flyoutTitle">

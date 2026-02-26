@@ -17,12 +17,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import { useUrlFilters, useAddUrlFilters } from '../hooks/url_filters';
-import type { BrowseIntegrationSortType } from '../types';
+import type { BrowseIntegrationSortType, IntegrationStatusFilterType } from '../types';
+import { StatusFilter } from '../../../components/status_filter';
 
 const SEARCH_DEBOUNCE_MS = 150;
 
@@ -172,6 +173,15 @@ const SearchBar: React.FC = () => {
 };
 
 export const SearchAndFiltersBar: React.FC = ({}) => {
+  const urlFilters = useUrlFilters();
+  const addUrlFilters = useAddUrlFilters();
+
+  const handleStatusChange = useCallback(
+    (statuses: IntegrationStatusFilterType[]) => {
+      addUrlFilters({ status: statuses.length > 0 ? statuses : undefined });
+    },
+    [addUrlFilters]
+  );
   return (
     <StickyFlexItem>
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
@@ -192,14 +202,16 @@ export const SearchAndFiltersBar: React.FC = ({}) => {
                 defaultMessage="All signals"
               />
             </EuiFilterButton>
-            <EuiFilterButton>
-              <FormattedMessage
-                id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.statusLabel"
-                defaultMessage="Status"
-              />
-            </EuiFilterButton>
+
+            <StatusFilter
+              selectedStatuses={urlFilters.status}
+              onChange={handleStatusChange}
+              testSubjPrefix="browseIntegrations.searchBar"
+              popoverId="browseIntegrationsStatusPopover"
+            />
           </EuiFilterGroup>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <SortFilter />
         </EuiFlexItem>

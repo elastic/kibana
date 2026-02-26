@@ -17,7 +17,9 @@ import {
 } from '../constants';
 
 function buildColorProps(
-  config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
+  config:
+    | NonNullable<DatatableState['metrics']>[number]
+    | NonNullable<DatatableState['rows']>[number]
 ): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
   if (!config.apply_color_to) return {};
   const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
@@ -34,7 +36,9 @@ function buildColorProps(
 }
 
 function buildCommonMetricRowState(
-  config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
+  config:
+    | NonNullable<DatatableState['metrics']>[number]
+    | NonNullable<DatatableState['rows']>[number]
 ): Pick<
   ColumnState,
   'hidden' | 'alignment' | 'colorMode' | 'isTransposed' | 'palette' | 'colorMapping' | 'width'
@@ -49,6 +53,8 @@ function buildCommonMetricRowState(
 }
 
 export function buildMetricsState(metrics: DatatableState['metrics']): ColumnState[] {
+  if (!metrics) return [];
+
   return metrics.map((metric, index) => {
     const columnId = getAccessorName(METRIC_ACCESSOR_PREFIX, index);
 

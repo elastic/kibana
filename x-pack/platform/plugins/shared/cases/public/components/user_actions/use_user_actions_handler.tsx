@@ -22,13 +22,17 @@ export type UseUserActionsHandler = Pick<
   | 'loadingCommentIds'
   | 'selectedOutlineCommentId'
   | 'manageMarkdownEditIds'
-  | 'commentRefs'
-  | 'handleManageMarkdownEditId'
   | 'handleOutlineComment'
-  | 'handleSaveComment'
-  | 'handleManageQuote'
   | 'handleDeleteComment'
-> & { handleUpdate: (updatedCase: CaseUI) => void };
+> & {
+  commentRefs: React.MutableRefObject<
+    Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
+  >;
+  handleManageMarkdownEditId: (id: string) => void;
+  handleSaveComment: (props: { id: string; version: string }, content: string) => void;
+  handleManageQuote: (quote: string) => void;
+  handleUpdate: (updatedCase: CaseUI) => void;
+};
 
 const isAddCommentRef = (
   ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined

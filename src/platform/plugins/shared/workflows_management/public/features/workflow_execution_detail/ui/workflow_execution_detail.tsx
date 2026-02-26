@@ -11,12 +11,14 @@ import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import { useQueryClient } from '@kbn/react-query';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -25,6 +27,7 @@ import {
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useStepExecution } from '../model/use_step_execution';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
 const DefaultSidebarWidth = 300;
@@ -36,6 +39,7 @@ export interface WorkflowExecutionDetailProps {
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
   ({ executionId, onClose }) => {
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
+    const queryClient = useQueryClient();
 
     const { activeTab, setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
     const [sidebarWidth = DefaultSidebarWidth, setSidebarWidth] = useLocalStorage(
@@ -43,6 +47,13 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       DefaultSidebarWidth
     );
     const showBackButton = activeTab === 'executions';
+
+    // Clear cached step I/O data when switching to a different execution
+    useEffect(() => {
+      return () => {
+        queryClient.removeQueries({ queryKey: ['stepExecution', executionId] });
+      };
+    }, [executionId, queryClient]);
 
     useEffect(() => {
       if (
@@ -68,7 +79,26 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       return null;
     }, [workflowExecution]);
 
-    const selectedStepExecution = useMemo(() => {
+    // For pseudo-steps (overview, trigger), build from execution context directly
+    const isPseudoStep =
+      selectedStepExecutionId === '__overview' || selectedStepExecutionId === 'trigger';
+
+    // Find the lightweight step from the polled execution (has status/duration but no I/O)
+    const lightweightStep = useMemo(() => {
+      if (!selectedStepExecutionId || isPseudoStep) {
+        return undefined;
+      }
+      return workflowExecution?.stepExecutions?.find((step) => step.id === selectedStepExecutionId);
+    }, [workflowExecution?.stepExecutions, selectedStepExecutionId, isPseudoStep]);
+
+    // Lazy-load full step data (with input/output) for real steps
+    const { data: fullStepData, isLoading: isLoadingStepData } = useStepExecution(
+      executionId,
+      isPseudoStep ? undefined : selectedStepExecutionId ?? undefined,
+      lightweightStep?.status
+    );
+
+    const selectedStepExecution = useMemo<WorkflowStepExecutionDto | undefined>(() => {
       if (!selectedStepExecutionId) {
         return undefined;
       }
@@ -81,11 +111,17 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
       }
 
-      if (!workflowExecution?.stepExecutions?.length) {
+      if (!lightweightStep) {
         return undefined;
       }
-      return workflowExecution.stepExecutions.find((step) => step.id === selectedStepExecutionId);
-    }, [workflowExecution, selectedStepExecutionId]);
+
+      // Merge: use lightweight step for structure/status, overlay full I/O when available
+      if (fullStepData) {
+        return { ...lightweightStep, input: fullStepData.input, output: fullStepData.output };
+      }
+
+      return lightweightStep;
+    }, [workflowExecution, selectedStepExecutionId, lightweightStep, fullStepData]);
 
     return (
       <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
@@ -110,6 +146,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               workflowExecutionId={executionId}
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
+              isLoadingStepData={isLoadingStepData && !isPseudoStep}
             />
           }
           minFlexPanelSize={200}

@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`riskScoreInlineToolHandler should modify additional context when entity store v2 is enabled 1`] = `
+"
+        This is a set of rules that you must follow strictly:
+        * Use the latest risk score index pattern: risk-score.risk-score-latest-default when answering questions about the current risk score of entities.
+        * Use the risk score time series patterns: risk-score.risk-score-default when answering questions about how the risk score changes over time.
+        * When querying the risk score for a entity you must **ALWAYS** use the normalized field 'host.risk.calculated_score_norm'.
+        * The field 'host.risk.calculated_level' contains a textual description of the risk level.
+        * The inputs field inside the risk score document contains the 10 highest-risk documents (sorted by 'kibana.alert.risk_score') that contributed to the risk score of an entity.
+        * When searching the risk score of an entity of type 'host', you must **ALWAYS** use exact and entire filter: \\"'WHERE ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))'\\""
+`;
+
+exports[`riskScoreInlineToolHandler should return generic security solution message when risk score index does not exist 1`] = `"Risk score index does not exist for this space. The user needs to enable the risk engine so that this agent can answer risk-related questions."`;
+
+exports[`riskScoreInlineToolHandler should return risk score message with ESQL query when risk score index exists 1`] = `
+"
+        This is a set of rules that you must follow strictly:
+        * Use the latest risk score index pattern: risk-score.risk-score-latest-default when answering questions about the current risk score of entities.
+        * Use the risk score time series patterns: risk-score.risk-score-default when answering questions about how the risk score changes over time.
+        * When querying the risk score for a entity you must **ALWAYS** use the normalized field 'host.risk.calculated_score_norm'.
+        * The field 'host.risk.calculated_level' contains a textual description of the risk level.
+        * The inputs field inside the risk score document contains the 10 highest-risk documents (sorted by 'kibana.alert.risk_score') that contributed to the risk score of an entity.
+        * When searching the risk score of an entity of type 'host', you must **ALWAYS** use exact and entire filter: \\"'WHERE host.name IS NOT NULL'\\""
+`;

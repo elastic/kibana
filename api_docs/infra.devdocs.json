@@ -15,7 +15,7 @@
       "label": "InfraClientStartExports",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
-      "lineNumber": 62,
+      "lineNumber": 63,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +31,7 @@
             "InventoryViewsServiceStart"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
-          "lineNumber": 63,
+          "lineNumber": 64,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -48,7 +48,7 @@
             " | undefined"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
-          "lineNumber": 64,
+          "lineNumber": 65,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -64,7 +64,7 @@
             "ITelemetryClient"
           ],
           "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
-          "lineNumber": 65,
+          "lineNumber": 66,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false

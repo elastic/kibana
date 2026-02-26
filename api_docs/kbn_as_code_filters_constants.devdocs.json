@@ -1,0 +1,81 @@
+{
+  "id": "@kbn/as-code-filters-constants",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/as-code-filters-constants",
+        "id": "def-common.ASCODE_FILTER_OPERATOR",
+        "type": "Object",
+        "tags": [],
+        "label": "ASCODE_FILTER_OPERATOR",
+        "description": [
+          "\nAs Code Filter operator constants\nThese operators are used in SimpleFilterCondition to specify how to match field values"
+        ],
+        "signature": [
+          "{ readonly IS: \"is\"; readonly IS_ONE_OF: \"is_one_of\"; readonly EXISTS: \"exists\"; readonly RANGE: \"range\"; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-constants/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-constants",
+        "id": "def-common.ASCODE_FILTER_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "ASCODE_FILTER_TYPE",
+        "description": [],
+        "signature": [
+          "{ readonly CONDITION: \"condition\"; readonly GROUP: \"group\"; readonly DSL: \"dsl\"; readonly SPATIAL: \"spatial\"; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-constants/src/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-filters-constants",
+        "id": "def-common.ASCODE_GROUPED_CONDITION_TYPE",
+        "type": "Object",
+        "tags": [],
+        "label": "ASCODE_GROUPED_CONDITION_TYPE",
+        "description": [],
+        "signature": [
+          "{ readonly AND: \"and\"; readonly OR: \"or\"; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/filters-constants/src/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

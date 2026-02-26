@@ -19,7 +19,7 @@
 | **Detection**   | `get_alerts`, `get_services`                                 |
 | **Scope**       | `get_services`, `get_hosts`, `get_trace_metrics`             |
 | **Timeline**    | `get_trace_metrics` (time series), `run_log_rate_analysis`   |
-| **Correlation** | `get_correlated_logs`, `get_downstream_dependencies`         |
+| **Correlation** | `get_traces`, `get_service_topology`                         |
 | **Root Cause**  | `get_log_groups`, `get_trace_metrics` (grouped by dimension) |
 
 ---
@@ -279,9 +279,116 @@ All new tools **must** be added to the Agent Builder allow list:
 x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts
 ```
 
+### Cleaning Observability Data
+
+Delete all observability data streams (APM, OTel, logs, infrastructure metrics, synthetics) to avoid stale data polluting results:
+
+```bash
+curl -s -X DELETE "http://elastic:changeme@localhost:9200/_data_stream/traces-apm*,metrics-apm*,logs-apm*,metrics-*.otel*,traces-*.otel*,logs-*.otel*,logs-*-*,metrics-system*,metrics-kubernetes*,metrics-docker*,metrics-aws*,synthetics-*-*" | jq .
+```
+
+Verify that all data streams are gone:
+
+```bash
+curl -s "http://elastic:changeme@localhost:9200/_data_stream/*apm*,*otel*,logs-*,metrics-*,synthetics-*" | jq '[.data_streams[] | .name]'
+# Expected: []
+```
+
 ---
 
-## 8. Pre-Merge Checklist
+## 8. Testing with OpenTelemetry Demo
+
+The [OpenTelemetry Demo](https://github.com/elastic/opentelemetry-demo) is a microservices application that generates realistic Observability data (traces, logs, metrics) and supports feature flags to simulate various failure scenarios. Use it to validate the Observability Agent and individual tools against real-world-like incidents.
+
+### Starting the OTel Demo
+
+Clone the repo and start the demo, configured to send data to your local Elasticsearch:
+
+```bash
+cd /path/to/opentelemetry-demo
+
+# Create an API key for the demo
+API_KEY=$(curl -s -X POST "http://localhost:9200/_security/api_key" \
+  -u elastic:changeme \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "opentelemetry-demo" }' | jq -r .encoded)
+
+sed -i '' -E "s|^ELASTICSEARCH_ENDPOINT=.*|ELASTICSEARCH_ENDPOINT=\"http://host.docker.internal:9200\"|" .env.override
+sed -i '' -E "s|^ELASTICSEARCH_API_KEY=.*|ELASTICSEARCH_API_KEY=$API_KEY|" .env.override
+
+# Start all services
+make start
+```
+
+This starts ~28 Docker containers. Wait for all containers to be healthy before proceeding. The demo sends data to the local Elasticsearch instance at `localhost:9200`.
+
+### Feature Flags
+
+Feature flags are configured via the `flagd` service. Edit the file:
+
+```
+/path/to/opentelemetry-demo/src/flagd/demo.flagd.json
+```
+
+Flagd watches this file for changes — edits take effect automatically (no restart needed).
+
+To enable a flag, change its `defaultVariant` from `"off"` to `"on"` (or to a specific variant for flags with multiple levels):
+
+```json
+"paymentUnreachable": {
+  "defaultVariant": "on",
+  ...
+}
+```
+
+To disable a flag, set `defaultVariant` back to `"off"`.
+
+Full list of available feature flags: https://opentelemetry.io/docs/demo/feature-flags/
+
+### Cleaning Data Between Test Runs
+
+Between test runs, clean all observability data streams — see [Cleaning Observability Data](#cleaning-observability-data) in section 7.
+
+### Wait for Data Accumulation
+
+After enabling feature flags and cleaning data, **wait at least 10 minutes** before running an investigation. This ensures enough metric rollups and trace data have been generated for meaningful analysis.
+
+When running the investigation tool, use a lookback window that matches the wait time:
+
+```bash
+curl -s --max-time 600 -X POST http://localhost:5601/api/agent_builder/tools/_execute \
+  -u elastic:changeme \
+  -H 'kbn-xsrf: true' \
+  -H 'x-elastic-internal-origin: kibana' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "tool_id": "observability.run_investigation",
+    "tool_params": { "start": "now-10m", "end": "now" }
+  }'
+```
+
+Note: the `run_investigation` tool makes multiple internal LLM calls and may take 60–120 seconds to complete. Use `--max-time 600` to avoid curl timeouts.
+
+### Full Test Workflow
+
+```
+1. Start OTel demo:          (see "Starting the OTel Demo" above)
+2. Clean APM data:           (delete data streams — see above)
+3. Enable feature flag(s):   Edit demo.flagd.json
+4. Wait 30 minutes:          sleep 600
+5. Run investigation:        curl ... run_investigation with start=now-30m
+6. Review results
+7. Disable feature flag(s):  Reset defaultVariant to "off"
+8. Repeat from step 2 for next scenario
+```
+
+### Resetting All Feature Flags
+
+After testing, reset all flags to `"off"` by setting each `defaultVariant` back to `"off"` in `demo.flagd.json`. Verify no flags are accidentally left enabled — leftover flags cause confusing results in subsequent tests.
+
+---
+
+## 9. Pre-Merge Checklist
 
 - [ ] Tool added to `allow_lists.ts`
 - [ ] Works with both ECS and OTel data (where applicable)

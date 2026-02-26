@@ -55,6 +55,14 @@ export default function ({ getService }: FtrProviderContext) {
       } catch (e) {
         // ignore
       }
+      try {
+        await es.transport.request({
+          method: 'DELETE',
+          path: `/_data_stream/metrics-collectortelemetry.otel-default`,
+        });
+      } catch (e) {
+        // ignore
+      }
     });
 
     it('should return the list of agents when requesting as admin', async () => {
@@ -304,6 +312,95 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should return metrics for OPAMP agents when called with withMetrics', async () => {
+      await es.index({
+        id: 'opamp-agent-with-metrics',
+        index: '.fleet-agents',
+        refresh: 'wait_for',
+        document: {
+          access_api_key_id: 'api-key-opamp',
+          active: true,
+          policy_id: 'policy1',
+          type: 'OPAMP',
+          local_metadata: { host: { hostname: 'opamp-host' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:14:25Z',
+          last_checkin: '2022-06-27T12:27:29Z',
+          tags: ['existingTag'],
+          agent: { id: 'opamp-agent-with-metrics', version: '9.2.0' },
+        },
+      });
+
+      const now = Date.now();
+      const threeMinutesAgo = new Date(now - 3 * 60 * 1000);
+      threeMinutesAgo.setSeconds(0, 0);
+      const twoMinutesAgo = new Date(now - 2 * 60 * 1000);
+      twoMinutesAgo.setSeconds(0, 0);
+
+      await es.index({
+        index: 'metrics-collectortelemetry.otel-default',
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': threeMinutesAgo.toISOString(),
+          data_stream: {
+            namespace: 'default',
+            type: 'metrics',
+            dataset: 'collectortelemetry.otel',
+          },
+          metrics: {
+            otelcol_process_memory_rss: 1500.9,
+            otelcol_process_cpu_seconds: 100,
+            otelcol_process_uptime: 1000,
+          },
+          resource: {
+            attributes: {
+              'service.instance.id': 'opamp-agent-with-metrics',
+            },
+          },
+        },
+      });
+
+      await es.index({
+        index: 'metrics-collectortelemetry.otel-default',
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': twoMinutesAgo.toISOString(),
+          data_stream: {
+            namespace: 'default',
+            type: 'metrics',
+            dataset: 'collectortelemetry.otel',
+          },
+          metrics: {
+            otelcol_process_memory_rss: 1500.1,
+            otelcol_process_cpu_seconds: 110,
+            otelcol_process_uptime: 1100,
+          },
+          resource: {
+            attributes: {
+              'service.instance.id': 'opamp-agent-with-metrics',
+            },
+          },
+        },
+      });
+
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?withMetrics=true`)
+        .expect(200);
+
+      const opampAgent: Agent = apiResponse.items.find(
+        (agent: any) => agent.id === 'opamp-agent-with-metrics'
+      );
+
+      expect(opampAgent.metrics?.memory_size_byte_avg).to.eql('1500');
+      expect(opampAgent.metrics?.cpu_avg).to.eql('0.1');
+
+      await es.delete({
+        id: 'opamp-agent-with-metrics',
+        index: '.fleet-agents',
+        refresh: true,
+      });
+    });
+
     it('should return a status summary if getStatusSummary provided', async () => {
       const { body: apiResponse } = await supertest
         .get('/api/fleet/agents?getStatusSummary=true&perPage=0')
@@ -509,6 +606,37 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         expect(apiResponse3.items.map(({ agent }: any) => agent.id)).to.eql(['agent3', 'agent2']);
         expect(apiResponse3.nextSearchAfter).to.eql(JSON.stringify(apiResponse3.items[1].sort));
+      });
+    });
+
+    describe('effective config', () => {
+      it('should return effective config', async () => {
+        const agentId = 'agent-with-effective-config';
+        await es.index({
+          id: agentId,
+          index: '.fleet-agents',
+          refresh: 'wait_for',
+          document: {
+            access_api_key_id: 'api-key-2',
+            active: true,
+            policy_id: 'policy1',
+            type: 'PERMANENT',
+            local_metadata: { host: { hostname: 'host2' } },
+            user_provided_metadata: {},
+            enrolled_at: '2022-06-21T12:14:25Z',
+            last_checkin: '2022-06-27T12:27:29Z',
+            agent: { id: agentId, version: '9.4.0' },
+            effective_config: {},
+          },
+        });
+
+        const { body: apiResponse } = await supertest
+          .get(`/api/fleet/agents/${agentId}/effective_config`)
+          .expect(200);
+
+        expect(apiResponse).to.eql({ effective_config: {} });
+
+        await es.delete({ index: AGENTS_INDEX, id: agentId, refresh: 'wait_for' });
       });
     });
   });

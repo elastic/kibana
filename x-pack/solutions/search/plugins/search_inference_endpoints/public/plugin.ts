@@ -16,7 +16,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { PLUGIN_ID, PLUGIN_TITLE } from '../common/constants';
+import { MANAGEMENT_APP_ID, PLUGIN_ID, PLUGIN_TITLE } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
@@ -73,6 +73,23 @@ export class SearchInferenceEndpointsPlugin
       },
       order: 6,
       visibleIn: ['sideNav'],
+    });
+
+    plugins.management.sections.section.machineLearning.registerApp({
+      id: MANAGEMENT_APP_ID,
+      title: PLUGIN_TITLE,
+      order: 2,
+      async mount(params) {
+        const { renderInferenceEndpointsMgmtApp } = await import('./application');
+        const [coreStart, depsStart] = await core.getStartServices();
+        const startDeps: AppPluginStartDependencies = {
+          ...depsStart,
+          history: params.history,
+          searchNavigation: undefined,
+        };
+
+        return renderInferenceEndpointsMgmtApp(coreStart, startDeps, params.element);
+      },
     });
 
     registerLocators(plugins.share);

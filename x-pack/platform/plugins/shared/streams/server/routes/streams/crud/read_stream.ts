@@ -11,6 +11,8 @@ import {
   getInheritedFieldsFromAncestors,
   getInheritedSettings,
   findInheritedFailureStore,
+  getRoot,
+  LOGS_ECS_STREAM_NAME,
 } from '@kbn/streams-schema';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -141,10 +143,14 @@ export async function readStream({
     } satisfies Streams.ClassicStream.GetResponse;
   }
 
-  const inheritedFields = addAliasesForNamespacedFields(
-    streamDefinition,
-    getInheritedFieldsFromAncestors(ancestors)
-  );
+  // For OTEL-based streams (logs, logs.otel), process inherited fields to add OTEL aliases
+  // For ECS streams (logs.ecs), use inherited fields directly without OTEL-specific processing
+  const rootStream = getRoot(streamDefinition.name);
+  const isEcsStream = rootStream === LOGS_ECS_STREAM_NAME;
+
+  const inheritedFields = isEcsStream
+    ? getInheritedFieldsFromAncestors(ancestors)
+    : addAliasesForNamespacedFields(streamDefinition, getInheritedFieldsFromAncestors(ancestors));
 
   const inheritedFailureStore = findInheritedFailureStore(streamDefinition, ancestors);
 

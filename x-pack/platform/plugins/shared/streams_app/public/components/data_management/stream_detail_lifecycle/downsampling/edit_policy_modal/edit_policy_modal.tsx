@@ -50,6 +50,7 @@ export function EditPolicyModal({
 }: EditPolicyModalProps) {
   const modalTitleId = useGeneratedHtmlId();
   const isInUse = affectedResources.length > 0;
+  const affectedResourcesCount = affectedResources.length;
   const streamsCount = isInUse
     ? affectedResources.filter((resource) => resource.type === 'stream').length
     : 0;
@@ -83,7 +84,7 @@ export function EditPolicyModal({
 
   const modalTitle = isInUse
     ? i18n.translate('xpack.streams.editPolicyModal.title', {
-        defaultMessage: '{affectedResourcesLabel} will be affected',
+        defaultMessage: 'This update affects {affectedResourcesLabel}',
         values: {
           affectedResourcesLabel,
         },
@@ -128,7 +129,7 @@ export function EditPolicyModal({
               <p>
                 {i18n.translate('xpack.streams.editPolicyModal.managedWarningDescription', {
                   defaultMessage:
-                    'This policy is managed by Elasticsearch. Modifying it may cause unexpected behavior. Consider saving as a new policy instead.',
+                    'This policy is managed by Elasticsearch. Modifying it can cause unexpected behavior. To avoid unintended changes, save as a new policy instead.',
                 })}
               </p>
             </EuiCallOut>
@@ -140,9 +141,10 @@ export function EditPolicyModal({
             <EuiText size="s">
               {i18n.translate('xpack.streams.editPolicyModal.description', {
                 defaultMessage:
-                  'The ILM policy you are updating is currently used in {affectedResourcesLabel}. If you would like your updates to only affect this stream, you may save as a new ILM policy.',
+                  "{affectedResourcesLabel} {affectedResourcesCount, plural, one {uses} other {use}} the ILM policy you're updating. To apply your changes to only this stream, save as a new policy.",
                 values: {
                   affectedResourcesLabel,
+                  affectedResourcesCount,
                 },
               })}
             </EuiText>
@@ -157,6 +159,7 @@ export function EditPolicyModal({
               }}
               color="subdued"
               data-test-subj="editPolicyModal-affectedResourcesList"
+              tabIndex={0}
             >
               <EuiFlexGroup direction="column" gutterSize="s">
                 {affectedResources.map((resource) => (
@@ -166,7 +169,9 @@ export function EditPolicyModal({
                       data-test-subj={`editPolicyModal-affectedResourcesList-${resource.name}`}
                     >
                       <EuiText size="s">{resource.name}</EuiText>
-                      <EuiText size="s">{affectedResourceTypeLabelMap[resource.type]}</EuiText>
+                      <EuiText size="xs" color="subdued">
+                        {affectedResourceTypeLabelMap[resource.type]}
+                      </EuiText>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 ))}
@@ -183,6 +188,7 @@ export function EditPolicyModal({
               data-test-subj="editPolicyModal-cancelButton"
               onClick={onCancel}
               disabled={isProcessing}
+              flush="both"
             >
               {i18n.translate('xpack.streams.editPolicyModal.cancelButton', {
                 defaultMessage: 'Cancel',
@@ -196,12 +202,14 @@ export function EditPolicyModal({
                 <EuiButton
                   data-test-subj="editPolicyModal-overwriteButton"
                   color="danger"
-                  onClick={onOverwrite}
+                  onClick={() => {
+                    onOverwrite();
+                  }}
                   disabled={isProcessing}
                   isLoading={isProcessing}
                 >
                   {i18n.translate('xpack.streams.editPolicyModal.overwriteButton', {
-                    defaultMessage: 'Overwrite',
+                    defaultMessage: 'Update current policy',
                   })}
                 </EuiButton>
               </EuiFlexItem>
@@ -213,7 +221,7 @@ export function EditPolicyModal({
                   disabled={isProcessing}
                 >
                   {i18n.translate('xpack.streams.editPolicyModal.saveAsNewButton', {
-                    defaultMessage: 'Save as new',
+                    defaultMessage: 'Save as new policy',
                   })}
                 </EuiButton>
               </EuiFlexItem>

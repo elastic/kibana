@@ -173,3 +173,60 @@ paths:
           description: Indicates the data stream id was not found.
         500:
           description: An internal server error occurred.
+  /internal/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}/reanalyze:
+    put:
+      summary: Re-runs the analysis workflow for an existing data stream.
+      operationId: ReanalyzeDataStream
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Re-runs the analysis workflow for an existing data stream. Old result are removed. This resets the data stream status to pending and schedules a new analysis task.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        - name: data_stream_id
+          in: path
+          required: true
+          description: The data stream identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      requestBody:
+        required: true
+        additionalProperties: false
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connectorId
+              properties:
+                connectorId:
+                  description: The inference connector ID to use for the reanalysis task.
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                langSmithOptions:
+                  description: The LangSmith tracing options
+                  $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
+      responses:
+        200:
+          description: The data stream reanalysis has been scheduled successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the reanalysis was scheduled successfully.
+        400:
+          description: The request is invalid.
+        404:
+          description: The data stream is not found.
+        500:
+          description: An internal server error occurred.

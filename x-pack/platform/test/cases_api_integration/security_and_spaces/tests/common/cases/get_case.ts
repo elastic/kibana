@@ -40,6 +40,11 @@ import {
 } from '../../../../common/lib/authentication/users';
 import { getUserInfo } from '../../../../common/lib/authentication';
 
+export const secOnlyUserWithProfileId = {
+  ...getUserInfo(secOnly),
+  profile_uid: 'u_wkt3gf0rIZhCK_z5XG1De6X-qfAJFidfVACakLFBVDM_0',
+};
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -149,7 +154,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(comment).to.eql({
           type: postCommentUserReq.type,
           comment: postCommentUserReq.comment,
-          created_by: getUserInfo(secOnly),
+          created_by: secOnlyUserWithProfileId,
           pushed_at: null,
           pushed_by: null,
           updated_by: null,

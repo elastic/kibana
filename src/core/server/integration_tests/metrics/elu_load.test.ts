@@ -9,6 +9,7 @@
 
 import supertest from 'supertest';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
@@ -42,6 +43,7 @@ describe('GET /api/_elu_load', () => {
     const httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
     listener = httpSetup.server.listener;
     await service.setup({

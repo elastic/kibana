@@ -29,7 +29,7 @@ describe('applyDefaults', () => {
   });
 
   describe('reserved keyword validation', () => {
-    it('should throw if mappings contain reserved "kibana" key', () => {
+    it('should throw if mappings contain reserved "kibana.space_ids" key', () => {
       const dataStream = createTestDataStream({
         template: {
           mappings: {
@@ -37,6 +37,7 @@ describe('applyDefaults', () => {
               '@timestamp': mappings.date(),
               kibana: mappings.object({
                 properties: {
+                  space_ids: mappings.keyword(),
                   custom_field: mappings.keyword(),
                 },
               }),
@@ -45,7 +46,9 @@ describe('applyDefaults', () => {
         },
       });
 
-      expect(() => applyDefaults(dataStream)).toThrow(/contains reserved mapping key "kibana"/);
+      expect(() => applyDefaults(dataStream)).toThrow(
+        /contains reserved mapping key "kibana\.space_ids"/
+      );
     });
 
     it('should throw if mappings contain reserved "_id" key', () => {
@@ -63,8 +66,70 @@ describe('applyDefaults', () => {
       expect(() => applyDefaults(dataStream)).toThrow(/contains reserved mapping key "_id"/);
     });
 
+    it('should throw if mappings contain reserved "kibana._system" key', () => {
+      const dataStream = createTestDataStream({
+        template: {
+          mappings: {
+            properties: {
+              '@timestamp': mappings.date(),
+              kibana: mappings.object({
+                properties: {
+                  _system: mappings.object({
+                    properties: {
+                      custom_field: mappings.keyword(),
+                    },
+                  }),
+                },
+              }),
+            },
+          },
+        },
+      });
+
+      expect(() => applyDefaults(dataStream)).toThrow(
+        /contains reserved mapping key "kibana\._system"/
+      );
+    });
+
+    it('should throw if "kibana" is not mapped as an object', () => {
+      const dataStream = createTestDataStream({
+        template: {
+          mappings: {
+            properties: {
+              '@timestamp': mappings.date(),
+              kibana: mappings.keyword(),
+            },
+          },
+        },
+      });
+
+      expect(() => applyDefaults(dataStream)).toThrow(
+        /contains invalid mapping for "kibana".*must be mapped as type "object"/
+      );
+    });
+
     it('should not throw if mappings do not contain reserved keys', () => {
       const dataStream = createTestDataStream();
+      expect(() => applyDefaults(dataStream)).not.toThrow();
+    });
+
+    it('should not throw if mappings contain non-reserved "kibana" properties', () => {
+      const dataStream = createTestDataStream({
+        template: {
+          mappings: {
+            properties: {
+              '@timestamp': mappings.date(),
+              kibana: mappings.object({
+                properties: {
+                  custom_field_1: mappings.keyword(),
+                  custom_field_2: mappings.keyword(),
+                },
+              }),
+            },
+          },
+        },
+      });
+
       expect(() => applyDefaults(dataStream)).not.toThrow();
     });
   });
@@ -87,6 +152,32 @@ describe('applyDefaults', () => {
 
       expect(result.template?.mappings?.properties?.['@timestamp']).toBeDefined();
       expect(result.template?.mappings?.properties?.field).toBeDefined();
+    });
+
+    it('should preserve user-defined kibana mappings and inject kibana.space_ids', () => {
+      const dataStream = createTestDataStream({
+        template: {
+          mappings: {
+            properties: {
+              '@timestamp': mappings.date(),
+              kibana: mappings.object({
+                properties: {
+                  custom_field: mappings.keyword(),
+                },
+              }),
+            },
+          },
+        },
+      });
+      const result = applyDefaults(dataStream);
+
+      expect(result.template?.mappings?.properties?.kibana).toEqual({
+        type: 'object',
+        properties: {
+          custom_field: { type: 'keyword', ignore_above: 1024 },
+          space_ids: { type: 'keyword', ignore_above: 1024 },
+        },
+      });
     });
 
     it('should apply defaults', () => {
