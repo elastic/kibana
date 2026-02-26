@@ -31,7 +31,7 @@ export const ConnectorCard: React.FC<ConnectorCardProps> = ({
     <EuiPanel
       css={({ euiTheme }) => ({
         height: 110,
-        padding: '20px 18px 20px 20px',
+        padding: euiTheme.size.l,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         opacity: isDisabled ? 0.5 : 1,
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
