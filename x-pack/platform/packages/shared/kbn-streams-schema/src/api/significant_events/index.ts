@@ -36,7 +36,6 @@ interface SignificantEventOccurrence {
 }
 
 type SignificantEventsResponse = StreamQuery & {
-  stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
@@ -54,7 +53,7 @@ type SignificantEventsPreviewResponse = Pick<
   'occurrences' | 'change_points' | 'kql'
 >;
 
-type GeneratedSignificantEventQuery = Omit<StreamQuery, 'id' | 'stream_name'>;
+type GeneratedSignificantEventQuery = Omit<StreamQuery, 'id' | 'affected_streams'>;
 
 type SignificantEventsGenerateResponse = Observable<
   ServerSentEventBase<

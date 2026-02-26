@@ -40,6 +40,7 @@ import {
   ASSET_ID,
   ASSET_TYPE,
   ASSET_UUID,
+  QUERY_AFFECTED_STREAMS,
   QUERY_CATEGORY,
   QUERY_CREATED_AT,
   QUERY_DESCRIPTION,
@@ -125,6 +126,7 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
     ...asset,
     query: {
       ...asset.query,
+      affected_streams: [definition.name],
       esql: { query: buildEsqlQuery(indices, asset.query) },
     },
     [ASSET_UUID]: getQueryLinkUuid(definition.name, asset),
@@ -136,6 +138,7 @@ type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
   [QUERY_ESQL_QUERY]: string;
+  [QUERY_AFFECTED_STREAMS]?: string[];
   [QUERY_SEVERITY_SCORE]?: number;
   [RULE_BACKED]?: boolean;
 };
@@ -169,6 +172,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     [QUERY_CATEGORY]?: StreamQueryCategory;
     [QUERY_TAGS]?: string[];
     [QUERY_SOURCE]?: StreamQuerySource;
+    [QUERY_AFFECTED_STREAMS]?: string[];
     [QUERY_MODEL]?: string;
     [QUERY_CREATED_AT]?: string;
     [QUERY_UPDATED_AT]?: string;
@@ -182,6 +186,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     [QUERY_TYPE]?: StreamQueryType;
     [QUERY_CATEGORY]?: StreamQueryCategory;
     [QUERY_TAGS]?: string[];
+    [QUERY_AFFECTED_STREAMS]?: string[];
     [QUERY_MODEL]?: string;
     [QUERY_CREATED_AT]?: string;
     [QUERY_UPDATED_AT]?: string;
@@ -194,7 +199,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
-      stream_name: link[STREAM_NAME],
+      affected_streams: storageFields[QUERY_AFFECTED_STREAMS] ?? [link[STREAM_NAME]],
       kql: {
         query: storageFields[QUERY_KQL_BODY],
       },
@@ -246,6 +251,7 @@ function toStorage(
     [QUERY_TYPE]: query.type,
     [QUERY_CATEGORY]: query.category,
     [QUERY_TAGS]: query.tags,
+    [QUERY_AFFECTED_STREAMS]: query.affected_streams,
     [QUERY_SOURCE]: query.source,
     [QUERY_MODEL]: query.model,
     [QUERY_CREATED_AT]: query.created_at,
@@ -409,7 +415,7 @@ export class QueryClient {
 
     const filter = [
       ...termQuery(ASSET_TYPE, 'query'),
-      ...termsQuery(STREAM_NAME, streamNames),
+      ...termsQuery(QUERY_AFFECTED_STREAMS, streamNames),
       ...termsQuery(QUERY_TYPE, filters?.type),
       ...termsQuery(QUERY_CATEGORY, filters?.category),
       ...termsQuery(QUERY_SOURCE, filters?.source),
@@ -435,7 +441,26 @@ export class QueryClient {
       query,
     });
 
-    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source).query);
+    const queriesById = new Map<string, StreamQuery>();
+
+    queriesResponse.hits.hits.forEach((hit) => {
+      const streamQuery = fromStorage(hit._source).query;
+      const existingQuery = queriesById.get(streamQuery.id);
+
+      if (!existingQuery) {
+        queriesById.set(streamQuery.id, streamQuery);
+        return;
+      }
+
+      queriesById.set(streamQuery.id, {
+        ...existingQuery,
+        affected_streams: Array.from(
+          new Set([...existingQuery.affected_streams, ...streamQuery.affected_streams])
+        ),
+      });
+    });
+
+    return Array.from(queriesById.values());
   }
 
   /**
@@ -794,16 +819,26 @@ export class QueryClient {
 
     const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
-    const indexOperationsMap = new Map(
+    const currentQueriesById = new Map<string, StreamQuery>(
+      currentQueryLinks.map((link) => [link.query.id, link.query] as const)
+    );
+    const timestamp = new Date().toISOString();
+    const indexOperationsMap = new Map<string, StreamQuery>(
       operations
         .filter((operation) => operation.index)
-        .map((operation) => [
-          operation.index!.id,
-          {
-            ...operation.index!,
-            esql: { query: buildEsqlQuery(indices, operation.index!) },
-          },
-        ])
+        .map((operation) => {
+          const nextQuery = operation.index!;
+          const currentQuery = currentQueriesById.get(nextQuery.id);
+          const query: StreamQuery = {
+            ...nextQuery,
+            affected_streams: [stream],
+            created_at: currentQuery?.created_at ?? timestamp,
+            updated_at: currentQuery ? timestamp : undefined,
+            esql: { query: buildEsqlQuery(indices, nextQuery) },
+          };
+
+          return [nextQuery.id, query] as const;
+        })
     );
     const deleteOperationIds = new Set(
       operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)
@@ -819,15 +854,7 @@ export class QueryClient {
       ...operations
         .filter((operation) => operation.index && !currentIds.has(operation.index!.id))
         .map((operation) =>
-          toQueryLinkFromQuery(
-            {
-              ...operation.index!,
-              esql: {
-                query: buildEsqlQuery(indices, operation.index!),
-              },
-            },
-            stream
-          )
+          toQueryLinkFromQuery(indexOperationsMap.get(operation.index!.id)!, stream)
         ),
     ];
 

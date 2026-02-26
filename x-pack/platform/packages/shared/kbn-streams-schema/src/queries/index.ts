@@ -30,7 +30,7 @@ export type StreamQueryCategory = z.infer<typeof streamQueryCategorySchema>;
 export type StreamQuerySource = z.infer<typeof streamQuerySourceSchema>;
 
 export interface StreamQuery extends StreamQueryBase {
-  stream_name: string;
+  affected_streams: string[];
   /**
    * @deprecated Use esql.query instead. Will be removed in a future version.
    */
@@ -75,7 +75,7 @@ export type StreamQueryInput = Omit<StreamQuery, 'esql'>;
 export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection(
   streamQueryBaseSchema,
   z.object({
-    stream_name: NonEmptyString,
+    affected_streams: z.array(NonEmptyString).min(1),
     feature: z
       .object({
         name: NonEmptyString,
@@ -114,7 +114,6 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
 
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
-  stream_name: NonEmptyString,
   feature: z
     .object({
       name: NonEmptyString,
@@ -133,8 +132,6 @@ export const upsertStreamQueryRequestSchema = z.object({
   tags: z.array(z.string()),
   source: streamQuerySourceSchema,
   model: z.string().optional(),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
 });
 
 export interface GetQueriesFilters {

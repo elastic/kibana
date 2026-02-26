@@ -173,7 +173,7 @@ export function AddSignificantEventFlyout({
           })
           .map((nextQuery) => ({
             id: v4(),
-            stream_name: definition.stream.name,
+            affected_streams: [definition.stream.name],
             kql: nextQuery.kql,
             esql: nextQuery.esql,
             title: nextQuery.title,
@@ -186,7 +186,6 @@ export function AddSignificantEventFlyout({
             model: nextQuery.model,
             description: nextQuery.description,
             tags: nextQuery.tags,
-            created_at: nextQuery.created_at,
           }))
       );
     }

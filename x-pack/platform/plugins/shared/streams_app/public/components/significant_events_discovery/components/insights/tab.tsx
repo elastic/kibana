@@ -16,39 +16,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { useFetchDiscoveryQueries } from '../../../../hooks/use_fetch_discovery_queries';
 import { Summary } from './summary';
 
 export function InsightsTab() {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const queriesFetch = useFetchDiscoveryQueries();
 
-  const queriesFetch = useStreamsAppFetch(
-    async ({ signal }) =>
-      streamsRepositoryClient.fetch('GET /internal/streams/_queries', {
-        params: {
-          query: {
-            from: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-            to: new Date().toISOString(),
-            bucketSize: '30s',
-          },
-        },
-        signal,
-      }),
-    [streamsRepositoryClient]
-  );
-
-  if (queriesFetch.loading) {
+  if (queriesFetch.isLoading) {
     return <EuiLoadingElastic />;
   }
 
-  const totalEvents = queriesFetch.value?.total ?? 0;
+  const totalEvents = queriesFetch.data?.total ?? 0;
 
   if (totalEvents === 0 || totalEvents === undefined) {
     return (

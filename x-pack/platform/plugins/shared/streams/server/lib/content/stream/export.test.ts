@@ -19,7 +19,15 @@ const streams = [
       { destination: 'logs.hello', where: { always: {} }, status: 'enabled' },
     ],
     queries: [
-      { id: 'logs-query', title: 'logs-query', kql: { query: 'logs' }, esql: { query: '' } },
+      {
+        id: 'logs-query',
+        title: 'logs-query',
+        kql: { query: 'logs' },
+        esql: { query: '' },
+        affected_streams: ['logs'],
+        type: 'match',
+        tags: [],
+      },
     ],
   }),
   testContentPackEntry({
@@ -30,7 +38,15 @@ const streams = [
   testContentPackEntry({
     name: 'logs.hello',
     queries: [
-      { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
+      {
+        id: 'hello-query',
+        title: 'hello-query',
+        kql: { query: 'hello' },
+        esql: { query: '' },
+        affected_streams: ['logs.hello'],
+        type: 'match',
+        tags: [],
+      },
     ],
   }),
 ];
@@ -53,7 +69,15 @@ describe('content pack export', () => {
           { destination: 'hello', where: { always: {} }, status: 'enabled' },
         ],
         queries: [
-          { id: 'logs-query', title: 'logs-query', kql: { query: 'logs' }, esql: { query: '' } },
+          {
+            id: 'logs-query',
+            title: 'logs-query',
+            kql: { query: 'logs' },
+            esql: { query: '' },
+            affected_streams: ['logs'],
+            type: 'match',
+            tags: [],
+          },
         ],
       }),
       testContentPackEntry({
@@ -64,7 +88,15 @@ describe('content pack export', () => {
       testContentPackEntry({
         name: 'hello',
         queries: [
-          { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
+          {
+            id: 'hello-query',
+            title: 'hello-query',
+            kql: { query: 'hello' },
+            esql: { query: '' },
+            affected_streams: ['logs.hello'],
+            type: 'match',
+            tags: [],
+          },
         ],
       }),
     ]);
@@ -101,7 +133,15 @@ describe('content pack export', () => {
       testContentPackEntry({
         name: 'hello',
         queries: [
-          { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
+          {
+            id: 'hello-query',
+            title: 'hello-query',
+            kql: { query: 'hello' },
+            esql: { query: '' },
+            affected_streams: ['logs.hello'],
+            type: 'match',
+            tags: [],
+          },
         ],
       }),
     ]);

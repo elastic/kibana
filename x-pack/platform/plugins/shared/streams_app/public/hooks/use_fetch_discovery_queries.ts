@@ -13,10 +13,10 @@ import { useFetchErrorToast } from './use_fetch_error_toast';
 export const DISCOVERY_QUERIES_QUERY_KEY = ['discoveryQueries'] as const;
 
 export const useFetchDiscoveryQueries = (
-  options: { name?: string; query?: string; page: number; perPage: number },
+  options: { name?: string; query?: string; page?: number; perPage?: number } = {},
   deps: unknown[] = []
 ) => {
-  const { name, query, page, perPage } = options;
+  const { name, query, page = 1, perPage = 10 } = options;
   const {
     dependencies: {
       start: {

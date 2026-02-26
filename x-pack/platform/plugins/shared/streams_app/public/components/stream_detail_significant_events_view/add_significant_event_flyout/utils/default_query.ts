@@ -18,7 +18,7 @@ export function defaultQuery({ streamName }: { streamName: string }): StreamQuer
     esql: {
       query: '',
     },
-    stream_name: streamName,
+    affected_streams: [streamName],
     feature: undefined,
     type: 'match',
     tags: [],

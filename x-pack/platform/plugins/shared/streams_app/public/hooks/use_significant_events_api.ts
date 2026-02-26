@@ -52,7 +52,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
   const { signal, abort, refresh } = useAbortController();
 
   return {
-    upsertQuery: async ({ id, esql, ...body }) => {
+    upsertQuery: async ({ id, esql, affected_streams: _affectedStreams, ...body }) => {
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {

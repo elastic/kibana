@@ -236,10 +236,16 @@ export function QueriesTable() {
         },
       },
       {
-        field: 'stream_name',
+        field: 'affected_streams',
         name: STREAM_COLUMN,
         render: (_: unknown, item: StreamQuery) => (
-          <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+            {item.affected_streams.map((streamName) => (
+              <EuiFlexItem key={streamName} grow={false}>
+                <EuiBadge color="hollow">{streamName}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         ),
       },
       {
@@ -282,8 +288,13 @@ export function QueriesTable() {
             description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
             enabled: () => discoverLocator !== undefined,
             onClick: (item) => {
+              const primaryStreamName = item.affected_streams[0];
+              if (!primaryStreamName) {
+                return;
+              }
+
               const definition = streamDefinitions.find(
-                (streamItem) => streamItem.stream.name === item.stream_name
+                (streamItem) => streamItem.stream.name === primaryStreamName
               );
 
               if (!definition) {

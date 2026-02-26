@@ -193,9 +193,13 @@ const getQueriesRoute = createServerRoute({
     const start = (page - 1) * perPage;
     const queriesPage = start >= total ? [] : sortedQueries.slice(start, start + perPage);
     const filteredQueryIds = new Set(queries.map((query) => query.id));
-    const unbacked = unbackedQueryLinks
-      .filter((queryLink) => filteredQueryIds.has(queryLink.query.id))
-      .map((queryLink) => queryLink.query.id);
+    const unbacked = Array.from(
+      new Set(
+        unbackedQueryLinks
+          .filter((queryLink) => filteredQueryIds.has(queryLink.query.id))
+          .map((queryLink) => queryLink.query.id)
+      )
+    );
 
     return { queries: queriesPage, unbacked, page, perPage, total };
   },

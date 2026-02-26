@@ -273,7 +273,7 @@ export async function saveQueries(
     queries.map((query) => ({
       index: {
         id: v4(),
-        stream_name: streamName,
+        affected_streams: [streamName],
         kql: query.kql,
         title: query.title,
         description: query.description,

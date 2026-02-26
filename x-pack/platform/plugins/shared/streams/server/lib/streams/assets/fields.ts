@@ -21,6 +21,7 @@ export const QUERY_SEVERITY_SCORE = 'query.severity_score';
 export const QUERY_TYPE = 'query.type';
 export const QUERY_CATEGORY = 'query.category';
 export const QUERY_EVIDENCE = 'query.evidence';
+export const QUERY_AFFECTED_STREAMS = 'query.affected_streams';
 export const QUERY_TAGS = 'query.tags';
 export const QUERY_SOURCE = 'query.source';
 export const QUERY_MODEL = 'query.model';

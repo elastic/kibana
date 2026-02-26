@@ -110,6 +110,7 @@ export function QueryDetailsFlyout({
     [queryOccurrencesChartData?.buckets]
   );
   const isSaveDisabled = !title.trim() || !query.trim() || isSaving;
+  const primaryStreamName = item.affected_streams[0];
 
   const handleCancelEdit = () => {
     setIsEditMode(false);
@@ -118,6 +119,10 @@ export function QueryDetailsFlyout({
     setSeverityScore(item.severity_score);
   };
   const handleSaveQuery = async () => {
+    if (!primaryStreamName) {
+      return;
+    }
+
     await onSave(
       {
         ...item,
@@ -128,7 +133,7 @@ export function QueryDetailsFlyout({
         },
         severity_score: severityScore,
       },
-      item.stream_name
+      primaryStreamName
     );
     setIsEditMode(false);
   };
@@ -204,7 +209,15 @@ export function QueryDetailsFlyout({
     },
     {
       title: STREAM_COLUMN,
-      description: <EuiBadge color="hollow">{item.stream_name}</EuiBadge>,
+      description: (
+        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+          {item.affected_streams.map((streamName) => (
+            <EuiFlexItem grow={false} key={streamName}>
+              <EuiBadge color="hollow">{streamName}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ),
     },
     {
       title: BACKED_STATUS_COLUMN,
@@ -412,7 +425,11 @@ export function QueryDetailsFlyout({
             setIsDeleteModalVisible(false);
           }}
           onConfirm={async () => {
-            await onDelete(item.id, item.stream_name);
+            if (!primaryStreamName) {
+              return;
+            }
+
+            await onDelete(item.id, primaryStreamName);
             setIsDeleteModalVisible(false);
           }}
           cancelButtonText={CANCEL_BUTTON_LABEL}

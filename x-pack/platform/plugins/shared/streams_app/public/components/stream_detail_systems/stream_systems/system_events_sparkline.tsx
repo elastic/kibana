@@ -26,6 +26,7 @@ export const SystemEventsSparklineLast24hrs = ({
 }) => {
   const query = useMemo(
     () => ({
+      affected_streams: [definition.name],
       feature: {
         name: system.name,
         filter: system.filter,
@@ -35,8 +36,10 @@ export const SystemEventsSparklineLast24hrs = ({
       esql: { query: '' },
       id: 'system-events-sparkline',
       title: system.name,
+      type: 'match' as const,
+      tags: [],
     }),
-    [system.name, system.filter, system.type]
+    [definition.name, system.name, system.filter, system.type]
   );
 
   const { noOfBuckets, timeRange }: { noOfBuckets: number; timeRange: AbsoluteTimeRange } =

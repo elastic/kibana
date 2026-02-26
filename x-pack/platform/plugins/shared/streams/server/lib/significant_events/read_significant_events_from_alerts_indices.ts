@@ -163,7 +163,6 @@ export async function readSignificantEventsFromAlertsIndices(
 
     return {
       ...toStreamQuery(queryLink),
-      stream_name: queryLink.stream_name,
       occurrences: isArray(occurrences)
         ? occurrences.map((occurrence) => ({
             date: occurrence.key_as_string,
@@ -180,7 +179,6 @@ export async function readSignificantEventsFromAlertsIndices(
     .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
     .map((queryLink) => ({
       ...toStreamQuery(queryLink),
-      stream_name: queryLink.stream_name,
       occurrences: [],
       change_points: {
         type: {
@@ -201,7 +199,7 @@ const toStreamQuery = (queryLink: QueryLink): StreamQuery => {
     id: queryLink.query.id,
     title: queryLink.query.title,
     description: queryLink.query.description,
-    stream_name: queryLink.stream_name,
+    affected_streams: queryLink.query.affected_streams ?? [queryLink.stream_name],
     kql: queryLink.query.kql,
     feature: queryLink.query.feature,
     severity_score: queryLink.query.severity_score,
