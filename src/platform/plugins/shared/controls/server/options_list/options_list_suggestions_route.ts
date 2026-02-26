@@ -55,7 +55,6 @@ export const setupOptionsListSuggestionsRoute = (
                 sort: schema.maybe(schema.any()),
                 filters: schema.maybe(schema.any()),
                 fieldSpec: schema.maybe(schema.any()),
-                allowExpensiveQueries: schema.boolean(),
                 ignoreValidations: schema.maybe(schema.boolean()),
                 searchString: schema.maybe(schema.string()),
                 searchTechnique: schema.maybe(
