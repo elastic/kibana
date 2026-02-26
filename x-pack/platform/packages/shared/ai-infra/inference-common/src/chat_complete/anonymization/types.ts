@@ -4,30 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AnonymizationEntityClass } from '@kbn/anonymization-common';
 import type { Message } from '../messages';
 
 interface AnonymizationRuleBase {
   type: string;
   enabled: boolean;
 }
-
-/**
- * All recognized entity class labels. Shared by field rules, regex rules, and NER output.
- * NER models additionally constrain their output to the CoNLL-03 subset: PER, ORG, LOC, MISC.
- */
-export type AnonymizationEntityClass =
-  | 'PER'
-  | 'ORG'
-  | 'LOC'
-  | 'MISC'
-  | 'HOST_NAME'
-  | 'USER_NAME'
-  | 'IP'
-  | 'EMAIL'
-  | 'CLOUD_ACCOUNT'
-  | 'ENTITY_NAME'
-  | 'RESOURCE_NAME'
-  | 'RESOURCE_ID';
 
 export interface NamedEntityRecognitionRule extends AnonymizationRuleBase {
   type: 'NER';
