@@ -397,7 +397,7 @@ describe('useESQLVariables', () => {
       expect(activePanels).toEqual(mockControlState);
     });
 
-    it('should return undefined if both currentTab.controlGroupState and savedSearchState.controlGroupJson are empty/invalid', async () => {
+    it('should return undefined if currentTab.controlGroupState is empty/invalid', async () => {
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,
       });
