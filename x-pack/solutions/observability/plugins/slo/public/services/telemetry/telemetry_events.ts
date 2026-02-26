@@ -13,16 +13,10 @@ const locationSchema = {
   _meta: { description: 'Where the flyout was opened from' },
 };
 
-const sloIdSchema = {
-  type: 'keyword' as const,
-  _meta: { description: 'The SLO identifier' },
-};
-
 const sloDetailsFlyoutViewedEventType: SloTelemetryEvent = {
   eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_VIEWED,
   schema: {
     location: locationSchema,
-    sloId: sloIdSchema,
   },
 };
 
@@ -30,7 +24,6 @@ const sloDetailsFlyoutTabChangedEventType: SloTelemetryEvent = {
   eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_TAB_CHANGED,
   schema: {
     location: locationSchema,
-    sloId: sloIdSchema,
     tabId: {
       type: 'keyword',
       _meta: { description: 'The tab identifier that was selected' },
@@ -42,7 +35,6 @@ const sloDetailsFlyoutOpenInAppClickedEventType: SloTelemetryEvent = {
   eventType: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_OPEN_IN_APP_CLICKED,
   schema: {
     location: locationSchema,
-    sloId: sloIdSchema,
   },
 };
 

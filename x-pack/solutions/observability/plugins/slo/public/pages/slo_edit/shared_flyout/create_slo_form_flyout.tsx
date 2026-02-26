@@ -14,6 +14,7 @@ import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
 import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useSloFlyoutTelemetry } from '../../../hooks/use_slo_flyout_telemetry';
 import type { FormSettings } from '../types';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
@@ -23,19 +24,20 @@ export default function CreateSLOFormFlyout({
   onClose,
   initialValues = {},
   formSettings,
-  location = 'unknown',
+  telemetryLocation,
 }: {
   onClose: () => void;
   initialValues: RecursivePartial<CreateSLOInput>;
   formSettings?: FormSettings;
-  location?: string;
+  telemetryLocation?: string;
 }) {
   const { telemetry } = usePluginContext();
+  const flyoutTelemetry = useSloFlyoutTelemetry(telemetry, telemetryLocation);
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
   useEffect(() => {
-    telemetry?.reportSloCreateFlyoutViewed({ location });
-  }, [telemetry, location]);
+    flyoutTelemetry.reportCreateFlyoutViewed();
+  }, [flyoutTelemetry]);
 
   return (
     <EuiFlyout

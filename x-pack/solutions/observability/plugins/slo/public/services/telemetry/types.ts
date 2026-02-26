@@ -9,18 +9,15 @@ import type { RootSchema } from '@kbn/core/public';
 
 export interface SloDetailsFlyoutViewedParams {
   location: string;
-  sloId: string;
 }
 
 export interface SloDetailsFlyoutTabChangedParams {
   location: string;
-  sloId: string;
   tabId: string;
 }
 
 export interface SloDetailsFlyoutOpenInAppClickedParams {
   location: string;
-  sloId: string;
 }
 
 export interface SloCreateFlyoutViewedParams {

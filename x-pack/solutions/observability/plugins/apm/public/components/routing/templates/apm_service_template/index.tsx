@@ -198,7 +198,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
           <SloOverviewFlyout
             serviceName={sloOverviewFlyout.serviceName}
             agentName={sloOverviewFlyout.agentName as AgentName | undefined}
-            location="service_overview"
+            telemetryLocation="service_overview"
             onClose={closeSloOverviewFlyout}
           />
         )}

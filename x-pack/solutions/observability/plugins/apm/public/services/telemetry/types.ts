@@ -23,41 +23,32 @@ export interface SearchQuerySubmittedParams {
 
 export interface SloOverviewFlyoutViewedParams {
   location: string;
-  serviceName: string;
 }
 
 export interface SloOverviewFlyoutServiceNameClickedParams {
   location: string;
-  serviceName: string;
 }
 
 export interface SloOverviewFlyoutSloLinkClickedParams {
   location: string;
-  serviceName: string;
 }
 
 export interface SloOverviewFlyoutAlertClickedParams {
   location: string;
-  serviceName: string;
-  sloId: string;
 }
 
 export interface SloOverviewFlyoutSearchQueriedParams {
   location: string;
-  serviceName: string;
   searchQuery: string;
 }
 
 export interface SloOverviewFlyoutStatusFilteredParams {
   location: string;
-  serviceName: string;
   statuses: string[];
 }
 
 export interface SloOverviewFlyoutSloClickedParams {
   location: string;
-  serviceName: string;
-  sloId: string;
 }
 
 export type TelemetryEventParams =

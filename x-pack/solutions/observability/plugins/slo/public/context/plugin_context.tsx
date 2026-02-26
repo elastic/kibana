@@ -21,7 +21,7 @@ export interface PluginContextValue {
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   experimentalFeatures?: ExperimentalFeatures;
   sloClient: SLORepositoryClient;
-  telemetry?: ISloTelemetryClient;
+  telemetry: ISloTelemetryClient;
 }
 
 export const PluginContext = createContext<PluginContextValue | null>(null);

@@ -26,6 +26,7 @@ import React, { useMemo, useCallback, useEffect } from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useSloFlyoutTelemetry } from '../../../hooks/use_slo_flyout_telemetry';
 import {
   SloOverviewDetailsContent,
   SloOverviewDetailsFlyoutFooter,
@@ -39,7 +40,7 @@ export interface SLODetailsFlyoutProps {
   hideFooter?: boolean;
   session?: 'start' | 'inherit';
   initialTabId?: SloTabId;
-  location?: string;
+  telemetryLocation?: string;
 }
 
 const TITLES = {
@@ -63,10 +64,11 @@ export default function SLODetailsFlyout({
   hideFooter = false,
   session = 'inherit',
   initialTabId,
-  location = 'unknown',
+  telemetryLocation,
 }: SLODetailsFlyoutProps) {
   const { share } = useKibana().services;
   const { telemetry } = usePluginContext();
+  const flyoutTelemetry = useSloFlyoutTelemetry(telemetry, telemetryLocation);
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',
@@ -84,8 +86,8 @@ export default function SLODetailsFlyout({
   });
 
   useEffect(() => {
-    telemetry?.reportSloDetailsFlyoutViewed({ location, sloId });
-  }, [telemetry, location, sloId]);
+    flyoutTelemetry.reportDetailsFlyoutViewed();
+  }, [flyoutTelemetry]);
 
   const isNotFound = isSuccess && !slo;
 
@@ -112,16 +114,14 @@ export default function SLODetailsFlyout({
           href={sloDetailsUrl}
           data-test-subj="sloDetailsFlyoutTitleLink"
           target="_blank"
-          onClick={() =>
-            telemetry?.reportSloDetailsFlyoutOpenInAppClicked({ location, sloId: slo.id })
-          }
+          onClick={() => flyoutTelemetry.reportDetailsFlyoutOpenInAppClicked()}
         >
           {slo.name}
         </EuiLink>
       );
     }
     return slo?.name ?? '';
-  }, [isError, isNotFound, isLoading, slo, sloDetailsUrl, location, telemetry]);
+  }, [isError, isNotFound, isLoading, slo, sloDetailsUrl, flyoutTelemetry]);
 
   const renderBody = useCallback(() => {
     if (isError) {
@@ -173,8 +173,14 @@ export default function SLODetailsFlyout({
       return null;
     }
 
-    return <SloOverviewDetailsContent slo={slo} initialTabId={initialTabId} location={location} />;
-  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId, location]);
+    return (
+      <SloOverviewDetailsContent
+        slo={slo}
+        initialTabId={initialTabId}
+        telemetryLocation={telemetryLocation}
+      />
+    );
+  }, [sloId, isError, isNotFound, isLoading, slo, initialTabId, telemetryLocation]);
 
   const renderFooter = useCallback(() => {
     if (isError || isNotFound || isLoading || !slo) {
@@ -191,12 +197,10 @@ export default function SLODetailsFlyout({
       <SloOverviewDetailsFlyoutFooter
         slo={slo}
         onClose={onClose}
-        onOpenInApp={() =>
-          telemetry?.reportSloDetailsFlyoutOpenInAppClicked({ location, sloId: slo.id })
-        }
+        onOpenInApp={() => flyoutTelemetry.reportDetailsFlyoutOpenInAppClicked()}
       />
     );
-  }, [isError, isNotFound, isLoading, slo, onClose, telemetry, location]);
+  }, [isError, isNotFound, isLoading, slo, onClose, flyoutTelemetry]);
 
   return (
     <EuiFlyout
