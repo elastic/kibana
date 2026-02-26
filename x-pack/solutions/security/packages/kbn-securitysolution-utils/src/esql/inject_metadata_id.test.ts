@@ -8,17 +8,6 @@
 import { injectMetadataId } from './inject_metadata_id';
 
 describe('injectMetadataId', () => {
-  describe('aggregating queries (unchanged)', () => {
-    it.each([
-      ['FROM logs* | STATS count(*) BY host'],
-      ['FROM logs* | STATS total = SUM(bytes) BY host | WHERE total > 100'],
-      ['FROM logs* METADATA _id | STATS count(*) BY host'],
-      ['FROM logs* | STATS count(*) BY host | KEEP host'],
-    ])('returns aggregating query unchanged: "%s"', (query) => {
-      expect(injectMetadataId(query)).toBe(query);
-    });
-  });
-
   describe('METADATA _id injection into FROM', () => {
     it('injects METADATA _id when FROM has no metadata', () => {
       expect(injectMetadataId('FROM logs*')).toBe('FROM logs* METADATA _id');

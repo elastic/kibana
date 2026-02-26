@@ -14,13 +14,13 @@ import {
   isColumn,
   isFunctionExpression,
 } from '@kbn/esql-language';
-import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 
 /**
- * Ensures that a non-aggregating ES|QL query has `METADATA _id` in the FROM command
+ * Ensures that an ES|QL query has `METADATA _id` in the FROM command
  * and that any downstream KEEP command also includes `_id`.
  *
- * Aggregating queries (those with STATS...BY) are returned unchanged.
+ * The caller is responsible for skipping aggregating queries — this function
+ * performs the transformation unconditionally.
  *
  * DROP _id is intentionally left untouched — removing a user's explicit DROP
  * would be surprising. This remains an accepted limitation.
@@ -28,13 +28,6 @@ import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 export const injectMetadataId = (query: string): string => {
   const { root } = Parser.parse(query);
 
-  if (isAggregatingQuery(root)) {
-    return query;
-  }
-
-  // Upsert METADATA _id into the FROM command: creates the METADATA clause if
-  // absent, appends _id if the clause exists without it, no-ops if _id is
-  // already present.
   mutate.commands.from.metadata.upsert(root, '_id');
 
   // Best-effort: add _id to KEEP commands that would otherwise drop it.
