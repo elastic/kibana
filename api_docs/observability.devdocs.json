@@ -11119,7 +11119,7 @@
           "\"ALERTS_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -18845,7 +18845,7 @@
           "\"observability-overview\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -18862,7 +18862,7 @@
           "\"observability\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 65,
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -23093,7 +23093,7 @@
           "\nuiSettings definitions for Observability."
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -23106,7 +23106,7 @@
             "label": "[enableInspectEsQueries]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -23122,7 +23122,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 44,
+                "lineNumber": 45,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23135,7 +23135,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 45,
+                "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23151,7 +23151,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 48,
+                "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23164,7 +23164,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 49,
+                "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23187,7 +23187,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 52,
+                "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23203,7 +23203,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 53,
+                "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23219,7 +23219,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 54,
+                "lineNumber": 55,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23234,7 +23234,7 @@
             "label": "[maxSuggestions]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -23250,7 +23250,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23263,7 +23263,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 58,
+                "lineNumber": 59,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23276,7 +23276,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 61,
+                "lineNumber": 62,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23289,7 +23289,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 62,
+                "lineNumber": 63,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23312,7 +23312,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 65,
+                "lineNumber": 66,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23328,7 +23328,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 66,
+                "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23343,7 +23343,7 @@
             "label": "[enableComparisonByDefault]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -23359,7 +23359,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 69,
+                "lineNumber": 70,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23372,7 +23372,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 70,
+                "lineNumber": 71,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23388,7 +23388,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 73,
+                "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23401,7 +23401,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 74,
+                "lineNumber": 75,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23424,7 +23424,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 78,
+                "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23440,7 +23440,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 79,
+                "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23455,7 +23455,7 @@
             "label": "[defaultApmServiceEnvironment]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -23471,7 +23471,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 82,
+                "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23487,7 +23487,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 83,
+                "lineNumber": 84,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23500,7 +23500,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 84,
+                "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23513,7 +23513,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 87,
+                "lineNumber": 88,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23526,7 +23526,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 91,
+                "lineNumber": 92,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23549,7 +23549,7 @@
                   "<string>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 92,
+                "lineNumber": 93,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23565,7 +23565,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 93,
+                "lineNumber": 94,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23580,7 +23580,7 @@
             "label": "[apmProgressiveLoading]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -23596,7 +23596,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 96,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23609,7 +23609,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 97,
+                "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23622,7 +23622,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 100,
+                "lineNumber": 101,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23644,7 +23644,7 @@
                   }
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 104,
+                "lineNumber": 105,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23675,7 +23675,7 @@
                   ">"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 105,
+                "lineNumber": 106,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23691,7 +23691,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 111,
+                "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23707,7 +23707,7 @@
                   "\"select\""
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 112,
+                "lineNumber": 113,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23730,7 +23730,7 @@
                   "[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 113,
+                "lineNumber": 114,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23743,7 +23743,7 @@
                 "label": "optionLabels",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 119,
+                "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -23756,7 +23756,7 @@
                     "label": "[ProgressiveLoadingQuality.off]",
                     "description": [],
                     "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                    "lineNumber": 120,
+                    "lineNumber": 121,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -23769,7 +23769,7 @@
                     "label": "[ProgressiveLoadingQuality.low]",
                     "description": [],
                     "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                    "lineNumber": 126,
+                    "lineNumber": 127,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -23782,7 +23782,7 @@
                     "label": "[ProgressiveLoadingQuality.medium]",
                     "description": [],
                     "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                    "lineNumber": 132,
+                    "lineNumber": 133,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -23795,7 +23795,7 @@
                     "label": "[ProgressiveLoadingQuality.high]",
                     "description": [],
                     "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                    "lineNumber": 138,
+                    "lineNumber": 139,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -23813,7 +23813,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 145,
+                "lineNumber": 146,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23828,7 +23828,7 @@
             "label": "[apmServiceGroupMaxNumberOfServices]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 147,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -23844,7 +23844,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 148,
+                "lineNumber": 149,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23857,7 +23857,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 149,
+                "lineNumber": 150,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23870,7 +23870,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 152,
+                "lineNumber": 153,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23883,7 +23883,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 153,
+                "lineNumber": 154,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23906,7 +23906,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 156,
+                "lineNumber": 157,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23922,7 +23922,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 157,
+                "lineNumber": 158,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23937,7 +23937,7 @@
             "label": "[enableInfrastructureAssetCustomDashboards]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 159,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -23953,7 +23953,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 160,
+                "lineNumber": 161,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23966,7 +23966,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 161,
+                "lineNumber": 162,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23982,7 +23982,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 164,
+                "lineNumber": 165,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -23995,7 +23995,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 165,
+                "lineNumber": 166,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24018,7 +24018,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 171,
+                "lineNumber": 172,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24034,7 +24034,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 172,
+                "lineNumber": 173,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24050,7 +24050,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 173,
+                "lineNumber": 174,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24065,7 +24065,7 @@
             "label": "[apmEnableTableSearchBar]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 175,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -24081,7 +24081,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 176,
+                "lineNumber": 177,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24094,7 +24094,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 177,
+                "lineNumber": 178,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24107,7 +24107,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 180,
+                "lineNumber": 181,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24130,7 +24130,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 184,
+                "lineNumber": 185,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24146,7 +24146,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 185,
+                "lineNumber": 186,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24162,7 +24162,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 186,
+                "lineNumber": 187,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24178,7 +24178,7 @@
                   "\"boolean\""
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 187,
+                "lineNumber": 188,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24194,7 +24194,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 188,
+                "lineNumber": 189,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24210,7 +24210,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 189,
+                "lineNumber": 190,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24225,7 +24225,7 @@
             "label": "[apmEnableServiceInventoryTableSearchBar]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 191,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -24241,7 +24241,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 192,
+                "lineNumber": 193,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24254,7 +24254,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 193,
+                "lineNumber": 194,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24267,7 +24267,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 196,
+                "lineNumber": 197,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24290,7 +24290,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 203,
+                "lineNumber": 204,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24306,7 +24306,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 204,
+                "lineNumber": 205,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24322,7 +24322,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 205,
+                "lineNumber": 206,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24338,7 +24338,7 @@
                   "\"boolean\""
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 206,
+                "lineNumber": 207,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24354,7 +24354,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 207,
+                "lineNumber": 208,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24370,7 +24370,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 208,
+                "lineNumber": 209,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24385,7 +24385,7 @@
             "label": "[apmAWSLambdaPriceFactor]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 210,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -24401,7 +24401,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 211,
+                "lineNumber": 212,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24414,7 +24414,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 212,
+                "lineNumber": 213,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24430,7 +24430,7 @@
                   "\"json\""
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 215,
+                "lineNumber": 216,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24443,7 +24443,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 216,
+                "lineNumber": 217,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24456,7 +24456,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 217,
+                "lineNumber": 218,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24495,7 +24495,7 @@
                   "<number>; }>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 220,
+                "lineNumber": 221,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24511,7 +24511,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 224,
+                "lineNumber": 225,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24526,7 +24526,7 @@
             "label": "[apmAWSLambdaRequestCostPerMillion]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 226,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -24542,7 +24542,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 227,
+                "lineNumber": 228,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24555,7 +24555,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 228,
+                "lineNumber": 229,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24568,7 +24568,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 231,
+                "lineNumber": 232,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24591,7 +24591,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 232,
+                "lineNumber": 233,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24607,7 +24607,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 233,
+                "lineNumber": 234,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24622,7 +24622,7 @@
             "label": "[syntheticsThrottlingEnabled]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 235,
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -24638,7 +24638,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 236,
+                "lineNumber": 237,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24651,7 +24651,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 237,
+                "lineNumber": 238,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24667,7 +24667,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 240,
+                "lineNumber": 241,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24680,7 +24680,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 241,
+                "lineNumber": 242,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24703,7 +24703,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 253,
+                "lineNumber": 254,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24719,7 +24719,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 254,
+                "lineNumber": 255,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24735,7 +24735,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 255,
+                "lineNumber": 256,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24751,7 +24751,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 256,
+                "lineNumber": 257,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24766,7 +24766,7 @@
             "label": "[enableLegacyUptimeApp]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 258,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -24782,7 +24782,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 259,
+                "lineNumber": 260,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24795,7 +24795,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 260,
+                "lineNumber": 261,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24811,7 +24811,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 263,
+                "lineNumber": 264,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24824,7 +24824,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 264,
+                "lineNumber": 265,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24847,7 +24847,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 268,
+                "lineNumber": 269,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24863,7 +24863,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 269,
+                "lineNumber": 270,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24879,7 +24879,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 270,
+                "lineNumber": 271,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24894,7 +24894,7 @@
             "label": "[profilingShowErrorFrames]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 272,
+            "lineNumber": 273,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -24910,7 +24910,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 273,
+                "lineNumber": 274,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24923,7 +24923,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 274,
+                "lineNumber": 275,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24939,7 +24939,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 277,
+                "lineNumber": 278,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24962,7 +24962,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 278,
+                "lineNumber": 279,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24978,7 +24978,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 279,
+                "lineNumber": 280,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -24994,7 +24994,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 280,
+                "lineNumber": 281,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25009,7 +25009,7 @@
             "label": "[profilingPervCPUWattX86]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 282,
+            "lineNumber": 283,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -25025,7 +25025,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 283,
+                "lineNumber": 284,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25038,7 +25038,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 284,
+                "lineNumber": 285,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25051,7 +25051,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 287,
+                "lineNumber": 288,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25064,7 +25064,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 288,
+                "lineNumber": 289,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25087,7 +25087,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 291,
+                "lineNumber": 292,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25103,7 +25103,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 292,
+                "lineNumber": 293,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25119,7 +25119,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 293,
+                "lineNumber": 294,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25134,7 +25134,7 @@
             "label": "[profilingPervCPUWattArm64]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 295,
+            "lineNumber": 296,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -25150,7 +25150,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 296,
+                "lineNumber": 297,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25163,7 +25163,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 297,
+                "lineNumber": 298,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25176,7 +25176,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 300,
+                "lineNumber": 301,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25189,7 +25189,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 301,
+                "lineNumber": 302,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25212,7 +25212,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 307,
+                "lineNumber": 308,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25228,7 +25228,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 308,
+                "lineNumber": 309,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25244,7 +25244,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 309,
+                "lineNumber": 310,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25259,7 +25259,7 @@
             "label": "[profilingDatacenterPUE]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 311,
+            "lineNumber": 312,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -25275,7 +25275,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 312,
+                "lineNumber": 313,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25288,7 +25288,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 313,
+                "lineNumber": 314,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25301,7 +25301,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 316,
+                "lineNumber": 317,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25314,7 +25314,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 317,
+                "lineNumber": 318,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25337,7 +25337,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 332,
+                "lineNumber": 333,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25353,7 +25353,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 333,
+                "lineNumber": 334,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25369,7 +25369,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 334,
+                "lineNumber": 335,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25384,7 +25384,7 @@
             "label": "[profilingCo2PerKWH]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 336,
+            "lineNumber": 337,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -25400,7 +25400,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 337,
+                "lineNumber": 338,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25413,7 +25413,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 338,
+                "lineNumber": 339,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25426,7 +25426,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 341,
+                "lineNumber": 342,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25439,7 +25439,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 342,
+                "lineNumber": 343,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25462,7 +25462,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 356,
+                "lineNumber": 357,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25478,7 +25478,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 357,
+                "lineNumber": 358,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25494,7 +25494,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 358,
+                "lineNumber": 359,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25509,7 +25509,7 @@
             "label": "[profilingAWSCostDiscountRate]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 360,
+            "lineNumber": 361,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -25525,7 +25525,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 361,
+                "lineNumber": 362,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25538,7 +25538,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 362,
+                "lineNumber": 363,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25551,7 +25551,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 365,
+                "lineNumber": 366,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25574,7 +25574,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 366,
+                "lineNumber": 367,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25590,7 +25590,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 367,
+                "lineNumber": 368,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25603,7 +25603,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 368,
+                "lineNumber": 369,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25619,7 +25619,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 375,
+                "lineNumber": 376,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25634,7 +25634,7 @@
             "label": "[profilingAzureCostDiscountRate]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 377,
+            "lineNumber": 378,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -25650,7 +25650,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 378,
+                "lineNumber": 379,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25663,7 +25663,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 379,
+                "lineNumber": 380,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25676,7 +25676,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 382,
+                "lineNumber": 383,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25699,7 +25699,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 383,
+                "lineNumber": 384,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25715,7 +25715,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 384,
+                "lineNumber": 385,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25728,7 +25728,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 385,
+                "lineNumber": 386,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25744,7 +25744,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 392,
+                "lineNumber": 393,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25759,7 +25759,7 @@
             "label": "[profilingCostPervCPUPerHour]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 394,
+            "lineNumber": 395,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -25775,7 +25775,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 395,
+                "lineNumber": 396,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25788,7 +25788,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 396,
+                "lineNumber": 397,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25801,7 +25801,7 @@
                 "label": "value",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 399,
+                "lineNumber": 400,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25814,7 +25814,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 400,
+                "lineNumber": 401,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25837,7 +25837,7 @@
                   "<number>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 406,
+                "lineNumber": 407,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25853,7 +25853,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 407,
+                "lineNumber": 408,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25869,7 +25869,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 408,
+                "lineNumber": 409,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25884,7 +25884,7 @@
             "label": "[apmEnableTransactionProfiling]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 410,
+            "lineNumber": 411,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -25900,7 +25900,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 411,
+                "lineNumber": 412,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25913,7 +25913,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 412,
+                "lineNumber": 413,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25929,7 +25929,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 415,
+                "lineNumber": 416,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25952,7 +25952,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 416,
+                "lineNumber": 417,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25968,7 +25968,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 417,
+                "lineNumber": 418,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25984,7 +25984,135 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 418,
+                "lineNumber": 419,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.uiSettings.apmUseUnifiedTraceWaterfall",
+            "type": "Object",
+            "tags": [],
+            "label": "[apmUseUnifiedTraceWaterfall]",
+            "description": [],
+            "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+            "lineNumber": 421,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmUseUnifiedTraceWaterfall.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "lineNumber": 422,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmUseUnifiedTraceWaterfall.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "lineNumber": 423,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmUseUnifiedTraceWaterfall.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "lineNumber": 426,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmUseUnifiedTraceWaterfall.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "lineNumber": 427,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmUseUnifiedTraceWaterfall.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "lineNumber": 430,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmUseUnifiedTraceWaterfall.requiresPageReload",
+                "type": "boolean",
+                "tags": [],
+                "label": "requiresPageReload",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "lineNumber": 431,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.apmUseUnifiedTraceWaterfall.solutionViews",
+                "type": "Array",
+                "tags": [],
+                "label": "solutionViews",
+                "description": [],
+                "signature": [
+                  "(\"oblt\" | \"classic\")[]"
+                ],
+                "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
+                "lineNumber": 432,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -25999,7 +26127,7 @@
             "label": "[searchExcludedDataTiers]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 420,
+            "lineNumber": 434,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -26015,7 +26143,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 421,
+                "lineNumber": 435,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26028,7 +26156,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 422,
+                "lineNumber": 436,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26041,7 +26169,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 425,
+                "lineNumber": 439,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26057,7 +26185,7 @@
                   "never[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 432,
+                "lineNumber": 446,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26080,7 +26208,7 @@
                   "<(\"data_cold\" | \"data_frozen\")[]>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 433,
+                "lineNumber": 447,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26096,7 +26224,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 436,
+                "lineNumber": 450,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26112,7 +26240,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 437,
+                "lineNumber": 451,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26128,7 +26256,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 438,
+                "lineNumber": 452,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26143,7 +26271,7 @@
             "label": "[enableDiagnosticMode]",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-            "lineNumber": 440,
+            "lineNumber": 454,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -26159,7 +26287,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 441,
+                "lineNumber": 455,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26172,7 +26300,7 @@
                 "label": "name",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 442,
+                "lineNumber": 456,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26188,7 +26316,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 445,
+                "lineNumber": 459,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26201,7 +26329,7 @@
                 "label": "description",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 446,
+                "lineNumber": 460,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26224,7 +26352,7 @@
                   "<boolean>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 450,
+                "lineNumber": 464,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26240,7 +26368,7 @@
                   "false"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 451,
+                "lineNumber": 465,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26256,7 +26384,7 @@
                   "(\"oblt\" | \"classic\")[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 452,
+                "lineNumber": 466,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -26272,7 +26400,7 @@
                   "true"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability/server/ui_settings.ts",
-                "lineNumber": 453,
+                "lineNumber": 467,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -27540,7 +27668,7 @@
           "\"ALERTS_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -27660,6 +27788,23 @@
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
         "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmUseUnifiedTraceWaterfall",
+        "type": "string",
+        "tags": [],
+        "label": "apmUseUnifiedTraceWaterfall",
+        "description": [],
+        "signature": [
+          "\"observability:apmUseUnifiedTraceWaterfall\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -27797,7 +27942,7 @@
           "\"OBSERVABILITY_CASES_DETAIL_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 71,
+        "lineNumber": 72,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -27816,7 +27961,7 @@
           "\"observabilityCases\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 55,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": true,
         "trackAdoption": false,
@@ -27834,7 +27979,7 @@
           "\"observabilityCasesV2\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 56,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -27851,7 +27996,7 @@
           "\"observabilityCasesV3\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -27868,7 +28013,7 @@
           "\"OBSERVABILITY_CASES_OVERVIEW_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -27919,7 +28064,7 @@
           "\"observability:enableDiagnosticMode\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/ui_settings_keys.ts",
-        "lineNumber": 34,
+        "lineNumber": 35,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28029,7 +28174,7 @@
           "\"observability-overview\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28046,7 +28191,7 @@
           "\"observability\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 65,
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28199,7 +28344,7 @@
           "\"slo\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 58,
+        "lineNumber": 59,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28216,7 +28361,7 @@
           "\"SYNTHETICS_ADD_MONITOR_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 76,
+        "lineNumber": 77,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28233,7 +28378,7 @@
           "\"SYNTHETICS_EDIT_MONITOR_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 75,
+        "lineNumber": 76,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28250,7 +28395,7 @@
           "\"SYNTHETICS_MONITOR_DETAIL_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 72,
+        "lineNumber": 73,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28267,7 +28412,7 @@
           "\"SYNTHETICS_MONITOR_GROUP_BY_LOCATION_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 73,
+        "lineNumber": 74,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28284,7 +28429,7 @@
           "\"SYNTHETICS_SETTINGS\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 77,
+        "lineNumber": 78,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -28468,7 +28613,7 @@
           "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; createRuleFromTemplate: (templateId: string) => string; editRule: (id: string) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
-        "lineNumber": 81,
+        "lineNumber": 82,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
