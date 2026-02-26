@@ -1,8 +1,9 @@
 # Migration Workflow (Condensed)
 
-## TL;DR migration recipe
+## Important note
 
 - If the suite mostly validates **data correctness**, migrate it to a Scout **API** test (or unit/integration) instead of a Scout UI test.
+- Prefer component/unit tests for isolated UI behaviors rather than Scout functional tests.
 - Follow steps **1–9** below. Common migration failures: missing UI tags, wrong Scout package imports, relying on ordering/shared state, and ingestion/setup that isn’t space/parallel-safe.
 
 ## Migration checklist
