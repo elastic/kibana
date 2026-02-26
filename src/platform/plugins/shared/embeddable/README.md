@@ -208,8 +208,7 @@ Derive Embeddable state typescript types from REST API schemas to ensure type co
 import type { TypeOf } from '@kbn/config-schema';
 
 const myEmbeddlabeStateSchema = schema: schema.object({
-  required_field_foo: schema.string(),
-  optional_field_foo: schema.maybe(schema.string()),
+  foo: schema.string(),
 });
 
 export type MyEmbeddableState = TypeOf<typeof myEmbeddlabeStateSchema>;
@@ -228,8 +227,7 @@ export const getMyEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFn
     serializedTitlesSchema,
     getDrilldownsSchema(MY_EMBEDDABLE_SUPPORTED_TRIGGERS),
     schema.object({
-      required_field_foo: schema.string(),
-      optional_field_foo: schema.maybe(schema.string()),
+      foo: schema.string(),
     })
   ])
 };
@@ -263,7 +261,7 @@ export const myEmbeddableFactory: EmbeddableFactory<
         serializeState: () => {
           // Embeddable serializes state as MyEmbeddableState
           return {
-            required_field_foo: 'hello world'
+            foo: 'hello world'
           }
         }
       },
