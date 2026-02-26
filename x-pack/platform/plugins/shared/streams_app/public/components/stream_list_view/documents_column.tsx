@@ -100,6 +100,7 @@ export function DocumentsColumn({
     <EuiFlexGroup
       alignItems="center"
       gutterSize="m"
+      responsive={false}
       className={css`
         height: ${euiTheme.size.xl};
         white-space: nowrap;
@@ -130,6 +131,8 @@ export function DocumentsColumn({
               display: flex;
               justify-content: center;
               align-items: center;
+              overflow: hidden;
+              min-width: 0;
             `}
           >
             {hasData ? (

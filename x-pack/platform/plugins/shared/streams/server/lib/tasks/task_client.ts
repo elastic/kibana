@@ -100,7 +100,7 @@ export class TaskClient<TaskType extends string> {
   public async getStatusesByType<TParams extends {} = {}, TPayload extends {} = {}>(
     taskType: TaskType,
     taskIds?: string[]
-  ): Promise<Map<string, TaskStatus>> {
+  ): Promise<Map<string, { status: TaskStatus; payload?: TPayload }>> {
     const query: {
       bool: { filter: Array<{ term: { type: TaskType } } | { terms: { id: string[] } }> };
     } = {
@@ -119,7 +119,7 @@ export class TaskClient<TaskType extends string> {
       query,
     });
 
-    const results = new Map<string, TaskStatus>();
+    const results = new Map<string, { status: TaskStatus; payload?: TPayload }>();
 
     for (const hit of response.hits.hits) {
       const task = hit._source as PersistedTask<TParams, TPayload>;
@@ -131,7 +131,12 @@ export class TaskClient<TaskType extends string> {
         status = task.status;
       }
 
-      results.set(task.id, status);
+      const payload =
+        task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged
+          ? task.task.payload
+          : undefined;
+
+      results.set(task.id, { status, payload });
     }
 
     return results;

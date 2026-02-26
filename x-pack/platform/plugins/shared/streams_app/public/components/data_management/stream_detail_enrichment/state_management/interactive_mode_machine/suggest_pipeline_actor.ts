@@ -251,6 +251,7 @@ export type LoadExistingSuggestionResult =
   | { type: 'in_progress' }
   | { type: 'being_canceled' }
   | { type: 'failed'; error: string }
+  | { type: 'no_suggestions' }
   | { type: 'none' };
 
 /**
@@ -307,8 +308,7 @@ export async function loadExistingSuggestionLogic(
           pipeline: streamlangDSLSchema.parse(taskResult.pipeline),
         };
       }
-      // Task completed but no pipeline (NoSuggestionsError case)
-      return { type: 'none' };
+      return { type: 'no_suggestions' };
 
     case TaskStatus.Failed:
       return { type: 'failed', error: taskResult.error };

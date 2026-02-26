@@ -86,6 +86,7 @@ export const interactiveModeMachine = setup({
     notifySuggestionFailure: (_, __: { event: { error: unknown } }) => {},
     cancelSuggestionTask: (_, __: { streamName: string }) => {},
     acknowledgeSuggestionTask: (_, __: { streamName: string }) => {},
+    deleteSuggestionTask: (_, __: { streamName: string }) => {},
     addProcessor: assign(
       (
         assignArgs,
@@ -548,6 +549,12 @@ export const interactiveModeMachine = setup({
                 target: 'idle',
               },
               {
+                // Handle completed task that produced no suggestions
+                guard: ({ context, event }) =>
+                  event.output.type === 'no_suggestions' && context.initialStepRefs.length === 0,
+                target: 'noSuggestionsFound',
+              },
+              {
                 // For 'none', 'being_canceled', or when stream already has steps - go to idle
                 target: 'idle',
               },
@@ -739,7 +746,7 @@ export const interactiveModeMachine = setup({
               target: 'idle',
               actions: [
                 {
-                  type: 'acknowledgeSuggestionTask',
+                  type: 'deleteSuggestionTask',
                   params: ({ context }) => ({ streamName: context.streamName }),
                 },
                 { type: 'clearSuggestionError' },
@@ -1024,6 +1031,18 @@ export const createInteractiveModeMachineImplementations = ({
         } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
         .catch(() => {
           // Ignore errors - task may not exist or may have already been acknowledged
+        });
+    },
+    deleteSuggestionTask: (_, params: { streamName: string }) => {
+      streamsRepositoryClient
+        .fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
+          params: {
+            path: { name: params.streamName },
+            body: { action: 'delete' },
+          },
+        } as Parameters<typeof streamsRepositoryClient.fetch<'POST /internal/streams/{name}/_pipeline_suggestion/_task'>>[1])
+        .catch(() => {
+          // Ignore errors - task may not exist or may have already been deleted
         });
     },
   },

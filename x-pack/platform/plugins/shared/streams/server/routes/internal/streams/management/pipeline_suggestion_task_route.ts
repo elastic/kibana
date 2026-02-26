@@ -105,6 +105,9 @@ const pipelineSuggestionTaskRoute = createServerRoute({
           .literal('acknowledge')
           .describe('Acknowledge a completed pipeline suggestion task'),
       }),
+      z.object({
+        action: z.literal('delete').describe('Delete a pipeline suggestion task'),
+      }),
     ]),
   }),
   handler: async ({
@@ -284,16 +287,21 @@ const pipelineSuggestionBulkStatusRoute = createServerRoute({
 
       const statusMap = await taskClient.getStatusesByType(taskType, taskIds);
 
-      for (const [taskId, status] of statusMap.entries()) {
+      for (const [taskId, { status, payload }] of statusMap.entries()) {
         const extractedStreamName = extractStreamNameFromTaskId(taskId, taskType);
         const counts = getOrCreateCounts(extractedStreamName);
 
         if (taskType === STREAMS_PIPELINE_SUGGESTION_TASK_TYPE) {
-          if (status === TaskStatus.Completed) {
+          const hasEmptyPipeline =
+            status === TaskStatus.Completed &&
+            payload != null &&
+            'pipeline' in payload &&
+            payload.pipeline == null;
+          if (status === TaskStatus.Completed && !hasEmptyPipeline) {
             counts.pipelineCount += 1;
           } else if (status === TaskStatus.InProgress || status === TaskStatus.Stale) {
             counts.pipelineInProgressCount += 1;
-          } else if (status === TaskStatus.Failed) {
+          } else if (status === TaskStatus.Failed || hasEmptyPipeline) {
             counts.pipelineFailedCount += 1;
           }
         } else if (taskType === FEATURES_IDENTIFICATION_TASK_TYPE) {

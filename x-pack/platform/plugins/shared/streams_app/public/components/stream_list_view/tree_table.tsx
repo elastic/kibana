@@ -71,6 +71,17 @@ const datePickerStyle = css`
   }
 `;
 
+// This makes the table horizontaly scrollable if space is thight,
+// but keeps the header and footers in place.
+const scrollableTableStyle = css`
+  overflow-x: auto;
+
+  > *:not(table) {
+    position: sticky;
+    left: 0;
+  }
+`;
+
 const SUGGESTION_STATUS_POLLING_INTERVAL_MS = 2000;
 
 export function StreamsTreeTable({
@@ -399,12 +410,14 @@ export function StreamsTreeTable({
     <EuiInMemoryTable<TableRow>
       loading={loading}
       data-test-subj="streamsTable"
+      className={scrollableTableStyle}
       columns={[
         {
           field: 'nameSortKey',
           name: nameColumnHeader,
           sortable: (row: TableRow) => row.rootNameSortKey,
           dataType: 'string',
+          width: '300px',
           render: (_: unknown, item: TableRow) => {
             // Only show expand/collapse if tree mode is active and has children
             const treeMode = shouldComposeTree(sortField);
