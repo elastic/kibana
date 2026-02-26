@@ -189,7 +189,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          'Error find rules: Filter is not supported on this field alert.attributes.monitoring.run.calculated_metrics.success_ratio'
+          '[request query.filter]: Filter is not supported on this field alert.attributes.monitoring.run.calculated_metrics.success_ratio>50'
         );
       });
 
@@ -202,7 +202,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          'Error find rules: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
+          '[request query.sort_field]: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
         );
       });
 
@@ -215,7 +215,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          'Error find rules: Search field monitoring.run.calculated_metrics.success_ratio not supported'
+          '[request query.search_fields]: Search field monitoring.run.calculated_metrics.success_ratio is not supported'
         );
       });
 
@@ -352,7 +352,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          'Error find rules: Filter is not supported on this field alert.attributes.mapped_params.risk_score'
+          '[request query.filter]: Filter is not supported on this field alert.attributes.mapped_params.risk_score:40'
         );
       });
 
@@ -400,13 +400,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
     });
 
     describe('artifacts', () => {
-      it('does not return artifacts when present', async () => {
+      it('returns artifacts when present', async () => {
         const expectedArtifacts = {
           artifacts: {
             investigation_guide: { blob: 'Sample investigation guide' },
             dashboards: [{ id: 'dashboard-1' }],
           },
         };
+
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -425,7 +426,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         const foundAlert = response.body.data.find((obj: any) => obj.id === id);
         expect(foundAlert).not.to.be(undefined);
-        expect(foundAlert.artifacts).to.be(undefined);
+        expect(foundAlert.artifacts).to.eql(expectedArtifacts.artifacts);
       });
     });
   });
