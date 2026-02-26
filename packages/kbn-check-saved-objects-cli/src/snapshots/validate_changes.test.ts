@@ -212,4 +212,16 @@ describe('validateChangesNewType', () => {
       /The SO type 'type-with-wrong-name-title' has 'name' or 'title' fields with incorrect types.*name \(type: keyword, expected: text\).*title \(type: keyword, expected: text\)/
     );
   });
+
+  it('should not throw when mapping has nested fields that match schema (path format normalization)', () => {
+    const to = loadSnapshot('nested_mapping_fields.json');
+
+    expect(() =>
+      validateNewTypeWrapper({
+        to,
+        name: 'type-with-nested-fields',
+        schemaFields: ['topLevel', 'parent.child'],
+      })
+    ).not.toThrow();
+  });
 });

@@ -189,6 +189,33 @@ function mappingsUpdated(infoBefore: MigrationInfoRecord, infoAfter: MigrationIn
   return !equal(infoBefore.mappings, infoAfter.mappings);
 }
 
+/**
+ * Extracts field paths from flattened ES mapping keys (e.g. properties.foo.type, properties.bar.properties.baz.type).
+ * Returns paths in ES format (e.g. "bar.properties.baz" for nested).
+ */
+function getMappingFieldPaths(mappings: Record<string, unknown>): string[] {
+  return [
+    ...new Set(
+      Object.keys(mappings)
+        .filter((key) => key.startsWith('properties.'))
+        .map((key) => {
+          const withoutPrefix = key.slice('properties.'.length);
+          const lastDotIndex = withoutPrefix.lastIndexOf('.');
+          return lastDotIndex > 0 ? withoutPrefix.slice(0, lastDotIndex) : null;
+        })
+        .filter((path): path is string => path !== null)
+    ),
+  ].sort();
+}
+
+/**
+ * Normalizes ES mapping path (e.g. "schedule.properties.interval") to schema path format (e.g. "schedule.interval")
+ * for comparison with getSchemaStructure() output.
+ */
+function toSchemaPathFormat(mappingPath: string): string {
+  return mappingPath.replace(/\.properties\./g, '.');
+}
+
 function validateNewMappingsInModelVersion(
   name: string,
   from: MigrationInfoRecord,
@@ -198,22 +225,10 @@ function validateNewMappingsInModelVersion(
     return;
   }
 
-  // Extract field names from mappings
-  const getFieldNames = (mappings: Record<string, unknown>): string[] =>
-    [
-      ...new Set(
-        Object.keys(mappings)
-          .filter((key) => key.startsWith('properties.'))
-          .map((key) => {
-            const withoutPrefix = key.slice('properties.'.length);
-            const lastDotIndex = withoutPrefix.lastIndexOf('.');
-            return lastDotIndex > 0 ? withoutPrefix.slice(0, lastDotIndex) : null;
-          })
-          .filter((path): path is string => path !== null)
-      ),
-    ].sort();
-
-  const newMappingFields = difference(getFieldNames(to.mappings), getFieldNames(from.mappings));
+  const newMappingFields = difference(
+    getMappingFieldPaths(to.mappings),
+    getMappingFieldPaths(from.mappings)
+  );
   if (newMappingFields.length === 0) {
     return;
   }
@@ -246,19 +261,6 @@ function validateAllMappingsInModelVersion(
     return;
   }
 
-  const mappingFields = [
-    ...new Set(
-      Object.keys(to.mappings)
-        .filter((key) => key.startsWith('properties.'))
-        .map((key) => {
-          const withoutPrefix = key.slice('properties.'.length);
-          const lastDotIndex = withoutPrefix.lastIndexOf('.');
-          return lastDotIndex > 0 ? withoutPrefix.slice(0, lastDotIndex) : null;
-        })
-        .filter((path): path is string => path !== null)
-    ),
-  ].sort();
-
   const modelVersionMap =
     typeof registeredType.modelVersions === 'function'
       ? registeredType.modelVersions()
@@ -279,11 +281,15 @@ function validateAllMappingsInModelVersion(
     return;
   }
 
+  const mappingFieldPaths = getMappingFieldPaths(to.mappings);
   const schemaFields = (
     createSchema.getSchemaStructure() as Array<{ path: string[]; type: string }>
   ).map(({ path }) => path.join('.'));
 
-  const undeclaredFields = mappingFields.filter((field) => !schemaFields.includes(field));
+  // Normalize mapping paths (ES format: "parent.properties.child") to schema format ("parent.child")
+  const normalizedMappingPaths = mappingFieldPaths.map((p) => toSchemaPathFormat(p));
+  const undeclaredFields = normalizedMappingPaths.filter((field) => !schemaFields.includes(field));
+
   if (undeclaredFields.length > 0) {
     throw new Error(
       `❌ The SO type '${name}' has mapping fields not present in the latest model version schema: ${undeclaredFields.join(
