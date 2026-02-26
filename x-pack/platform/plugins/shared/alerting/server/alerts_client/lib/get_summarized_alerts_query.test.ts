@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALERT_MUTED } from '@kbn/rule-data-utils';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import {
   getLifecycleAlertsQueries,
@@ -18,20 +17,9 @@ import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 const toFilterArray = (f: unknown): unknown[] => (Array.isArray(f) ? f : f != null ? [f] : []);
 
-const hasAlertMutedFilter = (filter: unknown[]): boolean =>
-  Array.isArray(filter) &&
-  filter.some(
-    (clause) =>
-      typeof clause === 'object' &&
-      clause !== null &&
-      'bool' in clause &&
-      (clause as { bool?: { must_not?: { term?: Record<string, unknown> } } }).bool?.must_not
-        ?.term?.[ALERT_MUTED] === true
-  );
-
 describe('get_summarized_alerts_query', () => {
   describe('getLifecycleAlertsQueries', () => {
-    test('excludes ALERT_MUTED true when using executionUuid', () => {
+    test('does not include ALERT_MUTED filter (mute exclusion is done via excludedAlertInstanceIds)', () => {
       const queries = getLifecycleAlertsQueries({
         executionUuid: 'exec-123',
         ruleId: 'rule-1',
@@ -41,26 +29,8 @@ describe('get_summarized_alerts_query', () => {
 
       expect(queries).toHaveLength(3);
       for (const query of queries) {
-        const filter = (query as SearchRequest).query?.bool?.filter;
-        expect(hasAlertMutedFilter(toFilterArray(filter))).toBe(true);
-      }
-    });
-
-    test('excludes ALERT_MUTED true when using time range', () => {
-      const start = new Date('2024-01-01T00:00:00.000Z');
-      const end = new Date('2024-01-02T00:00:00.000Z');
-      const queries = getLifecycleAlertsQueries({
-        start,
-        end,
-        ruleId: 'rule-1',
-        excludedAlertInstanceIds: [],
-        maxAlertLimit: 100,
-      });
-
-      expect(queries).toHaveLength(3);
-      for (const query of queries) {
-        const filter = (query as SearchRequest).query?.bool?.filter;
-        expect(hasAlertMutedFilter(toFilterArray(filter))).toBe(true);
+        const filterStr = JSON.stringify((query as SearchRequest).query?.bool?.filter);
+        expect(filterStr).not.toContain('kibana.alert.muted');
       }
     });
 
@@ -85,7 +55,7 @@ describe('get_summarized_alerts_query', () => {
   });
 
   describe('getContinualAlertsQuery', () => {
-    test('excludes ALERT_MUTED true when using executionUuid', () => {
+    test('does not include ALERT_MUTED filter (mute exclusion is done via excludedAlertInstanceIds)', () => {
       const query = getContinualAlertsQuery({
         executionUuid: 'exec-456',
         ruleId: 'rule-2',
@@ -93,28 +63,13 @@ describe('get_summarized_alerts_query', () => {
         maxAlertLimit: 50,
       });
 
-      const filter = (query as SearchRequest).query?.bool?.filter;
-      expect(hasAlertMutedFilter(toFilterArray(filter))).toBe(true);
-    });
-
-    test('excludes ALERT_MUTED true when using time range', () => {
-      const start = new Date('2024-02-01T00:00:00.000Z');
-      const end = new Date('2024-02-02T00:00:00.000Z');
-      const query = getContinualAlertsQuery({
-        start,
-        end,
-        ruleId: 'rule-2',
-        excludedAlertInstanceIds: [],
-        maxAlertLimit: 50,
-      });
-
-      const filter = (query as SearchRequest).query?.bool?.filter;
-      expect(hasAlertMutedFilter(toFilterArray(filter))).toBe(true);
+      const filterStr = JSON.stringify((query as SearchRequest).query?.bool?.filter);
+      expect(filterStr).not.toContain('kibana.alert.muted');
     });
   });
 
   describe('getMaintenanceWindowAlertsQuery', () => {
-    test('excludes ALERT_MUTED true in scoped queries', () => {
+    test('does not include ALERT_MUTED filter in scoped queries', () => {
       const items = getMaintenanceWindowAlertsQuery({
         executionUuid: 'exec-mw',
         ruleId: 'rule-mw',
@@ -137,8 +92,10 @@ describe('get_summarized_alerts_query', () => {
       const searchBodies = items.filter((_, i) => i % 2 === 1);
       for (const body of searchBodies) {
         if (body && typeof body === 'object' && 'query' in body) {
-          const filter = (body as { query?: { bool?: { filter?: unknown } } }).query?.bool?.filter;
-          expect(hasAlertMutedFilter(toFilterArray(filter))).toBe(true);
+          const filterStr = JSON.stringify(
+            (body as { query?: { bool?: { filter?: unknown } } }).query?.bool?.filter
+          );
+          expect(filterStr).not.toContain('kibana.alert.muted');
         }
       }
     });

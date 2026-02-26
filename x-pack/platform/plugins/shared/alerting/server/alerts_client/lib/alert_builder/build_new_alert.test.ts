@@ -531,7 +531,7 @@ describe('buildNewAlert', () => {
       expect((result as Record<string, unknown>)[ALERT_SNOOZE_EXPIRES_AT]).toBe(expiresAt);
     });
 
-    test('should set snooze detail fields from rule when no existingAlert (re-fire after recovery)', () => {
+    test('should set snooze detail fields from rule (re-fire after recovery)', () => {
       const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-B');
       legacyAlert.scheduleActions('default');
       const expiresAt = '2025-06-01T12:00:00.000Z';
@@ -545,7 +545,6 @@ describe('buildNewAlert', () => {
 
       const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
-        existingAlert: undefined,
         rule: alertRule,
         ruleData: {
           ...ruleData,

@@ -213,14 +213,12 @@ export class AlertBuilder<
         } else {
           // "New" / open lifecycle:
           // (1) no tracked doc for this UUID (first-time active or re-fire with new UUID), or
-          // (2) tracked doc exists but is recovered (re-open same doc).
-          // In (1) existingAlert is undefined and buildNewAlert gets snoozze from the rule.
-          // In (2) we pass the recovered doc so the built alert can preserve fields when we
-          // update the same document back to active.
+          // (2) tracked doc exists but is recovered (new alert, reusing recovered doc).
+          // Snooze fields always come from the rule SO (source of truth), never from
+          // the existing alert doc.
           activeAlertsToIndex.push(
             buildNewAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
               legacyAlert: activeAlert,
-              existingAlert: trackedAlert,
               snoozeFromRule: snoozeFromRuleMap.get(activeAlert.getId()),
               rule: this.rule,
               ruleData: this.alertRuleData,

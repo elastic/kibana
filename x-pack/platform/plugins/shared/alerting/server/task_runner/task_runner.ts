@@ -152,6 +152,17 @@ export class TaskRunner<
     AlertData
   >;
   private runDate = new Date();
+  private pendingSnoozedInstancesUpdate?: Array<{
+    instanceId: string;
+    expiresAt?: string;
+    conditions?: Array<{
+      type: string;
+      field: string;
+      value?: string;
+      snapshotValue?: string;
+    }>;
+    conditionOperator?: 'any' | 'all';
+  }>;
 
   constructor({
     context,
@@ -215,6 +226,17 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      snoozedInstances?: Array<{
+        instanceId: string;
+        expiresAt?: string;
+        conditions?: Array<{
+          type: string;
+          field: string;
+          value?: string;
+          snapshotValue?: string;
+        }>;
+        conditionOperator?: 'any' | 'all';
+      }>;
     }
   ) {
     const client = this.context.elasticsearch.client.asInternalUser;
@@ -479,19 +501,9 @@ export class TaskRunner<
         });
       }
 
-      // Persist the updated snoozedInstances to the rule SO. If this fails,
-      // the entry remains and the scheduler will re-evaluate and retry on the
-      // next execution. The AAD doc may be temporarily inconsistent (ALERT_MUTED
-      // cleared by updatePersistedAlerts below, but rule SO still has the entry),
-      // which self-heals when the next build sets ALERT_MUTED from the rule SO.
-      try {
-        const esClient = this.context.elasticsearch.client.asInternalUser;
-        await partiallyUpdateRuleWithEs(esClient, rule.id, {
-          snoozedInstances: updatedSnoozedInstances,
-        });
-      } catch (err) {
-        this.logger.error(`Error updating snoozedInstances for rule '${rule.id}': ${err.message}`);
-      }
+      // Defer snoozedInstances persistence to updateRuleSavedObjectPostRun so it is
+      // batched with the other post-run attribute writes (one ES update instead of two).
+      this.pendingSnoozedInstancesUpdate = updatedSnoozedInstances;
     }
 
     if (this.shouldLogAndScheduleActionsForAlerts()) {
@@ -723,6 +735,9 @@ export class TaskRunner<
             nextRun,
             lastRun: lastRunToRaw(lastRun),
             monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+            ...(this.pendingSnoozedInstancesUpdate != null
+              ? { snoozedInstances: this.pendingSnoozedInstancesUpdate }
+              : {}),
           });
         }
 

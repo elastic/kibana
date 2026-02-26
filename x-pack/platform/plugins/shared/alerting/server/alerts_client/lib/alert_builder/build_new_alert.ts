@@ -102,8 +102,6 @@ interface BuildNewAlertOpts<
   RecoveryActionGroupId extends string
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
-  /** When re-indexing an existing active alert, pass the current document to preserve snooze fields */
-  existingAlert?: Alert & AlertData;
   /** Precomputed snooze fields from rule (e.g. from buildSnoozeFromRuleMap) for O(1) lookup; falls back to getSnoozeFieldsFromRule when not provided */
   snoozeFromRule?: Partial<Record<string, unknown>>;
   rule: AlertRule;
@@ -128,7 +126,6 @@ export const buildNewAlert = <
   RecoveryActionGroupId extends string
 >({
   legacyAlert,
-  existingAlert,
   snoozeFromRule,
   rule,
   ruleData,
@@ -152,28 +149,13 @@ export const buildNewAlert = <
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
 
-  const hasSnoozeOnExisting =
-    existingAlert &&
-    (existingAlert[ALERT_SNOOZE_EXPIRES_AT] != null ||
-      existingAlert[ALERT_SNOOZE_CONDITIONS] != null ||
-      existingAlert[ALERT_SNOOZE_CONDITION_OPERATOR] != null ||
-      existingAlert[ALERT_SNOOZE_SNAPSHOT] != null);
-
-  const snoozeFromExisting =
-    hasSnoozeOnExisting && existingAlert
-      ? {
-          [ALERT_SNOOZE_EXPIRES_AT]: existingAlert[ALERT_SNOOZE_EXPIRES_AT],
-          [ALERT_SNOOZE_CONDITIONS]: existingAlert[ALERT_SNOOZE_CONDITIONS],
-          [ALERT_SNOOZE_CONDITION_OPERATOR]: existingAlert[ALERT_SNOOZE_CONDITION_OPERATOR],
-          [ALERT_SNOOZE_SNAPSHOT]: existingAlert[ALERT_SNOOZE_SNAPSHOT],
-        }
-      : snoozeFromRule ?? getSnoozeFieldsFromRule(alertInstanceId, ruleData);
+  const snoozeFields = snoozeFromRule ?? getSnoozeFieldsFromRule(alertInstanceId, ruleData);
 
   return deepmerge.all(
     [
       cleanedPayload,
       rule,
-      snoozeFromExisting,
+      snoozeFields,
       {
         [TIMESTAMP]: timestamp,
         [EVENT_ACTION]: 'open',

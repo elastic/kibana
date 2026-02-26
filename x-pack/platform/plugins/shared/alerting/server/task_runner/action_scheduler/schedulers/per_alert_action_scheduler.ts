@@ -156,7 +156,10 @@ export class PerAlertActionScheduler<
         const optionsBase = {
           spaceId: this.context.taskInstance.params.spaceId,
           ruleId: this.context.rule.id,
-          excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
+          excludedAlertInstanceIds: [
+            ...this.context.rule.mutedInstanceIds,
+            ...(this.context.rule.snoozedInstances ?? []).map((e) => e.instanceId),
+          ],
           alertsFilter: action.alertsFilter,
         };
 
@@ -392,11 +395,27 @@ export class PerAlertActionScheduler<
   }
 
   /**
+   * Returns the current execution's built alert fields for condition evaluation.
+   * Uses only the built alert from this execution cycle (never tracked/previous-execution data).
+   */
+  private getCurrentAlertFields(alertId: string): Record<string, unknown> {
+    return (
+      (this.context.alertsClient.getBuiltAlertByInstanceId?.(alertId) as
+        | Record<string, unknown>
+        | undefined) ?? {}
+    );
+  }
+
+  /**
    * Evaluates whether an alert's per-alert snooze (snoozedInstances entry) has expired
    * and should be auto-unmuted. Returns null if the alert has no snooze config.
+   *
+   * Alert field data for condition evaluation must come from the current execution
+   * (via the caller), not from persisted alert-as-data documents.
    */
   private evaluateSnoozeForAlert(
-    alertId: string
+    alertId: string,
+    currentAlertFields: Record<string, unknown>
   ): { shouldUnmute: boolean; reason?: string } | null {
     const snoozeInstanceConfig = this.snoozedInstancesMap.get(alertId);
     if (!snoozeInstanceConfig) {
@@ -409,15 +428,7 @@ export class PerAlertActionScheduler<
       conditionOperator: snoozeInstanceConfig.conditionOperator,
     };
 
-    const alertData =
-      (this.context.alertsClient.getBuiltAlertByInstanceId?.(alertId) as
-        | Record<string, unknown>
-        | undefined) ??
-      (this.context.alertsClient.getTrackedAlertByInstanceId?.(alertId) as
-        | Record<string, unknown>
-        | undefined) ??
-      {};
-    const evalResult = evaluateSnoozeConditions(snoozeConfig, alertData);
+    const evalResult = evaluateSnoozeConditions(snoozeConfig, currentAlertFields);
     return {
       shouldUnmute: evalResult.shouldUnmute,
       reason: evalResult.reason ?? 'conditions met',
@@ -433,7 +444,8 @@ export class PerAlertActionScheduler<
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>
   ): void {
     const alertId = alert.getId();
-    const result = this.evaluateSnoozeForAlert(alertId);
+    const currentAlertFields = this.getCurrentAlertFields(alertId);
+    const result = this.evaluateSnoozeForAlert(alertId, currentAlertFields);
     if (!result?.shouldUnmute) {
       return;
     }
@@ -464,7 +476,8 @@ export class PerAlertActionScheduler<
       return false;
     }
 
-    const result = this.evaluateSnoozeForAlert(alertId);
+    const currentAlertFields = this.getCurrentAlertFields(alertId);
+    const result = this.evaluateSnoozeForAlert(alertId, currentAlertFields);
     if (!result) {
       return false;
     }
