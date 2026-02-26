@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { KQLSyntaxError } from '@kbn/es-query';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('get_index_pattern', () => {
-    loadTestFile(require.resolve('./errors'));
-    loadTestFile(require.resolve('./main'));
-  });
+export function isKqlSyntaxError(error: unknown): error is KQLSyntaxError {
+  return error instanceof KQLSyntaxError;
 }

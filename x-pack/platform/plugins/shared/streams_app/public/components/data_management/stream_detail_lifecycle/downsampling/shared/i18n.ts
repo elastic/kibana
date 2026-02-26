@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { i18n } from '@kbn/i18n';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('get_data_views', () => {
-    loadTestFile(require.resolve('./main'));
-  });
-}
+export const downsamplingHelpText = i18n.translate('xpack.streams.downsamplingHelpText', {
+  defaultMessage:
+    'Aggregate time series data into fixed intervals to reduce index size and granularity.',
+});
