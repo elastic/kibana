@@ -48,6 +48,7 @@ export const createToolCallEvent = (data: {
   toolCallId: string;
   toolId: string;
   params: Record<string, unknown>;
+  toolCallGroupId?: string;
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
@@ -55,6 +56,7 @@ export const createToolCallEvent = (data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
       params: data.params,
+      tool_call_group_id: data.toolCallGroupId,
     },
   };
 };

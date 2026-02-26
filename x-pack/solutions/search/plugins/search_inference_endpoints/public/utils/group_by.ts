@@ -7,8 +7,13 @@
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
-import { type GroupedInferenceEndpointsData, GroupByOptions } from '../types';
+import {
+  type GroupedInferenceEndpointsData,
+  type GroupByViewOptions,
+  GroupByOptions,
+} from '../types';
 
 import { getModelId } from './get_model_id';
 import { KNOWN_MODEL_GROUPS, ELASTIC_GROUP_ID } from './known_models';
@@ -56,13 +61,34 @@ export const GroupByModelReducer = (
   return acc;
 };
 
-export function GroupByReducer(groupBy: GroupByOptions) {
+export const GroupByServiceReducer = (
+  acc: Record<string, GroupedInferenceEndpointsData>,
+  endpoint: InferenceAPIConfigResponse
+): Record<string, GroupedInferenceEndpointsData> => {
+  const service = endpoint.service;
+
+  if (service in acc) {
+    acc[service].endpoints.push(endpoint);
+  } else {
+    const provider = SERVICE_PROVIDERS[service];
+    acc[service] = {
+      groupId: service,
+      groupLabel: provider ? provider.name : service,
+      endpoints: [endpoint],
+    };
+  }
+
+  return acc;
+};
+
+export function GroupByReducer(groupBy: GroupByViewOptions) {
   switch (groupBy) {
     case GroupByOptions.Model:
       return GroupByModelReducer;
-    case GroupByOptions.None:
+    case GroupByOptions.Service:
+      return GroupByServiceReducer;
     default:
-      throw new Error('Grouping is not enabled');
+      return assertNever(groupBy);
   }
 }
 
@@ -104,11 +130,47 @@ export function ModelsGroupBySort(
   return 0;
 }
 
-export function GroupBySort(groupBy: GroupByOptions) {
+function isElasticService(service: string) {
+  return service === ServiceProviderKeys.elastic || service === ServiceProviderKeys.elasticsearch;
+}
+
+export function ServiceGroupBySort(
+  a: GroupedInferenceEndpointsData,
+  b: GroupedInferenceEndpointsData
+) {
+  if (a.groupLabel === b.groupLabel) {
+    return 0;
+  }
+  const aIsElastic = isElasticService(a.groupId);
+  const bIsElastic = isElasticService(b.groupId);
+  if (aIsElastic || bIsElastic) {
+    if (aIsElastic && bIsElastic) {
+      if (a.groupLabel < b.groupLabel) {
+        return -1;
+      }
+      return 1;
+    } else if (aIsElastic) {
+      return -1;
+    }
+    return 1;
+  }
+  if (a.groupLabel < b.groupLabel) {
+    return -1;
+  }
+  return 1;
+}
+
+export function GroupBySort(groupBy: GroupByViewOptions) {
   switch (groupBy) {
     case GroupByOptions.Model:
       return ModelsGroupBySort;
+    case GroupByOptions.Service:
+      return ServiceGroupBySort;
     default:
       return defaultGroupedInferenceEndpointsDataCompare;
   }
+}
+
+export function assertNever(x: never): never {
+  throw new Error(`Unhandled groupBy option: ${x}`);
 }
