@@ -21,6 +21,7 @@ import type { GetConfigFn } from '../../../types';
  * where `ISearchRequestParams` is used externally instead.
  * FIXME: replace with estypes.SearchRequest?
  */
+
 export type SearchRequest<T extends Record<string, any> = Record<string, any>> = {
   index?: DataView | string;
   query?: Array<Query | AggregateQuery>;

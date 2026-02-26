@@ -16,20 +16,18 @@ import type { IBucketAggConfig } from '../bucket_agg_type';
 export const createFilterHistogram = (
   getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart']
 ) => {
-  return (aggConfig: IBucketAggConfig, key: string) => {
+  return (aggConfig: IBucketAggConfig, key: unknown) => {
     const { deserialize } = getFieldFormatsStart();
-    const value = parseInt(key, 10);
+    const value = parseInt(key as string, 10);
+    const usedInterval = aggConfig.getParam('used_interval');
+    const interval = aggConfig.getParam('interval');
     const params: RangeFilterParams = {
       gte: value,
-      lt:
-        value +
-        (typeof aggConfig.params.used_interval === 'number'
-          ? aggConfig.params.used_interval
-          : aggConfig.params.interval),
+      lt: value + (typeof usedInterval === 'number' ? usedInterval : (interval as number)),
     };
 
     return buildRangeFilter(
-      aggConfig.params.field,
+      aggConfig.getField()!,
       params,
       aggConfig.getIndexPattern(),
       deserialize(aggConfig.toSerializedFieldFormat()).convert(key)

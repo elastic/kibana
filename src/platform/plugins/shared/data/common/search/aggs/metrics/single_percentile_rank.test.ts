@@ -149,9 +149,10 @@ describe('AggTypeMetricSinglePercentileRankProvider class', () => {
       jest.fn()
     );
 
-    expect(aggConfigs.toDsl().single_percentile_rank.percentile_ranks.script.source).toEqual(
-      'return 456'
-    );
-    expect(aggConfigs.toDsl().single_percentile_rank.percentile_ranks.values).toEqual([1024]);
+    const dsl = aggConfigs.toDsl() as Record<string, any>;
+    expect(dsl.single_percentile_rank.percentile_ranks.script.source).toEqual('return 456');
+
+    const dsl2 = aggConfigs.toDsl() as Record<string, any>;
+    expect(dsl2.single_percentile_rank.percentile_ranks.values).toEqual([1024]);
   });
 });

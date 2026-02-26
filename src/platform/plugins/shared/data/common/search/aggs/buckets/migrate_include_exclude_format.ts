@@ -10,6 +10,7 @@
 import { isString, isObject } from 'lodash';
 import type { IBucketAggConfig, BucketAggType, BucketAggParam } from './bucket_agg_type';
 import type { IAggConfig } from '../agg_config';
+import type { AggParamOutput } from '../param_types/base';
 
 export const isType = (...types: string[]) => {
   return (agg: IAggConfig): boolean => {
@@ -24,15 +25,15 @@ export const isStringType = isType('string');
 export const isStringOrNumberType = isType('string', 'number');
 
 export const migrateIncludeExcludeFormat = {
-  serialize(this: BucketAggParam<IBucketAggConfig>, value: any, agg: IBucketAggConfig) {
+  serialize(this: BucketAggParam<IBucketAggConfig>, value: unknown, agg: IBucketAggConfig) {
     if (this.shouldShow && !this.shouldShow(agg)) return;
     if (!value || isString(value) || Array.isArray(value)) return value;
-    else return value.pattern;
+    else return (value as { pattern: string }).pattern;
   },
   write(
     this: BucketAggType<IBucketAggConfig>,
     aggConfig: IBucketAggConfig,
-    output: Record<string, any>
+    output: AggParamOutput
   ) {
     const value = aggConfig.getParam(this.name);
 
@@ -49,7 +50,7 @@ export const migrateIncludeExcludeFormat = {
         output.params[this.name] = isRegularExpression ? filtered[0] : filtered;
       }
     } else if (isObject(value)) {
-      output.params[this.name] = (value as any).pattern;
+      output.params[this.name] = (value as { pattern: string }).pattern;
     } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;
     }

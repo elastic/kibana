@@ -116,11 +116,12 @@ export const getStdDeviationMetricAgg = () => {
     },
 
     getValue(agg, bucket) {
+      const b = bucket as Record<string, any>;
       const showBounds = agg.getParam('showBounds');
       if (showBounds === false) {
-        return bucket[agg.id]?.std_deviation;
+        return b[agg.id]?.std_deviation;
       }
-      return get(bucket[agg.parentId], agg.valProp());
+      return get(b[agg.parentId], agg.valProp());
     },
   });
 };

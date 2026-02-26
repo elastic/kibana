@@ -60,11 +60,12 @@ export const getSinglePercentileRankMetricAgg = () => {
       },
     ],
     getValue(agg, bucket) {
+      const b = bucket as Record<string, any>;
       let valueKey = String(agg.params.value);
       if (Number.isInteger(agg.params.value)) {
         valueKey += '.0';
       }
-      const { values } = bucket[agg.id] ?? {};
+      const { values } = b[agg.id] ?? {};
       return values ? values[valueKey] / 100 : NaN;
     },
   });

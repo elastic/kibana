@@ -87,12 +87,15 @@ interface EsqlStartDependencies {
   uiSettings: UiSettingsCommon;
 }
 
-function extractTypeAndReason(attributes: any): { type?: string; reason?: string } {
+function extractTypeAndReason(attributes: Record<string, unknown>): {
+  type?: string;
+  reason?: string;
+} {
   if (['type', 'reason'].every((prop) => prop in attributes)) {
-    return attributes;
+    return attributes as { type?: string; reason?: string };
   }
   if ('error' in attributes) {
-    return extractTypeAndReason(attributes.error);
+    return extractTypeAndReason(attributes.error as Record<string, unknown>);
   }
   return {};
 }

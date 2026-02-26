@@ -8,16 +8,18 @@
  */
 
 import type { IAggConfig } from '../agg_config';
+import type { AggParamOutput } from './base';
 import { BaseParamType } from './base';
 
 export class StringParamType extends BaseParamType {
-  constructor(config: Record<string, any>) {
+  constructor(config: Record<string, unknown>) {
     super(config);
 
     if (!config.write) {
-      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
-        if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
-          output.params[this.name] = aggConfig.params[this.name];
+      this.write = (aggConfig: IAggConfig, output: AggParamOutput) => {
+        const val = aggConfig.params[this.name] as string | undefined;
+        if (val && val.length) {
+          output.params[this.name] = val;
         }
       };
     }

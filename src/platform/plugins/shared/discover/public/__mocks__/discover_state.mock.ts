@@ -37,6 +37,7 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
@@ -151,7 +152,9 @@ export function getDiscoverInternalStateMock({
       );
     }
 
-    return Promise.resolve(createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView }));
+    return Promise.resolve(
+      createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView } as SearchSourceFields)
+    );
   });
 
   jest.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation((discoverSession) =>

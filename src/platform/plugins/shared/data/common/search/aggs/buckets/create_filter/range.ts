@@ -8,6 +8,7 @@
  */
 
 import { buildRangeFilter } from '@kbn/es-query';
+import type { RangeFilterParams } from '@kbn/es-query';
 import type { AggTypesDependencies } from '../../agg_types';
 import type { IBucketAggConfig } from '../bucket_agg_type';
 
@@ -15,11 +16,12 @@ import type { IBucketAggConfig } from '../bucket_agg_type';
 export const createFilterRange = (
   getFieldFormatsStart: AggTypesDependencies['getFieldFormatsStart']
 ) => {
-  return (aggConfig: IBucketAggConfig, { label, ...params }: any) => {
+  return (aggConfig: IBucketAggConfig, key: unknown) => {
+    const { label, ...params } = key as RangeFilterParams & { label?: string };
     const { deserialize } = getFieldFormatsStart();
     return buildRangeFilter(
-      aggConfig.params.field,
-      params,
+      aggConfig.getField()!,
+      params as RangeFilterParams,
       aggConfig.getIndexPattern(),
       deserialize(aggConfig.toSerializedFieldFormat()).convert(params)
     );

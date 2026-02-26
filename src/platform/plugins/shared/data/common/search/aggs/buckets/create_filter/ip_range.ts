@@ -13,7 +13,8 @@ import { CidrMask } from '../lib/cidr_mask';
 import type { IBucketAggConfig } from '../bucket_agg_type';
 import type { IpRangeKey } from '../lib/ip_range';
 
-export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey) => {
+export const createFilterIpRange = (aggConfig: IBucketAggConfig, rawKey: unknown) => {
+  const key = rawKey as IpRangeKey;
   let range: RangeFilterParams;
 
   if (key.type === 'mask') {
@@ -26,7 +27,7 @@ export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey
   }
 
   return buildRangeFilter(
-    aggConfig.params.field,
+    aggConfig.getField()!,
     { gte: range.from, lte: range.to },
     aggConfig.getIndexPattern()
   );

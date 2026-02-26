@@ -23,8 +23,12 @@ import type { IAggConfigs } from './agg_configs';
 import { BaseParamType } from './param_types/base';
 import type { AggParamType } from './param_types/agg';
 
+export interface AggOrdered {
+  date?: boolean;
+}
+
 type PostFlightRequestFn<TAggConfig> = (
-  resp: estypes.SearchResponse<any>,
+  resp: estypes.SearchResponse<unknown>,
   aggConfigs: IAggConfigs,
   aggConfig: TAggConfig,
   searchSource: ISearchSource,
@@ -32,7 +36,7 @@ type PostFlightRequestFn<TAggConfig> = (
   abortSignal?: AbortSignal,
   searchSessionId?: string,
   disableWarningToasts?: boolean
-) => Promise<estypes.SearchResponse<any>>;
+) => Promise<estypes.SearchResponse<unknown>>;
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -40,12 +44,12 @@ export interface AggTypeConfig<
 > {
   name: string;
   title: string;
-  createFilter?: (aggConfig: TAggConfig, key: any, params?: any) => any;
+  createFilter?: (aggConfig: TAggConfig, key: unknown, params?: Record<string, unknown>) => unknown;
   type?: string;
   dslName?: string;
   expressionName: string;
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
-  ordered?: any;
+  ordered?: AggOrdered;
   hasNoDsl?: boolean;
   hasNoDslParams?: boolean;
   params?: Array<Partial<TParam>>;
@@ -54,12 +58,12 @@ export interface AggTypeConfig<
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
   json?: boolean;
-  decorateAggConfig?: () => any;
+  decorateAggConfig?: () => Record<string, PropertyDescriptor>;
   postFlightRequest?: PostFlightRequestFn<TAggConfig>;
   hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
-  getValue?: (agg: TAggConfig, bucket: any) => any;
-  getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
+  getValue?: (agg: TAggConfig, bucket: unknown) => unknown;
+  getKey?: (bucket: unknown, key: unknown, agg: TAggConfig) => unknown;
   getValueBucketPath?: (agg: TAggConfig) => string;
   getResponseId?: (agg: TAggConfig) => string;
 }
@@ -130,7 +134,7 @@ export class AggType<
    * @property ordered
    * @type {object|undefined}
    */
-  ordered: any;
+  ordered: AggOrdered | undefined;
   /**
    * Flag that prevents this aggregation from being included in the dsl. This is only
    * used by the count aggregation (currently) since it doesn't really exist and it's output
@@ -151,7 +155,9 @@ export class AggType<
    * @param {mixed} key The key for the bucket
    * @returns {object} The filter
    */
-  createFilter: ((aggConfig: TAggConfig, key: any, params?: any) => any) | undefined;
+  createFilter:
+    | ((aggConfig: TAggConfig, key: unknown, params?: Record<string, unknown>) => unknown)
+    | undefined;
   /**
    * An instance of {{#crossLink "AggParams"}}{{/crossLink}}.
    *
@@ -184,7 +190,7 @@ export class AggType<
    * A function that will be called each time an aggConfig of this type
    * is created, giving the agg type a chance to modify the agg config
    */
-  decorateAggConfig: () => any;
+  decorateAggConfig: () => Record<string, PropertyDescriptor>;
 
   hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
 
@@ -212,9 +218,9 @@ export class AggType<
    */
   getSerializedFormat: <T extends FieldFormatParams>(agg: TAggConfig) => SerializedFieldFormat<T>;
 
-  getValue: (agg: TAggConfig, bucket: any) => any;
+  getValue: (agg: TAggConfig, bucket: unknown) => unknown;
 
-  getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
+  getKey?: (bucket: unknown, key: unknown, agg: TAggConfig) => unknown;
 
   paramByName = (name: string) => {
     return this.params.find((p: TParam) => p.name === name);
@@ -280,14 +286,14 @@ export class AggType<
       this.params = config.params as TParam[];
     } else {
       // always append the raw JSON param unless it is configured to false
-      const params: any[] = config.params ? [...config.params] : [];
+      const params = (config.params ? [...config.params] : []) as Array<Partial<TParam>>;
 
       if (config.json !== false) {
         params.push({
           name: 'json',
           type: 'json',
           advanced: true,
-        });
+        } as Partial<TParam>);
       }
 
       // always append custom label
@@ -300,10 +306,12 @@ export class AggType<
           }),
           type: 'string',
           write: noop,
-        });
+        } as Partial<TParam>);
       }
 
-      this.params = initParams(params);
+      this.params = initParams(
+        params as unknown as Array<Partial<AggParamType<AggConfig>>>
+      ) as unknown as TParam[];
     }
 
     this.getRequestAggs = config.getRequestAggs || noop;
@@ -315,12 +323,11 @@ export class AggType<
     this.getSerializedFormat =
       config.getSerializedFormat ||
       ((agg: TAggConfig) => {
-        return agg.params.field
-          ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
-          : {};
+        const field = agg.getField();
+        return field ? agg.aggConfigs.indexPattern.getFormatterForField(field).toJSON() : {};
       });
 
-    this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
+    this.getValue = config.getValue || ((agg: TAggConfig, bucket: unknown) => {});
 
     this.getResponseId = config.getResponseId || ((agg: TAggConfig) => agg.id);
   }

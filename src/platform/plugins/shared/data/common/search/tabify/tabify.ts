@@ -35,7 +35,7 @@ function collectBucket(
     const agg = column.aggConfig;
     if (agg.getParam('scaleMetricValues')) {
       const aggInfo = agg.write(aggs);
-      aggScale *= aggInfo.metricScale || 1;
+      aggScale *= (aggInfo.metricScale as number) || 1;
     }
 
     switch (agg.type.type) {
@@ -53,18 +53,18 @@ function collectBucket(
           tabifyBuckets.forEach((subBucket, tabifyBucketKey) => {
             // if the bucket doesn't have value don't add it to the row
             // we don't want rows like: { column1: undefined, column2: 10 }
-            const bucketValue = agg.getKey(subBucket, tabifyBucketKey);
+            const bucketValue = agg.getKey(subBucket, tabifyBucketKey as string);
             const hasBucketValue = typeof bucketValue !== 'undefined';
 
             if (hasBucketValue) {
-              write.bucketBuffer.push({ id: column.id, value: bucketValue });
+              write.bucketBuffer.push({ id: column.id, value: bucketValue as string | number });
             }
 
             collectBucket(
               aggs,
               write,
-              subBucket,
-              agg.getKey(subBucket, tabifyBucketKey),
+              subBucket as AggResponseBucket,
+              agg.getKey(subBucket, tabifyBucketKey as string) as string,
               aggScale,
               respOpts
             );
@@ -87,7 +87,7 @@ function collectBucket(
         }
         break;
       case AggGroupNames.Metrics:
-        let value = agg.getValue(bucket);
+        let value = agg.getValue(bucket) as number;
         // since the aggregation could be a non integer (such as a max date)
         // only do the scaling calculation if it is needed.
         if (aggScale !== 1) {
@@ -148,9 +148,15 @@ function hasDocCount(key: string) {
 /**
  * Sets up the ResponseWriter and kicks off bucket collection.
  */
+/** @public */
+export interface EsAggsResponse {
+  aggregations?: Record<string, unknown>;
+  hits?: { total?: unknown };
+}
+
 export function tabifyAggResponse(
   aggConfigs: IAggConfigs,
-  esResponse: Record<string, any>,
+  esResponse: EsAggsResponse,
   respOpts?: Partial<TabbedResponseWriterOptions>
 ): Datatable {
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
@@ -166,18 +172,18 @@ export function tabifyAggResponse(
   }
 
   const topLevelBucket: AggResponseBucket = {
-    ...(aggConfigs.isSamplingEnabled()
+    ...((aggConfigs.isSamplingEnabled()
       ? esResponse.aggregations?.sampling
-      : esResponse.aggregations),
-    doc_count: esResponse.aggregations?.doc_count,
-  };
+      : esResponse.aggregations) as Record<string, unknown>),
+    doc_count: esResponse.aggregations?.doc_count as number,
+  } as AggResponseBucket;
 
   // The fix itself is one line, but it's a bit hard to clear assess the full impact of it
   // therefore here's a check to scope down the impact to the known scenario with the bug https://github.com/elastic/kibana/issues/178073
   // this can be lifted off once the full impact is assessed
   if (!topLevelBucket.doc_count) {
     if (!hasMultipleDocCountAtRootWithFilters) {
-      topLevelBucket.doc_count = esResponse.hits?.total;
+      topLevelBucket.doc_count = esResponse.hits?.total as number;
     }
   }
 
@@ -189,7 +195,7 @@ export function tabifyAggResponse(
       type: 'esaggs',
       source: aggConfigs.indexPattern.id,
       statistics: {
-        totalCount: esResponse.hits?.total,
+        totalCount: esResponse.hits?.total as number | undefined,
       },
     },
   };

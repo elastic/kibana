@@ -194,12 +194,14 @@ describe('Top metrics metric', () => {
       expect(getTopMetricsMetricAgg().getValue(aggConfig, bucket)).toEqual([1024, 512, 256]);
     });
     it('returns phrase filter', () => {
-      expect(getTopMetricsMetricAgg().createFilter!(aggConfig, '10').query.match_phrase).toEqual({
+      expect(
+        (getTopMetricsMetricAgg().createFilter!(aggConfig, '10') as any).query.match_phrase
+      ).toEqual({
         bytes: 10,
       });
     });
     it('returns combined OR filter for array values', () => {
-      const params = getTopMetricsMetricAgg().createFilter!(aggConfig, ['10', '20']).meta
+      const params = (getTopMetricsMetricAgg().createFilter!(aggConfig, ['10', '20']) as any).meta
         .params as CombinedFilter['meta']['params'];
       expect(params.map((p) => p.query!.match_phrase)).toEqual([{ bytes: 10 }, { bytes: 20 }]);
     });

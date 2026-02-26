@@ -12,19 +12,28 @@ import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
 import { StringParamType } from './param_types/string';
 import { JsonParamType } from './param_types/json';
+import type { AggParamOutput } from './param_types/base';
 import { BaseParamType } from './param_types/base';
 
 import type { AggConfig } from './agg_config';
 import type { IAggConfigs } from './agg_configs';
 
-const paramTypeMap = {
+const paramTypeMap: Record<
+  string,
+  | typeof BaseParamType
+  | typeof FieldParamType
+  | typeof OptionedParamType
+  | typeof StringParamType
+  | typeof JsonParamType
+  | typeof AggParamType
+> = {
   field: FieldParamType,
   optioned: OptionedParamType,
   string: StringParamType,
   json: JsonParamType,
   agg: AggParamType,
   _default: BaseParamType,
-} as Record<string, any>;
+};
 
 export type AggParam = BaseParamType;
 
@@ -35,12 +44,12 @@ export interface AggParamOption {
 }
 
 export const initParams = <TAggParam extends AggParamType = AggParamType>(
-  params: TAggParam[]
+  params: Array<Partial<TAggParam>>
 ): TAggParam[] =>
-  params.map((config: TAggParam) => {
-    const Class = paramTypeMap[config.type] || paramTypeMap._default;
+  params.map((config: Partial<TAggParam>) => {
+    const Class = paramTypeMap[config.type as string] || paramTypeMap._default;
 
-    return new Class(config);
+    return new Class(config as Record<string, unknown>);
   }) as TAggParam[];
 
 /**
@@ -64,10 +73,10 @@ export const writeParams = <
   params: Array<Partial<TAggParam>> = [],
   aggConfig: TAggConfig,
   aggs?: IAggConfigs,
-  locals?: Record<string, any>
-) => {
-  const output: Record<string, any> = {
-    params: {} as Record<string, any>,
+  locals?: Record<string, unknown>
+): AggParamOutput => {
+  const output: AggParamOutput = {
+    params: {} as Record<string, unknown>,
   };
   locals = locals || {};
 

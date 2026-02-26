@@ -161,7 +161,11 @@ export const getTopMetricsMetricAgg = () => {
       const field = agg.getParam('field').name;
       return `${agg.id}[${field}]`;
     },
-    getValue(agg, aggregate: Record<string, estypes.AggregationsTopMetricsAggregate | undefined>) {
+    getValue(agg, bucket) {
+      const aggregate = bucket as Record<
+        string,
+        estypes.AggregationsTopMetricsAggregate | undefined
+      >;
       const metricFieldName = agg.getParam('field').name;
       const results = aggregate[agg.id]?.top.map((result) => result.metrics[metricFieldName]) ?? [];
 

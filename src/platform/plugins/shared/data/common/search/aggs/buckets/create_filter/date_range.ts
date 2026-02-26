@@ -13,12 +13,13 @@ import { buildRangeFilter } from '@kbn/es-query';
 import type { DateRange } from '../../../expressions';
 import type { IBucketAggConfig } from '../bucket_agg_type';
 
-export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRange) => {
+export const createFilterDateRange = (agg: IBucketAggConfig, key: unknown) => {
+  const { from, to } = key as DateRange;
   const filter: RangeFilterParams = {};
   if (from) filter.gte = moment.tz(from, agg.aggConfigs.timeZone).toISOString();
   if (to) filter.lt = moment.tz(to, agg.aggConfigs.timeZone).toISOString();
 
   if (to && from) filter.format = 'strict_date_optional_time';
 
-  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
+  return buildRangeFilter(agg.getField()!, filter, agg.getIndexPattern());
 };

@@ -11,15 +11,12 @@ import moment from 'moment-timezone';
 import { buildRangeFilter } from '@kbn/es-query';
 import type { IBucketDateHistogramAggConfig } from '../date_histogram';
 
-export const createFilterDateHistogram = (
-  agg: IBucketDateHistogramAggConfig,
-  key: string | number
-) => {
-  const start = moment.tz(key, agg.aggConfigs.timeZone);
+export const createFilterDateHistogram = (agg: IBucketDateHistogramAggConfig, key: unknown) => {
+  const start = moment.tz(key as string | number, agg.aggConfigs.timeZone);
   const interval = agg.buckets.getInterval();
 
   return buildRangeFilter(
-    agg.params.field,
+    agg.getField()!,
     {
       gte: start.toISOString(),
       lt: start.add(interval).toISOString(),

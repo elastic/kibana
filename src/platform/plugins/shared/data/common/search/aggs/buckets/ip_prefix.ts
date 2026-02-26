@@ -35,7 +35,12 @@ export const getIpPrefixBucketAgg = () =>
     title: ipPrefixTitle,
     createFilter: createFilterIpPrefix,
     getKey(bucket, key, agg): IpPrefixKey {
-      return { type: 'ip_prefix', address: key, prefix_length: bucket.prefix_length };
+      const b = bucket as Record<string, unknown>;
+      return {
+        type: 'ip_prefix',
+        address: key as string,
+        prefix_length: b.prefix_length as number,
+      };
     },
     getSerializedFormat(agg) {
       return {
@@ -69,7 +74,7 @@ export const getIpPrefixBucketAgg = () =>
           output.params.prefix_length = aggConfig.params.ipPrefix.prefixLength;
           output.params.is_ipv6 = aggConfig.params.ipPrefix.isIpv6;
         },
-        toExpressionAst: ipPrefixToAst,
+        toExpressionAst: (value: unknown) => ipPrefixToAst(value as IpPrefix),
       },
     ],
   });

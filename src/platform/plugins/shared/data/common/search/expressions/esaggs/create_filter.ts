@@ -52,9 +52,9 @@ export const createFilter = (
   }
   if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
     const terms = getOtherBucketFilterTerms(table, columnIndex, rowIndex);
-    filter = aggConfig.createFilter(value, { terms });
+    filter = aggConfig.createFilter(value, { terms }) as Filter[];
   } else {
-    filter = aggConfig.createFilter(value);
+    filter = aggConfig.createFilter(value) as Filter[];
   }
 
   if (!filter) {

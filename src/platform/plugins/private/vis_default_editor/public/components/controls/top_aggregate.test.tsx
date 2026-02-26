@@ -137,7 +137,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'string',
         },
       },
-    } as IAggConfig;
+    } as unknown as IAggConfig;
 
     comp.setProps({ agg });
 
@@ -152,7 +152,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'date',
         },
       },
-    } as IAggConfig;
+    } as unknown as IAggConfig;
 
     comp.setProps({ agg });
 
@@ -166,7 +166,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'string',
         },
       },
-    } as IAggConfig;
+    } as unknown as IAggConfig;
 
     comp.setProps({ agg, value: undefined });
 
