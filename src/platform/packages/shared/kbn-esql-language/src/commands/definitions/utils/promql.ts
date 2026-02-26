@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAstPromqlCommand, ESQLMapEntry } from '@elastic/esql/types';
-import {
-  isIdentifier,
-  isList,
-  isSource,
-  PromQLFunctionDefinitionTypes,
-  type PromQLFunctionDefinition,
-  type PromQLFunctionParamType,
-} from '@elastic/esql';
+import { isIdentifier, isList, isSource } from '@elastic/esql';
 import { EDITOR_MARKER } from '../constants';
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { promqlOperatorDefinitions } from '../generated/promql_operators';
-import { EDITOR_MARKER } from '../constants';
+import {
+  PromQLFunctionDefinitionTypes,
+  type PromQLFunctionDefinition,
+  type PromQLFunctionParamType,
+} from '../types';
 
 /* Returns the PromQL function definition matching the provided name. */
 export const getPromqlFunctionDefinition = (
