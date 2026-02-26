@@ -205,14 +205,14 @@ The downstream system does **not** understand what a "Building Block" or a "Depe
   #### Data Sources (Only to be used for finding correct indices)
   Zscaler
 
-  #### Key Commands ( including the negate attribute handling):
+  #### Flattened Detection Logic (including the negate attribute handling):
   - condition 1
   - condition 2
 
  #### Reference Sets / Lookups
 
 For each reference set, output a bullet in the following pattern:
-- LOOKUP JOIN to check if value of field "<source_field>" [exists / does NOT exist] in the "value" column of lookup index "<lookup_index_name_without_spaces>".
+- LOOKUP JOIN to check if value of field \`<source_field>\` [exists / does NOT exist] in the lookup field \`value\` of lookup index "<lookup_index_name_without_spaces>".
 
 </example_response>
     `,
