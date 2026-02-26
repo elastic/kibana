@@ -22,6 +22,7 @@ import { registerUiSettings } from './infra/feature_flags/register';
 import { EngineDescriptorType } from './domain/definitions/saved_objects';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
+import { CRUDClient } from './domain/crud_client';
 
 export class EntityStorePlugin
   implements
@@ -92,6 +93,12 @@ export class EntityStorePlugin
     plugins.taskManager.registerApiKeyInvalidateFn(
       plugins.security?.authc.apiKeys.invalidateAsInternalUser
     );
+
+    const logger = this.logger;
+    return {
+      createCRUDClient: (esClient, namespace) =>
+        new CRUDClient({ logger, esClient, namespace }),
+    };
   }
 
   public stop() {

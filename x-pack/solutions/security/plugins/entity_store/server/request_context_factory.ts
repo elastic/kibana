@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
+  EntityStoreCoreSetup,
   EntityStoreRequestHandlerContext,
-  EntityStoreStartPlugins,
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
@@ -20,7 +19,7 @@ import { LogsExtractionClient } from './domain/logs_extraction_client';
 import { CRUDClient } from './domain/crud_client';
 
 interface EntityStoreApiRequestHandlerContextDeps {
-  coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
+  coreSetup: EntityStoreCoreSetup;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
   request: KibanaRequest;
