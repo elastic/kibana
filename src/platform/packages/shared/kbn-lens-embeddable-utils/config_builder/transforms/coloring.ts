@@ -31,7 +31,7 @@ const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | '
   percentage: 'percent',
 };
 
-const LEGACY_PALETTE_PREFIX = 'LEGACY_PALETTE_';
+export const LEGACY_PALETTE_PREFIX = 'LEGACY_PALETTE_';
 
 export function isLegacyColorPalette(
   color: { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined

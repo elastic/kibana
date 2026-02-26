@@ -16,6 +16,7 @@ import {
   fromStaticColorAPIToLensState,
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
+  LEGACY_PALETTE_PREFIX,
 } from './coloring';
 
 describe('Color util transforms', () => {
@@ -337,6 +338,20 @@ describe('Color util transforms', () => {
       expect(fromColorMappingLensStateToAPI(undefined)).toBeUndefined();
     });
 
+    it('should convert legacy color palette', () => {
+      const originalColorPalette: PaletteOutput = {
+        type: 'palette',
+        name: 'kibana_palette',
+      };
+
+      const result = fromColorMappingLensStateToAPI(undefined, originalColorPalette);
+      expect(result).toEqual({
+        palette: `${LEGACY_PALETTE_PREFIX}kibana_palette`,
+        mode: 'categorical',
+        mapping: [],
+      });
+    });
+
     it('should convert categorical color mapping with empty assignments', () => {
       const originalColorMapping: ColorMapping.Config = {
         paletteId: 'kibana_palette',
@@ -412,8 +427,23 @@ describe('Color util transforms', () => {
   });
 
   describe('fromColorMappingAPIToLensState', () => {
-    it('should convert legacy color mapping', () => {
+    it('should convert undefined color mapping', () => {
       expect(fromColorMappingAPIToLensState(undefined)).toBeUndefined();
+    });
+
+    it('should convert legacy color mapping', () => {
+      expect(
+        fromColorMappingAPIToLensState({
+          palette: `${LEGACY_PALETTE_PREFIX}kibana_palette`,
+          mode: 'categorical',
+          mapping: [],
+        })
+      ).toEqual({
+        palette: {
+          type: 'palette',
+          name: 'kibana_palette',
+        },
+      });
     });
 
     it('should convert empty mapping correctly', () => {
