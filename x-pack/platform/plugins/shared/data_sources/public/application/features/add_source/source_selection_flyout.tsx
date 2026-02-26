@@ -35,13 +35,6 @@ interface SourceSelectionFlyoutProps {
   onSelectSource: (source: Connector) => void;
 }
 
-const filterSources = (sources: Connector[], searchValue: string): Connector[] => {
-  const sorted = [...sources].sort((a, b) => a.name.localeCompare(b.name));
-  if (!searchValue) return sorted;
-  const query = searchValue.toLowerCase();
-  return sorted.filter((source) => source.name.toLowerCase().includes(query));
-};
-
 const ITEMS_PER_ROW = 3;
 
 export const SourceSelectionFlyout: React.FC<SourceSelectionFlyoutProps> = ({
@@ -53,10 +46,16 @@ export const SourceSelectionFlyout: React.FC<SourceSelectionFlyoutProps> = ({
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
 
-  const filteredSources = useMemo(
-    () => filterSources(dataSources, searchQuery),
-    [dataSources, searchQuery]
+  const sortedSources = useMemo(
+    () => [...dataSources].sort((a, b) => a.name.localeCompare(b.name)),
+    [dataSources]
   );
+
+  const filteredSources = useMemo(() => {
+    if (!searchQuery) return sortedSources;
+    const query = searchQuery.toLowerCase();
+    return sortedSources.filter((source) => source.name.toLowerCase().includes(query));
+  }, [sortedSources, searchQuery]);
 
   const paginatedSources = useMemo(() => {
     const start = activePage * itemsPerPage;
