@@ -46,11 +46,11 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.filter',
-    handlerHash: 'f6a53444546e8f37cb75771c3efb2b4db672062e285b4b9f3df468db03bf2358',
+    handlerHash: '829a245561a33b2f8349755a4ff6b4a2953774b6f862a7a0228b93f517742c9a',
   },
   {
     id: 'data.find',
-    handlerHash: '087b86ab7afb9649c84fdc6687b3909549c7bc957b4f9d66092c635e39a06389',
+    handlerHash: 'b23058c153f427b8a8cb4a9ee1ed8c06881e3d2ed291ea7e78846e113aa0301d',
   },
   {
     id: 'data.map',
