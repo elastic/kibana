@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_dedupe_step';
-export * from './data_filter_step';
-export * from './data_find_step';
-export * from './data_map_step';
-export * from './data_regex_extract_step';
-export * from './data_regex_replace_step';
+import { KQLSyntaxError } from '@kbn/es-query';
+
+export function isKqlSyntaxError(error: unknown): error is KQLSyntaxError {
+  return error instanceof KQLSyntaxError;
+}
