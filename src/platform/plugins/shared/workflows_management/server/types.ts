@@ -12,6 +12,11 @@ import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
+import type { HooksServiceSetup } from '@kbn/agent-builder-server';
+import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server/tools';
 import type {
   AlertingApiRequestHandlerContext,
   AlertingServerSetup,
@@ -32,13 +37,44 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { ZodObject, ZodRawShape } from '@kbn/zod';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
+  /**
+   * Register the Agent Builder plugin with Workflows Management.
+   * Called by the agentBuilder plugin during its setup phase so that
+   * workflowsManagement can register agents, tools, and attachments
+   * without creating a circular dependency.
+   */
+  registerAgentBuilder: (agentBuilder: AgentBuilderPluginSetupContract) => void;
 }
 
 export type WorkflowsServerPluginStart = Record<string, never>;
+
+/**
+ * AgentBuilder plugin setup contract interface.
+ * Uses types from @kbn/agent-builder-server (shared package) instead of
+ * importing from the plugin directly, to avoid a circular dependency.
+ */
+export interface AgentBuilderPluginSetupContract {
+  agents: {
+    register: (definition: BuiltInAgentDefinition) => void;
+  };
+  tools: {
+    register: <RunInput extends ZodObject<ZodRawShape>>(
+      tool: StaticToolRegistration<RunInput>
+    ) => void;
+  };
+  attachments: {
+    registerType: (definition: AttachmentTypeDefinition) => void;
+  };
+  hooks: HooksServiceSetup;
+  skills: {
+    register: (definition: SkillDefinition) => void;
+  };
+}
 
 export interface WorkflowsServerPluginSetupDeps {
   features?: FeaturesPluginSetup;

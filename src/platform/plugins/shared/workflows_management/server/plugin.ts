@@ -26,6 +26,7 @@ import { validateWorkflowForExecution } from './connectors/workflows/validate_wo
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
+  AgentBuilderPluginSetupContract,
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
@@ -165,6 +166,11 @@ export class WorkflowsPlugin
 
     return {
       management: this.api,
+      registerAgentBuilder: (_agentBuilder: AgentBuilderPluginSetupContract) => {
+        this.logger.debug(
+          'Workflows Management: Agent Builder registered via registerAgentBuilder'
+        );
+      },
     };
   }
 

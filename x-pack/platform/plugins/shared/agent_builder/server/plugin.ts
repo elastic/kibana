@@ -130,7 +130,7 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    return {
+    const agentBuilderSetup: AgentBuilderPluginSetup = {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
@@ -147,6 +147,13 @@ export class AgentBuilderPlugin
         register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
     };
+
+    if (setupDeps.workflowsManagement?.registerAgentBuilder) {
+      this.logger.debug('Registering Agent Builder with Workflows Management');
+      setupDeps.workflowsManagement.registerAgentBuilder(agentBuilderSetup);
+    }
+
+    return agentBuilderSetup;
   }
 
   start(

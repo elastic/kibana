@@ -79,7 +79,9 @@
     "@kbn/shared-ux-utility",
     "@kbn/licensing-types",
     "@kbn/core-lifecycle-server-mocks",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
   ],
   "exclude": ["target/**/*"]
 }
