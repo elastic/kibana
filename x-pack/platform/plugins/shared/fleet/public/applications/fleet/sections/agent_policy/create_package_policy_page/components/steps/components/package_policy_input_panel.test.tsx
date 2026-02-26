@@ -463,7 +463,9 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessEnabled: true,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        isAgentlessIntegration: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: true,
       });
@@ -498,7 +500,9 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessEnabled: false,
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
-        isAgentlessIntegration: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
         isServerless: false,
         isCloud: false,
       });

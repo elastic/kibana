@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { getIndexMappings } from '@kbn/agent-builder-genai-utils';
+import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
@@ -22,19 +22,48 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
     description: 'Retrieve mappings for the specified index or indices.',
     schema: getIndexMappingsSchema,
     handler: async ({ indices }, { esClient }) => {
-      const result = await getIndexMappings({ indices, esClient: esClient.asCurrentUser });
+      // getIndexFields transparently handles the local-vs-CCS split:
+      //  - local indices use _mapping API (full mapping tree in rawMapping)
+      //  - CCS indices use batched _field_caps API (flat field list)
+      const indexFields = await getIndexFields({
+        indices,
+        esClient: esClient.asCurrentUser,
+      });
 
-      return {
-        results: [
-          {
-            type: ToolResultType.other,
-            data: {
-              mappings: result,
-              indices,
-            },
+      const results = [];
+
+      // Local indices: return full mapping tree for richer LLM context
+      const localEntries = Object.entries(indexFields).filter(([, v]) => v.rawMapping);
+      if (localEntries.length > 0) {
+        results.push({
+          type: ToolResultType.other,
+          data: {
+            mappings: Object.fromEntries(
+              localEntries.map(([idx, v]) => [idx, { mappings: v.rawMapping }])
+            ),
+            indices: localEntries.map(([idx]) => idx),
           },
-        ],
-      };
+        });
+      }
+
+      // Remote (CCS) indices: return flattened field lists
+      const remoteEntries = Object.entries(indexFields).filter(([, v]) => !v.rawMapping);
+      if (remoteEntries.length > 0) {
+        results.push({
+          type: ToolResultType.other,
+          data: {
+            fieldsByIndex: Object.fromEntries(
+              remoteEntries.map(([idx, v]) => [
+                idx,
+                { fields: v.fields.map(({ path, type }) => ({ path, type })) },
+              ])
+            ),
+            indices: remoteEntries.map(([idx]) => idx),
+          },
+        });
+      }
+
+      return { results };
     },
     tags: [],
   };
