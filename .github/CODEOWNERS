@@ -1040,6 +1040,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic
 x-pack/platform/plugins/private/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_links @elastic/kibana-core
+x-pack/platform/plugins/private/cps_test_endpoints @elastic/kibana-core
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
 x-pack/platform/plugins/private/data_usage @elastic/kibana-management
@@ -1170,7 +1171,6 @@ x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kib
 x-pack/platform/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
 x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
-x-pack/platform/test/serverless/plugins/cps_test_endpoints @elastic/kibana-core
 x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
