@@ -12,10 +12,6 @@ import type { EndpointAppContextService } from '../../endpoint/endpoint_app_cont
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
-import { alertTriageSkill } from './alert_triage_skill';
-import { hostAnalysisSkill } from './host_analysis_skill';
-import { threatIntelSkill } from './threat_intel_skill';
-import { networkForensicsSkill } from './network_forensics_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -39,11 +35,6 @@ export const registerSkills = async ({
   logger,
   options,
 }: RegisterSkillsOpts): Promise<void> => {
-  agentBuilder.skills.register(alertTriageSkill);
-  agentBuilder.skills.register(hostAnalysisSkill);
-  agentBuilder.skills.register(threatIntelSkill);
-  agentBuilder.skills.register(networkForensicsSkill);
-
   if (experimentalFeatures.automaticTroubleshootingSkill) {
     agentBuilder.skills.register(
       createAutomaticTroubleshootingSkill(options.endpointAppContextService)

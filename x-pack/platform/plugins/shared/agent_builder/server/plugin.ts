@@ -30,7 +30,6 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerTaskDefinitions } from './services/execution';
-import { dataExplorationSkill } from './skills';
 
 export class AgentBuilderPlugin
   implements
@@ -94,11 +93,6 @@ export class AgentBuilderPlugin
         }
         return services.taskHandler;
       },
-    });
-
-    // Register built-in skills
-    serviceSetups.skills.registerSkill(dataExplorationSkill).catch((err) => {
-      this.logger.error(`Failed to register built-in data-exploration skill: ${err.message}`);
     });
 
     registerFeatures({ features: setupDeps.features });
