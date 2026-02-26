@@ -52,4 +52,9 @@ export const NoData: React.FC<NoDataProps> = ({
 
 const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 `;
