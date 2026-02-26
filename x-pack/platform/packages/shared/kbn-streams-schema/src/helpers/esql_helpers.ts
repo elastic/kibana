@@ -51,7 +51,12 @@ export function ensureMetadata(esql: string): string {
   if (!fromCmd) return esql;
 
   const hasMetadata = fromCmd.args.some(
-    (arg) => !Array.isArray(arg) && 'type' in arg && arg.type === 'option'
+    (arg) =>
+      !Array.isArray(arg) &&
+      'type' in arg &&
+      arg.type === 'option' &&
+      'name' in arg &&
+      arg.name === 'metadata'
   );
 
   if (hasMetadata) return esql;

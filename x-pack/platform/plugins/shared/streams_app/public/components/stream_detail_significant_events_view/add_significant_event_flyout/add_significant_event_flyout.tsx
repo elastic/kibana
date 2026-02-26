@@ -19,7 +19,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
 import { TaskStatus, type StreamQuery, type Streams, type System } from '@kbn/streams-schema';
@@ -158,7 +157,6 @@ export function AddSignificantEventFlyout({
             id: v4(),
             esql: nextQuery.esql,
             title: nextQuery.title,
-            feature: nextQuery.feature,
             severity_score: nextQuery.severity_score,
             evidence: nextQuery.evidence,
           }))
@@ -362,24 +360,14 @@ export function AddSignificantEventFlyout({
                         case 'manual':
                           onSave({
                             type: 'single',
-                            query: {
-                              ...queries[0],
-                              feature: queries[0].feature
-                                ? omit(queries[0].feature, 'description')
-                                : undefined,
-                            },
+                            query: queries[0],
                             isUpdating: isEditMode,
                           }).finally(() => setIsSubmitting(false));
                           break;
                         case 'ai':
                           onSave({
                             type: 'multiple',
-                            queries: queries.map((nextQuery) => ({
-                              ...nextQuery,
-                              feature: nextQuery.feature
-                                ? omit(nextQuery.feature, 'description')
-                                : undefined,
-                            })),
+                            queries,
                           }).finally(() => setIsSubmitting(false));
                           break;
                       }

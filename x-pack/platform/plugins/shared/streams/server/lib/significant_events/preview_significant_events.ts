@@ -12,48 +12,48 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SignificantEventsPreviewResponse, StreamQuery, Streams } from '@kbn/streams-schema';
 import { extractWhereExpression, getIndexPatternsForStream } from '@kbn/streams-schema';
 
-/**
- * Converts a fixed-interval string (e.g. "300s") to an ES|QL time literal
- * (e.g. "300 seconds") for use in the BUCKET function.
- */
-function toEsqlDuration(bucketSize: string): string {
-  const match = bucketSize.match(/^(\d+)([smhd])$/);
-  if (!match) return bucketSize;
-  const [, value, unit] = match;
-  const unitMap: Record<string, string> = {
-    s: 'seconds',
-    m: 'minutes',
-    h: 'hours',
-    d: 'days',
-  };
-  return `${value} ${unitMap[unit] || unit}`;
+const ESQL_UNITS: Record<string, string> = {
+  s: 'seconds',
+  m: 'minutes',
+  h: 'hours',
+  d: 'days',
+};
+
+const MS_PER_UNIT: Record<string, number> = {
+  s: 1000,
+  m: 60000,
+  h: 3600000,
+  d: 86400000,
+};
+
+function parseBucketSize(raw: string): { value: number; unit: string } {
+  const match = raw.match(/^(\d+)([smhd])$/);
+  if (!match) return { value: 60, unit: 's' };
+  return { value: parseInt(match[1], 10), unit: match[2] };
 }
 
-function parseBucketSizeMs(bucketSize: string): number {
-  const match = bucketSize.match(/^(\d+)([smhd])$/);
-  if (!match) return 60000;
-  const [, value, unit] = match;
-  const multipliers: Record<string, number> = {
-    s: 1000,
-    m: 60000,
-    h: 3600000,
-    d: 86400000,
-  };
-  return parseInt(value, 10) * (multipliers[unit] || 1000);
-}
-
-function buildEsqlHistogramQuery(esqlQuery: string, indices: string[], bucketSize: string): string {
+function buildEsqlQuery(
+  esqlQuery: string,
+  indices: string[],
+  bucketSize: string,
+  withChangePoint: boolean
+): string {
+  const { value, unit } = parseBucketSize(bucketSize);
   const whereExpr = extractWhereExpression(esqlQuery);
   const fromPart = `FROM ${indices.join(',')}`;
   const wherePart = whereExpr ? `| WHERE ${BasicPrettyPrinter.expression(whereExpr)}` : '';
-  const interval = toEsqlDuration(bucketSize);
+  const interval = `${value} ${ESQL_UNITS[unit] || unit}`;
 
-  return `${fromPart} ${wherePart} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${interval})`;
+  let query = `${fromPart} ${wherePart} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${interval})`;
+  if (withChangePoint) {
+    query += ' | CHANGE_POINT count ON bucket';
+  }
+  return query;
 }
 
 /**
- * ES|QL BUCKET does not emit empty buckets. This function fills gaps so the
- * sparkline chart receives a contiguous time series.
+ * ES|QL BUCKET does not emit empty buckets (unlike date_histogram with
+ * extended_bounds). Fill the gaps so the sparkline receives a contiguous series.
  */
 function fillBucketGaps(
   occurrences: Array<{ date: string; count: number }>,
@@ -61,7 +61,8 @@ function fillBucketGaps(
   to: Date,
   bucketSize: string
 ): Array<{ date: string; count: number }> {
-  const intervalMs = parseBucketSizeMs(bucketSize);
+  const { value, unit } = parseBucketSize(bucketSize);
+  const intervalMs = value * (MS_PER_UNIT[unit] || 1000);
   const existingBuckets = new Map(occurrences.map((o) => [new Date(o.date).getTime(), o.count]));
 
   const result: Array<{ date: string; count: number }> = [];
@@ -95,7 +96,6 @@ export async function previewSignificantEvents(
   const { scopedClusterClient } = dependencies;
 
   const indices = getIndexPatternsForStream(definition);
-  const esqlQuery = buildEsqlHistogramQuery(query.esql!.query, indices, bucketSize);
 
   const filter: QueryDslQueryContainer = {
     bool: {
@@ -109,11 +109,22 @@ export async function previewSignificantEvents(
     },
   };
 
-  const response = (await scopedClusterClient.asCurrentUser.esql.query({
-    query: esqlQuery,
-    filter,
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  // Try with CHANGE_POINT to get histogram + change-point detection in a
+  // single round trip. Falls back to histogram-only when CHANGE_POINT cannot
+  // run (e.g. fewer than 22 buckets).
+  let response: ESQLSearchResponse;
+  try {
+    response = (await scopedClusterClient.asCurrentUser.esql.query({
+      query: buildEsqlQuery(query.esql!.query, indices, bucketSize, true),
+      filter,
+    })) as unknown as ESQLSearchResponse;
+  } catch {
+    response = (await scopedClusterClient.asCurrentUser.esql.query({
+      query: buildEsqlQuery(query.esql!.query, indices, bucketSize, false),
+      filter,
+      drop_null_columns: true,
+    })) as unknown as ESQLSearchResponse;
+  }
 
   const countIdx = response.columns.findIndex((col) => col.name === 'count');
   const bucketIdx = response.columns.findIndex((col) => col.name === 'bucket');
@@ -125,9 +136,30 @@ export async function previewSignificantEvents(
 
   const occurrences = fillBucketGaps(sparseOccurrences, from, to, bucketSize);
 
+  // Parse change point columns if present (CHANGE_POINT adds `type` and `pvalue`)
+  const typeIdx = response.columns.findIndex((col) => col.name === 'type');
+  const pvalueIdx = response.columns.findIndex((col) => col.name === 'pvalue');
+  let changePoints: SignificantEventsPreviewResponse['change_points'] = { type: {} };
+
+  if (typeIdx >= 0 && pvalueIdx >= 0) {
+    const cpRow = response.values.find((row) => row[typeIdx] != null);
+    if (cpRow) {
+      const cpBucketMs = new Date(cpRow[bucketIdx] as string).getTime();
+      const cpIndex = occurrences.findIndex((o) => new Date(o.date).getTime() === cpBucketMs);
+      changePoints = {
+        type: {
+          [cpRow[typeIdx] as string]: {
+            p_value: cpRow[pvalueIdx] as number,
+            change_point: cpIndex >= 0 ? cpIndex : 0,
+          },
+        },
+      };
+    }
+  }
+
   return {
     ...query,
-    change_points: { type: {} },
+    change_points: changePoints,
     occurrences,
   };
 }

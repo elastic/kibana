@@ -52,21 +52,11 @@ interface SignificantEventsGetResponse {
 
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
-  'occurrences' | 'change_points' | 'kql'
-> & {
-  esql?: EsqlQuery;
-};
+  'occurrences' | 'change_points' | 'esql'
+>;
 
 interface GeneratedSignificantEventQuery {
   title: string;
-  /** @deprecated Legacy KQL query — only present on results from old generation tasks. */
-  kql?: string;
-  /** @deprecated Legacy feature filter — only present on results from old generation tasks. */
-  feature?: {
-    name: string;
-    filter: Condition;
-    type: 'system';
-  };
   esql: EsqlQuery;
   severity_score: number;
   evidence?: string[];

@@ -607,7 +607,7 @@ export class QueryClient {
           return update ? { ...link, query: update } : link;
         }),
       ...operations
-        .filter((operation) => operation.index && !currentIds.has(operation.index!.id))
+        .filter((operation) => operation.index && !currentIds.has(operation.index.id))
         .map((operation) => toQueryLinkFromQuery(operation.index!, stream)),
     ];
 
