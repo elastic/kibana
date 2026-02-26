@@ -32,19 +32,10 @@ export const NoData: React.FC<NoDataProps> = ({
   return (
     <EuiPageTemplate.EmptyPrompt
       data-test-subj={testString}
-      css={css`
-        align-self: center;
-        min-height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-      `}
       title={
-        <EuiTitle size="m">
-          <h2>{titleText}</h2>
-        </EuiTitle>
+        <h2>{titleText}</h2>
       }
+      titleSize="s"
       icon={<ElasticAgentCardIllustration />}
       body={<p>{bodyText}</p>}
       actions={
@@ -68,7 +59,7 @@ export const NoData: React.FC<NoDataProps> = ({
                 defaultMessage: 'Want to learn more?',
               })}
             </span>
-          </EuiTitle>{' '}
+          </EuiTitle>
           <EuiLink href="#" onClick={(e) => e.preventDefault()} data-test-subj="infraNoDataReadTheDocsLink">
             {i18n.translate('xpack.infra.noData.readTheDocs', {
               defaultMessage: 'Read the docs',
