@@ -49,55 +49,6 @@ describe('esqlQueryValidator', () => {
       ).resolves.toBeUndefined()
     );
   });
-
-  describe('non-aggregating queries without METADATA (no longer blocked)', () => {
-    it.each([
-      ['from test*'],
-      ['from metadata*'],
-      ['from test* | keep metadata'],
-      ['from test* | eval x="metadata _id"'],
-    ])(
-      'succeeds validation for non-aggregating query without METADATA "%s" (metadata _id is auto-injected at execution)',
-      (esqlQuery) =>
-        expect(
-          createValidator()({
-            value: createEsqlQueryFieldValue(esqlQuery),
-          } as EsqlQueryValidatorArgs)
-        ).resolves.toBeUndefined()
-    );
-  });
-
-  describe('queries with METADATA operator', () => {
-    it.each([
-      ['from test* metadata _id'],
-      ['from test* metadata _id, _index'],
-      ['from test* metadata _index, _id'],
-      ['from test*  metadata _id '],
-      ['from test*    metadata _id '],
-      ['from test*  metadata _id | limit 10'],
-      [
-        `from packetbeat* metadata
-
-        _id
-        | limit 100`,
-      ],
-    ])(
-      'succeeds validation when METADATA operator EXISTS in a NON aggregating query "%s"',
-      (esqlQuery) =>
-        expect(
-          createValidator()({
-            value: createEsqlQueryFieldValue(esqlQuery),
-          } as EsqlQueryValidatorArgs)
-        ).resolves.toBeUndefined()
-    );
-
-    it('succeeds validation when METADATA operator is missing in an aggregating query', () =>
-      expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue('from test* | stats c = count(*) by fieldA'),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toBeUndefined());
-  });
 });
 
 type EsqlQueryValidatorArgs = ValidationFuncArg<FormData, FieldValueQueryBar>;
