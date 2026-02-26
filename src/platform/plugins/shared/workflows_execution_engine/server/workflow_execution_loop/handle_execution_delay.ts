@@ -45,7 +45,12 @@ export async function handleExecutionDelay(
       await abortableTimeout(timeout, stepExecutionRuntime.abortController.signal);
     } catch (error) {
       if (error instanceof TimeoutAbortedError) {
-        // Execution was aborted, exit early
+        // Delay was interrupted (e.g. by a timeout or cancellation).
+        // Reset status to RUNNING so the execution loop can continue
+        // after error handling (e.g. on-failure continue).
+        params.workflowExecutionState.updateWorkflowExecution({
+          status: ExecutionStatus.RUNNING,
+        });
         return;
       }
 

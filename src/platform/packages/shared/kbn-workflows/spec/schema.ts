@@ -211,6 +211,8 @@ export const BuiltInStepProperties = [
   'foreach',
   'timeout',
   'on-failure',
+  'iteration-timeout',
+  'iteration-on-failure',
 ];
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
@@ -342,6 +344,8 @@ export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.union([z.string(), z.array(z.unknown())]),
   steps: z.array(BaseStepSchema).min(1),
+  'iteration-timeout': DurationSchema.optional(),
+  'iteration-on-failure': WorkflowOnFailureSchema.optional(),
 })
   .merge(StepWithIfConditionSchema)
   .merge(TimeoutPropSchema);
@@ -351,6 +355,7 @@ export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = fal
   const schema = ForEachStepSchema.extend({
     steps: z.array(stepSchema).min(1),
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    'iteration-on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
   });
 
   if (loose) {

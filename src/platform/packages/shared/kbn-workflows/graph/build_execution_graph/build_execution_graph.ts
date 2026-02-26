@@ -346,29 +346,13 @@ function createIfGraphForIfStepLevel(
   return createIfGraph(generatedStepId, ifStep, context);
 }
 
-function visitOnFailure(
-  currentStep: BaseStep,
+function applyOnFailure(
+  stepId: string,
+  innerGraph: WorkflowGraphType,
   onFailureConfiguration: WorkflowOnFailure,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const onFailureGraphNode: GraphNodeUnion = {
-    id: `onFailure_${stepId}`,
-    type: 'on-failure',
-    stepId,
-    stepType: 'on-failure',
-  };
-
-  context.stack.push(onFailureGraphNode);
-  let graph = createStepsSequence(
-    [
-      {
-        ...currentStep,
-        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
-      } as BaseStep,
-    ],
-    context
-  );
+  let graph = innerGraph;
 
   if (onFailureConfiguration?.retry) {
     graph = createRetry(stepId, graph, onFailureConfiguration.retry);
@@ -387,9 +371,37 @@ function visitOnFailure(
     graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
+  return graph;
+}
+
+function visitOnFailure(
+  currentStep: BaseStep,
+  onFailureConfiguration: WorkflowOnFailure,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const onFailureGraphNode: GraphNodeUnion = {
+    id: `onFailure_${stepId}`,
+    type: 'on-failure',
+    stepId,
+    stepType: 'on-failure',
+  };
+
+  context.stack.push(onFailureGraphNode);
+  const graph = createStepsSequence(
+    [
+      {
+        ...currentStep,
+        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
+      } as BaseStep,
+    ],
+    context
+  );
+
+  const result = applyOnFailure(stepId, graph, onFailureConfiguration, context);
   context.stack.pop();
 
-  return graph;
+  return result;
 }
 
 function handleTimeout(
@@ -742,7 +754,22 @@ function createForeachGraph(
     startNodeId: enterForeachNodeId,
   };
   graph.setNode(exitNodeId, exitForeachNode);
-  const innerGraph = createStepsSequence(foreachStep.steps || [], context);
+  let innerGraph = createStepsSequence(foreachStep.steps || [], context);
+
+  if (foreachStep['iteration-timeout']) {
+    innerGraph = handleTimeout(
+      `iteration_${stepId}`,
+      'step_level_timeout',
+      foreachStep['iteration-timeout'],
+      innerGraph,
+      context
+    );
+  }
+
+  const iterationOnFailure = foreachStep['iteration-on-failure'];
+  if (iterationOnFailure) {
+    innerGraph = applyOnFailure(`iteration_${stepId}`, innerGraph, iterationOnFailure, context);
+  }
 
   insertGraphBetweenNodes(graph, innerGraph, enterForeachNodeId, exitNodeId);
   context.stack.pop();
