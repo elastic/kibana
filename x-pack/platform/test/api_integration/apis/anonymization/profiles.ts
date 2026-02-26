@@ -293,8 +293,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('alerts data view profile bootstrap behavior', () => {
-      it('does not create the alerts profile before alerts data view exists in default space', async () => {
+    describe('alerts data view profile lazy initialization behavior', () => {
+      it('does not create the alerts profile from profile listing before alerts target runtime usage', async () => {
         const { body, status } = await supertest
           .get(
             `${PROFILES_API}/_find?target_type=data_view&target_id=${encodeURIComponent(

@@ -175,25 +175,6 @@ export class AnonymizationPlugin
       return uiSettingsClient.get<string | undefined>(LEGACY_ANONYMIZATION_UI_SETTING_KEY);
     };
 
-    // Ensure default alerts profile at startup. Global profile is lazily ensured
-    // on profiles `_find` and anonymization runtime usage.
-    void (async () => {
-      try {
-        await ensureProfilesIndexReady();
-        await ensureAlertsDataViewProfile({
-          namespace: 'default',
-          profilesRepo,
-          saltService,
-          logger: this.logger,
-          checkDataViewExists: () => alertsDataViewExists('default'),
-        });
-      } catch (err) {
-        this.logger.error(
-          `Failed to initialize default alerts anonymization profile: ${(err as Error).message}`
-        );
-      }
-    })();
-
     this.policyService = {
       resolveEffectivePolicy: async (namespace, target) => {
         await ensureProfilesIndexReady();

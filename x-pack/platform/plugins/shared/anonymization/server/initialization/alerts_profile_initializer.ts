@@ -21,8 +21,7 @@ export const ALERTS_DATA_VIEW_TARGET_TYPE = 'data_view' as const;
  * `resolveEffectivePolicy` will create the profile once the data view is present.
  *
  * Called:
- * - Automatically on startup when Security Solution is available in a space
- * - Lazily on first anonymization usage in Classic view
+ * - Lazily on first anonymization usage for the alerts data view target
  */
 export const ensureAlertsDataViewProfile = async ({
   namespace,

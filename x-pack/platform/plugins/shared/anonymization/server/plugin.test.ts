@@ -30,6 +30,7 @@ jest.mock('./initialization', () => ({
 }));
 const initializationMock = jest.requireMock('./initialization') as {
   ensureGlobalProfileForNamespace: jest.Mock;
+  ensureAlertsDataViewProfile: jest.Mock;
 };
 
 const createProfile = ({
@@ -240,4 +241,5 @@ describe('AnonymizationPlugin policy resolution', () => {
 
     expect(initializationMock.ensureGlobalProfileForNamespace).toHaveBeenCalled();
   });
+
 });
