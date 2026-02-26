@@ -16558,7 +16558,7 @@
         "label": "NetworkMode",
         "description": [],
         "signature": [
-          "\"always\" | \"online\" | \"offlineFirst\""
+          "\"online\" | \"always\" | \"offlineFirst\""
         ],
         "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
         "lineNumber": 28,
