@@ -10,6 +10,7 @@ import type AdmZip from 'adm-zip';
 import path from 'path';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type { DataStreamManifest, IntegrationManifest } from './types';
+import { buildAgentTemplate } from './agent_templates';
 
 export const addManifestToZip = (
   zip: AdmZip,
@@ -47,4 +48,24 @@ export const addIngestPipelineToZip = (
   );
   const yamlContent = `---\n${dump(pipeline, { sortKeys: false, lineWidth: -1 })}`;
   zip.addFile(pipelinePath, Buffer.from(yamlContent));
+};
+
+export const addAgentStreamToZip = (
+  zip: AdmZip,
+  rootDir: string,
+  dataStreamName: string,
+  inputTypes: string[]
+): void => {
+  for (const inputType of inputTypes) {
+    const templateContent = buildAgentTemplate(inputType);
+    const templatePath = path.join(
+      rootDir,
+      'data_stream',
+      dataStreamName,
+      'agent',
+      'stream',
+      `${inputType}.yml.hbs`
+    );
+    zip.addFile(templatePath, Buffer.from(templateContent));
+  }
 };

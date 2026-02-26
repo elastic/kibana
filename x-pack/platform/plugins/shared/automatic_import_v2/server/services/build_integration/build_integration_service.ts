@@ -14,7 +14,12 @@ import type {
   DataStreamManifestVar,
   IntegrationManifest,
 } from './types';
-import { addDataStreamToZip, addIngestPipelineToZip, addManifestToZip } from './util';
+import {
+  addAgentStreamToZip,
+  addDataStreamToZip,
+  addIngestPipelineToZip,
+  addManifestToZip,
+} from './util';
 import { getInputVars } from './input_vars';
 
 const FORMAT_VERSION = '3.4.0';
@@ -159,6 +164,8 @@ export const buildIntegrationPackage = async (
         on_failure: on_failure as Pipeline['on_failure'],
       });
     }
+
+    addAgentStreamToZip(zip, packageName, dataStream.data_stream_id, dataStream.input_types);
   }
 
   const buffer = await zip.toBufferPromise();
