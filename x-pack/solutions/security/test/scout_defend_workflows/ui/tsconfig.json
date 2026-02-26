@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/test-subj-selector",
     "@kbn/scout-security",
-    "@kbn/scout",
-    "@kbn/security-solution-plugin",
+    "@kbn/scout"
   ]
 }
