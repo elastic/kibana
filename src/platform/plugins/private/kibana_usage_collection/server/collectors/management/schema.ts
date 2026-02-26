@@ -614,6 +614,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmUseUnifiedTraceWaterfall': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:profilingShowErrorFrames': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -747,6 +751,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Restrict to default AI connector only',
+    },
+  },
+  'agentBuilder:prePromptWorkflowIds': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'Pre-prompt workflow IDs',
+      },
     },
   },
   'securitySolution:entityStoreEnableV2': {
