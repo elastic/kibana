@@ -58,7 +58,7 @@ describe('getKibanaUrl', () => {
     expect(getKibanaUrl()).toBe('http://localhost:5601');
   });
 
-  describe('forceServerInfo', () => {
+  describe('use_server_info', () => {
     it('returns server info URL even when publicBaseUrl is available', () => {
       const coreStart = {
         http: {
@@ -97,12 +97,12 @@ describe('getKibanaUrl', () => {
       expect(getKibanaUrl(coreStart, cloudSetup, true)).toBe('http://internal-host:5601/base-path');
     });
 
-    it('falls back to localhost when forceServerInfo is true but no coreStart', () => {
+    it('falls back to localhost when use_server_info is true but no coreStart', () => {
       expect(getKibanaUrl(undefined, undefined, true)).toBe('http://localhost:5601');
     });
   });
 
-  describe('forceLocalhost', () => {
+  describe('use_localhost', () => {
     it('returns localhost even when publicBaseUrl is available', () => {
       const coreStart = {
         http: {
@@ -124,7 +124,7 @@ describe('getKibanaUrl', () => {
     });
   });
 
-  describe('forceServerInfo takes precedence over forceLocalhost', () => {
+  describe('use_server_info takes precedence over use_localhost', () => {
     it('returns server info URL when both flags are true', () => {
       const coreStart = {
         http: {
