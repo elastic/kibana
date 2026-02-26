@@ -17,9 +17,6 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 const mockClose = jest.fn().mockResolvedValue(undefined);
 const mockConnect = jest.fn().mockResolvedValue(undefined);
 const mockPing = jest.fn().mockResolvedValue(undefined);
-const mockListDatabases = jest.fn().mockResolvedValue({
-  databases: [{ name: 'testDb', sizeOnDisk: 1024 }],
-});
 const mockToArray = jest.fn();
 const mockListCollectionsCursor = { toArray: mockToArray };
 const mockFindCursor = {
@@ -34,7 +31,6 @@ function mockCreateMockClient() {
   const mockDb = jest.fn().mockReturnValue({
     admin: () => ({
       ping: mockPing,
-      listDatabases: mockListDatabases,
     }),
     listCollections: jest.fn().mockReturnValue(mockListCollectionsCursor),
     collection: jest.fn().mockReturnValue({
@@ -64,7 +60,7 @@ describe('MongoConnector', () => {
   let connector: MongoConnector;
   let connectorUsageCollector: ConnectorUsageCollector;
 
-  const defaultConfig = {};
+  const defaultConfig = { database: 'testdb' };
   const defaultSecrets = { connectionUri: 'mongodb://localhost:27017' };
 
   beforeEach(() => {
@@ -97,15 +93,10 @@ describe('MongoConnector', () => {
 
     it('should register all sub-actions', () => {
       const subActions = connector.getSubActions();
-      expect(subActions.size).toBe(5);
+      expect(subActions.size).toBe(4);
       expect(subActions.get(SUB_ACTION.TEST)).toEqual({
         method: 'testConnector',
         name: SUB_ACTION.TEST,
-        schema: expect.anything(),
-      });
-      expect(subActions.get(SUB_ACTION.LIST_DATABASES)).toEqual({
-        method: 'listDatabases',
-        name: SUB_ACTION.LIST_DATABASES,
         schema: expect.anything(),
       });
       expect(subActions.get(SUB_ACTION.LIST_COLLECTIONS)).toEqual({
@@ -153,7 +144,7 @@ describe('MongoConnector', () => {
       const connectorNoSecrets = new MongoConnector({
         configurationUtilities: actionsConfigMock.create(),
         connector: { id: 'test-2', type: CONNECTOR_ID },
-        config: {},
+        config: { database: 'testdb' },
         secrets: {} as MongoConnectorSecrets,
         logger,
         services: actionsMock.createServices(),
@@ -168,7 +159,7 @@ describe('MongoConnector', () => {
       const connectorEmptyUri = new MongoConnector({
         configurationUtilities: actionsConfigMock.create(),
         connector: { id: 'test-3', type: CONNECTOR_ID },
-        config: {},
+        config: { database: 'testdb' },
         secrets: { connectionUri: '' },
         logger,
         services: actionsMock.createServices(),
@@ -180,61 +171,41 @@ describe('MongoConnector', () => {
     });
   });
 
-  describe('listDatabases', () => {
-    it('should return databases and close client', async () => {
-      const result = await connector.listDatabases({}, connectorUsageCollector);
-
-      expect(result).toEqual({
-        databases: [{ name: 'testDb', sizeOnDisk: 1024 }],
-      });
-      expect(mockListDatabases).toHaveBeenCalledWith({ nameOnly: false });
-      expect(mockClose).toHaveBeenCalledTimes(1);
-      expect(connectorUsageCollector.addRequestBodyBytes).toHaveBeenCalledWith(undefined, {});
-    });
-
-    it('should pass nameOnly when provided', async () => {
-      await connector.listDatabases({ nameOnly: true }, connectorUsageCollector);
-
-      expect(mockListDatabases).toHaveBeenCalledWith({ nameOnly: true });
-    });
-
-    it('should close client when listDatabases throws', async () => {
-      mockListDatabases.mockRejectedValueOnce(new Error('Auth failed'));
-
-      await expect(connector.listDatabases({}, connectorUsageCollector)).rejects.toThrow(
-        'Auth failed'
-      );
-
-      expect(mockClose).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('listCollections', () => {
-    it('should return collections and close client', async () => {
+    it('should return collections and close client using config database', async () => {
       mockToArray.mockResolvedValueOnce([{ name: 'users', type: 'collection' }]);
 
-      const result = await connector.listCollections({ database: 'mydb' }, connectorUsageCollector);
+      const result = await connector.listCollections({}, connectorUsageCollector);
 
       expect(result).toEqual({
         collections: [{ name: 'users', type: 'collection' }],
       });
-      expect(mockClientInstance.db).toHaveBeenCalledWith('mydb');
+      expect(mockClientInstance.db).toHaveBeenCalledWith('testdb');
+      expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('should pass nameOnly when provided', async () => {
+      mockToArray.mockResolvedValueOnce([{ name: 'users', type: 'collection' }]);
+
+      await connector.listCollections({ nameOnly: true }, connectorUsageCollector);
+
+      expect(mockClientInstance.db).toHaveBeenCalledWith('testdb');
       expect(mockClose).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('find', () => {
-    it('should return documents and close client', async () => {
+    it('should return documents and close client using config database', async () => {
       const mockDocs = [{ _id: '1', name: 'alice' }];
       mockFindCursor.toArray.mockResolvedValueOnce(mockDocs);
 
       const result = await connector.find(
-        { database: 'mydb', collection: 'users', limit: 10 },
+        { collection: 'users', limit: 10 },
         connectorUsageCollector
       );
 
       expect(result).toEqual({ documents: mockDocs });
-      expect(mockClientInstance.db).toHaveBeenCalledWith('mydb');
+      expect(mockClientInstance.db).toHaveBeenCalledWith('testdb');
       expect(mockClientInstance.db().collection).toHaveBeenCalledWith('users');
       expect(mockFindCursor.limit).toHaveBeenCalledWith(10);
       expect(mockClose).toHaveBeenCalledTimes(1);
@@ -245,7 +216,6 @@ describe('MongoConnector', () => {
 
       await connector.find(
         {
-          database: 'mydb',
           collection: 'users',
           filter: { status: 'active' },
           skip: 5,
@@ -263,19 +233,38 @@ describe('MongoConnector', () => {
   });
 
   describe('aggregate', () => {
-    it('should return pipeline results and close client', async () => {
+    it('should return pipeline results and close client using config database', async () => {
       const mockDocs = [{ count: 42 }];
       mockAggregateCursor.toArray.mockResolvedValueOnce(mockDocs);
 
       const pipeline = [{ $match: { status: 'active' } }, { $count: 'count' }];
       const result = await connector.aggregate(
-        { database: 'mydb', collection: 'users', pipeline },
+        { collection: 'users', pipeline },
         connectorUsageCollector
       );
 
       expect(result).toEqual({ documents: mockDocs });
+      expect(mockClientInstance.db).toHaveBeenCalledWith('testdb');
+      expect(mockClientInstance.db().collection).toHaveBeenCalledWith('users');
       expect(mockClientInstance.db().collection().aggregate).toHaveBeenCalledWith(pipeline);
       expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getDatabase', () => {
+    it('should throw when database is missing from config', async () => {
+      const connectorNoDb = new MongoConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: 'test-4', type: CONNECTOR_ID },
+        config: { database: '' },
+        secrets: defaultSecrets,
+        logger,
+        services: actionsMock.createServices(),
+      });
+
+      await expect(
+        connectorNoDb.listCollections({}, connectorUsageCollector)
+      ).rejects.toThrow('database is required in connector config');
     });
   });
 

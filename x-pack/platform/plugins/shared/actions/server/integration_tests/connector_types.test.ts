@@ -85,6 +85,7 @@ describe('Connector type config checks', () => {
       // SubActionConnector
       if (getService) {
         let connectorConfig: ActionTypeConfig = {};
+        let connectorSecrets: Record<string, unknown> = {};
 
         if (connectorTypeId === '.microsoft_defender_endpoint') {
           connectorConfig = {
@@ -108,6 +109,9 @@ describe('Connector type config checks', () => {
             serverUrl: 'https://_fake_mcp_.com',
             hasAuth: false,
           };
+        } else if (connectorTypeId === '.mongodb') {
+          connectorConfig = { database: 'testdb' };
+          connectorSecrets = { connectionUri: 'mongodb://localhost:27017' };
         }
 
         const subActions = getService({
@@ -115,7 +119,7 @@ describe('Connector type config checks', () => {
           configurationUtilities: actionsConfigMock.create(),
           connector: { id: 'foo', type: 'bar' },
           logger: loggerMock.create(),
-          secrets: {},
+          secrets: connectorSecrets,
           services: {} as Services,
         }).getSubActions();
 

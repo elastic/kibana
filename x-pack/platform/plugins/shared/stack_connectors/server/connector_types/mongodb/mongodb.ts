@@ -15,7 +15,6 @@ import type { MongoConnectorConfig, MongoConnectorSecrets } from './schemas';
 import {
   SUB_ACTION,
   TestConnectorRequestSchema,
-  ListDatabasesRequestSchema,
   ListCollectionsRequestSchema,
   FindRequestSchema,
   AggregateRequestSchema,
@@ -45,11 +44,6 @@ export class MongoConnector extends SubActionConnector<
       schema: TestConnectorRequestSchema,
     });
     this.registerSubAction({
-      name: SUB_ACTION.LIST_DATABASES,
-      method: 'listDatabases',
-      schema: ListDatabasesRequestSchema,
-    });
-    this.registerSubAction({
       name: SUB_ACTION.LIST_COLLECTIONS,
       method: 'listCollections',
       schema: ListCollectionsRequestSchema,
@@ -72,6 +66,18 @@ export class MongoConnector extends SubActionConnector<
       throw new Error('MongoDB connection URI is required in secrets');
     }
     return uri;
+  }
+
+  /**
+   * Returns the database this connector is bound to (from config).
+   * Throws if config.database is missing.
+   */
+  private getDatabase(): string {
+    const database = this.config.database;
+    if (!database || typeof database !== 'string') {
+      throw new Error('database is required in connector config');
+    }
+    return database;
   }
 
   /**
@@ -100,26 +106,6 @@ export class MongoConnector extends SubActionConnector<
     }
   }
 
-  public async listDatabases(
-    params: z.infer<typeof ListDatabasesRequestSchema>,
-    connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<{ databases: Array<{ name: string; sizeOnDisk?: number }> }> {
-    connectorUsageCollector.addRequestBodyBytes(undefined, params);
-    const client = await this.getClient();
-    try {
-      const admin = client.db().admin();
-      const result = await admin.listDatabases({ nameOnly: params.nameOnly ?? false });
-      return {
-        databases: result.databases.map((db) => ({
-          name: db.name,
-          ...(db.sizeOnDisk != null && { sizeOnDisk: db.sizeOnDisk }),
-        })),
-      };
-    } finally {
-      await client.close();
-    }
-  }
-
   public async listCollections(
     params: z.infer<typeof ListCollectionsRequestSchema>,
     connectorUsageCollector: ConnectorUsageCollector
@@ -127,7 +113,8 @@ export class MongoConnector extends SubActionConnector<
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
     const client = await this.getClient();
     try {
-      const db = client.db(params.database);
+      const database = this.getDatabase();
+      const db = client.db(database);
       const cursor = db.listCollections(undefined, { nameOnly: params.nameOnly ?? true });
       const collections = await cursor.toArray();
       return {
@@ -148,7 +135,8 @@ export class MongoConnector extends SubActionConnector<
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
     const client = await this.getClient();
     try {
-      const db = client.db(params.database);
+      const database = this.getDatabase();
+      const db = client.db(database);
       const collection = db.collection(params.collection);
       let cursor = collection.find(params.filter ?? {});
       if (params.sort) {
@@ -174,7 +162,8 @@ export class MongoConnector extends SubActionConnector<
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
     const client = await this.getClient();
     try {
-      const db = client.db(params.database);
+      const database = this.getDatabase();
+      const db = client.db(database);
       const collection = db.collection(params.collection);
       const documents = await collection.aggregate(params.pipeline).toArray();
       return { documents };

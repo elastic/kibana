@@ -35,16 +35,15 @@ describe('MongoDB connector type', () => {
     const service = connectorType.getService({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: 'test-id', type: CONNECTOR_ID },
-      config: {},
+      config: { database: 'testdb' },
       secrets: { connectionUri: 'mongodb://localhost:27017' },
       logger: loggingSystemMock.createLogger(),
       services: actionsMock.createServices(),
     });
 
     const subActions = service.getSubActions();
-    expect(subActions.size).toBe(5);
+    expect(subActions.size).toBe(4);
     expect(subActions.has(SUB_ACTION.TEST)).toBe(true);
-    expect(subActions.has(SUB_ACTION.LIST_DATABASES)).toBe(true);
     expect(subActions.has(SUB_ACTION.LIST_COLLECTIONS)).toBe(true);
     expect(subActions.has(SUB_ACTION.FIND)).toBe(true);
     expect(subActions.has(SUB_ACTION.AGGREGATE)).toBe(true);

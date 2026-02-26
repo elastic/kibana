@@ -16,14 +16,15 @@ export const CONNECTOR_NAME = 'MongoDB';
 /** Sub-action names */
 export const SUB_ACTION = {
   TEST: 'test',
-  LIST_DATABASES: 'listDatabases',
   LIST_COLLECTIONS: 'listCollections',
   FIND: 'find',
   AGGREGATE: 'aggregate',
 } as const;
 
-/** Schema for MongoDB connector configuration. No config fields required. */
-export const MongoConnectorConfigSchema = z.object({}).strict();
+/** Schema for MongoDB connector configuration. database is the database this connector is bound to. */
+export const MongoConnectorConfigSchema = z.object({
+  database: z.string().min(1),
+}).strict();
 
 /**
  * Schema for MongoDB connector secrets.
@@ -40,17 +41,11 @@ export type MongoConnectorSecrets = z.infer<typeof MongoConnectorSecretsSchema>;
 
 export const TestConnectorRequestSchema = z.object({}).strict();
 
-export const ListDatabasesRequestSchema = z.object({
-  nameOnly: z.boolean().optional(),
-});
-
 export const ListCollectionsRequestSchema = z.object({
-  database: z.string().min(1),
   nameOnly: z.boolean().optional(),
 });
 
 export const FindRequestSchema = z.object({
-  database: z.string().min(1),
   collection: z.string().min(1),
   filter: z.record(z.string(), z.unknown()).optional(),
   limit: z.number().int().min(1).max(10000).optional(),
@@ -59,7 +54,6 @@ export const FindRequestSchema = z.object({
 });
 
 export const AggregateRequestSchema = z.object({
-  database: z.string().min(1),
   collection: z.string().min(1),
   pipeline: z.array(z.record(z.string(), z.unknown())).min(1),
 });
