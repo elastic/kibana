@@ -6,14 +6,12 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import type { EntityMaintainerListEntry } from '../../../domain/entity_maintainers';
-import type {
-  EntityMaintainerState,
-  EntityMaintainerTaskStatus,
-} from '../../../tasks/entity_maintainers/types';
+import type { EntityMaintainerState, EntityMaintainerTaskStatus } from '../../../tasks/entity_maintainers/types';
 
 interface EntityMaintainerResponseItem {
   id: string;
@@ -45,7 +43,7 @@ function toGetMaintainersResponseItem(
 export function registerGetMaintainers(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: '/internal/security/entity-store/entity-maintainers',
+      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -60,7 +58,7 @@ export function registerGetMaintainers(router: EntityStorePluginRouter) {
       wrapMiddlewares(
         async (
           ctx,
-          _req,
+          req,
           res
         ): Promise<IKibanaResponse<{ list: EntityMaintainerResponseItem[] }>> => {
           const entityStoreCtx = await ctx.entityStore;
