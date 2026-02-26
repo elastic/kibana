@@ -141,6 +141,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           titlesTextAlign: primaryMetric.alignments.labels,
         }
       : {}),
+    ...(primaryMetric.position ? { primaryPosition: primaryMetric.position } : {}),
+    ...(primaryMetric.title_weight ? { titleWeight: primaryMetric.title_weight } : {}),
     ...(primaryMetric.icon
       ? {
           icon: primaryMetric.icon.name,
@@ -157,7 +159,8 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
             ? { secondaryLabelPosition: secondaryMetric.label_position }
             : {}),
           secondaryAlign:
-            'alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined,
+            ('alignments' in secondaryMetric && secondaryMetric.alignments?.value) ||
+            ('alignments' in primaryMetric ? primaryMetric.alignments?.value : undefined),
           ...('compare' in secondaryMetric && secondaryMetric.compare
             ? fromCompareAPIToLensState(secondaryMetric.compare)
             : {}),
@@ -374,7 +377,10 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     if (visualization.palette) {
-      primaryMetric.color = fromColorByValueLensStateToAPI(visualization.palette);
+      const colorByValue = fromColorByValueLensStateToAPI(visualization.palette);
+      if (colorByValue?.range === 'absolute') {
+        primaryMetric.color = colorByValue;
+      }
     }
 
     if (visualization.applyColorTo) {
@@ -403,6 +409,14 @@ function enrichConfigurationWithVisualizationProperties(
     }
 
     primaryMetric.fit = visualization.valueFontMode === 'fit';
+
+    if (visualization.primaryPosition) {
+      primaryMetric.position = visualization.primaryPosition;
+    }
+
+    if (visualization.titleWeight) {
+      primaryMetric.title_weight = visualization.titleWeight;
+    }
   }
 
   if (secondaryMetric) {
@@ -422,6 +436,12 @@ function enrichConfigurationWithVisualizationProperties(
       secondaryMetric.color = {
         type: 'static',
         color: visualization.secondaryTrend.color,
+      };
+    }
+
+    if (visualization.secondaryAlign) {
+      secondaryMetric.alignments = {
+        value: visualization.secondaryAlign,
       };
     }
   }
