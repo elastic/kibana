@@ -18,9 +18,8 @@ export const RuleExecutionStepsToken = Symbol.for(
 ) as ServiceIdentifier<RuleExecutionStep>;
 
 /**
- * DI token for the array of step middleware.
- * Middleware are executed in order (first middleware is outermost).
+ * Token for multi-injecting the ordered execution middlewares.
  */
 export const RuleExecutionMiddlewaresToken = Symbol.for(
   'alerting_v2.RuleExecutionMiddlewares'
-) as ServiceIdentifier<RuleExecutionMiddleware[]>;
+) as ServiceIdentifier<RuleExecutionMiddleware>;

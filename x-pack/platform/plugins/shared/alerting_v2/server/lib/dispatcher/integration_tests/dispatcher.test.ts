@@ -20,6 +20,7 @@ import {
   type StorageServiceContract,
 } from '../../services/storage_service/storage_service';
 import { DispatcherService, type DispatcherServiceContract } from '../dispatcher';
+import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
 
 /**
@@ -325,7 +326,7 @@ describe('DispatcherService integration tests', () => {
     kibanaServer = servers.kibanaServer;
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
 
-    await new Promise((res) => setTimeout(res, 5000));
+    await waitForDataStreamsReady(esClient, [ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
   });
 
   afterAll(async () => {
