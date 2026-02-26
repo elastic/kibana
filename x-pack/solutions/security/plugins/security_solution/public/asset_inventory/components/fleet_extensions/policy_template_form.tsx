@@ -12,7 +12,7 @@ import { CloudSetup, type CloudSetupConfig } from '@kbn/cloud-security-posture';
 
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
-import { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from '@kbn/fleet-plugin/public/components/cloud_connector/constants';
+import { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from '@kbn/fleet-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { ASSET_POLICY_TEMPLATE, CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 

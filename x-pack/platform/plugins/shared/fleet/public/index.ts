@@ -124,3 +124,4 @@ export const LazyCloudConnectorSetup = lazy(() =>
   }))
 );
 export type { CloudConnectorSetupProps } from './components/cloud_connector';
+export { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from './components/cloud_connector/constants';
