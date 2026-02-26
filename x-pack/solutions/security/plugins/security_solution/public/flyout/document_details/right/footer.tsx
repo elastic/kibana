@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
 import {
@@ -35,6 +36,12 @@ export const ASK_AI_ASSISTANT = i18n.translate(
 export const EVENT = i18n.translate('xpack.securitySolution.flyout.right.footer.event', {
   defaultMessage: 'Security Event',
 });
+const ScrollableFlyoutFooter = styled(EuiFlyoutFooter)`
+  @media (max-width: 767px) {
+    max-height: 40vh;
+    overflow: auto;
+  }
+`;
 
 interface PanelFooterProps {
   /**
@@ -72,7 +79,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
   if (isRulePreview) return null;
 
   return (
-    <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
+    <ScrollableFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -98,7 +105,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    </EuiFlyoutFooter>
+    </ScrollableFlyoutFooter>
   );
 };
 

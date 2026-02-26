@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
-import { EuiPanel } from '@elastic/eui';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 
 export interface FiltersGlobalProps {
@@ -20,7 +20,9 @@ export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => {
   return (
     <InPortal node={globalKQLHeaderPortalNode}>
       <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
-        <header data-test-subj="filters-global-container">{children}</header>
+        <header data-test-subj="filters-global-container" style={{ overflowX: 'auto' }}>
+          {children}
+        </header>
       </EuiPanel>
     </InPortal>
   );

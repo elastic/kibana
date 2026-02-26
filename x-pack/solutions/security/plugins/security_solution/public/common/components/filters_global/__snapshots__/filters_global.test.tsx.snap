@@ -20,6 +20,11 @@ exports[`rendering renders correctly 1`] = `
   >
     <header
       data-test-subj="filters-global-container"
+      style={
+        Object {
+          "overflowX": "auto",
+        }
+      }
     >
       <p>
         Additional filters here.
