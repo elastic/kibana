@@ -35,6 +35,7 @@ import {
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
 } from './utils';
+import { withAPM } from '../apm/with_apm_decorator';
 
 @injectable()
 export class RulesClient {
@@ -54,6 +55,7 @@ export class RulesClient {
     return { spaceId };
   }
 
+  @withAPM
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
@@ -107,6 +109,7 @@ export class RulesClient {
     return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes);
   }
 
+  @withAPM
   public async updateRule({
     id,
     data,
@@ -175,6 +178,7 @@ export class RulesClient {
     return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
   }
 
+  @withAPM
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
     try {
       const doc = await this.rulesSavedObjectService.get(id);
@@ -187,6 +191,7 @@ export class RulesClient {
     }
   }
 
+  @withAPM
   public async getRules(ids: string[]): Promise<RuleResponse[]> {
     const result = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
@@ -199,6 +204,7 @@ export class RulesClient {
     });
   }
 
+  @withAPM
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
@@ -217,6 +223,7 @@ export class RulesClient {
     await this.rulesSavedObjectService.delete({ id });
   }
 
+  @withAPM
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 20;
