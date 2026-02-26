@@ -30,6 +30,9 @@ const LazyStandaloneRuleFormFlyout = React.lazy(() =>
   }))
 );
 
+// Export lazy components directly for consumers who need full control over Suspense
+export { LazyDynamicRuleFormFlyout, LazyStandaloneRuleFormFlyout, LazyRuleFormFlyout };
+
 /** Base flyout wrapper - use with DynamicRuleForm or StandaloneRuleForm as children */
 export const RuleFormFlyout: React.FC<RuleFormFlyoutProps> = (props) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>

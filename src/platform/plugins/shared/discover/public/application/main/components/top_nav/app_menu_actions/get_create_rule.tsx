@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { Suspense, useEffect, useRef, useState, useMemo } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
-import { DynamicRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { CreateAlertFlyout, getManageRulesUrl, getTimeField } from './get_alerts';
+
+// Lazy load to avoid Jest module resolution issues with Monaco dependencies
+const DynamicRuleFormFlyout = React.lazy(() =>
+  import('@kbn/alerting-v2-rule-form').then((m) => ({ default: m.DynamicRuleFormFlyout }))
+);
 
 export function CreateESQLRuleFlyout({
   services,
@@ -77,16 +82,18 @@ export function CreateESQLRuleFlyout({
   }, [appState$, history, core.application.currentAppId$]);
 
   return (
-    <DynamicRuleFormFlyout
-      services={{
-        http,
-        data,
-        dataViews,
-        notifications,
-      }}
-      query={query}
-      onClose={onClose}
-    />
+    <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+      <DynamicRuleFormFlyout
+        services={{
+          http,
+          data,
+          dataViews,
+          notifications,
+        }}
+        query={query}
+        onClose={onClose}
+      />
+    </Suspense>
   );
 }
 
