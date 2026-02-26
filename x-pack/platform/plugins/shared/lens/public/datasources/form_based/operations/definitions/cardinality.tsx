@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
 import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@kbn/esql-language';
 import type { OperationDefinition, ParamEditorProps } from '.';
 
 import {
@@ -177,7 +177,7 @@ export const cardinalityOperation: OperationDefinition<
   toESQL: (column) => {
     if (column.params?.emptyAsNull || column.timeShift) return;
     return {
-      template: `COUNT_DISTINCT(${sanitazeESQLInput(column.sourceField)})`,
+      template: `COUNT_DISTINCT(${esql.col(column.sourceField)})`,
     };
   },
   toEsAggsFn: (column, columnId) => {

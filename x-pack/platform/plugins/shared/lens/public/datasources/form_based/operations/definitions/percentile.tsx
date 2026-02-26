@@ -19,8 +19,8 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { memoize } from 'lodash';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@kbn/esql-language';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -208,7 +208,7 @@ export const percentileOperation: OperationDefinition<
   toESQL: (column) => {
     if (column.timeShift) return;
     return {
-      template: `PERCENTILE(${sanitazeESQLInput(column.sourceField)}, ${column.params.percentile})`,
+      template: `PERCENTILE(${esql.col(column.sourceField)}, ${column.params.percentile})`,
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {

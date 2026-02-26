@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { esql } from '@kbn/esql-language';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
@@ -121,20 +121,17 @@ export function generateEsqlQuery(
   // indexPattern.title is the actual ES pattern
   // Build query parts as strings, then combine with esql() for proper parameterization
   // ES|QL composer docs: src/platform/packages/shared/kbn-esql-language/src/composer/README.md
-  const queryParts: string[] = [`FROM ${indexPattern.title}`];
+  const queryParts: string[] = [`FROM ${esql.src(indexPattern.title)}`];
 
   if (indexPattern.timeFieldName) {
-    const timeField = sanitazeESQLInput(indexPattern.timeFieldName);
+    const timeField = `${esql.col(indexPattern.timeFieldName)}`;
     queryParts.push(`WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`);
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
   const absDateRange = convertToAbsoluteDateRange(dateRange, nowInstant);
 
-  const firstDateHistogramColumn = esAggEntries.find(
-    ([, col]) => col.operationType === 'date_histogram'
-  );
-  const hasDateHistogram = Boolean(firstDateHistogramColumn);
+  const hasDateHistogram = esAggEntries.some(([, col]) => col.operationType === 'date_histogram');
 
   const esAggsIdMap: Record<string, OriginalColumn[]> = {};
 
@@ -180,8 +177,18 @@ export function generateEsqlQuery(
       dateRange,
     });
 
-    // Generate EVAL statement for the static value
-    staticValueEvals.push(`${esAggsId} = ${value}`);
+    // Generate EVAL statement using composer literal helpers
+    const numValue =
+      typeof value === 'number'
+        ? value
+        : typeof value === 'string' && /^-?\d+(\.\d+)?$/.test(value)
+        ? Number(value)
+        : NaN;
+    const valueForEval =
+      staticCol.dataType === 'number' && !Number.isNaN(numValue)
+        ? `${esql.num(numValue)}`
+        : `${esql.str(String(value))}`;
+    staticValueEvals.push(`${esAggsId} = ${valueForEval}`);
   });
 
   // Process metrics (excluding static_value which is handled above)
@@ -440,11 +447,12 @@ export function generateEsqlQuery(
     queryParts.push(`EVAL ${staticValueEvals.join(', ')}`);
   }
 
+  const queryString = queryParts.join(' | ');
   try {
-    const queryString = queryParts.join(' | ');
+    const query = esql(queryString);
     return {
       success: true,
-      esql: queryString,
+      esql: query.print('wrapping'),
       partialRows,
       esAggsIdMap,
     };

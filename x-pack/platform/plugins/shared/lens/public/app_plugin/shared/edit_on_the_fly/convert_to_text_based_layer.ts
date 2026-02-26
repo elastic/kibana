@@ -107,12 +107,8 @@ function buildTextBasedState(
           meta: {
             type: metaType,
           },
+          customLabel: true, // Set always to true so we can use the default label as a custom label
         };
-
-        // Only include customLabel if it's explicitly set to true
-        if (sourceColumn.customLabel) {
-          column.customLabel = sourceColumn.customLabel;
-        }
 
         // Determine format: user-configured first, then data view field format as fallback
         let format = sourceColumn.format;

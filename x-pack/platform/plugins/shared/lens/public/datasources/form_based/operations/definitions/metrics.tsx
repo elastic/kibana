@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
+
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
@@ -34,6 +34,7 @@ import type {
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
+import { esql } from '@kbn/esql-language';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -217,7 +218,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       if (column.timeShift) return;
       if (!typeToESQLFn[type]) return;
       return {
-        template: `${typeToESQLFn[type]}(${sanitazeESQLInput(column.sourceField)})`,
+        template: `${typeToESQLFn[type]}(${esql.col(column.sourceField)})`,
       };
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {

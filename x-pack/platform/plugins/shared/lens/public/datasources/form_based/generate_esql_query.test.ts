@@ -22,6 +22,9 @@ describe('generateEsqlQuery', () => {
     return defaultUiSettingsGet(key);
   });
 
+  /** Normalize ESQL string for comparison (query.print('wrapping') may output multi-line). */
+  const normalizeEsql = (s: string) => s.replace(/\s+/g, ' ').trim();
+
   it('should produce valid esql for date histogram and count', () => {
     const result = generateEsqlQuery(
       [
@@ -54,12 +57,14 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: 'FROM myIndexPattern | WHERE `order_date` >= ?_tstart AND `order_date` <= ?_tend | STATS COUNT(*) BY BUCKET(`order_date`, 30 minutes)',
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(normalizeEsql(result.esql)).toBe(
+        normalizeEsql(
+          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
+        )
+      );
+    }
   });
 
   it('should return failure with include_empty_rows_not_supported reason if missing row option is set', () => {
@@ -159,12 +164,14 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: 'FROM myIndexPattern | WHERE `order_date` >= ?_tstart AND `order_date` <= ?_tend | STATS COUNT(*) BY BUCKET(`order_date`, 30 minutes)',
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(normalizeEsql(result.esql)).toBe(
+        normalizeEsql(
+          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
+        )
+      );
+    }
   });
 
   it('should not add a where condition to esql if timeField is not set', () => {
@@ -199,12 +206,12 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: 'FROM myIndexPattern | STATS COUNT(*) BY BUCKET(`order_date`, 30 minutes)',
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(normalizeEsql(result.esql)).toBe(
+        normalizeEsql('FROM myIndexPattern | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)')
+      );
+    }
   });
 
   it('should preserve user-configured format (e.g., currency) in esAggsIdMap', () => {
@@ -254,7 +261,7 @@ describe('generateEsqlQuery', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      const metricKey = 'SUM(`price`)';
+      const metricKey = 'SUM(price)';
       expect(result.esAggsIdMap).toHaveProperty(metricKey);
       const metricColumn = result.esAggsIdMap[metricKey][0];
       expect(metricColumn.format).toEqual({
@@ -313,7 +320,7 @@ describe('generateEsqlQuery', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      const metricKey = 'AVG(`bytes`)';
+      const metricKey = 'AVG(bytes)';
       expect(result.esAggsIdMap).toHaveProperty(metricKey);
       const metricColumn = result.esAggsIdMap[metricKey][0];
       expect(metricColumn.format).toEqual({
@@ -361,11 +368,14 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: 'FROM myIndexPattern | WHERE `order_date` >= ?_tstart AND `order_date` <= ?_tend | STATS COUNT(*) WHERE KQL("""geo.src:"US"""") BY BUCKET(`order_date`, 30 minutes)',
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(normalizeEsql(result.esql)).toBe(
+        normalizeEsql(
+          // eslint-disable-next-line prettier/prettier
+          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 30 minutes)'
+        )
+      );
+    }
   });
 });

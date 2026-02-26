@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -41,6 +40,7 @@ import type {
   IndexPattern,
   FormBasedLayer,
 } from '@kbn/lens-common';
+import { esql } from '@kbn/esql-language';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
@@ -242,7 +242,7 @@ export const dateHistogramOperation: OperationDefinition<
         : mapToEsqlInterval(dateRange, interval);
 
     return {
-      template: `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${resolvedInterval})`,
+      template: `BUCKET(${esql.col(column.sourceField)}, ${resolvedInterval})`,
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {

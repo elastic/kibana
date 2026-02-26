@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
+import { esql } from '@kbn/esql-language';
 import type { OperationDefinition, ParamEditorProps } from '.';
 import {
   getInvalidFieldMessage,
@@ -188,7 +188,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       return { template: 'COUNT(*)' };
     }
     return {
-      template: `COUNT(${sanitazeESQLInput(field.name)})`,
+      template: `COUNT(${esql.col(field.name)})`,
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {

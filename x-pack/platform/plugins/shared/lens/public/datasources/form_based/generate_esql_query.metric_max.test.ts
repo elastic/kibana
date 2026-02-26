@@ -37,6 +37,9 @@ describe('generateEsqlQuery metric max (static_value)', () => {
     return defaultUiSettingsGet(key);
   });
 
+  /** Normalize ESQL for comparison (query.print('wrapping') may output multi-line; composer may omit backticks for simple identifiers). */
+  const normalizeEsql = (s: string) => s.replace(/\s+/g, ' ').trim();
+
   it('should convert static_value columns to EVAL statements', () => {
     const result = generateEsqlQuery(
       [
@@ -70,13 +73,13 @@ describe('generateEsqlQuery metric max (static_value)', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: 'FROM myIndexPattern | WHERE `order_date` >= ?_tstart AND `order_date` <= ?_tend | STATS COUNT(*) BY BUCKET(`order_date`, 30 minutes) | EVAL static_value = 100',
-      })
-    );
+    expect(result.success).toBe(true);
     if (result.success) {
+      expect(normalizeEsql(result.esql)).toBe(
+        normalizeEsql(
+          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes) | EVAL static_value = 100'
+        )
+      );
       expect(result.esAggsIdMap).toHaveProperty('static_value');
       expect(result.esAggsIdMap.static_value[0].id).toBe('3');
     }
@@ -92,13 +95,11 @@ describe('generateEsqlQuery metric max (static_value)', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: 'FROM myIndexPattern | EVAL static_value = 50',
-      })
-    );
+    expect(result.success).toBe(true);
     if (result.success) {
+      expect(normalizeEsql(result.esql)).toBe(
+        normalizeEsql('FROM myIndexPattern | EVAL static_value = 50')
+      );
       expect(result.esAggsIdMap).toHaveProperty('static_value');
     }
   });
@@ -126,13 +127,11 @@ describe('generateEsqlQuery metric max (static_value)', () => {
       { 'max-col-id': 'max_value' }
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: 'FROM myIndexPattern | STATS COUNT(*) | EVAL static_max_value = 100',
-      })
-    );
+    expect(result.success).toBe(true);
     if (result.success) {
+      expect(normalizeEsql(result.esql)).toBe(
+        normalizeEsql('FROM myIndexPattern | STATS COUNT(*) | EVAL static_max_value = 100')
+      );
       expect(result.esAggsIdMap).toHaveProperty('static_max_value');
     }
   });
@@ -150,13 +149,11 @@ describe('generateEsqlQuery metric max (static_value)', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: 'FROM myIndexPattern | EVAL static_value_0 = 100, static_value_1 = 200',
-      })
-    );
+    expect(result.success).toBe(true);
     if (result.success) {
+      expect(normalizeEsql(result.esql)).toBe(
+        normalizeEsql('FROM myIndexPattern | EVAL static_value_0 = 100, static_value_1 = 200')
+      );
       expect(result.esAggsIdMap).toHaveProperty('static_value_0');
       expect(result.esAggsIdMap).toHaveProperty('static_value_1');
     }
