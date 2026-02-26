@@ -20,7 +20,7 @@ export const FirecrawlConnector: ConnectorSpec = {
     description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.metadata.description', {
       defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API.',
     }),
-    minimumLicense: 'basic',
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
 
