@@ -6,11 +6,11 @@
  */
 
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ConversationRound } from '@kbn/agent-builder-common';
-import { isToolCallStep } from '@kbn/agent-builder-common';
+import type { ConversationRound, ToolCallStep } from '@kbn/agent-builder-common';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import type { ResearchAgentAction } from '../default/actions';
 import { toolCallAction, executeToolAction } from '../default/actions';
+import { groupToolCallSteps } from './to_langchain_messages';
 
 export const roundToActions = ({
   round,
@@ -20,32 +20,59 @@ export const roundToActions = ({
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];
+  const groups = groupToolCallSteps(round.steps);
 
-  const toolCalls = round.steps.filter(isToolCallStep);
-  toolCalls.forEach((toolCall, index) => {
-    const toolName = toolIdMapping.get(toolCall.tool_id) ?? toolCall.tool_id;
-    actions.push(
-      toolCallAction([
-        {
-          toolName,
-          toolCallId: toolCall.tool_call_id,
-          args: toolCall.params,
-        },
-      ])
-    );
-    // interrupted tool call won't have results
-    if (index < toolCalls.length - 1 || toolCall.results.length) {
+  for (const group of groups) {
+    const { completed, pending } = partitionGroupByCompletion(group);
+
+    if (completed.length > 0) {
       actions.push(
-        executeToolAction([
-          {
-            toolCallId: toolCall.tool_call_id,
-            content: JSON.stringify({ results: toolCall.results }),
-            artifact: { results: toolCall.results },
-          },
-        ])
+        toolCallAction(
+          completed.map((step) => ({
+            toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
+            toolCallId: step.tool_call_id,
+            args: step.params,
+          }))
+        )
+      );
+      actions.push(
+        executeToolAction(
+          completed.map((step) => ({
+            toolCallId: step.tool_call_id,
+            content: JSON.stringify({ results: step.results }),
+            artifact: { results: step.results },
+          }))
+        )
       );
     }
-  });
+
+    if (pending.length > 0) {
+      actions.push(
+        toolCallAction(
+          pending.map((step) => ({
+            toolName: toolIdMapping.get(step.tool_id) ?? step.tool_id,
+            toolCallId: step.tool_call_id,
+            args: step.params,
+          }))
+        )
+      );
+    }
+  }
 
   return actions;
+};
+
+const partitionGroupByCompletion = (
+  group: ToolCallStep[]
+): { completed: ToolCallStep[]; pending: ToolCallStep[] } => {
+  const completed: ToolCallStep[] = [];
+  const pending: ToolCallStep[] = [];
+  for (const step of group) {
+    if (step.results.length > 0) {
+      completed.push(step);
+    } else {
+      pending.push(step);
+    }
+  }
+  return { completed, pending };
 };
