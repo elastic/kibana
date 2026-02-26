@@ -65,10 +65,7 @@ export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) 
 export type EntityStoreCRUDClient = CRUDClient;
 
 export interface EntityStoreStartContract {
-  createCRUDClient: (
-    esClient: ElasticsearchClient,
-    namespace: string
-  ) => EntityStoreCRUDClient;
+  createCRUDClient: (esClient: ElasticsearchClient, namespace: string) => EntityStoreCRUDClient;
 }
 
 export interface EntityStoreSetupContract {

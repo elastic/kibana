@@ -101,8 +101,7 @@ export class EntityStorePlugin
 
     const logger = this.logger;
     return {
-      createCRUDClient: (esClient, namespace) =>
-        new CRUDClient({ logger, esClient, namespace }),
+      createCRUDClient: (esClient, namespace) => new CRUDClient({ logger, esClient, namespace }),
     };
   }
 
