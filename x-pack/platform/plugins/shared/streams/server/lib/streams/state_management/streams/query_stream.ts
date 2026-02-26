@@ -474,6 +474,12 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
         },
       },
       {
+        type: 'unlink_relationships',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
         type: 'delete_esql_view',
         request: {
           name: getEsqlViewName(this._definition.name),

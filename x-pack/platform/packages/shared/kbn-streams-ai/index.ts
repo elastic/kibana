@@ -24,3 +24,22 @@ export {
 export { sumTokens } from './src/helpers/sum_tokens';
 export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
+export {
+  suggestDashboard,
+  prepareDashboardSuggestionInput,
+  isQueryStreamDefinition,
+  isIngestStreamDefinition,
+  getInputTypeFromDefinition,
+  type PrepareDashboardSuggestionInputOptions,
+  type DashboardSuggestionInput,
+  type DashboardSuggestionEngineOptions,
+} from './workflows/dashboard_suggestions';
+export {
+  suggestIntegrations,
+  type PackageSearchProvider,
+  type IntegrationSuggestionInput,
+  type IntegrationPackageInfo,
+  type IntegrationSuggestionOutput,
+  type SuggestIntegrationsResult,
+  type SuggestIntegrationsEngineOptions,
+} from './workflows/integration_suggestions';

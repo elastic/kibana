@@ -17,6 +17,7 @@ import { contentRoutes } from './content/route';
 import { internalCrudRoutes } from './internal/streams/crud/route';
 import { internalManagementRoutes } from './internal/streams/management/route';
 import { systemRoutes as internalSystemsRoutes } from './internal/streams/systems/route';
+import { relationshipRoutes as internalRelationshipRoutes } from './internal/streams/relationships/route';
 import { internalPromptsRoutes } from './internal/streams/prompts/route';
 import { internalSignificantEventsRoutes } from './internal/streams/significant_events/route';
 import { significantEventsRoutes } from './streams/significant_events/route';
@@ -33,6 +34,9 @@ import { internalInsightsRoutes } from './internal/streams/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
 import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
 import { internalQueriesRoutes } from './internal/streams/queries/route';
+import { internalDashboardSuggestionRoutes } from './internal/streams/dashboard_suggestions/route';
+import { internalContentPackSuggestionsRoutes } from './internal/streams/content_pack_suggestions/route';
+import { internalIntegrationSuggestionsRoutes } from './internal/streams/integration_suggestions/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -43,6 +47,7 @@ export const streamsRouteRepository = {
   ...internalProcessingRoutes,
   ...failureStoreRoutes,
   ...internalSystemsRoutes,
+  ...internalRelationshipRoutes,
   ...internalPromptsRoutes,
   ...internalSignificantEventsRoutes,
   ...internalIngestRoutes,
@@ -54,6 +59,9 @@ export const streamsRouteRepository = {
   ...internalTasksRoutes,
   ...internalOnboardingRoutes,
   ...internalQueriesRoutes,
+  ...internalDashboardSuggestionRoutes,
+  ...internalContentPackSuggestionsRoutes,
+  ...internalIntegrationSuggestionsRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

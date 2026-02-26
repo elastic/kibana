@@ -1048,6 +1048,7 @@ function emptyActionsByType(): ActionsByType {
     unlink_assets: [],
     unlink_systems: [],
     unlink_features: [],
+    unlink_relationships: [],
     update_ingest_settings: [],
     update_failure_store: [],
     upsert_esql_view: [],

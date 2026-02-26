@@ -186,6 +186,16 @@ export {
 export { type System, systemSchema, isSystem } from './src/system';
 
 export {
+  type Relationship,
+  type RelationshipDirection,
+  type RelationshipSource,
+  relationshipSchema,
+  relationshipDirectionSchema,
+  relationshipSourceSchema,
+  isRelationship,
+} from './src/relationship';
+
+export {
   type BaseSimulationError,
   type SimulationError,
   type DocSimulationStatus,
@@ -207,3 +217,17 @@ export type { IdentifyFeaturesResult } from './src/api/features';
 export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
+
+export type {
+  DashboardSuggestionResult,
+  DashboardSuggestionInputType,
+  DashboardSuggestionTaskResult,
+  RawDashboard,
+  DashboardPanel,
+  DashboardFilter,
+  ColumnMetadata,
+  PanelType,
+  PanelPosition,
+  PanelDimensions,
+  TimeRange,
+} from './src/api/dashboard_suggestions';

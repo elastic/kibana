@@ -75,6 +75,7 @@ export function getRequiredPermissionsForActions({
     unlink_assets,
     unlink_systems,
     unlink_features,
+    unlink_relationships,
     update_failure_store,
     upsert_esql_view,
     delete_esql_view,

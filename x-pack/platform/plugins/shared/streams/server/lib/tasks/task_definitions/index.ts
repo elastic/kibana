@@ -14,7 +14,10 @@ import { createStreamsInsightsDiscoveryTask } from './insights_discovery';
 import { createStreamsSignificantEventsQueriesGenerationTask } from './significant_events_queries_generation';
 import type { EbtTelemetryClient } from '../../telemetry';
 import { createStreamsFeaturesIdentificationTask } from './features_identification';
+import { createStreamsPipelineSuggestionTask } from './pipeline_suggestion';
 import { createStreamsOnboardingTask } from './onboarding';
+import { createStreamsDashboardSuggestionTask } from './dashboard_suggestion';
+import { createStreamsPartitionSuggestionTask } from './partition_suggestion';
 
 export interface TaskContext {
   logger: Logger;
@@ -29,7 +32,10 @@ export function createTaskDefinitions(taskContext: TaskContext) {
     ...createStreamsSignificantEventsQueriesGenerationTask(taskContext),
     ...createStreamsFeaturesIdentificationTask(taskContext),
     ...createStreamsInsightsDiscoveryTask(taskContext),
+    ...createStreamsPipelineSuggestionTask(taskContext),
     ...createStreamsOnboardingTask(taskContext),
+    ...createStreamsDashboardSuggestionTask(taskContext),
+    ...createStreamsPartitionSuggestionTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }
 

@@ -6,21 +6,20 @@
  */
 
 import type { Condition } from '@kbn/streamlang';
-import { useState } from 'react';
-import { useAbortController } from '@kbn/react-hooks';
-import { isRequestAbortedError } from '@kbn/server-route-repository-client';
-import { lastValueFrom } from 'rxjs';
+import { TaskStatus } from '@kbn/streams-schema';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { isEmpty } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { usePartitionSuggestionApi } from '../../../../hooks/use_partition_suggestion_api';
 import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
+import { useTaskPolling } from '../../../../hooks/use_task_polling';
 import {
   useStreamsRoutingActorRef,
   useStreamsRoutingSelector,
 } from '../state_management/stream_routing_state_machine';
 
 export interface FetchSuggestedPartitionsParams {
-  streamName: string;
   connectorId: string;
   start: number;
   end: number;
@@ -34,56 +33,96 @@ export interface PartitionSuggestion {
 export type UseReviewSuggestionsFormResult = ReturnType<typeof useReviewSuggestionsForm>;
 
 export function useReviewSuggestionsForm() {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
   const showFetchErrorToast = useFetchErrorToast();
   const streamName = useStreamsRoutingSelector(
     (snapshot) => snapshot.context.definition.stream.name
   );
   const streamsRoutingActorRef = useStreamsRoutingActorRef();
 
+  const {
+    getPartitionSuggestionStatus,
+    schedulePartitionSuggestionTask,
+    cancelPartitionSuggestionTask,
+  } = usePartitionSuggestionApi(streamName);
+
   const [suggestions, setSuggestions] = useState<PartitionSuggestion[] | undefined>(undefined);
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const previousStatusRef = useRef<TaskStatus | undefined>();
 
-  const abortController = useAbortController();
+  const [{ loading: isGettingTask, value: task, error: taskError }, getTask] = useAsyncFn(
+    getPartitionSuggestionStatus,
+    [getPartitionSuggestionStatus]
+  );
 
-  const fetchSuggestions = async (params: FetchSuggestedPartitionsParams) => {
-    setIsLoadingSuggestions(true);
+  useTaskPolling(task, getPartitionSuggestionStatus, getTask);
+
+  useEffect(() => {
+    const currentStatus = task?.status;
+    const previousStatus = previousStatusRef.current;
+
+    if (currentStatus === previousStatus) {
+      return;
+    }
+
+    previousStatusRef.current = currentStatus;
+
+    if (currentStatus === TaskStatus.Completed) {
+      if (task && 'partitions' in task && Array.isArray(task.partitions)) {
+        setSuggestions(task.partitions as PartitionSuggestion[]);
+      }
+    }
+
+    if (currentStatus === TaskStatus.Failed) {
+      if (task && 'error' in task) {
+        showFetchErrorToast(new Error(task.error as string));
+      }
+    }
+  }, [task, showFetchErrorToast]);
+
+  useEffect(() => {
+    if (taskError) {
+      showFetchErrorToast(taskError);
+    }
+  }, [taskError, showFetchErrorToast]);
+
+  const fetchSuggestions = useCallback(
+    async (params: FetchSuggestedPartitionsParams) => {
+      try {
+        await schedulePartitionSuggestionTask({
+          connectorId: params.connectorId,
+          start: params.start,
+          end: params.end,
+        });
+        await getTask();
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          showFetchErrorToast(error);
+        }
+      }
+    },
+    [schedulePartitionSuggestionTask, getTask, showFetchErrorToast]
+  );
+
+  const cancelSuggestions = useCallback(async () => {
     try {
-      const response = await lastValueFrom(
-        streamsRepositoryClient.stream('POST /internal/streams/{name}/_suggest_partitions', {
-          signal: abortController.signal,
-          params: {
-            path: { name: params.streamName },
-            body: {
-              connector_id: params.connectorId,
-              start: params.start,
-              end: params.end,
-            },
-          },
-        })
-      );
-      setSuggestions(response.partitions);
+      await cancelPartitionSuggestionTask();
+      await getTask();
     } catch (error) {
       if (!isRequestAbortedError(error)) {
         showFetchErrorToast(error);
       }
-    } finally {
-      setIsLoadingSuggestions(false);
     }
-  };
+  }, [cancelPartitionSuggestionTask, getTask, showFetchErrorToast]);
+
+  const isLoadingSuggestions =
+    isGettingTask ||
+    task?.status === TaskStatus.InProgress ||
+    task?.status === TaskStatus.BeingCanceled;
 
   const removeSuggestion = (index: number) => {
     if (!suggestions) return;
 
     const updatedSuggestions = suggestions.toSpliced(index, 1);
 
-    // Reset form when all partitions are removed
     if (isEmpty(updatedSuggestions)) {
       resetForm();
     } else {
@@ -98,7 +137,7 @@ export function useReviewSuggestionsForm() {
     setSuggestions(updatedSuggestions);
   };
 
-  const resetPreview = () => {
+  const resetPreview = useCallback(() => {
     streamsRoutingActorRef.send({
       type: 'suggestion.preview',
       condition: { always: {} },
@@ -106,16 +145,14 @@ export function useReviewSuggestionsForm() {
       index: 0,
       toggle: false,
     });
-  };
+  }, [streamsRoutingActorRef]);
 
-  const resetForm = () => {
-    abortController.abort();
-    abortController.refresh();
+  const resetForm = useCallback(() => {
     setSuggestions(undefined);
+    previousStatusRef.current = undefined;
     resetPreview();
-  };
+  }, [resetPreview]);
 
-  // Reset suggestions when navigating to a different stream
   useUpdateEffect(() => {
     resetForm();
   }, [streamName]);
@@ -125,6 +162,7 @@ export function useReviewSuggestionsForm() {
     removeSuggestion,
     isLoadingSuggestions,
     fetchSuggestions,
+    cancelSuggestions,
     resetForm,
     updateSuggestion,
     previewSuggestion: (index: number, toggle?: boolean) => {
@@ -146,5 +184,6 @@ export function useReviewSuggestionsForm() {
       }
       removeSuggestion(index);
     },
+    task,
   };
 }

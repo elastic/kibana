@@ -14,6 +14,7 @@ import type { QueryClient } from '../assets/query/query_client';
 import type { AttachmentClient } from '../attachments/attachment_client';
 import type { SystemClient } from '../system/system_client';
 import type { FeatureClient } from '../feature/feature_client';
+import type { RelationshipClient } from '../relationships/relationship_client';
 
 interface StreamUpsertChange {
   type: 'upsert';
@@ -37,6 +38,7 @@ export interface StateDependencies {
   attachmentClient: AttachmentClient;
   queryClient: QueryClient;
   featureClient: FeatureClient;
+  relationshipClient: RelationshipClient;
   isServerless: boolean;
   isDev: boolean;
 }

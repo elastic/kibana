@@ -20,7 +20,7 @@ import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { WiredStreamBadge } from '../../stream_badges';
-import { StreamDetailAttachments } from '../../stream_detail_attachments';
+import { StreamDetailContent } from '../../stream_detail_content';
 
 const wiredStreamManagementSubTabs = [
   'partitioning',
@@ -30,7 +30,7 @@ const wiredStreamManagementSubTabs = [
   'advanced',
   'significantEvents',
   'dataQuality',
-  'attachments',
+  'content',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
@@ -158,10 +158,10 @@ export function WiredStreamDetailManagement({
     },
     ...(attachments.enabled
       ? {
-          attachments: {
-            content: <StreamDetailAttachments definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-              defaultMessage: 'Attachments',
+          content: {
+            content: <StreamDetailContent definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.contentTab', {
+              defaultMessage: 'Content',
             }),
           },
         }

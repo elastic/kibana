@@ -30,6 +30,7 @@ import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/serv
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -41,6 +42,7 @@ export interface StreamsServer {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  fleet?: FleetStartContract;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -70,4 +72,5 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   spaces?: SpacesPluginStart;
+  fleet?: FleetStartContract;
 }
