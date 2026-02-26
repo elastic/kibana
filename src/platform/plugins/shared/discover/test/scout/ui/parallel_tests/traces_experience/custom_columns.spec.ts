@@ -50,10 +50,29 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'should display trace-specific columns in Classic mode',
+      'should display trace-specific columns in data view mode',
       async ({ page, pageObjects }) => {
         await spaceTest.step('wait for results to load', async () => {
           await pageObjects.discover.waitForDocTableRendered();
+        });
+
+        await spaceTest.step('verify trace-specific column headers', async () => {
+          for (const column of EXPECTED_COLUMNS) {
+            await expect(page.testSubj.locator(`dataGridHeaderCell-${column}`)).toBeVisible();
+          }
+        });
+      }
+    );
+
+    spaceTest(
+      'should display trace-specific columns in ES|QL mode',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('switch to ES|QL mode with a different index pattern', async () => {
+          await pageObjects.discover.writeEsqlQuery('FROM traces-*');
+        });
+
+        await spaceTest.step('change to traces-apm* to trigger profile columns', async () => {
+          await pageObjects.discover.updateEsqlQuery(TRACES.ESQL_QUERY);
         });
 
         await spaceTest.step('verify trace-specific column headers', async () => {

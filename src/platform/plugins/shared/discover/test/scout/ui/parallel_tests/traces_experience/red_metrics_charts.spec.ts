@@ -49,6 +49,7 @@ spaceTest.describe(
       await spaceTest.step('verify RED metrics charts are visible', async () => {
         const grid = page.testSubj.locator('metricsExperienceGrid');
         await expect(grid).toBeVisible();
+
         for (const title of RED_METRICS_CHART_TITLES) {
           await expect(grid.getByText(title)).toBeVisible();
         }
@@ -60,7 +61,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         await spaceTest.step('run ESQL query with WHERE filter', async () => {
           await pageObjects.discover.writeEsqlQuery(
-            `${TRACES.ESQL_QUERY} | WHERE service.name == "synth-traces-frontend"`
+            `${TRACES.ESQL_QUERY} | WHERE service.name == "synth-traces-service"`
           );
         });
 
@@ -76,11 +77,10 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'should not render RED metrics charts in data view mode',
+      'should not render RED metrics charts with transformative ESQL query',
       async ({ page, pageObjects }) => {
-        await spaceTest.step('verify data table is loaded', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
+        await spaceTest.step('run transformative ESQL query', async () => {
+          await pageObjects.discover.writeEsqlQuery(`${TRACES.ESQL_QUERY} | STATS count()`);
         });
 
         await spaceTest.step('verify RED metrics grid is not visible', async () => {
@@ -90,10 +90,11 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'should not render RED metrics charts with transformative ESQL query',
+      'should not render RED metrics charts in data view mode',
       async ({ page, pageObjects }) => {
-        await spaceTest.step('run transformative ES|QL query', async () => {
-          await pageObjects.discover.writeEsqlQuery(`${TRACES.ESQL_QUERY} | STATS count()`);
+        await spaceTest.step('verify data table is loaded', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
 
         await spaceTest.step('verify RED metrics grid is not visible', async () => {
