@@ -107,5 +107,6 @@
     "@kbn/core-data-streams-server",
     "@kbn/task-manager-plugin",
     "@kbn/deeplinks-data-sources",
+    "@kbn/evals-plugin",
   ]
 }

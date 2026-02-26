@@ -40,7 +40,17 @@ const connectorTokenTypeRegistrationV2 = {
   ]),
 };
 
-export const getConnectorTokenModelVersions = (
+export const connectorTokenModelVersions: SavedObjectsModelVersionMap = {
+  '1': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawConnectorTokenSchemaV1.extends({}, { unknowns: 'ignore' }),
+      create: rawConnectorTokenSchemaV1,
+    },
+  },
+};
+
+export const connectorTokenModelVersionsWithRefreshToken = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectsModelVersionMap => ({
   '1': {
