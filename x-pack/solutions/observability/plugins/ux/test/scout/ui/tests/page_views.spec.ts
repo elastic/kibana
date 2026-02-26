@@ -13,7 +13,7 @@ import { test } from '../fixtures';
 test.describe('Page Views Chart', { tag: tags.stateful.classic }, () => {
   test('displays page views with browser breakdown', async ({ pageObjects, page, browserAuth }) => {
     await test.step('Navigate to UX Dashboard', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
       await pageObjects.uxDashboard.goto();
       await pageObjects.uxDashboard.waitForLoadingToFinish();
     });
@@ -33,8 +33,11 @@ test.describe('Page Views Chart', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('Navigate to exploratory view', async () => {
-      await page.hover('text=Firefox');
-      await pageObjects.uxDashboard.embeddablePanelMenuIcon('.pageViewsChart').click();
+      await page.testSubj
+        .locator('uxPageViewsChart')
+        .locator('[data-testid="echLegendItemLabel"]', { hasText: 'Firefox' })
+        .hover();
+      await pageObjects.uxDashboard.embeddablePanelMenuIcon().click();
       await page.testSubj.click('embeddablePanelAction-expViewExplore');
       await page.waitForURL(/exploratory-view/);
     });

@@ -15,7 +15,7 @@ const UA_NAME_CHART_ID = 'ux-visitor-breakdown-user_agent-name';
 test.describe('UX Visitor Breakdown', { tag: tags.stateful.classic }, () => {
   test('displays visitor breakdown charts', async ({ pageObjects, page, browserAuth }) => {
     await test.step('Navigate to UX Dashboard', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
       await pageObjects.uxDashboard.goto();
       await pageObjects.uxDashboard.waitForLoadingToFinish();
     });

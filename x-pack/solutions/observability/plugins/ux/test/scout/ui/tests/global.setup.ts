@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EsClient } from '@kbn/scout-oblt';
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import { testData } from '../fixtures';
 
@@ -128,7 +129,7 @@ function getPageExitDocument(inpValue: number = 200) {
   };
 }
 
-async function indexInpTestData(esClient: any) {
+async function indexInpTestData(esClient: EsClient) {
   const index = 'apm-8.0.0-transaction-000001';
 
   const { count } = await esClient.count({

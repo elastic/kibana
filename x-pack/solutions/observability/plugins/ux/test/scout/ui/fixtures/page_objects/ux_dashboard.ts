@@ -37,9 +37,9 @@ export class UxDashboardPage {
     return this.page.locator(`[data-test-embeddable-id="${dataTestId}"]`);
   }
 
-  embeddablePanelMenuIcon(containerSelector: string) {
-    return this.page.locator(
-      `${containerSelector} [data-test-subj="embeddablePanelToggleMenuIcon"]`
-    );
+  embeddablePanelMenuIcon() {
+    return this.page.testSubj
+      .locator('uxPageViewsChart')
+      .locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
   }
 }
