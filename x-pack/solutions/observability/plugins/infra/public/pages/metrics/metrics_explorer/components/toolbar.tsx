@@ -38,6 +38,7 @@ interface Props {
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
+  rightSideItems?: React.ReactNode;
 }
 
 export const MetricsExplorerToolbar = ({
@@ -51,6 +52,7 @@ export const MetricsExplorerToolbar = ({
   onAggregationChange,
   chartOptions,
   onChartOptionsChange,
+  rightSideItems,
 }: Props) => {
   const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
   const [timepickerQuickRanges] = useKibanaUiSetting(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
@@ -96,17 +98,26 @@ export const MetricsExplorerToolbar = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup wrap alignItems="center">
-          <EuiFlexItem>
-            <UnifiedSearchBar onQuerySubmit={onFilterQuerySubmit} />
-          </EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap={false}>
           <EuiFlexItem grow={false}>
-            <MetricsExplorerChartOptionsComponent
-              onChange={onChartOptionsChange}
-              chartOptions={chartOptions}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+              {rightSideItems && (
+                <EuiFlexItem grow={false}>{rightSideItems}</EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <MetricsExplorerChartOptionsComponent
+                  onChange={onChartOptionsChange}
+                  chartOptions={chartOptions}
+                />
+              </EuiFlexItem>              
+              {!rightSideItems && (
+                <EuiFlexItem grow={true}>
+                  <UnifiedSearchBar onQuerySubmit={onFilterQuerySubmit} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ marginRight: 5, maxWidth: '100%' }}>
+          <EuiFlexItem grow={false} style={{ marginLeft: 8, maxWidth: '100%' }}>
             <EuiSuperDatePicker
               start={timeRange.from}
               end={timeRange.to}

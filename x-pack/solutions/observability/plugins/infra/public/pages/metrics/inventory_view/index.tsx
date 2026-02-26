@@ -13,7 +13,6 @@ import { OnboardingFlow } from '../../../components/shared/templates/no_data_con
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { inventoryTitle } from '../../../translations';
-import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
@@ -42,10 +41,6 @@ export const SnapshotPage = () => {
                 <InfraPageTemplate
                   onboardingFlow={OnboardingFlow.Infra}
                   dataSourceAvailability="all"
-                  pageHeader={{
-                    pageTitle: inventoryTitle,
-                    rightSideItems: [<SavedViews />],
-                  }}
                   pageSectionProps={{
                     contentProps: {
                       css: css`

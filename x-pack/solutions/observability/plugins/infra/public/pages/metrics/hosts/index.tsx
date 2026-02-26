@@ -8,7 +8,6 @@
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { css } from '@emotion/react';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -31,20 +30,6 @@ export const HostsPage = () => {
       <InfraPageTemplate
         dataSourceAvailability="host"
         onboardingFlow={OnboardingFlow.Hosts}
-        pageHeader={{
-          alignItems: 'center',
-          pageTitle: (
-            <div
-              css={css`
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-              `}
-            >
-              <h1>{hostsTitle}</h1>
-            </div>
-          ),
-        }}
         pageSectionProps={{
           contentProps: {
             css: fullHeightContentStyles,

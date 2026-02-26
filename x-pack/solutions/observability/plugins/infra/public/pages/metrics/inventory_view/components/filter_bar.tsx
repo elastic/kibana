@@ -11,8 +11,14 @@ import React from 'react';
 import { WaffleTimeControls } from './waffle/waffle_time_controls';
 import { SearchBar } from './search_bar';
 
-export const FilterBar = ({ interval }: { interval: string }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" style={{ flexGrow: 0 }}>
+interface FilterBarProps {
+  interval: string;
+  rightSideItems?: React.ReactNode;
+}
+
+export const FilterBar = ({ interval, rightSideItems }: FilterBarProps) => (
+  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" style={{ flexGrow: 0 }}>
+    {rightSideItems && <EuiFlexItem grow={false}>{rightSideItems}</EuiFlexItem>}
     <EuiFlexItem>
       <SearchBar />
     </EuiFlexItem>

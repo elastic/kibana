@@ -111,13 +111,7 @@ const MetricsExplorerContent = () => {
   };
 
   return (
-    <InfraPageTemplate
-      onboardingFlow={OnboardingFlow.Infra}
-      pageHeader={{
-        pageTitle: metricsExplorerTitle,
-        rightSideItems: [<SavedViews viewState={viewState} />],
-      }}
-    >
+    <InfraPageTemplate onboardingFlow={OnboardingFlow.Infra}>
       <MetricsInDiscoverCallout timeRange={timeRange} />
       <MetricsExplorerToolbar
         timeRange={timeRange}
@@ -130,6 +124,7 @@ const MetricsExplorerContent = () => {
         onMetricsChange={handleMetricsChange}
         onAggregationChange={handleAggregationChange}
         onChartOptionsChange={setChartOptions}
+        rightSideItems={<SavedViews viewState={viewState} />}
       />
       {error ? (
         <NoData
