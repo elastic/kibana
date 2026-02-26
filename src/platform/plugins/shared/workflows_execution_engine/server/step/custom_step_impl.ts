@@ -87,14 +87,21 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   private createBaseContext(): BaseStepContext {
     return {
       contextManager: {
-        getContext: () => this.stepExecutionRuntime.contextManager.getContext(),
-        getScopedEsClient: () => this.stepExecutionRuntime.contextManager.getEsClientAsUser(),
-        renderInputTemplate: (value, additionalContext) =>
-          this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+        getContext: () => {
+          return this.stepExecutionRuntime.contextManager.getContext();
+        },
+        getScopedEsClient: () => {
+          return this.stepExecutionRuntime.contextManager.getEsClientAsUser();
+        },
+        renderInputTemplate: (value, additionalContext) => {
+          return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
             value,
             additionalContext
-          ),
-        getFakeRequest: () => this.stepExecutionRuntime.contextManager.getFakeRequest(),
+          );
+        },
+        getFakeRequest: () => {
+          return this.stepExecutionRuntime.contextManager.getFakeRequest();
+        },
       },
       logger: {
         debug: (message, meta) => this.workflowLogger.logDebug(message, meta),
