@@ -13,7 +13,6 @@
     "@kbn/evals",
     "@kbn/scout",
     "@kbn/inference-common",
-    "@kbn/tooling-log",
-    "@kbn/agent-builder-common"
+    "@kbn/tooling-log"
   ]
 }
