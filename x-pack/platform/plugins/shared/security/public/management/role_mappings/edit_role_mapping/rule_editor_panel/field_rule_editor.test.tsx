@@ -16,9 +16,7 @@ import { FieldRule } from '../../model';
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 function assertField(index: number, field: string) {
-  const comboEl = document.querySelector(
-    `[data-test-subj~="fieldRuleEditorField-${index}-combo"]`
-  );
+  const comboEl = document.querySelector(`[data-test-subj~="fieldRuleEditorField-${index}-combo"]`);
   const expressionEl = document.querySelector(
     `[data-test-subj~="fieldRuleEditorField-${index}-expression"]`
   );
