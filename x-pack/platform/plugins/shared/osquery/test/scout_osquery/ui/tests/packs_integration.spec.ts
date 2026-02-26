@@ -271,6 +271,11 @@ test.describe(
               globalPackId = packIdMatch[1];
             }
 
+            // Create agent policy with osquery integration.
+            // The packagePolicyCreate callback finds global packs via saved objects.
+            // A brief pause ensures ES has refreshed the index after pack creation.
+            await page.waitForTimeout(3_000);
+
             // Create agent policy with osquery integration
             const agentPolicy = await loadAgentPolicy(kbnClient);
             agentPolicyId = agentPolicy.id;
