@@ -31,7 +31,7 @@ interface Options {
   kbnClient?: KbnClient;
   /**
    * When true, `kbnClient` is not required and loading archives that contain
-   * saved-object indices (.kibana*) will throw. Intended for Scout tests and
+   * saved-object indices (.kibana*) will throw an error. Intended for Scout tests and
    * linked CPS projects that should only ingest pure ES data.
    */
   dataOnly?: boolean;
