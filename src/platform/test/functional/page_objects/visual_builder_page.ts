@@ -577,14 +577,12 @@ export class VisualBuilderPageObject extends FtrService {
     }
 
     if (useKibanaIndices === false) {
-      await this.retry.try(async () => {
-        const el = await this.testSubjects.find(metricsIndexPatternInput);
-        await el.focus();
-        await el.clearValue();
-        if (value) {
-          await el.type(value, { charByChar: true });
-        }
-      });
+      const el = await this.testSubjects.find(metricsIndexPatternInput);
+      await el.focus();
+      await el.clearValue();
+      if (value) {
+        await el.type(value, { charByChar: true });
+      }
     } else {
       await this.comboBox.clearInputField(metricsIndexPatternInput);
       if (value) {

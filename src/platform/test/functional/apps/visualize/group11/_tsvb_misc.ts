@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
 
   const { visChart, visualBuilder, visualize, settings, common } = getPageObjects([
     'visChart',
@@ -48,6 +49,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('switch index pattern mode', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
+      });
+
       beforeEach(async () => {
         await visualBuilder.clickMetric();
         await visualBuilder.checkMetricTabIsPresent();
