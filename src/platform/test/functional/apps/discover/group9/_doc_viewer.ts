@@ -282,7 +282,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const initialFieldsCount = 8;
         await retry.waitFor('filter applied', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === initialFieldsCount;
+          return (
+            (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === initialFieldsCount
+          );
         });
         await discover.closeFilterByFieldTypeInDocViewer();
 
