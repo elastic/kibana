@@ -210,13 +210,15 @@ export class WorkflowsManagementApi {
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
     inputs: Record<string, any>,
-    request: KibanaRequest
+    request: KibanaRequest,
+    triggeredBy?: string
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
       spaceId,
       inputs: manualInputs,
+      triggeredBy,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(

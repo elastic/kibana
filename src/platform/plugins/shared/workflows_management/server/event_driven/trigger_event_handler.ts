@@ -72,7 +72,13 @@ export function createTriggerEventHandler({
             definition: workflow.definition,
             yaml: workflow.yaml,
           };
-          await api.runWorkflow(workflowToRun, spaceId, { event: payload }, request);
+          await api.runWorkflow(
+            workflowToRun,
+            spaceId,
+            { event: payload },
+            request,
+            triggerId
+          );
         } catch (error) {
           logger.warn(
             `Event-driven workflow execution failed for workflow ${workflow.id} (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
