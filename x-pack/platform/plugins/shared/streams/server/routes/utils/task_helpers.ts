@@ -11,6 +11,7 @@ import { TaskStatus } from '@kbn/streams-schema';
 import type { TaskResult } from '@kbn/streams-schema';
 import { AcknowledgingIncompleteError } from '../../lib/tasks/acknowledging_incomplete_error';
 import { CancellationInProgressError } from '../../lib/tasks/cancellation_in_progress_error';
+import { TaskNotFoundError } from '../../lib/streams/errors/task_not_found_error';
 import type { TaskClient } from '../../lib/tasks/task_client';
 import type { StreamsTaskType } from '../../lib/tasks/task_definitions';
 
@@ -31,17 +32,17 @@ interface HandleScheduleActionParams<TParams extends object> extends HandleTaskA
   scheduleConfig: ScheduleTaskConfig<TParams>;
 }
 
-interface HandleCancelOrAcknowledgeActionParams extends HandleTaskActionBaseParams {
-  action: 'cancel' | 'acknowledge';
+interface HandleCancelOrAcknowledgeOrDeleteActionParams extends HandleTaskActionBaseParams {
+  action: 'cancel' | 'acknowledge' | 'delete';
   scheduleConfig?: undefined;
 }
 
 type HandleTaskActionParams<TParams extends object> =
   | HandleScheduleActionParams<TParams>
-  | HandleCancelOrAcknowledgeActionParams;
+  | HandleCancelOrAcknowledgeOrDeleteActionParams;
 
 /**
- * Handles task lifecycle actions: schedule, cancel, and acknowledge.
+ * Handles task lifecycle actions: schedule, cancel, acknowledge, and delete.
  * Returns the appropriate response based on the action.
  */
 export async function handleTaskAction<TParams extends object, TPayload extends object>(
@@ -78,6 +79,18 @@ export async function handleTaskAction<TParams extends object, TPayload extends 
     return {
       status: TaskStatus.BeingCanceled,
     };
+  } else if (action === 'delete') {
+    try {
+      await taskClient.deleteTask(taskId);
+    } catch (error) {
+      if (!(error instanceof TaskNotFoundError)) {
+        throw error;
+      }
+    }
+
+    return {
+      status: TaskStatus.Acknowledged,
+    } as TaskResult<TPayload>;
   }
 
   // action === 'acknowledge'

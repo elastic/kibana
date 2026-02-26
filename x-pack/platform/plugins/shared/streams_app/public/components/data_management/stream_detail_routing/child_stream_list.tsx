@@ -346,6 +346,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                 onCancel={() => {
                   resetForm();
                 }}
+                showBackgroundMessage={false}
               />
             )}
             {!isLoadingSuggestions && suggestions ? (

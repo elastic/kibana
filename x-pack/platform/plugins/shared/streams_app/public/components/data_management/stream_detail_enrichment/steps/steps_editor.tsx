@@ -6,16 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiAccordion,
-  EuiCallOut,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiCode, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
@@ -247,17 +238,26 @@ export const StepsEditor = React.memo(() => {
   );
 
   // Pipeline suggestion state
-  const isLoadingSuggestion = useInteractiveModeSelector((snapshot) =>
-    snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' })
+  const isLoadingSuggestion = useInteractiveModeSelector(
+    (snapshot) =>
+      snapshot.matches({ pipelineSuggestion: 'submittingSuggestionTask' }) ||
+      snapshot.matches({ pipelineSuggestion: 'checkingSuggestionStatus' }) ||
+      snapshot.matches({ pipelineSuggestion: 'waitingForCompletion' })
   );
   const suggestedPipeline = useInteractiveModeSelector(
     (snapshot) => snapshot.context.suggestedPipeline
   );
   const isViewingSuggestion = useInteractiveModeSelector((snapshot) =>
-    snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' })
+    snapshot.matches({ pipelineSuggestion: 'completed' })
   );
   const isNoSuggestionsFound = useInteractiveModeSelector((snapshot) =>
     snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' })
+  );
+  const isSuggestionFailed = useInteractiveModeSelector((snapshot) =>
+    snapshot.matches({ pipelineSuggestion: 'suggestionFailed' })
+  );
+  const suggestionError = useInteractiveModeSelector(
+    (snapshot) => snapshot.context.suggestionError
   );
 
   // Pipeline suggestion events
@@ -284,60 +284,16 @@ export const StepsEditor = React.memo(() => {
   const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
 
   if (aiFeatures && aiFeatures.enabled) {
+    // Show loading prompt only once we know there's an in-progress task.
+    // Don't show during the initial existing-task status check to avoid a flash.
     if (isLoadingSuggestion) {
       return (
         <SuggestionLoadingPrompt
           onCancel={() => {
             cancelSuggestion();
           }}
+          showBackgroundMessage={true}
         />
-      );
-    }
-
-    if (isNoSuggestionsFound) {
-      return (
-        <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
-          <div css={{ maxWidth: 400, margin: '0 auto', textAlign: 'left' }}>
-            <EuiCallOut
-              announceOnMount
-              title={i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.noSuggestionsTitle',
-                { defaultMessage: 'Could not generate suggestions' }
-              )}
-              color="primary"
-              size="s"
-              onDismiss={() => clearSuggestedSteps()}
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.noSuggestionsDescription',
-                  {
-                    defaultMessage:
-                      'The AI assistant was unable to generate pipeline suggestions for your data. You can try again.',
-                  }
-                )}
-              </p>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <GenerateSuggestionButton
-                    aiFeatures={aiFeatures}
-                    iconType="refresh"
-                    size="s"
-                    onClick={(connectorId) =>
-                      suggestPipeline({ connectorId, streamName: stream.name })
-                    }
-                    isLoading={false}
-                  >
-                    {i18n.translate('xpack.streams.stepsEditor.tryAgainButtonLabel', {
-                      defaultMessage: 'Try again',
-                    })}
-                  </GenerateSuggestionButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiCallOut>
-          </div>
-        </NoStepsEmptyPrompt>
       );
     }
 
@@ -384,9 +340,103 @@ export const StepsEditor = React.memo(() => {
         </NoStepsEmptyPrompt>
       )}
       <ErrorPanels showBottomBar={hasChanges} />
+      {isNoSuggestionsFound && (
+        <NoSuggestionsPanel showBottomBar={hasChanges} onDismiss={clearSuggestedSteps} />
+      )}
+      {isSuggestionFailed && (
+        <SuggestionFailedPanel
+          showBottomBar={hasChanges}
+          errorMessage={suggestionError}
+          onDismiss={clearSuggestedSteps}
+        />
+      )}
     </>
   );
 });
+
+interface NoSuggestionsPanelProps {
+  showBottomBar: boolean;
+  onDismiss: () => void;
+}
+
+const NoSuggestionsPanel = React.memo<NoSuggestionsPanelProps>(({ showBottomBar, onDismiss }) => {
+  return (
+    <div
+      css={css`
+        ${showBottomBar ? 'margin-bottom: 30px;' : ''}
+      `}
+    >
+      <EuiCallOut
+        announceOnMount
+        title={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.noSuggestionsTitle',
+          { defaultMessage: 'Could not generate suggestions' }
+        )}
+        color="warning"
+        size="s"
+        onDismiss={onDismiss}
+      >
+        <p>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.noSuggestionsDescription',
+            {
+              defaultMessage:
+                'The AI assistant was unable to generate pipeline suggestions for your data. You can try again.',
+            }
+          )}
+        </p>
+      </EuiCallOut>
+    </div>
+  );
+});
+
+interface SuggestionFailedPanelProps {
+  showBottomBar: boolean;
+  errorMessage?: string;
+  onDismiss: () => void;
+}
+
+const SuggestionFailedPanel = React.memo<SuggestionFailedPanelProps>(
+  ({ showBottomBar, errorMessage, onDismiss }) => {
+    return (
+      <div
+        css={css`
+          ${showBottomBar ? 'margin-bottom: 30px;' : ''}
+        `}
+      >
+        <EuiCallOut
+          announceOnMount
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedPanelTitle',
+            { defaultMessage: 'Suggestion generation failed' }
+          )}
+          color="warning"
+          size="s"
+          onDismiss={onDismiss}
+        >
+          <p>
+            {errorMessage
+              ? i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedPanelDescriptionWithError',
+                  {
+                    defaultMessage:
+                      'Last time there was an issue generating the suggestion: {errorMessage}. Please try again. If it keeps happening, let us know.',
+                    values: { errorMessage },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.pipelineSuggestion.failedPanelDescription',
+                  {
+                    defaultMessage:
+                      'Last time there was an issue generating the suggestion. Please try again. If it keeps happening, let us know.',
+                  }
+                )}
+          </p>
+        </EuiCallOut>
+      </div>
+    );
+  }
+);
 
 const clampTwoLines = css`
   display: -webkit-box;
