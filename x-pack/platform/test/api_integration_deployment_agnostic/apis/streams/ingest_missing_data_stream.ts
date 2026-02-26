@@ -36,7 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('restoring', () => {
-      const restoreStreamName = 'logs.orphaned_wired_restore';
+      const restoreStreamName = 'logs.otel.orphaned_wired_restore';
 
       before(async () => {
         // Create a wired stream
@@ -72,7 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('deleting', () => {
-      const deleteStreamName = 'logs.orphaned_wired_delete';
+      const deleteStreamName = 'logs.otel.orphaned_wired_delete';
 
       before(async () => {
         // Create a wired stream
