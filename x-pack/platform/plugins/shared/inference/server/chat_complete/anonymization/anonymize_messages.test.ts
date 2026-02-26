@@ -78,21 +78,26 @@ describe('anonymizeMessages', () => {
     const rec = messageToAnonymizationRecords(messages[0]);
     const q = rec['/toolCalls/0/function/arguments/query']!;
 
-    setupMockResponse([
-      { entities: [] }, // /toolCalls/0/function/name
-      {
-        predicted_value: '',
-        entities: [
-          {
-            entity: 'Bob',
-            class_name: 'PER',
-            class_probability: 0.9828533515650252,
-            start_pos: q.indexOf('Bob'),
-            end_pos: q.indexOf('Bob') + 3,
-          },
-        ],
-      }, // /toolCalls/0/function/arguments/query
-    ]);
+    setupMockResponse(
+      Object.entries(rec)
+        .filter(([, value]) => value.length > 0)
+        .map(([pointer]) =>
+        pointer === '/toolCalls/0/function/arguments/query'
+          ? {
+              predicted_value: '',
+              entities: [
+                {
+                  entity: 'Bob',
+                  class_name: 'PER',
+                  class_probability: 0.9828533515650252,
+                  start_pos: q.indexOf('Bob'),
+                  end_pos: q.indexOf('Bob') + 3,
+                },
+              ],
+            }
+          : { entities: [] }
+        )
+    );
 
     // Execute
     const result = await anonymizeMessages({
@@ -265,34 +270,43 @@ describe('anonymizeMessages', () => {
     const q0 = rec['/toolCalls/0/function/arguments/query']!;
     const q1 = rec['/toolCalls/1/function/arguments/query']!;
 
-    setupMockResponse([
-      { entities: [] }, // /toolCalls/0/function/name
-      {
-        predicted_value: '',
-        entities: [
-          {
-            entity: 'Bob',
-            class_name: 'PER',
-            class_probability: 0.99,
-            start_pos: q0.indexOf('Bob'),
-            end_pos: q0.indexOf('Bob') + 3,
-          },
-        ],
-      }, // /toolCalls/0/function/arguments/query
-      { entities: [] }, // /toolCalls/1/function/name
-      {
-        predicted_value: '',
-        entities: [
-          {
-            entity: 'Bob',
-            class_name: 'PER',
-            class_probability: 0.99,
-            start_pos: q1.indexOf('Bob'),
-            end_pos: q1.indexOf('Bob') + 3,
-          },
-        ],
-      }, // /toolCalls/1/function/arguments/query
-    ]);
+    setupMockResponse(
+      Object.entries(rec)
+        .filter(([, value]) => value.length > 0)
+        .map(([pointer]) => {
+        if (pointer === '/toolCalls/0/function/arguments/query') {
+          return {
+            predicted_value: '',
+            entities: [
+              {
+                entity: 'Bob',
+                class_name: 'PER',
+                class_probability: 0.99,
+                start_pos: q0.indexOf('Bob'),
+                end_pos: q0.indexOf('Bob') + 3,
+              },
+            ],
+          };
+        }
+
+        if (pointer === '/toolCalls/1/function/arguments/query') {
+          return {
+            predicted_value: '',
+            entities: [
+              {
+                entity: 'Bob',
+                class_name: 'PER',
+                class_probability: 0.99,
+                start_pos: q1.indexOf('Bob'),
+                end_pos: q1.indexOf('Bob') + 3,
+              },
+            ],
+          };
+        }
+
+        return { entities: [] };
+        })
+    );
 
     const result = await anonymizeMessages({
       messages,

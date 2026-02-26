@@ -77,27 +77,8 @@ describe('ProfilesRepository.create', () => {
   it('returns 409 conflict when tuple already exists before insert', async () => {
     const { repository, esClientMock } = createRepository();
 
-    esClientMock.search.mockResolvedValueOnce({
-      hits: {
-        total: 1,
-        hits: [
-          {
-            _source: {
-              id: 'existing-id',
-              name: 'Existing',
-              target_type: 'data_view',
-              target_id: 'security-solution-default',
-              rules: { field_rules: [], regex_rules: [], ner_rules: [] },
-              salt_id: 'salt-default',
-              namespace: 'default',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              created_by: 'tester',
-              updated_by: 'tester',
-            },
-          },
-        ],
-      },
+    esClientMock.index.mockRejectedValueOnce({
+      statusCode: 409,
     });
 
     await expect(repository.create(profileCreateParams)).rejects.toMatchObject({

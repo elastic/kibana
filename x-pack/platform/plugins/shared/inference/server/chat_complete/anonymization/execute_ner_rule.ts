@@ -168,7 +168,11 @@ export async function executeNerRule({
 
           let anonymizedValue = allTexts[position];
 
-          for (const entity of (nerOutput.entities ?? []).filter((e) =>
+          for (const entity of ((nerOutput?.entities ?? []) as Array<{
+            class_name: string;
+            start_pos: number;
+            end_pos: number;
+          }>).filter((e) =>
             allowedNerEntities ? allowedNerEntities.includes(e.class_name as any) : true
           )) {
             const from = entity.start_pos + offset;
