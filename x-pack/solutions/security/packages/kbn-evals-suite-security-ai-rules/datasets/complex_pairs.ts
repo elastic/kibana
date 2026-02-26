@@ -99,7 +99,11 @@ process.parent.name in ("Runner.Worker", "Runner.Listener") and process.env_vars
 not process.env_vars like~ "RUNNER_TRACKING_ID=github_*"`,
     threat: [
       { technique: 'T1059', tactic: 'TA0002' },
-      { technique: 'T1195', tactic: 'TA0001', subtechnique: 'Compromise Software Dependencies and Development Tools' },
+      {
+        technique: 'T1195',
+        tactic: 'TA0001',
+        subtechnique: 'Compromise Software Dependencies and Development Tools',
+      },
       { technique: 'T1562', tactic: 'TA0005', subtechnique: 'Disable or Modify Tools' },
     ],
     severity: 'medium',

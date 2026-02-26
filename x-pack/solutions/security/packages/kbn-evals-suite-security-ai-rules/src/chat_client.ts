@@ -170,7 +170,9 @@ const parseSseEvents = (ssePayload: string): ParsedSseEvent[] => {
   return parsedEvents;
 };
 
-const extractRuleDataFromToolResults = (results?: ToolResult[]): {
+const extractRuleDataFromToolResults = (
+  results?: ToolResult[]
+): {
   ruleData?: Record<string, unknown>;
   error?: string;
 } => {
@@ -226,7 +228,7 @@ const mapThreat = (raw: unknown): ReferenceRule['threat'] => {
   return raw.flatMap((entry: Record<string, unknown>) => {
     const tacticId =
       entry.tactic && typeof entry.tactic === 'object'
-        ? (entry.tactic as Record<string, unknown>).id as string
+        ? ((entry.tactic as Record<string, unknown>).id as string)
         : (entry.tactic as string);
 
     const techniques = Array.isArray(entry.technique) ? entry.technique : [];
@@ -239,7 +241,7 @@ const mapThreat = (raw: unknown): ReferenceRule['threat'] => {
       technique: tech.id as string,
       tactic: tacticId,
       subtechnique: Array.isArray(tech.subtechnique)
-        ? (tech.subtechnique[0] as Record<string, unknown>)?.id as string | undefined
+        ? ((tech.subtechnique[0] as Record<string, unknown>)?.id as string | undefined)
         : undefined,
     }));
   });

@@ -287,7 +287,7 @@ export const standardPairs: ReferenceRule[] = [
     id: 'entra-id-service-principal-created',
     name: 'Entra ID Service Principal Created',
     prompt:
-      'Identifies when a new service principal is added in Microsoft Entra ID. An application, hosted service, or automated tool that accesses or modifies resources needs an identity created. This identity is known as a service principal. For security reasons, it\'s always recommended to use service principals with automated tools rather than allowing them to log in with a user identity.',
+      "Identifies when a new service principal is added in Microsoft Entra ID. An application, hosted service, or automated tool that accesses or modifies resources needs an identity created. This identity is known as a service principal. For security reasons, it's always recommended to use service principals with automated tools rather than allowing them to log in with a user identity.",
     description:
       'Identifies when a new service principal is added in Microsoft Entra ID. An application, hosted service, or automated tool that accesses or modifies resources needs an identity created. This identity is known as a service principal.',
     query: `event.dataset:azure.auditlogs
@@ -300,9 +300,7 @@ export const standardPairs: ReferenceRule[] = [
  "AAD App Management" or
  "Power Virtual Agents Service"
  )`,
-    threat: [
-      { technique: 'T1136', tactic: 'TA0003', subtechnique: 'Cloud Account' },
-    ],
+    threat: [{ technique: 'T1136', tactic: 'TA0003', subtechnique: 'Cloud Account' }],
     severity: 'low',
     tags: [
       'Domain: Cloud',
@@ -325,9 +323,9 @@ export const standardPairs: ReferenceRule[] = [
     id: 'gcp-logging-sink-deletion',
     name: 'GCP Logging Sink Deletion',
     prompt:
-      'Identifies a Logging sink deletion in Google Cloud Platform (GCP). Every time a log entry arrives, Logging compares the log entry to the sinks in that resource. Each sink whose filter matches the log entry writes a copy of the log entry to the sink\'s export destination. An adversary may delete a Logging sink to evade detection.',
+      "Identifies a Logging sink deletion in Google Cloud Platform (GCP). Every time a log entry arrives, Logging compares the log entry to the sinks in that resource. Each sink whose filter matches the log entry writes a copy of the log entry to the sink's export destination. An adversary may delete a Logging sink to evade detection.",
     description:
-      'Identifies a Logging sink deletion in Google Cloud Platform (GCP). Every time a log entry arrives, Logging compares the log entry to the sinks in that resource. Each sink whose filter matches the log entry writes a copy of the log entry to the sink\'s export destination. An adversary may delete a Logging sink to evade detection.',
+      "Identifies a Logging sink deletion in Google Cloud Platform (GCP). Every time a log entry arrives, Logging compares the log entry to the sinks in that resource. Each sink whose filter matches the log entry writes a copy of the log entry to the sink's export destination. An adversary may delete a Logging sink to evade detection.",
     query: `event.dataset:gcp.audit and event.action:google.logging.v*.ConfigServiceV*.DeleteSink and event.outcome:success`,
     threat: [{ technique: 'T1562', tactic: 'TA0005' }],
     severity: 'medium',
@@ -420,14 +418,12 @@ export const standardPairs: ReferenceRule[] = [
     id: 'google-workspace-custom-gmail-route',
     name: 'Google Workspace Custom Gmail Route Created or Modified',
     prompt:
-      'Detects when a custom Gmail route is added or modified in Google Workspace. Adversaries can add a custom e-mail route for outbound mail to route these e-mails to their own inbox of choice for data gathering. This allows adversaries to capture sensitive information from e-mail and potential attachments, such as invoices or payment documents. By default, all email from current Google Workspace users with accounts are routed through a domain\'s mail server for inbound and outbound mail.',
+      "Detects when a custom Gmail route is added or modified in Google Workspace. Adversaries can add a custom e-mail route for outbound mail to route these e-mails to their own inbox of choice for data gathering. This allows adversaries to capture sensitive information from e-mail and potential attachments, such as invoices or payment documents. By default, all email from current Google Workspace users with accounts are routed through a domain's mail server for inbound and outbound mail.",
     description:
       'Detects when a custom Gmail route is added or modified in Google Workspace. Adversaries can add a custom e-mail route for outbound mail to route these e-mails to their own inbox of choice for data gathering.',
     query: `event.dataset:"google_workspace.admin" and event.action:("CREATE_GMAIL_SETTING" or "CHANGE_GMAIL_SETTING")
  and google_workspace.event.type:"EMAIL_SETTINGS" and google_workspace.admin.setting.name:("EMAIL_ROUTE" or "MESSAGE_SECURITY_RULE")`,
-    threat: [
-      { technique: 'T1114', tactic: 'TA0009', subtechnique: 'Email Forwarding Rule' },
-    ],
+    threat: [{ technique: 'T1114', tactic: 'TA0009', subtechnique: 'Email Forwarding Rule' }],
     severity: 'medium',
     tags: [
       'Domain: Cloud',
@@ -590,16 +586,14 @@ process.entry_leader.entry_meta.type == "container" and process.name == "mount" 
     id: 'okta-multiple-sessions-single-user',
     name: 'Multiple Okta Sessions Detected for a Single User',
     prompt:
-      'Detects when a user has started multiple Okta sessions with the same user account and different session IDs. This may indicate that an attacker has stolen the user\'s session cookie and is using it to access the user\'s account from a different location.',
+      "Detects when a user has started multiple Okta sessions with the same user account and different session IDs. This may indicate that an attacker has stolen the user's session cookie and is using it to access the user's account from a different location.",
     description:
-      'Detects when a user has started multiple Okta sessions with the same user account and different session IDs. This may indicate that an attacker has stolen the user\'s session cookie and is using it to access the user\'s account from a different location.',
+      "Detects when a user has started multiple Okta sessions with the same user account and different session IDs. This may indicate that an attacker has stolen the user's session cookie and is using it to access the user's account from a different location.",
     query: `event.dataset:okta.system
  and okta.event_type:user.session.start
  and okta.authentication_context.external_session_id:*
  and not (okta.actor.id: okta* or okta.actor.display_name: okta*)`,
-    threat: [
-      { technique: 'T1550', tactic: 'TA0008', subtechnique: 'Web Session Cookie' },
-    ],
+    threat: [{ technique: 'T1550', tactic: 'TA0008', subtechnique: 'Web Session Cookie' }],
     severity: 'medium',
     tags: [
       'Use Case: Identity and Access Audit',

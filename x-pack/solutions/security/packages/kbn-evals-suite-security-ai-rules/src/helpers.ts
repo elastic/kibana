@@ -10,11 +10,9 @@ import type { ReferenceRule } from '../datasets/sample_rules';
 /**
  * Extract MITRE ATT&CK techniques from a rule
  */
-export function extractMitreTechniques(
-  rule: Partial<ReferenceRule>
-): Set<string> {
+export function extractMitreTechniques(rule: Partial<ReferenceRule>): Set<string> {
   const techniques = new Set<string>();
-  
+
   if (rule.threat) {
     for (const threat of rule.threat) {
       if (threat.technique) {
@@ -22,7 +20,7 @@ export function extractMitreTechniques(
       }
     }
   }
-  
+
   return techniques;
 }
 
@@ -87,22 +85,22 @@ export function calculateSetMetrics<T>(
   if (predicted.size === 0 && expected.size === 0) {
     return { precision: 1.0, recall: 1.0, f1: 1.0 };
   }
-  
+
   if (predicted.size === 0) {
     return { precision: 0, recall: 0, f1: 0 };
   }
-  
+
   if (expected.size === 0) {
     return { precision: 0, recall: 0, f1: 0 };
   }
-  
+
   const truePositives = [...predicted].filter((x) => expected.has(x)).length;
-  
+
   const precision = truePositives / predicted.size;
   const recall = truePositives / expected.size;
-  
+
   const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
-  
+
   return { precision, recall, f1 };
 }
 
@@ -159,17 +157,19 @@ export function hasRequiredFields(rule: Partial<ReferenceRule>): {
 } {
   const requiredFields = ['name', 'description', 'query', 'severity', 'tags', 'riskScore'];
   const missing: string[] = [];
-  
+
   for (const field of requiredFields) {
-    if (!rule[field as keyof ReferenceRule] || 
-        (Array.isArray(rule[field as keyof ReferenceRule]) && 
-         (rule[field as keyof ReferenceRule] as unknown[]).length === 0)) {
+    if (
+      !rule[field as keyof ReferenceRule] ||
+      (Array.isArray(rule[field as keyof ReferenceRule]) &&
+        (rule[field as keyof ReferenceRule] as unknown[]).length === 0)
+    ) {
       missing.push(field);
     }
   }
-  
+
   const coverage = (requiredFields.length - missing.length) / requiredFields.length;
-  
+
   return {
     hasAll: missing.length === 0,
     coverage,

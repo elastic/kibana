@@ -14,7 +14,10 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createEsClientForTesting } from '@kbn/test';
-import { EvaluationScoreRepository, type EvaluationScoreDocument } from '../../utils/score_repository';
+import {
+  EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+} from '../../utils/score_repository';
 import { resolveEvalSuites } from '../suites';
 
 const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9200';
@@ -91,7 +94,9 @@ function buildDatasetTable(datasetScores: EvaluationScoreDocument[]): string {
   return table([headers, ...dataRows], tableConfig);
 }
 
-function buildSummaryTables(scores: EvaluationScoreDocument[]): Array<{ name: string; table: string }> {
+function buildSummaryTables(
+  scores: EvaluationScoreDocument[]
+): Array<{ name: string; table: string }> {
   const byDataset = new Map<string, EvaluationScoreDocument[]>();
   for (const doc of scores) {
     const key = doc.example.dataset.name;

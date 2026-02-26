@@ -14,17 +14,16 @@ import { standardPairs } from '../datasets/standard_pairs';
 import { complexPairs } from '../datasets/complex_pairs';
 import { negativePairs } from '../datasets/negative_pairs';
 
-evaluate.describe(
-  'AI Rule Generation',
-  { tag: tags.serverless.security.complete },
-  () => {
-    evaluate('generates accurate detection rules', async ({
-      executorClient,
-      evaluators,
-      chatClient,
-      log,
-    }) => {
-      const evaluateDataset = createEvaluateDataset({ evaluators, executorClient, chatClient, log });
+evaluate.describe('AI Rule Generation', { tag: tags.serverless.security.complete }, () => {
+  evaluate(
+    'generates accurate detection rules',
+    async ({ executorClient, evaluators, chatClient, log }) => {
+      const evaluateDataset = createEvaluateDataset({
+        evaluators,
+        executorClient,
+        chatClient,
+        log,
+      });
 
       const allRules = [...sampleRules, ...standardPairs, ...complexPairs];
       log.info(`Running AI rule generation evaluation with ${allRules.length} examples`);
@@ -42,15 +41,18 @@ evaluate.describe(
         },
       });
       log.info('AI rule generation evaluation complete');
-    });
+    }
+  );
 
-    evaluate('handles edge cases and errors gracefully', async ({
-      executorClient,
-      evaluators,
-      chatClient,
-      log,
-    }) => {
-      const evaluateDataset = createEvaluateDataset({ evaluators, executorClient, chatClient, log });
+  evaluate(
+    'handles edge cases and errors gracefully',
+    async ({ executorClient, evaluators, chatClient, log }) => {
+      const evaluateDataset = createEvaluateDataset({
+        evaluators,
+        executorClient,
+        chatClient,
+        log,
+      });
 
       log.info('Running edge case evaluation');
       await evaluateDataset({
@@ -68,15 +70,18 @@ evaluate.describe(
         },
       });
       log.info('Edge case evaluation complete');
-    });
+    }
+  );
 
-    evaluate('rejects impossible detection requests', async ({
-      executorClient,
-      evaluators,
-      chatClient,
-      log,
-    }) => {
-      const evaluateDataset = createEvaluateDataset({ evaluators, executorClient, chatClient, log });
+  evaluate(
+    'rejects impossible detection requests',
+    async ({ executorClient, evaluators, chatClient, log }) => {
+      const evaluateDataset = createEvaluateDataset({
+        evaluators,
+        executorClient,
+        chatClient,
+        log,
+      });
 
       log.info(`Running negative case evaluation with ${negativePairs.length} examples`);
       await evaluateDataset({
@@ -105,6 +110,6 @@ evaluate.describe(
         },
       });
       log.info('Negative case evaluation complete');
-    });
-  }
-);
+    }
+  );
+});

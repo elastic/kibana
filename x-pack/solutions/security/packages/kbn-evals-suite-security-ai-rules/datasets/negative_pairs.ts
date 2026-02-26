@@ -42,7 +42,8 @@ export const negativePairs: NegativePair[] = [
   // Negative 2
   {
     id: 'okta-mfa-fatigue-endpoint-only',
-    prompt: 'Detect Okta MFA fatigue attacks and session hijacking using only Elastic Defend endpoint events.',
+    prompt:
+      'Detect Okta MFA fatigue attacks and session hijacking using only Elastic Defend endpoint events.',
     availableData: 'logs-endpoint.events.*',
     reason:
       'Okta authentication events, MFA challenges, and session activity are in Okta audit logs, not endpoint telemetry. Endpoint data has no visibility into the Okta identity plane.',

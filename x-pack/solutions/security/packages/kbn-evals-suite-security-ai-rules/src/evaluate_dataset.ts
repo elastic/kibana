@@ -59,7 +59,6 @@ function skipNegativeCases(
   };
 }
 
-
 // ---------------------------------------------------------------------------
 // CODE evaluators — deterministic, no LLM required
 // ---------------------------------------------------------------------------
@@ -94,7 +93,10 @@ function createFieldCoverageEvaluator(): Evaluator<RuleExample, RuleGenerationTa
       if (!output?.generatedRule) {
         return {
           score: 0,
-          metadata: { error: 'No rule generated', missing: ['name', 'description', 'query', 'severity', 'tags'] },
+          metadata: {
+            error: 'No rule generated',
+            missing: ['name', 'description', 'query', 'severity', 'tags'],
+          },
         };
       }
       const { coverage, missing } = hasRequiredFields(output.generatedRule);
@@ -133,9 +135,7 @@ function createMitreAccuracyEvaluator(): Evaluator<RuleExample, RuleGenerationTa
       const generatedTechniques = extractMitreTechniques(output.generatedRule);
       const expectedTechniques = extractMitreTechniques(expected ?? {});
       const metrics = calculateSetMetrics(generatedTechniques, expectedTechniques);
-      const invalidFormat = [...generatedTechniques].filter(
-        (t) => !/^T\d{4}(\.\d{3})?$/.test(t)
-      );
+      const invalidFormat = [...generatedTechniques].filter((t) => !/^T\d{4}(\.\d{3})?$/.test(t));
       return {
         score: metrics.f1,
         metadata: {
@@ -387,16 +387,16 @@ export function createEvaluateDataset({
 }): ({ dataset }: { dataset: EvaluationDataset<RuleExample> }) => Promise<void> {
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
-    skipNegativeCases(createQuerySyntaxValidityEvaluator()),      // syntax + FROM wildcard check (G)
-    skipNegativeCases(createFieldCoverageEvaluator()),            // required fields incl. riskScore (B partial)
+    skipNegativeCases(createQuerySyntaxValidityEvaluator()), // syntax + FROM wildcard check (G)
+    skipNegativeCases(createFieldCoverageEvaluator()), // required fields incl. riskScore (B partial)
     skipNegativeCases(createRuleTypeLanguageEvaluator()),
-    skipNegativeCases(createMitreAccuracyEvaluator()),            // F1 score + invalidFormat metadata (H-A)
-    skipNegativeCases(createSeverityValidityEvaluator()),         // enum check (A)
-    skipNegativeCases(createRiskScoreValidityEvaluator()),        // 0–100 range check (B)
-    skipNegativeCases(createIntervalFormatEvaluator()),           // duration string format (C)
-    skipNegativeCases(createLookbackGapEvaluator()),              // from >= interval coverage (D)
-    skipNegativeCases(createSeverityMatchEvaluator()),            // vs expected severity (E)
-    skipNegativeCases(createRiskScoreMatchEvaluator()),           // vs expected riskScore with tolerance (F)
+    skipNegativeCases(createMitreAccuracyEvaluator()), // F1 score + invalidFormat metadata (H-A)
+    skipNegativeCases(createSeverityValidityEvaluator()), // enum check (A)
+    skipNegativeCases(createRiskScoreValidityEvaluator()), // 0–100 range check (B)
+    skipNegativeCases(createIntervalFormatEvaluator()), // duration string format (C)
+    skipNegativeCases(createLookbackGapEvaluator()), // from >= interval coverage (D)
+    skipNegativeCases(createSeverityMatchEvaluator()), // vs expected severity (E)
+    skipNegativeCases(createRiskScoreMatchEvaluator()), // vs expected riskScore with tolerance (F)
     // LLM — functional/semantic equivalence via built-in @kbn/evals criteria evaluator
     skipNegativeCases(createEsqlFunctionalEquivalenceEvaluator(evaluators)),
     // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
@@ -434,12 +434,16 @@ export function createEvaluateDataset({
             const genTech = extractMitreTechniques(taskResult.generatedRule);
             const expTech = extractMitreTechniques(expected ?? {});
             log.info(
-              `[Result] MITRE: generated=[${[...genTech].join(', ') || 'none'}] | expected=[${[...expTech].join(', ') || 'none'}]`
+              `[Result] MITRE: generated=[${[...genTech].join(', ') || 'none'}] | expected=[${
+                [...expTech].join(', ') || 'none'
+              }]`
             );
 
             const { coverage, missing } = hasRequiredFields(taskResult.generatedRule);
             log.info(
-              `[Result] Field coverage: ${Math.round(coverage * 100)}%${missing.length ? ` | missing: ${missing.join(', ')}` : ''}`
+              `[Result] Field coverage: ${Math.round(coverage * 100)}%${
+                missing.length ? ` | missing: ${missing.join(', ')}` : ''
+              }`
             );
 
             log.info(
@@ -448,7 +452,9 @@ export function createEvaluateDataset({
 
             const syntaxResult = validateEsqlSyntax(taskResult.generatedRule.query ?? '');
             log.info(
-              `[Result] Query syntax: ${syntaxResult.valid ? 'valid' : `INVALID — ${syntaxResult.error}`}`
+              `[Result] Query syntax: ${
+                syntaxResult.valid ? 'valid' : `INVALID — ${syntaxResult.error}`
+              }`
             );
 
             return taskResult;
