@@ -78,5 +78,7 @@
     "@kbn/core-http-common",
     "@kbn/scout",
     "@kbn/esql-language",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-logging-server-mocks",
   ]
 }
