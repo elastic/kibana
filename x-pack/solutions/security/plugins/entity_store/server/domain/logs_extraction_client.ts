@@ -72,25 +72,27 @@ export interface LogsExtractionClientDependencies {
 }
 
 export class LogsExtractionClient {
-  constructor(private readonly deps: LogsExtractionClientDependencies) {}
+  logger: Logger;
+  namespace: string;
+  esClient: ElasticsearchClient;
+  dataViewsService: DataViewsService;
+  engineDescriptorClient: EngineDescriptorClient;
+  ccsLogsExtractionClient: CcsLogsExtractionClient;
 
-  private get logger() {
-    return this.deps.logger;
-  }
-  private get namespace() {
-    return this.deps.namespace;
-  }
-  private get esClient() {
-    return this.deps.esClient;
-  }
-  private get dataViewsService() {
-    return this.deps.dataViewsService;
-  }
-  private get engineDescriptorClient() {
-    return this.deps.engineDescriptorClient;
-  }
-  private get ccsLogsExtractionClient() {
-    return this.deps.ccsLogsExtractionClient;
+  constructor({
+    logger,
+    namespace,
+    esClient,
+    dataViewsService,
+    engineDescriptorClient,
+    ccsLogsExtractionClient,
+  }: LogsExtractionClientDependencies) {
+    this.logger = logger;
+    this.namespace = namespace;
+    this.esClient = esClient;
+    this.dataViewsService = dataViewsService;
+    this.engineDescriptorClient = engineDescriptorClient;
+    this.ccsLogsExtractionClient = ccsLogsExtractionClient;
   }
 
   public async extractLogs(
