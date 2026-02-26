@@ -8,7 +8,10 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
-export default function maintenanceWindowEventsTests({ loadTestFile, getService }: FtrProviderContext) {
+export default function maintenanceWindowEventsTests({
+  loadTestFile,
+  getService,
+}: FtrProviderContext) {
   describe('Maintenance Window - Group 16 (Events Generation)', () => {
     before(async () => {
       await setupSpacesAndUsers(getService);

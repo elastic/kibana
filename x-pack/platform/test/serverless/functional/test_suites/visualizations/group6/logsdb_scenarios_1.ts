@@ -230,9 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await retry.waitFor('lens flyout', async () => {
             const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-            return (
-              dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB'
-            );
+            return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB';
           });
 
           await common.navigateToApp('lens');

@@ -8,7 +8,10 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
-export default function maintenanceWindowExternalTests({ loadTestFile, getService }: FtrProviderContext) {
+export default function maintenanceWindowExternalTests({
+  loadTestFile,
+  getService,
+}: FtrProviderContext) {
   describe('Maintenance Window - Group 14 (External APIs)', () => {
     before(async () => {
       await setupSpacesAndUsers(getService);
@@ -18,12 +21,30 @@ export default function maintenanceWindowExternalTests({ loadTestFile, getServic
       await tearDown(getService);
     });
 
-    loadTestFile(require.resolve('../../../group3/tests/maintenance_window/external/get_maintenance_window'));
-    loadTestFile(require.resolve('../../../group3/tests/maintenance_window/external/create_maintenance_window'));
-    loadTestFile(require.resolve('../../../group3/tests/maintenance_window/external/delete_maintenance_window'));
-    loadTestFile(require.resolve('../../../group3/tests/maintenance_window/external/archive_maintenance_window'));
-    loadTestFile(require.resolve('../../../group3/tests/maintenance_window/external/unarchive_maintenance_window'));
-    loadTestFile(require.resolve('../../../group3/tests/maintenance_window/external/update_maintenance_window'));
-    loadTestFile(require.resolve('../../../group3/tests/maintenance_window/external/find_maintenance_window'));
+    loadTestFile(
+      require.resolve('../../../group3/tests/maintenance_window/external/get_maintenance_window')
+    );
+    loadTestFile(
+      require.resolve('../../../group3/tests/maintenance_window/external/create_maintenance_window')
+    );
+    loadTestFile(
+      require.resolve('../../../group3/tests/maintenance_window/external/delete_maintenance_window')
+    );
+    loadTestFile(
+      require.resolve(
+        '../../../group3/tests/maintenance_window/external/archive_maintenance_window'
+      )
+    );
+    loadTestFile(
+      require.resolve(
+        '../../../group3/tests/maintenance_window/external/unarchive_maintenance_window'
+      )
+    );
+    loadTestFile(
+      require.resolve('../../../group3/tests/maintenance_window/external/update_maintenance_window')
+    );
+    loadTestFile(
+      require.resolve('../../../group3/tests/maintenance_window/external/find_maintenance_window')
+    );
   });
 }

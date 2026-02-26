@@ -8,11 +8,11 @@
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = await readConfigFile(require.resolve('../config.base'));
+  const baseConfig = await readConfigFile(require.resolve('../config.base.ts'));
 
   return {
     ...baseConfig.getAll(),
-    testFiles: [require.resolve('./index')],
+    testFiles: [require.resolve('.')],
     junit: {
       reportName: 'X-Pack Cloud Security Posture Functional Tests - Group 1 (Rules)',
     },
