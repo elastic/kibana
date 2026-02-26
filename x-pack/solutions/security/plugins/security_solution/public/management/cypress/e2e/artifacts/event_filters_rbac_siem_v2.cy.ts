@@ -9,8 +9,9 @@ import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_pa
 import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
 describe(
-  'Event filters RBAC',
+  'Event filters RBAC (siemV2)',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
-
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('eventFilters'))
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('eventFilters'), {
+    siemVersionFilter: (versions) => versions.filter((v) => v === 'siemV2'),
+  })
 );

@@ -46,7 +46,8 @@ const getSpecFileWeight = (filePath: string): number => {
     const hasSiemVersionFilter = content.includes('siemVersionFilter');
 
     for (const [runner, weight] of Object.entries(DYNAMIC_RUNNER_WEIGHTS)) {
-      const occurrences = content.split(runner).length - 1;
+      const callPattern = `${runner}(`;
+      const occurrences = content.split(callPattern).length - 1;
       if (occurrences > 0) {
         const effectiveWeight =
           hasSiemVersionFilter && runner in FILTERED_RUNNER_WEIGHTS
