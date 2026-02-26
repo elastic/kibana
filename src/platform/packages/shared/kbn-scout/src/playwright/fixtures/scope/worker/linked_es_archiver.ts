@@ -13,26 +13,30 @@ import { coreWorkerFixtures } from './core_fixtures';
 import { getLinkedEsClient, getLinkedEsArchiver } from '../../../../common/services';
 import type { EsArchiverFixture } from './es_archiver';
 
-export interface LinkedEsFixtures {
-  linkedEsClient: Client;
-  linkedEsArchiver: EsArchiverFixture;
+export interface LinkedProjectFixture {
+  esClient: Client;
+  esArchiver: EsArchiverFixture;
 }
 
-export const linkedEsFixtures = coreWorkerFixtures.extend<{}, LinkedEsFixtures>({
-  linkedEsClient: [
+export const linkedEsFixtures = coreWorkerFixtures.extend<
+  {},
+  { linkedProject: LinkedProjectFixture }
+>({
+  /**
+   * Provides ES client and esArchiver for the linked CPS project.
+   * Usage in tests: `linkedProject.esArchiver.loadIfNeeded(...)` or `linkedProject.esClient`.
+   */
+  linkedProject: [
     ({ config, log }, use) => {
-      use(getLinkedEsClient(config, log));
-    },
-    { scope: 'worker' },
-  ],
-
-  linkedEsArchiver: [
-    ({ log, linkedEsClient, kbnClient }, use) => {
-      const archiver = getLinkedEsArchiver(linkedEsClient, kbnClient, log);
+      const esClient = getLinkedEsClient(config, log);
+      const archiver = getLinkedEsArchiver(esClient, log);
       const loadIfNeeded = async (name: string, performance?: LoadActionPerfOptions | undefined) =>
-        archiver!.loadIfNeeded(name, performance);
+        archiver.loadIfNeeded(name, performance);
 
-      use({ loadIfNeeded });
+      use({
+        esClient,
+        esArchiver: { loadIfNeeded },
+      });
     },
     { scope: 'worker' },
   ],
