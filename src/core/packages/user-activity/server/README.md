@@ -82,3 +82,17 @@ The following context is automatically added to every log entry by Kibana's HTTP
 | `session.id` | Session ID |
 | `kibana.space.id` | Current space ID |
 | `http.request.referrer` | Referrer |
+
+## Log schema
+
+Here's the current schema reference: [`docs/reference/user-activity.md`](../../../../../docs/reference/user-activity.md#logs-schema).
+
+Some of the fields in the schema come from:
+
+- `trackUserAction()` params (for example `message`, `event.*`, and `object.*`)
+- Injected context (for example `user.*`, `session.*`, `client.*`, `kibana.space.id`, and `http.request.referrer`)
+- Fields automatically added by the logging system / JSON layout (for example `@timestamp`)
+
+> **Important**
+>
+> If you need to extend this schema, reach out to the Core team (`@elastic/kibana-core`).
