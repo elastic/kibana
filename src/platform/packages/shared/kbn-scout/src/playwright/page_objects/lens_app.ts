@@ -204,6 +204,10 @@ export class LensApp {
     return this.page.getByTestId('applyFlyoutButton');
   }
 
+  async clickOnFlyoutCancelButton() {
+    await this.page.getByTestId('cancelFlyoutButton').click();
+  }
+
   async clickOnSecondaryFlyoutBackButton() {
     await this.page.getByTestId('lns-indexPattern-dimensionContainerClose').click();
   }

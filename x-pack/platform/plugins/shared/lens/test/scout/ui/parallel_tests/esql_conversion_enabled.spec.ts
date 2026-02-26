@@ -73,7 +73,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
             if (await lens.getApplyFlyoutButton().isDisabled()) {
               return true;
             }
-            await lens.clickOnSecondaryFlyoutBackButton();
+            await lens.clickOnFlyoutCancelButton();
             return false;
           },
           {
