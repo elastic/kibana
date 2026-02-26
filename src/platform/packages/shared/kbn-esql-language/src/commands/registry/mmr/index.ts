@@ -29,10 +29,10 @@ export const mmrCommand: ICommand = {
     }),
     declaration: 'MMR [<<query vector>>] ON <<field>> LIMIT <limit> [WITH {<<options>>}]',
     examples: [
-      'FROM test | EVAL dense_embedding=[0.5, 0.4, 0.3, 0.2]::dense_vector | MMR ON dense_embedding LIMIT 10',
-      'FROM movies | MMR [0.5, 0.4, 0.3, 0.2]::dense_vector ON genre LIMIT 10 WITH { "lambda": 0.7 }',
+      'FROM test | EVAL dense_embedding=[0.5, 0.4, 0.3, 0.2]::dense_vector | LIMIT 10 | MMR ON dense_embedding LIMIT 10',
+      'FROM movies | LIMIT 10 | MMR [0.5, 0.4, 0.3, 0.2]::dense_vector ON genre LIMIT 10 WITH { "lambda": 0.7 }',
     ],
     preview: false,
-    hidden: false,
+    hidden: true,
   },
 };
