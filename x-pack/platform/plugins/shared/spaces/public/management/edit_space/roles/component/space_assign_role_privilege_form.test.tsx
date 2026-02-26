@@ -322,8 +322,7 @@ describe('PrivilegesRolesForm', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/253663
-  describe.skip('applying custom privileges', () => {
+  describe('applying custom privileges', () => {
     it('for a selection of roles pre-assigned to a space, the first encountered privilege with a custom privilege is used as the starting point', async () => {
       getRolesSpy.mockResolvedValue([]);
       getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
@@ -466,6 +465,13 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
+      await waitFor(() =>
+        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        )
+      );
+
       await user.click(screen.getByTestId('custom-privilege-button'));
 
       expect(
@@ -523,6 +529,13 @@ describe('PrivilegesRolesForm', () => {
       renderPrivilegeRolesForm({
         preSelectedRoles: roles,
       });
+
+      await waitFor(() =>
+        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        )
+      );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
