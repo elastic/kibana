@@ -8,8 +8,8 @@
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-
-import { MANAGEMENT_APP_ID } from '../common/constants';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import { MANAGEMENT_APP_PATH } from '../common/constants';
 
 export function registerLocators(share: SharePluginSetup) {
   share.url.locators.create<SerializableRecord>(new SearchInferenceEndpointLocatorDefinition());
@@ -18,8 +18,8 @@ export function registerLocators(share: SharePluginSetup) {
 class SearchInferenceEndpointLocatorDefinition implements LocatorDefinition<SerializableRecord> {
   public readonly getLocation = async () => {
     return {
-      app: 'management',
-      path: `/ml/${MANAGEMENT_APP_ID}`,
+      app: MANAGEMENT_APP_ID,
+      path: MANAGEMENT_APP_PATH,
       state: {},
     };
   };

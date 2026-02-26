@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const PLUGIN_ID = 'searchInferenceEndpoints';
 export const PLUGIN_NAME = 'Inference Endpoints';
 export const MANAGEMENT_APP_ID = 'inference_endpoints';
+export const MANAGEMENT_APP_PATH = `/ml/${MANAGEMENT_APP_ID}`;
 
 export const PLUGIN_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.inferenceEndpointsTitle',
