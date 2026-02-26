@@ -265,19 +265,31 @@ const DashboardOverflowKeyPadSection: React.FC = () => (
 export function getDashboardListingHeaderAppActionsConfig(
   onCreateDashboard: () => void
 ): ChromeHeaderAppActionsConfig {
+  const primaryActionButtonCss = css`
+  background-color: transparent !important;
+  height: 28px !important;
+  margin-left: 4px;
+`;
   return {
-    secondaryActions: [
-      <EuiButtonIcon
+    primaryActions: [
+      <EuiButton
         key="listing-new-dashboard"
-        size="xs"
+        css={primaryActionButtonCss}
+        size="s"
+        minWidth={false}
         color="text"
-        iconType="plusInCircle"
+        iconType="plus"
+        iconSize="s"
         onClick={onCreateDashboard}
         data-test-subj="headerGlobalNav-appActionsNewDashboardButton"
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.newAriaLabel', {
           defaultMessage: 'New',
         })}
-      />,
+      >
+        {i18n.translate('core.ui.chrome.headerGlobalNav.newButton', {
+          defaultMessage: 'New',
+        })}
+      </EuiButton>
     ],
   };
 }

@@ -163,11 +163,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   > = (props) => (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        {isServerless ? (
-          <EuiButtonEmpty {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
-        ) : (
-          <EuiButton {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
-        )}
+        <EuiButtonEmpty {...props} data-test-subj="observabilityAiAssistantAppNavControlButton" />
       </EuiShowFor>
       <EuiShowFor sizes={['xs', 's']}>
         <EuiButtonIcon
@@ -206,7 +202,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
           }}
           color="primary"
           size="s"
-          iconType={AssistantIcon}
+          iconType="{AssistantIcon}"
           isLoading={chatService.loading}
         >
           {i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
