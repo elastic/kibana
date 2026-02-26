@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Visualizations - Group 2 (agg-based: gauge, goal, table)', function () {
+  describe('Visualizations - Group 9', function () {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./open_in_lens/agg_based'));

@@ -13,7 +13,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/esql', function () {
+  describe('discover/esql_4', function () {
     before(async function () {
       await browser.setWindowSize(1600, 1200);
     });
@@ -24,6 +24,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_esql_columns'));
+    loadTestFile(require.resolve('./_esql_controls'));
   });
 }

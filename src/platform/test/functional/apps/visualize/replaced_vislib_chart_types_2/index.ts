@@ -41,7 +41,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.refresh();
     });
 
-    loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
-    loadTestFile(require.resolve('./_timelion'));
+    loadTestFile(require.resolve('./_point_series_options'));
+    loadTestFile(require.resolve('./_vertical_bar_chart'));
   });
 }

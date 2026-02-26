@@ -70,6 +70,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('./top_n'));
+    loadTestFile(require.resolve('./gauge'));
+    loadTestFile(require.resolve('./timeseries'));
   });
 }

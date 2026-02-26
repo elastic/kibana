@@ -76,10 +76,10 @@ enabled:
   - src/platform/test/functional/apps/dashboard/esql_controls/config.ts
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
-  - src/platform/test/functional/apps/discover/esql/config.ts
   - src/platform/test/functional/apps/discover/esql_1/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/esql_3/config.ts
+  - src/platform/test/functional/apps/discover/esql_4/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid2/config.ts
@@ -101,13 +101,13 @@ enabled:
   - src/platform/test/functional/apps/discover/query_mode_esql_default/config.ts
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
-  - src/platform/test/functional/apps/discover/tabs2_1/config.ts
-  - src/platform/test/functional/apps/discover/tabs2_2/config.ts
-  - src/platform/test/functional/apps/discover/tabs2_3/config.ts
   - src/platform/test/functional/apps/discover/tabs3/config.ts
   - src/platform/test/functional/apps/discover/tabs4/config.ts
   - src/platform/test/functional/apps/discover/tabs5/config.ts
   - src/platform/test/functional/apps/discover/tabs6/config.ts
+  - src/platform/test/functional/apps/discover/tabs7/config.ts
+  - src/platform/test/functional/apps/discover/tabs8/config.ts
+  - src/platform/test/functional/apps/discover/tabs9/config.ts
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
@@ -129,9 +129,9 @@ enabled:
   - src/platform/test/functional/apps/visualize/group9/config.ts
   - src/platform/test/functional/apps/visualize/group10/config.ts
   - src/platform/test/functional/apps/visualize/group11/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/config.ts
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/functional/firefox/console.config.ts
   - src/platform/test/functional/firefox/dashboard.config.ts
@@ -272,14 +272,14 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group13/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
   - x-pack/platform/test/functional/apps/lens/group15/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_1/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_2/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_3/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based/config.ts
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb_4/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_1/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_2/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_3/config.ts
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based_4/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/platform/test/functional/apps/license_management/config.ts
   - x-pack/platform/test/functional/apps/logstash/config.ts

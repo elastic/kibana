@@ -6,20 +6,18 @@
  */
 
 import type { EsArchiver } from '@kbn/es-archiver';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
+export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);
+  const { timePicker } = getPageObjects(['timePicker']);
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens serverless - group 1 - subgroup 6 (logsdb scenarios 3-4)', function () {
-    this.tags(['esGate']);
-
+  describe('lens app - Agg based Vis Open in Lens', () => {
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -41,7 +39,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
-      await kibanaServer.savedObjects.cleanStandardList();
       try {
         config.get('esTestCluster.ccs');
         remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
@@ -55,23 +52,24 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       }
 
       await esNode.load(esArchive);
+      // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
       });
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await esArchiver.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('../group6/logsdb_scenarios_1.ts'));
+    loadTestFile(require.resolve('./heatmap'));
+    loadTestFile(require.resolve('./navigation'));
   });
-};
+}

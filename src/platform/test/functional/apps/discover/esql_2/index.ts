@@ -24,6 +24,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_index_editor'));
+    loadTestFile(require.resolve('./_esql_view'));
   });
 }

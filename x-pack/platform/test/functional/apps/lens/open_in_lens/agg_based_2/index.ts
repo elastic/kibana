@@ -69,7 +69,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('./goal'));
-    loadTestFile(require.resolve('./table'));
+    loadTestFile(require.resolve('./xy'));
+    loadTestFile(require.resolve('./gauge'));
   });
 }

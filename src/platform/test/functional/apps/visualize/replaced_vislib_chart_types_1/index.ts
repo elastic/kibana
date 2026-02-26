@@ -41,7 +41,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.refresh();
     });
 
-    loadTestFile(require.resolve('./_point_series_options'));
-    loadTestFile(require.resolve('./_vertical_bar_chart'));
+    // Test replaced vislib chart types
+    loadTestFile(require.resolve('./_area_chart'));
+    loadTestFile(require.resolve('./_line_chart_split_series'));
+    loadTestFile(require.resolve('./_line_chart_split_chart'));
+    loadTestFile(require.resolve('../group8/_pie_chart'));
+    loadTestFile(require.resolve('../group2/_heatmap_chart'));
   });
 }

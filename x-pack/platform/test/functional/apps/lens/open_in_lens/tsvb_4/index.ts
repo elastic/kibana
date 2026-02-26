@@ -17,7 +17,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - Agg based Vis Open in Lens', () => {
+  describe('lens app - TSVB Open in Lens', () => {
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -52,12 +52,13 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       }
 
       await esNode.load(esArchive);
-      // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
+        // changing the timepicker default here saves us from having to set it in Discover (~8s)
+        // The TSVB tests are using a slightly difference end date, so it needs to be set manually here
+        'timepicker:timeDefaults': `{ "from": "${timePicker.defaultStartTime}", "to": "Sep 22, 2015 @ 18:31:44.000" }`,
       });
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
@@ -69,7 +70,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('./pie'));
-    loadTestFile(require.resolve('./metric'));
+    loadTestFile(require.resolve('./table'));
   });
 }

@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const security = getService('security');
   const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
 
-  describe('discover/tabs2_2', function () {
+  describe('discover/tabs8', function () {
     before(async function () {
       await browser.setWindowSize(1200, 1200);
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);

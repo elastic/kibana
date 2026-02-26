@@ -6,18 +6,20 @@
  */
 
 import type { EsArchiver } from '@kbn/es-archiver';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
+export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext) => {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { timePicker } = getPageObjects(['timePicker']);
+  const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - TSVB Open in Lens', () => {
+  describe('Visualizations - Group 12', function () {
+    this.tags(['esGate']);
+
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -39,6 +41,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     before(async () => {
       log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
+      await kibanaServer.savedObjects.cleanStandardList();
       try {
         config.get('esTestCluster.ccs');
         remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
@@ -55,22 +58,20 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
-        // changing the timepicker default here saves us from having to set it in Discover (~8s)
-        // The TSVB tests are using a slightly difference end date, so it needs to be set manually here
-        'timepicker:timeDefaults': `{ "from": "${timePicker.defaultStartTime}", "to": "Sep 22, 2015 @ 18:31:44.000" }`,
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await esArchiver.unload(esArchive);
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./metric'));
+    loadTestFile(require.resolve('../group6/logsdb_scenarios_2.ts'));
   });
-}
+};
