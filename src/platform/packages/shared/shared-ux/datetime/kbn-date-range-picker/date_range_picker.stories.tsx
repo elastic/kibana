@@ -23,11 +23,11 @@ const meta: Meta<DateRangePickerProps> = {
   component: DateRangePicker,
   argTypes: {
     onChange: { action: 'onChange' },
-    _onInputChange: { action: '_onInputChange' },
+    onInputChange: { action: 'onInputChange' },
   },
   args: {
     onChange: action('onChange'),
-    _onInputChange: action('_onInputChange'),
+    onInputChange: action('onInputChange'),
   },
 };
 
@@ -70,7 +70,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
   const [invalid, setInvalid] = useState<boolean>(false);
   const [recents, setRecents] = useState<TimeRangeBoundsOption[]>([]);
   const [presets, setPresets] = useState<TimeRangeBoundsOption[]>(props.presets ?? []);
-  const { onChange, onPresetSave, onPresetDelete, _onInputChange, ...rest } = props;
+  const { onChange, onPresetSave, onPresetDelete, onInputChange, ...rest } = props;
 
   const handleOnChange = (args: DateRangePickerOnChangeProps) => {
     setInvalid(args.isInvalid);
@@ -112,9 +112,9 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
   const handleInputChange = useCallback(
     (value: string) => {
       setInvalid(false);
-      _onInputChange?.(value);
+      onInputChange?.(value);
     },
-    [_onInputChange]
+    [onInputChange]
   );
 
   return (
@@ -124,7 +124,7 @@ function StatefulDateRangePicker(props: DateRangePickerProps) {
       {...rest}
       presets={presets}
       onChange={handleOnChange}
-      _onInputChange={handleInputChange}
+      onInputChange={handleInputChange}
       onPresetSave={onPresetSave ? handlePresetSave : undefined}
       onPresetDelete={onPresetDelete ? handlePresetDelete : undefined}
     />
