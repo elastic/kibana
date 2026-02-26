@@ -48,7 +48,7 @@ validation against the vendor API.
   some params in third-party docs may be outdated or unavailable via MCP)
 - **Parameter descriptions**: Every workflow input has a clear `description`. For **query/search** parameters, state
   the **vendor-specific format** concisely (e.g. Zendesk `field:value`, JQL, Lucene) and whether it's free text, a
-  DSL, or both.
+  DSL, or both. For optional params with defaults or fixed options, name the default and/or list allowed values.
 - **Optional params**: For optional inputs with a default, name the default in the description. For enum-like or
   constrained options, list allowed values or use a **choice** type in the workflow with **options** so the AI and UI 
   get valid options.
@@ -101,21 +101,3 @@ Run when the user asks for **thorough** or **deep** validation. Same areas as th
    optional, types, constraints (enums, min/max, format). Report mismatches and suggest fixes.
 3. **Output shape**: Compare expected response shape to the actual API response in the docs — top-level shape,
    fields, maps/arrays, pagination fields. Report expected vs actual for any mismatch.
-
----
-
-## Tips
-
-1. **One source of truth for IDs** — Use the same connector ID everywhere: spec `metadata.id`, `iconType`,
-   `stackConnector(s).type`, ConnectorIconsMap. Search the codebase before adding.
-2. **Schema = UX** — Config fields need `.meta({ label, widget, placeholder/helpText })` or `UISchemas.*` so the
-   form is clear.
-3. **MCP names and params** — Verify tool names (often snake_case) via `listTools`; only pass params in the tool's
-   schema.
-4. **Workflow query param descriptions** — For search/query params, describe vendor-specific format and valid
-   operators; for optional params with defaults or fixed options, name the default and/or list allowed values.
-5. **OAuth** — Minimize user input: pre-fill tokenUrl/scope when fixed; use overrides.meta for labels.
-6. **Test before merge** — Run connector unit tests; confirm tool names and workflow step types so runtime errors
-   are caught early.
-7. **Connector spec** — Only set flags the platform or this connector use; avoid cargo-culting from other specs.
-8. **Auth** — Verify format in vendor docs; document or link where users get tokens.
