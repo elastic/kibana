@@ -92,6 +92,9 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
     closed_at_ms: {
       type: 'long',
     },
+    extended_fields: {
+      type: 'flattened',
+    },
     closed_by: {
       properties: {
         username: {

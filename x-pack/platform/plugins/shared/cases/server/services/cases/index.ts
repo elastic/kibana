@@ -7,6 +7,7 @@
 
 import type {
   Logger,
+  ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -17,8 +18,13 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import type { estypes } from '@elastic/elasticsearch';
+import type {
+  MappingRuntimeFields,
+  MappingRuntimeFieldType,
+} from '@elastic/elasticsearch/lib/api/types';
 import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 
 import type {
@@ -91,23 +97,91 @@ import {
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
+const EXTENDED_FIELD_TYPES = [
+  'keyword',
+  'boolean',
+  'date',
+  'ip',
+  'text',
+  'long',
+  'integer',
+  'float',
+] as const;
+
+const EXTENDED_FIELD_COUNT = 1000;
+
+const RUNTIME_TYPE_MAP: Record<string, MappingRuntimeFieldType> = {
+  keyword: 'keyword',
+  boolean: 'boolean',
+  date: 'date',
+  ip: 'ip',
+  text: 'keyword',
+  long: 'long',
+  integer: 'long',
+  float: 'double',
+};
+
+function generateExtendedFieldsRuntimeMappings(): MappingRuntimeFields {
+  const runtime: MappingRuntimeFields = {};
+
+  for (let i = 0; i < EXTENDED_FIELD_COUNT; i++) {
+    const dataType = EXTENDED_FIELD_TYPES[i % EXTENDED_FIELD_TYPES.length];
+    const fieldName = `field_${i}_as_${dataType}`;
+    const runtimeType = RUNTIME_TYPE_MAP[dataType];
+    const sourcePath = `params._source['cases']['extended_fields']['${fieldName}']`;
+
+    let emitExpression: string;
+    switch (dataType) {
+      case 'date':
+        emitExpression = `emit(ZonedDateTime.parse(v.toString()).toInstant().toEpochMilli())`;
+        break;
+      case 'boolean':
+        emitExpression = `emit(Boolean.parseBoolean(v.toString()))`;
+        break;
+      case 'long':
+      case 'integer':
+        emitExpression = `emit(((Number)v).longValue())`;
+        break;
+      case 'float':
+        emitExpression = `emit(((Number)v).doubleValue())`;
+        break;
+      default: // keyword, ip, text
+        emitExpression = `emit(v.toString())`;
+        break;
+    }
+
+    runtime[`cases.extended_runtime.${fieldName}`] = {
+      type: runtimeType,
+      script: {
+        source: `def v = ${sourcePath}; if (v != null) { ${emitExpression}; }`,
+      },
+    };
+  }
+
+  return runtime;
+}
+
 export class CasesService {
   private readonly log: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
+  private readonly esClient: ElasticsearchClient;
 
   constructor({
     log,
     unsecuredSavedObjectsClient,
     attachmentService,
+    esClient,
   }: {
     log: Logger;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
+    esClient: ElasticsearchClient;
   }) {
     this.log = log;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
+    this.esClient = esClient;
   }
 
   private buildCaseIdsAggs = (
@@ -749,6 +823,38 @@ export class CasesService {
       transformedAttributes.attributes.total_alerts = 0;
       transformedAttributes.attributes.total_comments = 0;
       transformedAttributes.attributes.total_events = 0;
+
+      transformedAttributes.attributes.extended_fields = {};
+
+      const typeOptions = ['keyword', 'boolean', 'date', 'ip', 'text', 'long', 'integer', 'float'];
+      const sampleIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1', '8.8.8.8', '255.255.255.0'];
+
+      for (let i = 0; i < 1000; i++) {
+        const mappingType = typeOptions[i % typeOptions.length];
+        const value: string | number | boolean =
+          mappingType === 'keyword'
+            ? `keyword_value_${i}`
+            : mappingType === 'boolean'
+            ? i % 2 === 0
+            : mappingType === 'date'
+            ? new Date(Date.now() - i * 86400000).toISOString()
+            : mappingType === 'ip'
+            ? sampleIps[i % sampleIps.length]
+            : mappingType === 'text'
+            ? `This is sample text content for field ${i}`
+            : mappingType === 'long'
+            ? i * 100000
+            : mappingType === 'integer'
+            ? i * 2
+            : i * 1.5; // float
+
+        transformedAttributes.attributes.extended_fields[`field_${i}_as_${mappingType}`] = value;
+      }
+
+      await this.esClient.indices.putMapping({
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        runtime: generateExtendedFieldsRuntimeMappings(),
+      });
 
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
