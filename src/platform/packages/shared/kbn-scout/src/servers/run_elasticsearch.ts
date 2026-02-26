@@ -17,8 +17,6 @@ import { resolve } from 'path';
 import Url from 'url';
 import type { Config } from './configs';
 
-const LINKED_PROJECT_PORT = 9230;
-
 interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom?: string;
@@ -208,11 +206,11 @@ function getESServerlessOptions(
       hostname: config.get('servers.kibana.hostname'),
       port: config.get('servers.kibana.port'),
     }),
-    ...(csp
+    ...(csp && config.get('servers.linkedElasticsearch.port')
       ? {
           linkedProject: {
             projectId: MOCK_IDP_UIAM_PROJECT_ID2,
-            port: LINKED_PROJECT_PORT,
+            port: config.get('servers.linkedElasticsearch.port') as number,
           },
         }
       : {}),

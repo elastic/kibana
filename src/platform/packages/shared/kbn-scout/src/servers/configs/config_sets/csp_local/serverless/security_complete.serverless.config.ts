@@ -7,11 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LINKED_CLUSTER_PORT_OFFSET } from '@kbn/es';
 import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
+  servers: {
+    ...uiamConfig.servers,
+    linkedElasticsearch: {
+      ...uiamConfig.servers.elasticsearch,
+      port: (uiamConfig.servers.elasticsearch.port as number) + LINKED_CLUSTER_PORT_OFFSET,
+    },
+  },
   esServerlessOptions: {
     uiam: true,
     csp: true,

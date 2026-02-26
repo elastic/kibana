@@ -17,8 +17,6 @@ import { schema } from './schema';
 import { formatCurrentDate, getProjectType, getOrganizationId } from './utils/common';
 import type { ScoutServerConfig, ScoutTestConfig } from '../../types';
 
-const LINKED_PROJECT_PORT = 9230;
-
 const $values = Symbol('values');
 
 export class Config {
@@ -137,14 +135,14 @@ export class Config {
         password: this.get('servers.kibana.password'),
       },
 
-      ...(this.get('esServerlessOptions.csp', false)
+      ...(this.get('servers.linkedElasticsearch.port')
         ? {
             linkedProject: {
               hosts: {
                 elasticsearch: Url.format({
-                  protocol: this.get('servers.elasticsearch.protocol'),
-                  hostname: this.get('servers.elasticsearch.hostname'),
-                  port: LINKED_PROJECT_PORT,
+                  protocol: this.get('servers.linkedElasticsearch.protocol'),
+                  hostname: this.get('servers.linkedElasticsearch.hostname'),
+                  port: this.get('servers.linkedElasticsearch.port'),
                 }),
               },
               auth: {

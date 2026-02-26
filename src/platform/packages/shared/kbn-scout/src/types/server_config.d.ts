@@ -14,6 +14,7 @@ export interface ScoutServerConfig {
   servers: {
     kibana: UrlParts;
     elasticsearch: UrlParts;
+    linkedElasticsearch?: UrlParts;
     fleet?: UrlParts;
   };
   dockerServers: any;

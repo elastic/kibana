@@ -200,6 +200,11 @@ describe('Config.getScoutTestConfig', () => {
           username: 'elastic_serverless',
           password: 'changeme',
         },
+        linkedElasticsearch: {
+          protocol: 'https',
+          hostname: 'localhost',
+          port: 9230,
+        },
         kibana: {
           protocol: 'http',
           hostname: 'localhost',
