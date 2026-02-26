@@ -88,12 +88,12 @@ export const getEntitiesIndexName = (entityType: EntityTypeOpenAPI, namespace: s
     definitionId: buildEntityDefinitionId(entityType, namespace),
   });
 
-/** Returns the Entity Store v2 latest index name for the given entity type and namespace. */
-export const getEntitiesIndexNameV2 = (entityType: EntityTypeOpenAPI, namespace: string) =>
+/** Returns the Entity Store v2 latest index name. Uses unified index (security_${namespace}) for v2. */
+export const getEntitiesIndexNameV2 = (_entityType: EntityTypeOpenAPI, namespace: string) =>
   entitiesIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_LATEST,
-    definitionId: buildEntityDefinitionId(entityType, namespace),
+    definitionId: `security_${namespace}`,
   });
 
 export function getEntitiesSnapshotIndexName(

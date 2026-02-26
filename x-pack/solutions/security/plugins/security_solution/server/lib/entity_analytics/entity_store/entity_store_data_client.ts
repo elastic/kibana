@@ -22,7 +22,7 @@ import type { HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/typ
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
-import { isEqual } from 'lodash/fp';
+import { isEqual, uniq } from 'lodash/fp';
 import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityStoreCapability, EntityDefinition } from '@kbn/entities-schema';
@@ -927,13 +927,23 @@ export class EntityStoreDataClient {
   }> {
     const { page, perPage, sortField, sortOrder, filterQuery, entityTypes } = params;
 
-    // All hosts and all users use entity store v2
+    // All hosts and all users use entity store v2 (unified index .entities.v2.latest.security_default)
     const useV2 = true;
     const getIndexName = useV2 ? getEntitiesIndexNameV2 : getEntitiesIndexName;
-    const index = entityTypes.map((type) => getIndexName(type, this.options.namespace));
+    const index = uniq(entityTypes.map((type) => getIndexName(type, this.options.namespace)));
     const from = (page - 1) * perPage;
     const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
-    const query = filterQuery ? JSON.parse(filterQuery) : undefined;
+    const parsedQuery = filterQuery ? JSON.parse(filterQuery) : undefined;
+
+    // When using unified v2 index, filter by entity type (entity.EngineMetadata.Type matches API entityTypes)
+    const entityTypeFilter =
+      useV2 && entityTypes.length > 0
+        ? { terms: { 'entity.EngineMetadata.Type': entityTypes } }
+        : undefined;
+    const query =
+      entityTypeFilter && parsedQuery
+        ? { bool: { must: [entityTypeFilter, parsedQuery] } }
+        : entityTypeFilter ?? parsedQuery;
 
     const response = await this.esClient.search<EntityRecord>({
       index,

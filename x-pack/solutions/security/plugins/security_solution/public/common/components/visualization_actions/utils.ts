@@ -20,6 +20,30 @@ const pageFilterFieldMap: Record<string, string> = {
   [SecurityPageName.users]: 'user',
 };
 
+const ENTITY_ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
+
+/**
+ * Creates a filter for entity store KPIs to restrict results to a specific entity type.
+ * Use filters (not query) because useLensAttributes overwrites query with globalQuery when applyGlobalQueriesAndFilters is true.
+ */
+export const getEntityTypeFilter = (entityType: 'host' | 'user'): Filter[] => [
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: ENTITY_ENGINE_METADATA_TYPE_FIELD,
+      params: { query: entityType },
+    },
+    query: {
+      match_phrase: {
+        [ENTITY_ENGINE_METADATA_TYPE_FIELD]: entityType,
+      },
+    },
+  },
+];
+
 export const getDetailsPageFilter = (pageName: string, detailName?: string): Filter[] => {
   const field = pageFilterFieldMap[pageName];
   return field && detailName

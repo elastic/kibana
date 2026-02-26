@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getEntityDefinitionId } from '../../../common/domain/definitions/registry';
 import { getEntityIndexPattern, ENTITY_LATEST, ENTITY_SCHEMA_VERSION_V2 } from '../constants';
 
 // Mostly copied from

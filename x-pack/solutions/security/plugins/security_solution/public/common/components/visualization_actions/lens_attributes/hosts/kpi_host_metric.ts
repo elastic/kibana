@@ -6,6 +6,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { getEntityTypeFilter } from '../../utils';
 
 const LAYER_ID = '416b6fad-1923-4f6a-a2df-b223bb287e30';
 const COLUMN_ID = 'b00c65ea-32be-4163-bfc8-f795b1ef9d06';
@@ -13,7 +14,7 @@ const DATA_VIEW_ID = 'entity-store-host-data-view';
 
 export const getKpiHostMetricLensAttributes = (spaceId?: string): LensAttributes => {
   const namespace = spaceId || 'default';
-  const entityStoreIndexPattern = `.entities.v2.latest.security_host_${namespace}`;
+  const entityStoreIndexPattern = `.entities.v2.latest.security_${namespace}`;
 
   // Ad-hoc data view refs must be in state.internalReferences so Lens does not try to load them as saved objects (SavedObjectNotFound)
   const internalReferences = [
@@ -61,7 +62,7 @@ export const getKpiHostMetricLensAttributes = (spaceId?: string): LensAttributes
           },
         },
       },
-      filters: [],
+      filters: getEntityTypeFilter('host'),
       query: { language: 'kuery', query: '' },
       visualization: {
         accessor: COLUMN_ID,

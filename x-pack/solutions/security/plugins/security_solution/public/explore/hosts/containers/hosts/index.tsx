@@ -80,8 +80,8 @@ const mapEntityToHostsEdge = (entity: HostEntity): HostsEdges => {
   return { node, cursor: { value: cursorValue, tiebreaker: null } };
 };
 
-const ENTITY_STORE_HOST_INDEX_PATTERN_V2 = (namespace: string) =>
-  `.entities.v2.latest.security_host_${namespace}`;
+const ENTITY_STORE_INDEX_PATTERN_V2 = (namespace: string) =>
+  `.entities.v2.latest.security_${namespace}`;
 
 export const useAllHost = ({
   endDate,
@@ -160,9 +160,9 @@ export const useAllHost = ({
       ? {
           dsl: data.inspect.dsl ?? [],
           response: data.inspect.response ?? [],
-          indexPattern: [ENTITY_STORE_HOST_INDEX_PATTERN_V2(namespace)],
+          indexPattern: [ENTITY_STORE_INDEX_PATTERN_V2(namespace)],
         }
-      : { dsl: [], response: [], indexPattern: [ENTITY_STORE_HOST_INDEX_PATTERN_V2(namespace)] };
+      : { dsl: [], response: [], indexPattern: [ENTITY_STORE_INDEX_PATTERN_V2(namespace)] };
 
     return {
       endDate,

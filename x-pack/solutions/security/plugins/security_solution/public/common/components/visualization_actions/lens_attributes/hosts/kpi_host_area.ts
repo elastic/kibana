@@ -7,6 +7,7 @@
 
 import { UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
+import { getEntityTypeFilter } from '../../utils';
 
 const columnTimestamp = '5eea817b-67b7-4268-8ecb-7688d1094721';
 const columnHostName = 'b00c65ea-32be-4163-bfc8-f795b1ef9d06';
@@ -17,7 +18,7 @@ const DATA_VIEW_ID = 'entity-store-host-data-view';
 export const getKpiHostAreaLensAttributes = (spaceId?: string): GetLensAttributes => {
   return ({ extraOptions }) => {
     const namespace = spaceId || extraOptions?.spaceId || 'default';
-    const entityStoreIndexPattern = `.entities.v2.latest.security_host_${namespace}`;
+    const entityStoreIndexPattern = `.entities.v2.latest.security_${namespace}`;
 
     // Ad-hoc data view refs must be in state.internalReferences so Lens does not try to load them as saved objects (SavedObjectNotFound)
     const internalReferences = [
@@ -74,7 +75,7 @@ export const getKpiHostAreaLensAttributes = (spaceId?: string): GetLensAttribute
             },
           },
         },
-        filters: [],
+        filters: getEntityTypeFilter('host'),
         query: { language: 'kuery', query: '' },
         visualization: {
           axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: false },
