@@ -19,23 +19,24 @@ export interface HardCase {
  * Add new cases here and they will automatically be picked up by the eval suite.
  */
 export const hardCases: HardCase[] = [
-  {
-    id: 'vague-suspicious-activity',
-    prompt: 'Detect suspicious activity',
-    output: {
-      id: 'generic-suspicious-activity',
-      name: 'Generic Suspicious Activity',
-      description: 'Detects suspicious activity',
-      query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
-      threat: [],
-      severity: 'low',
-      tags: [],
-      riskScore: 21,
-      from: 'now-5m',
-      category: 'unknown',
-    },
-    metadata: { testType: 'vague-prompt', difficulty: 'hard' },
-  },
+  // Placeholder expected output — not a useful benchmark until a real reference query is provided
+  // {
+  //   id: 'vague-suspicious-activity',
+  //   prompt: 'Detect suspicious activity',
+  //   output: {
+  //     id: 'generic-suspicious-activity',
+  //     name: 'Generic Suspicious Activity',
+  //     description: 'Detects suspicious activity',
+  //     query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
+  //     threat: [],
+  //     severity: 'low',
+  //     tags: [],
+  //     riskScore: 21,
+  //     from: 'now-5m',
+  //     category: 'unknown',
+  //   },
+  //   metadata: { testType: 'vague-prompt', difficulty: 'hard' },
+  // },
   {
     id: 'complex-apt-zero-day',
     prompt:
@@ -52,6 +53,6 @@ export const hardCases: HardCase[] = [
       from: 'now-5m',
       category: 'execution',
     },
-    metadata: { testType: 'complex-prompt', difficulty: 'very-hard' },
+    metadata: { testType: 'complex-prompt', difficulty: 'hard' },
   },
 ];

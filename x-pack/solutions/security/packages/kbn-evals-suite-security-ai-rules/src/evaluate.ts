@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Phoenix executor is omitted intentionally — this suite runs against a local
+// Kibana instance, not an external Phoenix/Arize tracing endpoint.
 import { evaluate as base } from '@kbn/evals';
 import { SecurityRuleGenerationClient } from './chat_client';
 

@@ -138,7 +138,7 @@ Validates that the generated ES|QL query is structurally sound:
 
 ### 2. Field Coverage (CODE — 0–1 scale)
 
-Measures the percentage of required rule fields that are present in the generated rule. Required fields: `name`, `description`, `query`, `severity`, `tags`.
+Measures the percentage of required rule fields that are present in the generated rule. Required fields: `name`, `description`, `query`, `severity`, `tags`, `riskScore`.
 
 **Interpretation**:
 - `1.0` = All required fields present
@@ -361,7 +361,7 @@ GET .kibana-evaluations/_search
 
 ## Dataset
 
-The evaluation dataset includes 8 Windows detection rules covering:
+The evaluation dataset includes 31 examples (8 sample rules + 18 standard pairs + 5 complex pairs) covering:
 
 1. **Collection**: File encryption with WinRAR/7z
 2. **Credential Access**: LSASS access, Mimikatz usage

@@ -17,7 +17,7 @@ import { createEsClientForTesting } from '@kbn/test';
 import { EvaluationScoreRepository, type EvaluationScoreDocument } from '../../utils/score_repository';
 import { resolveEvalSuites } from '../suites';
 
-const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9220';
+const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9200';
 
 const EXECUTORS = ['phoenix', 'kibana'] as const;
 type Executor = (typeof EXECUTORS)[number];
@@ -56,19 +56,17 @@ const colourScore = (value: number): string => {
   return chalk.red(pct);
 };
 
-function buildSummaryTable(scores: EvaluationScoreDocument[]): string {
-  const evalNames = [...new Set(scores.map((d) => d.evaluator.name))].sort();
+function buildDatasetTable(datasetScores: EvaluationScoreDocument[]): string {
+  const evalNames = [...new Set(datasetScores.map((d) => d.evaluator.name))].sort();
 
-  // Group docs by model
   const byModel = new Map<string, EvaluationScoreDocument[]>();
-  for (const doc of scores) {
+  for (const doc of datasetScores) {
     const modelId = doc.task.model.id ?? doc.task.model.family;
     if (!byModel.has(modelId)) byModel.set(modelId, []);
     byModel.get(modelId)!.push(doc);
   }
 
   const modelIds = [...byModel.keys()].sort();
-
   const headers = ['Model', ...evalNames];
 
   const dataRows = modelIds.map((modelId) => {
@@ -91,6 +89,19 @@ function buildSummaryTable(scores: EvaluationScoreDocument[]): string {
   };
 
   return table([headers, ...dataRows], tableConfig);
+}
+
+function buildSummaryTables(scores: EvaluationScoreDocument[]): Array<{ name: string; table: string }> {
+  const byDataset = new Map<string, EvaluationScoreDocument[]>();
+  for (const doc of scores) {
+    const key = doc.example.dataset.name;
+    if (!byDataset.has(key)) byDataset.set(key, []);
+    byDataset.get(key)!.push(doc);
+  }
+
+  return [...byDataset.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([name, datasetScores]) => ({ name, table: buildDatasetTable(datasetScores) }));
 }
 
 async function printSummary(
@@ -119,8 +130,12 @@ async function printSummary(
   ].join('   ');
 
   log.info(`\n${header}\n`);
-  log.info(chalk.bold.blue('═══ MODEL COMPARISON ═══'));
-  log.info(`\n${buildSummaryTable(scores)}`);
+
+  const datasetTables = buildSummaryTables(scores);
+  for (const { name, table: tableStr } of datasetTables) {
+    log.info(chalk.bold.blue(`═══ ${name} ═══`));
+    log.info(`\n${tableStr}`);
+  }
 }
 
 export const summaryCmd: Command<void> = {
