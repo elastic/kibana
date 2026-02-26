@@ -18,6 +18,8 @@ export interface QueryLink {
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */
   rule_backed?: boolean;
+  /** The deterministic ID of the Kibana rule associated with this query. */
+  rule_id: string;
 }
 
 export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name' | 'query'> & {
