@@ -19,12 +19,12 @@ const SYNTAX_ERRORS_TO_IGNORE = [
 const REPLACE_DEV = /,{0,1}(?<!\s)\s*DEV_\w+\s*/g;
 const REPLACE_ORPHAN_COMMA = /{, /g;
 
-export class ESQLErrorListener extends antlr4.ErrorListener<any> {
+export class ESQLErrorListener extends antlr4.ErrorListener<unknown> {
   protected errors: EditorError[] = [];
 
   syntaxError(
-    recognizer: antlr4.Recognizer<any>,
-    offendingSymbol: any,
+    recognizer: antlr4.Recognizer<unknown>,
+    offendingSymbol: unknown,
     line: number,
     column: number,
     message: string,
@@ -44,7 +44,7 @@ export class ESQLErrorListener extends antlr4.ErrorListener<any> {
 
     const textMessage = `SyntaxError: ${message}`;
 
-    const tokenPosition = getPosition(offendingSymbol);
+    const tokenPosition = getPosition(offendingSymbol as antlr4.Token);
     const startColumn = offendingSymbol && tokenPosition ? tokenPosition.min + 1 : column + 1;
     const endColumn = offendingSymbol && tokenPosition ? tokenPosition.max + 1 : column + 2;
 

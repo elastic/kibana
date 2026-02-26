@@ -46,6 +46,13 @@ export interface SavedQuerySO {
   prebuilt?: boolean;
 }
 
+const RUN_QUERY_PERMISSION_DENIED = i18n.translate(
+  'xpack.osquery.savedQueryList.permissionDeniedRunTooltip',
+  {
+    defaultMessage: 'You do not have sufficient permissions to run this query.',
+  }
+);
+
 interface PlayButtonProps {
   disabled: boolean;
   savedQuery: SavedQuerySO;
@@ -80,8 +87,10 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
     [savedQuery]
   );
 
+  const tooltipContent = disabled ? RUN_QUERY_PERMISSION_DENIED : playText;
+
   return (
-    <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
+    <EuiToolTip position="top" content={tooltipContent}>
       <EuiButtonIcon
         color="primary"
         iconType="play"
@@ -155,13 +164,10 @@ const SavedQueriesPageComponent = () => {
   );
 
   const renderPlayAction = useCallback(
-    (item: SavedQuerySO) =>
-      permissions.runSavedQueries || permissions.writeLiveQueries ? (
-        <PlayButton savedQuery={item} disabled={false} />
-      ) : (
-        <></>
-      ),
-    [permissions.runSavedQueries, permissions.writeLiveQueries]
+    (item: SavedQuerySO) => (
+      <PlayButton savedQuery={item} disabled={!permissions.runSavedQueries} />
+    ),
+    [permissions.runSavedQueries]
   );
 
   const renderUpdatedAt = useCallback((updatedAt: any, item: any) => {

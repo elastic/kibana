@@ -47,11 +47,22 @@ interface WorkflowExecutionListItemProps {
   duration: number | null;
   executedBy?: string;
   triggeredBy?: string;
+  showExecutor?: boolean;
   selected?: boolean;
   onClick?: () => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
-  ({ status, isTestRun, startedAt, duration, executedBy, triggeredBy, selected, onClick }) => {
+  ({
+    status,
+    isTestRun,
+    startedAt,
+    duration,
+    executedBy,
+    triggeredBy,
+    showExecutor = false,
+    selected,
+    onClick,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
@@ -129,25 +140,27 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false} css={styles.executedByContainer}>
-                {executedBy && (
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="flexEnd"
-                    gutterSize="xs"
-                    wrap={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiAvatar name={executedBy} size="s" />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {executedBy}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
-              </EuiFlexItem>
+              {showExecutor && (
+                <EuiFlexItem grow={false} css={styles.executedByContainer}>
+                  {executedBy && (
+                    <EuiFlexGroup
+                      alignItems="center"
+                      justifyContent="flexEnd"
+                      gutterSize="xs"
+                      wrap={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiAvatar name={executedBy} size="s" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {executedBy}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false} css={styles.durationContainer} justifyContent="flexEnd">
                 {formattedDuration && (
                   <EuiFlexGroup
@@ -157,7 +170,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                     wrap={false}
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="clock" color="subdued" />
+                      <EuiIcon type="clock" color="subdued" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
