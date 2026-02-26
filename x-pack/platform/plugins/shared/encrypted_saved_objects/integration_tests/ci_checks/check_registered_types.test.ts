@@ -20,7 +20,12 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 21 as const;
+// To test for oauth_authorization_code feature flag enabled, bump this value to 21 and update L46 as:
+// root = createRootWithCorePlugins(
+//   { xpack: { actions: { auth: { oauth_authorization_code: { enabled: true } } } } },
+//   { oss: false }
+// );
+export const ESO_TYPES_COUNT = 19 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
