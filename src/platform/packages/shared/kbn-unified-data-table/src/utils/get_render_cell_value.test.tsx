@@ -739,14 +739,9 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": Array [
-              100,
-            ],
-          }
-        }
-      />
+      >
+        100
+      </span>
     `);
   });
 
@@ -839,14 +834,9 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": Array [
-              ".gz",
-            ],
-          }
-        }
-      />
+      >
+        .gz
+      </span>
     `);
 
     const componentWithDetails = shallow(
@@ -869,15 +859,9 @@ describe('Unified data table cell rendering', function () {
       >
         <EuiFlexItem>
           <DataTablePopoverCellValue>
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": Array [
-                    ".gz",
-                  ],
-                }
-              }
-            />
+            <span>
+              .gz
+            </span>
           </DataTablePopoverCellValue>
         </EuiFlexItem>
         <EuiFlexItem
@@ -942,12 +926,9 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithDataViewField).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "gif",
-          }
-        }
-      />
+      >
+        gif
+      </span>
     `);
     const componentWithCustomESQLField = shallow(
       <DataTableCellValue
@@ -963,12 +944,9 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithCustomESQLField).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": 350,
-          }
-        }
-      />
+      >
+        350
+      </span>
     `);
 
     expect(dataViewMock.fields.create).toHaveBeenCalledTimes(1);
@@ -996,12 +974,9 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithCustomESQLFieldOverride).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": 100,
-          }
-        }
-      />
+      >
+        100
+      </span>
     `);
 
     expect(dataViewMock.fields.create).toHaveBeenCalledTimes(2);

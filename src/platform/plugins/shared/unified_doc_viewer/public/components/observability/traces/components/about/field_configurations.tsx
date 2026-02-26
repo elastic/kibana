@@ -43,7 +43,7 @@ export const getSharedFieldConfigurations = (
   return {
     [SERVICE_NAME]: {
       title: fieldLabels.SERVICE_NAME_LABEL,
-      formatter: (value: unknown, formattedValue: string) => (
+      formatter: (value, formattedValue) => (
         <>
           <HighlightField value={value as string} formattedValue={formattedValue}>
             {({ content }) => (
@@ -71,7 +71,7 @@ export const getSharedFieldConfigurations = (
     },
     [TRACE_ID]: {
       title: fieldLabels.TRACE_ID_LABEL,
-      formatter: (value: unknown, formattedValue: string) => (
+      formatter: (value, formattedValue) => (
         <HighlightField value={value as string} formattedValue={formattedValue} />
       ),
     },
@@ -90,7 +90,7 @@ export const getSpanFieldConfigurations = (
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE]: {
       title: fieldLabels.SPAN_DESTINATION_SERVICE_RESOURCE_LABEL,
-      formatter: (value: unknown, formattedValue: string) => (
+      formatter: (value, formattedValue) => (
         <HighlightField value={value as string} formattedValue={formattedValue}>
           {({ content }) => (
             <DependencyNameLink

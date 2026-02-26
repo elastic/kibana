@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
@@ -18,11 +19,21 @@ import type {
   FieldFormatConvertFunction,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
+  ReactContextTypeOptions,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from './types';
-import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
+import {
+  htmlContentTypeSetup,
+  textContentTypeSetup,
+  reactContentTypeSetup,
+  TEXT_CONTEXT_TYPE,
+} from './content_types';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+  ReactContextTypeConvert,
+} from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
@@ -71,6 +82,8 @@ export abstract class FieldFormat {
    * @protected
    * have to remove the protected because of
    * https://github.com/Microsoft/TypeScript/issues/17293
+   * @deprecated Prefer implementing {@link reactConvert} for new formatters.
+   * htmlConvert is retained for server-side use (CSV, reporting) and backward compatibility.
    */
   htmlConvert: HtmlContextTypeConvert | undefined;
 
@@ -81,6 +94,13 @@ export abstract class FieldFormat {
    * https://github.com/Microsoft/TypeScript/issues/17293
    */
   textConvert: TextContextTypeConvert | undefined;
+
+  /**
+   * @property {reactConvert}
+   * @protected
+   * Override in subclasses to return native JSX instead of relying on the HTML fallback.
+   */
+  reactConvert: ReactContextTypeConvert | undefined;
 
   /**
    * @property {Function} - ref to child class
@@ -104,21 +124,30 @@ export abstract class FieldFormat {
   }
 
   /**
-   * Convert a raw value to a formatted string
-   * @param  {unknown} value
-   * @param  {string} [contentType=text] - optional content type, the only two contentTypes
-   *                                currently supported are "html" and "text", which helps
-   *                                formatters adjust to different contexts
-   * @return {string} - the formatted string, which is assumed to be html, safe for
-   *                    injecting into the DOM or a DOM attribute
+   * Convert a raw value to a formatted string or ReactNode.
+   *
+   * When contentType is 'react', returns a ReactNode for safe client-side rendering.
+   * For 'html' and 'text', returns a string.
+   *
    * @public
    */
+  convert(value: unknown, contentType: 'react', options?: ReactContextTypeOptions): ReactNode;
+  convert(
+    value: unknown,
+    contentType?: 'html' | 'text',
+    options?: HtmlContextTypeOptions | TextContextTypeOptions
+  ): string;
+  convert(
+    value: unknown,
+    contentType: FieldFormatsContentType,
+    options?: HtmlContextTypeOptions | TextContextTypeOptions | ReactContextTypeOptions
+  ): string | ReactNode;
   convert(
     value: unknown,
     contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE,
-    options?: HtmlContextTypeOptions | TextContextTypeOptions
-  ): string {
-    return this.getConverterFor(contentType).call(this, value, options);
+    options?: HtmlContextTypeOptions | TextContextTypeOptions | ReactContextTypeOptions
+  ): string | ReactNode {
+    return this.getConverterFor(contentType).call(this, value, options) as string | ReactNode;
   }
 
   /**
@@ -127,6 +156,9 @@ export abstract class FieldFormat {
    * @return {function} - a bound converter function
    * @public
    */
+  getConverterFor(contentType: 'react'): ReactContextTypeConvert;
+  getConverterFor(contentType?: 'html' | 'text'): HtmlContextTypeConvert | TextContextTypeConvert;
+  getConverterFor(contentType: FieldFormatsContentType): FieldFormatConvertFunction;
   getConverterFor(
     contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE
   ): FieldFormatConvertFunction {
@@ -203,13 +235,14 @@ export abstract class FieldFormat {
   }
 
   static from(convertFn: FieldFormatConvertFunction): FieldFormatInstanceType {
-    return createCustomFieldFormat(convertFn);
+    return createCustomFieldFormat(convertFn as TextContextTypeConvert);
   }
 
   setupContentType(): FieldFormatConvert {
     return {
       text: textContentTypeSetup(this, this.textConvert),
       html: htmlContentTypeSetup(this, this.htmlConvert),
+      react: reactContentTypeSetup(this, this.reactConvert),
     };
   }
 

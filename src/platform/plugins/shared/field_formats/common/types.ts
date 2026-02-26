@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { FieldFormat } from './field_format';
 import type { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
-export type FieldFormatsContentType = 'html' | 'text';
+export type FieldFormatsContentType = 'html' | 'text' | 'react';
 
 /**
  * Html converter options
@@ -45,15 +46,34 @@ export interface TextContextTypeOptions {
 export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
 
 /**
+ * React converter options (same shape as HtmlContextTypeOptions)
+ */
+export interface ReactContextTypeOptions {
+  field?: { name: string };
+  hit?: { highlight?: Record<string, string[]> };
+  skipFormattingInStringifiedJSON?: boolean;
+}
+
+/**
+ * To React converter function — returns ReactNode for safe client-side rendering
+ * @public
+ */
+export type ReactContextTypeConvert = (value: any, options?: ReactContextTypeOptions) => ReactNode;
+
+/**
  * Converter function
  * @public
  */
-export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
+export type FieldFormatConvertFunction =
+  | HtmlContextTypeConvert
+  | TextContextTypeConvert
+  | ReactContextTypeConvert;
 
 /** @public **/
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
   html: HtmlContextTypeConvert;
+  react?: ReactContextTypeConvert;
 }
 
 /** @public **/
