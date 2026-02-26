@@ -10,7 +10,7 @@
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
-  OnCancelContext,
+  BaseStepContext,
   ServerStepDefinition,
   StepHandlerContext,
 } from '@kbn/workflows-extensions/server';
@@ -52,8 +52,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     if (stepDefinition.onCancel) {
       const onCancelFn = stepDefinition.onCancel;
       (this as unknown as CancellableNode).onCancel = async () => {
-        const context = this.createOnCancelContext();
-        await onCancelFn(context);
+        await onCancelFn(this.createBaseContext());
       };
     }
   }
@@ -85,10 +84,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     }
   }
 
-  /**
-   * Create the lightweight context for onCancel handlers.
-   */
-  private createOnCancelContext(): OnCancelContext {
+  private createBaseContext(): BaseStepContext {
     return {
       contextManager: {
         getContext: () => this.stepExecutionRuntime.contextManager.getContext(),
@@ -117,35 +113,10 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
    */
   private createHandlerContext(input: unknown): StepHandlerContext {
     return {
+      ...this.createBaseContext(),
       input,
       rawInput: this.node.configuration.with || {},
       config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
-      contextManager: {
-        getContext: () => {
-          return this.stepExecutionRuntime.contextManager.getContext();
-        },
-        getScopedEsClient: () => {
-          return this.stepExecutionRuntime.contextManager.getEsClientAsUser();
-        },
-        renderInputTemplate: (value, additionalContext) => {
-          return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-            value,
-            additionalContext
-          );
-        },
-        getFakeRequest: () => {
-          return this.stepExecutionRuntime.contextManager.getFakeRequest();
-        },
-      },
-      logger: {
-        debug: (message, meta) => this.workflowLogger.logDebug(message, meta),
-        info: (message, meta) => this.workflowLogger.logInfo(message, meta),
-        warn: (message, meta) => this.workflowLogger.logWarn(message, meta),
-        error: (message, error) => this.workflowLogger.logError(message, error),
-      },
-      abortSignal: this.stepExecutionRuntime.abortController.signal,
-      stepId: this.node.stepId,
-      stepType: this.node.stepType,
     };
   }
 }

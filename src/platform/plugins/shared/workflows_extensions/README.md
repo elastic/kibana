@@ -874,7 +874,7 @@ const myStepDefinition = createServerStepDefinition({
 
 **Key points:**
 
-- `onCancel` receives a lightweight `OnCancelContext` with `logger`, `abortSignal`, `stepId`, `stepType`, and `contextManager`
+- `onCancel` receives a `BaseStepContext` with `logger`, `abortSignal`, `stepId`, `stepType`, and `contextManager`
 - Implementations must be **idempotent** — `onCancel` may be called more than once in edge cases
 - Errors thrown in `onCancel` are logged but do **not** disrupt the cancellation flow
 - Steps without `onCancel` are unaffected — no changes required for existing step implementations
