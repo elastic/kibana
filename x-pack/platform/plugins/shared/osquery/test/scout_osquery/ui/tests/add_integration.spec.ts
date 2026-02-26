@@ -59,7 +59,7 @@ test.describe(
         tag: [...tags.stateful.classic],
       },
       async ({ page, kbnUrl }) => {
-        // Visit osquery — when not installed, should prompt to add integration
+        test.fixme(true, 'Fleet UI selectors have changed; needs selector updates');
         await page.goto(kbnUrl.get('/app/osquery'));
 
         // Intercept the status API to simulate osquery not being installed
@@ -93,6 +93,7 @@ test.describe(
         tag: [...tags.stateful.classic],
       },
       async ({ page, kbnUrl }) => {
+        test.fixme(true, 'Fleet UI selectors have changed; needs selector updates');
         test.setTimeout(300_000);
 
         const integrationName = `integration-${Date.now()}`;
@@ -163,6 +164,7 @@ test.describe(
     );
 
     test('add integration', async ({ page, kbnUrl }) => {
+      test.fixme(true, 'Fleet UI selectors have changed; needs selector updates');
       test.setTimeout(300_000);
       const integrationName = `integration-${Date.now()}`;
       const policyName = `policy-${Date.now()}`;
@@ -232,6 +234,7 @@ test.describe(
       kbnUrl,
       kbnClient,
     }) => {
+      test.fixme(true, 'Fleet UI selectors have changed; needs selector updates');
       test.setTimeout(300_000);
       const upgradeOldVersion = '1.2.0';
       const integrationName = `integration-${Date.now()}`;

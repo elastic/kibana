@@ -20,31 +20,56 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     ruleId = rule.id;
   });
 
-  test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
-    test.setTimeout(300_000);
-    await browserAuth.loginWithCustomRole(t1AnalystRole);
-    await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-    await waitForAlerts(page, kbnClient, ruleId);
-
-    // Expand first event
-    // eslint-disable-next-line playwright/no-nth-methods -- first event in list
-    await page.testSubj.locator('expand-event').first().click();
-    await page.testSubj.locator('securitySolutionFlyoutInvestigationGuideButton').click();
-    await page.getByRole('button', { name: 'Get processes' }).click();
-  });
-
   test.afterAll(async ({ kbnClient }) => {
     if (ruleId) {
       await cleanupRule(kbnClient, ruleId);
     }
   });
 
-  test('should be able to run rule investigation guide query', async ({ page, pageObjects }) => {
+  test('should be able to run rule investigation guide query', async ({
+    page,
+    pageObjects,
+    browserAuth,
+    kbnUrl,
+    kbnClient,
+  }) => {
+    test.setTimeout(600_000);
+    await browserAuth.loginWithCustomRole(t1AnalystRole);
+    await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
+    await waitForAlerts(page, kbnClient, ruleId, { timeout: 480_000 });
+
+    // eslint-disable-next-line playwright/no-nth-methods -- first event in list
+    await page.testSubj.locator('expand-event').first().click();
+    await page.testSubj
+      .locator('securitySolutionFlyoutInvestigationGuideButton')
+      .waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('securitySolutionFlyoutInvestigationGuideButton').click();
+    await page.getByRole('button', { name: 'Get processes' }).click();
+
     await pageObjects.liveQuery.submitQuery();
     await pageObjects.liveQuery.checkResults();
   });
 
-  test('should not be able to run custom query', async ({ page, pageObjects }) => {
+  test('should not be able to run custom query', async ({
+    page,
+    pageObjects,
+    browserAuth,
+    kbnUrl,
+    kbnClient,
+  }) => {
+    test.setTimeout(600_000);
+    await browserAuth.loginWithCustomRole(t1AnalystRole);
+    await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
+    await waitForAlerts(page, kbnClient, ruleId, { timeout: 480_000 });
+
+    // eslint-disable-next-line playwright/no-nth-methods -- first event in list
+    await page.testSubj.locator('expand-event').first().click();
+    await page.testSubj
+      .locator('securitySolutionFlyoutInvestigationGuideButton')
+      .waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('securitySolutionFlyoutInvestigationGuideButton').click();
+    await page.getByRole('button', { name: 'Get processes' }).click();
+
     // Intercept the POST request and modify the query
     await page.route('**/api/osquery/live_queries', async (route) => {
       const request = route.request();

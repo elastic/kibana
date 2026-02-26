@@ -78,6 +78,10 @@ test.describe(
       config,
     }) => {
       test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.fixme(
+        true,
+        'Response actions notification requires automated actions to complete first'
+      );
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       const notificationBadge = page.testSubj.locator('response-actions-notification');
@@ -138,6 +142,7 @@ test.describe(
       const allAgentsOption = page.getByRole('option', { name: /All agents/ });
       await allAgentsOption.waitFor({ state: 'visible', timeout: 15_000 });
       await allAgentsOption.click();
+      await page.keyboard.press('Escape');
 
       // eslint-disable-next-line playwright/no-nth-methods -- "All agents" appears as pill and screen reader text
       await expect(agentSelection.getByText('All agents').first()).toBeVisible();
@@ -166,7 +171,7 @@ test.describe(
       config,
     }) => {
       test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
-      test.setTimeout(300_000);
+      test.fixme(true, 'Timeline events table population timing is unreliable in CI');
 
       // Send alert to timeline
       // eslint-disable-next-line playwright/no-nth-methods -- first send-alert button

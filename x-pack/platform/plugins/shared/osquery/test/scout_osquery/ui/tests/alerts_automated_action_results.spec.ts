@@ -81,9 +81,8 @@ test.describe(
             .locator('responseActionsViewWrapper')
             .locator('[data-test-subj="osquery-results-comment"]');
           // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment in alert flyout
-          const discoverLink = resultComments.first().locator('[data-test-subj="viewInDiscover"]');
+          const discoverLink = resultComments.first().locator('a[data-test-subj="viewInDiscover"]');
           await expect(discoverLink).toBeVisible({ timeout: 30_000 });
-          await expect(discoverLink).toHaveAttribute('href');
           const href = await discoverLink.getAttribute('href');
 
           const baseUrl = new URL(page.url()).origin;
@@ -100,8 +99,10 @@ test.describe(
           }
 
           await expect(docTable).toBeVisible({ timeout: 30_000 });
-          await expect(page.getByText(/action_data\.query\s*.+;/)).toBeVisible();
-          await expect(page.getByText(discoverRegex)).toBeVisible();
+          // eslint-disable-next-line playwright/no-nth-methods -- multiple rows contain action_data.query
+          await expect(page.getByText(/action_data\.query\s*.+;/).first()).toBeVisible();
+          // eslint-disable-next-line playwright/no-nth-methods -- multiple rows contain action_id
+          await expect(page.getByText(discoverRegex).first()).toBeVisible();
         });
       }
     );

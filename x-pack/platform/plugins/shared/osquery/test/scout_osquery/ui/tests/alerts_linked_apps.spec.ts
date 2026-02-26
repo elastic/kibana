@@ -104,6 +104,7 @@ test.describe(
       const allAgentsOption = page.getByRole('option', { name: /All agents/ });
       await expect(allAgentsOption).toBeVisible({ timeout: 15_000 });
       await allAgentsOption.click();
+      await page.keyboard.press('Escape');
       await expect(page.getByText(/\d+ agents? selected\./)).toBeVisible({
         timeout: 30_000,
       });
