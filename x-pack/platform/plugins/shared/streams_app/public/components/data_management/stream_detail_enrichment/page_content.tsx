@@ -258,6 +258,13 @@ export function StreamDetailEnrichmentContentImpl() {
   }
 
   const openConfirmationModal = () => {
+    const changes = getChanges(schemaEditorFields, definitionFields);
+    if (changes.length === 0) {
+      // If there are no mapping-affecting changes, skip the review modal entirely.
+      void saveChanges();
+      return;
+    }
+
     const overlay = core.overlays.openModal(
       toMountPoint(
         <StreamsAppContextProvider context={context}>

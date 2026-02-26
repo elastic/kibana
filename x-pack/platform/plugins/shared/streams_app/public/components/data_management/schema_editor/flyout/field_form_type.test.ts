@@ -86,14 +86,15 @@ describe('getFieldTypeOptions', () => {
   });
 
   describe('option completeness', () => {
-    it('includes all non-readonly types for classic streams with geo_point enabled', () => {
+    it('includes all non-readonly types for classic streams with geo_point enabled (except unmapped)', () => {
       const options = getFieldTypeOptions({
         streamType: 'classic',
         enableGeoPointSuggestions: true,
       });
 
+      // Classic streams exclude 'unmapped' type since they don't support description-only overrides
       const expectedTypes = Object.keys(FIELD_TYPE_MAP).filter(
-        (key) => !FIELD_TYPE_MAP[key as keyof typeof FIELD_TYPE_MAP].readonly
+        (key) => !FIELD_TYPE_MAP[key as keyof typeof FIELD_TYPE_MAP].readonly && key !== 'unmapped'
       );
 
       expect(options.length).toBe(expectedTypes.length);

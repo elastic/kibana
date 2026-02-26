@@ -811,6 +811,22 @@ export class StreamsApp {
   }
 
   /**
+   * Confirms changes in the review modal if it appears, otherwise does nothing.
+   * The review modal only appears when there are mapping-affecting changes (not just
+   * description-only or unmapped field changes). Use this when the save operation
+   * might or might not trigger the modal depending on the type of changes.
+   */
+  async confirmChangesInReviewModalIfPresent() {
+    const submitButton = this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton');
+    // Use a short timeout since the modal appears quickly if it's going to appear
+    const isVisible = await submitButton.isVisible({ timeout: 3_000 }).catch(() => false);
+    if (isVisible) {
+      await expect(submitButton).toBeEnabled({ timeout: 30_000 });
+      await submitButton.click();
+    }
+  }
+
+  /**
    * Utility for data preview
    */
   async getPreviewTableRows() {
