@@ -19,6 +19,12 @@ import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { HeaderBreadcrumbsBadges } from '../ui/header/header_breadcrumbs_badges';
 import { createArrayState, type ArrayState } from './state_helpers';
 
+export interface BreadcrumbBadgesContextDeps {
+  rendering: {
+    addContext: (element: React.ReactNode) => React.ReactElement;
+  };
+}
+
 interface BreadcrumbsState {
   breadcrumbs: ArrayState<ChromeBreadcrumb>;
   breadcrumbsAppendExtensions: ArrayState<ChromeBreadcrumbsAppendExtension>;
@@ -57,23 +63,28 @@ const areBadgesRenderModelsEqual = (
 };
 
 const toBadgesExtension = (
-  badgesRenderModel: BadgesExtensionRenderModel | undefined
+  badgesRenderModel: BadgesExtensionRenderModel | undefined,
+  deps: BreadcrumbBadgesContextDeps
 ): ChromeBreadcrumbsAppendExtension | undefined => {
   if (!badgesRenderModel) {
     return undefined;
   }
 
+  const { rendering } = deps;
+
   return {
     content: mountReactNode(
-      <HeaderBreadcrumbsBadges
-        badges={badgesRenderModel.badges}
-        isFirst={badgesRenderModel.isFirst}
-      />
+      rendering.addContext(
+        <HeaderBreadcrumbsBadges
+          badges={badgesRenderModel.badges}
+          isFirst={badgesRenderModel.isFirst}
+        />
+      )
     ),
   };
 };
 
-export const createBreadcrumbsState = (): BreadcrumbsState => {
+export const createBreadcrumbsState = (deps: BreadcrumbBadgesContextDeps): BreadcrumbsState => {
   const breadcrumbs = createArrayState<ChromeBreadcrumb>();
   const breadcrumbsAppendExtensions = createArrayState<ChromeBreadcrumbsAppendExtension>();
   const breadcrumbsBadges = createArrayState<ChromeBreadcrumbsBadge>();
@@ -81,7 +92,7 @@ export const createBreadcrumbsState = (): BreadcrumbsState => {
   const badgesExtension$ = combineLatest([breadcrumbsBadges.$, breadcrumbsAppendExtensions.$]).pipe(
     map(([badges, extensions]) => toBadgesExtensionRenderModel(badges, extensions.length)),
     distinctUntilChanged(areBadgesRenderModelsEqual),
-    map(toBadgesExtension),
+    map((renderModel) => toBadgesExtension(renderModel, deps)),
     shareReplay({ bufferSize: 1, refCount: true })
   );
 

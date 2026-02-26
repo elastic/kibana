@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -74,10 +74,17 @@ export interface ChromeState {
 export interface ChromeStateDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
+  rendering: {
+    addContext: (element: ReactNode) => ReactElement;
+  };
 }
 
 /** Creates all chrome state in one place */
-export function createChromeState({ application, docLinks }: ChromeStateDeps): ChromeState {
+export function createChromeState({
+  application,
+  docLinks,
+  rendering,
+}: ChromeStateDeps): ChromeState {
   // Create headerBanner first (needed by body classes)
   const headerBanner = createState<ChromeUserBanner | undefined>(undefined);
 
@@ -96,7 +103,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     breadcrumbsAppendExtensions,
     breadcrumbsBadges,
     breadcrumbsAppendExtensionsWithBadges$,
-  } = createBreadcrumbsState();
+  } = createBreadcrumbsState({ rendering });
 
   // UI Elements (per-app reset handled in setupAppChangeHandler)
   const badge = createState<ChromeBadge | undefined>(undefined);

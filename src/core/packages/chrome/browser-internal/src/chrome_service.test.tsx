@@ -16,12 +16,12 @@ import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import type { App, PublicAppInfo } from '@kbn/core-application-browser';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
@@ -74,6 +74,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     getNotifications: () => Promise.resolve(notifications),
     notifications, // Keep for test assertions
+    rendering: { addContext: (element: React.ReactNode) => <>{element}</> },
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
     featureFlags: coreFeatureFlagsMock.createStart(),

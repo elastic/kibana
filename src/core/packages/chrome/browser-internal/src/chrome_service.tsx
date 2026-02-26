@@ -9,6 +9,8 @@
 
 import { ReplaySubject } from 'rxjs';
 
+import type { ReactElement, ReactNode } from 'react';
+
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -64,6 +66,9 @@ export interface StartDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
+  rendering: {
+    addContext: (element: ReactNode) => ReactElement;
+  };
   uiSettings: IUiSettingsClient;
   featureFlags: FeatureFlagsStart;
 }
@@ -106,6 +111,7 @@ export class ChromeService {
     i18n,
     theme,
     userProfile,
+    rendering,
     uiSettings,
     featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
@@ -113,6 +119,7 @@ export class ChromeService {
     const state = createChromeState({
       application,
       docLinks,
+      rendering,
     });
 
     // 2. Setup side effects (body classes, fullscreen changes, system color mode)

@@ -377,6 +377,7 @@ export class CoreSystem {
         i18n,
         theme,
         userProfile,
+        rendering: this.rendering,
         uiSettings,
         featureFlags,
       });
