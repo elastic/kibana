@@ -989,7 +989,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await disableStreams(apiClient);
       });
 
-it('persists description-only overrides without freezing inherited mappings', async () => {
+      it('persists description-only overrides without freezing inherited mappings', async () => {
         const parentStream = 'logs.otel.doconlyparent';
         const childStream = `${parentStream}.child`;
         const fieldName = 'attributes.abc';

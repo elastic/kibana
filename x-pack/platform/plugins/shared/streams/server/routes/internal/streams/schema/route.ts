@@ -371,8 +371,7 @@ export const schemaFieldsConflictsRoute = createServerRoute({
     // Only check conflicts for fields that affect ES mappings
     // Skip system fields and doc-only overrides (no type)
     const userFieldDefinitions = params.body.field_definitions.filter(
-      (field): field is typeof field & { type: string } =>
-        !!field.type && field.type !== 'system'
+      (field): field is typeof field & { type: string } => !!field.type && field.type !== 'system'
     );
 
     if (userFieldDefinitions.length === 0) {

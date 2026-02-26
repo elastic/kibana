@@ -259,7 +259,7 @@ describe('generateLayer', () => {
     });
   });
 
-it('should skip doc-only fields (no type) and not include them in mappings', () => {
+  it('should skip doc-only fields (no type) and not include them in mappings', () => {
     const definitionWithDocOnlyField: Streams.WiredStream.Definition = {
       name: 'logs.test',
       description: '',
