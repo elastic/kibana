@@ -86,7 +86,6 @@ export default function slackTest({ getService }: FtrProviderContext) {
         connector_type_id: '.slack',
         config: {},
         is_connector_type_deprecated: false,
-        auth_mode: 'shared',
       });
     });
 
