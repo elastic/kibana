@@ -222,8 +222,20 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       };
 
       const failedSpecFilePaths: string[] = [];
+      const infraFailedSpecFilePaths: string[] = [];
 
-      const runSpecs = async (filePaths: string[]) =>
+      const isTestAssertionFailure = (
+        runResult:
+          | CypressCommandLine.CypressRunResult
+          | CypressCommandLine.CypressFailedRunResult
+          | undefined
+      ): boolean => {
+        if (!runResult) return false;
+        const asRunResult = runResult as CypressCommandLine.CypressRunResult;
+        return Boolean(asRunResult.totalFailed && asRunResult.totalFailed > 0 && asRunResult.runs);
+      };
+
+      const runSpecs = async (filePaths: string[], isRetryRun: boolean = false) =>
         pMap<
           string,
           | CypressCommandLine.CypressRunResult
@@ -447,18 +459,12 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 ----------------------------------------------
 `);
 
-                if (isOpen) {
-                  await cypress.open({
-                    configFile: cypressConfigFilePath,
-                    config: {
-                      e2e: {
-                        baseUrl,
-                      },
-                      env: cyCustomEnv,
-                    },
-                  });
-                } else {
-                  result = await cypress.run({
+                const executeCypressRun = async (retryAttempt: boolean) => {
+                  if (retryAttempt) {
+                    process.env.CYPRESS_RETRY_RUN = 'true';
+                  }
+
+                  return cypress.run({
                     browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
@@ -470,10 +476,33 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                         baseUrl,
                       },
                       numTestsKeptInMemory: 0,
+                      video: retryAttempt,
                       env: cyCustomEnv,
                     },
                     runnerUi: !process.env.CI,
                   });
+                };
+
+                if (isOpen) {
+                  await cypress.open({
+                    configFile: cypressConfigFilePath,
+                    config: {
+                      e2e: {
+                        baseUrl,
+                      },
+                      env: cyCustomEnv,
+                    },
+                  });
+                } else {
+                  result = await executeCypressRun(isRetryRun);
+
+                  if (isTestAssertionFailure(result) && !isRetryRun) {
+                    log.info(
+                      `Test assertion failure detected for ${filePath}, retrying in-place against the same stack (with video enabled)...`
+                    );
+                    result = await executeCypressRun(true);
+                  }
+
                   if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     _.pull(failedSpecFilePaths, filePath);
                   }
@@ -482,15 +511,13 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                 log.error(error);
 
                 if (!result) {
-                  // `result` will be `undefined` when the process above does not reach the `cypress.run()`.
-                  // This can happen when there are errors setting up the run environment, and thus, we need
-                  // ensure we report the run as a failure.
                   result = {
                     status: 'failed',
                     failures: 1,
                     message: error.message,
                   };
                 }
+                infraFailedSpecFilePaths.push(filePath);
               }
 
               if (fleetServer) {
@@ -511,8 +538,11 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         );
 
       const initialResults = await runSpecs(files);
-      // If there are failed tests, retry them
-      const retryResults = await runSpecs([...failedSpecFilePaths]);
+
+      // Only rebuild the full stack for specs that had infrastructure failures.
+      // Test assertion failures were already retried in-place against the same stack.
+      const specsNeedingInfraRetry = [...infraFailedSpecFilePaths];
+      const retryResults = await runSpecs(specsNeedingInfraRetry, true);
 
       const finalResults = [
         // Don't include failed specs from initial run in results

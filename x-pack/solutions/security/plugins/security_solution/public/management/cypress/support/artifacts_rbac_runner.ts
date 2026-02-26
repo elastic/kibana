@@ -33,16 +33,23 @@ import { SECURITY_FEATURE_ID } from '../../../../common';
  *
  * Possible improvement: use custom roles on serverless to test the same as on ESS.
  */
-export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => () => {
+export const getArtifactMockedDataTests = (
+  testData: ArtifactsFixtureType,
+  options?: { siemVersionFilter?: (versions: string[]) => string[] }
+) => () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   const isServerless = Cypress.env('IS_SERVERLESS');
   const firstSiemVersion = testData.firstSiemVersion ?? 'siem';
-  const siemVersionsToTest = isServerless
+  let siemVersionsToTest: string[] = isServerless
     ? [SECURITY_FEATURE_ID]
     : SIEM_VERSIONS.filter(
         (version) => getVersionNumber(version) >= getVersionNumber(firstSiemVersion)
       );
+
+  if (options?.siemVersionFilter && !isServerless) {
+    siemVersionsToTest = options.siemVersionFilter(siemVersionsToTest);
+  }
 
   let loginWithoutAccess: () => void;
   let loginWithReadAccess: () => void;
