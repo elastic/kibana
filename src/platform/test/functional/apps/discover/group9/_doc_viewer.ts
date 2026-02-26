@@ -264,6 +264,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('hide null values switch - data view mode', function () {
+      it('should hide fields with null values when toggled', async function () {
+        if (!(await testSubjects.exists('select-text-based-language-btn'))) {
+          await discover.selectDataViewMode();
+          await discover.waitUntilTabIsLoaded();
+        }
+
+        await dataGrid.clickRowToggle();
+        await discover.isShowingDocViewer();
+        await retry.waitFor('rendered items', async () => {
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length > 0;
+        });
+
+        await discover.openFilterByFieldTypeInDocViewer();
+        await testSubjects.click('typeFilter-keyword');
+
+        const initialFieldsCount = 8;
+        await retry.waitFor('filter applied', async () => {
+          return (
+            (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === initialFieldsCount
+          );
+        });
+        await discover.closeFilterByFieldTypeInDocViewer();
+
+        let hideNullValuesSwitch = await testSubjects.find('unifiedDocViewerHideNullValuesSwitch');
+        await hideNullValuesSwitch.click();
+
+        await retry.waitFor('fields to be hidden', async () => {
+          return (
+            (await find.allByCssSelector('.kbnDocViewer__fieldName')).length < initialFieldsCount
+          );
+        });
+
+        hideNullValuesSwitch = await testSubjects.find('unifiedDocViewerHideNullValuesSwitch');
+        await hideNullValuesSwitch.click();
+      });
+    });
+
     describe('show only selected fields in ES|QL mode', function () {
       beforeEach(async () => {
         await discover.selectTextBaseLang();
