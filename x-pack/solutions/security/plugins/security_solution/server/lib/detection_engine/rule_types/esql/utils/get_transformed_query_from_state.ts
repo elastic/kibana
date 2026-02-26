@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { computeIsESQLQueryAggregating, injectMetadataId } from '@kbn/securitysolution-utils';
+import { injectMetadataId } from '@kbn/securitysolution-utils';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { EsqlState } from '../types';
 import { validateEsqlQuery } from './validate_esql_query';
@@ -20,12 +20,14 @@ export const getTransformedQueryFromState = async ({
   originalQuery,
   state,
   ruleExecutionLogger,
+  isAggregating,
 }: {
   originalQuery: string;
   state: EsqlState;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  isAggregating: boolean;
 }): Promise<string> => {
-  if (computeIsESQLQueryAggregating(originalQuery)) {
+  if (isAggregating) {
     return originalQuery;
   }
 
@@ -44,6 +46,7 @@ export const getTransformedQueryFromState = async ({
     return originalQuery;
   }
 
+  // if query not changed return early to avoid unnecesary validation
   if (candidateQuery === originalQuery) {
     return originalQuery;
   }

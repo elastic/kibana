@@ -37,21 +37,23 @@ describe('getTransformedQueryFromState', () => {
         originalQuery: query,
         state: {},
         ruleExecutionLogger,
+        isAggregating: true,
       });
 
       expect(result).toBe(query);
       expect(validateEsqlQueryMock).not.toHaveBeenCalled();
     });
 
-    it('skips cache lookup for aggregating queries', async () => {
+    it('skips state lookup for aggregating queries', async () => {
       const query = 'FROM logs* | STATS count(*) BY host';
       const result = await getTransformedQueryFromState({
         originalQuery: query,
         state: {
-          transformedQuery: 'SOMETHING CACHED',
+          transformedQuery: 'SOMETHING stateD',
           lastQuery: query,
         },
         ruleExecutionLogger,
+        isAggregating: true,
       });
 
       expect(result).toBe(query);
@@ -59,155 +61,97 @@ describe('getTransformedQueryFromState', () => {
     });
   });
 
-  describe('cache hit', () => {
-    it('returns cached transformedQuery when source matches', async () => {
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'FROM logs*',
-        state: {
-          transformedQuery: 'FROM logs* METADATA _id',
-          lastQuery: 'FROM logs*',
-        },
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('FROM logs* METADATA _id');
-      expect(validateEsqlQueryMock).not.toHaveBeenCalled();
-      expect(ruleExecutionLogger.trace).toHaveBeenCalledWith(
-        'Using state-based transformed ES|QL query'
-      );
+  it('returns saved in state transformedQuery', async () => {
+    const result = await getTransformedQueryFromState({
+      originalQuery: 'FROM logs*',
+      state: {
+        transformedQuery: 'FROM logs* METADATA _id',
+        lastQuery: 'FROM logs*',
+      },
+      ruleExecutionLogger,
+      isAggregating: false,
     });
 
-    it('does not call validateEsqlQuery on cache hit', async () => {
-      await getTransformedQueryFromState({
-        originalQuery: 'FROM logs* | WHERE x > 1',
-        state: {
-          transformedQuery: 'FROM logs* METADATA _id | WHERE x > 1',
-          lastQuery: 'FROM logs* | WHERE x > 1',
-        },
-        ruleExecutionLogger,
-      });
-
-      expect(validateEsqlQueryMock).not.toHaveBeenCalled();
-    });
+    expect(result).toBe('FROM logs* METADATA _id');
+    expect(validateEsqlQueryMock).not.toHaveBeenCalled();
+    expect(ruleExecutionLogger.trace).toHaveBeenCalledWith(
+      'Using state-based transformed ES|QL query'
+    );
   });
 
-  describe('cache miss', () => {
-    it('transforms and validates query on empty state', async () => {
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'FROM logs*',
-        state: {},
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('FROM logs* METADATA _id');
-      expect(validateEsqlQueryMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: 'FROM logs* METADATA _id',
-          ruleExecutionLogger,
-        })
-      );
+  it('transforms and validates query on empty state', async () => {
+    const result = await getTransformedQueryFromState({
+      originalQuery: 'FROM logs*',
+      state: {},
+      ruleExecutionLogger,
+      isAggregating: false,
     });
 
-    it('transforms and validates query when source differs', async () => {
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'FROM logs* | WHERE x > 5',
-        state: {
-          transformedQuery: 'FROM old-index* METADATA _id',
-          lastQuery: 'FROM old-index*',
-        },
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('FROM logs* METADATA _id | WHERE x > 5');
-      expect(validateEsqlQueryMock).toHaveBeenCalled();
-    });
+    expect(result).toBe('FROM logs* METADATA _id');
+    expect(validateEsqlQueryMock).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM logs* METADATA _id' })
+    );
+    expect(ruleExecutionLogger.trace).toHaveBeenCalledWith('Transformed ES|QL query validated');
   });
 
-  describe('AST validation', () => {
-    it('returns transformed query when validation passes', async () => {
-      validateEsqlQueryMock.mockResolvedValue(true);
-
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'FROM logs*',
-        state: {},
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('FROM logs* METADATA _id');
-      expect(ruleExecutionLogger.trace).toHaveBeenCalledWith('Transformed ES|QL query validated');
+  it('re-transforms when query changes (stale state)', async () => {
+    const result = await getTransformedQueryFromState({
+      originalQuery: 'FROM logs* | WHERE x > 5',
+      state: {
+        transformedQuery: 'FROM old-index* METADATA _id',
+        lastQuery: 'FROM old-index*',
+      },
+      ruleExecutionLogger,
+      isAggregating: false,
     });
 
-    it('falls back to original query when validation fails', async () => {
-      validateEsqlQueryMock.mockResolvedValue(false);
-
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'FROM logs*',
-        state: {},
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('FROM logs*');
-    });
-
-    it('falls back to original query when validation fails for complex query', async () => {
-      validateEsqlQueryMock.mockResolvedValue(false);
-
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'FROM logs* | DROP _id | KEEP agent.name',
-        state: {},
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('FROM logs* | DROP _id | KEEP agent.name');
-    });
+    expect(result).toBe('FROM logs* METADATA _id | WHERE x > 5');
+    expect(validateEsqlQueryMock).toHaveBeenCalled();
   });
 
-  describe('error handling', () => {
-    it('returns original query when injectMetadataId throws', async () => {
-      (injectMetadataId as jest.Mock).mockImplementationOnce(() => {
-        throw new Error('Parse error');
-      });
+  it('falls back to original query when validation fails', async () => {
+    validateEsqlQueryMock.mockResolvedValue(false);
 
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'INVALID QUERY!!!',
-        state: {},
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('INVALID QUERY!!!');
-      expect(ruleExecutionLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to inject METADATA _id')
-      );
+    const result = await getTransformedQueryFromState({
+      originalQuery: 'FROM logs*',
+      state: {},
+      ruleExecutionLogger,
+      isAggregating: false,
     });
+
+    expect(result).toBe('FROM logs*');
   });
 
-  describe('state transitions', () => {
-    it('invalidates cache when query changes', async () => {
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'FROM new-logs*',
-        state: {
-          transformedQuery: 'FROM old-logs* METADATA _id',
-          lastQuery: 'FROM old-logs*',
-        },
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('FROM new-logs* METADATA _id');
-      expect(validateEsqlQueryMock).toHaveBeenCalled();
+  it('returns original query when injectMetadataId throws', async () => {
+    (injectMetadataId as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('Parse error');
     });
 
-    it('treats undefined transformedQuery as cache miss', async () => {
-      const result = await getTransformedQueryFromState({
-        originalQuery: 'FROM logs*',
-        state: {
-          lastQuery: 'FROM logs*',
-          transformedQuery: undefined,
-        },
-        ruleExecutionLogger,
-      });
-
-      expect(result).toBe('FROM logs* METADATA _id');
-      expect(validateEsqlQueryMock).toHaveBeenCalled();
+    const result = await getTransformedQueryFromState({
+      originalQuery: 'INVALID QUERY!!!',
+      state: {},
+      ruleExecutionLogger,
+      isAggregating: false,
     });
+
+    expect(result).toBe('INVALID QUERY!!!');
+    expect(ruleExecutionLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to inject METADATA _id')
+    );
+  });
+
+  it('treats undefined transformedQuery as state miss', async () => {
+    const result = await getTransformedQueryFromState({
+      originalQuery: 'FROM logs*',
+      state: {
+        lastQuery: 'FROM logs*',
+        transformedQuery: undefined,
+      },
+      ruleExecutionLogger,
+      isAggregating: false,
+    });
+
+    expect(result).toBe('FROM logs* METADATA _id');
+    expect(validateEsqlQueryMock).toHaveBeenCalled();
   });
 });

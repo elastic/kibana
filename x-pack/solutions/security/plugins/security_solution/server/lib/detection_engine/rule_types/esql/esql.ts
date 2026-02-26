@@ -95,13 +95,12 @@ export const esqlExecutor = async ({
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
 
-    const transformedQuery = isRuleAggregating
-      ? ruleParams.query
-      : await getTransformedQueryFromState({
-          originalQuery: ruleParams.query,
-          state,
-          ruleExecutionLogger,
-        });
+    const transformedQuery = await getTransformedQueryFromState({
+      originalQuery: ruleParams.query,
+      state,
+      ruleExecutionLogger,
+      isAggregating: isRuleAggregating,
+    });
 
     const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
       state,
