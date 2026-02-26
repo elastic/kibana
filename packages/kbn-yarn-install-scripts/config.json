@@ -91,6 +91,12 @@
       "reason": "Prints version scheme warning - not needed"
     },
     {
+      "path": "@opentelemetry/otlp-transformer/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints version scheme warning - not needed"
+    },
+    {
       "path": "puppeteer",
       "lifecycle": "postinstall",
       "required": false,
