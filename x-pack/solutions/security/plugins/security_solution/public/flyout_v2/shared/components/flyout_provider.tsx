@@ -7,9 +7,9 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import React from 'react';
-import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
+import type { StartServices } from '../../../types';
 
 export const flyoutProviders = ({
   services,
