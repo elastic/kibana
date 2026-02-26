@@ -122,7 +122,7 @@ export async function scheduleStoreUsageTask({
       {
         id: getStoreUsageTaskId(namespace),
         taskType: config.type,
-        schedule: { interval: config.interval! },
+        schedule: { interval: config.interval },
         state: { namespace },
         params: {},
       },
