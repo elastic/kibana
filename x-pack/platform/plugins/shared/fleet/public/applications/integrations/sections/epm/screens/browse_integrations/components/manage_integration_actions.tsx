@@ -41,6 +41,7 @@ export const ManageIntegrationActions: React.FC<{
   }>;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
   onApproveAndDeploy: (integrationId: string, version: string) => Promise<void>;
+  onDownloadZip?: (integrationId: string) => Promise<void>;
 }> = ({
   integration,
   canReviewApprove,
@@ -51,6 +52,7 @@ export const ManageIntegrationActions: React.FC<{
   DataStreamResultsFlyoutComponent,
   onFetchReviewDetails,
   onApproveAndDeploy,
+  onDownloadZip,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -65,6 +67,17 @@ export const ManageIntegrationActions: React.FC<{
     setIsPopoverOpen(false);
     setShowDeleteConfirm(true);
   }, []);
+
+  const handleDownloadZip = useCallback(async () => {
+    if (!onDownloadZip) return;
+    setIsPopoverOpen(false);
+    setIsDownloadingZip(true);
+    try {
+      await onDownloadZip(integration.integrationId);
+    } finally {
+      setIsDownloadingZip(false);
+    }
+  }, [onDownloadZip, integration.integrationId]);
 
   const handleConfirmDelete = useCallback(async () => {
     setIsDeleting(true);
@@ -155,6 +168,28 @@ export const ManageIntegrationActions: React.FC<{
                 <FormattedMessage
                   id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
                   defaultMessage="Review & Approve"
+                />
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="downloadZip"
+                icon="download"
+                disabled={!canReviewApprove || isDownloadingZip}
+                toolTipContent={
+                  canReviewApprove
+                    ? undefined
+                    : i18n.translate(
+                        'xpack.fleet.epmList.manageIntegrations.actions.downloadZipDisabledHelp',
+                        {
+                          defaultMessage:
+                            'Download is available only when all data streams are successful.',
+                        }
+                      )
+                }
+                onClick={handleDownloadZip}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.downloadZip"
+                  defaultMessage="Download .zip package"
                 />
               </EuiContextMenuItem>,
               <EuiContextMenuItem

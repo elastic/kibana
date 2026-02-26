@@ -179,6 +179,38 @@ export const ManageIntegrationsTable: React.FC<{
     [http]
   );
 
+  const downloadZipPackage = useCallback(
+    async (integrationId: string) => {
+      try {
+        const response = await http.get(
+          `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/package`,
+          {
+            version: '1',
+            headers: { Accept: 'application/zip' },
+            asResponse: true,
+          }
+        );
+        const blob = response.body as unknown as Blob;
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${integrationId}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate(
+            'xpack.fleet.epmList.manageIntegrations.actions.downloadZipErrorTitle',
+            { defaultMessage: 'Failed to download .zip package' }
+          ),
+        });
+      }
+    },
+    [http, notifications]
+  );
+
   const approveAndDeployIntegration = useCallback(
     async (integrationId: string, version: string) => {
       try {
@@ -340,6 +372,7 @@ export const ManageIntegrationsTable: React.FC<{
                 }
                 onFetchReviewDetails={fetchIntegrationReviewDetails}
                 onApproveAndDeploy={approveAndDeployIntegration}
+                onDownloadZip={downloadZipPackage}
               />
             );
           }
@@ -358,6 +391,7 @@ export const ManageIntegrationsTable: React.FC<{
                 }
                 onFetchReviewDetails={fetchIntegrationReviewDetails}
                 onApproveAndDeploy={approveAndDeployIntegration}
+                onDownloadZip={downloadZipPackage}
               />
             );
           }
@@ -384,6 +418,7 @@ export const ManageIntegrationsTable: React.FC<{
             }
             onFetchReviewDetails={fetchIntegrationReviewDetails}
             onApproveAndDeploy={approveAndDeployIntegration}
+            onDownloadZip={downloadZipPackage}
           />
         ),
       },
@@ -394,6 +429,7 @@ export const ManageIntegrationsTable: React.FC<{
       deleteIntegration,
       fetchIntegrationReviewDetails,
       approveAndDeployIntegration,
+      downloadZipPackage,
       automaticImportVTwo?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
       userProfiles,
