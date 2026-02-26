@@ -10127,7 +10127,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"range\" | \"terms\" | \"formula\" | \"static_value\" | \"unique_count\" | \"average\" | \"standard_deviation\" | \"last_value\" | \"percentile\" | \"percentile_rank\" | \"differences\" | \"moving_average\" | \"cumulative_sum\" | \"counter_rate\" | \"filters\" | \"date_histogram\" | \"normalize_by_unit\""
+          "\"count\" | \"min\" | \"range\" | \"terms\" | \"max\" | \"sum\" | \"median\" | \"cumulative_sum\" | \"date_histogram\" | \"filters\" | \"last_value\" | \"percentile\" | \"average\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 201,
@@ -10144,7 +10144,7 @@
         "label": "OperationWithReferences",
         "description": [],
         "signature": [
-          "\"formula\" | \"static_value\" | \"differences\" | \"moving_average\" | \"cumulative_sum\" | \"counter_rate\" | \"normalize_by_unit\""
+          "\"cumulative_sum\" | \"moving_average\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 203,
@@ -10161,7 +10161,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"count\" | \"min\" | \"max\" | \"sum\" | \"median\" | \"range\" | \"terms\" | \"unique_count\" | \"average\" | \"standard_deviation\" | \"last_value\" | \"percentile\" | \"percentile_rank\" | \"filters\" | \"date_histogram\""
+          "\"count\" | \"min\" | \"range\" | \"terms\" | \"max\" | \"sum\" | \"median\" | \"date_histogram\" | \"filters\" | \"last_value\" | \"percentile\" | \"average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types.ts",
         "lineNumber": 202,
