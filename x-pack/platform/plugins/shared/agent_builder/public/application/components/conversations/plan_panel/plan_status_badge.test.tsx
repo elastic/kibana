@@ -22,7 +22,7 @@ const createPlan = (overrides: Partial<Plan> = {}): Plan => ({
 });
 
 describe('PlanStatusBadge', () => {
-  it('shows "Draft" for draft plans', () => {
+  it('shows "Draft" for draft plans in planning mode', () => {
     const plan = createPlan({ status: 'draft', source: 'planning' });
     render(<PlanStatusBadge plan={plan} agentMode="planning" />);
     expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('Draft');
@@ -34,7 +34,20 @@ describe('PlanStatusBadge', () => {
     expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('Ready');
   });
 
-  it('shows "Executing" for ready plans in agent mode with incomplete items', () => {
+  it('shows "Executing" when actively executing even if plan status is draft', () => {
+    const plan = createPlan({
+      status: 'draft',
+      source: 'planning',
+      action_items: [
+        { description: 'Step 1', status: 'pending' },
+        { description: 'Step 2', status: 'pending' },
+      ],
+    });
+    render(<PlanStatusBadge plan={plan} agentMode="agent" isExecuting />);
+    expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('Executing');
+  });
+
+  it('shows "Executing" when actively executing with ready plan', () => {
     const plan = createPlan({
       status: 'ready',
       source: 'planning',
@@ -43,11 +56,50 @@ describe('PlanStatusBadge', () => {
         { description: 'Step 2', status: 'in_progress' },
       ],
     });
-    render(<PlanStatusBadge plan={plan} agentMode="agent" />);
+    render(<PlanStatusBadge plan={plan} agentMode="agent" isExecuting />);
     expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('Executing');
   });
 
-  it('shows "Completed" for ready plans in agent mode with all items completed', () => {
+  it('shows "In Progress" when idle in agent mode with partial progress', () => {
+    const plan = createPlan({
+      status: 'ready',
+      source: 'planning',
+      action_items: [
+        { description: 'Step 1', status: 'completed' },
+        { description: 'Step 2', status: 'pending' },
+      ],
+    });
+    render(<PlanStatusBadge plan={plan} agentMode="agent" isExecuting={false} />);
+    expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('In Progress');
+  });
+
+  it('shows "In Progress" when idle in agent mode even with draft status if items have progress', () => {
+    const plan = createPlan({
+      status: 'draft',
+      source: 'agent',
+      action_items: [
+        { description: 'Step 1', status: 'completed' },
+        { description: 'Step 2', status: 'pending' },
+      ],
+    });
+    render(<PlanStatusBadge plan={plan} agentMode="agent" isExecuting={false} />);
+    expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('In Progress');
+  });
+
+  it('shows "Draft" for draft plans in agent mode with no progress and not executing', () => {
+    const plan = createPlan({
+      status: 'draft',
+      source: 'planning',
+      action_items: [
+        { description: 'Step 1', status: 'pending' },
+        { description: 'Step 2', status: 'pending' },
+      ],
+    });
+    render(<PlanStatusBadge plan={plan} agentMode="agent" isExecuting={false} />);
+    expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('Draft');
+  });
+
+  it('shows "Completed" when all items are completed', () => {
     const plan = createPlan({
       status: 'ready',
       source: 'planning',
@@ -60,22 +112,9 @@ describe('PlanStatusBadge', () => {
     expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('Completed');
   });
 
-  it('shows "Executing" for agent-sourced ready plans with incomplete items', () => {
+  it('shows "Completed" even if plan status is draft when all items completed', () => {
     const plan = createPlan({
-      status: 'ready',
-      source: 'agent',
-      action_items: [
-        { description: 'Step 1', status: 'completed' },
-        { description: 'Step 2', status: 'pending' },
-      ],
-    });
-    render(<PlanStatusBadge plan={plan} agentMode="agent" />);
-    expect(screen.getByTestId('agentBuilderPlanStatusBadge')).toHaveTextContent('Executing');
-  });
-
-  it('shows "Completed" for agent-sourced ready plans with all items completed', () => {
-    const plan = createPlan({
-      status: 'ready',
+      status: 'draft',
       source: 'agent',
       action_items: [
         { description: 'Step 1', status: 'completed' },

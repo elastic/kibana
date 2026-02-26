@@ -30,16 +30,16 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerTaskDefinitions } from './services/execution';
-import { dataExplorationSkill, skillBuilderSkill } from './skills';
+import { skillBuilderSkill } from './skills';
 
 export class AgentBuilderPlugin
   implements
-    Plugin<
-      AgentBuilderPluginSetup,
-      AgentBuilderPluginStart,
-      AgentBuilderSetupDependencies,
-      AgentBuilderStartDependencies
-    >
+  Plugin<
+    AgentBuilderPluginSetup,
+    AgentBuilderPluginStart,
+    AgentBuilderSetupDependencies,
+    AgentBuilderStartDependencies
+  >
 {
   private logger: Logger;
   // @ts-expect-error unused for now
@@ -97,12 +97,11 @@ export class AgentBuilderPlugin
     });
 
     // Register built-in skills
-    serviceSetups.skills.registerSkill(dataExplorationSkill).catch((err) => {
-      this.logger.error(`Failed to register built-in data-exploration skill: ${err.message}`);
-    });
-    serviceSetups.skills.registerSkill(skillBuilderSkill).catch((err) => {
+    try {
+      serviceSetups.skills.registerSkill(skillBuilderSkill);
+    } catch (err) {
       this.logger.error(`Failed to register built-in skill-builder skill: ${err.message}`);
-    });
+    }
 
     registerFeatures({ features: setupDeps.features });
 
@@ -206,5 +205,5 @@ export class AgentBuilderPlugin
     };
   }
 
-  stop() {}
+  stop() { }
 }

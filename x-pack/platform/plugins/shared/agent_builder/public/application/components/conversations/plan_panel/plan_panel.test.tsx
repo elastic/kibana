@@ -35,49 +35,76 @@ describe('PlanPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the plan title', () => {
+  it('renders the plan title in collapsed bar', () => {
     render(<PlanPanel plan={createPlan()} {...defaultProps} />);
     expect(screen.getByText('Test Plan')).toBeInTheDocument();
   });
 
-  it('renders the plan description', () => {
+  it('renders progress count with active items in collapsed bar', () => {
     render(<PlanPanel plan={createPlan()} {...defaultProps} />);
-    expect(screen.getByText('A test plan description')).toBeInTheDocument();
+    expect(screen.getByText('1/3 (1 active)')).toBeInTheDocument();
   });
 
-  it('renders all action items', () => {
+  it('renders progress count without active label when no in-progress items', () => {
+    const plan = createPlan({
+      action_items: [
+        { description: 'Step 1', status: 'completed' },
+        { description: 'Step 2', status: 'pending' },
+      ],
+    });
+    render(<PlanPanel plan={plan} {...defaultProps} />);
+    expect(screen.getByText('1/2')).toBeInTheDocument();
+  });
+
+  it('shows progress bar in collapsed state', () => {
     render(<PlanPanel plan={createPlan()} {...defaultProps} />);
+    expect(screen.getByTestId('agentBuilderPlanProgress')).toBeInTheDocument();
+  });
+
+  it('does not show action items in collapsed state', () => {
+    render(<PlanPanel plan={createPlan()} {...defaultProps} />);
+    expect(screen.queryByText('Step 1')).not.toBeInTheDocument();
+  });
+
+  it('expands to show action items when header is clicked', () => {
+    render(<PlanPanel plan={createPlan()} {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelHeader'));
     expect(screen.getByText('Step 1')).toBeInTheDocument();
     expect(screen.getByText('Step 2')).toBeInTheDocument();
     expect(screen.getByText('Step 3')).toBeInTheDocument();
   });
 
-  it('shows progress bar', () => {
+  it('shows the plan description when expanded', () => {
     render(<PlanPanel plan={createPlan()} {...defaultProps} />);
-    expect(screen.getByTestId('agentBuilderPlanProgress')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelExpand'));
+    expect(screen.getByText('A test plan description')).toBeInTheDocument();
   });
 
-  it('shows "Approve & Execute" button for draft plans with planning source', () => {
+  it('shows "Approve & Execute" button for draft plans with planning source when expanded', () => {
     const plan = createPlan({ status: 'draft', source: 'planning' });
     render(<PlanPanel plan={plan} {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelExpand'));
     expect(screen.getByTestId('agentBuilderPlanApproveButton')).toBeInTheDocument();
   });
 
   it('hides "Approve & Execute" button for ready plans (already approved)', () => {
     const plan = createPlan({ status: 'ready', source: 'planning' });
     render(<PlanPanel plan={plan} {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelExpand'));
     expect(screen.queryByTestId('agentBuilderPlanApproveButton')).not.toBeInTheDocument();
   });
 
   it('hides "Approve & Execute" button for agent-sourced plans', () => {
     const plan = createPlan({ status: 'draft', source: 'agent' });
     render(<PlanPanel plan={plan} {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelExpand'));
     expect(screen.queryByTestId('agentBuilderPlanApproveButton')).not.toBeInTheDocument();
   });
 
   it('hides "Approve & Execute" button when executing', () => {
     const plan = createPlan({ status: 'draft', source: 'planning' });
     render(<PlanPanel plan={plan} {...defaultProps} isExecuting />);
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelExpand'));
     expect(screen.queryByTestId('agentBuilderPlanApproveButton')).not.toBeInTheDocument();
   });
 
@@ -91,12 +118,14 @@ describe('PlanPanel', () => {
       ],
     });
     render(<PlanPanel plan={plan} {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelExpand'));
     expect(screen.queryByTestId('agentBuilderPlanApproveButton')).not.toBeInTheDocument();
   });
 
   it('calls onApproveAndExecute when button is clicked', () => {
     const plan = createPlan({ status: 'draft', source: 'planning' });
     render(<PlanPanel plan={plan} {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelExpand'));
     fireEvent.click(screen.getByTestId('agentBuilderPlanApproveButton'));
     expect(defaultProps.onApproveAndExecute).toHaveBeenCalledTimes(1);
   });
@@ -107,27 +136,22 @@ describe('PlanPanel', () => {
     expect(screen.getByText("Agent's Plan")).toBeInTheDocument();
   });
 
-  it('collapses panel when collapse button is clicked', () => {
+  it('collapses expanded panel when header is clicked again', () => {
     render(<PlanPanel plan={createPlan()} {...defaultProps} />);
-    const collapseButton = screen.getByTestId('agentBuilderPlanPanelCollapse');
-    fireEvent.click(collapseButton);
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelHeader'));
+    expect(screen.getByTestId('agentBuilderPlanPanel')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelHeader'));
     expect(screen.getByTestId('agentBuilderPlanPanelCollapsed')).toBeInTheDocument();
   });
 
-  it('shows progress badge when collapsed', () => {
+  it('toggles between collapsed and expanded via arrow button', () => {
     render(<PlanPanel plan={createPlan()} {...defaultProps} />);
-    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelCollapse'));
-    // After collapsing, the progress badge (1/3) should be visible
-    expect(screen.getByText('1/3')).toBeInTheDocument();
-  });
-
-  it('expands panel when expand button is clicked in collapsed state', () => {
-    render(<PlanPanel plan={createPlan()} {...defaultProps} />);
-    // Collapse first
-    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelCollapse'));
     expect(screen.getByTestId('agentBuilderPlanPanelCollapsed')).toBeInTheDocument();
-    // Expand
+
     fireEvent.click(screen.getByTestId('agentBuilderPlanPanelExpand'));
     expect(screen.getByTestId('agentBuilderPlanPanel')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('agentBuilderPlanPanelCollapse'));
+    expect(screen.getByTestId('agentBuilderPlanPanelCollapsed')).toBeInTheDocument();
   });
 });
