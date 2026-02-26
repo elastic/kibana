@@ -314,7 +314,7 @@
           "\nAgentBuilder tool service's setup contract"
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 70,
+        "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -346,7 +346,7 @@
               "<RunInput>) => void"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -414,7 +414,7 @@
           "\nAgentBuilder tool service's start contract"
         ],
         "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-        "lineNumber": 96,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -448,7 +448,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -502,7 +502,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -515,7 +515,7 @@
                 "label": "opts",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                "lineNumber": 107,
+                "lineNumber": 116,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -532,7 +532,7 @@
                       "<unknown, unknown, unknown, any>"
                     ],
                     "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-                    "lineNumber": 107,
+                    "lineNumber": 116,
                     "columnNumber": 25,
                     "deprecated": false,
                     "trackAdoption": false
@@ -559,7 +559,7 @@
         "\nSetup contract of the agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 117,
+      "lineNumber": 152,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -577,7 +577,7 @@
             "AgentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 121,
+          "lineNumber": 156,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -601,7 +601,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 125,
+          "lineNumber": 160,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -619,7 +619,7 @@
             "AttachmentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 129,
+          "lineNumber": 164,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -643,7 +643,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 133,
+          "lineNumber": 168,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -661,7 +661,7 @@
             "SkillsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 137,
+          "lineNumber": 172,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -680,7 +680,7 @@
         "\nStart contract of the agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 143,
+      "lineNumber": 178,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -695,18 +695,10 @@
             "\nAgents service, to execute agents."
           ],
           "signature": [
-            "{ runAgent: ",
-            {
-              "pluginId": "@kbn/agent-builder-server",
-              "scope": "common",
-              "docId": "kibKbnAgentBuilderServerPluginApi",
-              "section": "def-common.RunAgentFn",
-              "text": "RunAgentFn"
-            },
-            "; }"
+            "AgentsStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 147,
+          "lineNumber": 182,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -730,7 +722,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 153,
+          "lineNumber": 186,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -742,13 +734,31 @@
           "tags": [],
           "label": "skills",
           "description": [
-            "\nSkills service, to register or unregister skills dynamically."
+            "\nSkills service, to manage and access skills."
           ],
           "signature": [
             "SkillsStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 157,
+          "lineNumber": 190,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.execution",
+          "type": "Object",
+          "tags": [],
+          "label": "execution",
+          "description": [
+            "\nExecution service, to execute agents and retrieve execution status."
+          ],
+          "signature": [
+            "ExecutionStart"
+          ],
+          "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
+          "lineNumber": 194,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
