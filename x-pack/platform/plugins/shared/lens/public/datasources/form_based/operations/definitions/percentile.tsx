@@ -18,7 +18,8 @@ import type {
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
-import { memoize, snakeCase } from 'lodash';
+import { memoize } from 'lodash';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
 import {
@@ -204,17 +205,10 @@ export const percentileOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column, columnId) => {
+  toESQL: (column) => {
     if (column.timeShift) return;
-    // Use columnId to make param names unique
-    const fieldKey = `field_${snakeCase(columnId)}`;
-    const percentileKey = `percentile_${snakeCase(columnId)}`;
     return {
-      template: `PERCENTILE(??${fieldKey}, ?${percentileKey})`,
-      params: {
-        [fieldKey]: column.sourceField,
-        [percentileKey]: column.params.percentile,
-      },
+      template: `PERCENTILE(${sanitazeESQLInput(column.sourceField)}, ${column.params.percentile})`,
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {

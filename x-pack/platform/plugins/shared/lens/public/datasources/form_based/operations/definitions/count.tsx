@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { snakeCase } from 'lodash';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -180,18 +180,15 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     const field = indexPattern?.getFieldByName(column.sourceField);
     return field?.format ?? { id: 'number' };
   },
-  toESQL: (column, columnId, indexPattern) => {
+  toESQL: (column, _columnId, indexPattern) => {
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
     if (!field || field?.type === 'document') {
       return { template: 'COUNT(*)' };
     }
-    // Use columnId to make param name unique
-    const paramKey = `field_${snakeCase(columnId)}`;
     return {
-      template: `COUNT(??${paramKey})`,
-      params: { [paramKey]: field.name },
+      template: `COUNT(${sanitazeESQLInput(field.name)})`,
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {

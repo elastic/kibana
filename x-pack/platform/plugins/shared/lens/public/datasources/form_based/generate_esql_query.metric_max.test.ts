@@ -73,11 +73,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
     expect(result).toEqual(
       expect.objectContaining({
         success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)
-  | EVAL static_value = 100`,
+        esql: 'FROM myIndexPattern | WHERE `order_date` >= ?_tstart AND `order_date` <= ?_tend | STATS COUNT(*) BY BUCKET(`order_date`, 30 minutes) | EVAL static_value = 100',
       })
     );
     if (result.success) {
@@ -133,7 +129,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
     expect(result).toEqual(
       expect.objectContaining({
         success: true,
-        esql: 'FROM myIndexPattern | STATS bucket_0_0 = COUNT(*) | EVAL static_max_value = 100',
+        esql: 'FROM myIndexPattern | STATS COUNT(*) | EVAL static_max_value = 100',
       })
     );
     if (result.success) {

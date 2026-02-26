@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { snakeCase } from 'lodash';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
@@ -213,14 +213,11 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         },
       ];
     },
-    toESQL: (column, columnId, _indexPattern, layer) => {
+    toESQL: (column) => {
       if (column.timeShift) return;
       if (!typeToESQLFn[type]) return;
-      // Use columnId to make param name unique
-      const paramKey = `field_${snakeCase(columnId)}`;
       return {
-        template: `${typeToESQLFn[type]}(??${paramKey})`,
-        params: { [paramKey]: column.sourceField },
+        template: `${typeToESQLFn[type]}(${sanitazeESQLInput(column.sourceField)})`,
       };
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {
