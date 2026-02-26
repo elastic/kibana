@@ -25,6 +25,7 @@ import {
   type Query,
   type TimeRange,
 } from '@kbn/es-query';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import type {
@@ -359,7 +360,7 @@ export class MapApp extends React.Component<Props, State> {
   _initMapAndLayerSettings(mapState?: MapAttributes) {
     const globalState = this._getGlobalState();
 
-    const savedObjectFilters = mapState?.filters ? mapState.filters : [];
+    const savedObjectFilters = mapState?.filters ? toStoredFilters(mapState.filters) ?? [] : [];
     const appFilters = this._appStateManager.getFilters() || [];
 
     const query = getInitialQuery({

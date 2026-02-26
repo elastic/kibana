@@ -11,7 +11,6 @@ import { flow } from 'lodash';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
 import { transformMapAttributesOut } from '../../content_management/transform_map_attributes_out';
-import type { MapByValueState } from '../types';
 import { MAP_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import type { StoredMapEmbeddableState } from './types';
 
@@ -39,18 +38,15 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
     }
 
     // by value
-    if ((state as MapByValueState).attributes) {
+    if ('attributes' in state && state.attributes) {
       return {
         ...state,
-        attributes: transformMapAttributesOut(
-          (state as MapByValueState).attributes,
-          (targetName: string) => {
-            const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
-            if (panelRef) return panelRef;
+        attributes: transformMapAttributesOut(state.attributes, (targetName: string) => {
+          const panelRef = (panelReferences ?? []).find(({ name }) => name === targetName);
+          if (panelRef) return panelRef;
 
-            return (containerReferences ?? []).find(({ name }) => name === targetName);
-          }
-        ),
+          return (containerReferences ?? []).find(({ name }) => name === targetName);
+        }),
       };
     }
 
