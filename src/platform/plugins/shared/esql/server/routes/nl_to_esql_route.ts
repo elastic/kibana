@@ -27,7 +27,7 @@ const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 // Added the limit here to avoid overwhelming the LLM with too many fields. Tokens is not a problem anymore
 // but we don't want to risk the LLM getting stuck or taking too long to generate the query.
 // We can remove or increase this limit if we see that it's a problem.
-const MAX_FIELDS = 200;
+const MAX_FIELDS = 1000;
 
 const getSourceNames = async (client: ElasticsearchClient): Promise<string[]> => {
   const service = new EsqlService({ client });

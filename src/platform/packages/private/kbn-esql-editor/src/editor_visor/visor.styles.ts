@@ -163,16 +163,26 @@ export const visorStyles = (
     `,
     nlInputWrapper: css`
       background: ${euiTheme.colors.backgroundBasePlain};
-      justify-content: center;
-      align-self: stretch;
+      height: ${euiTheme.size.xl};
       border-bottom-right-radius: ${euiTheme.size.s};
       border-top-right-radius: ${euiTheme.size.s};
       padding-right: 2px;
+      overflow: visible;
+      position: relative;
     `,
     nlInput: css`
-      box-shadow: none;
-      border: none;
+      box-shadow: none !important;
+      border: none !important;
+      background-color: ${euiTheme.colors.backgroundBasePlain};
       font-size: ${fontSize} !important;
+      padding: calc(${euiTheme.size.xs} + 2px) ${euiTheme.size.s} !important;
+      margin: 0;
+      resize: none;
+      overflow: hidden;
+      min-height: ${euiTheme.size.xl};
+      border-radius: ${euiTheme.size.s} !important;
+      position: relative;
+      z-index: ${euiTheme.levels.flyout};
       &:focus,
       &:hover {
         box-shadow: none !important;

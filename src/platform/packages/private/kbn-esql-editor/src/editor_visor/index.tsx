@@ -10,9 +10,9 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextArea,
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -80,7 +80,7 @@ export function QuickSearchVisor({
   const connectorCheckRef = useRef(false);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const kqlInputRef = useRef<HTMLDivElement>(null);
-  const nlInputRef = useRef<HTMLInputElement>(null);
+  const nlInputRef = useRef<HTMLTextAreaElement>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
@@ -212,6 +212,25 @@ export function QuickSearchVisor({
     };
   }, [isVisible, sourcesKey, data.dataViews]);
 
+  const updateNlTextareaHeight = useCallback(() => {
+    const textarea = nlInputRef.current;
+    if (!textarea) return;
+    textarea.style.whiteSpace = 'pre-wrap';
+    textarea.style.overflow = 'auto';
+    textarea.style.maxHeight = 'calc(35vh - 100px)';
+    textarea.style.setProperty('height', 'auto', 'important');
+    textarea.style.setProperty('height', `${textarea.scrollHeight}px`, 'important');
+  }, []);
+
+  const resetNlTextareaHeight = useCallback(() => {
+    const textarea = nlInputRef.current;
+    if (!textarea) return;
+    textarea.style.removeProperty('white-space');
+    textarea.style.removeProperty('overflow');
+    textarea.style.removeProperty('max-height');
+    textarea.style.removeProperty('height');
+  }, []);
+
   useEffect(() => {
     if (isVisible) {
       if (visorMode === VisorMode.KQL && kqlInputRef.current) {
@@ -219,9 +238,10 @@ export function QuickSearchVisor({
         textArea?.focus();
       } else if (visorMode === VisorMode.NaturalLanguage && nlInputRef.current) {
         nlInputRef.current.focus();
+        updateNlTextareaHeight();
       }
     }
-  }, [isVisible, visorMode]);
+  }, [isVisible, visorMode, updateNlTextareaHeight]);
 
   const comboBoxWidth = useMemo(() => {
     const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
@@ -314,18 +334,24 @@ export function QuickSearchVisor({
               {hasConnector === false ? (
                 <NoConnectorMessage basePath={core.http.basePath} />
               ) : (
-                <EuiFieldText
+                <EuiTextArea
                   inputRef={nlInputRef}
                   compressed
                   fullWidth
-                  icon="sparkles"
+                  resize="none"
+                  rows={1}
                   placeholder={nlPlaceholder}
                   value={nlValue}
-                  isLoading={isNlLoading}
                   disabled={!isVisible || isNlLoading}
-                  onChange={(e) => setNlValue(e.target.value)}
+                  onChange={(e) => {
+                    setNlValue(e.target.value);
+                    updateNlTextareaHeight();
+                  }}
+                  onFocus={updateNlTextareaHeight}
+                  onBlur={resetNlTextareaHeight}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
                       onNlSubmit();
                     }
                   }}
