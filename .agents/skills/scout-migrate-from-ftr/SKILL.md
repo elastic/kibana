@@ -17,55 +17,124 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 - **REQUIRED SUB-SKILL:** ftr-testing (understand FTR structure, loadTestFile, and configs).
 - **REQUIRED SUB-SKILL:** scout-best-practices-reviewer (review new Scout tests and migration parity).
 
+## Important note
+
+- If the suite mostly validates **data correctness**, migrate it to a Scout **API** test (or unit/integration) instead of a Scout UI test.
+- Prefer component/unit tests for isolated UI behaviors rather than Scout functional tests.
+- Follow steps **1–10** below. Common migration failures: missing UI tags, wrong Scout package imports, relying on ordering/shared state, and ingestion/setup that isn't space/parallel-safe.
+
 ## Guardrails / gotchas (high signal)
 
-- Scout specs are **standalone**: don’t rely on file execution order or `loadTestFile()` indexes.
+- Scout specs are **standalone**: don't rely on file execution order or `loadTestFile()` indexes.
 - Each Scout `test()` runs in a **fresh browser context**: if an FTR suite used multiple `it()` blocks as one journey, combine into one `test()` + `test.step()`. Do login/navigation in `beforeEach` (avoid `page`/`browserAuth`/`pageObjects` in `beforeAll`).
-- Keep **one suite per file**, avoid nested `describe`, and don’t use `*.describe.configure()`.
+- Keep **one suite per file**, avoid nested `describe`, and don't use `*.describe.configure()`.
 - UI tests: tags are **required** (validated at runtime).
-- `parallel_tests/`: ingest via `parallel_tests/global.setup.ts` + `globalSetupHook` (don’t use `esArchiver` in spec files).
+- `parallel_tests/`: ingest via `parallel_tests/global.setup.ts` + `globalSetupHook` (don't use `esArchiver` in spec files).
 - Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-security`/`@kbn/scout-oblt`/`@kbn/scout-search`) and import `expect` from `/ui` or `/api`.
 - Replace FTR config nesting / per-suite server args with `uiSettings` / `scoutSpace.uiSettings` and (when needed) `apiServices.core.settings(...)`.
 
 ## Core workflow
 
-1. Decide whether the test should be Scout UI or Scout API.
-   - UI tests: verify user flows and rendering.
-   - API tests: validate server responses, data setup, or backend behaviors.
-2. Identify the module root and target Scout path.
-   - Place tests under `<module-root>/test/scout*/{ui,api}/{tests,parallel_tests}`.
-   - UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be isolated by a Kibana space and should run in parallel; otherwise use `ui/tests/` + `test`.
-   - API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
-3. Translate FTR suites into Scout specs.
-   - Split `loadTestFile` suites into standalone Scout spec files.
-   - If a single FTR file contains multiple top-level `describe` blocks, split into multiple Scout specs (one describe per file).
-   - If multiple FTR `it(...)` blocks were sequential steps of one flow, combine into a single Scout `test(...)` and use `test.step(...)`.
-   - Keep one top-level suite per file and avoid nested `describe` blocks.
-4. Replace FTR-only patterns.
-   - Replace `supertest` calls with Scout `apiClient` (endpoint under test) + `requestAuth`/`samlAuth` (auth).
-   - Use `apiServices`/`kbnClient` for setup/teardown and verifying side effects.
-   - Replace webdriver waits with Playwright/page object methods.
-   - Replace per-suite FTR config flags with `uiSettings` / `scoutSpace.uiSettings`, and (when needed) `apiServices.core.settings(...)`.
-   - Use the correct Scout package for the test location and import `expect` from `/ui` or `/api`.
-5. Move UI selectors/actions into page objects.
-   - Create a page object for the page under test and register it in plugin fixtures.
-   - Keep test-subject constants in fixtures (for reuse across tests and page objects).
-6. Port data ingestion to Scout fixtures/global setup (when needed).
-   - For parallel tests, ingest in `parallel_tests/global.setup.ts` via `globalSetupHook` (don’t use `esArchiver` in spec files).
-   - If using synthtrace generators, add `@kbn/synthtrace-client` to the test tsconfig references.
-7. Move isolated UI logic to component/unit tests when possible.
-   - If a feature can be tested in isolation (dropdowns, sorting, small components), prefer RTL/unit tests instead of Scout e2e.
-8. Clean up FTR wiring.
-   - Remove the `loadTestFile` entry from the FTR index.
-   - If the test exists in both stateful and serverless FTR suites, remove from all relevant config/index files.
-   - Delete the old FTR test file once Scout coverage is in place.
-   - For staged migrations, mark the remaining FTR suite as `describe.skip` to avoid duplicate coverage.
-9. Verify tests pass locally (look at tags to see where they should be run).
+### 1) Decide UI vs API
+
+- UI tests: verify user flows and rendering.
+- API tests: validate server responses, data setup, or backend behaviors.
+- Data validation belongs in API tests, not UI tests.
+
+### 2) Place files correctly
+
+- UI: `<module-root>/test/scout*/ui/{tests,parallel_tests}/**/*.spec.ts`
+- API: `<module-root>/test/scout*/api/{tests,parallel_tests}/**/*.spec.ts`
+- UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be space-isolated and should run in parallel; otherwise use `ui/tests/` + `test`.
+- API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
+- Parallel UI: avoid hardcoded saved object IDs (they can differ per space) and make names unique when needed (often suffix with `scoutSpace.id`).
+
+### 3) Translate the test structure
+
+- `describe/it` -> `test.describe/test` or `apiTest.describe/apiTest` (but don't assume 1:1 `it` -> `test`).
+- `before/after` -> `test.beforeAll/test.afterAll`.
+- `beforeEach/afterEach` -> `test.beforeEach/test.afterEach`.
+- Keep **one suite per file** and a flat hierarchy (avoid nested `describe`; use `test.step()` inside a test for structure).
+- If a single FTR file contains multiple top-level `describe` blocks, split into multiple Scout specs (one describe per file).
+
+#### `it` blocks are sometimes steps (not full test cases)
+
+In FTR it's common for multiple `it(...)` blocks in one `describe(...)` to behave like a single user journey (shared browser state across `it`s).
+In Scout (Playwright), each `test(...)` runs with a fresh browser context, so you usually can't preserve that state across multiple `test`s.
+
+Guideline:
+
+- If the FTR suite uses multiple `it(...)` blocks as sequential steps of one flow, combine them into a single `test(...)` and convert the step boundaries into `test.step(...)`.
+- If an `it(...)` block is already an independent test case, keep it as its own `test(...)` and ensure it sets up its own preconditions.
+
+Minimal sketch:
+
+```ts
+// FTR: multiple `it`s continue in the same browser context
+it('create entity', async () => {});
+it('edit entity', async () => {}); // continues...
+
+// Scout: combine into one test and use `test.step` for debuggability
+test('create and edit entity', async () => {
+  await test.step('create entity', async () => {});
+  await test.step('edit entity', async () => {});
+});
+```
+
+### 4) Replace FTR dependencies
+
+- Replace `supertest` calls with Scout `apiClient` (endpoint under test) + `requestAuth`/`samlAuth` (auth).
+- Replace other FTR services with Scout fixtures (`pageObjects`, `browserAuth`, `apiServices`, `kbnClient`, `esArchiver`).
+- Use `apiServices`/`kbnClient` for setup/teardown and verifying side effects.
+- Replace webdriver waits with Playwright/page object methods.
+- Move UI selectors/actions into Scout page objects; register new page objects in the plugin fixtures index.
+- If the test needs API setup/cleanup, add a scoped API service and use it in `beforeAll/afterAll`.
+- Replace per-suite FTR config flags with `uiSettings` / `scoutSpace.uiSettings`, and (when needed) `apiServices.core.settings(...)`.
+- Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-<solution>`), and import `expect` from `/ui` or `/api`.
+- If the test needs rison-encoded query params, use `@kbn/rison` and add it to `test/scout*/ui/tsconfig.json` `kbn_references`.
+
+### 5) Split loadTestFile suites
+
+- Each `loadTestFile` target becomes its own Scout spec.
+- Move shared setup into each spec (or a shared fixture/helper).
+- Don't rely on spec execution order (it's not guaranteed).
+- Split flows with different state requirements (localStorage, tour visibility) into dedicated specs.
+
+### 6) Add helpers and constants
+
+- Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
+- Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
+- For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
+- If using synthtrace generators, add `@kbn/synthtrace-client` to the test tsconfig references.
+
+### 7) Prefer component/unit tests for isolated UI
+
+- If functionality can be tested in isolation (dropdown constraints, sorting, small UI components), add RTL/unit tests instead of e2e.
+- Consider unit tests for tab configuration, feature-flagged tabs, and hook logic.
+
+### 8) Clean up FTR wiring
+
+- Remove `loadTestFile` entries from any stateful and serverless FTR configs/index files.
+- Delete old FTR test files once Scout coverage is verified.
+- For staged migrations, mark remaining FTR suites as `describe.skip` to avoid duplicate coverage.
+
+### 9) Verify and run tests locally
 
 - Use `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>` and
   `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
-- If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config dir from the Playwright config path (use `--config-dir <configSet>` only to override, or when using `start-server`).
-- If you start servers separately, pass `--serverConfigSet <configSet>` to `node scripts/scout.js start-server ...`.
+- If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config set from the Playwright config path.
+- `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <configSet>` when your tests require a custom config set.
+- Each test must include assertions.
+- UI tests must have at least one supported tag (Scout validates UI tags at runtime). API tests should also be tagged.
+- Avoid checking raw data in UI tests; prefer page object methods over direct selectors.
+- Preserve or update tags for deployment targets when needed.
+- Run Scout tests in both stateful and serverless if the plugin supports both.
+
+### 10) Review against Scout best practices
+
+- Read and follow the `scout-best-practices-reviewer` skill on all new/changed Scout spec files.
+- Provide the removed FTR test files as context so the reviewer can verify migration parity.
+- Address `blocker` and `major` findings before finalizing; discuss `minor` and `nit` items as appropriate.
 
 ## Common patterns
 
@@ -89,9 +158,3 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs instead).
 - Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
-
-## References
-
-Open only what you need:
-
-- Migration checklist (UI vs API, paths, fixtures mapping, manifests): `references/migration-workflow.md`
