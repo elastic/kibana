@@ -9,7 +9,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { RunResult } from '@kbn/task-manager-plugin/server/task';
+import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { TasksConfig } from './config';
@@ -40,22 +40,16 @@ async function runTask({
   logger,
   core,
   reportEvent,
-}: {
-  taskInstance: { state: Record<string, unknown> };
-  fakeRequest?: KibanaRequest;
+}: RunContext & {
   logger: Logger;
   core: EntityStoreCoreSetup;
-  reportEvent: TelemetryReporter;
+  reportEvent: TelemetryReporter['reportEvent'];
 }): Promise<RunResult> {
-  logger.info('Running store usage task');
-
-  const currentState = taskInstance.state;
-  const runs = (currentState.runs as number) || 0;
-  const namespace = currentState.namespace as string;
+  const namespace = taskInstance.state.namespace as string;
 
   if (!fakeRequest) {
     logger.error('No fake request found, skipping store usage task');
-    return { state: { ...currentState } };
+    return { state: { namespace } };
   }
 
   try {
@@ -63,33 +57,19 @@ async function runTask({
     const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
     const index = getLatestEntitiesIndexName(namespace);
 
-    await Promise.all(
-      ALL_ENTITY_TYPES.map(async (entityType) => {
+    for (const entityType of ALL_ENTITY_TYPES) {
+      try {
         const { count: storeSize } = await getStoreSize(esClient, index, entityType);
         reportEvent(ENTITY_STORE_USAGE_EVENT, { storeSize, entityType, namespace });
-        logger.debug(`Reported store usage for ${entityType}: ${storeSize} entities`);
-      })
-    );
-
-    return {
-      state: {
-        namespace,
-        lastExecutionTimestamp: new Date().toISOString(),
-        runs: runs + 1,
-        status: 'success',
-      },
-    };
+      } catch (e) {
+        logger.error(`Error reporting store usage for ${entityType}: ${e.message}`);
+      }
+    }
   } catch (e) {
     logger.error(`Error running store usage task: ${e.message}`);
-    return {
-      state: {
-        ...currentState,
-        lastError: e.message,
-        lastErrorTimestamp: new Date().toISOString(),
-        status: 'error',
-      },
-    };
   }
+
+  return { state: { namespace } };
 }
 
 export function registerStoreUsageTask({
@@ -101,17 +81,18 @@ export function registerStoreUsageTask({
   taskManager: TaskManagerSetupContract;
   logger: Logger;
 }): void {
-  const reportEvent = createReportEvent(core.analytics);
   try {
+    const { reportEvent } = createReportEvent(core.analytics);
     taskManager.registerTaskDefinitions({
       [config.type]: {
         title: config.title,
         timeout: config.timeout,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => ({
           run: () =>
             runTask({
               taskInstance,
               fakeRequest,
+              abortController,
               logger: logger.get(taskInstance.id),
               core,
               reportEvent,
@@ -137,10 +118,9 @@ export async function scheduleStoreUsageTask({
   request: KibanaRequest;
 }): Promise<void> {
   try {
-    const taskId = getStoreUsageTaskId(namespace);
     await taskManager.ensureScheduled(
       {
-        id: taskId,
+        id: getStoreUsageTaskId(namespace),
         taskType: config.type,
         schedule: { interval: config.interval! },
         state: { namespace },

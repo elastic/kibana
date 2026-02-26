@@ -125,11 +125,8 @@ const events = [
   ENTITY_STORE_USAGE_EVENT,
 ] as const;
 
-export const registerTelemetry = (analytics: AnalyticsServiceSetup) => {
-  events.forEach((eventConfig: EventTypeOpts<{}>) => {
-    analytics.registerEventType(eventConfig);
-  });
-};
+export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
+  events.forEach((eventConfig: EventTypeOpts<{}>) => analytics.registerEventType(eventConfig));
 
 // ------------------------------------
 // Type-safe reporting
