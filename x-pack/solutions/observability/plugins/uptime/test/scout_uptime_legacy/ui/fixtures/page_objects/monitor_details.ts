@@ -20,7 +20,7 @@ export class MonitorDetailsPage {
   }
 
   async waitForLoadingToFinish(): Promise<void> {
-    await this.page.testSubj.waitForSelector('kbnLoadingMessage', { state: 'hidden' });
+    await this.page.testSubj.waitForSelector('uptimeMonitorPage', { state: 'visible' });
   }
 
   async navigateToMonitorDetails(monitorId: string): Promise<void> {

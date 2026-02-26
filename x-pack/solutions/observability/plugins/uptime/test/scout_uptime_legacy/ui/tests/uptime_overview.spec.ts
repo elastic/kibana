@@ -15,7 +15,7 @@ test.describe('UptimeOverview', { tag: '@local-stateful-classic' }, () => {
     await test.step('configure heartbeat indices', async () => {
       await pageObjects.uptimeOverview.goto({ dateRangeStart: '2018-01-01', dateRangeEnd: 'now' });
       await pageObjects.uptimeOverview.clickSettingsLink();
-      await pageObjects.uptimeOverview.waitForLoadingToFinish();
+      await pageObjects.uptimeSettings.waitForLoadingToFinish();
       await expect(pageObjects.uptimeOverview.getHeartbeatIndicesInput()).toHaveValue(
         'heartbeat-*'
       );

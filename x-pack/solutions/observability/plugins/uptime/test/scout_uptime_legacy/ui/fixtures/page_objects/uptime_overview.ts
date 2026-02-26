@@ -15,7 +15,7 @@ export class UptimeOverviewPage {
   }
 
   async waitForLoadingToFinish(): Promise<void> {
-    await this.page.testSubj.waitForSelector('kbnLoadingMessage', { state: 'hidden' });
+    await this.page.testSubj.waitForSelector('uptimeOverviewPage', { state: 'visible' });
   }
 
   async clickSettingsLink(): Promise<void> {
@@ -39,7 +39,7 @@ export class UptimeOverviewPage {
     await this.page.testSubj.waitForSelector('uptimeOverviewPage', { state: 'visible' });
     await this.page.testSubj.waitForSelector('monitor-page-link-0001-up', {
       state: 'visible',
-      timeout: 60_000,
+      timeout: 30_000,
     });
   }
 

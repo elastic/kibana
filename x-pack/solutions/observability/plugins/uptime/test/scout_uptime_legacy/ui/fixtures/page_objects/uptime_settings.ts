@@ -15,7 +15,7 @@ export class UptimeSettingsPage {
   }
 
   async waitForLoadingToFinish(): Promise<void> {
-    await this.page.testSubj.waitForSelector('kbnLoadingMessage', { state: 'hidden' });
+    await this.page.testSubj.waitForSelector('uptimeSettingsPage', { state: 'visible' });
   }
 
   async waitForDefaultConnectorsLoaded(): Promise<void> {

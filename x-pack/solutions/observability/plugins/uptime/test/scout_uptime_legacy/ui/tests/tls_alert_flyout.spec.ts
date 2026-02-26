@@ -9,11 +9,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
 test.describe('TlsFlyoutInAlertingApp', { tag: '@local-stateful-classic' }, () => {
-  test('opens TLS alert flyout and verifies setting values', async ({
-    pageObjects,
-    browserAuth,
-    page,
-  }) => {
+  test('opens TLS alert flyout and verifies setting values', async ({ browserAuth, page }) => {
     await browserAuth.loginAsPrivilegedUser();
     await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
     await page.testSubj.locator('createRuleButton').waitFor({ timeout: 20_000 });
@@ -24,7 +20,6 @@ test.describe('TlsFlyoutInAlertingApp', { tag: '@local-stateful-classic' }, () =
       await page.testSubj.waitForSelector('xpack.synthetics.alerts.monitorStatus.filterBar', {
         state: 'visible',
       });
-      await pageObjects.uptimeOverview.waitForLoadingToFinish();
     });
 
     await test.step('verify TLS threshold values', async () => {
