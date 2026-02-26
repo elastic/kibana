@@ -9,14 +9,13 @@
 
 import type { DemoConfig, ServiceConfig } from '../../types';
 
-const CONTAINER_REGISTRY = 'ghcr.io/caulagi/rust-k8s-demo';
+const CONTAINER_REGISTRY = 'rust-k8s-demo';
 
 /**
  * Rust K8s Demo - Rust microservices with gRPC
  * https://github.com/caulagi/rust-k8s-demo
  *
- * WARNING: This demo requires custom-built container images that are NOT available in public registries.
- * See customImageInstructions below for build steps.
+ * Images are built automatically from source using minikube image build.
  *
  * Architecture:
  * - frontendservice: HTTP server (port 8080) that returns quotations
@@ -32,23 +31,27 @@ export const rustK8sDemoConfig: DemoConfig = {
   defaultVersion: 'latest',
   availableVersions: ['latest'],
   requiresCustomImages: true,
-  customImageInstructions: `This demo requires building and pushing images to GHCR or using local images.
-The project uses skaffold for local development. To build and push:
-  1. Clone https://github.com/caulagi/rust-k8s-demo
-  2. Run: make bootstrap
-  3. Build images: skaffold build --default-repo=ghcr.io/<your-username>/rust-k8s-demo
-  4. Push to your registry or load into minikube: minikube image load <image>`,
+  customImageInstructions: `Images will be built automatically from source.
+The first deployment may take several minutes while Rust compiles the services.`,
+  imageBuildConfig: {
+    gitUrl: 'https://github.com/caulagi/rust-k8s-demo.git',
+    images: [
+      { name: 'rust-k8s-demo/frontendservice:latest', context: 'frontendservice' },
+      { name: 'rust-k8s-demo/quotationservice:latest', context: 'quotationservice' },
+      { name: 'rust-k8s-demo/databaseservice:latest', context: 'databaseservice' },
+    ],
+  },
 
   frontendService: {
     name: 'frontendservice',
     nodePort: 30088,
   },
 
-  getServices: (version = 'latest'): ServiceConfig[] => [
+  getServices: (): ServiceConfig[] => [
     // PostgreSQL database with quotations data
     {
       name: 'databaseservice',
-      image: `${CONTAINER_REGISTRY}/databaseservice:${version}`,
+      image: `${CONTAINER_REGISTRY}/databaseservice:latest`,
       port: 5432,
       env: {
         POSTGRES_PASSWORD: 'postgres',
@@ -64,7 +67,7 @@ The project uses skaffold for local development. To build and push:
     // gRPC quotation service that queries PostgreSQL
     {
       name: 'quotationservice',
-      image: `${CONTAINER_REGISTRY}/quotationservice:${version}`,
+      image: `${CONTAINER_REGISTRY}/quotationservice:latest`,
       port: 9001,
       env: {
         RUST_LOG: 'quotation_server=debug,tower_http=trace',
@@ -84,7 +87,7 @@ The project uses skaffold for local development. To build and push:
     // Frontend HTTP service
     {
       name: 'frontendservice',
-      image: `${CONTAINER_REGISTRY}/frontendservice:${version}`,
+      image: `${CONTAINER_REGISTRY}/frontendservice:latest`,
       port: 8080,
       env: {
         QUOTATION_SERVICE_HOSTNAME: 'quotationservice',

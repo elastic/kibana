@@ -169,6 +169,7 @@ run(
     const teardown = Boolean(flags.teardown);
     const patch = Boolean(flags.patch);
     const reset = Boolean(flags.reset);
+    const forceRebuildImages = Boolean(flags['rebuild-images']);
 
     // Parse scenario flags
     const scenarioIds: string[] = [];
@@ -248,6 +249,7 @@ run(
       version,
       teardown,
       scenarioIds,
+      forceRebuildImages,
     }).catch((error) => {
       throw new Error(`Failed to manage ${demoConfig.displayName}`, { cause: error });
     });
@@ -283,6 +285,7 @@ run(
         'clear-chaos',
         'apply-chaos',
         'remove-chaos',
+        'rebuild-images',
       ],
       alias: {
         c: 'config',
@@ -307,6 +310,7 @@ run(
         --patch, -p        Patch scenarios onto running cluster (no redeploy)
         --reset, -r        Reset all scenarios to defaults (no redeploy)
         --teardown         Stop and remove demo deployment
+        --rebuild-images   Force rebuild of custom images (for demos that require building from source)
 
         Chaos Mesh Options:
         --list-chaos       List available Chaos Mesh scenarios

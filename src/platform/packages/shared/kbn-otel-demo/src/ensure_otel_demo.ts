@@ -26,6 +26,7 @@ import { readKibanaConfig } from './read_kibana_config';
 import { enableStreams } from './util/enable_streams';
 import { createDataView } from './util/create_data_view';
 import { resolveKibanaUrl } from './util/resolve_kibana_url';
+import { buildCustomImages } from './util/build_custom_images';
 import type { DemoType, FailureScenario } from './types';
 import {
   getDemoConfig,
@@ -102,6 +103,7 @@ export async function ensureOtelDemo({
   version,
   teardown = false,
   scenarioIds = [],
+  forceRebuildImages = false,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
@@ -111,6 +113,7 @@ export async function ensureOtelDemo({
   version?: string;
   teardown?: boolean;
   scenarioIds?: string[];
+  forceRebuildImages?: boolean;
 }) {
   await assertKubectlAvailable();
   await assertMinikubeAvailable();
@@ -131,19 +134,36 @@ export async function ensureOtelDemo({
   log.info(`  Version: ${demoVersion}`);
 
   if (demoConfig.requiresCustomImages) {
-    log.write('');
-    log.warning(
-      `${chalk.bold('WARNING:')} This demo requires custom-built container images that are NOT available in public registries.`
-    );
-    log.warning('Pods will fail to start with ImagePullBackOff errors until images are built.');
-    if (demoConfig.customImageInstructions) {
+    if (demoConfig.imageBuildConfig) {
       log.write('');
-      log.write(chalk.dim('Build instructions:'));
-      for (const line of demoConfig.customImageInstructions.split('\n')) {
-        log.write(chalk.dim(`  ${line}`));
+      log.info(
+        `${chalk.bold(
+          'Building custom images:'
+        )} This demo requires images to be built from source.`
+      );
+      if (demoConfig.customImageInstructions) {
+        log.write(chalk.dim(`  ${demoConfig.customImageInstructions.split('\n')[0]}`));
       }
+      log.write('');
+      await buildCustomImages(log, demoConfig.id, demoConfig.imageBuildConfig, forceRebuildImages);
+      log.write('');
+    } else {
+      log.write('');
+      log.warning(
+        `${chalk.bold(
+          'WARNING:'
+        )} This demo requires custom-built container images that are NOT available in public registries.`
+      );
+      log.warning('Pods will fail to start with ImagePullBackOff errors until images are built.');
+      if (demoConfig.customImageInstructions) {
+        log.write('');
+        log.write(chalk.dim('Build instructions:'));
+        for (const line of demoConfig.customImageInstructions.split('\n')) {
+          log.write(chalk.dim(`  ${line}`));
+        }
+      }
+      log.write('');
     }
-    log.write('');
   }
 
   // Ensure minikube is running

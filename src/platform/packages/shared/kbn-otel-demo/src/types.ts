@@ -82,6 +82,16 @@ export interface DemoConfig {
   requiresCustomImages?: boolean;
   /** Instructions for building custom images when requiresCustomImages is true */
   customImageInstructions?: string;
+  /** Configuration for automatic image building when requiresCustomImages is true */
+  imageBuildConfig?: {
+    gitUrl: string;
+    images: Array<{
+      name: string;
+      context: string;
+      dockerfile?: string;
+    }>;
+    preBuildCommand?: string;
+  };
 }
 
 /**

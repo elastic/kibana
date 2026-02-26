@@ -9,14 +9,13 @@
 
 import type { DemoConfig, ServiceConfig } from '../../types';
 
-const CONTAINER_REGISTRY = 'ghcr.io/teamlead/kubepay';
+const CONTAINER_REGISTRY = 'kubepay';
 
 /**
  * KubePay - Spring Boot microservices financial demo
  * https://github.com/teamlead/spring-microservices-kubernetes-demo
  *
- * WARNING: This demo requires custom-built container images that are NOT available in public registries.
- * See customImageInstructions below for build steps.
+ * Images are built automatically from source using minikube image build.
  */
 export const kubepayConfig: DemoConfig = {
   id: 'kubepay',
@@ -27,23 +26,25 @@ export const kubepayConfig: DemoConfig = {
   defaultVersion: 'latest',
   availableVersions: ['latest'],
   requiresCustomImages: true,
-  customImageInstructions: `This demo requires building and pushing images to GHCR or using local images.
-See the KubePay repo for build instructions:
-  1. Clone https://github.com/teamlead/spring-microservices-kubernetes-demo
-  2. Run: ./mvnw clean install -DskipTests
-  3. Build Docker images:
-     docker build -t ghcr.io/teamlead/kubepay/gateway:latest ./gateway/gateway-service
-     docker build -t ghcr.io/teamlead/kubepay/auth:latest ./auth/auth-service
-     docker build -t ghcr.io/teamlead/kubepay/user:latest ./user/user-service
-     docker build -t ghcr.io/teamlead/kubepay/wallet:latest ./wallet/wallet-service
-  4. Push to your registry or load into minikube: minikube image load <image>`,
+  customImageInstructions: `Images will be built automatically from source.
+The first deployment may take several minutes while Maven downloads dependencies and builds the JARs.`,
+  imageBuildConfig: {
+    gitUrl: 'https://github.com/teamlead/spring-microservices-kubernetes-demo.git',
+    preBuildCommand: './mvnw clean install -DskipTests',
+    images: [
+      { name: 'kubepay/gateway:latest', context: 'gateway/gateway-service' },
+      { name: 'kubepay/auth:latest', context: 'auth/auth-service' },
+      { name: 'kubepay/user:latest', context: 'user/user-service' },
+      { name: 'kubepay/wallet:latest', context: 'wallet/wallet-service' },
+    ],
+  },
 
   frontendService: {
     name: 'gateway',
     nodePort: 30086,
   },
 
-  getServices: (version = 'latest'): ServiceConfig[] => [
+  getServices: (): ServiceConfig[] => [
     // Zipkin for distributed tracing (required by KubePay)
     {
       name: 'zipkin',
@@ -58,7 +59,7 @@ See the KubePay repo for build instructions:
     // Gateway - API gateway and entry point
     {
       name: 'gateway',
-      image: `${CONTAINER_REGISTRY}/gateway:${version}`,
+      image: `${CONTAINER_REGISTRY}/gateway:latest`,
       port: 8100,
       env: {
         AUTH_URL: 'http://auth:8101',
@@ -83,7 +84,7 @@ See the KubePay repo for build instructions:
     // Auth service - handles authentication and authorization
     {
       name: 'auth',
-      image: `${CONTAINER_REGISTRY}/auth:${version}`,
+      image: `${CONTAINER_REGISTRY}/auth:latest`,
       port: 8101,
       env: {
         AUTH_URL: 'http://auth:8101',
@@ -108,7 +109,7 @@ See the KubePay repo for build instructions:
     // User service - handles user operations
     {
       name: 'user',
-      image: `${CONTAINER_REGISTRY}/user:${version}`,
+      image: `${CONTAINER_REGISTRY}/user:latest`,
       port: 8102,
       env: {
         AUTH_URL: 'http://auth:8101',
@@ -133,7 +134,7 @@ See the KubePay repo for build instructions:
     // Wallet service - handles wallet and fund operations
     {
       name: 'wallet',
-      image: `${CONTAINER_REGISTRY}/wallet:${version}`,
+      image: `${CONTAINER_REGISTRY}/wallet:latest`,
       port: 8103,
       env: {
         AUTH_URL: 'http://auth:8101',
