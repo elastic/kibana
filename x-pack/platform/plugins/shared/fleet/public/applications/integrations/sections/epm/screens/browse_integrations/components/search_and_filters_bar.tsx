@@ -30,13 +30,8 @@ import type {
   SetupMethodFilterType,
   SignalFilterType,
 } from '../types';
-import {
-  SETUP_METHOD_AGENTLESS,
-  SETUP_METHOD_ELASTIC_AGENT,
-  SETUP_METHOD_BEATS,
-  SIGNAL_LOGS,
-  SIGNAL_METRICS,
-} from '../types';
+import { SETUP_METHOD_AGENTLESS, SETUP_METHOD_ELASTIC_AGENT, SETUP_METHOD_BEATS } from '../types';
+import { dataTypes } from '../../../../../../../../common/constants';
 import { StatusFilter } from '../../../components/status_filter';
 
 const SEARCH_DEBOUNCE_MS = 150;
@@ -261,8 +256,8 @@ const SignalFilter: React.FC<{
           'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalLogsOption',
           { defaultMessage: 'Logs' }
         ),
-        key: SIGNAL_LOGS,
-        checked: selectedSignals.includes(SIGNAL_LOGS) ? 'on' : undefined,
+        key: dataTypes.Logs,
+        checked: selectedSignals.includes(dataTypes.Logs) ? 'on' : undefined,
         'data-test-subj': 'browseIntegrations.searchBar.signalLogsOption',
       },
       {
@@ -270,9 +265,18 @@ const SignalFilter: React.FC<{
           'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalMetricsOption',
           { defaultMessage: 'Metrics' }
         ),
-        key: SIGNAL_METRICS,
-        checked: selectedSignals.includes(SIGNAL_METRICS) ? 'on' : undefined,
+        key: dataTypes.Metrics,
+        checked: selectedSignals.includes(dataTypes.Metrics) ? 'on' : undefined,
         'data-test-subj': 'browseIntegrations.searchBar.signalMetricsOption',
+      },
+      {
+        label: i18n.translate(
+          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.signalTracesOption',
+          { defaultMessage: 'Traces' }
+        ),
+        key: dataTypes.Traces,
+        checked: selectedSignals.includes(dataTypes.Traces) ? 'on' : undefined,
+        'data-test-subj': 'browseIntegrations.searchBar.signalTracesOption',
       },
     ],
     [selectedSignals]

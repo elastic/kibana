@@ -16,9 +16,9 @@ export type SetupMethodFilterType =
   | typeof SETUP_METHOD_ELASTIC_AGENT
   | typeof SETUP_METHOD_BEATS;
 
-export const SIGNAL_LOGS = 'logs';
-export const SIGNAL_METRICS = 'metrics';
-export type SignalFilterType = typeof SIGNAL_LOGS | typeof SIGNAL_METRICS;
+import type { dataTypes } from '../../../../../../../common/constants';
+
+export type SignalFilterType = (typeof dataTypes)[keyof typeof dataTypes];
 
 export interface BrowseIntegrationsFilter {
   q?: string;

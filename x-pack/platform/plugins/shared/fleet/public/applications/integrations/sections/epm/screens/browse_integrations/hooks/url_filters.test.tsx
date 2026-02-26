@@ -10,13 +10,8 @@ import { useHistory } from 'react-router-dom';
 
 import { useUrlParams } from '../../../../../../../hooks';
 
-import {
-  STATUS_DEPRECATED,
-  SETUP_METHOD_AGENTLESS,
-  SETUP_METHOD_ELASTIC_AGENT,
-  SIGNAL_LOGS,
-  SIGNAL_METRICS,
-} from '../types';
+import { STATUS_DEPRECATED, SETUP_METHOD_AGENTLESS, SETUP_METHOD_ELASTIC_AGENT } from '../types';
+import { dataTypes } from '../../../../../../../../common/constants';
 
 import { useAddUrlFilters, useUrlFilters } from './url_filters';
 
@@ -176,7 +171,7 @@ describe('useUrlFilters', () => {
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.signal).toEqual([SIGNAL_LOGS]);
+    expect(result.current.signal).toEqual([dataTypes.Logs]);
   });
 
   it('parses signal array from URL', () => {
@@ -187,7 +182,7 @@ describe('useUrlFilters', () => {
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.signal).toEqual([SIGNAL_LOGS, SIGNAL_METRICS]);
+    expect(result.current.signal).toEqual([dataTypes.Logs, dataTypes.Metrics]);
   });
 
   it('ignores invalid signal values', () => {
@@ -209,7 +204,29 @@ describe('useUrlFilters', () => {
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.signal).toEqual([SIGNAL_LOGS]);
+    expect(result.current.signal).toEqual([dataTypes.Logs]);
+  });
+
+  it('parses single traces signal from URL', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: { signal: 'traces' },
+      toUrlParams: jest.fn(),
+    });
+
+    const { result } = renderHook(() => useUrlFilters());
+
+    expect(result.current.signal).toEqual([dataTypes.Traces]);
+  });
+
+  it('parses signal array with traces from URL', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: { signal: ['logs', 'metrics', 'traces'] },
+      toUrlParams: jest.fn(),
+    });
+
+    const { result } = renderHook(() => useUrlFilters());
+
+    expect(result.current.signal).toEqual([dataTypes.Logs, dataTypes.Metrics, dataTypes.Traces]);
   });
 });
 

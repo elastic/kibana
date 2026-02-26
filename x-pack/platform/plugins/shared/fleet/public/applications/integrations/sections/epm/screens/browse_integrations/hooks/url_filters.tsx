@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { omit } from 'lodash';
 
 import { useUrlParams } from '../../../../../../../hooks';
+import { dataTypes } from '../../../../../../../../common/constants';
 
 import type {
   BrowseIntegrationsFilter,
@@ -21,7 +22,7 @@ import type {
 
 const VALID_STATUSES: IntegrationStatusFilterType[] = ['deprecated'];
 const VALID_SETUP_METHODS: SetupMethodFilterType[] = ['agentless', 'elastic_agent', 'beats'];
-const VALID_SIGNALS: SignalFilterType[] = ['logs', 'metrics'];
+const VALID_SIGNALS: SignalFilterType[] = Object.values(dataTypes);
 const INTEGRATIONS_QUERYPARAM_Q = 'q';
 const INTEGRATIONS_QUERYPARAM_SORT = 'sort';
 const INTEGRATIONS_QUERYPARAM_STATUS = 'status';
