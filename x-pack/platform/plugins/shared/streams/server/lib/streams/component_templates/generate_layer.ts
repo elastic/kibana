@@ -15,16 +15,23 @@ import type {
   StreamsMappingProperties,
 } from '@kbn/streams-schema/src/fields';
 import type { Streams } from '@kbn/streams-schema';
-import { getAdvancedParameters, isRoot, namespacePrefixes } from '@kbn/streams-schema';
+import {
+  getAdvancedParameters,
+  isRoot,
+  getRoot,
+  namespacePrefixes,
+  LOGS_ECS_STREAM_NAME,
+} from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import {
-  logsSettings,
   baseMappings,
   NAMESPACE_PRIORITIES,
   otelEquivalentLookupMap,
   REQUIRED_RESOURCE_ATTRIBUTES_FIELDS,
 } from './logs_layer';
+import { ecsLogsSettings } from './logs_ecs_layer';
 import { getComponentTemplateName } from './name';
+import { otelLogsSettings } from './logs_otel_layer';
 
 function buildNamespaceStructure(
   prefix: string,
@@ -185,17 +192,27 @@ export function generateLayer(
     properties[field] = property;
   });
 
-  const passthroughProperties = buildPassthroughProperties(properties);
+  // Determine if this is an OTel-based stream or ECS stream
+  const rootStream = getRoot(name);
+  const isEcsStream = rootStream === LOGS_ECS_STREAM_NAME;
 
-  // Build OTel-to-ECS equivalent aliases
-  const otelAliases = buildOtelEquivalentAliases(properties);
+  let mappingProperties: MappingTypeMapping['properties'];
 
-  // For root streams, include baseMappings (passthrough definitions + static aliases)
-  // For child streams, just use the built passthrough properties
-  // OTel aliases are added to both
-  const mappingProperties = isRoot(name)
-    ? { ...baseMappings, ...passthroughProperties, ...otelAliases }
-    : { ...passthroughProperties, ...otelAliases };
+  if (isEcsStream) {
+    // For ECS streams, use raw properties directly without OTel passthrough or alias logic
+    mappingProperties = properties;
+  } else {
+    // For OTel-based streams, apply OTel-specific processing
+    const passthroughProperties = buildPassthroughProperties(properties);
+    const otelAliases = buildOtelEquivalentAliases(properties);
+
+    // For root streams, include baseMappings (passthrough definitions + static aliases)
+    // For child streams, just use the built passthrough properties
+    // OTel aliases are added to both
+    mappingProperties = isRoot(name)
+      ? { ...baseMappings, ...passthroughProperties, ...otelAliases }
+      : { ...passthroughProperties, ...otelAliases };
+  }
 
   const result = {
     name: getComponentTemplateName(name),
@@ -217,6 +234,11 @@ export function generateLayer(
 }
 
 function getTemplateSettings(definition: Streams.WiredStream.Definition, isServerless: boolean) {
-  const baseSettings = isRoot(definition.name) ? logsSettings : {};
-  return baseSettings;
+  if (!isRoot(definition.name)) {
+    return {};
+  }
+
+  // Use ECS settings for logs.ecs (sorts by host.name), OTel settings for others (sorts by resource.attributes.host.name)
+  const rootStream = getRoot(definition.name);
+  return rootStream === LOGS_ECS_STREAM_NAME ? ecsLogsSettings : otelLogsSettings;
 }
