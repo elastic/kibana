@@ -178,7 +178,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             params: {
               path: {
-                name: 'logs',
+                name: 'logs.otel',
               },
               body: {
                 field_definitions: [{ name: 'body.text', description: 'docs-only override' }],
@@ -198,7 +198,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             params: {
               path: {
-                name: 'logs',
+                name: 'logs.otel',
               },
               body: {
                 field_definitions: [

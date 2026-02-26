@@ -6,7 +6,11 @@
  */
 
 import type { FieldDefinition } from '.';
-import { fieldDefinitionConfigSchema, isMappingProperties } from '.';
+import {
+  fieldDefinitionConfigSchema,
+  isMappingProperties,
+  namedFieldDefinitionConfigSchema,
+} from '.';
 
 describe('fieldDefinitionConfigSchema', () => {
   it('should accept geo_point type', () => {
@@ -73,6 +77,48 @@ describe('fieldDefinitionConfigSchema', () => {
     expect(fieldDefinitionConfigSchema.parse(dateFieldWithFormatAndDesc)).toEqual(
       dateFieldWithFormatAndDesc
     );
+  });
+});
+
+describe('namedFieldDefinitionConfigSchema', () => {
+  it('should accept named field with type', () => {
+    const namedField = {
+      name: 'body.text',
+      type: 'keyword',
+    };
+    expect(namedFieldDefinitionConfigSchema.parse(namedField)).toEqual(namedField);
+  });
+
+  it('should accept named field with description-only (no type)', () => {
+    const namedFieldDescOnly = {
+      name: 'body.text',
+      description: 'docs-only override',
+    };
+    expect(namedFieldDefinitionConfigSchema.parse(namedFieldDescOnly)).toEqual(namedFieldDescOnly);
+  });
+
+  it('should accept named field with type and description', () => {
+    const namedFieldWithDesc = {
+      name: 'body.text',
+      type: 'keyword',
+      description: 'A keyword field',
+    };
+    expect(namedFieldDefinitionConfigSchema.parse(namedFieldWithDesc)).toEqual(namedFieldWithDesc);
+  });
+
+  it('should fail for named field without name', () => {
+    const fieldWithoutName = {
+      type: 'keyword',
+    };
+    expect(() => namedFieldDefinitionConfigSchema.parse(fieldWithoutName)).toThrow();
+  });
+
+  it('should fail for named field with empty name', () => {
+    const fieldWithEmptyName = {
+      name: '',
+      type: 'keyword',
+    };
+    expect(() => namedFieldDefinitionConfigSchema.parse(fieldWithEmptyName)).toThrow();
   });
 });
 
