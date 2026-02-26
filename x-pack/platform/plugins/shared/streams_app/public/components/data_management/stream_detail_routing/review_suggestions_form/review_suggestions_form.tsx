@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCheckbox,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -84,6 +85,7 @@ export function ReviewSuggestionsForm({
       snapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
       snapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
   );
+  const theme = useEuiTheme();
 
   const partitionForModal = ruleUnderReview
     ? suggestions.find(({ name }) => name === ruleUnderReview)
@@ -180,7 +182,7 @@ export function ReviewSuggestionsForm({
               aria-label={masterCheckboxLabel}
               data-test-subj="streamsAppMasterSuggestionCheckbox"
               className={css`
-                margin-left: 16px;
+                margin-left: ${theme.euiTheme.size.s};
               `}
             />
             <EuiSpacer size="m" />
