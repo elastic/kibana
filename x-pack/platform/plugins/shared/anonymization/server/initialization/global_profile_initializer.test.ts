@@ -48,7 +48,7 @@ describe('ensureGlobalAnonymizationProfile', () => {
     );
   });
 
-  it('normalizes existing profile fieldRules to empty', async () => {
+  it('does nothing when the global profile already exists', async () => {
     mockProfilesRepo.findByTarget.mockResolvedValue({
       id: 'global-profile',
       name: 'global',
@@ -73,16 +73,7 @@ describe('ensureGlobalAnonymizationProfile', () => {
       logger,
     });
 
-    expect(mockProfilesRepo.update).toHaveBeenCalledWith(
-      'default',
-      'global-profile',
-      expect.objectContaining({
-        rules: {
-          fieldRules: [],
-          regexRules: [],
-          nerRules: [],
-        },
-      })
-    );
+    expect(mockProfilesRepo.create).not.toHaveBeenCalled();
+    expect(mockProfilesRepo.update).not.toHaveBeenCalled();
   });
 });

@@ -23,22 +23,6 @@ export const isGlobalProfileTarget = (targetType: string, targetId: string): boo
   targetType === INTERNAL_GLOBAL_PROFILE_TARGET_TYPE &&
   targetId === INTERNAL_GLOBAL_PROFILE_TARGET_ID;
 
-const mergeRulesById = <T extends { id: string }>(
-  existingRules: T[],
-  incomingRules: T[]
-): { merged: T[]; changed: boolean } => {
-  const existingById = new Map(existingRules.map((rule) => [rule.id, rule]));
-  let changed = false;
-
-  for (const rule of incomingRules) {
-    if (!existingById.has(rule.id)) {
-      existingById.set(rule.id, rule);
-      changed = true;
-    }
-  }
-
-  return { merged: [...existingById.values()], changed };
-};
 export const ensureGlobalAnonymizationProfile = async ({
   namespace,
   profilesRepo,
@@ -79,24 +63,7 @@ export const ensureGlobalAnonymizationProfile = async ({
       return;
     }
 
-    const regexMerge = mergeRulesById(existing.rules.regexRules ?? [], regexRules);
-    const nerMerge = mergeRulesById(existing.rules.nerRules ?? [], nerRules);
-    const shouldNormalizeFieldRules = existing.rules.fieldRules.length > 0;
-    const hasChanges = regexMerge.changed || nerMerge.changed || shouldNormalizeFieldRules;
-
-    if (!hasChanges) {
-      return;
-    }
-
-    await profilesRepo.update(namespace, existing.id, {
-      updatedBy: createdBy,
-      rules: {
-        fieldRules: [],
-        regexRules: regexMerge.merged,
-        nerRules: nerMerge.merged,
-      },
-    });
-    logger.info(`Updated global anonymization profile in space: ${namespace}`);
+    return;
   } catch (err) {
     if ((err as { statusCode?: number }).statusCode === 409) {
       logger.debug(
