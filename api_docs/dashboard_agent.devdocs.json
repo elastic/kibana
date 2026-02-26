@@ -177,7 +177,7 @@
           "{ readonly manageDashboard: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/dashboard_agent/common/constants.ts",
-        "lineNumber": 30,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
