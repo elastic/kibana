@@ -44,9 +44,7 @@ const mockDataView = {
   getIndexPattern: () => 'metrics-*',
 } as unknown as DataView;
 
-const mockPanels = [
-  { type: 'lens', grid: { x: 0, y: 0, w: 24, h: 12 }, uid: '1', config: {} },
-];
+const mockPanels = [{ type: 'lens', grid: { x: 0, y: 0, w: 24, h: 12 }, uid: '1', config: {} }];
 
 function renderDashboard() {
   jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
@@ -72,10 +70,7 @@ function renderDashboard() {
         history={history}
         value={mockApmPluginContextValue as unknown as ApmPluginContextValue}
       >
-        <JsonMetricsDashboard
-          agentName="java"
-          dataView={mockDataView}
-        />
+        <JsonMetricsDashboard agentName="java" dataView={mockDataView} />
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );
@@ -179,10 +174,7 @@ describe('JsonMetricsDashboard', () => {
             history={history}
             value={mockApmPluginContextValue as unknown as ApmPluginContextValue}
           >
-            <JsonMetricsDashboard
-              agentName="java"
-              dataView={dataViewWithNoId}
-            />
+            <JsonMetricsDashboard agentName="java" dataView={dataViewWithNoId} />
           </MockApmPluginContextWrapper>
         </KibanaReactContext.Provider>
       );
