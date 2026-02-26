@@ -93,12 +93,14 @@ For running FTR tests, load the `ftr-testing` skill.
 Config: `x-pack/solutions/security/test/cloud_security_posture_api/config.ts`
 
 **UI functional**: `x-pack/solutions/security/test/cloud_security_posture_functional/pages/`
+
 - `alerts_flyout.ts`, `events_flyout.ts`, `entity_preview_flyout.ts`
-Config: `x-pack/solutions/security/test/cloud_security_posture_functional/config.ts`
+  Config: `x-pack/solutions/security/test/cloud_security_posture_functional/config.ts`
 
 **Serverless functional**: `x-pack/solutions/security/test/serverless/functional/test_suites/ftr/cloud_security_posture/`
+
 - `graph_alerts_flyout.ts`, `graph_events_flyout.ts`
-Config: `x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.complete.ts`
+  Config: `x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.complete.ts`
 
 ### Test fixtures (es_archives)
 
@@ -120,7 +122,17 @@ yarn storybook cloud_security_posture_graph
 - Frontend styling: EUI components + Emotion (`@emotion/react`).
 - Storybook stories co-located with components (`.stories.tsx`).
 - Unit tests co-located with components (`.test.ts`, `.test.tsx`).
+- ES|QL query tests should be mostly black-box (assert inputs/outputs). Asserting critical ES|QL clauses is acceptable, but avoid testing every implementation detail.
+
+## Philosophy
+
+- **Keep ES|QL query code lean**: minimize complexity in query construction; prefer straightforward, readable queries.
+- **Graph UI must be reusable**: `@kbn/cloud-security-posture-graph` components should not be coupled with API domain or response details. The package should work with any conforming view model.
+- **Co-locate code in our package**: keep as much logic as possible inside `@kbn/cloud-security-posture-graph` for clear ownership and to avoid depending on other teams for reviews.
+- **`GraphInvestigation` is the orchestrator, not the owner**: do not tightly couple it with specific consumers like the flyout panel. Use decoupling patterns (Pub-Sub, URL-serializable params via `useExpandableFlyoutApi`) instead of direct dependencies.
 
 ## Further reading
 
-- [Graph Visualization team docs](https://github.com/elastic/security-team/blob/main/docs/cloud-security-team/cdr/graph-visualization.mdx) — field mapping requirements, actor resolution logic, entity enrichment, examples, troubleshooting, and performance considerations.
+Open only what you need:
+
+- `references/integration-guide.md` — field mapping requirements, actor resolution logic, entity enrichment, examples, troubleshooting, and performance considerations.
