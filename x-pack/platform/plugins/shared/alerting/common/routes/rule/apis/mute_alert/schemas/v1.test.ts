@@ -18,10 +18,9 @@ describe('muteAlertBodySchema', () => {
     expect(muteAlertBodySchema.validate(null)).toBeNull();
   });
 
-  test('rejects empty body when object is provided', () => {
-    expect(() => muteAlertBodySchema.validate({})).toThrow(
-      'When providing a request body, at least one of expires_at or conditions (non-empty array) is required. Omit the body for indefinite mute.'
-    );
+  test('allows empty object (indefinite mute, backward compatibility with clients that send empty JSON body)', () => {
+    expect(() => muteAlertBodySchema.validate({})).not.toThrow();
+    expect(muteAlertBodySchema.validate({})).toEqual({});
   });
 
   test('allows body with expires_at only', () => {
