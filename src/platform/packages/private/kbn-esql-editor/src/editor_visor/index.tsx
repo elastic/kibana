@@ -25,7 +25,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
 import { ModeSelector, VisorMode } from './mode_selector';
 import { NoConnectorMessage } from './no_connector_message';
-import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
+import {
+  visorStyles,
+  visorWidthPercentage,
+  dropdownWidthPercentage,
+  NL_TEXTAREA_MAX_HEIGHT,
+} from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
 import { extractQueryFromLLMMessage } from './utils';
 
@@ -217,7 +222,7 @@ export function QuickSearchVisor({
     if (!textarea) return;
     textarea.style.whiteSpace = 'pre-wrap';
     textarea.style.overflow = 'auto';
-    textarea.style.maxHeight = 'calc(35vh - 100px)';
+    textarea.style.maxHeight = NL_TEXTAREA_MAX_HEIGHT;
     textarea.style.setProperty('height', 'auto', 'important');
     textarea.style.setProperty('height', `${textarea.scrollHeight}px`, 'important');
   }, []);

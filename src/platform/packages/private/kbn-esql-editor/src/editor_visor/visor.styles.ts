@@ -15,6 +15,10 @@ export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
 export const MODE_SELECT_WIDTH_KQL = 80;
 export const MODE_SELECT_WIDTH_NL = 160;
+// Cap the expanded NL textarea height to roughly a third of the viewport,
+// offset by 100px to leave room for the editor chrome above and below.
+// Matches the max-height used by the KQL QueryStringInput textarea.
+export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
 const visorGradientPadding = '1px';
 const visorGradient =
   'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);';
