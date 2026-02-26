@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/jest_bench.sh
+    cancel_on_build_failing: true
     label: 'Jest Bench'
     agents:
       machineType: c4d-standard-16

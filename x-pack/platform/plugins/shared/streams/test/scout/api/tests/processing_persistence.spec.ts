@@ -14,8 +14,11 @@ apiTest.describe(
   'Stream data processing - persistence API (CRUD)',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Stream names must be exactly one level deep when forking from 'logs'
-    const streamNamePrefix = 'logs.pp';
+    // Use logs.otel as it's guaranteed to exist after enableStreams() in fresh installs
+    // Stream names must be exactly one level deep when forking from 'logs.otel'
+    // Format: logs.otel.<name> where name uses hyphens, not dots
+    const rootStream = 'logs.otel';
+    const streamNamePrefix = `${rootStream}.pp`;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type ApiClient = any;
@@ -31,7 +34,7 @@ apiTest.describe(
       streamName: string,
       condition: { field: string; eq: string }
     ): Promise<{ success: boolean; stream?: StreamResponse; error?: string }> {
-      const forkResponse = await apiClient.post('api/streams/logs/_fork', {
+      const forkResponse = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: streamName },

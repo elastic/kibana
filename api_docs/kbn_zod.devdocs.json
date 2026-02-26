@@ -3456,7 +3456,44 @@
             "lineNumber": 771,
             "columnNumber": 5,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodEnum.create.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "values",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/zod/v3/types.d.cts",
+                "lineNumber": 760,
+                "columnNumber": 83,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/zod",
+                "id": "def-common.ZodEnum.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "{ errorMap?: ",
+                  "ZodErrorMap",
+                  " | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
+                ],
+                "path": "node_modules/zod/v3/types.d.cts",
+                "lineNumber": 760,
+                "columnNumber": 94,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -17737,6 +17774,43 @@
         "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.enumType.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "values",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "node_modules/zod/v3/types.d.cts",
+            "lineNumber": 760,
+            "columnNumber": 83,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.enumType.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ errorMap?: ",
+              "ZodErrorMap",
+              " | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
+            ],
+            "path": "node_modules/zod/v3/types.d.cts",
+            "lineNumber": 760,
+            "columnNumber": 94,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -17878,6 +17952,8 @@
         "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       },
       {
@@ -17908,7 +17984,7 @@
         "label": "getParsedType",
         "description": [],
         "signature": [
-          "(data: any) => \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
+          "(data: any) => \"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
         ],
         "path": "node_modules/zod/v3/helpers/util.d.cts",
         "lineNumber": 85,
@@ -19354,6 +19430,43 @@
         "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.recordType.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "valueType",
+            "description": [],
+            "signature": [
+              "Value"
+            ],
+            "path": "node_modules/zod/v3/types.d.cts",
+            "lineNumber": 672,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/zod",
+            "id": "def-common.recordType.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ errorMap?: ",
+              "ZodErrorMap",
+              " | undefined; invalid_type_error?: string | undefined; required_error?: string | undefined; message?: string | undefined; description?: string | undefined; } | undefined"
+            ],
+            "path": "node_modules/zod/v3/types.d.cts",
+            "lineNumber": 672,
+            "columnNumber": 63,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -19975,7 +20088,7 @@
             "label": "parsedType",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
             ],
             "path": "node_modules/zod/v3/helpers/parseUtil.d.cts",
             "lineNumber": 27,
@@ -21504,7 +21617,7 @@
             "label": "validation",
             "description": [],
             "signature": [
-              "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"duration\" | \"time\" | \"uuid\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+              "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"uuid\" | \"duration\" | \"time\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 83,
@@ -21557,7 +21670,7 @@
             "label": "expected",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 37,
@@ -21573,7 +21686,7 @@
             "label": "received",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
+              "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
             ],
             "path": "node_modules/zod/v3/ZodError.d.cts",
             "lineNumber": 38,
@@ -24745,7 +24858,7 @@
         "label": "StringValidation",
         "description": [],
         "signature": [
-          "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"duration\" | \"time\" | \"uuid\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+          "\"jwt\" | \"ip\" | \"date\" | \"base64\" | \"base64url\" | \"uuid\" | \"duration\" | \"time\" | \"url\" | \"email\" | \"cidr\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
         "lineNumber": 73,
@@ -24924,7 +25037,7 @@
         "label": "UnknownKeysParam",
         "description": [],
         "signature": [
-          "\"passthrough\" | \"strict\" | \"strip\""
+          "\"strict\" | \"passthrough\" | \"strip\""
         ],
         "path": "node_modules/zod/v3/types.d.cts",
         "lineNumber": 497,
@@ -25291,7 +25404,7 @@
         "label": "ZodIssueCode",
         "description": [],
         "signature": [
-          "\"custom\" | \"unrecognized_keys\" | \"invalid_union\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | \"not_multiple_of\" | \"invalid_literal\" | \"invalid_type\" | \"invalid_intersection_types\" | \"invalid_date\" | \"not_finite\" | \"too_big\" | \"too_small\" | \"invalid_enum_value\""
+          "\"unrecognized_keys\" | \"custom\" | \"invalid_union\" | \"invalid_union_discriminator\" | \"invalid_arguments\" | \"invalid_return_type\" | \"invalid_string\" | \"not_multiple_of\" | \"invalid_literal\" | \"invalid_type\" | \"invalid_intersection_types\" | \"invalid_date\" | \"not_finite\" | \"too_big\" | \"too_small\" | \"invalid_enum_value\""
         ],
         "path": "node_modules/zod/v3/ZodError.d.cts",
         "lineNumber": 30,
@@ -25426,7 +25539,7 @@
         "label": "ZodParsedType",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"never\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\""
+          "\"string\" | \"number\" | \"bigint\" | \"boolean\" | \"symbol\" | \"undefined\" | \"object\" | \"function\" | \"unknown\" | \"date\" | \"integer\" | \"float\" | \"map\" | \"set\" | \"array\" | \"promise\" | \"nan\" | \"null\" | \"void\" | \"never\""
         ],
         "path": "node_modules/zod/v3/helpers/util.d.cts",
         "lineNumber": 84,
