@@ -10,15 +10,7 @@ import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { StreamQuery, StreamQueryInput, Streams } from '@kbn/streams-schema';
-import {
-  buildMetadataOption,
-  ensureMetadata,
-  extractWhereExpression,
-  getIndexPatternsForStream,
-} from '@kbn/streams-schema';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
-import type { ESQLCommand } from '@kbn/esql-language';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -30,6 +22,7 @@ import {
 } from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
+import type { QUERY_FEATURE_TYPE } from '../fields';
 import {
   ASSET_ID,
   ASSET_TYPE,
@@ -38,7 +31,6 @@ import {
   QUERY_EVIDENCE,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
-  QUERY_FEATURE_TYPE,
   QUERY_KQL_BODY,
   QUERY_SEVERITY_SCORE,
   QUERY_TITLE,
@@ -105,9 +97,6 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 ): QueryLink {
   return {
     ...asset,
-    query: {
-      ...asset.query,
-    },
     [ASSET_UUID]: getQueryLinkUuid(definition.name, asset),
     stream_name: definition.name,
   };
@@ -115,7 +104,6 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 
 type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
-  [QUERY_KQL_BODY]: string;
   [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
   [RULE_BACKED]?: boolean;
@@ -156,19 +144,12 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
-      kql: {
-        query: storageFields[QUERY_KQL_BODY],
-      },
+      /**
+       * The storageClient migrateSource converts the `kql` and `feature` filter to esql, making safe their removal here.
+       */
       esql: {
         query: storageFields[QUERY_ESQL_QUERY],
       },
-      feature: storageFields[QUERY_FEATURE_NAME]
-        ? {
-            name: storageFields[QUERY_FEATURE_NAME],
-            filter: JSON.parse(storageFields[QUERY_FEATURE_FILTER]),
-            type: 'system',
-          }
-        : undefined,
       severity_score: storageFields[QUERY_SEVERITY_SCORE],
       evidence: storageFields[QUERY_EVIDENCE],
     },
@@ -188,11 +169,7 @@ function toStorage(
     ...rest,
     [STREAM_NAME]: definition.name,
     [QUERY_TITLE]: query.title,
-    [QUERY_KQL_BODY]: query.kql?.query ?? '',
     [QUERY_ESQL_QUERY]: query.esql.query,
-    [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
-    [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
-    [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: ruleBacked,
@@ -214,31 +191,6 @@ function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
     stream_name: stream,
     rule_id: computeRuleId(assetUuid, query.esql.query),
   };
-}
-
-/**
- * Builds the ES|QL query used by alerting rules. The stored `esql.query`
- * is always the complete, authoritative query — for legacy KQL-based
- * queries it already contains the feature filter (baked in by the storage
- * migration), and for new queries it is the full ES|QL from the LLM or
- * user. This function only replaces the FROM clause with the authoritative
- * stream indices and METADATA fields.
- */
-function buildRuleEsqlQuery(indices: string[], query: StreamQuery): string {
-  const whereExpr = extractWhereExpression(query.esql.query);
-
-  const fromCommand = Builder.command({
-    name: 'from',
-    args: [Builder.expression.source.index(indices.join(',')), buildMetadataOption()],
-  });
-
-  const commands: ESQLCommand[] = [fromCommand];
-
-  if (whereExpr) {
-    commands.push(Builder.command({ name: 'where', args: [whereExpr] }));
-  }
-
-  return BasicPrettyPrinter.print(Builder.expression.query(commands));
 }
 
 export class QueryClient {
@@ -455,7 +407,6 @@ export class QueryClient {
           should: [
             ...wildcardQuery(QUERY_TITLE, query),
             ...wildcardQuery(QUERY_KQL_BODY, query),
-            ...wildcardQuery(QUERY_ESQL_QUERY, query),
             ...wildcardQuery(QUERY_FEATURE_NAME, query),
             ...wildcardQuery(QUERY_FEATURE_FILTER, query),
           ],
@@ -585,7 +536,7 @@ export class QueryClient {
     );
   }
 
-  public async upsert(definition: Streams.all.Definition, query: StreamQueryInput) {
+  public async upsert(definition: Streams.all.Definition, query: StreamQuery) {
     const stream = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
@@ -625,7 +576,7 @@ export class QueryClient {
 
   public async bulk(
     definition: Streams.all.Definition,
-    operations: Array<{ index?: StreamQueryInput; delete?: { id: string } }>,
+    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
     options?: { createRules?: boolean }
   ) {
     const stream = definition.name;
@@ -642,14 +593,7 @@ export class QueryClient {
     const indexOperationsMap = new Map(
       operations
         .filter((operation) => operation.index)
-        .map((operation) => {
-          const input = operation.index!;
-          const normalized: StreamQueryInput = {
-            ...input,
-            esql: { query: ensureMetadata(input.esql.query) },
-          };
-          return [normalized.id, normalized];
-        })
+        .map((operation) => [operation.index!.id, operation.index!])
     );
     const deleteOperationIds = new Set(
       operations.filter((operation) => operation.delete).map((operation) => operation.delete!.id)
@@ -801,20 +745,18 @@ export class QueryClient {
       });
   }
 
-  private toCreateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
-    const { rule_id: ruleId } = query;
-    const indices = getIndexPatternsForStream(definition);
+  private toCreateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
+    const { rule_id: ruleId, query } = queryLink;
 
-    const esqlQuery = buildRuleEsqlQuery(indices, query.query);
     return {
       data: {
-        name: query.query.title,
+        name: query.title,
         consumer: 'streams',
         alertTypeId: 'streams.rules.esql',
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: esqlQuery,
+          query: query.esql.query,
         },
         enabled: true,
         tags: ['streams', definition.name],
@@ -828,18 +770,17 @@ export class QueryClient {
     };
   }
 
-  private toUpdateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
-    const { rule_id: ruleId } = query;
-    const indices = getIndexPatternsForStream(definition);
-    const esqlQuery = buildRuleEsqlQuery(indices, query.query);
+  private toUpdateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
+    const { rule_id: ruleId, query } = queryLink;
+
     return {
       id: ruleId,
       data: {
-        name: query.query.title,
+        name: query.title,
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: esqlQuery,
+          query: query.esql.query,
         },
         tags: ['streams', definition.name],
         schedule: {

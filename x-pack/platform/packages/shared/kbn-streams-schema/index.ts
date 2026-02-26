@@ -52,6 +52,7 @@ export {
   buildMetadataOption,
   ensureMetadata,
   extractWhereExpression,
+  normalizeEsqlQuery,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
@@ -94,18 +95,13 @@ export {
 } from './src/fields';
 
 export {
-  type KqlQuery,
   type EsqlQuery,
-  kqlQuerySchema,
   esqlQuerySchema,
   type StreamQuery,
-  type StreamQueryInput,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
   streamQuerySchema,
-  streamQueryInputSchema,
-  isNativeEsqlQuery,
 } from './src/queries';
 
 export {

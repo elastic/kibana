@@ -11,6 +11,7 @@ import { ESQLLangEditor } from '@kbn/esql/public';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { normalizeEsqlQuery } from '@kbn/streams-schema';
 
 export const StreamsESQLEditor = ({
   prefix,
@@ -45,7 +46,9 @@ export const StreamsESQLEditor = ({
 };
 
 export function validatePrefix(value: string, prefix?: string) {
-  if (!prefix || value.startsWith(prefix)) {
+  const normalizedValue = normalizeEsqlQuery(value);
+  const normalizedPrefix = prefix ? normalizeEsqlQuery(prefix) : undefined;
+  if (!normalizedPrefix || normalizedValue.startsWith(normalizedPrefix)) {
     return { isValid: true, error: undefined } as const;
   }
 

@@ -8,7 +8,6 @@
 import type { Condition } from '@kbn/streamlang';
 import { conditionToESQLAst } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
-import type { KqlQuery } from '../queries';
 import { buildMetadataOption } from './esql_helpers';
 
 /**
@@ -20,7 +19,7 @@ import { buildMetadataOption } from './esql_helpers';
 export const buildEsqlQuery = (
   indices: string[],
   input: {
-    kql: KqlQuery;
+    kql: { query: string };
     feature?: { name: string; filter: Condition; type: 'system' };
   }
 ): string => {

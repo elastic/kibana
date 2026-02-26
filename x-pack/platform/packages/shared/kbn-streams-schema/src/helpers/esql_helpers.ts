@@ -60,7 +60,16 @@ export function ensureMetadata(esql: string): string {
     cmd === fromCmd ? { ...cmd, args: [...cmd.args, buildMetadataOption()] } : cmd
   );
 
-  return BasicPrettyPrinter.print(
-    Builder.expression.query(updatedCommands as ESQLCommand[])
-  );
+  return BasicPrettyPrinter.print(Builder.expression.query(updatedCommands as ESQLCommand[]));
+}
+
+/**
+ * Normalizes an ES|QL query string by parsing it into an AST and
+ * pretty-printing it back. This strips comments, collapses whitespace,
+ * and uppercases command/keyword names so that two syntactically
+ * equivalent queries produce the same string.
+ */
+export function normalizeEsqlQuery(esql: string): string {
+  const { root } = Parser.parse(esql);
+  return BasicPrettyPrinter.print(root);
 }
