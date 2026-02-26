@@ -197,7 +197,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         },
         loadMoreSubject: new BehaviorSubject<void>(undefined),
         fieldFormatter: new BehaviorSubject((v: string) => v),
-        allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
         dataViews$: new BehaviorSubject(undefined) as OptionsListComponentApi['dataViews$'],
       };
 
