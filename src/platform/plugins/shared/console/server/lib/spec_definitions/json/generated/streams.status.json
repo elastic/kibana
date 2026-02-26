@@ -18,6 +18,7 @@
       "_streams/status"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
     "availability": {
       "stack": true,
       "serverless": false
