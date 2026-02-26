@@ -105,6 +105,14 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     }
   }
 
+  if ((currentStep as StepWithIfCondition).if) {
+    return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
+  }
+
+  if ((currentStep as IfStep).type === 'if') {
+    return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
+  }
+
   if ((currentStep as TimeoutProp).timeout) {
     const step = currentStep as BaseStep & TimeoutProp;
     return handleTimeout(
@@ -114,14 +122,6 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
       visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
       context
     );
-  }
-
-  if ((currentStep as StepWithIfCondition).if) {
-    return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
-  }
-
-  if ((currentStep as IfStep).type === 'if') {
-    return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
   }
 
   if ((currentStep as ForEachStep).type === 'foreach') {
