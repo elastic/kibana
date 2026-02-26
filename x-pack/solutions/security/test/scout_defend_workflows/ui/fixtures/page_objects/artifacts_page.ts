@@ -10,10 +10,7 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 export class ArtifactsPage {
   readonly pageContainer: Locator;
 
-  constructor(
-    protected readonly page: ScoutPage,
-    private readonly artifactType: string
-  ) {
+  constructor(protected readonly page: ScoutPage, private readonly artifactType: string) {
     this.pageContainer = this.page.testSubj.locator(`${artifactType}-container`);
   }
 
@@ -30,9 +27,7 @@ export class ArtifactsPage {
   }
 
   async clickCardActionMenu() {
-    await this.page.testSubj
-      .locator(`${this.artifactType}-card-header-actions-button`)
-      .click();
+    await this.page.testSubj.locator(`${this.artifactType}-card-header-actions-button`).click();
   }
 }
 

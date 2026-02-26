@@ -70,10 +70,7 @@ export interface DWParallelWorkerFixtures extends SecurityParallelWorkerFixtures
 
 const DW_BASE_AGENT_POLICY_NAME = 'DW Scout Base Policy';
 
-export const spaceTest = baseSpaceTest.extend<
-  DWParallelTestFixtures,
-  DWParallelWorkerFixtures
->({
+export const spaceTest = baseSpaceTest.extend<DWParallelTestFixtures, DWParallelWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
@@ -153,10 +150,7 @@ export const spaceTest = baseSpaceTest.extend<
     ) => {
       log.info('[DW fixture] Creating endpoint integration policy...');
 
-      const policyData = await indexFleetEndpointPolicy(
-        kbnClient,
-        `DW Scout Policy ${Date.now()}`
-      );
+      const policyData = await indexFleetEndpointPolicy(kbnClient, `DW Scout Policy ${Date.now()}`);
 
       const agentPolicyId = policyData.agentPolicies[0].id;
       const integrationPolicyId = policyData.integrationPolicies[0].id;

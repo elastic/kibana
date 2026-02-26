@@ -21,17 +21,13 @@ export class EndpointListPage {
   constructor(private readonly page: ScoutPage) {
     this.endpointPage = this.page.testSubj.locator('endpointPage');
     this.endpointTable = this.page.testSubj.locator('endpointListTable');
-    this.emptyState = this.page.testSubj.locator(
-      'emptyHostsTable'
-    );
+    this.emptyState = this.page.testSubj.locator('emptyHostsTable');
     this.tableRows = this.endpointTable.locator('tbody tr');
     this.searchBar = this.page.testSubj.locator('adminSearchBar');
   }
 
   async navigate(searchParams?: string) {
-    const url = searchParams
-      ? `${ROUTES.endpoints}?${searchParams}`
-      : ROUTES.endpoints;
+    const url = searchParams ? `${ROUTES.endpoints}?${searchParams}` : ROUTES.endpoints;
     await this.page.goto(url);
     await this.page.waitForLoadingIndicatorHidden();
   }

@@ -17,12 +17,9 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest(
-      'loads the response actions history page',
-      async ({ pageObjects, endpointData }) => {
-        await pageObjects.responseActions.navigate();
-        await expect(pageObjects.responseActions.responsePage).toBeVisible();
-      }
-    );
+    spaceTest('loads the response actions history page', async ({ pageObjects, endpointData }) => {
+      await pageObjects.responseActions.navigate();
+      await expect(pageObjects.responseActions.responsePage).toBeVisible();
+    });
   }
 );

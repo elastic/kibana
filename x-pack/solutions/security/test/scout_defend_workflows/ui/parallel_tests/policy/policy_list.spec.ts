@@ -25,12 +25,9 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'can navigate to policy details',
-      async ({ pageObjects, endpointPolicy }) => {
-        await pageObjects.policy.navigateToDetails(endpointPolicy.integrationPolicyId);
-        await expect(pageObjects.policy.policyDetailsPage).toBeVisible();
-      }
-    );
+    spaceTest('can navigate to policy details', async ({ pageObjects, endpointPolicy }) => {
+      await pageObjects.policy.navigateToDetails(endpointPolicy.integrationPolicyId);
+      await expect(pageObjects.policy.policyDetailsPage).toBeVisible();
+    });
   }
 );
