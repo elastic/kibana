@@ -118,6 +118,10 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     },
     marginRight: euiTheme.size.s,
     maxWidth: '320px',
+    height: '28px',
+    input: {
+      height: '28px',
+    },
   });
   // Initialize searchableTypes data
   useEffect(() => {

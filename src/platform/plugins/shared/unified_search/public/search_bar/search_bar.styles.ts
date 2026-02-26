@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean) => {
   return {
     uniSearchBar: css`
-      padding: ${isESQLQuery ? 0 : euiTheme.size.m};
+      padding: ${isESQLQuery ? 0 : euiTheme.size.base};
       position: relative;
     `,
     detached: css`

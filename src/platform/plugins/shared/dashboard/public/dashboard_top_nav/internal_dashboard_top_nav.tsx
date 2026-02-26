@@ -456,7 +456,7 @@ const topNavStyles = {
         },
       },
       '.controlGroup': {
-        padding: euiTheme.size.s,
+        padding: euiTheme.size.base,
         paddingTop: 0,
       },
     }),
