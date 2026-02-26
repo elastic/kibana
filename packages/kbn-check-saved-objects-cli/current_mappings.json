@@ -334,8 +334,16 @@
       "updatedBy": {
         "type": "keyword"
       },
-      "workflow_id": {
-        "type": "keyword"
+      "destinations": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "keyword"
+          },
+          "id": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
@@ -2991,6 +2999,9 @@
     "dynamic": false,
     "properties": {
       "created_by": {
+        "type": "keyword"
+      },
+      "created_by_profile_uid": {
         "type": "keyword"
       },
       "data_stream_count": {

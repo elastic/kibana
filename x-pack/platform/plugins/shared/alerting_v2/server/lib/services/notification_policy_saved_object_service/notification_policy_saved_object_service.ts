@@ -6,19 +6,19 @@
  */
 
 import { PluginStart } from '@kbn/core-di';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ISavedObjectsClientFactory } from '@kbn/core-di-server';
 import { SavedObjectsClientFactory } from '@kbn/core-di-server';
-import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
-import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { inject, injectable } from 'inversify';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 
-export type NotificationPolicySavedObjectsBulkGetResultItem =
+export type NotificationPolicySavedObjectBulkGetItem =
   | {
       id: string;
       attributes: NotificationPolicySavedObjectAttributes;
@@ -38,7 +38,10 @@ export interface NotificationPolicySavedObjectServiceContract {
     id: string,
     spaceId?: string
   ): Promise<{ id: string; attributes: NotificationPolicySavedObjectAttributes; version?: string }>;
-  bulkGetByIds(ids: string[]): Promise<NotificationPolicySavedObjectsBulkGetResultItem[]>;
+  bulkGetByIds(
+    ids: string[],
+    spaceId?: string
+  ): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   update(params: {
     id: string;
     attrs: NotificationPolicySavedObjectAttributes;
@@ -101,25 +104,6 @@ export class NotificationPolicySavedObjectService
     return { id: doc.id, attributes: doc.attributes, version: doc.version };
   }
 
-  public async bulkGetByIds(
-    ids: string[]
-  ): Promise<NotificationPolicySavedObjectsBulkGetResultItem[]> {
-    if (ids.length === 0) {
-      return [];
-    }
-
-    const result = await this.client.bulkGet<NotificationPolicySavedObjectAttributes>(
-      ids.map((id) => ({ type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id }))
-    );
-
-    return result.saved_objects.map((doc) => {
-      if ('error' in doc && doc.error) {
-        return { id: doc.id, error: doc.error };
-      }
-      return { id: doc.id, attributes: doc.attributes, version: doc.version };
-    });
-  }
-
   public async update({
     id,
     attrs,
@@ -137,6 +121,33 @@ export class NotificationPolicySavedObjectService
     );
 
     return { id: result.id, version: result.version };
+  }
+
+  public async bulkGetByIds(
+    ids: string[],
+    spaceId?: string
+  ): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const namespace = spaceIdToNamespace(this.spaces, spaceId);
+    const result = await this.client.bulkGet<NotificationPolicySavedObjectAttributes>(
+      ids.map((id) => ({ type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id })),
+      namespace ? { namespace } : undefined
+    );
+
+    return result.saved_objects.map((savedObject) => {
+      if ('error' in savedObject && savedObject.error) {
+        return { id: savedObject.id, error: savedObject.error };
+      }
+
+      return {
+        id: savedObject.id,
+        attributes: savedObject.attributes,
+        version: savedObject.version,
+      };
+    });
   }
 
   public async delete({ id }: { id: string }): Promise<void> {

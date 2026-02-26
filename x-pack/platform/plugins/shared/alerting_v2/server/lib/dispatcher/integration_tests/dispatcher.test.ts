@@ -29,6 +29,7 @@ import type {
   NotificationPolicySavedObjectAttributes,
 } from '../../../saved_objects';
 import { DispatcherService, type DispatcherServiceContract } from '../dispatcher';
+import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
 
 /**
@@ -336,8 +337,6 @@ describe('DispatcherService integration tests', () => {
     kibanaServer = servers.kibanaServer;
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
 
-    await new Promise((res) => setTimeout(res, 5000));
-
     rulesSoService = new RulesSavedObjectService(
       (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
       undefined as unknown as SpacesPluginStart
@@ -346,6 +345,8 @@ describe('DispatcherService integration tests', () => {
       (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
       undefined as unknown as SpacesPluginStart
     );
+
+    await waitForDataStreamsReady(esClient, [ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
 
     await seedRulesAndPolicies(rulesSoService, npSoService);
   });

@@ -94,10 +94,12 @@
     "createdAt",
     "createdBy",
     "description",
+    "destinations",
+    "destinations.id",
+    "destinations.type",
     "name",
     "updatedAt",
-    "updatedBy",
-    "workflow_id"
+    "updatedBy"
   ],
   "alerting_rule": [
     "createdAt",
@@ -901,6 +903,7 @@
   ],
   "integration-config": [
     "created_by",
+    "created_by_profile_uid",
     "data_stream_count",
     "integration_id",
     "metadata",
