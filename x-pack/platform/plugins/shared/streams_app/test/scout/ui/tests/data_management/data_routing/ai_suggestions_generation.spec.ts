@@ -14,7 +14,6 @@ import {
   cleanupLlmProxyAndConnector,
   setupTestPage,
   setupPartitionLogsInterceptor,
-  generateSuggestions,
   getStreamName,
   MOCK_SUGGESTIONS_MULTIPLE,
   type LlmProxySetup,
@@ -48,7 +47,18 @@ test.describe(
 
     test('should successfully generate and display suggestions', async ({ page }) => {
       setupPartitionLogsInterceptor(llmSetup.llmProxy, MOCK_SUGGESTIONS_MULTIPLE);
-      await generateSuggestions(page, llmSetup.llmProxy);
+
+      // Click the generate button
+      const button = page.getByTestId('streamsAppGenerateSuggestionButton');
+      await expect(button).toBeVisible();
+      await expect(button).toBeEnabled();
+      await button.click();
+
+      await llmSetup.llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      // Wait for suggestions to appear
+      const suggestionsCallout = page.getByTestId('streamsAppReviewPartitioningSuggestionsCallout');
+      await expect(suggestionsCallout).toBeVisible();
 
       for (const suggestion of MOCK_SUGGESTIONS_MULTIPLE) {
         const streamName = getStreamName(suggestion.name);
@@ -58,10 +68,50 @@ test.describe(
 
     test('should handle empty suggestions response', async ({ page }) => {
       setupPartitionLogsInterceptor(llmSetup.llmProxy, [], 'partition_logs with empty partitions');
-      await generateSuggestions(page, llmSetup.llmProxy);
+
+      // Click the generate button
+      const button = page.getByTestId('streamsAppGenerateSuggestionButton');
+      await expect(button).toBeVisible();
+      await expect(button).toBeEnabled();
+      await button.click();
+
+      await llmSetup.llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       const noSuggestionsCallout = page.getByTestId('streamsAppNoSuggestionsCallout');
       await expect(noSuggestionsCallout).toBeVisible();
+    });
+
+    test('should not show background processing message during loading', async ({ page }) => {
+      setupPartitionLogsInterceptor(llmSetup.llmProxy, MOCK_SUGGESTIONS_MULTIPLE);
+
+      // Click the generate button
+      const button = page.getByTestId('streamsAppGenerateSuggestionButton');
+      await expect(button).toBeVisible();
+      await expect(button).toBeEnabled();
+      await button.click();
+
+      // Wait for the loading prompt to appear
+      const loadingPrompt = page.getByTestId('streamsAppPipelineSuggestionLoadingPrompt');
+      await expect(loadingPrompt).toBeVisible();
+
+      // Verify that the background processing message is NOT shown on the partitioning page
+      // This message should only appear for processing steps, not for partitioning suggestions
+      const backgroundMessage = page.getByText(
+        "You don't need to stay on this page. The suggestion will be available when you return."
+      );
+      await expect(backgroundMessage).toHaveCount(0);
+
+      await llmSetup.llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      // Wait for suggestions to appear (or no suggestions callout)
+      const suggestionsCallout = page.getByTestId('streamsAppReviewPartitioningSuggestionsCallout');
+      const noSuggestionsCallout = page.getByTestId('streamsAppNoSuggestionsCallout');
+
+      // Either one is acceptable - we're mainly testing the loading state behavior
+      await Promise.race([
+        suggestionsCallout.waitFor({ state: 'visible', timeout: 15000 }),
+        noSuggestionsCallout.waitFor({ state: 'visible', timeout: 15000 }),
+      ]);
     });
   }
 );

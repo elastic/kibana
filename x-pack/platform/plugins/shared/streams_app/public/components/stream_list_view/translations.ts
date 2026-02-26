@@ -84,3 +84,15 @@ export const NO_RETENTION_LABEL = i18n.translate(
   'xpack.streams.streamsRetentionColumn.noDataAriaLabel',
   { defaultMessage: 'No retention policy configured' }
 );
+
+export const SUGGESTION_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.suggestionColumnName',
+  { defaultMessage: 'Suggestions' }
+);
+
+export const SUGGESTION_COLUMN_HEADER_ARIA_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.suggestionColumnHeaderAriaLabel',
+  {
+    defaultMessage: 'Suggestions column - shows the count of available suggestions for each stream',
+  }
+);
