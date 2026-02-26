@@ -20,7 +20,7 @@ test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => 
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.uptimeSettings.goto(queryParams);
 
     await test.step('reset alerting defaults for idempotency', async () => {

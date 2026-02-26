@@ -29,7 +29,7 @@ export class MonitorDetailsPage {
 
   async selectFilterItem(filterType: string, itemArg: string | string[]): Promise<void> {
     const itemList = Array.isArray(itemArg) ? itemArg : [itemArg];
-    await this.page.click(`[aria-label="expands filter group for ${filterType} filter"]`);
+    await this.page.testSubj.click(`o11yFilterGroupButton-${filterType}`);
     for (const title of itemList) {
       await this.page.click(`li[title="${title}"]`);
     }

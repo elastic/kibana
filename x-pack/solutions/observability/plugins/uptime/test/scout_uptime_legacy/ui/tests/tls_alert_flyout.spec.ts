@@ -14,7 +14,7 @@ test.describe('TlsFlyoutInAlertingApp', { tag: '@local-stateful-classic' }, () =
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await page.gotoApp('management/insightsAndAlerting/triggersActions/rules');
     await page.testSubj.locator('createRuleButton').waitFor({ timeout: 20_000 });
 
