@@ -354,13 +354,15 @@ const downloadIntegrationRoute = (
           const automaticImportv2 = await context.automaticImportv2;
           const automaticImportService = automaticImportv2.automaticImportService;
           const { integration_id: integrationId } = request.params;
-          const zipBuffer = await automaticImportService.buildIntegrationPackage(integrationId);
+          const { buffer, packageName } = await automaticImportService.buildIntegrationPackage(
+            integrationId
+          );
 
           return response.ok({
-            body: zipBuffer,
+            body: buffer,
             headers: {
               'content-type': 'application/zip',
-              'content-disposition': `attachment; filename="${integrationId}.zip"`,
+              'content-disposition': `attachment; filename="${packageName}.zip"`,
             },
           });
         } catch (err) {

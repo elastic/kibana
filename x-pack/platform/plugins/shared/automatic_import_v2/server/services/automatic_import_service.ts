@@ -6,7 +6,6 @@
  */
 
 import assert from 'assert';
-import AdmZip from 'adm-zip';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
   Logger,
@@ -41,6 +40,8 @@ import type {
   CreateUpdateIntegrationParams,
 } from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
+import type { BuildIntegrationPackageResult } from './build_integration/build_integration_service';
+import { buildIntegrationPackage } from './build_integration/build_integration_service';
 
 /**
  * Derives the integration status from its data streams.
@@ -299,12 +300,12 @@ export class AutomaticImportService {
     await this.savedObjectService.updateIntegration(updateData, version);
   }
 
-  public async buildIntegrationPackage(integrationId: string): Promise<Buffer> {
+  public async buildIntegrationPackage(
+    integrationId: string
+  ): Promise<BuildIntegrationPackageResult> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-
-    const zip = new AdmZip();
-
-    return zip.toBufferPromise();
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    return buildIntegrationPackage(integration);
   }
 
   public async createDataStream(
