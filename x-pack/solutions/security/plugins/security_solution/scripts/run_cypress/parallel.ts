@@ -494,14 +494,16 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                     },
                   });
                 } else {
-                  result = await executeCypressRun(isRetryRun);
+                  let runResult = await executeCypressRun(isRetryRun);
 
-                  if (isTestAssertionFailure(result) && !isRetryRun) {
+                  if (isTestAssertionFailure(runResult) && !isRetryRun) {
                     log.info(
                       `Test assertion failure detected for ${filePath}, retrying in-place against the same stack (with video enabled)...`
                     );
-                    result = await executeCypressRun(true);
+                    runResult = await executeCypressRun(true);
                   }
+
+                  result = runResult;
 
                   if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     _.pull(failedSpecFilePaths, filePath);
