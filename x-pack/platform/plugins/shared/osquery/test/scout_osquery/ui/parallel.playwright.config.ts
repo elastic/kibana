@@ -17,7 +17,7 @@ const parallelJobIndex = process.env.BUILDKITE_PARALLEL_JOB
 const config: ReturnType<typeof createPlaywrightConfig> = {
   ...createPlaywrightConfig({
     testDir: './tests',
-    workers: 2,
+    workers: 1,
     runGlobalSetup: true,
   }),
   timeout: 300_000,

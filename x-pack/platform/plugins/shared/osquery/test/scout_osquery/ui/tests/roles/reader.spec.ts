@@ -92,6 +92,14 @@ test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
 
     const toggle = page.locator(`[aria-label="${packName}"]`);
     await toggle.scrollIntoViewIfNeeded().catch(() => {});
+
+    const toggleStart = Date.now();
+    while (Date.now() - toggleStart < 60_000) {
+      if (await toggle.isVisible().catch(() => false)) break;
+      await page.reload();
+      await packs.ensureAllPacksVisible();
+    }
+
     await toggle.waitFor({ state: 'visible', timeout: 30_000 });
     await expect(toggle).toBeDisabled();
 

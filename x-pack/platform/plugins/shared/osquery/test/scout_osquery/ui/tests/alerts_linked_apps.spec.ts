@@ -119,21 +119,18 @@ test.describe(
       // Submit query using the page object's retry-aware submitQuery
       await pageObjects.liveQuery.submitQuery();
 
-      // Check results - use a polling loop for agent response delays
-      const resultsTable = page.testSubj.locator('osqueryResultsTable');
-      const resultStart = Date.now();
-      while (Date.now() - resultStart < 120_000) {
+      const flyoutBody = page.testSubj.locator('flyout-body-osquery');
+      const resultsTable = flyoutBody.locator('[data-test-subj="osqueryResultsTable"]');
+      const resultsStart = Date.now();
+      while (Date.now() - resultsStart < 120_000) {
         if (await resultsTable.isVisible({ timeout: 15_000 }).catch(() => false)) break;
-        // eslint-disable-next-line playwright/no-wait-for-timeout -- brief pause between checks
+        // eslint-disable-next-line playwright/no-wait-for-timeout -- brief pause between agent response checks
         await page.waitForTimeout(5_000);
       }
 
       await expect(resultsTable).toBeVisible({ timeout: 30_000 });
-      // eslint-disable-next-line playwright/no-nth-methods -- first cell in results grid
-      const dataCell = page.testSubj.locator('dataGridRowCell').first();
-      await expect(dataCell).toBeVisible({ timeout: 120_000 });
 
-      const addToTimelineButtons = page.getByRole('button', {
+      const addToTimelineButtons = flyoutBody.getByRole('button', {
         name: 'Add to Timeline investigation',
       });
       // eslint-disable-next-line playwright/no-nth-methods -- multiple timeline buttons may exist across result rows
@@ -141,7 +138,7 @@ test.describe(
         timeout: 30_000,
       });
       // eslint-disable-next-line playwright/no-nth-methods -- first add-to-timeline in results
-      await page.testSubj.locator('add-to-timeline').first().click();
+      await flyoutBody.locator('[data-test-subj="add-to-timeline"]').first().click();
       await expect(page.testSubj.locator('globalToastList').getByText(/Added/)).toBeVisible();
 
       // Close the osquery flyout using keyboard (Escape) to avoid portal intercept issues

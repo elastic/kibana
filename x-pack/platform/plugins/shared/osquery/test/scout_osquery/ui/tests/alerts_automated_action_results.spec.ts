@@ -80,8 +80,13 @@ test.describe(
           const resultComments = page.testSubj
             .locator('responseActionsViewWrapper')
             .locator('[data-test-subj="osquery-results-comment"]');
-          // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment in alert flyout
-          const discoverLink = resultComments.first().locator('a[data-test-subj="viewInDiscover"]');
+
+          const discoverLink = resultComments
+            // eslint-disable-next-line playwright/no-nth-methods -- first osquery result comment in alert flyout
+            .first()
+            .locator('a[data-test-subj="viewInDiscover"]')
+            // eslint-disable-next-line playwright/no-nth-methods -- icon + text link both match data-test-subj
+            .first();
           await expect(discoverLink).toBeVisible({ timeout: 30_000 });
           const href = await discoverLink.getAttribute('href');
 

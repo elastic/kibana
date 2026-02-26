@@ -123,7 +123,9 @@ for (const testSpace of testSpaces) {
       const baseUrl = new URL(page.url()).origin;
       await page.goto(`${baseUrl}${href!}`);
 
-      const docTable = page.testSubj.locator('discoverDocTable');
+      const docTable = page.testSubj
+        .locator('discoverDocTable')
+        .or(page.testSubj.locator('unifiedDataTable'));
       const discoverStart = Date.now();
       while (Date.now() - discoverStart < 120_000) {
         if (await docTable.isVisible({ timeout: 10_000 }).catch(() => false)) break;
@@ -132,10 +134,7 @@ for (const testSpace of testSpaces) {
 
       await expect(docTable).toBeVisible({ timeout: 30_000 });
 
-      const actionDataColumn = page.testSubj
-        .locator('discoverDocTable')
-        .getByText('action_data')
-        .first(); // eslint-disable-line playwright/no-nth-methods -- multiple columns contain 'action_data' substring
+      const actionDataColumn = docTable.getByText('action_data').first(); // eslint-disable-line playwright/no-nth-methods -- multiple columns contain 'action_data' substring
       await expect(actionDataColumn).toBeVisible({
         timeout: 30_000,
       });

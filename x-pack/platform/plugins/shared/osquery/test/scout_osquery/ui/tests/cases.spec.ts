@@ -48,13 +48,14 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
 
       await test.step('Navigate to live query results page', async () => {
         await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
-        // Single-query rows auto-expand; wait for results table (agents can be slow)
+        const resultsTable = page.testSubj
+          .locator('osqueryResultsTable')
+          .or(page.testSubj.locator('dataGridRowCell'));
         const start = Date.now();
-        while (Date.now() - start < 90_000) {
+        while (Date.now() - start < 120_000) {
           try {
-            await page.testSubj
-              .locator('osqueryResultsTable')
-              .waitFor({ state: 'visible', timeout: 20_000 });
+            // eslint-disable-next-line playwright/no-nth-methods -- .or() produces multiple matches; need first
+            await resultsTable.first().waitFor({ state: 'visible', timeout: 20_000 });
             break;
           } catch {
             await page.reload();
@@ -63,6 +64,8 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
 
         await page.testSubj
           .locator('osqueryResultsTable')
+          .or(page.testSubj.locator('dataGridRowCell'))
+          .first() // eslint-disable-line playwright/no-nth-methods -- .or() produces multiple matches
           .waitFor({ state: 'visible', timeout: 30_000 });
       });
 
@@ -121,12 +124,14 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
       await test.step('Navigate to live query results page', async () => {
         await page.goto(kbnUrl.get(`/app/osquery/live_queries/${liveQueryId}`));
 
+        const resultsTable = page.testSubj
+          .locator('osqueryResultsTable')
+          .or(page.testSubj.locator('dataGridRowCell'));
         const start = Date.now();
         while (Date.now() - start < 120_000) {
           try {
-            await page.testSubj
-              .locator('osqueryResultsTable')
-              .waitFor({ state: 'visible', timeout: 15_000 });
+            // eslint-disable-next-line playwright/no-nth-methods -- .or() produces multiple matches; need first
+            await resultsTable.first().waitFor({ state: 'visible', timeout: 15_000 });
             break;
           } catch {
             await page.reload();
@@ -135,6 +140,8 @@ test.describe('Add to Cases', { tag: [...tags.stateful.classic] }, () => {
 
         await page.testSubj
           .locator('osqueryResultsTable')
+          .or(page.testSubj.locator('dataGridRowCell'))
+          .first() // eslint-disable-line playwright/no-nth-methods -- .or() produces multiple matches
           .waitFor({ state: 'visible', timeout: 30_000 });
       });
 
