@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useSloFlyoutTelemetry } from '../../../hooks/use_slo_flyout_telemetry';
 import {
   SloOverviewDetailsContent,
@@ -67,8 +66,7 @@ export default function SLODetailsFlyout({
   telemetryLocation,
 }: SLODetailsFlyoutProps) {
   const { share } = useKibana().services;
-  const { telemetry } = usePluginContext();
-  const flyoutTelemetry = useSloFlyoutTelemetry(telemetry, telemetryLocation);
+  const flyoutTelemetry = useSloFlyoutTelemetry(telemetryLocation);
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',

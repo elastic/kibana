@@ -33,7 +33,6 @@ import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useSloFlyoutTelemetry } from '../../../hooks/use_slo_flyout_telemetry';
 
 export interface SloOverviewDetailsContentProps {
@@ -48,8 +47,7 @@ export function SloOverviewDetailsContent({
   telemetryLocation,
 }: SloOverviewDetailsContentProps) {
   const { agentBuilder } = useKibana().services;
-  const { telemetry } = usePluginContext();
-  const flyoutTelemetry = useSloFlyoutTelemetry(telemetry, telemetryLocation);
+  const flyoutTelemetry = useSloFlyoutTelemetry(telemetryLocation);
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
 
   const handleTabChange = useCallback(

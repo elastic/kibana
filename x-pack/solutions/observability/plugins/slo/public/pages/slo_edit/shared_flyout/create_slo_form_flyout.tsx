@@ -13,7 +13,6 @@ import React, { useEffect } from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { SloEditForm } from '../components/slo_edit_form';
 import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useSloFlyoutTelemetry } from '../../../hooks/use_slo_flyout_telemetry';
 import type { FormSettings } from '../types';
 
@@ -31,8 +30,7 @@ export default function CreateSLOFormFlyout({
   formSettings?: FormSettings;
   telemetryLocation?: string;
 }) {
-  const { telemetry } = usePluginContext();
-  const flyoutTelemetry = useSloFlyoutTelemetry(telemetry, telemetryLocation);
+  const flyoutTelemetry = useSloFlyoutTelemetry(telemetryLocation);
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
 
   useEffect(() => {

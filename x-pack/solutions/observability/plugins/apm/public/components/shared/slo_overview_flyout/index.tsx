@@ -114,8 +114,8 @@ export function SloOverviewFlyout({ serviceName, agentName, telemetryLocation, o
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
-  const { uiSettings, slo: sloPlugin, telemetry } = services;
-  const flyoutTelemetry = useSloOverviewFlyoutTelemetry(telemetry, telemetryLocation);
+  const { uiSettings, slo: sloPlugin } = services;
+  const flyoutTelemetry = useSloOverviewFlyoutTelemetry(telemetryLocation);
   const { link } = useApmRouter();
   const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
   const [searchQuery, setSearchQuery] = useState('');

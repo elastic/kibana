@@ -6,11 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import type { ISloTelemetryClient } from '../services/telemetry/types';
+import { usePluginContext } from './use_plugin_context';
 
 const noop = () => {};
 
-export const useSloFlyoutTelemetry = (telemetry: ISloTelemetryClient, location?: string) => {
+export const useSloFlyoutTelemetry = (location?: string) => {
+  const { telemetry } = usePluginContext();
+
   return useMemo(() => {
     if (!location) {
       return {

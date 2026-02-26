@@ -6,11 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import type { ITelemetryClient } from '../../../services/telemetry/types';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 
 const noop = () => {};
 
-export const useSloOverviewFlyoutTelemetry = (telemetry: ITelemetryClient, location?: string) => {
+export const useSloOverviewFlyoutTelemetry = (location?: string) => {
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const { telemetry } = services;
+
   return useMemo(() => {
     if (!location) {
       return {
