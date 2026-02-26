@@ -6,9 +6,4 @@
  */
 
 export { NotificationPolicyClient } from './notification_policy_client';
-export type {
-  CreateNotificationPolicyData,
-  CreateNotificationPolicyParams,
-  NotificationPolicyResponse,
-  UpdateNotificationPolicyData,
-} from './types';
+export type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';

@@ -334,8 +334,16 @@
       "updatedBy": {
         "type": "keyword"
       },
-      "workflow_id": {
-        "type": "keyword"
+      "destinations": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "keyword"
+          },
+          "id": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
