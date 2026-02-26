@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { HttpError, OptimisticContext } from './types';
 
-export interface DeleteWorkflowsActionParams {
+export interface DeleteWorkflowsParams {
   /** Workflow IDs to delete in a single request. */
   ids: string[];
 }
@@ -24,17 +24,17 @@ export interface DeleteWorkflowsActionParams {
  *
  * @example
  * ```ts
- * const { mutate: deleteWorkflows } = useDeleteWorkflowsAction();
+ * const { mutate: deleteWorkflows } = useDeleteWorkflows();
  *
  * deleteWorkflows({ ids: ['workflow-1', 'workflow-2'] });
  * ```
  */
-export const useDeleteWorkflowsAction = (
-  options?: UseMutationOptions<void, HttpError, DeleteWorkflowsActionParams, OptimisticContext>
+export const useDeleteWorkflows = (
+  options?: UseMutationOptions<void, HttpError, DeleteWorkflowsParams, OptimisticContext>
 ) => {
   const { http } = useKibana().services;
 
-  return useMutation<void, HttpError, DeleteWorkflowsActionParams, OptimisticContext>({
+  return useMutation<void, HttpError, DeleteWorkflowsParams, OptimisticContext>({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }) => {
       if (!http) {

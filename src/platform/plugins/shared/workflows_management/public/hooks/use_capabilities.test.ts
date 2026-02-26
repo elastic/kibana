@@ -8,229 +8,53 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows/common/constants';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useCapabilities } from './use_capabilities';
-import { useKibana } from './use_kibana';
-import { createStartServicesMock } from '../mocks';
 
-jest.mock('./use_kibana');
-const mockUseKibana = useKibana as jest.Mock;
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsCapabilities: jest.fn(),
+}));
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 
 describe('useCapabilities', () => {
-  let mockServices: ReturnType<typeof createStartServicesMock>;
-
-  const mockCapabilities = (capabilities: any) => {
-    mockServices.application.capabilities = {
-      [WORKFLOWS_MANAGEMENT_FEATURE_ID]: capabilities,
-      navLinks: {},
-      management: {},
-      catalogue: {},
-    };
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockServices = createStartServicesMock();
-    mockUseKibana.mockReturnValue({ services: mockServices });
-  });
-
-  describe('when all capabilities are enabled', () => {
-    beforeEach(() => {
-      mockCapabilities({
-        createWorkflow: true,
-        readWorkflow: true,
-        updateWorkflow: true,
-        deleteWorkflow: true,
-        executeWorkflow: true,
-        readWorkflowExecution: true,
-        cancelWorkflowExecution: true,
-      });
-    });
-
-    it('should return all capabilities as true', () => {
-      const { result } = renderHook(useCapabilities);
-
-      expect(result.current).toEqual({
-        canCreateWorkflow: true,
-        canReadWorkflow: true,
-        canUpdateWorkflow: true,
-        canDeleteWorkflow: true,
-        canExecuteWorkflow: true,
-        canReadWorkflowExecution: true,
-        canCancelWorkflowExecution: true,
-      });
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      workflowUIEnabled: true,
+      canCreateWorkflow: false,
+      canReadWorkflow: false,
+      canUpdateWorkflow: false,
+      canDeleteWorkflow: false,
+      canExecuteWorkflow: false,
+      canReadWorkflowExecution: false,
+      canCancelWorkflowExecution: false,
     });
   });
 
-  describe('when all capabilities are disabled', () => {
-    beforeEach(() => {
-      mockCapabilities({
-        createWorkflow: false,
-        readWorkflow: false,
-        updateWorkflow: false,
-        deleteWorkflow: false,
-        executeWorkflow: false,
-        readWorkflowExecution: false,
-        cancelWorkflowExecution: false,
-      });
+  it('returns workflow capabilities without the uiSettings flag', () => {
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      workflowUIEnabled: true,
+      canCreateWorkflow: true,
+      canReadWorkflow: false,
+      canUpdateWorkflow: true,
+      canDeleteWorkflow: false,
+      canExecuteWorkflow: true,
+      canReadWorkflowExecution: false,
+      canCancelWorkflowExecution: true,
     });
 
-    it('should return all capabilities as false', () => {
-      const { result } = renderHook(useCapabilities);
+    const { result } = renderHook(useCapabilities);
 
-      expect(result.current).toEqual({
-        canCreateWorkflow: false,
-        canReadWorkflow: false,
-        canUpdateWorkflow: false,
-        canDeleteWorkflow: false,
-        canExecuteWorkflow: false,
-        canReadWorkflowExecution: false,
-        canCancelWorkflowExecution: false,
-      });
-    });
-  });
-
-  describe('when some capabilities are enabled', () => {
-    beforeEach(() => {
-      mockCapabilities({
-        createWorkflow: true,
-        readWorkflow: true,
-        updateWorkflow: false,
-        deleteWorkflow: false,
-        executeWorkflow: true,
-        readWorkflowExecution: false,
-        cancelWorkflowExecution: false,
-      });
-    });
-
-    it('should return correct mixed capabilities', () => {
-      const { result } = renderHook(useCapabilities);
-
-      expect(result.current).toEqual({
-        canCreateWorkflow: true,
-        canReadWorkflow: true,
-        canUpdateWorkflow: false,
-        canDeleteWorkflow: false,
-        canExecuteWorkflow: true,
-        canReadWorkflowExecution: false,
-        canCancelWorkflowExecution: false,
-      });
-    });
-  });
-
-  describe('when capabilities object is undefined', () => {
-    beforeEach(() => {
-      mockCapabilities(undefined);
-    });
-
-    it('should return all capabilities as false', () => {
-      const { result } = renderHook(useCapabilities);
-
-      expect(result.current).toEqual({
-        canCreateWorkflow: false,
-        canReadWorkflow: false,
-        canUpdateWorkflow: false,
-        canDeleteWorkflow: false,
-        canExecuteWorkflow: false,
-        canReadWorkflowExecution: false,
-        canCancelWorkflowExecution: false,
-      });
-    });
-  });
-
-  describe('when capabilities object does not exist', () => {
-    beforeEach(() => {
-      mockCapabilities({});
-    });
-
-    it('should return all capabilities as false', () => {
-      const { result } = renderHook(useCapabilities);
-
-      expect(result.current).toEqual({
-        canCreateWorkflow: false,
-        canReadWorkflow: false,
-        canUpdateWorkflow: false,
-        canDeleteWorkflow: false,
-        canExecuteWorkflow: false,
-        canReadWorkflowExecution: false,
-        canCancelWorkflowExecution: false,
-      });
-    });
-  });
-
-  describe('when application is undefined', () => {
-    beforeEach(() => {
-      mockServices.application = undefined as any;
-    });
-
-    it('should return all capabilities as false', () => {
-      const { result } = renderHook(useCapabilities);
-
-      expect(result.current).toEqual({
-        canCreateWorkflow: false,
-        canReadWorkflow: false,
-        canUpdateWorkflow: false,
-        canDeleteWorkflow: false,
-        canExecuteWorkflow: false,
-        canReadWorkflowExecution: false,
-        canCancelWorkflowExecution: false,
-      });
-    });
-  });
-
-  describe('when capability values are falsy', () => {
-    beforeEach(() => {
-      mockCapabilities({
-        createWorkflow: 0,
-        readWorkflow: '',
-        updateWorkflow: null,
-        deleteWorkflow: undefined,
-        executeWorkflow: false,
-        readWorkflowExecution: 0,
-        cancelWorkflowExecution: null,
-      });
-    });
-
-    it('should convert all falsy values to false', () => {
-      const { result } = renderHook(useCapabilities);
-
-      expect(result.current).toEqual({
-        canCreateWorkflow: false,
-        canReadWorkflow: false,
-        canUpdateWorkflow: false,
-        canDeleteWorkflow: false,
-        canExecuteWorkflow: false,
-        canReadWorkflowExecution: false,
-        canCancelWorkflowExecution: false,
-      });
-    });
-  });
-
-  describe('when capability values are truthy', () => {
-    beforeEach(() => {
-      mockCapabilities({
-        createWorkflow: 1,
-        readWorkflow: 'true',
-        updateWorkflow: {},
-        deleteWorkflow: [],
-        executeWorkflow: true,
-        readWorkflowExecution: 'test',
-        cancelWorkflowExecution: 42,
-      });
-    });
-
-    it('should convert all truthy values to true', () => {
-      const { result } = renderHook(useCapabilities);
-
-      expect(result.current).toEqual({
-        canCreateWorkflow: true,
-        canReadWorkflow: true,
-        canUpdateWorkflow: true,
-        canDeleteWorkflow: true,
-        canExecuteWorkflow: true,
-        canReadWorkflowExecution: true,
-        canCancelWorkflowExecution: true,
-      });
+    expect(result.current).toEqual({
+      canCreateWorkflow: true,
+      canReadWorkflow: false,
+      canUpdateWorkflow: true,
+      canDeleteWorkflow: false,
+      canExecuteWorkflow: true,
+      canReadWorkflowExecution: false,
+      canCancelWorkflowExecution: true,
     });
   });
 });

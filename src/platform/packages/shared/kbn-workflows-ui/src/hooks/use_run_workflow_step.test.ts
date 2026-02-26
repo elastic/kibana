@@ -12,7 +12,8 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useDeleteWorkflowsAction } from './use_delete_workflows_action';
+import type { RunWorkflowResponseDto } from '@kbn/workflows';
+import { useRunWorkflowStep } from '../..';
 import { testQueryClientConfig } from '../test_utils';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -26,7 +27,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: queryClient }, children);
 
-describe('useDeleteWorkflowsAction', () => {
+describe('useRunWorkflowStep', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
@@ -37,19 +38,25 @@ describe('useDeleteWorkflowsAction', () => {
     } as unknown as ReturnType<typeof useKibana>);
   });
 
-  it('deletes workflows via API', async () => {
-    mockCore.http.delete.mockResolvedValue(undefined);
+  it('runs a step test via API', async () => {
+    const response = { workflowExecutionId: 'execution-1' } as RunWorkflowResponseDto;
+    mockCore.http.post.mockResolvedValue(response);
 
-    const { result } = renderHook(() => useDeleteWorkflowsAction(), { wrapper });
+    const { result } = renderHook(() => useRunWorkflowStep(), { wrapper });
 
     await act(async () => {
       await result.current.mutateAsync({
-        ids: ['workflow-1', 'workflow-2'],
+        stepId: 'step-1',
+        workflowYaml: 'name: test-workflow',
       });
     });
 
-    expect(mockCore.http.delete).toHaveBeenCalledWith('/api/workflows', {
-      body: JSON.stringify({ ids: ['workflow-1', 'workflow-2'] }),
+    expect(mockCore.http.post).toHaveBeenCalledWith('/api/workflows/testStep', {
+      body: JSON.stringify({
+        stepId: 'step-1',
+        contextOverride: undefined,
+        workflowYaml: 'name: test-workflow',
+      }),
     });
   });
 
@@ -61,13 +68,14 @@ describe('useDeleteWorkflowsAction', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    const { result } = renderHook(() => useDeleteWorkflowsAction(), { wrapper });
+    const { result } = renderHook(() => useRunWorkflowStep(), { wrapper });
 
     let thrownError: Error | undefined;
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          ids: ['workflow-1'],
+          stepId: 'step-1',
+          workflowYaml: 'name: test-workflow',
         });
       } catch (error) {
         thrownError = error as Error;

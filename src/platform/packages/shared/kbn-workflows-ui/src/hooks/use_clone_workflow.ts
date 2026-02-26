@@ -12,7 +12,7 @@ import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { HttpError } from './types';
 
-export interface CloneWorkflowActionParams {
+export interface CloneWorkflowParams {
   /** Workflow ID to clone. */
   id: string;
 }
@@ -25,17 +25,17 @@ export interface CloneWorkflowActionParams {
  *
  * @example
  * ```ts
- * const { mutateAsync: cloneWorkflow } = useCloneWorkflowAction();
+ * const { mutateAsync: cloneWorkflow } = useCloneWorkflow();
  *
  * const clonedWorkflow: WorkflowDetailDto = await cloneWorkflow({ id: workflowId });
  * ```
  */
-export const useCloneWorkflowAction = (
-  options?: UseMutationOptions<WorkflowDetailDto, HttpError, CloneWorkflowActionParams>
+export const useCloneWorkflow = (
+  options?: UseMutationOptions<WorkflowDetailDto, HttpError, CloneWorkflowParams>
 ) => {
   const { http } = useKibana().services;
 
-  return useMutation<WorkflowDetailDto, HttpError, CloneWorkflowActionParams>({
+  return useMutation<WorkflowDetailDto, HttpError, CloneWorkflowParams>({
     mutationKey: ['POST', 'workflows', 'id', 'clone'],
     mutationFn: ({ id }) => {
       if (!http) {

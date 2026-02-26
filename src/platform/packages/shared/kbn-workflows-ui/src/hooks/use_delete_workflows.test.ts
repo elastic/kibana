@@ -12,8 +12,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { RunWorkflowResponseDto } from '@kbn/workflows';
-import { useRunWorkflowAction } from './use_run_workflow_action';
+import { useDeleteWorkflows } from '../..';
 import { testQueryClientConfig } from '../test_utils';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -27,7 +26,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: queryClient }, children);
 
-describe('useRunWorkflowAction', () => {
+describe('useDeleteWorkflows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
@@ -38,21 +37,19 @@ describe('useRunWorkflowAction', () => {
     } as unknown as ReturnType<typeof useKibana>);
   });
 
-  it('runs workflow via API', async () => {
-    const response = { workflowExecutionId: 'execution-1' } as RunWorkflowResponseDto;
-    mockCore.http.post.mockResolvedValue(response);
+  it('deletes workflows via API', async () => {
+    mockCore.http.delete.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useRunWorkflowAction(), { wrapper });
+    const { result } = renderHook(() => useDeleteWorkflows(), { wrapper });
 
     await act(async () => {
       await result.current.mutateAsync({
-        id: 'workflow-1',
-        inputs: { event: { triggerType: 'manual' } },
+        ids: ['workflow-1', 'workflow-2'],
       });
     });
 
-    expect(mockCore.http.post).toHaveBeenCalledWith('/api/workflows/workflow-1/run', {
-      body: JSON.stringify({ inputs: { event: { triggerType: 'manual' } } }),
+    expect(mockCore.http.delete).toHaveBeenCalledWith('/api/workflows', {
+      body: JSON.stringify({ ids: ['workflow-1', 'workflow-2'] }),
     });
   });
 
@@ -64,14 +61,13 @@ describe('useRunWorkflowAction', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    const { result } = renderHook(() => useRunWorkflowAction(), { wrapper });
+    const { result } = renderHook(() => useDeleteWorkflows(), { wrapper });
 
     let thrownError: Error | undefined;
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          id: 'workflow-1',
-          inputs: {},
+          ids: ['workflow-1'],
         });
       } catch (error) {
         thrownError = error as Error;

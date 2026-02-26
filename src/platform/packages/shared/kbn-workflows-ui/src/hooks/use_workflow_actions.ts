@@ -9,11 +9,11 @@
 
 import { useQueryClient } from '@kbn/react-query';
 import type { WorkflowDetailDto, WorkflowListDto } from '@kbn/workflows';
-import { useCloneWorkflowAction } from './use_clone_workflow_action';
-import { useDeleteWorkflowsAction } from './use_delete_workflows_action';
-import { useRunWorkflowAction } from './use_run_workflow_action';
-import { useRunWorkflowStepAction } from './use_run_workflow_step_action';
-import { useUpdateWorkflowAction } from './use_update_workflow_action';
+import { useCloneWorkflow } from './use_clone_workflow';
+import { useDeleteWorkflows } from './use_delete_workflows';
+import { useRunWorkflow } from './use_run_workflow';
+import { useRunWorkflowStep } from './use_run_workflow_step';
+import { useUpdateWorkflow } from './use_update_workflow';
 import type { WorkflowTriggerTab } from '../types';
 
 export interface WorkflowActionsTelemetry {
@@ -63,7 +63,7 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
   const telemetry = useTelemetry?.();
   const queryClient = useQueryClient();
 
-  const updateWorkflow = useUpdateWorkflowAction({
+  const updateWorkflow = useUpdateWorkflow({
     onMutate: async ({ id, workflow }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
@@ -161,7 +161,7 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
     },
   });
 
-  const deleteWorkflows = useDeleteWorkflowsAction({
+  const deleteWorkflows = useDeleteWorkflows({
     onMutate: async ({ ids }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
@@ -228,7 +228,7 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
     },
   });
 
-  const runWorkflow = useRunWorkflowAction({
+  const runWorkflow = useRunWorkflow({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
@@ -263,7 +263,7 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
     },
   });
 
-  const runIndividualStep = useRunWorkflowStepAction({
+  const runIndividualStep = useRunWorkflowStep({
     onSuccess: ({ workflowExecutionId }, variables) => {
       // Report telemetry for successful step test run
       telemetry?.reportWorkflowStepTestRunInitiated({
@@ -287,7 +287,7 @@ export const useWorkflowActions = ({ useTelemetry }: UseWorkflowActionsOptions =
     },
   });
 
-  const cloneWorkflow = useCloneWorkflowAction({
+  const cloneWorkflow = useCloneWorkflow({
     onSuccess: (clonedWorkflow, variables) => {
       // Report telemetry for successful clone
       telemetry?.reportWorkflowCloned({

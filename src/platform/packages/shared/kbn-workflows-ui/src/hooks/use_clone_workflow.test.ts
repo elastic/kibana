@@ -13,7 +13,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { useCloneWorkflowAction } from './use_clone_workflow_action';
+import { useCloneWorkflow } from '../..';
 import { testQueryClientConfig } from '../test_utils';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -27,7 +27,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: queryClient }, children);
 
-describe('useCloneWorkflowAction', () => {
+describe('useCloneWorkflow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
@@ -42,7 +42,7 @@ describe('useCloneWorkflowAction', () => {
     const response = { id: 'cloned-workflow-1' } as WorkflowDetailDto;
     mockCore.http.post.mockResolvedValue(response);
 
-    const { result } = renderHook(() => useCloneWorkflowAction(), { wrapper });
+    const { result } = renderHook(() => useCloneWorkflow(), { wrapper });
 
     await act(async () => {
       await result.current.mutateAsync({
@@ -61,7 +61,7 @@ describe('useCloneWorkflowAction', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    const { result } = renderHook(() => useCloneWorkflowAction(), { wrapper });
+    const { result } = renderHook(() => useCloneWorkflow(), { wrapper });
 
     let thrownError: Error | undefined;
     await act(async () => {

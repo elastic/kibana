@@ -22,7 +22,17 @@ import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts
 import * as i18n from '../translations';
 
 const mockMutate = jest.fn();
-const mockUseRunWorkflowAction = jest.fn(() => ({ mutate: mockMutate }));
+const mockUseRunWorkflow = jest.fn(() => ({ mutate: mockMutate }));
+const mockUseWorkflowsCapabilities = jest.fn(() => ({
+  workflowUIEnabled: true,
+  canCreateWorkflow: true,
+  canReadWorkflow: true,
+  canUpdateWorkflow: true,
+  canDeleteWorkflow: true,
+  canExecuteWorkflow: true,
+  canReadWorkflowExecution: true,
+  canCancelWorkflowExecution: true,
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -32,7 +42,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('@kbn/workflows-ui', () => ({
-  useRunWorkflowAction: () => mockUseRunWorkflowAction(),
+  useRunWorkflow: () => mockUseRunWorkflow(),
+  useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
     <div data-test-subj="workflow-selector-mock">
       {'Workflow selector'}
@@ -54,8 +65,6 @@ jest.mock('../../../../common/components/loader', () => ({
 
 const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
 
-const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
-
 const defaultProps: UseRunAlertWorkflowPanelProps = {
   closePopover: jest.fn(),
   ecsRowData: {
@@ -71,39 +80,18 @@ const defaultProps: UseRunAlertWorkflowPanelProps = {
 
 const createMockKibana = (
   overrides: {
-    workflowUIEnabled?: boolean;
-    canExecuteWorkflow?: boolean;
     application?: { navigateToApp: jest.Mock };
     rendering?: object;
   } = {}
 ) => {
-  const {
-    workflowUIEnabled = true,
-    canExecuteWorkflow = true,
-    application,
-    rendering = {},
-  } = overrides;
+  const { application, rendering = {} } = overrides;
   const baseServices = createStartServicesMock();
-  const baseGet = baseServices.uiSettings.get as jest.Mock;
   return {
     services: {
       ...baseServices,
-      uiSettings: {
-        ...baseServices.uiSettings,
-        get: jest.fn((key: string, defaultValue?: boolean) => {
-          if (key === WORKFLOWS_UI_SETTING_ID) return workflowUIEnabled;
-          return baseGet(key, defaultValue);
-        }),
-      },
       application: {
         ...baseServices.application,
         ...application,
-        capabilities: {
-          ...baseServices.application.capabilities,
-          workflowsManagement: {
-            executeWorkflow: canExecuteWorkflow,
-          },
-        },
       },
       rendering: rendering || undefined,
     },
@@ -130,7 +118,17 @@ const renderContextMenu = (
 
 describe('useRunAlertWorkflowPanel', () => {
   beforeEach(() => {
-    mockUseRunWorkflowAction.mockReturnValue({ mutate: mockMutate });
+    mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      workflowUIEnabled: true,
+      canCreateWorkflow: true,
+      canReadWorkflow: true,
+      canUpdateWorkflow: true,
+      canDeleteWorkflow: true,
+      canExecuteWorkflow: true,
+      canReadWorkflowExecution: true,
+      canCancelWorkflowExecution: true,
+    });
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useKibanaMock.mockReturnValue(createMockKibana());
   });
@@ -160,7 +158,16 @@ describe('useRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty lists when workflow UI is disabled', () => {
-      useKibanaMock.mockReturnValue(createMockKibana({ workflowUIEnabled: false }));
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        workflowUIEnabled: false,
+        canCreateWorkflow: true,
+        canReadWorkflow: true,
+        canUpdateWorkflow: true,
+        canDeleteWorkflow: true,
+        canExecuteWorkflow: true,
+        canReadWorkflowExecution: true,
+        canCancelWorkflowExecution: true,
+      });
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
@@ -171,7 +178,16 @@ describe('useRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty lists when user does not have executeWorkflow capability', () => {
-      useKibanaMock.mockReturnValue(createMockKibana({ canExecuteWorkflow: false }));
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        workflowUIEnabled: true,
+        canCreateWorkflow: true,
+        canReadWorkflow: true,
+        canUpdateWorkflow: true,
+        canDeleteWorkflow: true,
+        canExecuteWorkflow: false,
+        canReadWorkflowExecution: true,
+        canCancelWorkflowExecution: true,
+      });
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
@@ -192,14 +208,16 @@ describe('useRunAlertWorkflowPanel', () => {
       expect(result.current.runAlertWorkflowPanel).toEqual([]);
     });
 
-    it('returns empty lists when uiSettings is undefined', () => {
-      useKibanaMock.mockReturnValue({
-        services: {
-          uiSettings: undefined,
-          application: {
-            capabilities: { workflowsManagement: { executeWorkflow: true } },
-          },
-        },
+    it('returns empty lists when workflow ui setting is disabled', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        workflowUIEnabled: false,
+        canCreateWorkflow: true,
+        canReadWorkflow: true,
+        canUpdateWorkflow: true,
+        canDeleteWorkflow: true,
+        canExecuteWorkflow: true,
+        canReadWorkflowExecution: true,
+        canCancelWorkflowExecution: true,
       });
 
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {

@@ -13,7 +13,7 @@ import type { RunWorkflowCommand, RunWorkflowResponseDto } from '@kbn/workflows'
 import type { HttpError } from './types';
 import type { WorkflowTriggerTab } from '../types';
 
-export type RunWorkflowActionParams = RunWorkflowCommand & {
+export type RunWorkflowParams = RunWorkflowCommand & {
   /** Workflow ID to run. */
   id: string;
   /**
@@ -33,7 +33,7 @@ export type RunWorkflowActionParams = RunWorkflowCommand & {
  *
  * @example
  * ```ts
- * const { mutate: runWorkflow } = useRunWorkflowAction();
+ * const { mutate: runWorkflow } = useRunWorkflow();
  *
  * runWorkflow({
  *   id: workflowId,
@@ -41,12 +41,12 @@ export type RunWorkflowActionParams = RunWorkflowCommand & {
  * });
  * ```
  */
-export const useRunWorkflowAction = (
-  options?: UseMutationOptions<RunWorkflowResponseDto, HttpError, RunWorkflowActionParams>
+export const useRunWorkflow = (
+  options?: UseMutationOptions<RunWorkflowResponseDto, HttpError, RunWorkflowParams>
 ) => {
   const { http } = useKibana().services;
 
-  return useMutation<RunWorkflowResponseDto, HttpError, RunWorkflowActionParams>({
+  return useMutation<RunWorkflowResponseDto, HttpError, RunWorkflowParams>({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
       if (!http) {

@@ -10,11 +10,8 @@ import type {
   ContentPanelConfig,
   RenderContentPanelProps,
 } from '@kbn/response-ops-alerts-table/types';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import React, { useCallback, useMemo } from 'react';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import * as i18n from '../../components/alerts_table/translations';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import {
@@ -28,12 +25,7 @@ export interface UseBulkRunAlertWorkflowPanelResult {
 }
 
 export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResult => {
-  const {
-    services: { uiSettings, application },
-  } = useKibana<{ application: ApplicationStart; uiSettings: IUiSettingsClient }>();
-
-  const workflowUIEnabled = uiSettings?.get<boolean>(WORKFLOWS_UI_SETTING_ID, false) ?? false;
-  const canExecuteWorkflow = application.capabilities.workflowsManagement?.executeWorkflow ?? false;
+  const { workflowUIEnabled, canExecuteWorkflow } = useWorkflowsCapabilities();
   const { hasIndexWrite } = useAlertsPrivileges();
   const canRunWorkflow = useMemo(
     () => hasIndexWrite && workflowUIEnabled && canExecuteWorkflow,

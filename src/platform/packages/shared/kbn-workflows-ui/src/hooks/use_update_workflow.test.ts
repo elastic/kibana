@@ -12,8 +12,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { RunWorkflowResponseDto } from '@kbn/workflows';
-import { useRunWorkflowStepAction } from './use_run_workflow_step_action';
+import { useUpdateWorkflow } from '../..';
 import { testQueryClientConfig } from '../test_utils';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -27,7 +26,7 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: queryClient }, children);
 
-describe('useRunWorkflowStepAction', () => {
+describe('useUpdateWorkflow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
@@ -38,25 +37,21 @@ describe('useRunWorkflowStepAction', () => {
     } as unknown as ReturnType<typeof useKibana>);
   });
 
-  it('runs a step test via API', async () => {
-    const response = { workflowExecutionId: 'execution-1' } as RunWorkflowResponseDto;
-    mockCore.http.post.mockResolvedValue(response);
+  it('updates workflow via API', async () => {
+    mockCore.http.put.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useRunWorkflowStepAction(), { wrapper });
+    const { result } = renderHook(() => useUpdateWorkflow(), { wrapper });
+    const workflowUpdate = { enabled: false };
 
     await act(async () => {
       await result.current.mutateAsync({
-        stepId: 'step-1',
-        workflowYaml: 'name: test-workflow',
+        id: 'workflow-1',
+        workflow: workflowUpdate,
       });
     });
 
-    expect(mockCore.http.post).toHaveBeenCalledWith('/api/workflows/testStep', {
-      body: JSON.stringify({
-        stepId: 'step-1',
-        contextOverride: undefined,
-        workflowYaml: 'name: test-workflow',
-      }),
+    expect(mockCore.http.put).toHaveBeenCalledWith('/api/workflows/workflow-1', {
+      body: JSON.stringify(workflowUpdate),
     });
   });
 
@@ -68,14 +63,14 @@ describe('useRunWorkflowStepAction', () => {
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    const { result } = renderHook(() => useRunWorkflowStepAction(), { wrapper });
+    const { result } = renderHook(() => useUpdateWorkflow(), { wrapper });
 
     let thrownError: Error | undefined;
     await act(async () => {
       try {
         await result.current.mutateAsync({
-          stepId: 'step-1',
-          workflowYaml: 'name: test-workflow',
+          id: 'workflow-1',
+          workflow: {},
         });
       } catch (error) {
         thrownError = error as Error;

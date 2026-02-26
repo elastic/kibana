@@ -7,56 +7,40 @@
 
 import React from 'react';
 import { render, renderHook, screen } from '@testing-library/react';
+import type { RenderContentPanelProps, TimelineItem } from '@kbn/response-ops-alerts-table/types';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useBulkRunAlertWorkflowPanel } from './use_bulk_run_alert_workflow_panel';
 import { RUN_WORKFLOW_BULK_PANEL_ID } from '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { TestProviders } from '../../../common/mock';
-import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../../components/alerts_table/translations';
-import type { RenderContentPanelProps, TimelineItem } from '@kbn/response-ops-alerts-table/types';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...actual,
-    useKibana: jest.fn(),
-  };
-});
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsCapabilities: jest.fn(),
+}));
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 
-const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
+const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 
-const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
-
-const createMockKibana = (
+const createCapabilities = (
   overrides: {
     workflowUIEnabled?: boolean;
     canExecuteWorkflow?: boolean;
   } = {}
 ) => {
   const { workflowUIEnabled = true, canExecuteWorkflow = true } = overrides;
-  const baseServices = createStartServicesMock();
-  const baseGet = baseServices.uiSettings.get as jest.Mock;
+
   return {
-    services: {
-      ...baseServices,
-      uiSettings: {
-        ...baseServices.uiSettings,
-        get: jest.fn((key: string, defaultValue?: boolean) => {
-          if (key === WORKFLOWS_UI_SETTING_ID) return workflowUIEnabled;
-          return baseGet(key, defaultValue);
-        }),
-      },
-      application: {
-        ...baseServices.application,
-        capabilities: {
-          ...baseServices.application.capabilities,
-          workflowsManagement: {
-            executeWorkflow: canExecuteWorkflow,
-          },
-        },
-      },
-    },
+    workflowUIEnabled,
+    canCreateWorkflow: true,
+    canReadWorkflow: true,
+    canUpdateWorkflow: true,
+    canDeleteWorkflow: true,
+    canExecuteWorkflow,
+    canReadWorkflowExecution: true,
+    canCancelWorkflowExecution: true,
   };
 };
 
@@ -86,7 +70,7 @@ jest.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow
 describe('useBulkRunAlertWorkflowPanel', () => {
   beforeEach(() => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
-    useKibanaMock.mockReturnValue(createMockKibana());
+    useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
   });
 
   afterEach(() => {
@@ -118,7 +102,9 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty arrays when workflow UI is disabled', () => {
-      useKibanaMock.mockReturnValue(createMockKibana({ workflowUIEnabled: false }));
+      useWorkflowsCapabilitiesMock.mockReturnValue(
+        createCapabilities({ workflowUIEnabled: false })
+      );
 
       const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
         wrapper: TestProviders,
@@ -129,7 +115,9 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     });
 
     it('returns empty arrays when user does not have executeWorkflow capability', () => {
-      useKibanaMock.mockReturnValue(createMockKibana({ canExecuteWorkflow: false }));
+      useWorkflowsCapabilitiesMock.mockReturnValue(
+        createCapabilities({ canExecuteWorkflow: false })
+      );
 
       const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
         wrapper: TestProviders,
@@ -141,24 +129,6 @@ describe('useBulkRunAlertWorkflowPanel', () => {
 
     it('returns empty arrays when user does not have index write', () => {
       (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
-
-      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
-        wrapper: TestProviders,
-      });
-
-      expect(result.current.runWorkflowItems).toEqual([]);
-      expect(result.current.runWorkflowPanels).toEqual([]);
-    });
-
-    it('returns empty arrays when uiSettings is undefined', () => {
-      useKibanaMock.mockReturnValue({
-        services: {
-          uiSettings: undefined,
-          application: {
-            capabilities: { workflowsManagement: { executeWorkflow: true } },
-          },
-        },
-      });
 
       const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
         wrapper: TestProviders,

@@ -35,7 +35,7 @@ export interface UpdateWorkflowParams {
  *
  * @example
  * ```ts
- * const { mutate: updateWorkflow } = useUpdateWorkflowAction();
+ * const { mutate: updateWorkflow } = useUpdateWorkflow();
  *
  * updateWorkflow({
  *   id: workflowId,
@@ -43,7 +43,7 @@ export interface UpdateWorkflowParams {
  * });
  * ```
  */
-export const useUpdateWorkflowAction = (
+export const useUpdateWorkflow = (
   options?: UseMutationOptions<void, HttpError, UpdateWorkflowParams, OptimisticContext>
 ) => {
   const { http } = useKibana().services;

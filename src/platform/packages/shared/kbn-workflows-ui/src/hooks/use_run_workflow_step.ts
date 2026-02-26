@@ -23,7 +23,7 @@ import type { HttpError } from './types';
  *
  * @example
  * ```ts
- * const { mutate: testStep } = useRunWorkflowStepAction();
+ * const { mutate: testStep } = useRunWorkflowStep();
  *
  * testStep({
  *   stepId: 'send_slack_message',
@@ -32,7 +32,7 @@ import type { HttpError } from './types';
  * });
  * ```
  */
-export const useRunWorkflowStepAction = (
+export const useRunWorkflowStep = (
   options?: UseMutationOptions<RunWorkflowResponseDto, HttpError, RunStepCommand>
 ) => {
   const { http } = useKibana().services;
