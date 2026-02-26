@@ -6,8 +6,24 @@
  */
 
 /**
- * Prefix used for ES|QL view names to avoid shadowing existing streams/indices.
- * For example, a query stream named "cars.electric" will have an ES|QL view named "$.cars.electric".
+ * Prefix used for ES|QL view names created by query streams.
+ *
+ * This prefix serves two purposes:
+ * 1. **Avoids shadowing**: Prevents query stream views from colliding with existing
+ *    data streams or indices that share the same name.
+ * 2. **Isolates query streams from parent views**: Ingest streams query their data using
+ *    patterns like `FROM logs.otel, logs.otel.*`. Because query stream views live in the
+ *    `$.` namespace (e.g. `$.logs.otel.electric`), they are never matched by these
+ *    wildcard patterns. This ensures that aggregated or transformed columns defined by
+ *    query streams do not leak into parent stream schemas.
+ *
+ * To query a query stream directly, use its prefixed view name: `FROM $.cars.electric`.
+ *
+ * @example
+ * // Stream name:  "cars.electric"
+ * // ES|QL view:   "$.cars.electric"
+ * // Parent query: "FROM cars, cars.*"  → does NOT include $.cars.electric
+ * // Direct query: "FROM $.cars.electric"  → returns query stream data
  */
 export const ESQL_VIEW_PREFIX = '$.';
 
