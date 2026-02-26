@@ -31,10 +31,7 @@ export class EntityMaintainersRegistry {
     });
   }
 
-  update(
-    id: string,
-    overrides: Partial<EntityMaintainerRegistryData>
-  ): boolean {
+  update(id: string, overrides: Partial<EntityMaintainerRegistryData>): boolean {
     const existing = this.tasks.get(id);
     if (!existing) {
       return false;

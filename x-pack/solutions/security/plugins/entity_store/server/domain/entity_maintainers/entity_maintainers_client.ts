@@ -14,7 +14,8 @@ import {
   stopEntityMaintainer,
 } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
-import { EntityMaintainerState, EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
+import type { EntityMaintainerState } from '../../tasks/entity_maintainers/types';
+import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 
 interface TaskSnapshot {
   runs: number;
