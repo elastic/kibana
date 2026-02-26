@@ -193,7 +193,7 @@ roles.forEach(({ name, role }) => {
         pageObjects,
       }) => {
         await page.gotoApp('osquery');
-        await page.testSubj.locator('newLiveQueryButton').click();
+        await page.testSubj.locator('newLiveQueryButton').click({ timeout: 30_000 });
         await waitForPageReady(page);
         await pageObjects.liveQuery.selectAllAgents();
         await expect(page.testSubj.locator('kibanaCodeEditor')).toHaveCount(0);

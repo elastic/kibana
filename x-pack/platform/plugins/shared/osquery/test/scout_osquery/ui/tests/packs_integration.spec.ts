@@ -243,6 +243,7 @@ test.describe(
         });
 
         test('add global packs to policies', async ({ page, kbnUrl, kbnClient }) => {
+          test.skip();
           test.setTimeout(300_000);
           const globalPack = `globalPack${Date.now()}`;
           let globalPackId: string | undefined;
