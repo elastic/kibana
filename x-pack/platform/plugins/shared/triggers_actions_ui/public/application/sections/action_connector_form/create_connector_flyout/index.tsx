@@ -234,18 +234,30 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       isMounted.current = false;
     };
   }, []);
-
+  const [flyoutHeaderName, setFlyoutHeaderName] = useState<string>('Select a connector');
+  useEffect(() => {
+    if (actionType) {
+      if (!actionType.name.toLowerCase().includes('connector')) {
+        setFlyoutHeaderName(`${actionType.name} connector`);
+      } else {
+        setFlyoutHeaderName(actionType.name);
+      }
+    }
+  }, [actionType]);
   return (
     <EuiFlyout
       onClose={onClose}
       data-test-subj="create-connector-flyout"
       aria-label={i18n.translate('xpack.triggersActionsUI.createConnectorFlyout', {
-        defaultMessage: 'create connector flyout',
+        defaultMessage: '{headerName} flyout',
+        values: {
+          headerName: flyoutHeaderName,
+        },
       })}
     >
       <FlyoutHeader
-        icon={actionTypeModel?.iconClass}
-        actionTypeName={actionType?.name}
+        icon={icon ?? actionTypeModel?.iconClass}
+        actionTypeName={flyoutHeaderName}
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
