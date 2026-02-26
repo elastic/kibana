@@ -60,9 +60,7 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
    - If the test exists in both stateful and serverless FTR suites, remove from all relevant config/index files.
    - Delete the old FTR test file once Scout coverage is in place.
    - For staged migrations, mark the remaining FTR suite as `describe.skip` to avoid duplicate coverage.
-9. Update Scout manifests (discovery/CI).
-   - Run `node scripts/scout.js update-test-config-manifests` so `.meta` manifests reflect the new/changed tests and configs.
-10. Verify in both stateful and serverless when applicable.
+9. Verify tests pass locally (look at tags to see where they should be run).
 
 - Use `node scripts/scout.js run-tests --stateful --testFiles <path>` and
   `node scripts/scout.js run-tests --serverless=oblt --testFiles <path>` (adjust serverless target).
