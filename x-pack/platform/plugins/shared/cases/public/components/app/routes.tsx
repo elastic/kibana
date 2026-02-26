@@ -13,6 +13,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
+import { CaseCallouts } from '../callouts/case_callouts';
 import { CreateCase } from '../create';
 import { ConfigureCases } from '../configure_cases';
 import type { CasesRoutesProps } from './types';
@@ -61,6 +62,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   timelineIntegration,
   renderAlertsTable,
   renderEventsTable,
+  renderCalloutInRoute = true,
 }) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
@@ -80,7 +82,14 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
       <ReactQueryDevtools initialIsOpen={false} />
       <Routes>
         <Route strict exact path={basePath}>
-          <AllCases />
+          {renderCalloutInRoute ? (
+            <>
+              <CaseCallouts />
+              <AllCases />
+            </>
+          ) : (
+            <AllCases />
+          )}
         </Route>
 
         <Route path={getCreateCasePath(basePath)}>

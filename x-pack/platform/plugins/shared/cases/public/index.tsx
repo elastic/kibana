@@ -23,3 +23,4 @@ export type { CaseAttachments, CaseAttachmentsWithoutOwner } from './types';
 
 export type { ICasesDeepLinkId } from './common/navigation';
 export { getCasesDeepLinks, CasesDeepLinkId, generateCaseViewPath } from './common/navigation';
+export { CaseCallouts } from './components/callouts/case_callouts';

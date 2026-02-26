@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { CaseCallouts } from '@kbn/cases-plugin/public';
 
 import { observabilityFeatureId } from '../../../common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -45,9 +46,12 @@ export function CasesPage() {
   const userCasesPermissions = canUseCases?.([observabilityFeatureId]);
 
   return userCasesPermissions?.read ? (
-    <ObservabilityPageTemplate isPageDataLoaded data-test-subj="o11yCasesPage">
-      <Cases permissions={userCasesPermissions} />
-    </ObservabilityPageTemplate>
+    <>
+      <CaseCallouts />
+      <ObservabilityPageTemplate isPageDataLoaded data-test-subj="o11yCasesPage">
+        <Cases permissions={userCasesPermissions} />
+      </ObservabilityPageTemplate>
+    </>
   ) : (
     <CaseFeatureNoPermissions />
   );

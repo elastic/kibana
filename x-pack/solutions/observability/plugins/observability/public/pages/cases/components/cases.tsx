@@ -62,6 +62,7 @@ export function Cases({ permissions }: CasesProps) {
     <>
       <CasesList
         basePath={CASES_PATH}
+        renderCalloutInRoute={false}
         features={{
           alerts: { sync: false, isExperimental: false },
           observables: { enabled: false },

@@ -11,6 +11,7 @@ import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
+import { CaseCallouts } from '@kbn/cases-plugin/public';
 import { EuiPageSection } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EasePanelKey } from '../../flyout/ease/constants/panel_keys';
@@ -172,74 +173,78 @@ const CaseContainerComponent: React.FC = () => {
   }, []);
 
   return (
-    <SecuritySolutionPageWrapper noPadding>
-      <EuiPageSection paddingSize="m" component="div" grow>
-        <CaseDetailsRefreshContext.Provider value={refreshRef}>
-          {cases.ui.getCases({
-          basePath: CASES_PATH,
-          owner: [APP_ID],
-          features: {
-            ...CASES_FEATURES,
-            metrics: [
-              CaseMetricsFeature.ALERTS_COUNT,
-              CaseMetricsFeature.ALERTS_USERS,
-              CaseMetricsFeature.ALERTS_HOSTS,
-              CaseMetricsFeature.CONNECTORS,
-              CaseMetricsFeature.LIFESPAN,
-            ],
-            alerts: {
-              isExperimental: false,
-              read: hasAlertsRead,
-              all: hasAlertsAll,
-            },
-            events: { enabled: true },
-          },
-          refreshRef,
-          actionsNavigation: {
-            href: endpointDetailsHref,
-            onClick: (endpointId: string, e) => {
-              if (e) {
-                e.preventDefault();
-              }
-              return navigateTo({
-                path: getEndpointDetailsPath({
-                  name: 'endpointActivityLog',
-                  selected_endpoint: endpointId,
-                }),
-              });
-            },
-          },
-          ...(canReadRules
-            ? {
-                ruleDetailsNavigation: {
-                  onClick: onRuleDetailsClick,
+    <>
+      <CaseCallouts />
+      <SecuritySolutionPageWrapper noPadding>
+        <EuiPageSection paddingSize="m" component="div" grow>
+          <CaseDetailsRefreshContext.Provider value={refreshRef}>
+            {cases.ui.getCases({
+              basePath: CASES_PATH,
+              owner: [APP_ID],
+              renderCalloutInRoute: false,
+              features: {
+                ...CASES_FEATURES,
+                metrics: [
+                  CaseMetricsFeature.ALERTS_COUNT,
+                  CaseMetricsFeature.ALERTS_USERS,
+                  CaseMetricsFeature.ALERTS_HOSTS,
+                  CaseMetricsFeature.CONNECTORS,
+                  CaseMetricsFeature.LIFESPAN,
+                ],
+                alerts: {
+                  isExperimental: false,
+                  read: hasAlertsRead,
+                  all: hasAlertsAll,
                 },
-              }
-            : {}),
-          showAlertDetails,
-          timelineIntegration: {
-            editor_plugins: {
-              parsingPlugin: timelineMarkdownPlugin.parser,
-              processingPluginRenderer: timelineMarkdownPlugin.renderer,
-              uiPlugin: timelineMarkdownPlugin.plugin({
-                interactionsUpsellingMessage,
-                canSeeTimeline,
-              }),
-            },
-            hooks: {
-              useInsertTimeline,
-            },
-          },
-          useFetchAlertData,
-          onAlertsTableLoaded,
-          permissions: userCasesPermissions,
-          renderAlertsTable,
-          renderEventsTable: EventsTableForCases,
-        })}
-        </CaseDetailsRefreshContext.Provider>
-        <SpyRoute pageName={SecurityPageName.case} />
-      </EuiPageSection>
-    </SecuritySolutionPageWrapper>
+                events: { enabled: true },
+              },
+              refreshRef,
+              actionsNavigation: {
+                href: endpointDetailsHref,
+                onClick: (endpointId: string, e) => {
+                  if (e) {
+                    e.preventDefault();
+                  }
+                  return navigateTo({
+                    path: getEndpointDetailsPath({
+                      name: 'endpointActivityLog',
+                      selected_endpoint: endpointId,
+                    }),
+                  });
+                },
+              },
+              ...(canReadRules
+                ? {
+                    ruleDetailsNavigation: {
+                      onClick: onRuleDetailsClick,
+                    },
+                  }
+                : {}),
+              showAlertDetails,
+              timelineIntegration: {
+                editor_plugins: {
+                  parsingPlugin: timelineMarkdownPlugin.parser,
+                  processingPluginRenderer: timelineMarkdownPlugin.renderer,
+                  uiPlugin: timelineMarkdownPlugin.plugin({
+                    interactionsUpsellingMessage,
+                    canSeeTimeline,
+                  }),
+                },
+                hooks: {
+                  useInsertTimeline,
+                },
+              },
+              useFetchAlertData,
+              onAlertsTableLoaded,
+              permissions: userCasesPermissions,
+              renderAlertsTable,
+              renderEventsTable: EventsTableForCases,
+            })}
+          </CaseDetailsRefreshContext.Provider>
+          <SpyRoute pageName={SecurityPageName.case} />
+        </EuiPageSection>
+      </SecuritySolutionPageWrapper>
+    </>
   );
 };
 
