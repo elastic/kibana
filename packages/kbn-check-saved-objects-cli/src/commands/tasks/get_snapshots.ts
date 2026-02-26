@@ -28,7 +28,7 @@ export const getSnapshots: Task = async (ctx, task) => {
       task: async () => {
         ctx.serverlessFrom = await fetchSnapshot(ctx.serverlessGitRev!);
       },
-      enabled: () => Boolean(ctx.serverlessGitRev),
+      enabled: () => Boolean(ctx.serverlessGitRev) && ctx.serverlessGitRev !== ctx.gitRev,
       retry: {
         delay: 2000,
         tries: 5,
