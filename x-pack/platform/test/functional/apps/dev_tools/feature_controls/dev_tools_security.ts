@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Dev Tools navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools', 'Rules']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools']);
       });
 
       describe('console', () => {
