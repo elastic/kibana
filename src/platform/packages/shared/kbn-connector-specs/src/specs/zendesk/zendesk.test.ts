@@ -80,4 +80,60 @@ describe('ZendeskConnector', () => {
       );
     });
   });
+
+  describe('whoAmI action', () => {
+    it('should call Zendesk users/me.json API', async () => {
+      const mockResponse = { data: { user: { id: 1, email: 'agent@test.com' } } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await ZendeskConnector.actions.whoAmI.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-company.zendesk.com/api/v2/users/me.json'
+      );
+    });
+  });
+
+  describe('getTicketComments action', () => {
+    it('should call Zendesk get ticket comments API', async () => {
+      const mockResponse = { data: { comments: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await ZendeskConnector.actions.getTicketComments.handler(mockContext, {
+        ticketId: '456',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-company.zendesk.com/api/v2/tickets/456/comments.json',
+        expect.objectContaining({
+          params: {},
+        })
+      );
+    });
+
+    it('should pass optional params to the API', async () => {
+      const mockResponse = { data: { comments: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await ZendeskConnector.actions.getTicketComments.handler(mockContext, {
+        ticketId: '789',
+        page: 2,
+        perPage: 10,
+        include: 'users',
+        includeInlineImages: true,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-company.zendesk.com/api/v2/tickets/789/comments.json',
+        expect.objectContaining({
+          params: {
+            page: 2,
+            per_page: 10,
+            include: 'users',
+            include_inline_images: true,
+          },
+        })
+      );
+    });
+  });
 });

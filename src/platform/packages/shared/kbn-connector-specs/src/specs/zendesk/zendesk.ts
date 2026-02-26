@@ -44,12 +44,13 @@ export const ZendeskConnector: ConnectorSpec = {
             },
             username: {
               label: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.label', {
-                defaultMessage: 'Username',
+                defaultMessage: 'Email',
               }),
               helpText: i18n.translate('core.kibanaConnectorSpecs.zendesk.auth.username.helpText', {
                 defaultMessage:
                   'Your Zendesk account email; add "/token" at the end for API token auth (e.g. your_email@example.com/token)',
               }),
+              placeholder: 'your_email@example.com/token',
             },
           },
         },
@@ -82,12 +83,51 @@ export const ZendeskConnector: ConnectorSpec = {
   actions: {
     search: {
       input: z.object({
-        query: z.string(),
-        sortBy: z.string().optional(),
-        sortOrder: z.enum(['asc', 'desc']).optional(),
-        page: z.number().optional(),
-        perPage: z.number().optional(),
-        include: z.string().optional(),
+        query: z.string().describe(
+          i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.search.input.query', {
+            defaultMessage: 'Search query (e.g. status:open, type:ticket)',
+          })
+        ),
+        sortBy: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.search.input.sortBy', {
+              defaultMessage: 'Field to sort results by',
+            })
+          ),
+        sortOrder: z
+          .enum(['asc', 'desc'])
+          .optional()
+          .describe(
+            i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.search.input.sortOrder', {
+              defaultMessage: 'Sort direction',
+            })
+          ),
+        page: z
+          .number()
+          .optional()
+          .describe(
+            i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.search.input.page', {
+              defaultMessage: 'Page number for pagination',
+            })
+          ),
+        perPage: z
+          .number()
+          .optional()
+          .describe(
+            i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.search.input.perPage', {
+              defaultMessage: 'Number of results per page',
+            })
+          ),
+        include: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.search.input.include', {
+              defaultMessage: 'Comma-separated list of resources to sideload',
+            })
+          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -106,9 +146,31 @@ export const ZendeskConnector: ConnectorSpec = {
 
     listTickets: {
       input: z.object({
-        page: z.number().optional(),
-        perPage: z.number().optional(),
-        include: z.string().optional(),
+        page: z
+          .number()
+          .optional()
+          .describe(
+            i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.listTickets.input.page', {
+              defaultMessage: 'Page number for pagination',
+            })
+          ),
+        perPage: z
+          .number()
+          .optional()
+          .describe(
+            i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.listTickets.input.perPage', {
+              defaultMessage: 'Number of tickets per page (max 100)',
+            })
+          ),
+        include: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.listTickets.input.include', {
+              defaultMessage:
+                'Comma-separated sideloads, e.g. users, users,groups, users,groups,organizations',
+            })
+          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -123,7 +185,11 @@ export const ZendeskConnector: ConnectorSpec = {
 
     getTicket: {
       input: z.object({
-        ticketId: z.string(),
+        ticketId: z.string().describe(
+          i18n.translate('core.kibanaConnectorSpecs.zendesk.actions.getTicket.input.ticketId', {
+            defaultMessage: 'The Zendesk ticket ID',
+          })
+        ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -136,11 +202,50 @@ export const ZendeskConnector: ConnectorSpec = {
 
     getTicketComments: {
       input: z.object({
-        ticketId: z.string(),
-        page: z.number().optional(),
-        perPage: z.number().optional(),
-        include: z.string().optional(),
-        includeInlineImages: z.boolean().optional(),
+        ticketId: z
+          .string()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.zendesk.actions.getTicketComments.input.ticketId',
+              { defaultMessage: 'The Zendesk ticket ID' }
+            )
+          ),
+        page: z
+          .number()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.zendesk.actions.getTicketComments.input.page',
+              { defaultMessage: 'Page number for pagination' }
+            )
+          ),
+        perPage: z
+          .number()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.zendesk.actions.getTicketComments.input.perPage',
+              { defaultMessage: 'Number of comments per page' }
+            )
+          ),
+        include: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.zendesk.actions.getTicketComments.input.include',
+              { defaultMessage: 'Comma-separated list of resources to sideload (e.g. users)' }
+            )
+          ),
+        includeInlineImages: z
+          .boolean()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.zendesk.actions.getTicketComments.input.includeInlineImages',
+              { defaultMessage: 'Whether to include inline images in comment bodies' }
+            )
+          ),
       }),
       handler: async (ctx, input) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -154,6 +259,15 @@ export const ZendeskConnector: ConnectorSpec = {
           `${baseUrl}/tickets/${input.ticketId}/comments.json`,
           { params }
         );
+        return response.data;
+      },
+    },
+
+    whoAmI: {
+      input: z.object({}),
+      handler: async (ctx) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(`${baseUrl}/users/me.json`);
         return response.data;
       },
     },

@@ -3,7 +3,7 @@ navigation_title: "Zendesk"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/zendesk-action-type.html
 applies_to:
-  stack: preview 9.3
+  stack: preview 9.4
   serverless: preview
 ---
 
@@ -44,10 +44,11 @@ and integrations > APIs > Zendesk API). For API token auth, the username must be
 2. Go to **Admin Center** (gear icon) → **Apps and integrations** → **APIs** → **Zendesk API**.
 3. Enable **Token access** and create a new API token.
 4. Make sure that API access is enabled in the Admin UI under Apps and integrations > APIs > API Configuration
-4. Copy the token and store it securely.
-5. When configuring the connector: set the username to `your_email@example.com/token` and the password to the API token.
+5. Copy the token and store it securely.
+6. When configuring the connector: set the username to `your_email@example.com/token` and the password to the API token.
 
-When activating a Zendesk data source via script or API with a single credential string, use the format:
-`your_email@example.com/token:your_api_token` (the script will parse this for Basic auth). You must also provide 
-the **subdomain** in the connector config (e.g. when creating the connector in the UI, or via API 
+When creating or activating a Zendesk data source via script or API (including the "create new" flow with a single 
+credential string), use the format `your_email@example.com/token:your_api_token`. The system parses this as Basic 
+auth (username before the colon, password after) and creates the connector with the correct auth type. You must also 
+provide the **subdomain** in the connector config (e.g. when creating the connector in the UI, or via API 
 with `config: { subdomain: 'your-company' }`).
