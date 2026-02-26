@@ -32,6 +32,9 @@ const SEARCH_USERS_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'Search users' }
 );
 
+const PANEL_PROPS = { 'data-test-subj': 'history-run-by-filter-popover' };
+const POPOVER_CONTENT_STYLE = { width: POPOVER_WIDTH };
+
 interface RunByFilterPopoverProps {
   selectedUserIds: string[];
   onSelectedUsersChanged: (newUserIds: string[]) => void;
@@ -41,18 +44,16 @@ interface RunByFilterPopoverProps {
 const toSelectableOption = (
   option: HistoryUserOption,
   isSelected: boolean
-): EuiSelectableOption => ({
-  label: option.displayName,
-  key: option.userId,
-  checked: isSelected ? 'on' : undefined,
-  prepend: (
-    <UserAvatar
-      user={option.profile?.user ?? { username: option.userId }}
-      avatar={option.profile?.data?.avatar}
-      size="s"
-    />
-  ),
-});
+): EuiSelectableOption => {
+  const user = option.profile?.user ?? { username: option.userId };
+
+  return {
+    label: option.displayName,
+    key: option.userId,
+    checked: isSelected ? 'on' : undefined,
+    prepend: <UserAvatar user={user} avatar={option.profile?.data?.avatar} size="s" />,
+  };
+};
 
 const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
   selectedUserIds,
@@ -112,6 +113,15 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
 
+  const searchProps = useMemo(
+    () => ({
+      placeholder: SEARCH_USERS_PLACEHOLDER,
+      onChange: handleSearchChange,
+      value: searchValue,
+    }),
+    [handleSearchChange, searchValue]
+  );
+
   const triggerButton = (
     <EuiFilterButton
       iconType="arrowDown"
@@ -134,15 +144,11 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
       closePopover={closePopover}
       panelPaddingSize="none"
       repositionOnScroll
-      panelProps={{ 'data-test-subj': 'history-run-by-filter-popover' }}
+      panelProps={PANEL_PROPS}
     >
       <EuiSelectable
         searchable
-        searchProps={{
-          placeholder: SEARCH_USERS_PLACEHOLDER,
-          onChange: handleSearchChange,
-          value: searchValue,
-        }}
+        searchProps={searchProps}
         aria-label={RUN_BY_LABEL}
         options={selectableOptions}
         onChange={handleChange}
@@ -155,7 +161,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
         })}
       >
         {(list, search) => (
-          <div css={{ width: POPOVER_WIDTH }}>
+          <div css={POPOVER_CONTENT_STYLE}>
             <EuiPopoverTitle paddingSize="s">
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem>{search}</EuiFlexItem>

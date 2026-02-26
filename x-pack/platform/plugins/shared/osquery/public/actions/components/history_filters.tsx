@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFieldSearch, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RunByFilterPopover } from './run_by_filter_popover';
@@ -27,9 +27,12 @@ const HistoryFiltersComponent: React.FC<HistoryFiltersProps> = ({
   selectedUserIds,
   onSelectedUsersChanged,
 }) => {
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onSearchChange(e.target.value);
-  };
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onSearchChange(e.target.value);
+    },
+    [onSearchChange]
+  );
 
   return (
     <EuiFlexGroup gutterSize="m" responsive={false}>
