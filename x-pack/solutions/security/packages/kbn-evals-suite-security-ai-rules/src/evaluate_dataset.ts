@@ -283,6 +283,14 @@ function createEsqlFunctionalEquivalenceEvaluator(
     name: 'ESQL Functional Equivalence',
     kind: 'LLM',
     evaluate: async ({ input, output, expected, metadata }) => {
+      if (!expected?.query) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No reference query to compare against',
+        };
+      }
+
       if (!output?.generatedRule) {
         return {
           score: 0,
@@ -292,7 +300,7 @@ function createEsqlFunctionalEquivalenceEvaluator(
       }
 
       const generatedQuery = output.generatedRule.query ?? '(no query generated)';
-      const expectedQuery = expected?.query ?? '(no expected query)';
+      const expectedQuery = expected.query;
 
       const criteriaEval = evaluators.criteria([
         `The generated ES|QL query should be functionally equivalent to the expected query — ` +

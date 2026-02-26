@@ -57,12 +57,14 @@ evaluate.describe(
         dataset: {
           name: 'security-ai-rules: edge-cases',
           description: 'Tests AI rule generation with edge cases and challenging prompts',
-          examples: hardCases.map((c) => ({
-            id: c.id,
-            input: { prompt: c.prompt },
-            output: c.output,
-            metadata: c.metadata,
-          })),
+          examples: hardCases
+            .filter((c) => c.metadata.difficulty !== 'very-hard') // too slow / rate-limited for CI
+            .map((c) => ({
+              id: c.id,
+              input: { prompt: c.prompt },
+              output: c.output,
+              metadata: c.metadata,
+            })),
         },
       });
       log.info('Edge case evaluation complete');
