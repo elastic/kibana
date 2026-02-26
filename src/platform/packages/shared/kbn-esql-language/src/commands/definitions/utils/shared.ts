@@ -162,6 +162,13 @@ export function unescapeColumnName(columnName: string) {
   return columnName;
 }
 
+/** Extracts the trailing identifier from text (e.g., "start" from "end=value start"). */
+export function getTrailingIdentifier(text: string): string | undefined {
+  const match = text.match(/([A-Za-z_][A-Za-z0-9_]*)\s*$/);
+
+  return match ? match[1] : undefined;
+}
+
 /**
  * This function returns the userDefinedColumn or field matching a column
  */
