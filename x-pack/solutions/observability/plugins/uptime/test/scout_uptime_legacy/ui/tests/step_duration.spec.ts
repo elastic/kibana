@@ -23,12 +23,12 @@ test.describe('StepsDuration', { tag: '@local-stateful-classic' }, () => {
     await pageObjects.uptimeOverview.goto(queryParams);
 
     await test.step('navigate to monitor details', async () => {
-      await page.getByText('test-monitor - inline').click();
+      await pageObjects.uptimeOverview.clickMonitorByName('test-monitor - inline');
       await expect(page).toHaveURL(/\/app\/uptime\/monitor\/dGVzdC1tb25pdG9yLWlubGluZQ/);
     });
 
     await test.step('navigate to journey steps', async () => {
-      const stepsLocator = page.locator('table .euiTableRow-isClickable');
+      const stepsLocator = pageObjects.uptimeOverview.getJourneyStepRows();
       await expect(stepsLocator).toHaveCount(4);
       // eslint-disable-next-line playwright/no-nth-methods
       await stepsLocator.first().click();
@@ -39,8 +39,7 @@ test.describe('StepsDuration', { tag: '@local-stateful-classic' }, () => {
 
     await test.step('verify step duration chart', async () => {
       await expect(async () => {
-        // eslint-disable-next-line playwright/no-nth-methods
-        await page.testSubj.locator('syntheticsStepDurationButton').first().hover();
+        await pageObjects.monitorDetails.hoverStepDurationButton();
         await expect(page.testSubj.locator('uptimeExploreDataButton')).toBeVisible();
         await expect(page.testSubj.locator('lens-embeddable')).toBeVisible();
       }).toPass({ timeout: 30_000 });

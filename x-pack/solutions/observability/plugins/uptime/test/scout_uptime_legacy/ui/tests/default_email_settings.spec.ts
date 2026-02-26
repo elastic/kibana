@@ -33,9 +33,7 @@ test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => 
     });
 
     await test.step('no connector is defined by default', async () => {
-      await expect(
-        page.testSubj.locator('default-connectors-input-loaded').locator('input')
-      ).toHaveValue('');
+      await expect(pageObjects.uptimeSettings.getDefaultConnectorsInput()).toHaveValue('');
     });
 
     await test.step('create email connector', async () => {
@@ -51,7 +49,7 @@ test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => 
       await expect(page.testSubj.locator('emailAddBccButton')).toBeHidden();
       await pageObjects.uptimeSettings.selectDefaultConnector(name);
       await expect(page.testSubj.locator('emailAddBccButton')).toBeVisible();
-      await expect(page.locator('.euiFormErrorText')).toHaveText(
+      await expect(pageObjects.uptimeSettings.getFormErrorText()).toHaveText(
         'To email is required for email connector'
       );
 
@@ -62,7 +60,7 @@ test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => 
 
     await test.step('validate invalid email handling', async () => {
       await pageObjects.uptimeSettings.fillToEmail('test@gmail');
-      await expect(page.locator('.euiFormErrorText')).toHaveText(
+      await expect(pageObjects.uptimeSettings.getFormErrorText()).toHaveText(
         'test@gmail is not a valid email.'
       );
       await expect(pageObjects.uptimeSettings.getApplyButton()).toBeDisabled();

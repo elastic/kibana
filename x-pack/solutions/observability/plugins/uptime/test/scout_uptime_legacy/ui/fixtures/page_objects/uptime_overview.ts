@@ -50,4 +50,16 @@ export class UptimeOverviewPage {
   async clickExploreDataButton(): Promise<void> {
     await this.page.testSubj.click('uptimeExploreDataButton');
   }
+
+  getPingListTable() {
+    return this.page.testSubj.locator('uptimePingListTable');
+  }
+
+  async clickMonitorByName(name: string): Promise<void> {
+    await this.page.getByText(name).click();
+  }
+
+  getJourneyStepRows() {
+    return this.page.locator('table .euiTableRow-isClickable');
+  }
 }

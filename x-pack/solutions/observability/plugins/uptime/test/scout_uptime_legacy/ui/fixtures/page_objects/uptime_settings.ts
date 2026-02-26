@@ -84,4 +84,12 @@ export class UptimeSettingsPage {
     await this.page.testSubj.click('default-connectors-input-loaded');
     await this.page.testSubj.click(`${name}`);
   }
+
+  getDefaultConnectorsInput() {
+    return this.page.testSubj.locator('default-connectors-input-loaded').locator('input');
+  }
+
+  getFormErrorText() {
+    return this.page.locator('.euiFormErrorText');
+  }
 }

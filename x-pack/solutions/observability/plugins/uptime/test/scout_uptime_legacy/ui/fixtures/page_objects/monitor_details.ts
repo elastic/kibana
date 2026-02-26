@@ -76,4 +76,21 @@ export class MonitorDetailsPage {
     await this.page.testSubj.click('ruleFlyoutFooterSaveButton');
     await this.page.testSubj.click('confirmModalConfirmButton');
   }
+
+  getPingListRows() {
+    return this.page.testSubj.locator('uptimePingListTable').locator('tbody tr');
+  }
+
+  getDurationChart() {
+    return this.page.testSubj.locator('uptimeWithResponsiveWrapper--panel').locator('.echChart');
+  }
+
+  getOverallAvailability() {
+    return this.page.testSubj.locator('uptimeOverallAvailability');
+  }
+
+  async hoverStepDurationButton(): Promise<void> {
+    // eslint-disable-next-line playwright/no-nth-methods
+    await this.page.testSubj.locator('syntheticsStepDurationButton').first().hover();
+  }
 }

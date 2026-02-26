@@ -16,7 +16,6 @@ test.describe('MonitorDetails', { tag: '@local-stateful-classic' }, () => {
   test('navigates to monitor details and displays ping data', async ({
     pageObjects,
     browserAuth,
-    page,
   }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.monitorDetails.navigateToOverviewPage({ dateRangeEnd, dateRangeStart });
@@ -29,11 +28,10 @@ test.describe('MonitorDetails', { tag: '@local-stateful-classic' }, () => {
     });
 
     await test.step('verify ping list items', async () => {
-      const pingRows = page.testSubj.locator('uptimePingListTable').locator('tbody tr');
-      await expect(pingRows).toHaveCount(10, { timeout: 20_000 });
-      await expect(
-        page.testSubj.locator('uptimeWithResponsiveWrapper--panel').locator('.echChart')
-      ).toBeVisible({
+      await expect(pageObjects.monitorDetails.getPingListRows()).toHaveCount(10, {
+        timeout: 20_000,
+      });
+      await expect(pageObjects.monitorDetails.getDurationChart()).toBeVisible({
         timeout: 20_000,
       });
     });

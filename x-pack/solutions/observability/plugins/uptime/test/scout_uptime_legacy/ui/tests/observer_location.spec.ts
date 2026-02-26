@@ -38,20 +38,19 @@ test.describe('Observer location', { tag: '@local-stateful-classic' }, () => {
   test('displays the overall availability for no location monitor', async ({
     pageObjects,
     browserAuth,
-    page,
   }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.monitorDetails.navigateToOverviewPage();
     await pageObjects.monitorDetails.navigateToMonitorDetails(NO_LOCATION_MONITOR_ID);
     await pageObjects.monitorDetails.waitForLoadingToFinish();
-    await expect(page.testSubj.locator('uptimeOverallAvailability')).toHaveText('100.00 %');
+    await expect(pageObjects.monitorDetails.getOverallAvailability()).toHaveText('100.00 %');
   });
 
-  test('displays less monitor availability', async ({ pageObjects, browserAuth, page }) => {
+  test('displays less monitor availability', async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.monitorDetails.navigateToOverviewPage();
     await pageObjects.monitorDetails.navigateToMonitorDetails(LESS_AVAIL_MONITOR_ID);
     await pageObjects.monitorDetails.waitForLoadingToFinish();
-    await expect(page.testSubj.locator('uptimeOverallAvailability')).toHaveText('50.00 %');
+    await expect(pageObjects.monitorDetails.getOverallAvailability()).toHaveText('50.00 %');
   });
 });
