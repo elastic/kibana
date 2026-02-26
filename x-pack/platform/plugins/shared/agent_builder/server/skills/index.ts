@@ -6,4 +6,3 @@
  */
 
 export { dataExplorationSkill } from './data_exploration_skill';
-export { skillBuilderSkill } from './skill_builder_skill';
