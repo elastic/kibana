@@ -12,6 +12,7 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -33,6 +34,7 @@ import type {
 } from '../state_management/discover_data_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
+import { fetchMetricsInfo } from './fetch_metrics_info';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
@@ -100,12 +102,39 @@ export function fetchAll(
       });
     }
 
+    // Clear or skip METRICS_INFO when not in metrics experience
+    const shouldFetchMetricsInfo =
+      isEsqlQuery &&
+      query &&
+      typeof query === 'object' &&
+      'esql' in query &&
+      !hasTransformationalCommand((query as { esql: string }).esql);
+
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$, { query });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
+
+    // Start METRICS_INFO fetch when metrics experience is enabled (non-transformational ES|QL)
+    if (shouldFetchMetricsInfo) {
+      const metricsInfoQuery = buildMetricsInfoQuery((query as { esql: string }).esql);
+      if (metricsInfoQuery) {
+        fetchMetricsInfo({
+          esqlQuery: metricsInfoQuery,
+          search: data.search.search,
+          signal: abortController.signal,
+          dataView,
+          timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+          filters: [],
+          variables: currentTab.esqlVariables,
+          uiSettings: services.uiSettings,
+        })
+          .then((response) => {})
+          .catch((error) => {});
+      }
+    }
 
     // Start fetching all required requests
     const response = isEsqlQuery
