@@ -10,8 +10,8 @@ import type { estypes } from '@elastic/elasticsearch';
 interface ScheduledResponsesQueryOptions {
   pageSize: number;
   cursor?: string; // ISO timestamp — fetch executions older than this
-  scheduleIds?: string[]; // when searching by name, restrict to these schedule IDs
-  spaceId?: string; // Kibana space ID for native space filtering on newer docs
+  scheduleIds?: string[]; // optional — narrow to specific schedule IDs (e.g. kuery search)
+  spaceId: string; // Kibana space ID — primary space isolation filter
   startDate?: string; // ISO timestamp or datemath expression (e.g. 'now-24h')
   endDate?: string; // ISO timestamp or datemath expression (e.g. 'now')
 }
@@ -26,30 +26,18 @@ export const buildScheduledResponsesQuery = ({
 }: ScheduledResponsesQueryOptions): {
   body: Record<string, unknown>;
 } => {
-  const filters: estypes.QueryDslQueryContainer[] = [{ exists: { field: 'schedule_id' } }];
+  const filters: estypes.QueryDslQueryContainer[] = [
+    { exists: { field: 'schedule_id' } },
+    // Primary space isolation — response documents carry space_id from Fleet config
+    // TODO: uncomment when response documents start containign space_id
+    // { term: { space_id: spaceId } },
+  ];
 
-  // Space isolation: use space_id field when available (newer docs),
-  // fall back to schedule ID whitelist for legacy docs without space_id.
-  // Both filters work together during the transition period.
-  if (spaceId) {
-    filters.push({
-      bool: {
-        should: [
-          { term: { space_id: spaceId } },
-          { bool: { must_not: { exists: { field: 'space_id' } } } },
-        ],
-        minimum_should_match: 1,
-      },
-    });
-  }
-
-  // Filter by known schedule IDs from the current space's packs.
-  // This provides space isolation for legacy docs (without space_id field),
-  // eliminates orphaned rows from deleted packs, and narrows results
-  // when searching by name.
+  // Optional: narrow to specific schedule IDs when searching by name (kuery).
+  // This is purely for search narrowing, not space isolation.
   if (scheduleIds) {
     if (scheduleIds.length === 0) {
-      // No known schedule IDs — short-circuit with match_none
+      // No matching schedule IDs for the search term — short-circuit
       filters.push({ match_none: {} });
     } else {
       filters.push({ terms: { schedule_id: scheduleIds } });

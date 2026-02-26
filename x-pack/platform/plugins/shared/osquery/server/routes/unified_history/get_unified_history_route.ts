@@ -141,31 +141,10 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             packCache.set(spaceId, packSOs);
           }
 
-          const logger = osqueryContext.logFactory.get('unifiedHistory');
-
-          // Collect all known schedule IDs from the current space's packs.
-          // This provides space isolation (response docs have no space_id field)
-          // and eliminates orphaned rows from deleted packs.
-          const allScheduleIds: string[] = [];
-          for (const packSO of packSOs) {
-            const pack = packSO.attributes;
-            if (!pack.queries) continue;
-            for (const query of pack.queries) {
-              if (query.schedule_id) {
-                allScheduleIds.push(query.schedule_id);
-              }
-              allScheduleIds.push(`pack_${pack.name}_${query.id}`);
-            }
-          }
-
-          if (allScheduleIds.length > 10000) {
-            logger.warn(
-              `Space "${spaceId}" has ${allScheduleIds.length} schedule IDs — approaching ES terms filter limit`
-            );
-          }
-
-          // When searching, narrow to only schedule IDs matching the search term
-          let scheduleIdsForQuery: string[];
+          // When searching by name, narrow to schedule IDs matching the search term.
+          // Without kuery, no schedule ID filter is applied — space isolation is
+          // handled natively by space_id on response documents.
+          let scheduleIdsForQuery: string[] | undefined;
           if (kuery) {
             const searchTerm = kuery.trim().toLowerCase();
             scheduleIdsForQuery = [];
@@ -185,8 +164,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 }
               }
             }
-          } else {
-            scheduleIdsForQuery = allScheduleIds;
           }
 
           const actionsQuery = includeLive
