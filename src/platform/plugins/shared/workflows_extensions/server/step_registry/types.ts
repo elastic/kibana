@@ -113,21 +113,13 @@ export type StepHandler<
 
 /**
  * Cancellation cleanup handler for custom workflow steps.
- * Receives the base step context with logger, abort signal, and step identifiers.
+ * Receives the same context as the main handler so it has access to input,
+ * config, and runtime services needed for cleanup.
  */
 export type OnCancelHandler<
   Input extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject
-> = (context: BaseStepContext<Input, Config>) => Promise<void> | void;
-
-/**
- * Base context shared across step lifecycle hooks (handler, onCancel, etc.).
- * Contains runtime services common to all hooks — without input-specific fields.
- */
-export type BaseStepContext<TInput = z.ZodType, TConfig = z.ZodObject> = Pick<
-  StepHandlerContext<TInput, TConfig>,
-  'logger' | 'abortSignal' | 'stepId' | 'stepType' | 'contextManager'
->;
+> = (context: StepHandlerContext<Input, Config>) => Promise<void> | void;
 
 /**
  * Context provided to custom step handlers during execution.

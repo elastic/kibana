@@ -9,11 +9,7 @@
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import type {
-  BaseStepContext,
-  ServerStepDefinition,
-  StepHandlerContext,
-} from '@kbn/workflows-extensions/server';
+import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { BaseStep, CancellableNode, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -52,7 +48,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     if (stepDefinition.onCancel) {
       const onCancelFn = stepDefinition.onCancel;
       (this as unknown as CancellableNode).onCancel = async () => {
-        await onCancelFn(this.createBaseContext());
+        await onCancelFn(this.createHandlerContext(this.getInput()));
       };
     }
   }
@@ -84,8 +80,14 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     }
   }
 
-  private createBaseContext(): BaseStepContext {
+  /**
+   * Create the handler context shared by both handler and onCancel.
+   */
+  private createHandlerContext(input: unknown): StepHandlerContext {
     return {
+      input,
+      rawInput: this.node.configuration.with || {},
+      config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
       contextManager: {
         getContext: () => {
           return this.stepExecutionRuntime.contextManager.getContext();
@@ -112,18 +114,6 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
       abortSignal: this.stepExecutionRuntime.abortController.signal,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
-    };
-  }
-
-  /**
-   * Create the handler context
-   */
-  private createHandlerContext(input: unknown): StepHandlerContext {
-    return {
-      ...this.createBaseContext(),
-      input,
-      rawInput: this.node.configuration.with || {},
-      config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
     };
   }
 }
