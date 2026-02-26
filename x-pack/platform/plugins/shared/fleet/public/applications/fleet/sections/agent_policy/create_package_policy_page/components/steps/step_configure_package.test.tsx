@@ -15,12 +15,9 @@ import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { allowedExperimentalValues } from '../../../../../../../../common/experimental_features';
 
-import { validatePackagePolicy } from '../../services';
+import { validatePackagePolicy, isInputCompatibleWithVarGroupSelections } from '../../services';
 
-import {
-  StepConfigurePackagePolicy,
-  isInputCompatibleWithVarGroupSelections,
-} from './step_configure_package';
+import { StepConfigurePackagePolicy } from './step_configure_package';
 
 describe('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;
