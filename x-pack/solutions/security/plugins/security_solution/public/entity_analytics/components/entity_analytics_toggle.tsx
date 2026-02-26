@@ -23,7 +23,7 @@ import { useToggleEntityAnalytics } from '../hooks/use_toggle_entity_analytics';
 import * as i18n from '../translations';
 
 export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> = ({ status }) => {
-  const isOn = status === 'enabled';
+  const isOn = status === 'enabled' || status === 'partially_enabled';
   return (
     <EuiHealth
       textSize="m"

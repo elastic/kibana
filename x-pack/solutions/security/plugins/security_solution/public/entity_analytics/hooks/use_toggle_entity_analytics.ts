@@ -117,6 +117,12 @@ export const useToggleEntityAnalytics = ({
       ...(enableEntityStoreMutation.isError
         ? [safeErrorMessage(enableEntityStoreMutation.error, unknownError)]
         : []),
+      ...(startEntityEngineMutation.isError
+        ? [safeErrorMessage(startEntityEngineMutation.error, unknownError)]
+        : []),
+      ...(stopEntityEngineMutation.isError
+        ? [safeErrorMessage(stopEntityEngineMutation.error, unknownError)]
+        : []),
     ],
   };
 

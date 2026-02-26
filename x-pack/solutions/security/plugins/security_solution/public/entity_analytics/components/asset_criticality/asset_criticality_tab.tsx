@@ -23,20 +23,20 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../../../common/entity_analytics/asset_criticality';
-import { AssetCriticalityFileUploader } from '../../asset_criticality_file_uploader/asset_criticality_file_uploader';
-import { useAssetCriticalityPrivileges } from '../../asset_criticality/use_asset_criticality';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { useKibana } from '../../../../common/lib/kibana';
-import type { EngineDescriptor } from '../../../../../common/api/entity_analytics';
-import { EntityStoreErrorCallout } from './entity_store_error_callout';
+import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../../common/entity_analytics/asset_criticality';
+import { AssetCriticalityFileUploader } from '../asset_criticality_file_uploader/asset_criticality_file_uploader';
+import { useAssetCriticalityPrivileges } from './use_asset_criticality';
+import { useHasSecurityCapability } from '../../../helper_hooks';
+import { useKibana } from '../../../common/lib/kibana';
+import type { EngineDescriptor } from '../../../../common/api/entity_analytics';
+import { EntityStoreErrorCallout } from '../entity_store/components/entity_store_error_callout';
 
-interface ImportEntitiesTabProps {
+interface AssetCriticalityTabProps {
   deleteError?: string;
   engines?: EngineDescriptor[];
 }
 
-export const ImportEntitiesTab = ({ deleteError, engines }: ImportEntitiesTabProps) => {
+export const AssetCriticalityTab = ({ deleteError, engines }: AssetCriticalityTabProps) => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const {
     data: assetCriticalityPrivileges,

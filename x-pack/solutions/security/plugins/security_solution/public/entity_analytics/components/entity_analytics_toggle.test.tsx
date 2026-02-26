@@ -38,6 +38,11 @@ describe('EntityAnalyticsHealth', () => {
     expect(screen.getByText('On')).toBeInTheDocument();
   });
 
+  it('shows On when status is partially_enabled', () => {
+    render(<EntityAnalyticsHealth status="partially_enabled" />);
+    expect(screen.getByText('On')).toBeInTheDocument();
+  });
+
   it('shows Off when status is disabled', () => {
     render(<EntityAnalyticsHealth status="disabled" />);
     expect(screen.getByText('Off')).toBeInTheDocument();

@@ -24,7 +24,7 @@ import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privilege
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab';
-import { ImportEntitiesTab } from '../components/entity_store/components/import_entities_tab';
+import { AssetCriticalityTab } from '../components/asset_criticality/asset_criticality_tab';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -38,7 +38,7 @@ import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
 
 enum TabId {
   RiskScore = 'riskScore',
-  Import = 'import',
+  AssetCriticality = 'assetCriticality',
   Status = 'status',
 }
 
@@ -155,14 +155,14 @@ export const EntityAnalyticsManagementPage = () => {
           />
         </EuiTab>
         <EuiTab
-          key={TabId.Import}
-          isSelected={selectedTabId === TabId.Import}
-          onClick={() => setSelectedTabId(TabId.Import)}
-          data-test-subj="importEntitiesTab"
+          key={TabId.AssetCriticality}
+          isSelected={selectedTabId === TabId.AssetCriticality}
+          onClick={() => setSelectedTabId(TabId.AssetCriticality)}
+          data-test-subj="assetCriticalityTab"
         >
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.importEntities.tabTitle"
-            defaultMessage="Import Entities"
+            id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.tabTitle"
+            defaultMessage="Asset Criticality"
           />
         </EuiTab>
         {shouldDisplayEngineStatusTab && (
@@ -202,8 +202,8 @@ export const EntityAnalyticsManagementPage = () => {
         />
       </div>
 
-      <div hidden={selectedTabId !== TabId.Import}>
-        <ImportEntitiesTab deleteError={deleteError} engines={entityStoreStatus.data?.engines} />
+      <div hidden={selectedTabId !== TabId.AssetCriticality}>
+        <AssetCriticalityTab deleteError={deleteError} engines={entityStoreStatus.data?.engines} />
       </div>
 
       {shouldDisplayEngineStatusTab && (
