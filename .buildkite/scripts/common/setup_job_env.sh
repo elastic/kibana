@@ -157,81 +157,14 @@ EOF
     # Validate config shape (safe; does not print secrets)
     node x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
 
-    # EVAL connectors
-    # NOTE: `@kbn/evals` expects `KIBANA_TESTING_AI_CONNECTORS` to be base64-encoded JSON.
-    LITELLM_BASE_URL="$(jq -r '.litellm.baseUrl // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    LITELLM_VIRTUAL_KEY="$(jq -r '.litellm.virtualKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    LITELLM_TEAM_ID="$(jq -r '.litellm.teamId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    LITELLM_TEAM_NAME="$(jq -r '.litellm.teamName // "kibana-ci-evals"' <<<"$KBN_EVALS_CONFIG_JSON")"
-
     # Eval suites require this for the LLM-as-a-judge connector selection
     export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
 
-    # When EVAL_MODEL_GROUPS only contains EIS models (eis/...) and the judge connector
-    # is also EIS-backed (or unset), skip LiteLLM connector generation entirely.
-    # This avoids failing eval runs when the LiteLLM team budget is exhausted but
-    # the eval doesn't need LiteLLM at all.
-    NEED_LITELLM_CONNECTORS="true"
-    if [[ -n "${EVAL_MODEL_GROUPS:-}" ]]; then
-      _all_eis="true"
-      IFS=',' read -ra _model_groups <<< "$EVAL_MODEL_GROUPS"
-      for _mg in "${_model_groups[@]}"; do
-        _mg="${_mg## }"; _mg="${_mg%% }"
-        if [[ -n "$_mg" ]] && [[ "$_mg" != eis/* ]]; then
-          _all_eis="false"
-          break
-        fi
-      done
-      if [[ "$_all_eis" == "true" ]]; then
-        NEED_LITELLM_CONNECTORS="false"
-      fi
-    fi
-    if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == litellm-* ]]; then
-      NEED_LITELLM_CONNECTORS="true"
-    fi
-
-    if [[ "$NEED_LITELLM_CONNECTORS" == "true" ]]; then
-      # NOTE: bash `set -e` does not reliably fail the script for errors inside `$(...)` in all contexts.
-      # Generate into a variable, then explicitly validate it, so we never feed empty/invalid data into JSON.parse below.
-      if [[ -n "${LITELLM_TEAM_ID:-}" ]]; then
-        KIBANA_TESTING_AI_CONNECTORS="$(
-          node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
-            --base-url "$LITELLM_BASE_URL" \
-            --team-id "$LITELLM_TEAM_ID" \
-            --api-key "$LITELLM_VIRTUAL_KEY" \
-            --model-prefix "llm-gateway/"
-        )"
-      else
-        KIBANA_TESTING_AI_CONNECTORS="$(
-          node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
-            --base-url "$LITELLM_BASE_URL" \
-            --team-name "$LITELLM_TEAM_NAME" \
-            --api-key "$LITELLM_VIRTUAL_KEY" \
-            --model-prefix "llm-gateway/"
-        )"
-      fi
-      export KIBANA_TESTING_AI_CONNECTORS
-
-      if [[ -z "${KIBANA_TESTING_AI_CONNECTORS:-}" ]]; then
-        echo "ERROR: Failed to generate KIBANA_TESTING_AI_CONNECTORS (empty output)."
-        exit 1
-      fi
-
-      # Sanity-check: when the evaluation connector is expected to be LiteLLM-backed, it must match
-      # a generated LiteLLM connector id. (Non-LiteLLM evaluation connectors may be injected later.)
-      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == litellm-* ]]; then
-        if ! node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);const id=process.env.EVALUATION_CONNECTOR_ID;process.exit(Object.prototype.hasOwnProperty.call(o,id)?0:1);" ; then
-          echo "ERROR: EVALUATION_CONNECTOR_ID ($EVALUATION_CONNECTOR_ID) is not present in generated connectors."
-          echo "Sample generated connector ids:"
-          node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);console.log(Object.keys(o).slice(0,20).join('\\n'));"
-          exit 1
-        fi
-      fi
-    else
-      echo "Skipping LiteLLM connector generation (only EIS models requested via EVAL_MODEL_GROUPS)"
-      KIBANA_TESTING_AI_CONNECTORS="$(printf '{}' | base64)"
-      export KIBANA_TESTING_AI_CONNECTORS
-    fi
+    # Export the vault config so eval-owned scripts can extract LiteLLM / connector
+    # settings without needing vault access themselves.
+    # Connector generation happens in .buildkite/scripts/steps/evals/setup_connectors.sh.
+    export KBN_EVALS_CONFIG_B64
+    KBN_EVALS_CONFIG_B64="$(printf '%s' "$KBN_EVALS_CONFIG_JSON" | base64)"
 
     # Elasticsearch cluster for evaluation results export
     export EVALUATIONS_ES_URL="$(jq -r '.evaluationsEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
