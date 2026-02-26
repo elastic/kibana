@@ -568,7 +568,13 @@ Spec groups by FTR config (${specGroups.length} group(s), ${files.length} spec(s
 ${specGroups
   .map(
     (g, i) =>
-      `  Group ${i + 1} [${g.configKey === '{"license":"","kbnServerArgs":[],"productTypes":[]}' ? 'default' : g.configKey}]: ${g.specFilePaths.length} spec(s)\n${g.specFilePaths.map((f) => `    - ${path.basename(f)}`).join('\n')}`
+      `  Group ${i + 1} [${
+        g.configKey === '{"license":"","kbnServerArgs":[],"productTypes":[]}'
+          ? 'default'
+          : g.configKey
+      }]: ${g.specFilePaths.length} spec(s)\n${g.specFilePaths
+        .map((f) => `    - ${path.basename(f)}`)
+        .join('\n')}`
   )
   .join('\n')}
 ----------------------------------------------
