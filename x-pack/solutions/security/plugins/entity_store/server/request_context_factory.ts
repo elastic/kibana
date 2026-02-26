@@ -19,6 +19,7 @@ import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient } from './domain/definitions/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
 import { CRUDClient } from './domain/crud_client';
+import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
   coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
@@ -26,6 +27,7 @@ interface EntityStoreApiRequestHandlerContextDeps {
   logger: Logger;
   request: KibanaRequest;
   isServerless: boolean;
+  analytics: TelemetryReporter;
 }
 
 export async function createRequestHandlerContext({
@@ -34,6 +36,7 @@ export async function createRequestHandlerContext({
   coreSetup,
   request,
   isServerless,
+  analytics,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
   const [, startPlugins] = await coreSetup.getStartServices();
@@ -78,6 +81,7 @@ export async function createRequestHandlerContext({
       isServerless,
       logsExtractionClient,
       security: startPlugins.security,
+      analytics,
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,
