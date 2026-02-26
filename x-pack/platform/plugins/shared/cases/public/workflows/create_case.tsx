@@ -36,61 +36,10 @@ export const createCreateCaseStepDefinition = () => {
     description: "Suspicious activity detected in system logs"
     tags: ["security", "incident", "automated"]
     owner: "securitySolution"
-    connector:
-      id: "none"
-      name: "none"
-      type: ".none"
-      fields: null
-    settings:
-      syncAlerts: true
-\`\`\``,
-        `## Case with assignees and severity
-\`\`\`yaml
-- name: create_high_severity_case
-  type: ${CreateCaseStepTypeId}
-  with:
-    title: "Critical alert requires immediate attention"
-    description: "Multiple high-priority alerts triggered"
-    tags: ["critical", "high-priority"]
-    owner: "securitySolution"
     severity: "critical"
-    assignees:
-      - uid: "user-123"
-      - uid: "user-456"
-    connector:
-      id: "none"
-      name: "none"
-      type: ".none"
-      fields: null
     settings:
       syncAlerts: true
-      extractObservables: true
-\`\`\``,
-        `## Case with category and custom fields
-\`\`\`yaml
-- name: create_categorized_case
-  type: ${CreateCaseStepTypeId}
-  with:
-    title: "Infrastructure issue"
-    description: "Network connectivity problems detected"
-    tags: ["infrastructure", "network"]
-    owner: "observability"
-    category: "Network"
-    severity: "high"
-    customFields:
-      - key: "priority_level"
-        type: "text"
-        value: "P1"
-      - key: "auto_assigned"
-        type: "toggle"
-        value: true
-    connector:
-      id: "none"
-      name: "none"
-      type: ".none"
-      fields: null
-    settings:
-      syncAlerts: true
+      autoExtractObersvables: true
 \`\`\``,
         `## Using data from previous steps
 \`\`\`yaml
@@ -110,11 +59,6 @@ export const createCreateCaseStepDefinition = () => {
     tags: ["automated", "critical-alerts"]
     owner: "securitySolution"
     severity: "critical"
-    connector:
-      id: "none"
-      name: "none"
-      type: ".none"
-      fields: null
     settings:
       syncAlerts: true
 \`\`\``,
