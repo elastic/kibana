@@ -9,6 +9,7 @@ import { run } from '@kbn/dev-cli-runner';
 import yargs from 'yargs';
 import _ from 'lodash';
 import globby from 'globby';
+import pMap from 'p-map';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
 import { findChangedFiles } from 'find-cypress-specs';
@@ -34,6 +35,7 @@ import { renderSummaryTable } from './print_run';
 import {
   groupSpecsByFtrConfig,
   orderSpecFilesForLoadBalance,
+  parseTestFileConfig,
   retrieveIntegrations,
   setDefaultToolingLoggingLevel,
 } from './utils';
@@ -559,9 +561,12 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
         return results;
       };
 
-      const specGroups = groupSpecsByFtrConfig(files);
+      const shareStacks = process.env.CYPRESS_SHARE_STACKS === 'true';
 
-      log.info(`
+      if (shareStacks) {
+        const specGroups = groupSpecsByFtrConfig(files);
+
+        log.info(`
 ----------------------------------------------
 Spec groups by FTR config (${specGroups.length} group(s), ${files.length} spec(s) total):
 ----------------------------------------------
@@ -580,59 +585,126 @@ ${specGroups
 ----------------------------------------------
 `);
 
-      const initialResults = await runSpecGroups(specGroups);
+        const initialResults = await runSpecGroups(specGroups);
 
-      // Only rebuild the full stack for specs that had infrastructure failures.
-      // Test assertion failures were already retried in-place against the same stack.
-      const specsNeedingInfraRetry = [...infraFailedSpecFilePaths];
-      const retryGroups = groupSpecsByFtrConfig(specsNeedingInfraRetry);
-      const retryResults = await runSpecGroups(retryGroups, true);
+        // Only rebuild the full stack for specs that had infrastructure failures.
+        // Test assertion failures were already retried in-place against the same stack.
+        const specsNeedingInfraRetry = [...infraFailedSpecFilePaths];
+        const retryGroups = groupSpecsByFtrConfig(specsNeedingInfraRetry);
+        const retryResults = await runSpecGroups(retryGroups, true);
 
-      const finalResults = [
-        // Don't include failed specs from initial run in results
-        ..._.filter(
-          initialResults,
-          (initialResult: CypressCommandLine.CypressRunResult) =>
-            initialResult?.runs &&
-            _.some(
-              initialResult?.runs,
-              (runResult) => !failedSpecFilePaths.includes(runResult.spec.absolute)
-            )
-        ),
-        ..._.filter(retryResults, (retryResult) => !!retryResult),
-      ] as CypressCommandLine.CypressRunResult[];
+        const finalResults = [
+          ..._.filter(
+            initialResults,
+            (initialResult: CypressCommandLine.CypressRunResult) =>
+              initialResult?.runs &&
+              _.some(
+                initialResult?.runs,
+                (runResult) => !failedSpecFilePaths.includes(runResult.spec.absolute)
+              )
+          ),
+          ..._.filter(retryResults, (retryResult) => !!retryResult),
+        ] as CypressCommandLine.CypressRunResult[];
 
-      try {
-        renderSummaryTable(finalResults);
-      } catch (e) {
-        log.error('Failed to render summary table');
-        log.error(e);
-      }
+        try {
+          renderSummaryTable(finalResults);
+        } catch (e) {
+          log.error('Failed to render summary table');
+          log.error(e);
+        }
 
-      const hasFailedTests = (
-        runResults: Array<
-          | CypressCommandLine.CypressFailedRunResult
-          | CypressCommandLine.CypressRunResult
-          | undefined
-        >
-      ) =>
-        _.some(
-          // only fail the job if retry failed as well
-          runResults,
-          (runResult) =>
-            (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-            (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
-        );
+        const hasFailedTests = (
+          runResults: Array<
+            | CypressCommandLine.CypressFailedRunResult
+            | CypressCommandLine.CypressRunResult
+            | undefined
+          >
+        ) =>
+          _.some(
+            runResults,
+            (runResult) =>
+              (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+              (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
+          );
 
-      const hasFailedInitialTests = hasFailedTests(initialResults);
-      const hasFailedRetryTests = hasFailedTests(retryResults);
+        const hasFailedInitialTests = hasFailedTests(initialResults);
+        const hasFailedRetryTests = hasFailedTests(retryResults);
 
-      // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
-      if (
-        (hasFailedRetryTests && failedSpecFilePaths.length) ||
-        (hasFailedInitialTests && !retryResults.length)
-      ) {
-        throw createFailError('Not all tests passed');
+        if (
+          (hasFailedRetryTests && failedSpecFilePaths.length) ||
+          (hasFailedInitialTests && !retryResults.length)
+        ) {
+          throw createFailError('Not all tests passed');
+        }
+      } else {
+        const runSpecs = async (filePaths: string[], isRetryRun: boolean = false) =>
+          pMap<
+            string,
+            | CypressCommandLine.CypressRunResult
+            | CypressCommandLine.CypressFailedRunResult
+            | undefined
+          >(
+            filePaths,
+            async (filePath) => {
+              const group: SpecGroup = {
+                configKey: '',
+                ftrConfig: parseTestFileConfig(filePath),
+                specFilePaths: [filePath],
+              };
+              const groupResults = await runSpecGroup(group, isRetryRun);
+              return groupResults[0];
+            },
+            { concurrency: 1 }
+          );
+
+        const initialResults = await runSpecs(files);
+
+        const specsNeedingInfraRetry = [...infraFailedSpecFilePaths];
+        const retryResults = await runSpecs(specsNeedingInfraRetry, true);
+
+        const finalResults = [
+          ..._.filter(
+            initialResults,
+            (initialResult: CypressCommandLine.CypressRunResult) =>
+              initialResult?.runs &&
+              _.some(
+                initialResult?.runs,
+                (runResult) => !failedSpecFilePaths.includes(runResult.spec.absolute)
+              )
+          ),
+          ..._.filter(retryResults, (retryResult) => !!retryResult),
+        ] as CypressCommandLine.CypressRunResult[];
+
+        try {
+          renderSummaryTable(finalResults);
+        } catch (e) {
+          log.error('Failed to render summary table');
+          log.error(e);
+        }
+
+        const hasFailedTests = (
+          runResults: Array<
+            | CypressCommandLine.CypressFailedRunResult
+            | CypressCommandLine.CypressRunResult
+            | undefined
+          >
+        ) =>
+          _.some(
+            runResults,
+            (runResult) =>
+              (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+              (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
+          );
+
+        const hasFailedInitialTests = hasFailedTests(initialResults);
+        const hasFailedRetryTests = hasFailedTests(retryResults);
+
+        if (
+          (hasFailedRetryTests && failedSpecFilePaths.length) ||
+          (hasFailedInitialTests && !retryResults.length)
+        ) {
+          throw createFailError('Not all tests passed');
+        }
       }
     },
     {
