@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -191,21 +191,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       }
 
-      it('table can be toggled in document level view', async () => {
-        expect(await discover.isTableVisible()).to.be(true);
-        await testSubjects.existOrFail('dscHideTableButton');
-        await testSubjects.missingOrFail('dscShowTableButton');
+      if (isChartAvailable) {
+        it('table can be toggled in document level view', async () => {
+          expect(await discover.isTableVisible()).to.be(true);
+          await testSubjects.existOrFail('dscHideTableButton');
+          await testSubjects.missingOrFail('dscShowTableButton');
 
-        await discover.toggleTableVisibility();
-        expect(await discover.isTableVisible()).to.be(false);
-        await testSubjects.existOrFail('dscShowTableButton');
-        await testSubjects.missingOrFail('dscHideTableButton');
+          await discover.toggleTableVisibility();
+          expect(await discover.isTableVisible()).to.be(false);
+          await testSubjects.existOrFail('dscShowTableButton');
+          await testSubjects.missingOrFail('dscHideTableButton');
 
-        await discover.toggleTableVisibility();
-        expect(await discover.isTableVisible()).to.be(true);
-        await testSubjects.existOrFail('dscHideTableButton');
-        await testSubjects.missingOrFail('dscShowTableButton');
-      });
+          await discover.toggleTableVisibility();
+          expect(await discover.isTableVisible()).to.be(true);
+          await testSubjects.existOrFail('dscHideTableButton');
+          await testSubjects.missingOrFail('dscShowTableButton');
+        });
+      }
     }
 
     describe('time based data view', function () {
@@ -237,6 +239,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       checkPanelsToggle({ isChartAvailable: false, totalHits: '14,004' });
+
+      it('table toggle is not available when histogram is unavailable', async () => {
+        expect(await discover.isTableVisible()).to.be(true);
+        await testSubjects.missingOrFail('dscHideTableButton');
+        await testSubjects.missingOrFail('dscShowTableButton');
+      });
     });
 
     describe('ES|QL with histogram chart', function () {
