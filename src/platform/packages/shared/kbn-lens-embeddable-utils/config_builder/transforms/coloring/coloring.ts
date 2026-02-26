@@ -11,6 +11,7 @@ import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from
 
 import type {
   AllColoringTypes,
+  ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
   ColorMappingColorDefType,
@@ -401,6 +402,11 @@ export function fromColorMappingAPIToLensState(
 export function isColorByValueColor(color?: AllColoringTypes): color is ColorByValueType {
   if (!color || !('type' in color)) return false;
   return color.type === 'dynamic' || color.type === 'legacy-dynamic';
+}
+
+export function isColorByValueAbsolute(color?: AllColoringTypes): color is ColorByValueAbsolute {
+  // This is needed because the schema for `absolute` and `percentage` are combined in one
+  return isColorByValueColor(color) && color.range === 'absolute';
 }
 
 export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {

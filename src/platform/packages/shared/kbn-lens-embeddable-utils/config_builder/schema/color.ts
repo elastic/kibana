@@ -291,6 +291,9 @@ export const allColoringTypeSchema = schema.oneOf([
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
+export type ColorByValueAbsolute =
+  | TypeOf<typeof colorByValueAbsoluteSchema>
+  | TypeOf<typeof legacyColorByValueAbsoluteSchema>;
 export type ColorByValueStep = TypeOf<typeof colorByValueStepSchema>;
 export type ColorMappingType = TypeOf<typeof colorMappingSchema>;
 export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingSchema>;
