@@ -151,6 +151,20 @@ export const legacyColorByValueSchema = colorByValueBaseSchema.extends(
   }
 );
 
+export const legacyColorByValueAbsoluteSchema = legacyColorByValueSchema.extends(
+  {
+    range: schema.literal('absolute'),
+  },
+  {
+    meta: {
+      id: 'legacyColorByValueAbsolute',
+      title: 'Legacy color by value (absolute)',
+      description: 'Legacy color by absolute value configuration',
+      deprecated: true,
+    },
+  }
+);
+
 export const colorByValueAbsoluteSchema = colorByValueBaseSchema.extends(
   {
     range: schema.literal('absolute'),
