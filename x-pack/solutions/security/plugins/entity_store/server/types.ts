@@ -26,7 +26,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { AssetManager } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
-import type { LogsExtractionClient } from './domain/logs_extraction/logs_extraction_client';
+import type { LogsExtractionClient } from './domain/logs_extraction';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import type { CRUDClient } from './domain/crud_client';
 

@@ -43,7 +43,7 @@ import {
   getUpdatesComponentTemplateName,
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
-import type { LogsExtractionClient } from './logs_extraction/logs_extraction_client';
+import type { LogsExtractionClient } from './logs_extraction';
 import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
