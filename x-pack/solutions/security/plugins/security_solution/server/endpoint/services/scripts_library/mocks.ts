@@ -33,6 +33,7 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
     fileName: 'my_script.sh',
     fileSize: 12098,
     fileHash: 'e5441eb2bb',
+    fileType: 'script',
     requiresInput: false,
     downloadUri: SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE.replace('{script_id}', '1-2-3'),
     description: 'does some stuff',
@@ -51,6 +52,7 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
 const generateCreateScriptBodyMock = (
   overrides: Partial<CreateScriptRequestBody> = {}
 ): CreateScriptRequestBody => {
+  // @ts-ignore pathToExecutable is conditionally required
   return {
     name: 'script one',
     platform: ['linux', 'macos'],
@@ -60,6 +62,7 @@ const generateCreateScriptBodyMock = (
     requiresInput: false,
     tags: ['dataCollection'],
     file: createHapiReadableStreamMock(),
+    fileType: 'script',
     ...overrides,
   };
 };
@@ -87,6 +90,7 @@ const generateSavedObjectScriptEntryMock = (
       file_size: 12098,
       file_name: 'my_script.sh',
       file_hash_sha256: 'e5441eb2bb',
+      file_type: 'script',
       name: 'my script',
       platform: ['macos', 'linux'],
       requires_input: undefined,

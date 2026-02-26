@@ -108,6 +108,44 @@ describe('scripts library client', () => {
           file_id: '123',
           file_name: 'test.txt',
           file_size: 1234,
+          file_type: 'script',
+          id: scriptSoId,
+          instructions: 'just execute it',
+          name: 'script one',
+          platform: ['linux', 'macos'],
+          tags: ['dataCollection'],
+          requires_input: false,
+          created_by: 'elastic',
+          created_at: expect.any(String),
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { id: scriptSoId }
+      );
+    });
+
+    it('should create an `archive` script entry (SO) with expected content', async () => {
+      await scriptsClient.create(
+        ScriptsLibraryMock.generateCreateScriptBody({
+          fileType: 'archive',
+          pathToExecutable: '/test/script_one.sh',
+        })
+      );
+      const scriptSoId = soClientMock.create.mock.calls?.[0]?.[2]?.id;
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        {
+          description: 'does some stuff',
+          example: 'bash -c script_one.sh',
+          path_to_executable: '/test/script_one.sh',
+          file_hash_sha256: 'e5441eb2bb',
+          file_id: '123',
+          file_name: 'test.txt',
+          file_size: 1234,
+          file_type: 'archive',
           id: scriptSoId,
           instructions: 'just execute it',
           name: 'script one',
@@ -163,6 +201,7 @@ describe('scripts library client', () => {
         fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
+        fileType: 'script',
         platform: ['macos', 'linux'],
         requiresInput: false,
         tags: [],
@@ -282,6 +321,7 @@ describe('scripts library client', () => {
             fileId: 'file-1-2-3',
             fileName: 'my_script.sh',
             fileSize: 12098,
+            fileType: 'script',
             pathToExecutable: undefined,
             platform: ['macos', 'linux'],
             tags: [],
@@ -458,6 +498,7 @@ describe('scripts library client', () => {
         fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
+        fileType: 'script',
         platform: ['macos', 'linux'],
         tags: [],
         requiresInput: false,
@@ -486,6 +527,7 @@ describe('scripts library client', () => {
         fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
+        fileType: 'script',
         id: '1-2-3',
         name: 'my script',
         platform: ['macos', 'linux'],

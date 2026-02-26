@@ -84,6 +84,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     example,
     description,
     instructions,
+    fileType,
     requiresInput,
     pathToExecutable,
     tags,
@@ -102,6 +103,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       file_size: 0,
       file_name: '',
       file_hash_sha256: '',
+      file_type: fileType,
       requires_input: requiresInput,
       path_to_executable: pathToExecutable,
       created_by: '',
@@ -121,12 +123,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       requires_input: requiresInput = false,
-      path_to_executable: pathToExecutable = undefined,
+      path_to_executable: pathToExecutable,
       tags = [],
       file_id: fileId,
       file_name: fileName,
       file_size: fileSize,
       file_hash_sha256: fileHash,
+      file_type: fileType,
       created_by: createdBy,
       updated_by: updatedBy,
       created_at: createdAt,
@@ -143,6 +146,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       fileName,
       fileSize,
       fileHash,
+      fileType,
       downloadUri,
       requiresInput,
       description,
@@ -382,6 +386,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
           fieldName as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP
         ] ?? fieldName) as keyof ScriptsLibrarySavedObjectAttributes;
 
+        // force path_to_executable to be empty string
+        if (fieldName === 'fileType' && value === 'script') {
+          acc.path_to_executable = '';
+        }
         // @ts-expect-error: TS2322 - caused by the fact that `scriptUpdates` is a subset of fields
         acc[soFieldName] = value;
 

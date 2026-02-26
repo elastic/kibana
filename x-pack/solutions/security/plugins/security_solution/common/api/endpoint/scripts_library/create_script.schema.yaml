@@ -25,6 +25,20 @@ paths:
                   name: Collect host data
                   platform: [ linux, macos ]
                   file: ./collect_host_data.sh
+                  fileType: script
+                  description: Collects host data for investigation
+                  instructions: Collects host data for investigation
+                  example: ./collect_host_data.sh --help
+                  requiresInput: false
+
+              CreateArchiveScriptEntry:
+                summary: Create an archive script entry
+                value:
+                  name: Collect host data
+                  platform: [ linux, macos ]
+                  file: ./collect_host_data.zip
+                  fileType: archive
+                  pathToExecutable: ./bin/collect_host_data.sh
                   description: Collects host data for investigation
                   instructions: Collects host data for investigation
                   example: ./collect_host_data.sh --help
@@ -41,12 +55,20 @@ paths:
 components:
   x-codegen-enabled: false
   schemas:
+    ArchivePathToExecutableSchema:
+      type: string
+      description:
+        Used only for when the uploaded script is an archive (.zip file for example).
+        This property defines the relative path to the file included in the archive that should be executed
+        once its contents are extracted. The path should be relative to the root of the archive.
+      example: ./bin/script.sh
     CreateScriptRouteRequestBody:
       type: object
       required:
         - name
         - platform
         - file
+        - fileType
       properties:
         name:
           type: string
@@ -60,6 +82,10 @@ components:
           type: object
           format: binary
           description: The script file upload
+        fileType:
+          type: string
+          description: The type of the uploaded file, which determines the expected value of `pathToExecutable`. If `fileType` is "script", then `pathToExecutable` should not be included. If `fileType` is "archive", then `pathToExecutable` is required and should specify the path to the executable file within the archive.
+          enum: [script, archive]
         tags:
           type: array
           description: Tags to categorize the script
@@ -78,12 +104,8 @@ components:
           type: boolean
           description: Whether the script requires input arguments
         pathToExecutable:
-          type: string
-          description: >
-            Used only for when the uploaded script is an archive (.zip file for example).
-            This property defines the relative path to the file included in the archive that should be executed
-            once its contents are extracted. The path should be relative to the root of the archive.
-          example: ./bin/script.sh
+          oneOf:
+            -  $ref: "#/components/schemas/ArchivePathToExecutableSchema"
 
 
 

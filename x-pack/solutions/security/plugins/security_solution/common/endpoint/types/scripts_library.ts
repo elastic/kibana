@@ -22,6 +22,8 @@ export interface EndpointScript {
   fileHash: string;
   /** Id of the internally stored file for this script */
   fileId: string;
+  /** The type of the file, either a script or an archive */
+  fileType: 'script' | 'archive';
   /** If `true`, then the script, when invoked, requires input arguments to be provided */
   requiresInput: boolean;
   /**

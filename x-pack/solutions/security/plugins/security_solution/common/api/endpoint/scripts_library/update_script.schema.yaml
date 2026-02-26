@@ -35,6 +35,17 @@ paths:
                 value:
                   instructions: ./collect_host_data.sh --help
 
+              PatchUpdateScriptEntryToArchive:
+                summary: Update script entry to be an archive
+                value:
+                  fileType: archive
+                  pathToExecutable: ./bin/collect_host_data.sh
+
+              PatchUpdateScriptEntryFromArchiveToScript:
+                summary: Update script entry from an archive to a script
+                value:
+                  fileType: script
+
       responses:
         '200':
           description: Action request was successfully updated
@@ -46,6 +57,13 @@ paths:
 components:
   x-codegen-enabled: false
   schemas:
+    ArchivePathToExecutableSchema:
+      type: string
+      description:
+        Used only for when the uploaded script is an archive (.zip file for example).
+        This property defines the relative path to the file included in the archive that should be executed
+        once its contents are extracted. The path should be relative to the root of the archive.
+      example: ./bin/script.sh
     PatchUpdateScriptRouteRequestBody:
       type: object
       description: The script entry properties to be updated. At least one property must be provided.
@@ -63,6 +81,10 @@ components:
           type: object
           format: binary
           description: The script file upload
+        fileType:
+          type: string
+          description: The type of the uploaded file, which determines the expected value of `pathToExecutable`. If `fileType` is "script", then `pathToExecutable` should not be included. If `fileType` is "archive", then `pathToExecutable` is required and should specify the path to the executable file within the archive.
+          enum: [script, archive]
         tags:
           type: array
           description: Tags to categorize the script
@@ -81,12 +103,8 @@ components:
           type: boolean
           description: Whether the script requires input arguments
         pathToExecutable:
-          type: string
-          description: >
-            Used only for when the uploaded script is an archive (.zip file for example).
-            This property defines the relative path to the file included in the archive that should be executed
-            once its contents are extracted. The path should be relative to the root of the archive.
-          example: ./bin/script.sh
+          oneOf:
+            -  $ref: "#/components/schemas/ArchivePathToExecutableSchema"
 
 
 
