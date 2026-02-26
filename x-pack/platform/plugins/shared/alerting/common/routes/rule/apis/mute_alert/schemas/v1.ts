@@ -35,6 +35,14 @@ export const muteAlertQuerySchema = schema.maybe(
   })
 );
 
+function validateExpiresAt(value: string): string | void {
+  if (value.trim() === '') return;
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) {
+    return 'expires_at must be a valid ISO 8601 date string';
+  }
+}
+
 const muteAlertBodyConditionSchema = schema.object({
   type: schema.oneOf(
     [
@@ -66,31 +74,43 @@ const muteAlertBodyConditionSchema = schema.object({
 
 export const muteAlertBodySchema = schema.maybe(
   schema.nullable(
-    schema.object({
-      expires_at: schema.maybe(
-        schema.string({
-          meta: {
-            description: 'ISO date after which the snooze expires. Absent = indefinite.',
-          },
-        })
-      ),
-      conditions: schema.maybe(
-        schema.arrayOf(muteAlertBodyConditionSchema, {
-          maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY,
-          meta: { description: 'Conditions that auto-lift the snooze.' },
-        })
-      ),
-      condition_operator: schema.maybe(
-        schema.oneOf(
-          [
-            schema.literal(snoozeConditionOperator.ANY),
-            schema.literal(snoozeConditionOperator.ALL),
-          ],
-          {
-            meta: { description: 'How conditions combine: any (OR, default), all (AND).' },
+    schema.object(
+      {
+        expires_at: schema.maybe(
+          schema.string({
+            meta: {
+              description: 'ISO date after which the snooze expires. Absent = indefinite.',
+            },
+            validate: validateExpiresAt,
+          })
+        ),
+        conditions: schema.maybe(
+          schema.arrayOf(muteAlertBodyConditionSchema, {
+            maxSize: MAX_SNOOZE_CONDITIONS_PER_ENTRY,
+            meta: { description: 'Conditions that auto-lift the snooze.' },
+          })
+        ),
+        condition_operator: schema.maybe(
+          schema.oneOf(
+            [
+              schema.literal(snoozeConditionOperator.ANY),
+              schema.literal(snoozeConditionOperator.ALL),
+            ],
+            {
+              meta: { description: 'How conditions combine: any (OR, default), all (AND).' },
+            }
+          )
+        ),
+      },
+      {
+        validate: (value) => {
+          const hasExpiresAt = value.expires_at != null && value.expires_at !== '';
+          const hasConditions = Array.isArray(value.conditions) && value.conditions.length > 0;
+          if (!hasExpiresAt && !hasConditions) {
+            return 'When providing a request body, at least one of expires_at or conditions (non-empty array) is required. Omit the body for indefinite mute.';
           }
-        )
-      ),
-    })
+        },
+      }
+    )
   )
 );
