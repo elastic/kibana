@@ -15,7 +15,7 @@ export interface EntityStoreTaskConfig extends TaskScheduleConfig {
   type: string;
 }
 
-export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
+export const TasksConfig = {
   [EntityStoreTaskType.enum.extractEntity]: {
     title: 'Entity Store - Execute Entity Task',
     type: 'entity_store:v2:extract_entity_task',
@@ -37,4 +37,4 @@ export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
     timeout: '25s',
     interval: '1h',
   },
-};
+} as const satisfies Record<EntityStoreTaskType, EntityStoreTaskConfig>;
