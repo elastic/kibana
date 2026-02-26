@@ -45,10 +45,9 @@ const EntityStoreDashboardPanelsComponent = () => {
         callouts
       ) : (
         <EnablementPanel
-          state={{
-            riskEngine: riskEngineStatus,
-            entityStore: storeStatusQuery,
-          }}
+          riskEngineStatus={riskEngineStatus.data?.risk_engine_status}
+          entityStoreStatus={storeStatusQuery.data?.status}
+          engines={storeStatusQuery.data?.engines}
         />
       )}
 

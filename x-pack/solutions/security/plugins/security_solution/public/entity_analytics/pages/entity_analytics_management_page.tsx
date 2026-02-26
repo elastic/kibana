@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -17,7 +17,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMutation } from '@kbn/react-query';
 
 import { EntityAnalyticsToggle } from '../components/entity_analytics_toggle';
 import { ENTITY_ANALYTICS } from '../../app/translations';
@@ -35,6 +34,7 @@ import {
 } from '../components/entity_store/hooks/use_entity_store';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
+import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
 
 enum TabId {
   RiskScore = 'riskScore',
@@ -49,22 +49,47 @@ export const EntityAnalyticsManagementPage = () => {
 
   const riskEngineSettings = useConfigurableRiskEngineSettings();
   const {
+    savedRiskEngineSettings,
     selectedRiskEngineSettings,
     selectedSettingsMatchSavedSettings,
+    resetSelectedSettings,
     saveSelectedSettingsMutation,
+    setSelectedDateSetting,
+    toggleSelectedClosedAlertsSetting,
+    isLoadingRiskEngineSettings,
+    toggleScoreRetainment,
+    setAlertFilters,
+    getUIAlertFilters,
   } = riskEngineSettings;
 
-  const saveSettingsWrapperMutation = useMutation(async () => {
+  const handleSaveToggleSettings = useCallback(async () => {
     if (selectedRiskEngineSettings) {
       await saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
     }
-  });
+  }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const entityStoreStatus = useEntityStoreStatus({});
   const entityTypes = useEntityStoreTypes();
   const { data: entityEnginePrivileges } = useEntityEnginePrivileges();
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation({ entityTypes });
+
+  const userHasRiskEnginePrivileges =
+    !riskEnginePrivileges.isLoading &&
+    'hasAllRequiredPrivileges' in riskEnginePrivileges &&
+    riskEnginePrivileges.hasAllRequiredPrivileges;
+
+  const userHasEntityStorePrivileges = entityEnginePrivileges?.has_all_required ?? false;
+  const hasAllRequiredPrivileges = userHasRiskEnginePrivileges || userHasEntityStorePrivileges;
+
+  const canRunEngine =
+    (!riskEnginePrivileges.isLoading &&
+      (riskEnginePrivileges.hasAllRequiredPrivileges ||
+        (!riskEnginePrivileges.hasAllRequiredPrivileges &&
+          riskEnginePrivileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
+    false;
+
+  const hasReadPermissions = userHasRiskEngineReadPermissions(riskEnginePrivileges);
 
   const shouldDisplayEngineStatusTab =
     isEntityStoreInstalled(entityStoreStatus.data?.status) &&
@@ -77,6 +102,8 @@ export const EntityAnalyticsManagementPage = () => {
       setSelectedTabId(TabId.RiskScore);
     }
   }, [shouldDisplayEngineStatusTab, selectedTabId]);
+
+  const deleteError = safeErrorMessage(deleteEntityEngineMutation.error);
 
   return (
     <>
@@ -93,8 +120,10 @@ export const EntityAnalyticsManagementPage = () => {
               <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
                 <EntityAnalyticsToggle
                   selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
-                  saveSelectedSettingsMutation={saveSettingsWrapperMutation}
-                  privileges={riskEnginePrivileges}
+                  onSaveSettings={handleSaveToggleSettings}
+                  isSavingSettings={saveSelectedSettingsMutation.isLoading}
+                  hasAllRequiredPrivileges={hasAllRequiredPrivileges}
+                  isPrivilegesLoading={riskEnginePrivileges.isLoading}
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -153,22 +182,39 @@ export const EntityAnalyticsManagementPage = () => {
 
       <EuiSpacer size="s" />
 
-      {selectedTabId === TabId.RiskScore && (
+      <div hidden={selectedTabId !== TabId.RiskScore}>
         <RiskScoreTab
-          riskEnginePrivileges={riskEnginePrivileges}
-          riskEngineSettings={riskEngineSettings}
+          canRunEngine={canRunEngine}
+          hasReadPermissions={hasReadPermissions}
+          isPrivilegesLoading={riskEnginePrivileges.isLoading}
+          savedRiskEngineSettings={savedRiskEngineSettings}
+          selectedRiskEngineSettings={selectedRiskEngineSettings}
+          selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
+          resetSelectedSettings={resetSelectedSettings}
+          onSaveSettings={(settings) => saveSelectedSettingsMutation.mutateAsync(settings)}
+          isSavingSettings={saveSelectedSettingsMutation.isLoading}
+          setSelectedDateSetting={setSelectedDateSetting}
+          toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
+          isLoadingRiskEngineSettings={isLoadingRiskEngineSettings}
+          toggleScoreRetainment={toggleScoreRetainment}
+          setAlertFilters={setAlertFilters}
+          getUIAlertFilters={getUIAlertFilters}
         />
-      )}
+      </div>
 
-      {selectedTabId === TabId.Import && (
-        <ImportEntitiesTab
-          deleteEntityEngineMutation={deleteEntityEngineMutation}
-          entityStoreStatus={entityStoreStatus}
-        />
-      )}
+      <div hidden={selectedTabId !== TabId.Import}>
+        <ImportEntitiesTab deleteError={deleteError} engines={entityStoreStatus.data?.engines} />
+      </div>
 
-      {selectedTabId === TabId.Status && (
-        <EngineStatus deleteEntityEngineMutation={deleteEntityEngineMutation} />
+      {shouldDisplayEngineStatusTab && (
+        <div hidden={selectedTabId !== TabId.Status}>
+          <EngineStatus
+            onDeleteEntityEngine={async () => {
+              await deleteEntityEngineMutation.mutateAsync();
+            }}
+            isDeletingEntityEngine={deleteEntityEngineMutation.isLoading}
+          />
+        </div>
       )}
     </>
   );

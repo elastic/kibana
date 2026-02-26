@@ -11,8 +11,6 @@ import { EngineStatus } from '.';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
-import type { useDeleteEntityEngineMutation } from '../../hooks/use_entity_store';
-
 const mockUseEntityStore = jest.fn();
 jest.mock('../../hooks/use_entity_store', () => ({
   useEntityStoreStatus: () => mockUseEntityStore(),
@@ -27,12 +25,11 @@ jest.mock('../../../../../common/utils/download_blob', () => ({
   downloadBlob: () => mockDownloadBlob(),
 }));
 
-const mockDeleteEntityEngineMutation = {
-  isLoading: false,
-  isError: false,
-  mutate: jest.fn(),
-  mutateAsync: jest.fn(),
-} as unknown as ReturnType<typeof useDeleteEntityEngineMutation>;
+const mockOnDeleteEntityEngine = jest.fn().mockResolvedValue(undefined);
+const defaultProps = {
+  onDeleteEntityEngine: mockOnDeleteEntityEngine,
+  isDeletingEntityEngine: false,
+};
 
 describe('EngineStatus', () => {
   beforeEach(() => {
@@ -46,7 +43,7 @@ describe('EngineStatus', () => {
       error: null,
     });
 
-    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+    render(<EngineStatus {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
@@ -60,7 +57,7 @@ describe('EngineStatus', () => {
       error: new Error('Error'),
     });
 
-    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+    render(<EngineStatus {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
@@ -74,7 +71,7 @@ describe('EngineStatus', () => {
       error: null,
     });
 
-    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+    render(<EngineStatus {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
@@ -92,7 +89,7 @@ describe('EngineStatus', () => {
     };
     mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+    render(<EngineStatus {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
@@ -112,7 +109,7 @@ describe('EngineStatus', () => {
     };
     mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+    render(<EngineStatus {...defaultProps} />, {
       wrapper: TestProviders,
     });
 

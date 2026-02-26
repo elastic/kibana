@@ -7,8 +7,6 @@
 
 import { useCallback, useState } from 'react';
 
-import type { UseMutationResult } from '@kbn/react-query';
-
 import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
@@ -29,19 +27,19 @@ import {
   useEntityAnalyticsStatus,
   type EntityAnalyticsStatus,
 } from './use_entity_analytics_status';
+import { safeErrorMessage } from '../common';
 
 const TEN_SECONDS = 10000;
 const TOAST_OPTIONS = { toastLifeTimeMs: 5000 };
 
 interface ToggleOptions {
   selectedSettingsMatchSavedSettings: boolean;
-  saveSelectedSettingsMutation: UseMutationResult<void, unknown, void, unknown>;
+  onSaveSettings: () => Promise<void>;
+  isSavingSettings: boolean;
 }
 
 interface UseToggleEntityAnalyticsReturn {
   status: EntityAnalyticsStatus;
-  riskEngineStatus: ReturnType<typeof useRiskEngineStatus>;
-  entityStoreStatus: ReturnType<typeof useEntityStoreStatus>;
   isLoading: boolean;
   toggle: () => Promise<void>;
   isEntityStoreFeatureFlagDisabled: boolean;
@@ -55,7 +53,8 @@ interface EntityAnalyticsErrors {
 
 export const useToggleEntityAnalytics = ({
   selectedSettingsMatchSavedSettings,
-  saveSelectedSettingsMutation,
+  onSaveSettings,
+  isSavingSettings,
 }: ToggleOptions): UseToggleEntityAnalyticsReturn => {
   const { addSuccess } = useAppToasts();
   const invalidateRiskEngineSettingsQuery = useInvalidateRiskEngineSettingsQuery();
@@ -89,7 +88,7 @@ export const useToggleEntityAnalytics = ({
     enableEntityStoreMutation.isLoading ||
     startEntityEngineMutation.isLoading ||
     stopEntityEngineMutation.isLoading ||
-    saveSelectedSettingsMutation.isLoading;
+    isSavingSettings;
 
   const riskEngineStatus = riskEngineStatusQuery.data?.risk_engine_status;
   const entityStoreStatus = entityStoreStatusQuery.data?.status;
@@ -101,27 +100,22 @@ export const useToggleEntityAnalytics = ({
     isMutationLoading: isLoading,
   });
 
-  const safeErrorMessage = (error: unknown): string => {
-    if (error && typeof error === 'object' && 'body' in error) {
-      const body = (error as { body?: { message?: string } }).body;
-      if (body && typeof body.message === 'string') return body.message;
-    }
-    return 'An unknown error occurred';
-  };
-
+  const unknownError = 'An unknown error occurred';
   const errors: EntityAnalyticsErrors = {
     riskEngine: [
-      ...(initRiskEngineMutation.isError ? [safeErrorMessage(initRiskEngineMutation.error)] : []),
+      ...(initRiskEngineMutation.isError
+        ? [safeErrorMessage(initRiskEngineMutation.error, unknownError)]
+        : []),
       ...(enableRiskEngineMutation.isError
-        ? [safeErrorMessage(enableRiskEngineMutation.error)]
+        ? [safeErrorMessage(enableRiskEngineMutation.error, unknownError)]
         : []),
       ...(disableRiskEngineMutation.isError
-        ? [safeErrorMessage(disableRiskEngineMutation.error)]
+        ? [safeErrorMessage(disableRiskEngineMutation.error, unknownError)]
         : []),
     ],
     entityStore: [
       ...(enableEntityStoreMutation.isError
-        ? [safeErrorMessage(enableEntityStoreMutation.error)]
+        ? [safeErrorMessage(enableEntityStoreMutation.error, unknownError)]
         : []),
     ],
   };
@@ -150,7 +144,7 @@ export const useToggleEntityAnalytics = ({
       } else {
         if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
           if (!selectedSettingsMatchSavedSettings) {
-            await saveSelectedSettingsMutation.mutateAsync();
+            await onSaveSettings();
           }
           await initRiskEngineMutation.mutateAsync(undefined);
         } else if (riskEngineStatus === RiskEngineStatusEnum.DISABLED) {
@@ -182,7 +176,7 @@ export const useToggleEntityAnalytics = ({
     entityStoreStatus,
     isEntityStoreFeatureFlagDisabled,
     selectedSettingsMatchSavedSettings,
-    saveSelectedSettingsMutation,
+    onSaveSettings,
     initRiskEngineMutation,
     enableRiskEngineMutation,
     disableRiskEngineMutation,
@@ -194,8 +188,6 @@ export const useToggleEntityAnalytics = ({
 
   return {
     status,
-    riskEngineStatus: riskEngineStatusQuery,
-    entityStoreStatus: entityStoreStatusQuery,
     isLoading: isLoading || riskEngineStatusQuery.isFetching,
     toggle,
     isEntityStoreFeatureFlagDisabled,

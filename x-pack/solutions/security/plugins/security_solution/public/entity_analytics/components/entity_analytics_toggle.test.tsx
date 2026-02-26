@@ -9,27 +9,16 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import type { UseMutationResult } from '@kbn/react-query';
-
 import {
   EntityAnalyticsHealth,
   EntityAnalyticsErrorPanel,
   EntityAnalyticsToggle,
 } from './entity_analytics_toggle';
 import type { EntityAnalyticsStatus } from '../hooks/use_entity_analytics_status';
-import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 
 const mockToggle = jest.fn();
 jest.mock('../hooks/use_toggle_entity_analytics', () => ({
   useToggleEntityAnalytics: () => mockUseToggleReturn,
-}));
-
-let mockEntityEnginePrivilegesReturn = {
-  data: { has_all_required: true },
-  isLoading: false,
-};
-jest.mock('./entity_store/hooks/use_entity_engine_privileges', () => ({
-  useEntityEnginePrivileges: () => mockEntityEnginePrivilegesReturn,
 }));
 
 let mockUseToggleReturn: {
@@ -93,15 +82,11 @@ describe('EntityAnalyticsErrorPanel', () => {
 
 describe('EntityAnalyticsToggle', () => {
   const defaultProps = {
-    privileges: {
-      isLoading: false,
-      hasAllRequiredPrivileges: true,
-    } as RiskEngineMissingPrivilegesResponse,
+    hasAllRequiredPrivileges: true,
+    isPrivilegesLoading: false,
     selectedSettingsMatchSavedSettings: true,
-    saveSelectedSettingsMutation: {
-      isLoading: false,
-      mutateAsync: jest.fn(),
-    } as unknown as UseMutationResult<void, unknown, void, unknown>,
+    onSaveSettings: jest.fn().mockResolvedValue(undefined),
+    isSavingSettings: false,
   };
 
   beforeEach(() => {
@@ -111,10 +96,6 @@ describe('EntityAnalyticsToggle', () => {
       isLoading: false,
       toggle: mockToggle,
       errors: { riskEngine: [], entityStore: [] },
-    };
-    mockEntityEnginePrivilegesReturn = {
-      data: { has_all_required: true },
-      isLoading: false,
     };
   });
 
@@ -168,15 +149,7 @@ describe('EntityAnalyticsToggle', () => {
   it('disables the switch when privileges are missing', () => {
     const props = {
       ...defaultProps,
-      privileges: {
-        isLoading: false,
-        hasAllRequiredPrivileges: false,
-        missingPrivileges: { clusterPrivileges: { enable: [], run: [] }, indexPrivileges: [] },
-      } as RiskEngineMissingPrivilegesResponse,
-    };
-    mockEntityEnginePrivilegesReturn = {
-      data: { has_all_required: false },
-      isLoading: false,
+      hasAllRequiredPrivileges: false,
     };
 
     render(<EntityAnalyticsToggle {...props} />, { wrapper: Wrapper });

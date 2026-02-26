@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import { EuiButton, EuiText, useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 
-import type { RiskEngineMissingPrivilegesResponse } from '../../hooks/use_missing_risk_engine_privileges';
 import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
 import { useScheduleNowRiskEngineMutation } from '../../api/hooks/use_schedule_now_risk_engine_mutation';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -26,12 +25,10 @@ const formatTimeFromNow = (time: string | undefined): string => {
 };
 
 interface RunRiskEngineButtonProps {
-  riskEnginePrivileges: RiskEngineMissingPrivilegesResponse;
+  canRunEngine: boolean;
 }
 
-export const RunRiskEngineButton: React.FC<RunRiskEngineButtonProps> = ({
-  riskEnginePrivileges,
-}) => {
+export const RunRiskEngineButton: React.FC<RunRiskEngineButtonProps> = ({ canRunEngine }) => {
   const { euiTheme } = useEuiTheme();
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
 
@@ -47,17 +44,10 @@ export const RunRiskEngineButton: React.FC<RunRiskEngineButtonProps> = ({
   const { mutateAsync: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
 
-  const userCanRunEngine =
-    (!riskEnginePrivileges.isLoading &&
-      (riskEnginePrivileges.hasAllRequiredPrivileges ||
-        (!riskEnginePrivileges.hasAllRequiredPrivileges &&
-          riskEnginePrivileges.missingPrivileges?.clusterPrivileges?.run?.length === 0))) ||
-    false;
-
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
   const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
   const runEngineBtnIsDisabled =
-    !currentRiskEngineStatus || isLoadingRunRiskEngine || !userCanRunEngine || isRunning;
+    !currentRiskEngineStatus || isLoadingRunRiskEngine || !canRunEngine || isRunning;
 
   const countDownText = isRunning
     ? 'Now running'

@@ -22,7 +22,6 @@ import { useEntityStoreTypes } from '../../../../hooks/use_enabled_entity_types'
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
-import type { useDeleteEntityEngineMutation } from '../../hooks/use_entity_store';
 import { useEntityStoreStatus } from '../../hooks/use_entity_store';
 import { isEngineLoading } from './helpers';
 import { EngineStatusHeader } from './components/engine_status_header';
@@ -40,10 +39,14 @@ const errorMessage = i18n.translate(
 );
 
 interface EngineStatusProps {
-  deleteEntityEngineMutation: ReturnType<typeof useDeleteEntityEngineMutation>;
+  onDeleteEntityEngine: () => Promise<void>;
+  isDeletingEntityEngine: boolean;
 }
 
-export const EngineStatus: React.FC<EngineStatusProps> = ({ deleteEntityEngineMutation }) => {
+export const EngineStatus = ({
+  onDeleteEntityEngine,
+  isDeletingEntityEngine,
+}: EngineStatusProps) => {
   const {
     data,
     isLoading: isStatusAPILoading,
@@ -83,7 +86,10 @@ export const EngineStatus: React.FC<EngineStatusProps> = ({ deleteEntityEngineMu
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
             <EuiFlexItem grow={false}>
-              <ClearEntityDataButton deleteEntityEngineMutation={deleteEntityEngineMutation} />
+              <ClearEntityDataButton
+                onDelete={onDeleteEntityEngine}
+                isDeleting={isDeletingEntityEngine}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" onClick={downloadJson}>

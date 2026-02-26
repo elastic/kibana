@@ -9,14 +9,14 @@ import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { useDeleteEntityEngineMutation } from '../hooks/use_entity_store';
-
 interface ClearEntityDataButtonProps {
-  deleteEntityEngineMutation: ReturnType<typeof useDeleteEntityEngineMutation>;
+  onDelete: () => Promise<void>;
+  isDeleting: boolean;
 }
 
 export const ClearEntityDataButton: React.FC<ClearEntityDataButtonProps> = ({
-  deleteEntityEngineMutation,
+  onDelete,
+  isDeleting,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
   const [isClearModalVisible, setIsClearModalVisible] = useState(false);
@@ -34,7 +34,7 @@ export const ClearEntityDataButton: React.FC<ClearEntityDataButtonProps> = ({
 
       {isClearModalVisible && (
         <EuiConfirmModal
-          isLoading={deleteEntityEngineMutation.isLoading}
+          isLoading={isDeleting}
           aria-labelledby={modalTitleId}
           title={
             <FormattedMessage
@@ -45,8 +45,7 @@ export const ClearEntityDataButton: React.FC<ClearEntityDataButtonProps> = ({
           titleProps={{ id: modalTitleId }}
           onCancel={closeClearModal}
           onConfirm={() => {
-            deleteEntityEngineMutation
-              .mutateAsync()
+            onDelete()
               .then(closeClearModal)
               .catch(() => {});
           }}

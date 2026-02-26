@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiCallOut,
   EuiPanel,
@@ -15,12 +15,10 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useMutation } from '@kbn/react-query';
 
-import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type {
+  EngineDescriptor,
   RiskEngineStatusResponse,
   StoreStatus,
 } from '../../../../../common/api/entity_analytics';
@@ -45,16 +43,16 @@ import { EntityAnalyticsErrorPanel } from '../../entity_analytics_toggle';
 import { useConfigurableRiskEngineSettings } from '../../risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 
 interface EnableEntityStorePanelProps {
-  state: {
-    riskEngine: UseQueryResult<RiskEngineStatusResponse>;
-    entityStore: UseQueryResult<GetEntityStoreStatusResponse>;
-  };
+  riskEngineStatus?: RiskEngineStatusResponse['risk_engine_status'];
+  entityStoreStatus?: StoreStatus;
+  engines?: EngineDescriptor[];
 }
 
-export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }) => {
-  const riskEngineStatus = state.riskEngine.data?.risk_engine_status;
-  const entityStoreStatus = state.entityStore.data?.status;
-  const engines = state.entityStore.data?.engines;
+export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
+  riskEngineStatus,
+  entityStoreStatus,
+  engines,
+}) => {
   const enabledEntityTypes = useEntityStoreTypes();
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -65,11 +63,11 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     selectedRiskEngineSettings,
   } = useConfigurableRiskEngineSettings();
 
-  const saveSettingsWrapperMutation = useMutation(async () => {
+  const handleSaveSettings = useCallback(async () => {
     if (selectedRiskEngineSettings) {
       await saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
     }
-  });
+  }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
   const {
     toggle,
@@ -77,7 +75,8 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     errors: toggleErrors,
   } = useToggleEntityAnalytics({
     selectedSettingsMatchSavedSettings,
-    saveSelectedSettingsMutation: saveSettingsWrapperMutation,
+    onSaveSettings: handleSaveSettings,
+    isSavingSettings: saveSelectedSettingsMutation.isLoading,
   });
 
   const storeEnablement = useEnableEntityStoreMutation();

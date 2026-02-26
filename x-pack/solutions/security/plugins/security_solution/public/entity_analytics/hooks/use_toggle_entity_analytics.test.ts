@@ -106,10 +106,8 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
 const mockSaveSettings = jest.fn().mockResolvedValue(undefined);
 const defaultOptions = {
   selectedSettingsMatchSavedSettings: true,
-  saveSelectedSettingsMutation: {
-    mutateAsync: mockSaveSettings,
-    isLoading: false,
-  } as never,
+  onSaveSettings: mockSaveSettings,
+  isSavingSettings: false,
 };
 
 describe('useToggleEntityAnalytics', () => {

@@ -17,12 +17,9 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import type { UseMutationResult } from '@kbn/react-query';
 
-import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import type { EntityAnalyticsStatus } from '../hooks/use_entity_analytics_status';
 import { useToggleEntityAnalytics } from '../hooks/use_toggle_entity_analytics';
-import { useEntityEnginePrivileges } from './entity_store/hooks/use_entity_engine_privileges';
 import * as i18n from '../translations';
 
 export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> = ({ status }) => {
@@ -73,32 +70,28 @@ export const EntityAnalyticsErrorPanel: React.FC<{
 };
 
 interface EntityAnalyticsToggleProps {
-  privileges: RiskEngineMissingPrivilegesResponse;
+  hasAllRequiredPrivileges: boolean;
+  isPrivilegesLoading: boolean;
   selectedSettingsMatchSavedSettings: boolean;
-  saveSelectedSettingsMutation: UseMutationResult<void, unknown, void, unknown>;
+  onSaveSettings: () => Promise<void>;
+  isSavingSettings: boolean;
 }
 
 export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
-  privileges,
+  hasAllRequiredPrivileges,
+  isPrivilegesLoading,
   selectedSettingsMatchSavedSettings,
-  saveSelectedSettingsMutation,
+  onSaveSettings,
+  isSavingSettings,
 }) => {
   const { status, isLoading, toggle, errors } = useToggleEntityAnalytics({
     selectedSettingsMatchSavedSettings,
-    saveSelectedSettingsMutation,
+    onSaveSettings,
+    isSavingSettings,
   });
 
-  const { data: entityEnginePrivileges } = useEntityEnginePrivileges();
-
-  const userHasRiskEnginePrivileges =
-    !privileges.isLoading &&
-    'hasAllRequiredPrivileges' in privileges &&
-    privileges.hasAllRequiredPrivileges;
-  const userHasEntityStorePrivileges = entityEnginePrivileges?.has_all_required ?? false;
-  const isMissingAllPrivileges = !userHasRiskEnginePrivileges && !userHasEntityStorePrivileges;
-
   const isDisabled =
-    privileges.isLoading || isMissingAllPrivileges || status === 'enabling' || status === 'error';
+    isPrivilegesLoading || !hasAllRequiredPrivileges || status === 'enabling' || status === 'error';
 
   const isChecked = status === 'enabled' || status === 'partially_enabled';
 

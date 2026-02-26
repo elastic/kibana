@@ -28,21 +28,15 @@ import { AssetCriticalityFileUploader } from '../../asset_criticality_file_uploa
 import { useAssetCriticalityPrivileges } from '../../asset_criticality/use_asset_criticality';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { useKibana } from '../../../../common/lib/kibana';
-import type {
-  useDeleteEntityEngineMutation,
-  useEntityStoreStatus,
-} from '../hooks/use_entity_store';
+import type { EngineDescriptor } from '../../../../../common/api/entity_analytics';
 import { EntityStoreErrorCallout } from './entity_store_error_callout';
 
 interface ImportEntitiesTabProps {
-  deleteEntityEngineMutation: ReturnType<typeof useDeleteEntityEngineMutation>;
-  entityStoreStatus: ReturnType<typeof useEntityStoreStatus>;
+  deleteError?: string;
+  engines?: EngineDescriptor[];
 }
 
-export const ImportEntitiesTab: React.FC<ImportEntitiesTabProps> = ({
-  deleteEntityEngineMutation,
-  entityStoreStatus,
-}) => {
+export const ImportEntitiesTab = ({ deleteError, engines }: ImportEntitiesTabProps) => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const {
     data: assetCriticalityPrivileges,
@@ -51,7 +45,7 @@ export const ImportEntitiesTab: React.FC<ImportEntitiesTabProps> = ({
   } = useAssetCriticalityPrivileges('AssetCriticalityUploadPage');
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
 
-  const entityStoreCallouts = (entityStoreStatus.data?.engines || [])
+  const entityStoreCallouts = (engines ?? [])
     .filter((engine) => engine.status === 'error')
     .map((engine) => <EntityStoreErrorCallout key={engine.type} engine={engine} />);
 
@@ -65,7 +59,7 @@ export const ImportEntitiesTab: React.FC<ImportEntitiesTabProps> = ({
       />
       <EuiFlexItem grow={2}>
         <EuiFlexGroup direction="column">
-          {deleteEntityEngineMutation.isError && (
+          {deleteError && (
             <EuiCallOut
               announceOnMount
               title={
@@ -77,9 +71,7 @@ export const ImportEntitiesTab: React.FC<ImportEntitiesTabProps> = ({
               color="danger"
               iconType="alert"
             >
-              <p>
-                {(deleteEntityEngineMutation.error as { body: { message: string } }).body.message}
-              </p>
+              <p>{deleteError}</p>
             </EuiCallOut>
           )}
           {entityStoreCallouts}
