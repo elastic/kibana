@@ -29,6 +29,7 @@ toc:
       - file: configuration-reference/share-settings.md
   - file: advanced-settings.md
   - file: kibana-audit-events.md
+  - hidden: user-activity.md
   - file: connectors-kibana.md
     children:
       - file: connectors-kibana/gen-ai-connectors.md
