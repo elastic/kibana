@@ -31,6 +31,12 @@ paths:
           schema:
             type: string
           description: Filter by git branch
+        - name: dataset_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by dataset ID
         - name: page
           in: query
           required: false
@@ -83,6 +89,12 @@ components:
           type: string
           nullable: true
         git_commit_sha:
+          type: string
+          nullable: true
+        dataset_id:
+          type: string
+          nullable: true
+        dataset_name:
           type: string
           nullable: true
         total_repetitions:

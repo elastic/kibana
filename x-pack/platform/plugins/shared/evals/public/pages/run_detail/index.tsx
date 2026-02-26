@@ -10,6 +10,7 @@ import {
   EuiPageTemplate,
   EuiBasicTable,
   EuiBadge,
+  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiStat,
@@ -49,13 +50,33 @@ export const RunDetailPage: React.FC = () => {
     return Array.from(traceIds);
   }, [scoresData?.scores]);
 
+  const datasetStatsGroups = useMemo(() => {
+    const groupedStats = new Map<
+      string,
+      { datasetId: string; datasetName: string; stats: EvaluatorStats[] }
+    >();
+
+    for (const stat of runDetail?.stats ?? []) {
+      const existingGroup = groupedStats.get(stat.dataset_id);
+      if (existingGroup) {
+        existingGroup.stats.push(stat);
+        continue;
+      }
+
+      groupedStats.set(stat.dataset_id, {
+        datasetId: stat.dataset_id,
+        datasetName: stat.dataset_name,
+        stats: [stat],
+      });
+    }
+
+    return Array.from(groupedStats.values()).sort((a, b) =>
+      a.datasetName.localeCompare(b.datasetName)
+    );
+  }, [runDetail?.stats]);
+
   const statsColumns: Array<EuiBasicTableColumn<EvaluatorStats>> = useMemo(
     () => [
-      {
-        field: 'dataset_name',
-        name: i18n.COLUMN_DATASET,
-        sortable: true,
-      },
       {
         field: 'evaluator_name',
         name: i18n.COLUMN_EVALUATOR,
@@ -196,12 +217,25 @@ export const RunDetailPage: React.FC = () => {
         <EuiText size="s">
           <h3>{i18n.SECTION_EVALUATOR_STATS}</h3>
         </EuiText>
-        <EuiSpacer size="s" />
-        <EuiBasicTable<EvaluatorStats>
-          items={runDetail?.stats ?? []}
-          columns={statsColumns}
-          loading={runLoading}
-        />
+        <EuiSpacer size="m" />
+        {datasetStatsGroups.map(({ datasetId, datasetName, stats }) => (
+          <React.Fragment key={datasetId}>
+            <EuiText size="s">
+              <h4>
+                <EuiLink onClick={() => history.push(`/datasets/${datasetId}`)}>
+                  {datasetName}
+                </EuiLink>
+              </h4>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiBasicTable<EvaluatorStats>
+              items={stats}
+              columns={statsColumns}
+              loading={runLoading}
+            />
+            <EuiSpacer size="l" />
+          </React.Fragment>
+        ))}
       </EuiPageTemplate.Section>
 
       {selectedTraceId && (

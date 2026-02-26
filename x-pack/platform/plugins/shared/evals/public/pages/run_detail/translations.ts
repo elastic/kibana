@@ -41,10 +41,6 @@ export const SECTION_EVALUATOR_STATS = i18n.translate(
   { defaultMessage: 'Evaluator Statistics' }
 );
 
-export const COLUMN_DATASET = i18n.translate('xpack.evals.runDetail.columns.dataset', {
-  defaultMessage: 'Dataset',
-});
-
 export const COLUMN_EVALUATOR = i18n.translate('xpack.evals.runDetail.columns.evaluator', {
   defaultMessage: 'Evaluator',
 });

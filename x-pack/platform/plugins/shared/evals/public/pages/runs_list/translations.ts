@@ -23,6 +23,10 @@ export const COLUMN_TIMESTAMP = i18n.translate('xpack.evals.runsList.columns.tim
   defaultMessage: 'Timestamp',
 });
 
+export const COLUMN_DATASET = i18n.translate('xpack.evals.runsList.columns.dataset', {
+  defaultMessage: 'Dataset',
+});
+
 export const COLUMN_SUITE = i18n.translate('xpack.evals.runsList.columns.suite', {
   defaultMessage: 'Suite',
 });
@@ -51,3 +55,17 @@ export const COLUMN_CI = i18n.translate('xpack.evals.runsList.columns.ci', {
 export const CI_BUILD_LINK = i18n.translate('xpack.evals.runsList.ciBuildLink', {
   defaultMessage: 'Build',
 });
+
+export const DATASET_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.evals.runsList.datasetFilterAriaLabel',
+  {
+    defaultMessage: 'Filter runs by dataset',
+  }
+);
+
+export const DATASET_FILTER_ALL_OPTION = i18n.translate(
+  'xpack.evals.runsList.datasetFilterAllOption',
+  {
+    defaultMessage: 'All datasets',
+  }
+);

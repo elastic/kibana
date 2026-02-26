@@ -292,4 +292,67 @@ describe('KibanaEvalsClient', () => {
 
     expect(maxInFlight).toBe(2);
   });
+
+  it('upserts dataset and resolves upstream dataset when trustUpstreamDataset=true', async () => {
+    const getDatasetByName = jest.fn().mockResolvedValue({
+      id: 'upstream-dataset-id',
+      name: 'external-dataset',
+      description: 'resolved from ES',
+      examples: [{ input: { q: 'resolved' }, output: { expected: 'answer' } }],
+    });
+    const upsertDataset = jest.fn().mockResolvedValue(undefined);
+    const client = createClient({ getDatasetByName, upsertDataset });
+
+    const task = jest.fn(async () => ({ ok: true }));
+    const evaluator: Evaluator<EvaluationDataset['examples'][number], { ok: boolean }> = {
+      name: 'AlwaysOne',
+      kind: 'CODE',
+      evaluate: async () => ({ score: 1 }),
+    };
+
+    const ranExperiment = await client.runExperiment(
+      {
+        dataset: {
+          name: 'external-dataset',
+          description: 'local placeholder',
+          examples: [],
+        },
+        task,
+        trustUpstreamDataset: true,
+      },
+      [evaluator]
+    );
+
+    expect(getDatasetByName).toHaveBeenCalledWith('external-dataset');
+    expect(upsertDataset).toHaveBeenCalledWith({
+      name: 'external-dataset',
+      description: 'resolved from ES',
+      examples: [{ input: { q: 'resolved' }, output: { expected: 'answer' } }],
+    });
+    expect(task).toHaveBeenCalledTimes(1);
+    expect(ranExperiment.datasetName).toBe('external-dataset');
+    expect(ranExperiment.datasetDescription).toBe('resolved from ES');
+    expect(Object.values(ranExperiment.runs)).toHaveLength(1);
+  });
+
+  it('throws when trustUpstreamDataset=true without getDatasetByName', async () => {
+    const client = createClient();
+
+    await expect(
+      client.runExperiment(
+        {
+          dataset: {
+            name: 'external-dataset',
+            description: 'placeholder',
+            examples: [],
+          },
+          task: async () => ({ ok: true }),
+          trustUpstreamDataset: true,
+        },
+        []
+      )
+    ).rejects.toThrow(
+      'KibanaEvalsClient runExperiment called with trustUpstreamDataset=true, but getDatasetByName is not configured'
+    );
+  });
 });

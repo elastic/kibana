@@ -8,6 +8,13 @@
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
+import {
+  EVALS_DATASET_UPSERT_URL,
+  EVALS_DATASET_URL,
+  EVALS_DATASETS_URL,
+  GetEvaluationDatasetResponse,
+  GetEvaluationDatasetsResponse,
+} from '@kbn/evals-common';
 import { test as base } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
@@ -16,7 +23,6 @@ import type { EvaluationTestOptions } from './config/create_playwright_eval_conf
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
 import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
@@ -32,6 +38,13 @@ import {
   createToolCallsEvaluator,
 } from './evaluators/trace_based';
 import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
+import type {
+  DefaultEvaluators,
+  EvaluationDataset,
+  EvaluationDatasetWithId,
+  EvaluationSpecificWorkerFixtures,
+  Example,
+} from './types';
 
 function isElasticCloudEsUrl(esUrl: string): boolean {
   try {
@@ -45,6 +58,28 @@ function isElasticCloudEsUrl(esUrl: string): boolean {
   } catch {
     return false;
   }
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toDatasetRouteExample(example: Example) {
+  if (!isObjectRecord(example.input)) {
+    throw new Error('Dataset example input must be an object for dataset upsert route');
+  }
+  if (!isObjectRecord(example.output)) {
+    throw new Error('Dataset example output must be an object for dataset upsert route');
+  }
+  if (example.metadata != null && !isObjectRecord(example.metadata)) {
+    throw new Error('Dataset example metadata must be an object when provided');
+  }
+
+  return {
+    input: example.input,
+    output: example.output,
+    metadata: example.metadata ?? {},
+  };
 }
 
 /**
@@ -178,7 +213,15 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   executorClient: [
     async (
-      { log, connector, evaluationConnector, repetitions, evaluationsEsClient, reportModelScore },
+      {
+        log,
+        kbnClient,
+        connector,
+        evaluationConnector,
+        repetitions,
+        evaluationsEsClient,
+        reportModelScore,
+      },
       use
     ) => {
       function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Model {
@@ -205,12 +248,80 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
+      const listDatasetsPerPage = 100;
+
+      const upsertDataset = async (dataset: EvaluationDataset) => {
+        await kbnClient.request({
+          path: EVALS_DATASET_UPSERT_URL,
+          method: 'POST',
+          body: {
+            name: dataset.name,
+            description: dataset.description,
+            examples: dataset.examples.map(toDatasetRouteExample),
+          },
+          retries: 0,
+        });
+      };
+
+      const getDatasetByName = async (
+        datasetName: string
+      ): Promise<EvaluationDatasetWithId | null> => {
+        let page = 1;
+        let total = Number.POSITIVE_INFINITY;
+
+        while ((page - 1) * listDatasetsPerPage < total) {
+          const listResponse = GetEvaluationDatasetsResponse.parse(
+            await kbnClient.request({
+              path: EVALS_DATASETS_URL,
+              method: 'GET',
+              query: {
+                page,
+                per_page: listDatasetsPerPage,
+              },
+              retries: 0,
+            })
+          );
+
+          total = listResponse.total;
+
+          const datasetSummary = listResponse.datasets.find(({ name }) => name === datasetName);
+          if (datasetSummary) {
+            const datasetResponse = GetEvaluationDatasetResponse.parse(
+              await kbnClient.request({
+                path: EVALS_DATASET_URL.replace(
+                  '{datasetId}',
+                  encodeURIComponent(datasetSummary.id)
+                ),
+                method: 'GET',
+                retries: 0,
+              })
+            );
+
+            return {
+              id: datasetResponse.id,
+              name: datasetResponse.name,
+              description: datasetResponse.description,
+              examples: datasetResponse.examples.map(({ input, output, metadata }) => ({
+                input,
+                output,
+                metadata,
+              })),
+            };
+          }
+
+          page += 1;
+        }
+
+        return null;
+      };
 
       const executorClient = new KibanaEvalsClient({
         log,
         model,
         runId: process.env.TEST_RUN_ID!,
         repetitions,
+        upsertDataset,
+        getDatasetByName,
       });
 
       const currentRunId = process.env.TEST_RUN_ID;

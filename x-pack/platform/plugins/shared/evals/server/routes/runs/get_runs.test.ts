@@ -52,6 +52,31 @@ describe('GET /internal/evals/runs', () => {
     );
   });
 
+  it('applies dataset_id filter when provided', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: { total_runs: { value: 0 }, runs: { buckets: [] } },
+    } as any);
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: EVALS_RUNS_URL,
+      query: { page: 1, per_page: 25, dataset_id: 'dataset-123' },
+    });
+
+    await handler(context, request, kibanaResponseFactory);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [{ term: { 'example.dataset.id': 'dataset-123' } }],
+          },
+        },
+      })
+    );
+  });
+
   it('returns parsed runs listing on success', async () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({

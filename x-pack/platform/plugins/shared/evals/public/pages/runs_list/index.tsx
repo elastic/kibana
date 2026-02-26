@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   type EuiBasicTableColumn,
@@ -24,19 +25,56 @@ import type { EvaluationRunSummary } from '@kbn/evals-common';
 import { useEvaluationRuns } from '../../hooks/use_evals_api';
 import * as i18n from './translations';
 
+type RunSummaryTableItem = EvaluationRunSummary & {
+  dataset_id?: string | null;
+  dataset_name?: string | null;
+};
+
 export const RunsListPage: React.FC = () => {
   const history = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
+  const [datasetIdFilter, setDatasetIdFilter] = useState('');
 
   const { data, isLoading, error } = useEvaluationRuns({
     page: pageIndex + 1,
     perPage: pageSize,
     branch: searchText || undefined,
+    datasetId: datasetIdFilter || undefined,
   });
 
-  const columns: Array<EuiBasicTableColumn<EvaluationRunSummary>> = useMemo(
+  const { data: datasetFilterData } = useEvaluationRuns({
+    page: 1,
+    perPage: 100,
+    branch: searchText || undefined,
+  });
+
+  const datasetOptions = useMemo(() => {
+    const options = [
+      {
+        value: '',
+        text: i18n.DATASET_FILTER_ALL_OPTION,
+      },
+    ];
+    const datasetMap = new Map<string, string>();
+
+    for (const run of datasetFilterData?.runs ?? []) {
+      if (run.dataset_id) {
+        datasetMap.set(run.dataset_id, run.dataset_name ?? run.dataset_id);
+      }
+    }
+
+    for (const [id, name] of Array.from(datasetMap.entries()).sort((a, b) =>
+      a[1].localeCompare(b[1])
+    )) {
+      options.push({ value: id, text: name });
+    }
+
+    return options;
+  }, [datasetFilterData?.runs]);
+
+  const columns: Array<EuiBasicTableColumn<RunSummaryTableItem>> = useMemo(
     () => [
       {
         field: 'run_id',
@@ -47,6 +85,28 @@ export const RunsListPage: React.FC = () => {
         render: (runId: string) => (
           <EuiLink onClick={() => history.push(`/runs/${runId}`)}>{runId.slice(0, 12)}...</EuiLink>
         ),
+      },
+      {
+        field: 'dataset_name',
+        name: i18n.COLUMN_DATASET,
+        sortable: true,
+        render: (_datasetName: string | null | undefined, item: RunSummaryTableItem) => {
+          const datasetId = item.dataset_id;
+          if (!datasetId) {
+            return '-';
+          }
+
+          return (
+            <EuiLink
+              onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                event.stopPropagation();
+                history.push(`/runs/${item.run_id}?dataset_id=${encodeURIComponent(datasetId)}`);
+              }}
+            >
+              {item.dataset_name ?? datasetId}
+            </EuiLink>
+          );
+        },
       },
       {
         field: 'timestamp',
@@ -105,7 +165,7 @@ export const RunsListPage: React.FC = () => {
     pageSizeOptions: [10, 25, 50],
   };
 
-  const onTableChange = ({ page }: CriteriaWithPagination<EvaluationRunSummary>) => {
+  const onTableChange = ({ page }: CriteriaWithPagination<RunSummaryTableItem>) => {
     if (page) {
       setPageIndex(page.index);
       setPageSize(page.size);
@@ -121,8 +181,22 @@ export const RunsListPage: React.FC = () => {
             <EuiFieldSearch
               placeholder={i18n.SEARCH_PLACEHOLDER}
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={(e) => {
+                setSearchText(e.target.value);
+                setPageIndex(0);
+              }}
               isClearable
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ minWidth: 280 }}>
+            <EuiSelect
+              aria-label={i18n.DATASET_FILTER_ARIA_LABEL}
+              options={datasetOptions}
+              value={datasetIdFilter}
+              onChange={(event) => {
+                setDatasetIdFilter(event.target.value);
+                setPageIndex(0);
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -135,7 +209,7 @@ export const RunsListPage: React.FC = () => {
             <EuiSpacer size="m" />
           </>
         ) : null}
-        <EuiBasicTable<EvaluationRunSummary>
+        <EuiBasicTable<RunSummaryTableItem>
           items={data?.runs ?? []}
           columns={columns}
           loading={isLoading}

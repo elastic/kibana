@@ -6,6 +6,12 @@
  */
 
 export const queryKeys = {
+  datasets: {
+    all: ['evals', 'datasets'] as const,
+    list: (filters?: { page?: number; perPage?: number }) =>
+      ['evals', 'datasets', 'list', filters] as const,
+    detail: (datasetId: string) => ['evals', 'datasets', 'detail', datasetId] as const,
+  },
   runs: {
     all: ['evals', 'runs'] as const,
     list: (filters?: {

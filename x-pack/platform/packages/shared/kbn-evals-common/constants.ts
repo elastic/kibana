@@ -11,6 +11,11 @@ export const EVALS_RUNS_URL = `${EVALS_INTERNAL_URL}/runs` as const;
 export const EVALS_RUN_URL = `${EVALS_INTERNAL_URL}/runs/{runId}` as const;
 export const EVALS_RUN_SCORES_URL = `${EVALS_INTERNAL_URL}/runs/{runId}/scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;
+export const EVALS_DATASETS_URL = `${EVALS_INTERNAL_URL}/datasets` as const;
+export const EVALS_DATASET_URL = `${EVALS_DATASETS_URL}/{datasetId}` as const;
+export const EVALS_DATASET_EXAMPLES_URL = `${EVALS_DATASET_URL}/examples` as const;
+export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
+export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 
 export const EVALUATIONS_INDEX_PATTERN = 'kibana-evaluations*' as const;
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;

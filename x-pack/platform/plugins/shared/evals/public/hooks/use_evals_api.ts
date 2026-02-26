@@ -5,14 +5,29 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EVALS_RUNS_URL,
   EVALS_RUN_URL,
   EVALS_RUN_SCORES_URL,
   EVALS_TRACE_URL,
+  EVALS_DATASETS_URL,
+  EVALS_DATASET_URL,
+  EVALS_DATASET_EXAMPLES_URL,
   API_VERSIONS,
+  type GetEvaluationDatasetsResponse,
+  type GetEvaluationDatasetResponse,
+  type CreateEvaluationDatasetRequestBodyInput,
+  type CreateEvaluationDatasetResponse,
+  type UpdateEvaluationDatasetRequestBodyInput,
+  type UpdateEvaluationDatasetResponse,
+  type DeleteEvaluationDatasetResponse,
+  type AddEvaluationDatasetExamplesRequestBodyInput,
+  type AddEvaluationDatasetExamplesResponse,
+  type UpdateEvaluationDatasetExampleRequestBodyInput,
+  type UpdateEvaluationDatasetExampleResponse,
+  type DeleteEvaluationDatasetExampleResponse,
   type GetEvaluationRunsResponse,
   type GetEvaluationRunResponse,
   type GetEvaluationRunScoresResponse,
@@ -24,9 +39,214 @@ interface RunsListFilters {
   suiteId?: string;
   modelId?: string;
   branch?: string;
+  datasetId?: string;
   page?: number;
   perPage?: number;
 }
+
+interface DatasetsListFilters {
+  page?: number;
+  perPage?: number;
+}
+
+interface DatasetWithId {
+  datasetId: string;
+}
+
+interface UpdateDatasetVariables extends DatasetWithId {
+  updates: UpdateEvaluationDatasetRequestBodyInput;
+}
+
+interface AddExamplesVariables extends DatasetWithId {
+  body: AddEvaluationDatasetExamplesRequestBodyInput;
+}
+
+interface ExampleWithDatasetId extends DatasetWithId {
+  exampleId: string;
+}
+
+interface UpdateExampleVariables extends ExampleWithDatasetId {
+  updates: UpdateEvaluationDatasetExampleRequestBodyInput;
+}
+
+const getDatasetUrl = (datasetId: string) => EVALS_DATASET_URL.replace('{datasetId}', datasetId);
+
+const getDatasetExamplesUrl = (datasetId: string) =>
+  EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId);
+
+const getDatasetExampleUrl = (datasetId: string, exampleId: string) =>
+  getDatasetExamplesUrl(datasetId).replace('{exampleId}', exampleId);
+
+export const useDatasets = (filters: DatasetsListFilters = {}) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.datasets.list(filters),
+    queryFn: async (): Promise<GetEvaluationDatasetsResponse> => {
+      const query: Record<string, number> = {};
+      if (filters.page) query.page = filters.page;
+      if (filters.perPage) query.per_page = filters.perPage;
+
+      return services.http!.get<GetEvaluationDatasetsResponse>(EVALS_DATASETS_URL, {
+        query,
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    keepPreviousData: true,
+  });
+};
+
+export const useDataset = (datasetId: string) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.datasets.detail(datasetId),
+    queryFn: async (): Promise<GetEvaluationDatasetResponse> => {
+      return services.http!.get<GetEvaluationDatasetResponse>(getDatasetUrl(datasetId), {
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+  });
+};
+
+export const useCreateDataset = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (
+      body: CreateEvaluationDatasetRequestBodyInput
+    ): Promise<CreateEvaluationDatasetResponse> => {
+      return services.http!.post<CreateEvaluationDatasetResponse>(EVALS_DATASETS_URL, {
+        body: JSON.stringify(body),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all });
+    },
+  });
+};
+
+export const useUpdateDataset = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      datasetId,
+      updates,
+    }: UpdateDatasetVariables): Promise<UpdateEvaluationDatasetResponse> => {
+      return services.http!.put<UpdateEvaluationDatasetResponse>(getDatasetUrl(datasetId), {
+        body: JSON.stringify(updates),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async (_response, { datasetId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+      ]);
+    },
+  });
+};
+
+export const useDeleteDataset = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ datasetId }: DatasetWithId): Promise<DeleteEvaluationDatasetResponse> => {
+      return services.http!.delete<DeleteEvaluationDatasetResponse>(getDatasetUrl(datasetId), {
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async (_response, { datasetId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+      ]);
+    },
+  });
+};
+
+export const useAddExamples = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      datasetId,
+      body,
+    }: AddExamplesVariables): Promise<AddEvaluationDatasetExamplesResponse> => {
+      return services.http!.post<AddEvaluationDatasetExamplesResponse>(
+        getDatasetExamplesUrl(datasetId),
+        {
+          body: JSON.stringify(body),
+          version: API_VERSIONS.internal.v1,
+        }
+      );
+    },
+    onSuccess: async (_response, { datasetId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+      ]);
+    },
+  });
+};
+
+export const useUpdateExample = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      datasetId,
+      exampleId,
+      updates,
+    }: UpdateExampleVariables): Promise<UpdateEvaluationDatasetExampleResponse> => {
+      return services.http!.put<UpdateEvaluationDatasetExampleResponse>(
+        getDatasetExampleUrl(datasetId, exampleId),
+        {
+          body: JSON.stringify(updates),
+          version: API_VERSIONS.internal.v1,
+        }
+      );
+    },
+    onSuccess: async (_response, { datasetId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+      ]);
+    },
+  });
+};
+
+export const useDeleteExample = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      datasetId,
+      exampleId,
+    }: ExampleWithDatasetId): Promise<DeleteEvaluationDatasetExampleResponse> => {
+      return services.http!.delete<DeleteEvaluationDatasetExampleResponse>(
+        getDatasetExampleUrl(datasetId, exampleId),
+        {
+          version: API_VERSIONS.internal.v1,
+        }
+      );
+    },
+    onSuccess: async (_response, { datasetId }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+      ]);
+    },
+  });
+};
 
 export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
   const { services } = useKibana();
@@ -38,6 +258,7 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
       if (filters.suiteId) query.suite_id = filters.suiteId;
       if (filters.modelId) query.model_id = filters.modelId;
       if (filters.branch) query.branch = filters.branch;
+      if (filters.datasetId) query.dataset_id = filters.datasetId;
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
 
