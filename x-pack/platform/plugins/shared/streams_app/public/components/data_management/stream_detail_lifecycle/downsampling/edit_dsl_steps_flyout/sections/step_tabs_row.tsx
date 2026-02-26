@@ -42,7 +42,7 @@ export const StepTabsRow = ({
   tabHasErrors,
   dataTestSubj,
 }: StepTabsRowProps) => {
-  const tabsScrollCss = useEuiOverflowScroll('x', true);
+  const tabsScrollCss = useEuiOverflowScroll('x');
   const { tabsContainerStyles, tabsErrorSelectedUnderlineStyles } = useStyles();
   const tabsContainerRef = useRef<HTMLDivElement | null>(null);
 

@@ -43,7 +43,7 @@ export const PhaseTabsRow = ({
   tabHasErrors,
   dataTestSubj,
 }: PhaseTabsRowProps) => {
-  const tabsScrollCss = useEuiOverflowScroll('x', true);
+  const tabsScrollCss = useEuiOverflowScroll('x');
   const { tabsErrorSelectedUnderlineStyles } = useStyles();
   const tabsContainerRef = useRef<HTMLDivElement | null>(null);
 
