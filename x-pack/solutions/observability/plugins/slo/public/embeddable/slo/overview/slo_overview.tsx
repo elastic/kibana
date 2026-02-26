@@ -69,19 +69,7 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
     refetch();
   }, [lastRefreshTime, refetch]);
 
-  const isSloNotFound = !isLoading && slo === undefined;
-
-  if (isRefetching || isLoading || !slo) {
-    return (
-      <LoadingContainer>
-        <LoadingContent>
-          <EuiLoadingChart />
-        </LoadingContent>
-      </LoadingContainer>
-    );
-  }
-
-  if (isSloNotFound) {
+  if (!isLoading && !isRefetching && slo === undefined) {
     return (
       <LoadingContainer>
         <LoadingContent>
@@ -89,6 +77,16 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
             defaultMessage:
               'The SLO has been deleted. You can safely delete the widget from the dashboard.',
           })}
+        </LoadingContent>
+      </LoadingContainer>
+    );
+  }
+
+  if (isRefetching || isLoading || !slo) {
+    return (
+      <LoadingContainer>
+        <LoadingContent>
+          <EuiLoadingChart />
         </LoadingContent>
       </LoadingContainer>
     );
