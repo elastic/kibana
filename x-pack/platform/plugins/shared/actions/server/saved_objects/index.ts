@@ -140,7 +140,7 @@ export function setupSavedObjects(
       importableAndExportable: false,
     },
     modelVersions: authorizationCodeEnabled
-      ? connectorTokenModelVersionsWithRefreshToken
+      ? connectorTokenModelVersionsWithRefreshToken(encryptedSavedObjects)
       : connectorTokenModelVersions,
   });
 
@@ -217,10 +217,7 @@ export function setupSavedObjects(
       attributesToIncludeInAAD: new Set([
         'state',
         'connectorId',
-        'authorizationUrl',
-        'scope',
         'spaceId',
-        'createdAt',
         'expiresAt',
         'createdBy',
       ]),

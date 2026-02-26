@@ -6,10 +6,42 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectTypeRegistration,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import {
   rawConnectorTokenSchemaV1,
   rawConnectorTokenSchemaV2,
 } from '../schemas/raw_connector_token';
+import { CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../../constants/saved_objects';
+
+// ESO type registration for V1 (before refreshToken was added)
+const connectorTokenTypeRegistrationV1: EncryptedSavedObjectTypeRegistration = {
+  type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  attributesToEncrypt: new Set(['token']),
+  attributesToIncludeInAAD: new Set([
+    'connectorId',
+    'tokenType',
+    'expiresAt',
+    'createdAt',
+    'updatedAt',
+  ]),
+};
+
+// ESO type registration for V2 (with refreshToken and refreshTokenExpiresAt)
+const connectorTokenTypeRegistrationV2: EncryptedSavedObjectTypeRegistration = {
+  type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  attributesToEncrypt: new Set(['token', 'refreshToken']),
+  attributesToIncludeInAAD: new Set([
+    'connectorId',
+    'tokenType',
+    'expiresAt',
+    'createdAt',
+    'updatedAt',
+    'refreshTokenExpiresAt',
+  ]),
+};
 
 export const connectorTokenModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -21,7 +53,9 @@ export const connectorTokenModelVersions: SavedObjectsModelVersionMap = {
   },
 };
 
-export const connectorTokenModelVersionsWithRefreshToken: SavedObjectsModelVersionMap = {
+export const connectorTokenModelVersionsWithRefreshToken = (
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+): SavedObjectsModelVersionMap => ({
   '1': {
     changes: [],
     schemas: {
@@ -29,11 +63,22 @@ export const connectorTokenModelVersionsWithRefreshToken: SavedObjectsModelVersi
       create: rawConnectorTokenSchemaV1,
     },
   },
-  '2': {
-    changes: [], // backwards-compatible schema evolution
-    schemas: {
-      forwardCompatibility: rawConnectorTokenSchemaV2.extends({}, { unknowns: 'ignore' }),
-      create: rawConnectorTokenSchemaV2,
+  '2': encryptedSavedObjects.createModelVersion({
+    modelVersion: {
+      changes: [
+        {
+          // no-op backfill to trigger the re-encryption
+          type: 'data_backfill',
+          backfillFn: (doc) => doc,
+        },
+      ],
+      schemas: {
+        forwardCompatibility: rawConnectorTokenSchemaV2.extends({}, { unknowns: 'ignore' }),
+        create: rawConnectorTokenSchemaV2,
+      },
     },
-  },
-};
+    inputType: connectorTokenTypeRegistrationV1,
+    outputType: connectorTokenTypeRegistrationV2,
+    shouldTransformIfDecryptionFails: true,
+  }),
+});
