@@ -39,7 +39,7 @@ export const extractAttributeValue = (xmlDocument: string, attributeName: string
 
 const RULE_NAME = 'scout-create-rule';
 
-apiTest.describe('Alerting Rule', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete }, () => {
   let createdRuleId: string;
   let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
 
