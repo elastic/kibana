@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cps-test-endpoints-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "cpsTestEndpoints",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": [],
+    "description": "Test plugin for validating CPS behavior with internal user. For QA testing only.",
+    "enabledOnAnonymousPages": false
+  }
+}
+
