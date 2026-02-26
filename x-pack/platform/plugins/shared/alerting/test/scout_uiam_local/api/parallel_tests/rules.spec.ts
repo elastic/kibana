@@ -109,18 +109,19 @@ apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete 
     await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
   });
 
-  apiTest('newly created rule has api_key_owner', async ({ apiClient }) => {
-    const [userSessionCookie] = await userSessionCookieFactory();
-    const getResponse = await apiClient.get(`api/alerting/rule/${createdRuleId}`, {
-      headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
-      responseType: 'json',
+  apiTest('newly created rule has api_key_owner', async ({ esClient }) => {
+    // Verify encrypted fields exist on the rule saved object in ES (not exposed by the API)
+    const { _source } = await esClient.get({
+      index: '.kibana_alerting_cases_1',
+      id: `alert:${createdRuleId}`,
     });
-    expect(getResponse).toHaveStatusCode(200);
-    const getBody = getResponse.body as { api_key_owner: string | null };
-    expect(getBody.api_key_owner).toBe('1234567890');
-    // In scout_uiam_local (UIAM enabled), the backend creates both apiKey and uiamApiKey
-    // when creating a rule; they are not exposed by the API for security. api_key_owner
-    // being set confirms an API key was created; both keys are stored on the rule.
+
+    expect(_source).toBeDefined();
+    const alertAttrs = (_source as Record<string, unknown>)?.alert as Record<string, unknown>;
+    expect(alertAttrs).toBeDefined();
+    expect(alertAttrs.apiKey).toBeDefined();
+    expect(alertAttrs.uiamApiKey).toBeDefined();
+    expect(alertAttrs.apiKeyOwner).toBe('1234567890');
   });
 
   apiTest('The rule runs and event log shows success', async ({ apiClient }) => {
