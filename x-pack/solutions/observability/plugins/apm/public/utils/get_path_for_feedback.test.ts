@@ -47,7 +47,11 @@ describe('getPathForFeedback ', () => {
     },
     {
       value: undefined as any,
-      result: '/',
+      result: '/app/apm',
+    },
+    {
+      value: null as any,
+      result: '/app/apm',
     },
   ];
 
