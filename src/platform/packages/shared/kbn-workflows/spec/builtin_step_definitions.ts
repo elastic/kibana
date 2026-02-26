@@ -7,43 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod/v4';
-import { DataSetStepSchema, ForEachStepSchema, IfStepSchema, WaitStepSchema } from './schema';
+import { z } from '@kbn/zod/v4';
+import {
+  DataSetStepInputSchema,
+  ForEachStepConfigSchema,
+  IfStepConfigSchema,
+  WaitStepInputSchema,
+} from './schema';
+import type { BaseStepDefinition } from './step_definition_types';
 
-/**
- * Step categories aligned with ActionsMenuGroup from workflows_extensions
- * plus 'flowControl' for built-in control flow steps (if, foreach, wait).
- */
-export type StepCategory = 'elasticsearch' | 'external' | 'ai' | 'kibana' | 'data' | 'flowControl';
+const EmptyObjectSchema = z.object({});
 
-export interface BuiltInStepDefinition {
-  type: string;
-  description: string;
-  category: StepCategory;
-  schema: z.ZodType;
-  example: string;
-}
-
-/**
- * Extract the description from a step schema's `type` field.
- * In our schemas, `.describe()` is called on `z.literal('step_type')`.
- */
-function getTypeDescription(schema: z.ZodObject): string {
-  return (schema.shape as Record<string, z.ZodType>).type?.description ?? '';
-}
+export type BuiltInStepDefinition = BaseStepDefinition;
 
 /**
  * Built-in step definitions derived from the Zod schemas in schema.ts.
- * Descriptions come from the `.describe()` calls on each schema's `type` field.
- * Examples are provided for LLM consumption.
+ * Each definition decomposes into inputSchema (the `with` block),
+ * configSchema (step-level props like condition/steps/else/foreach),
+ * and outputSchema.
  */
-export const builtInStepDefinitions: BuiltInStepDefinition[] = [
+export const builtInStepDefinitions: BaseStepDefinition[] = [
   {
-    type: 'if',
-    description: getTypeDescription(IfStepSchema),
+    id: 'if',
+    label: 'If',
+    description:
+      'Conditional execution. Runs steps when condition is true, with optional else block for the false branch',
     category: 'flowControl',
-    schema: IfStepSchema,
-    example: `- name: check_status
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: IfStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: check_status
   type: if
   condition: "steps.previous_step.output.status : 'success'"
   steps:
@@ -56,13 +51,21 @@ export const builtInStepDefinitions: BuiltInStepDefinition[] = [
       type: console
       with:
         message: "Failed!"`,
+      ],
+    },
   },
   {
-    type: 'foreach',
-    description: getTypeDescription(ForEachStepSchema),
+    id: 'foreach',
+    label: 'Loop (foreach)',
+    description:
+      'Loop over a list. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}',
     category: 'flowControl',
-    schema: ForEachStepSchema,
-    example: `- name: process_items
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: ForEachStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: process_items
   type: foreach
   foreach: "{{ steps.search.output.hits.hits | json }}"
   steps:
@@ -70,32 +73,46 @@ export const builtInStepDefinitions: BuiltInStepDefinition[] = [
       type: console
       with:
         message: "Processing item {{ foreach.index }}: {{ foreach.item._source.name }}"`,
+      ],
+    },
   },
   {
-    type: 'wait',
-    description: getTypeDescription(WaitStepSchema),
+    id: 'wait',
+    label: 'Wait',
+    description: 'Pause execution for a specified duration',
     category: 'flowControl',
-    schema: WaitStepSchema,
-    example: `- name: wait_before_retry
+    inputSchema: WaitStepInputSchema,
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: wait_before_retry
   type: wait
   with:
     duration: "30s"`,
+      ],
+    },
   },
   {
-    type: 'data.set',
-    description: getTypeDescription(DataSetStepSchema),
+    id: 'data.set',
+    label: 'Set Variables',
+    description: 'Set variables in the workflow context',
     category: 'data',
-    schema: DataSetStepSchema,
-    example: `- name: set_variables
+    inputSchema: DataSetStepInputSchema,
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: set_variables
   type: data.set
   with:
     user_name: "{{ steps.get_user.output.body.name }}"
     alert_count: "{{ steps.search_alerts.output.hits.total.value }}"`,
+      ],
+    },
   },
 ];
 
-const builtInStepDefinitionsMap = new Map(builtInStepDefinitions.map((s) => [s.type, s]));
+const builtInStepDefinitionsMap = new Map(builtInStepDefinitions.map((s) => [s.id, s]));
 
-export function getBuiltInStepDefinition(type: string): BuiltInStepDefinition | undefined {
-  return builtInStepDefinitionsMap.get(type);
+export function getBuiltInStepDefinition(id: string): BaseStepDefinition | undefined {
+  return builtInStepDefinitionsMap.get(id);
 }

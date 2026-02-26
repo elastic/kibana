@@ -9,57 +9,63 @@
 
 import { builtInStepDefinitions, getBuiltInStepDefinition } from './builtin_step_definitions';
 
-const EXPECTED_BUILT_IN_TYPES = ['if', 'foreach', 'wait', 'data.set'];
+const EXPECTED_BUILT_IN_IDS = ['if', 'foreach', 'wait', 'data.set'];
 
 describe('builtInStepDefinitions', () => {
   it('covers all expected built-in step types', () => {
-    const types = builtInStepDefinitions.map((d) => d.type);
-    expect(types.sort()).toEqual([...EXPECTED_BUILT_IN_TYPES].sort());
+    const ids = builtInStepDefinitions.map((d) => d.id);
+    expect(ids.sort()).toEqual([...EXPECTED_BUILT_IN_IDS].sort());
   });
 
-  it.each(EXPECTED_BUILT_IN_TYPES)('"%s" has a non-empty description', (type) => {
-    const def = builtInStepDefinitions.find((d) => d.type === type);
+  it.each(EXPECTED_BUILT_IN_IDS)('"%s" has a non-empty description', (id) => {
+    const def = builtInStepDefinitions.find((d) => d.id === id);
     expect(def).toBeDefined();
     expect(def!.description.length).toBeGreaterThan(0);
   });
 
-  it.each(EXPECTED_BUILT_IN_TYPES)('"%s" has a valid category', (type) => {
-    const def = builtInStepDefinitions.find((d) => d.type === type);
+  it.each(EXPECTED_BUILT_IN_IDS)('"%s" has a valid category', (id) => {
+    const def = builtInStepDefinitions.find((d) => d.id === id);
     expect(def).toBeDefined();
     expect(['elasticsearch', 'external', 'ai', 'kibana', 'data', 'flowControl']).toContain(
       def!.category
     );
   });
 
-  it.each(EXPECTED_BUILT_IN_TYPES)('"%s" has a Zod schema', (type) => {
-    const def = builtInStepDefinitions.find((d) => d.type === type);
+  it.each(EXPECTED_BUILT_IN_IDS)('"%s" has an inputSchema with parse()', (id) => {
+    const def = builtInStepDefinitions.find((d) => d.id === id);
     expect(def).toBeDefined();
-    expect(def!.schema).toBeDefined();
-    expect(typeof def!.schema.parse).toBe('function');
+    expect(typeof def!.inputSchema.parse).toBe('function');
   });
 
-  it.each(EXPECTED_BUILT_IN_TYPES)('"%s" has a non-empty example', (type) => {
-    const def = builtInStepDefinitions.find((d) => d.type === type);
+  it.each(EXPECTED_BUILT_IN_IDS)('"%s" has an outputSchema with parse()', (id) => {
+    const def = builtInStepDefinitions.find((d) => d.id === id);
     expect(def).toBeDefined();
-    expect(def!.example.length).toBeGreaterThan(0);
+    expect(typeof def!.outputSchema.parse).toBe('function');
+  });
+
+  it.each(EXPECTED_BUILT_IN_IDS)('"%s" has non-empty documentation examples', (id) => {
+    const def = builtInStepDefinitions.find((d) => d.id === id);
+    expect(def).toBeDefined();
+    expect(def!.documentation?.examples?.length).toBeGreaterThan(0);
+    expect(def!.documentation!.examples![0].length).toBeGreaterThan(0);
   });
 });
 
 describe('getBuiltInStepDefinition', () => {
-  it('returns the definition for a known type', () => {
+  it('returns the definition for a known id', () => {
     const def = getBuiltInStepDefinition('if');
     expect(def).toBeDefined();
-    expect(def!.type).toBe('if');
+    expect(def!.id).toBe('if');
   });
 
   it('returns the correct definition for data.set', () => {
     const def = getBuiltInStepDefinition('data.set');
     expect(def).toBeDefined();
-    expect(def!.type).toBe('data.set');
+    expect(def!.id).toBe('data.set');
     expect(def!.category).toBe('data');
   });
 
-  it('returns undefined for an unknown type', () => {
+  it('returns undefined for an unknown id', () => {
     expect(getBuiltInStepDefinition('nonexistent')).toBeUndefined();
   });
 });

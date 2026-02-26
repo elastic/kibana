@@ -8,7 +8,7 @@
  */
 
 import type { DotKeysOf, DotObject } from '@kbn/utility-types';
-import type { StepPropertyHandler } from '@kbn/workflows';
+import type { StepDocumentation, StepPropertyHandler } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
 
@@ -126,34 +126,4 @@ export enum ActionsMenuGroup {
   ai = 'ai',
   kibana = 'kibana',
   data = 'data',
-}
-
-/**
- * Documentation information for a workflow step.
- */
-export interface StepDocumentation {
-  /**
-   * Detailed description with usage examples (markdown supported)
-   * @example "This step allows you to set variables that can be accessed in subsequent steps via `{{ steps.stepName.variableName }}`"
-   */
-  details?: string;
-
-  /**
-   * External documentation URL
-   * @example "https://docs.example.com/custom-steps/setvar"
-   */
-  url?: string;
-
-  /**
-   * Usage examples in YAML format
-   * @example
-   * ```yaml
-   * - name: myStep
-   *   type: setvar
-   *   with:
-   *     variables:
-   *       x: 10
-   * ```
-   */
-  examples?: string[];
 }
