@@ -90,7 +90,7 @@ describe('parseCliFlags', () => {
   });
 
   it('throws for invalid --changes value', () => {
-    expect(() => parseCliFlags({ changes: 'invalid' })).toThrow("--changes must be");
+    expect(() => parseCliFlags({ changes: 'invalid' })).toThrow('--changes must be');
   });
 
   it('defaults changesMode to undefined', () => {
