@@ -17,7 +17,7 @@ type Executor = (typeof EXECUTORS)[number];
 
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)
-    .map(([key, value]) => `${key}=${value}`)
+    .map(([key, value]) => `${key}=${key.includes('API_KEY') ? '[redacted]' : value}`)
     .join(' ');
 
 const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
@@ -61,7 +61,9 @@ export const runSuiteCmd: Command<void> = {
       'evaluation-connector-id',
       'repetitions',
       'trace-es-url',
+      'trace-es-api-key',
       'evaluations-es-url',
+      'evaluations-es-api-key',
       'phoenix-base-url',
       'phoenix-api-key',
     ],
@@ -100,6 +102,10 @@ export const runSuiteCmd: Command<void> = {
       EVALUATION_CONNECTOR_ID: evaluationConnectorId,
     };
 
+    if (suite) {
+      envOverrides.EVAL_SUITE_ID = suite.id;
+    }
+
     if (executor === 'phoenix') {
       envOverrides.KBN_EVALS_EXECUTOR = 'phoenix';
     }
@@ -114,9 +120,19 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.TRACING_ES_URL = traceEsUrl;
     }
 
+    const traceEsApiKey = flagsReader.string('trace-es-api-key');
+    if (traceEsApiKey) {
+      envOverrides.TRACING_ES_API_KEY = traceEsApiKey;
+    }
+
     const evaluationsEsUrl = flagsReader.string('evaluations-es-url');
     if (evaluationsEsUrl) {
       envOverrides.EVALUATIONS_ES_URL = evaluationsEsUrl;
+    }
+
+    const evaluationsEsApiKey = flagsReader.string('evaluations-es-api-key');
+    if (evaluationsEsApiKey) {
+      envOverrides.EVALUATIONS_ES_API_KEY = evaluationsEsApiKey;
     }
 
     const phoenixBaseUrl = flagsReader.string('phoenix-base-url');

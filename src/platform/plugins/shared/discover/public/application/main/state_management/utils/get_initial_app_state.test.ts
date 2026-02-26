@@ -74,8 +74,8 @@ describe('getInitialAppState', () => {
           },
         },
       }),
-      timeRestore: false,
       services,
+      currentDataView: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -120,8 +120,8 @@ describe('getInitialAppState', () => {
           },
         },
       }),
-      timeRestore: false,
       services,
+      currentDataView: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -177,7 +177,10 @@ describe('getInitialAppState', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "interval": "auto",
-        "query": undefined,
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
         "rowHeight": undefined,
         "rowsPerPage": undefined,
         "sampleSize": undefined,
@@ -219,7 +222,10 @@ describe('getInitialAppState', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
         "interval": "auto",
-        "query": undefined,
+        "query": Object {
+          "language": "kuery",
+          "query": "",
+        },
         "rowHeight": undefined,
         "rowsPerPage": undefined,
         "sampleSize": undefined,
@@ -233,8 +239,8 @@ describe('getInitialAppState', () => {
   const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),
-      timeRestore: false,
       services,
+      currentDataView: undefined,
     });
 
   test('should set view mode correctly', () => {
@@ -486,6 +492,130 @@ describe('getInitialAppState', () => {
                 query: { esql: 'FROM the-data-view-title' },
               })
             );
+          });
+        });
+
+        describe('when esql default is enabled', () => {
+          describe('when the query mode is unset', () => {
+            it('should return an esql initial query', () => {
+              // Given
+              const services = createDiscoverServicesMock();
+              services.storage.get = jest.fn().mockReturnValue(undefined);
+              services.uiSettings.get = jest.fn().mockReturnValue(true);
+              services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+              // When
+              const appState = getInitialAppState({
+                hasGlobalState: false,
+                initialUrlState: undefined,
+                persistedTab: undefined,
+                dataView: new DataView({
+                  spec: dataViewMock.toSpec(),
+                  fieldFormats: {} as DataView['fieldFormats'],
+                }),
+                services,
+              });
+
+              // Then
+              expect(appState).toEqual(
+                expect.objectContaining({
+                  query: { esql: 'FROM the-data-view-title' },
+                })
+              );
+            });
+
+            it('should prefer the root profile default esql query when provided', () => {
+              // Given
+              const services = createDiscoverServicesMock();
+              services.storage.get = jest.fn().mockReturnValue(undefined);
+              services.uiSettings.get = jest.fn().mockReturnValue(true);
+              services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+              const defaultProfileEsqlQuery = {
+                query: 'FROM test | WHERE 1 == 1',
+              };
+
+              // When
+              const appState = getInitialAppState({
+                hasGlobalState: false,
+                initialUrlState: undefined,
+                persistedTab: undefined,
+                dataView: new DataView({
+                  spec: dataViewMock.toSpec(),
+                  fieldFormats: {} as DataView['fieldFormats'],
+                }),
+                services,
+                defaultProfileEsqlQuery,
+              });
+
+              // Then
+              expect(appState).toEqual(
+                expect.objectContaining({
+                  query: { esql: defaultProfileEsqlQuery.query },
+                })
+              );
+            });
+
+            describe('when esql uiSetting is disabled', () => {
+              it('should return the default query', () => {
+                // Given
+                const services = createDiscoverServicesMock();
+                services.storage.get = jest.fn().mockReturnValue(undefined);
+                services.uiSettings.get = jest.fn().mockReturnValue(false);
+                services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+                services.data.query.queryString.getDefaultQuery = jest
+                  .fn()
+                  .mockReturnValue(defaultQuery);
+
+                // When
+                const appState = getInitialAppState({
+                  hasGlobalState: false,
+                  initialUrlState: undefined,
+                  persistedTab: undefined,
+                  dataView: new DataView({
+                    spec: dataViewMock.toSpec(),
+                    fieldFormats: {} as DataView['fieldFormats'],
+                  }),
+                  services,
+                });
+
+                // Then
+                expect(appState).toEqual(
+                  expect.objectContaining({
+                    query: defaultQuery,
+                  })
+                );
+              });
+            });
+
+            describe('when dataView is not a DataView instance', () => {
+              it('should return the default query', () => {
+                // Given
+                const services = createDiscoverServicesMock();
+                services.storage.get = jest.fn().mockReturnValue(undefined);
+                services.uiSettings.get = jest.fn().mockReturnValue(true);
+                services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+                services.data.query.queryString.getDefaultQuery = jest
+                  .fn()
+                  .mockReturnValue(defaultQuery);
+
+                // When
+                const appState = getInitialAppState({
+                  hasGlobalState: false,
+                  initialUrlState: undefined,
+                  persistedTab: undefined,
+                  dataView: dataViewMock,
+                  services,
+                });
+
+                // Then
+                expect(appState).toEqual(
+                  expect.objectContaining({
+                    query: defaultQuery,
+                  })
+                );
+              });
+            });
           });
         });
 
