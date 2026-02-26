@@ -120,7 +120,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders the rule details', async () => {
         const headingText = await testSubjects.getVisibleText('ruleDetailsTitle');
         expect(headingText.includes(`test-rule-${testRunUuid}`)).toBe(true);
-        const ruleType = await testSubjects.getVisibleText('ruleTypeLabel');
+        const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).toEqual('Elasticsearch query');
         const { username } = await svlUserManager.getUserData(ADMIN_ROLE);
 
@@ -337,6 +337,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
+        await actionsButton.click();
         await editButton.click();
 
         await testSubjects.click('ruleFormStep-details');

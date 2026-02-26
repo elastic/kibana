@@ -416,6 +416,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
+        await actionsButton.click();
         await editButton.click();
 
         const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');

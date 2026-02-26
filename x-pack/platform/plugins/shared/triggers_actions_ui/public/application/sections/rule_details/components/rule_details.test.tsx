@@ -14,7 +14,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
 import type { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import { EuiBadge, EuiButtonEmpty, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
+import { EuiBadge, EuiPageHeader, type EuiPageHeaderProps } from '@elastic/eui';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
   RuleExecutionStatusErrorReasons,
@@ -563,40 +563,15 @@ describe('rule_details', () => {
           .find(EuiPageHeader)
           .props() as EuiPageHeaderProps;
         const rightSideItems = pageHeaderProps.rightSideItems;
-        expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-          <ViewLinkedObject
-            rule={
-              Object {
-                "actions": Array [],
-                "apiKeyCreatedByUser": false,
-                "apiKeyOwner": null,
-                "consumer": "alerts",
-                "createdAt": 2026-02-26T15:18:46.902Z,
-                "createdBy": null,
-                "enabled": true,
-                "executionStatus": Object {
-                  "lastExecutionDate": 2020-08-20T19:23:38.000Z,
-                  "status": "unknown",
-                },
-                "id": "c9c3e56d-3690-4f32-8949-3527bf519e4a",
-                "muteAll": false,
-                "mutedInstanceIds": Array [],
-                "name": "rule-e3ea4b5d-96d7-4dfb-ab31-f378c60fdbd7",
-                "notifyWhen": null,
-                "params": Object {},
-                "revision": 0,
-                "ruleTypeId": ".noop",
-                "schedule": Object {
-                  "interval": "1m",
-                },
-                "tags": Array [],
-                "throttle": null,
-                "updatedAt": 2026-02-26T15:18:46.902Z,
-                "updatedBy": null,
-              }
-            }
-          />
-        `);
+        expect(rightSideItems?.[0]).toBeTruthy();
+
+        const actionsMenuWrapper = mountWithIntl(<>{rightSideItems![0]}</>);
+        actionsMenuWrapper.find('[data-test-subj="ruleActionsButton"]').last().simulate('click');
+        actionsMenuWrapper.update();
+
+        expect(
+          actionsMenuWrapper.find('[data-test-subj="openEditRuleFlyoutButton"]').last().exists()
+        ).toBeTruthy();
       });
     });
   });
@@ -644,47 +619,15 @@ describe('rule_details', () => {
         .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
-      expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <ViewLinkedObject
-          rule={
-            Object {
-              "actions": Array [
-                Object {
-                  "actionTypeId": ".server-log",
-                  "group": "default",
-                  "id": "b2365d23-514c-4721-bc0e-08eaab1cc1ff",
-                  "params": Object {},
-                },
-              ],
-              "apiKeyCreatedByUser": false,
-              "apiKeyOwner": null,
-              "consumer": "alerts",
-              "createdAt": 2026-02-26T15:18:46.933Z,
-              "createdBy": null,
-              "enabled": true,
-              "executionStatus": Object {
-                "lastExecutionDate": 2020-08-20T19:23:38.000Z,
-                "status": "unknown",
-              },
-              "id": "083ecbb0-42ff-41f3-80d6-16d4c2184d0d",
-              "muteAll": false,
-              "mutedInstanceIds": Array [],
-              "name": "rule-716351b9-09b4-4534-ad0c-1a28de15d28e",
-              "notifyWhen": null,
-              "params": Object {},
-              "revision": 0,
-              "ruleTypeId": ".noop",
-              "schedule": Object {
-                "interval": "1m",
-              },
-              "tags": Array [],
-              "throttle": null,
-              "updatedAt": 2026-02-26T15:18:46.933Z,
-              "updatedBy": null,
-            }
-          }
-        />
-      `);
+      expect(rightSideItems?.[0]).toBeTruthy();
+
+      const actionsMenuWrapper = mountWithIntl(<>{rightSideItems![0]}</>);
+      actionsMenuWrapper.find('[data-test-subj="ruleActionsButton"]').last().simulate('click');
+      actionsMenuWrapper.update();
+
+      expect(
+        actionsMenuWrapper.find('[data-test-subj="openEditRuleFlyoutButton"]').last().exists()
+      ).toBeTruthy();
     });
 
     it('should not render an edit button when rule editable but actions arent', () => {
@@ -702,20 +645,13 @@ describe('rule_details', () => {
           },
         ],
       });
-      expect(
-        shallowWithIntl(
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={actionTypes}
-            {...mockRuleApis}
-          />
-        )
-          .find(EuiButtonEmpty)
-          .find('[name="edit"]')
-          .first()
-          .exists()
-      ).toBeFalsy();
+      const pageHeaderProps = shallowWithIntl(
+        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
+      )
+        .find(EuiPageHeader)
+        .props() as EuiPageHeaderProps;
+      const rightSideItems = pageHeaderProps.rightSideItems;
+      expect(rightSideItems?.[0]).toBeFalsy();
     });
 
     it('should render an edit button when rule editable but actions arent when there are no actions on the rule', async () => {
@@ -732,40 +668,15 @@ describe('rule_details', () => {
         .find(EuiPageHeader)
         .props() as EuiPageHeaderProps;
       const rightSideItems = pageHeaderProps.rightSideItems;
-      expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <ViewLinkedObject
-          rule={
-            Object {
-              "actions": Array [],
-              "apiKeyCreatedByUser": false,
-              "apiKeyOwner": null,
-              "consumer": "alerts",
-              "createdAt": 2026-02-26T15:18:46.946Z,
-              "createdBy": null,
-              "enabled": true,
-              "executionStatus": Object {
-                "lastExecutionDate": 2020-08-20T19:23:38.000Z,
-                "status": "unknown",
-              },
-              "id": "6425c066-c52e-412f-8eb3-5468f8d5f972",
-              "muteAll": false,
-              "mutedInstanceIds": Array [],
-              "name": "rule-e166b7cd-9bd7-4a56-9624-b98408c05889",
-              "notifyWhen": null,
-              "params": Object {},
-              "revision": 0,
-              "ruleTypeId": ".noop",
-              "schedule": Object {
-                "interval": "1m",
-              },
-              "tags": Array [],
-              "throttle": null,
-              "updatedAt": 2026-02-26T15:18:46.946Z,
-              "updatedBy": null,
-            }
-          }
-        />
-      `);
+      expect(rightSideItems?.[0]).toBeTruthy();
+
+      const actionsMenuWrapper = mountWithIntl(<>{rightSideItems![0]}</>);
+      actionsMenuWrapper.find('[data-test-subj="ruleActionsButton"]').last().simulate('click');
+      actionsMenuWrapper.update();
+
+      expect(
+        actionsMenuWrapper.find('[data-test-subj="openEditRuleFlyoutButton"]').last().exists()
+      ).toBeTruthy();
     });
   });
 
