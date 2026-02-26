@@ -284,6 +284,16 @@ export interface DefaultAppStateExtension {
 }
 
 /**
+ * Supports setting a default ES|QL query when Discover starts in ES|QL mode
+ */
+export interface DefaultEsqlQueryConfig {
+  /**
+   * The ES|QL query string to use as the default
+   */
+  query: string;
+}
+
+/**
  * Parameters passed to the modified vis attributes extension
  */
 export interface ModifiedVisAttributesExtensionParams {
@@ -458,6 +468,16 @@ export interface Profile {
   getDefaultAdHocDataViews: () => Array<
     Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
   >;
+
+  /**
+   * Gets the default ES|QL query that should be used when Discover starts in ES|QL mode.
+   *
+   * This extension point is evaluated on Discover app initialization and is resolved from the
+   * root profile only.
+   *
+   * @returns The default ES|QL query config, or `undefined` to fall back to Discover defaults.
+   */
+  getDefaultEsqlQuery: () => DefaultEsqlQueryConfig | undefined;
 
   /**
    * Chart
