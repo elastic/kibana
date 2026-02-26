@@ -62,7 +62,7 @@ apiTest.describe(
         const convertResponse = await apiClient.post('test_endpoints/uiam/api_keys/_convert', {
           headers: { ...COMMON_UNSAFE_HEADERS },
           responseType: 'json',
-          body: { keys: [{ key: esApiKey.encoded }] },
+          body: { keys: [esApiKey.encoded] },
         });
 
         expect(convertResponse).toHaveStatusCode(200);
@@ -87,7 +87,7 @@ apiTest.describe(
           headers: { ...COMMON_UNSAFE_HEADERS },
           responseType: 'json',
           body: {
-            keys: [{ key: esApiKey1.encoded }, { key: esApiKey2.encoded }],
+            keys: [esApiKey1.encoded, esApiKey2.encoded],
           },
         });
 
@@ -108,7 +108,7 @@ apiTest.describe(
         const convertResponse = await apiClient.post('test_endpoints/uiam/api_keys/_convert', {
           headers: { ...COMMON_UNSAFE_HEADERS },
           responseType: 'json',
-          body: { keys: [{ key: 'dGhpcy1pcy1ub3QtYS12YWxpZC1rZXk=' }] },
+          body: { keys: ['dGhpcy1pcy1ub3QtYS12YWxpZC1rZXk='] },
         });
 
         expect(convertResponse).toHaveStatusCode(200);
@@ -126,7 +126,7 @@ apiTest.describe(
           headers: { ...COMMON_UNSAFE_HEADERS },
           responseType: 'json',
           body: {
-            keys: [{ key: esApiKey.encoded }, { key: 'dGhpcy1pcy1ub3QtYS12YWxpZC1rZXk=' }],
+            keys: [esApiKey.encoded, 'dGhpcy1pcy1ub3QtYS12YWxpZC1rZXk='],
           },
         });
 

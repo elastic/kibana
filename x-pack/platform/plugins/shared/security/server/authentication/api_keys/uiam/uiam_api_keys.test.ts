@@ -53,7 +53,6 @@ describe('UiamAPIKeys', () => {
       logger,
       license: mockLicense,
       uiam: mockUiam,
-      elasticsearchUrl: 'https://es.example.com',
     });
   });
 
@@ -302,25 +301,9 @@ describe('UiamAPIKeys', () => {
     it('returns null when license is not enabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
 
-      const result = await uiamApiKeys.convert({
-        keys: [{ key: 'es-api-key' }],
-      });
+      const result = await uiamApiKeys.convert(['es-api-key']);
 
       expect(result).toBeNull();
-      expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
-    });
-
-    it('throws when elasticsearchUrl is not configured', async () => {
-      const uiamApiKeysNoUrl = new UiamAPIKeys({
-        logger,
-        license: mockLicense,
-        uiam: mockUiam,
-      });
-
-      await expect(uiamApiKeysNoUrl.convert({ keys: [{ key: 'es-api-key' }] })).rejects.toThrow(
-        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
-      );
-
       expect(mockUiam.convertApiKeys).not.toHaveBeenCalled();
     });
 
@@ -342,14 +325,10 @@ describe('UiamAPIKeys', () => {
       };
       mockUiam.convertApiKeys.mockResolvedValue(mockResponse);
 
-      const result = await uiamApiKeys.convert({
-        keys: [{ key: 'es-api-key-base64' }],
-      });
+      const result = await uiamApiKeys.convert(['es-api-key-base64']);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.convertApiKeys).toHaveBeenCalledWith([
-        { type: 'elasticsearch', key: 'es-api-key-base64', endpoint: 'https://es.example.com' },
-      ]);
+      expect(mockUiam.convertApiKeys).toHaveBeenCalledWith(['es-api-key-base64']);
       expect(logger.debug).toHaveBeenCalledWith('Trying to convert 1 API key(s)');
       expect(logger.debug).toHaveBeenCalledWith('API key(s) converted successfully');
     });
@@ -379,26 +358,17 @@ describe('UiamAPIKeys', () => {
       };
       mockUiam.convertApiKeys.mockResolvedValue(mockResponse);
 
-      const result = await uiamApiKeys.convert({
-        keys: [{ key: 'valid-key' }, { key: 'invalid-key' }],
-      });
+      const result = await uiamApiKeys.convert(['valid-key', 'invalid-key']);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.convertApiKeys).toHaveBeenCalledWith([
-        { type: 'elasticsearch', key: 'valid-key', endpoint: 'https://es.example.com' },
-        { type: 'elasticsearch', key: 'invalid-key', endpoint: 'https://es.example.com' },
-      ]);
+      expect(mockUiam.convertApiKeys).toHaveBeenCalledWith(['valid-key', 'invalid-key']);
     });
 
     it('logs and throws error when UIAM conversion fails', async () => {
       const error = new Error('UIAM service error');
       mockUiam.convertApiKeys.mockRejectedValue(error);
 
-      await expect(
-        uiamApiKeys.convert({
-          keys: [{ key: 'es-api-key' }],
-        })
-      ).rejects.toThrow('UIAM service error');
+      await expect(uiamApiKeys.convert(['es-api-key'])).rejects.toThrow('UIAM service error');
 
       expect(logger.error).toHaveBeenCalledWith('Failed to convert API keys: UIAM service error');
     });

@@ -8,7 +8,6 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
-  ConvertUiamAPIKeyParams,
   ConvertUiamAPIKeysResponse,
   GrantAPIKeyResult,
   GrantUiamAPIKeyParams,
@@ -28,7 +27,6 @@ export interface UiamAPIKeysOptions {
   logger: Logger;
   license: SecurityLicense;
   uiam: UiamServicePublic;
-  elasticsearchUrl?: string;
 }
 
 /**
@@ -39,13 +37,11 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
-  private readonly elasticsearchUrl?: string;
 
-  constructor({ logger, license, uiam, elasticsearchUrl }: UiamAPIKeysOptions) {
+  constructor({ logger, license, uiam }: UiamAPIKeysOptions) {
     this.logger = logger;
     this.license = license;
     this.uiam = uiam;
-    this.elasticsearchUrl = elasticsearchUrl;
   }
 
   /**
@@ -158,28 +154,15 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * @param params The parameters containing the keys to convert.
    * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
    */
-  async convert(params: ConvertUiamAPIKeyParams): Promise<ConvertUiamAPIKeysResponse | null> {
+  async convert(keys: string[]): Promise<ConvertUiamAPIKeysResponse | null> {
     if (!this.license.isEnabled()) {
       return null;
     }
 
-    if (!this.elasticsearchUrl) {
-      throw new Error(
-        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
-      );
-    }
-
-    this.logger.debug(`Trying to convert ${params.keys.length} API key(s)`);
+    this.logger.debug(`Trying to convert ${keys.length} API key(s)`);
 
     try {
-      const endpoint = this.elasticsearchUrl;
-      const mappedKeys = params.keys.map(({ key }) => ({
-        type: 'elasticsearch' as const,
-        key,
-        endpoint,
-      }));
-
-      const response = await this.uiam.convertApiKeys(mappedKeys);
+      const response = await this.uiam.convertApiKeys(keys);
 
       this.logger.debug('API key(s) converted successfully');
       return response;

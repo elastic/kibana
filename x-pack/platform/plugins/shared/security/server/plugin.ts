@@ -432,14 +432,13 @@ export class SecurityPlugin
       loggers: this.initializerContext.logger,
       session,
       uiam: config.uiam?.enabled
-        ? new UiamService(this.logger.get('uiam'), config.uiam)
+        ? new UiamService(this.logger.get('uiam'), config.uiam, this.elasticsearchUrl)
         : undefined,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
-      elasticsearchUrl: this.elasticsearchUrl,
     });
 
     this.authorizationService.start({

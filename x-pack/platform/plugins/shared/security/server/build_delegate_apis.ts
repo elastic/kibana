@@ -7,7 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  ConvertUiamAPIKeyParams,
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
@@ -58,8 +57,7 @@ export const buildSecurityApi = ({
                 request: KibanaRequest,
                 invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
               ) => getAuthc().apiKeys.uiam!.invalidate(request, invalidateUiamApiKeyParams),
-              convert: (convertUiamApiKeyParams: ConvertUiamAPIKeyParams) =>
-                getAuthc().apiKeys.uiam!.convert(convertUiamApiKeyParams),
+              convert: (keys: string[]) => getAuthc().apiKeys.uiam!.convert(keys),
             }
           : null,
       },

@@ -622,12 +622,7 @@ export function initRoutes(
       path: '/test_endpoints/uiam/api_keys/_convert',
       validate: {
         body: schema.object({
-          keys: schema.arrayOf(
-            schema.object({
-              key: schema.string(),
-            }),
-            { minSize: 1 }
-          ),
+          keys: schema.arrayOf(schema.string(), { minSize: 1 }),
         }),
       },
       security: {
@@ -646,7 +641,7 @@ export function initRoutes(
           });
         }
 
-        const result = await security.authc.apiKeys.uiam.convert({ keys });
+        const result = await security.authc.apiKeys.uiam.convert(keys);
 
         if (!result) {
           return response.badRequest({

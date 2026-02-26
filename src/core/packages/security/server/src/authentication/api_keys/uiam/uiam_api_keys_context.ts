@@ -9,7 +9,6 @@
 
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
 import type {
-  ConvertUiamAPIKeyParams,
   ConvertUiamAPIKeysResponse,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
@@ -42,8 +41,8 @@ export interface UiamAPIKeysWithContextType {
   /**
    * Converts Elasticsearch API keys into UIAM API keys.
    *
-   * @param params The parameters containing the keys to convert.
+   * @param keys The base64-encoded Elasticsearch API key values to convert.
    * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
    */
-  convert(params: ConvertUiamAPIKeyParams): Promise<ConvertUiamAPIKeysResponse | null>;
+  convert(keys: string[]): Promise<ConvertUiamAPIKeysResponse | null>;
 }

@@ -42,10 +42,10 @@ export interface UiamAPIKeysType {
   /**
    * Converts Elasticsearch API keys into UIAM API keys.
    *
-   * @param params The parameters containing the keys to convert.
+   * @param keys The base64-encoded Elasticsearch API key values to convert.
    * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
    */
-  convert(params: ConvertUiamAPIKeyParams): Promise<ConvertUiamAPIKeysResponse | null>;
+  convert(keys: string[]): Promise<ConvertUiamAPIKeysResponse | null>;
 }
 
 /**
@@ -71,19 +71,6 @@ export interface InvalidateUiamAPIKeyParams {
    * ID of the API key to invalidate
    */
   id: string;
-}
-
-/**
- * Parameters for converting Elasticsearch API keys into UIAM API keys.
- */
-export interface ConvertUiamAPIKeyParams {
-  /**
-   * The Elasticsearch API keys to convert.
-   */
-  keys: Array<{
-    /** The base64-encoded Elasticsearch API key value. */
-    key: string;
-  }>;
 }
 
 /**

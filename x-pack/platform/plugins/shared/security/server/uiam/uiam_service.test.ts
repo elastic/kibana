@@ -45,7 +45,8 @@ describe('UiamService', () => {
           },
         },
         { serverless: true }
-      ).uiam
+      ).uiam,
+      'https://es.example.com'
     );
   });
 
@@ -635,7 +636,7 @@ describe('UiamService', () => {
   });
 
   describe('#convertApiKeys', () => {
-    it('properly calls UIAM service to convert API keys', async () => {
+    it('properly calls UIAM service to convert API keys with injected endpoint', async () => {
       const mockResponse = {
         results: [
           {
@@ -657,15 +658,9 @@ describe('UiamService', () => {
         json: async () => mockResponse,
       });
 
-      const keys = [
-        {
-          type: 'elasticsearch' as const,
-          key: 'es-api-key-base64',
-          endpoint: 'https://es.example.com',
-        },
-      ];
-
-      await expect(uiamService.convertApiKeys(keys)).resolves.toEqual(mockResponse);
+      await expect(
+        uiamService.convertApiKeys(['es-api-key-base64'])
+      ).resolves.toEqual(mockResponse);
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
@@ -674,12 +669,16 @@ describe('UiamService', () => {
           'Content-Type': 'application/json',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
-        body: JSON.stringify({ keys }),
+        body: JSON.stringify({
+          keys: [
+            { type: 'elasticsearch', key: 'es-api-key-base64', endpoint: 'https://es.example.com' },
+          ],
+        }),
         dispatcher: AGENT_MOCK,
       });
     });
 
-    it('properly calls UIAM service to convert multiple API keys', async () => {
+    it('properly calls UIAM service to convert multiple API keys with injected endpoint', async () => {
       const mockResponse = {
         results: [
           {
@@ -708,12 +707,9 @@ describe('UiamService', () => {
         json: async () => mockResponse,
       });
 
-      const keys = [
-        { type: 'elasticsearch' as const, key: 'valid-key', endpoint: 'https://es.example.com' },
-        { type: 'elasticsearch' as const, key: 'invalid-key', endpoint: 'https://es.example.com' },
-      ];
-
-      await expect(uiamService.convertApiKeys(keys)).resolves.toEqual(mockResponse);
+      await expect(
+        uiamService.convertApiKeys(['valid-key', 'invalid-key'])
+      ).resolves.toEqual(mockResponse);
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
@@ -722,9 +718,39 @@ describe('UiamService', () => {
           'Content-Type': 'application/json',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
-        body: JSON.stringify({ keys }),
+        body: JSON.stringify({
+          keys: [
+            { type: 'elasticsearch', key: 'valid-key', endpoint: 'https://es.example.com' },
+            { type: 'elasticsearch', key: 'invalid-key', endpoint: 'https://es.example.com' },
+          ],
+        }),
         dispatcher: AGENT_MOCK,
       });
+    });
+
+    it('throws when elasticsearchUrl is not configured', async () => {
+      const serviceWithoutUrl = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: { certificateAuthorities: '/some/ca/path' },
+            },
+          },
+          { serverless: true }
+        ).uiam
+      );
+
+      await expect(
+        serviceWithoutUrl.convertApiKeys(['es-api-key'])
+      ).rejects.toThrowError(
+        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
+      );
+
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
 
     it('throws error if conversion fails with 400 status code', async () => {
@@ -735,13 +761,9 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Must authenticate using mTLS' } }),
       });
 
-      const keys = [
-        { type: 'elasticsearch' as const, key: 'es-api-key', endpoint: 'https://es.example.com' },
-      ];
-
-      await expect(uiamService.convertApiKeys(keys)).rejects.toThrowError(
-        'Must authenticate using mTLS'
-      );
+      await expect(
+        uiamService.convertApiKeys(['es-api-key'])
+      ).rejects.toThrowError('Must authenticate using mTLS');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
@@ -750,7 +772,11 @@ describe('UiamService', () => {
           'Content-Type': 'application/json',
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
-        body: JSON.stringify({ keys }),
+        body: JSON.stringify({
+          keys: [
+            { type: 'elasticsearch', key: 'es-api-key', endpoint: 'https://es.example.com' },
+          ],
+        }),
         dispatcher: AGENT_MOCK,
       });
     });

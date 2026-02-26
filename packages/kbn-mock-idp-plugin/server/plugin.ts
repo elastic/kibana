@@ -363,12 +363,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           path: '/mock_idp/uiam/convert_api_keys',
           validate: {
             body: schema.object({
-              keys: schema.arrayOf(
-                schema.object({
-                  key: schema.string(),
-                }),
-                { minSize: 1 }
-              ),
+              keys: schema.arrayOf(schema.string(), { minSize: 1 }),
             }),
           },
           options: { authRequired: 'optional' },
@@ -383,7 +378,7 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               },
             ] = await core.getStartServices();
 
-            const result = await authc.apiKeys.uiam?.convert({ keys });
+            const result = await authc.apiKeys.uiam?.convert(keys);
 
             if (!result) {
               return response.badRequest({

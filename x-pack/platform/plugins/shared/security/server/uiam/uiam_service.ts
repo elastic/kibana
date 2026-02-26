@@ -140,11 +140,12 @@ export interface UiamServicePublic {
   revokeApiKey(apiKeyId: string, apiKey: string): Promise<void>;
 
   /**
-   * Converts Elasticsearch API keys into UIAM API keys.
-   * @param keys The keys to convert, each with type, base64-encoded key, and Elasticsearch endpoint.
+   * Converts Elasticsearch API keys into UIAM API keys. The Elasticsearch endpoint is injected
+   * automatically from the cloud.id configuration.
+   * @param keys The base64-encoded Elasticsearch API key values to convert.
    * @returns A promise that resolves to a response containing per-key success/failure results.
    */
-  convertApiKeys(keys: ConvertUiamApiKeyRequestEntry[]): Promise<ConvertUiamApiKeysResponse>;
+  convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
 }
 
 /**
@@ -154,9 +155,11 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
+  readonly #elasticsearchUrl?: string;
 
-  constructor(logger: Logger, config: UiamConfigType) {
+  constructor(logger: Logger, config: UiamConfigType, elasticsearchUrl?: string) {
     this.#logger = logger;
+    this.#elasticsearchUrl = elasticsearchUrl;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
     const { enabled, url, sharedSecret, ssl } = config;
@@ -329,11 +332,23 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.convertApiKeys}.
    */
-  async convertApiKeys(keys: ConvertUiamApiKeyRequestEntry[]): Promise<ConvertUiamApiKeysResponse> {
+  async convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse> {
+    if (!this.#elasticsearchUrl) {
+      throw new Error(
+        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
+      );
+    }
+
     try {
       this.#logger.debug(`Attempting to convert ${keys.length} API key(s).`);
 
-      const body: ConvertUiamApiKeysRequestBody = { keys };
+      const body: ConvertUiamApiKeysRequestBody = {
+        keys: keys.map((key) => ({
+          type: 'elasticsearch' as const,
+          key,
+          endpoint: this.#elasticsearchUrl!,
+        })),
+      };
 
       const response = await UiamService.#parseUiamResponse(
         await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_convert`, {

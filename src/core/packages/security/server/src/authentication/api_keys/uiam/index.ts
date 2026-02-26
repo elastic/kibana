@@ -11,7 +11,6 @@ export type {
   UiamAPIKeysType,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
-  ConvertUiamAPIKeyParams,
   ConvertUiamAPIKeyResult,
   ConvertUiamAPIKeyResultSuccess,
   ConvertUiamAPIKeyResultFailed,
