@@ -147,7 +147,7 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
   );
 
   const onIndexRefresh = useCallback(() => {
-    resendDocumentsSampleRequest();
+    return resendDocumentsSampleRequest();
   }, [resendDocumentsSampleRequest]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
