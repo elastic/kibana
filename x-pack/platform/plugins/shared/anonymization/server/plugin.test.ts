@@ -241,5 +241,4 @@ describe('AnonymizationPlugin policy resolution', () => {
 
     expect(initializationMock.ensureGlobalProfileForNamespace).toHaveBeenCalled();
   });
-
 });

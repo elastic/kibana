@@ -4,8 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AnonymizationEntityClass } from '@kbn/anonymization-common';
 import type { Message } from '../messages';
+
+type NerEntityClass = 'PER' | 'ORG' | 'LOC' | 'MISC';
+export type AnonymizationEntityClass =
+  | NerEntityClass
+  | 'HOST_NAME'
+  | 'USER_NAME'
+  | 'IP'
+  | 'EMAIL'
+  | 'CLOUD_ACCOUNT'
+  | 'ENTITY_NAME'
+  | 'RESOURCE_NAME'
+  | 'RESOURCE_ID';
 
 interface AnonymizationRuleBase {
   type: string;
