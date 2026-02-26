@@ -149,6 +149,13 @@ export function useServiceActions({
             }),
             icon: 'tableOfContents',
             isDisabled: !sloListLocator,
+            disabledTooltip: i18n.translate(
+              'xpack.apm.servicesTable.actions.manageSlosDisabledTooltip',
+              {
+                defaultMessage:
+                  'This button is disabled because the SLO list link is not available.',
+              }
+            ),
             href: (item) => getManageSlosUrl(sloListLocator, { serviceName: item.serviceName }),
           },
         ],

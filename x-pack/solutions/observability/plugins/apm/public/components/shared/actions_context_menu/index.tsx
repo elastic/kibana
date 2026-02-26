@@ -16,6 +16,7 @@ export interface ActionSubItem {
   href?: string;
   icon?: string;
   isDisabled?: boolean;
+  disabledTooltip?: string;
 }
 
 export interface Action {
@@ -25,6 +26,7 @@ export interface Action {
   href?: string;
   icon?: string;
   isDisabled?: boolean;
+  disabledTooltip?: string;
   items?: ActionSubItem[];
 }
 
@@ -105,6 +107,9 @@ export function ActionsContextMenu({
               name: subItem.name,
               icon: subItem.icon,
               disabled: subItem.isDisabled,
+              ...(subItem.isDisabled && subItem.disabledTooltip
+                ? { toolTipContent: subItem.disabledTooltip }
+                : {}),
               ...(!subItem.isDisabled &&
                 (subItem.href
                   ? { href: subItem.href, target: '_self' as const }
@@ -122,6 +127,9 @@ export function ActionsContextMenu({
             name: action.name,
             icon: action.icon,
             disabled: action.isDisabled,
+            ...(action.isDisabled && action.disabledTooltip
+              ? { toolTipContent: action.disabledTooltip }
+              : {}),
             ...(!action.isDisabled &&
               (action.href
                 ? { href: action.href, target: '_self' as const }
