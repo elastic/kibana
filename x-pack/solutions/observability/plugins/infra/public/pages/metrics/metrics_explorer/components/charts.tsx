@@ -63,7 +63,7 @@ export const MetricsExplorerCharts = ({
         css={css`
           display: flex;
           flex-direction: column;
-          min-height: calc(100vh - 280px);
+          min-height: 100%;
         `}
         data-test-subj="metrics-explorer-no-data"
       >
