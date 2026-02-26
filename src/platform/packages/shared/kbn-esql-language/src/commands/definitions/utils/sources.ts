@@ -62,13 +62,13 @@ export const buildSourcesDefinitions = (
     let filterText: string | undefined;
 
     // If this is a timeseries source we should replace FROM with TS.
-    // Keep filterText source-aware so Monaco can rank/filter by the typed source fragment.
     if (isTimeseries && queryString) {
       text = `TS ${text}`;
       rangeToReplace = {
         start: 0,
         end: queryString.length + 1,
       };
+      // Keep filterText source-aware so Monaco can rank/filter by the typed source fragment.
       filterText = `FROM ${name}`;
     }
 
