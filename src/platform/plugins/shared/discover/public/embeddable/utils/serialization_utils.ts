@@ -50,13 +50,13 @@ export const deserializeState = async ({
     const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
 
     const rawSavedObjectAttributes = isSelectedTabDeleted
-      ? savedObjectOverride
+      ? {}
       : pick(resolvedTab, EDITABLE_SAVED_SEARCH_KEYS);
 
     // Build runtime state from the resolved tab's attributes
     // ignore the time range from the tab - only global time range + panel time range matter
     const runtimeSavedSearchState = isSelectedTabDeleted
-      ? savedObjectOverride
+      ? { serializedSearchSource: resolvedTab?.serializedSearchSource }
       : { ...omit(resolvedTab, 'timeRange'), ...savedObjectOverride };
 
     return {
@@ -116,10 +116,17 @@ export const serializeState = ({
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
   if (savedObjectId) {
-    const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
     const isSelectedTabDeleted = Boolean(
       selectedTabId && !initialState.tabs?.some((tab) => tab.id === selectedTabId)
     );
+    const selectedTab = selectedTabId
+      ? initialState.tabs?.find((tab) => tab.id === selectedTabId)
+      : undefined;
+
+    const editableAttributesBackup = selectedTab
+      ? pick(selectedTab, EDITABLE_SAVED_SEARCH_KEYS)
+      : initialState.rawSavedObjectAttributes ?? {};
+
     const attributes =
       savedSearchAttributes.tabs?.[0]?.attributes ??
       pick(savedSearchAttributes, EDITABLE_SAVED_SEARCH_KEYS);

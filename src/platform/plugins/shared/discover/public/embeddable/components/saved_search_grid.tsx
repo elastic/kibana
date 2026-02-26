@@ -9,15 +9,15 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiPanel,
-  EuiSuperSelect,
+  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
@@ -32,7 +32,6 @@ import {
   getDataGridDensity,
   getRowHeight,
 } from '@kbn/unified-data-table';
-import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
@@ -43,6 +42,13 @@ import { useProfileAccessor } from '../../context_awareness';
 export type ViewModeDeletedTabAction =
   | { type: 'editPanel'; onClick: () => void }
   | { type: 'contactAdmin' };
+
+export interface InlineEditingProps {
+  isActive: boolean;
+  hasPendingChanges: boolean;
+  onApply: () => Promise<void>;
+  onCancel: () => Promise<void>;
+}
 
 interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
   sampleSizeState: number; // a required prop
@@ -56,25 +62,17 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   enableDocumentViewer: boolean;
   isEditMode: boolean;
   isSelectedTabDeleted: boolean;
-  selectedTabId: string | undefined;
-  tabs: DiscoverSessionTab[];
-  onTabChange: (tabId: string) => void;
+  inlineEditing: InlineEditingProps;
   viewModeDeletedTabAction: ViewModeDeletedTabAction;
 }
-
-export const DiscoverGridMemoized = React.memo(DiscoverGrid);
-
-const DELETED_TAB_VALUE = '__deleted_tab__';
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const {
     enableDocumentViewer,
+    inlineEditing,
     interceptedWarnings,
     isEditMode,
     isSelectedTabDeleted,
-    tabs,
-    onTabChange,
-    selectedTabId,
     viewModeDeletedTabAction,
     ...gridProps
   } = props;
@@ -82,6 +80,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
   const docViewerRef = useRef<DocViewerApi>(null);
+  const { euiTheme } = useEuiTheme();
 
   const setExpandedDocWithInitialTab = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
@@ -145,13 +144,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     [props.totalHitCount, props.isPlainRecord]
   );
 
-  const handleTabChange = useCallback(
-    (tabId: string) => {
-      if (tabId !== DELETED_TAB_VALUE) onTabChange(tabId);
-    },
-    [onTabChange]
-  );
-
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
@@ -177,35 +169,10 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     gridProps.rowHeightState,
   ]);
 
-  const tabOptions = useMemo(() => {
-    const options: Array<{ disabled?: boolean; inputDisplay: string; value: string }> = tabs.map(
-      (tab) => ({ inputDisplay: tab.label, value: tab.id })
-    );
-
-    if (isSelectedTabDeleted) {
-      options.unshift({
-        value: DELETED_TAB_VALUE,
-        inputDisplay: i18n.translate('discover.embeddable.tabSelector.deletedTabOption', {
-          defaultMessage: '(Deleted tab)',
-        }),
-        disabled: true,
-      });
-    }
-
-    return options;
-  }, [isSelectedTabDeleted, tabs]);
-
-  const deletedTabTitle = isEditMode ? (
+  const deletedTabTitle = (
     <h2>
       <FormattedMessage
-        id="discover.embeddable.deletedTab.editModeWarningTitle"
-        defaultMessage="The Discover session tab saved with this panel no longer exists"
-      />
-    </h2>
-  ) : (
-    <h2>
-      <FormattedMessage
-        id="discover.embeddable.deletedTab.viewModeWarningTitle"
+        id="discover.embeddable.deletedTab.warningTitle"
         defaultMessage="The Discover session tab saved with this panel no longer exists"
       />
     </h2>
@@ -214,7 +181,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const renderCenteredDeletedPrompt = (body: React.ReactNode) => (
     <EuiFlexGroup
       alignItems="center"
-      css={css({ height: '100%' })}
+      css={{ height: '100%' }}
       gutterSize="none"
       justifyContent="center"
       responsive={false}
@@ -230,32 +197,48 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     </EuiFlexGroup>
   );
 
-  const renderTabSelector = (valueOfSelected: string, isInvalid = false) => (
-    <EuiPanel
-      css={css({
-        maxWidth: 400,
-        minWidth: 0,
-        width: '100%',
-      })}
-      hasShadow={false}
-      paddingSize="s"
+  const renderInlineEditFooter = () => (
+    <div
+      css={{
+        paddingInline: euiTheme.size.s,
+        paddingBlockEnd: euiTheme.size.s,
+      }}
     >
-      <EuiSuperSelect
-        aria-label={i18n.translate('discover.embeddable.tabSelector.ariaLabel', {
-          defaultMessage: 'Select displayed tab',
-        })}
-        compressed
-        data-test-subj="discoverEmbeddableTabSelector"
-        fullWidth
-        isInvalid={isInvalid}
-        prepend={i18n.translate('discover.embeddable.tabSelector.label', {
-          defaultMessage: 'Displayed tab',
-        })}
-        onChange={handleTabChange}
-        options={tabOptions}
-        valueOfSelected={valueOfSelected}
-      />
-    </EuiPanel>
+      <EuiFlexGroup responsive={false} gutterSize="xs" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            color="primary"
+            data-test-subj="discoverEmbeddableInlineEditDiscardButton"
+            css={{ minInlineSize: 'initial' }}
+            onClick={() => {
+              void inlineEditing.onCancel();
+            }}
+          >
+            {i18n.translate('discover.embeddable.inlineEdit.discardButton', {
+              defaultMessage: 'Discard',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size={'xs' as 's'}
+            color="primary"
+            fill
+            data-test-subj="discoverEmbeddableInlineEditApplyButton"
+            css={{ minInlineSize: 'initial' }}
+            onClick={() => {
+              void inlineEditing.onApply();
+            }}
+            disabled={!inlineEditing.hasPendingChanges}
+          >
+            {i18n.translate('discover.embeddable.inlineEdit.applyButton', {
+              defaultMessage: 'Apply',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 
   if (!isEditMode && isSelectedTabDeleted) {
@@ -264,16 +247,14 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         <p>
           <FormattedMessage
             id="discover.embeddable.deletedTab.viewModeWarningDescriptionEditable"
-            defaultMessage="{editPanelLink} to fix it."
+            defaultMessage="<EditPanelLink>Edit the panel</EditPanelLink> to fix it."
             values={{
-              editPanelLink: (
+              EditPanelLink: (chunks) => (
                 <EuiLink
                   data-test-subj="discoverEmbeddableDeletedTabEditPanelLink"
                   onClick={viewModeDeletedTabAction.onClick}
                 >
-                  {i18n.translate('discover.embeddable.deletedTab.editPanelLinkLabel', {
-                    defaultMessage: 'Edit the panel',
-                  })}
+                  {chunks}
                 </EuiLink>
               ),
             }}
@@ -290,56 +271,52 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     );
   }
 
-  if (isEditMode && isSelectedTabDeleted) {
-    return (
-      <EuiFlexGroup
-        css={css({ height: '100%' })}
-        direction="column"
-        gutterSize="s"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>{renderTabSelector(DELETED_TAB_VALUE, true)}</EuiFlexItem>
-        <EuiFlexItem>
-          {renderCenteredDeletedPrompt(
-            <p>
+  return (
+    <SavedSearchEmbeddableBase
+      totalHitCount={undefined}
+      isLoading={props.loadingState === DiscoverGridLoadingState.loading}
+      dataTestSubj="embeddedSavedSearchDocTable"
+      interceptedWarnings={props.interceptedWarnings}
+      append={inlineEditing.isActive ? renderInlineEditFooter() : undefined}
+    >
+      {isEditMode && isSelectedTabDeleted ? (
+        renderCenteredDeletedPrompt(
+          <p>
+            {inlineEditing.isActive ? (
               <FormattedMessage
                 id="discover.embeddable.deletedTab.editModeWarningDescription"
                 defaultMessage="Select a different tab"
               />
-            </p>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  const showTabSelector = isEditMode && tabs.length > 1;
-
-  return (
-    <SavedSearchEmbeddableBase
-      totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
-      isLoading={props.loadingState === DiscoverGridLoadingState.loading}
-      dataTestSubj="embeddedSavedSearchDocTable"
-      interceptedWarnings={props.interceptedWarnings}
-      prepend={showTabSelector ? renderTabSelector(selectedTabId ?? tabs[0]?.id) : undefined}
-    >
-      <DiscoverGrid
-        {...gridProps}
-        isPaginationEnabled={!gridProps.isPlainRecord}
-        totalHits={props.totalHitCount}
-        setExpandedDoc={setExpandedDocWithInitialTab}
-        expandedDoc={expandedDoc}
-        showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
-        hideFilteringOnComputedColumns={true}
-        maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
-        renderCustomToolbar={renderCustomToolbarWithElements}
-        externalCustomRenderers={cellRenderers}
-        enableComparisonMode
-        showColumnTokens
-        showFullScreenButton={false}
-        className="unifiedDataTable"
-      />
+            ) : (
+              <FormattedMessage
+                id="discover.embeddable.deletedTab.editModePreEditWarningDescription"
+                defaultMessage="Use Edit {editIcon} to choose a different tab"
+                values={{
+                  editIcon: <EuiIcon aria-hidden={true} type="pencil" size="m" />,
+                }}
+              />
+            )}
+          </p>
+        )
+      ) : (
+        <DiscoverGrid
+          {...gridProps}
+          isPaginationEnabled={!gridProps.isPlainRecord}
+          totalHits={props.totalHitCount}
+          setExpandedDoc={setExpandedDocWithInitialTab}
+          expandedDoc={expandedDoc}
+          showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
+          hideFilteringOnComputedColumns={true}
+          maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+          renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
+          renderCustomToolbar={renderCustomToolbarWithElements}
+          externalCustomRenderers={cellRenderers}
+          enableComparisonMode
+          showColumnTokens
+          showFullScreenButton={false}
+          className="unifiedDataTable"
+        />
+      )}
     </SavedSearchEmbeddableBase>
   );
 }

@@ -25,7 +25,7 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DiscoverGridSettings, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER_ID,
@@ -35,7 +35,11 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
-import { DiscoverGridEmbeddable, type ViewModeDeletedTabAction } from './saved_search_grid';
+import {
+  DiscoverGridEmbeddable,
+  type InlineEditingProps,
+  type ViewModeDeletedTabAction,
+} from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { useAdditionalCellActions } from '../../context_awareness';
@@ -50,11 +54,10 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
-  onTabChange: (tabId: string) => void;
   enableDocumentViewer: boolean;
+  isSelectedTabDeleted: boolean;
+  inlineEditing: InlineEditingProps;
   stateManager: SearchEmbeddableStateManager;
-  selectedTabId$: BehaviorSubject<string | undefined>;
-  tabs: DiscoverSessionTab[];
 }
 
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
@@ -77,11 +80,10 @@ export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
-  onTabChange,
   enableDocumentViewer,
+  isSelectedTabDeleted,
+  inlineEditing,
   stateManager,
-  selectedTabId$,
-  tabs,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
   const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
@@ -90,7 +92,7 @@ export function SearchEmbeddableGridComponent({
 
   const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
 
-  const viewModeSubject = useMemo(
+  const viewModeSubject$ = useMemo(
     () => getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view'),
     [api]
   );
@@ -113,7 +115,6 @@ export function SearchEmbeddableGridComponent({
     savedSearchDescription,
     esqlVariables,
     viewMode,
-    selectedTabId,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -131,13 +132,7 @@ export function SearchEmbeddableGridComponent({
     api.defaultTitle$,
     api.defaultDescription$,
     esqlVariables$ ?? emptyEsqlVariables$,
-    viewModeSubject,
-    selectedTabId$
-  );
-
-  const isSelectedTabDeleted = useMemo(
-    () => Boolean(selectedTabId) && !tabs.some((tab) => tab.id === selectedTabId),
-    [selectedTabId, tabs]
+    viewModeSubject$
   );
 
   const isEditMode = viewMode === 'edit';
@@ -327,9 +322,7 @@ export function SearchEmbeddableGridComponent({
       enableDocumentViewer={enableDocumentViewer}
       isEditMode={isEditMode}
       isSelectedTabDeleted={isSelectedTabDeleted}
-      onTabChange={onTabChange}
-      selectedTabId={selectedTabId}
-      tabs={tabs}
+      inlineEditing={inlineEditing}
       viewModeDeletedTabAction={viewModeDeletedTabAction}
     />
   );

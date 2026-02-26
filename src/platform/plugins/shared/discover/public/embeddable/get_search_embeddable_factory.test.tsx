@@ -18,6 +18,7 @@ import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../common/data_sources';
@@ -63,6 +64,7 @@ describe('saved search embeddable', () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('./utils/serialization_utils').deserializeState = () => runtimeState;
+    mockedEditableDashboardApi.setFocusedPanelId.mockClear();
   });
 
   const mockServices = {
@@ -113,6 +115,31 @@ describe('saved search embeddable', () => {
     uuid,
     type: factory.type,
     parentApi: mockedDashboardApi,
+    phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
+  });
+
+  const mockedEditableDashboardApi = {
+    ...mockedDashboardApi,
+    getAppContext: jest.fn().mockReturnValue({
+      currentAppId: 'dashboard',
+      getCurrentPath: jest.fn().mockReturnValue('/dashboard'),
+    }),
+    setFocusedPanelId: jest.fn(),
+    viewMode$: new BehaviorSubject<'view' | 'edit'>('edit'),
+  } as unknown as PresentationContainer &
+    PublishesUnifiedSearch & {
+      getAppContext: jest.Mock;
+      setFocusedPanelId: jest.Mock;
+      viewMode$: BehaviorSubject<'view' | 'edit'>;
+    };
+
+  const finalizeEditableApiMock = (
+    api: Omit<SearchEmbeddableApi, 'uuid' | 'type' | 'parentApi' | 'phase$'>
+  ) => ({
+    ...api,
+    uuid,
+    type: factory.type,
+    parentApi: mockedEditableDashboardApi,
     phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
   });
 
@@ -202,6 +229,64 @@ describe('saved search embeddable', () => {
       api.setTitle('custom title');
       await waitOneTick();
       expect(search).toHaveBeenCalledTimes(1);
+    });
+
+    it('should enter inline edit mode and keep legacy discover edit behavior', async () => {
+      const user = userEvent.setup();
+
+      const { search, resolveSearch } = createSearchFnMock(1);
+
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+      });
+      const navigateToEditor = jest.fn();
+
+      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockImplementation(() => ({
+        navigateToEditor,
+      }));
+      (discoverServiceMock.locator.getLocation as jest.Mock).mockResolvedValue({
+        app: 'discover',
+        path: '/mock-url',
+        state: {},
+      });
+
+      const { api, Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+      await waitOneTick();
+
+      const discoverComponent = render(<Component />);
+      resolveSearch();
+      await waitOneTick();
+
+      expect(api.overrideHoverActions$?.getValue()).toBe(false);
+      expect(api.onEdit).toBeDefined();
+
+      await act(async () => {
+        await api.onEdit?.();
+      });
+
+      expect(api.overrideHoverActions$?.getValue()).toBe(true);
+      expect(mockedEditableDashboardApi.setFocusedPanelId).toHaveBeenCalledWith(uuid);
+      await waitFor(() => {
+        expect(
+          discoverComponent.getByTestId('discoverEmbeddableInlineEditApplyButton')
+        ).toBeInTheDocument();
+      });
+
+      await user.click(discoverComponent.getByTestId('discoverEmbeddableInlineEditDiscardButton'));
+
+      expect(api.overrideHoverActions$?.getValue()).toBe(false);
+      await waitFor(() => {
+        expect(
+          discoverComponent.queryByTestId('discoverEmbeddableInlineEditApplyButton')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 

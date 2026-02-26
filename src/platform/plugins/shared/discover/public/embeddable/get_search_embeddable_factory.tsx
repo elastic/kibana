@@ -8,9 +8,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
-import { pick } from 'lodash';
-
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
@@ -18,8 +17,10 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, HasEditCapabilities } from '@kbn/presentation-publishing';
 import {
+  apiCanFocusPanel,
+  apiPublishesChildren,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -31,10 +32,11 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
+import { SearchEmbeddableInlineEditHoverActions } from './components/search_embeddable_inline_edit_hover_actions';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
@@ -44,6 +46,7 @@ import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { isTabDeleted } from './utils/is_tab_deleted';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -94,14 +97,25 @@ export const getSearchEmbeddableFactory = ({
         runtimeState?.savedObjectDescription
       );
       const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
+      const draftSelectedTabId$ = new BehaviorSubject<string | undefined>(
+        runtimeState.selectedTabId
+      );
+      const isInlineEditing$ = new BehaviorSubject<boolean>(false);
+      const inlineEditDirty$ = new BehaviorSubject<boolean>(false);
+      const overrideHoverActions$ = isInlineEditing$;
 
       const tabs = runtimeState.tabs ?? [];
-      let rawSavedObjectAttributes = runtimeState.rawSavedObjectAttributes;
+      let inlineEditOriginalTab: DiscoverSessionTab | undefined;
+      let inlineEditStateSnapshot: Record<string, unknown> | undefined;
 
-      const isSelectedTabDeleted = (
-        selectedTabId: string | undefined,
-        availableTabs: typeof tabs = tabs
-      ) => Boolean(selectedTabId && !availableTabs.some((tab) => tab.id === selectedTabId));
+      const isSelectedTabDeleted = (tabId: string | undefined, availableTabs: typeof tabs = tabs) =>
+        isTabDeleted(tabId, availableTabs);
+
+      const setFocusedPanelId = (panelId?: string) => {
+        if (apiCanFocusPanel(parentApi)) {
+          parentApi.setFocusedPanelId(panelId);
+        }
+      };
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -120,10 +134,7 @@ export const getSearchEmbeddableFactory = ({
       const serialize = (savedObjectId?: string) =>
         serializeState({
           uuid,
-          initialState: {
-            ...runtimeState,
-            rawSavedObjectAttributes,
-          },
+          initialState: runtimeState,
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
@@ -132,16 +143,103 @@ export const getSearchEmbeddableFactory = ({
           selectedTabId: selectedTabId$.getValue(),
         });
 
-      const switchTab = async (tabId: string) => {
+      const switchTab = async (tabId: string): Promise<boolean> => {
         const tab = tabs.find((t) => t.id === tabId);
+        if (!tab) return false;
 
-        if (!tab) return;
+        try {
+          await searchEmbeddable.switchToTab(tab);
+          return true;
+        } catch (error) {
+          blockingError$.next(error as Error);
+          dataLoading$.next(false);
+          return false;
+        }
+      };
 
-        dataLoading$.next(true);
-        selectedTabId$.next(tabId);
+      const stopInlineEditing = () => {
+        isInlineEditing$.next(false);
+        inlineEditDirty$.next(false);
+        draftSelectedTabId$.next(selectedTabId$.getValue());
+        inlineEditOriginalTab = undefined;
+        inlineEditStateSnapshot = undefined;
+        setFocusedPanelId();
+      };
 
-        await searchEmbeddable.switchToTab(tab);
-        rawSavedObjectAttributes = pick(tab, EDITABLE_SAVED_SEARCH_KEYS);
+      const startInlineEditing = async () => {
+        if (isInlineEditing$.getValue()) return;
+        const currentTabId = selectedTabId$.getValue();
+        inlineEditOriginalTab = tabs.find((t) => t.id === currentTabId);
+        const { stateManager: sm } = searchEmbeddable;
+        inlineEditStateSnapshot = {
+          sort: sm.sort.getValue(),
+          columns: sm.columns.getValue(),
+          grid: sm.grid.getValue(),
+          sampleSize: sm.sampleSize.getValue(),
+          rowsPerPage: sm.rowsPerPage.getValue(),
+          rowHeight: sm.rowHeight.getValue(),
+          headerRowHeight: sm.headerRowHeight.getValue(),
+          viewMode: sm.viewMode.getValue(),
+          density: sm.density.getValue(),
+        };
+        draftSelectedTabId$.next(currentTabId);
+        isInlineEditing$.next(true);
+        setFocusedPanelId(uuid);
+      };
+
+      const previewInlineTabSelection = async (tabId: string) => {
+        if (!isInlineEditing$.getValue()) return;
+        if (draftSelectedTabId$.getValue() === tabId) return;
+
+        const previousDraftTabId = draftSelectedTabId$.getValue();
+
+        draftSelectedTabId$.next(tabId);
+
+        const didSwitch = await switchTab(tabId);
+
+        if (didSwitch) {
+          inlineEditDirty$.next(true);
+        } else {
+          draftSelectedTabId$.next(previousDraftTabId);
+        }
+      };
+
+      const applyInlineTabSelection = async () => {
+        if (!isInlineEditing$.getValue()) return;
+
+        const draftTabId = draftSelectedTabId$.getValue();
+        const committedTabId = selectedTabId$.getValue();
+
+        if (!draftTabId || draftTabId === committedTabId) {
+          stopInlineEditing();
+          return;
+        }
+
+        if (!tabs.some((tab) => tab.id === draftTabId)) return;
+
+        selectedTabId$.next(draftTabId);
+        stopInlineEditing();
+      };
+
+      const cancelInlineTabSelection = async () => {
+        if (!isInlineEditing$.getValue()) return;
+
+        if (inlineEditOriginalTab && draftSelectedTabId$.getValue() !== inlineEditOriginalTab.id) {
+          try {
+            await searchEmbeddable.switchToTab(inlineEditOriginalTab);
+          } catch (error) {
+            blockingError$.next(error as Error);
+            dataLoading$.next(false);
+          }
+        }
+        if (inlineEditStateSnapshot) {
+          const { stateManager: sm } = searchEmbeddable;
+
+          for (const [key, value] of Object.entries(inlineEditStateSnapshot)) {
+            (sm[key as keyof typeof sm] as BehaviorSubject<unknown>)?.next(value);
+          }
+        }
+        stopInlineEditing();
       };
 
       const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
@@ -160,22 +258,22 @@ export const getSearchEmbeddableFactory = ({
         ),
         getComparators: () => {
           const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
+          const shouldSkipTabComparators = isDeleted || isInlineEditing$.getValue();
 
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
             ...searchEmbeddable.comparators,
-            // While the selected tab is missing, ignore tab-dependent comparators
-            // until the user explicitly picks a valid tab.
-            ...(isDeleted
+            // While the selected tab is missing or inline editing is in progress,
+            // skip tab-dependent comparators so unsaved-changes badges don't appear
+            // until the user explicitly applies a tab change.
+            ...(shouldSkipTabComparators
               ? Object.fromEntries(
-                  Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip' as const])
+                  Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip'])
                 )
               : {}),
-            selectedTabId: isDeleted
-              ? ('skip' as const)
-              : (a: string | undefined, b: string | undefined) => a === b,
+            selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
             attributes: 'skip',
             breakdownField: 'skip',
             hideAggregatedPreview: 'skip',
@@ -197,7 +295,7 @@ export const getSearchEmbeddableFactory = ({
           timeRangeManager.reinitializeState(lastSaved);
           titleManager.reinitializeState(lastSaved);
           if (lastSaved) {
-            const currentTabId = selectedTabId$.getValue();
+            const currentTabId = draftSelectedTabId$.getValue();
 
             const lastSavedRuntimeState = await deserializeState({
               serializedState: lastSaved,
@@ -205,7 +303,6 @@ export const getSearchEmbeddableFactory = ({
             });
 
             selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
-            rawSavedObjectAttributes = lastSavedRuntimeState.rawSavedObjectAttributes;
 
             const isLastSavedSelectedTabDeleted = isSelectedTabDeleted(
               lastSavedRuntimeState.selectedTabId,
@@ -216,32 +313,52 @@ export const getSearchEmbeddableFactory = ({
               ? undefined
               : lastSavedRuntimeState.selectedTabId;
 
-            if (currentTabId !== resolvedTabId && resolvedTabId) {
-              const resolvedTab = tabs.find((t) => t.id === resolvedTabId);
+            const resolvedTab = resolvedTabId
+              ? tabs.find((t) => t.id === resolvedTabId)
+              : undefined;
 
-              if (resolvedTab) await searchEmbeddable.switchToTab(resolvedTab);
-              else searchEmbeddable.reinitializeState(lastSavedRuntimeState);
+            if (currentTabId !== resolvedTabId && resolvedTab) {
+              await searchEmbeddable.switchToTab(resolvedTab);
             } else {
               searchEmbeddable.reinitializeState(lastSavedRuntimeState);
             }
           }
+          stopInlineEditing();
         },
       });
+
+      const editApi = initializeEditApi({
+        uuid,
+        parentApi,
+        partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
+        discoverServices,
+        isEditable: startServices.isEditable,
+        getTitle: () => titleManager.api.title$.getValue(),
+      }) as Partial<HasEditCapabilities & { getEditHref: () => Promise<string> }>;
+      const navigateToDiscover = editApi.onEdit;
 
       const api: SearchEmbeddableApi = finalizeApi({
         ...unsavedChangesApi,
         ...titleManager.api,
-        ...searchEmbeddable.api,
+        ...(searchEmbeddable.api as typeof searchEmbeddable.api &
+          Required<Pick<SearchEmbeddableApi, 'filters$' | 'query$' | 'setFilters' | 'setQuery'>>),
         ...timeRangeManager.api,
         ...drilldownsManager.api,
-        ...initializeEditApi({
-          uuid,
-          parentApi,
-          partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
-          discoverServices,
-          isEditable: startServices.isEditable,
-          getTitle: () => titleManager.api.title$.getValue(),
-        }),
+        ...editApi,
+        ...(navigateToDiscover
+          ? {
+              onEdit: startInlineEditing,
+              overrideHoverActions$,
+              OverriddenHoverActionsComponent: () => (
+                <SearchEmbeddableInlineEditHoverActions
+                  draftSelectedTabId$={draftSelectedTabId$}
+                  tabs={tabs}
+                  onEditInDiscover={navigateToDiscover}
+                  onSelectTab={previewInlineTabSelection}
+                />
+              ),
+            }
+          : {}),
         dataLoading$,
         blockingError$,
         savedObjectId$,
@@ -308,19 +425,63 @@ export const getSearchEmbeddableFactory = ({
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
 
+      let hasPanelBeenRegisteredInParent = false;
+      let hasBeenCleanedUp = false;
+      let parentChildrenSubscription: Subscription | undefined;
+      const cleanupEmbeddableResources = () => {
+        if (hasBeenCleanedUp) return;
+
+        hasBeenCleanedUp = true;
+        drilldownsManager.cleanup();
+        searchEmbeddable.cleanup();
+        unsubscribeFromFetch();
+        parentChildrenSubscription?.unsubscribe();
+      };
+
+      if (apiPublishesChildren(parentApi)) {
+        parentChildrenSubscription = parentApi.children$.subscribe((children) => {
+          if (children[uuid]) {
+            hasPanelBeenRegisteredInParent = true;
+            return;
+          }
+          if (hasPanelBeenRegisteredInParent) {
+            cleanupEmbeddableResources();
+          }
+        });
+      }
+
       return {
         api,
         Component: () => {
-          const [savedSearch, dataViews] = useBatchedPublishingSubjects(
+          const [
+            savedSearch,
+            dataViews,
+            isInlineEditing,
+            draftSelectedTabId,
+            selectedTabId,
+            isInlineEditDirty,
+          ] = useBatchedPublishingSubjects(
             api.savedSearch$,
-            api.dataViews$
+            api.dataViews$,
+            isInlineEditing$,
+            draftSelectedTabId$,
+            selectedTabId$,
+            inlineEditDirty$
           );
+
+          const selectedTabIdForDisplay = isInlineEditing
+            ? draftSelectedTabId ?? selectedTabId
+            : selectedTabId;
+          const isSelectedTabDeletedForDisplay = isTabDeleted(selectedTabIdForDisplay, tabs);
+          const hasPendingInlineTabChanges = isInlineEditing && isInlineEditDirty;
 
           useEffect(() => {
             return () => {
-              drilldownsManager.cleanup();
-              searchEmbeddable.cleanup();
-              unsubscribeFromFetch();
+              // In dashboard, this component can transiently unmount/remount during panel state transitions.
+              // Cleanup is handled when the child API is actually removed from the parent container.
+              if (!apiPublishesChildren(parentApi)) {
+                cleanupEmbeddableResources();
+              }
             };
           }, []);
 
@@ -412,10 +573,14 @@ export const getSearchEmbeddableFactory = ({
                               ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
                               : true
                           }
-                          onTabChange={switchTab}
-                          selectedTabId$={selectedTabId$}
+                          isSelectedTabDeleted={isSelectedTabDeletedForDisplay}
+                          inlineEditing={{
+                            isActive: isInlineEditing,
+                            hasPendingChanges: hasPendingInlineTabChanges,
+                            onApply: applyInlineTabSelection,
+                            onCancel: cancelInlineTabSelection,
+                          }}
                           stateManager={searchEmbeddable.stateManager}
-                          tabs={tabs}
                         />
                       </CellActionsProvider>
                     )}

@@ -42,6 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
+      await kibanaServer.importExport.load(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/discover/saved_search_embeddable'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -63,63 +66,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
     });
 
-    const searchSourceJSON = (query: string) =>
-      JSON.stringify({
-        highlightAll: true,
-        version: true,
-        query: {
-          language: 'kuery',
-          query,
-        },
-        filter: [],
-        indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-      });
-
-    const defaultTab = {
-      id: 'default-tab',
-      label: 'Default tab',
-      attributes: {
-        columns: ['@timestamp', 'agent'],
-        sort: [['@timestamp', 'desc']],
-        grid: {},
-        hideChart: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: searchSourceJSON(''),
-        },
-      },
-    };
-
-    const filteredTab = {
-      id: 'filtered-tab',
-      label: 'Filtered tab',
-      attributes: {
-        columns: ['bytes', 'clientip'],
-        sort: [['bytes', 'asc']],
-        grid: {},
-        hideChart: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: searchSourceJSON('bytes > 5000'),
-        },
-      },
-    };
-
-    const filteredTab2 = {
-      id: 'filtered-tab-2',
-      label: 'Filtered tab 2',
-      attributes: {
-        columns: ['bytes', 'clientip', 'agent'],
-        sort: [['bytes', 'asc']],
-        grid: {},
-        hideChart: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: searchSourceJSON('bytes > 5000'),
-        },
-      },
-    };
-
     const addSearchEmbeddableToDashboard = async (title = 'Rendering-Test:-saved-search') => {
       await dashboardAddPanel.addSavedSearch(title);
       await header.waitUntilLoadingHasFinished();
@@ -136,47 +82,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     };
 
-    const createMultiTabSavedSearch = async ({ id, title }: { id: string; title: string }) => {
-      await kibanaServer.savedObjects.create({
-        type: 'search',
-        id,
-        overwrite: true,
-        attributes: {
-          title,
-          description: '',
-          columns: defaultTab.attributes.columns,
-          sort: defaultTab.attributes.sort,
-          grid: {},
-          hideChart: false,
-          isTextBasedQuery: false,
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: searchSourceJSON(''),
-          },
-          tabs: [defaultTab, filteredTab, filteredTab2],
-        },
-        references: [
-          {
-            id: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            type: 'index-pattern',
-          },
-        ],
-      });
-    };
-
     const getDeletedTabCalloutText = async () => {
       const deletedTabCallout = await testSubjects.find('discoverEmbeddableDeletedTabCallout');
       return await deletedTabCallout.getVisibleText();
     };
 
-    const removeFilteredTabFromSavedSearch = async (id: string) => {
-      await kibanaServer.savedObjects.update({
-        type: 'search',
-        id,
-        attributes: {
-          tabs: [defaultTab, filteredTab2],
-        },
-      });
+    const removeFilteredTabFromSavedSearch = async (savedSearchTitle: string) => {
+      await discover.navigateToApp();
+      await discover.loadSavedSearch(savedSearchTitle);
+      await discover.waitUntilTabIsLoaded();
+
+      await testSubjects.moveMouseTo('unifiedTabs_tab_filtered-tab');
+      await testSubjects.click('unifiedTabs_closeTabBtn_filtered-tab');
+      await discover.waitUntilTabIsLoaded();
+
+      await discover.saveSearch(savedSearchTitle, false);
+      await discover.waitUntilTabIsLoaded();
     };
 
     const selectEmbeddableTab = async (tabId: string, tabLabel: string) => {
@@ -283,14 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should apply data, columns and sorting from selected Discover tab', async () => {
-      const savedSearchId = 'discover-embeddable-multi-tab-ftr';
-      const savedSearchTitle = 'Discover embeddable multi tab';
-
-      await createMultiTabSavedSearch({
-        id: savedSearchId,
-        title: savedSearchTitle,
-      });
-      await addSearchEmbeddableToDashboard(savedSearchTitle);
+      await addSearchEmbeddableToDashboard('Discover embeddable multi tab');
       await testSubjects.existOrFail('discoverEmbeddableTabSelector');
 
       const initialDocumentCount = await discover.getSavedSearchDocumentCount();
@@ -327,14 +241,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show deleted-tab warning in view and edit modes for editor users and dismiss it by selecting a different tab', async () => {
-      const savedSearchId = 'discover-embeddable-deleted-tab-editor-ftr';
       const savedSearchTitle = 'Discover embeddable deleted tab editor';
       const dashboardName = 'Dashboard deleted tab editor';
 
-      await createMultiTabSavedSearch({
-        id: savedSearchId,
-        title: savedSearchTitle,
-      });
       await addSearchEmbeddableToDashboard(savedSearchTitle);
       await selectEmbeddableTab('filtered-tab', 'Filtered tab');
 
@@ -344,8 +253,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await removeFilteredTabFromSavedSearch(savedSearchId);
-      await refreshDashboardPage();
+      await removeFilteredTabFromSavedSearch(savedSearchTitle);
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard(dashboardName);
+      await dashboard.waitForRenderComplete();
 
       const viewModeCalloutText = await getDeletedTabCalloutText();
       expect(viewModeCalloutText).to.contain('Edit the panel');
@@ -370,14 +281,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show deleted-tab warning in view mode for read-only users', async () => {
-      const savedSearchId = 'discover-embeddable-deleted-tab-read-only-ftr';
       const savedSearchTitle = 'Discover embeddable deleted tab read only';
       const dashboardName = 'Dashboard deleted tab read only';
 
-      await createMultiTabSavedSearch({
-        id: savedSearchId,
-        title: savedSearchTitle,
-      });
       await addSearchEmbeddableToDashboard(savedSearchTitle);
       await selectEmbeddableTab('filtered-tab', 'Filtered tab');
 
@@ -387,7 +293,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         exitFromEditMode: true,
       });
 
-      await removeFilteredTabFromSavedSearch(savedSearchId);
+      await removeFilteredTabFromSavedSearch(savedSearchTitle);
+      await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
 
       try {

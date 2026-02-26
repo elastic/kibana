@@ -10,8 +10,9 @@
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type {
   SearchEmbeddableByValueState,
@@ -77,13 +78,13 @@ describe('Serialization utils', () => {
     ...overrides,
   });
 
-  const mockDiscoverSession = (sessionTabs: DiscoverSessionTab[]): DiscoverSession => ({
-    id: 'savedSearch',
-    title: 'test1',
-    description: 'description',
-    tabs: sessionTabs,
-    managed: false,
-  });
+  const mockDiscoverSession = (sessionTabs: DiscoverSessionTab[]) =>
+    createDiscoverSessionMock({
+      id: 'savedSearch',
+      title: 'test1',
+      description: 'description',
+      tabs: sessionTabs,
+    });
 
   describe('deserialize state', () => {
     test('by value', async () => {
@@ -172,7 +173,7 @@ describe('Serialization utils', () => {
       expect(deserializedState.sampleSize).toEqual(200);
     });
 
-    test('by reference - deleted selectedTabId keeps saved dashboard overrides', async () => {
+    test('by reference - deleted selectedTabId discards stale dashboard overrides', async () => {
       const sessionTabs = [
         mockDiscoverSessionTab({
           id: 'tab-1',
@@ -199,9 +200,9 @@ describe('Serialization utils', () => {
         discoverServices: discoverServiceMock,
       });
       expect(deserializedState.selectedTabId).toEqual('deleted-tab-id');
-      // Keep serialized dashboard overrides; no runtime fallback tab should be applied
-      expect(deserializedState.columns).toEqual(['stale-col-a']);
-      expect(deserializedState.sort).toEqual([['stale_field', 'asc']]);
+      // Stale overrides from the deleted tab should not carry over
+      expect(deserializedState.columns).toBeUndefined();
+      expect(deserializedState.sort).toBeUndefined();
     });
 
     test('by reference - valid selectedTabId with dashboard overrides', async () => {

@@ -12,6 +12,7 @@ import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   EmbeddableApiContext,
+  CanOverrideHoverActions,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -98,6 +99,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
   HasTimeRange &
   HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
+  Partial<CanOverrideHoverActions> &
   HasDrilldowns &
   HasSupportedTriggers;
 
