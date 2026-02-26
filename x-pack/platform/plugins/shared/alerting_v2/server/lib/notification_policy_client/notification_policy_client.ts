@@ -14,6 +14,7 @@ import {
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
+import { omit } from 'lodash';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
@@ -111,10 +112,12 @@ export class NotificationPolicyClient {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
-    const { attributes: existingAttrs } = await this.fetchRawNotificationPolicy(params.options.id);
+    const existingPolicy = await this.getNotificationPolicy({
+      id: params.options.id,
+    });
 
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
-      ...existingAttrs,
+      ...omit(existingPolicy, ['id', 'version']),
       ...parsed.data,
       updatedBy: userProfileUid,
       updatedAt: now,
@@ -141,21 +144,6 @@ export class NotificationPolicyClient {
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
     await this.getNotificationPolicy({ id });
     await this.notificationPolicySavedObjectService.delete({ id });
-  }
-
-  private async fetchRawNotificationPolicy(id: string): Promise<{
-    attributes: NotificationPolicySavedObjectAttributes;
-    version?: string;
-  }> {
-    try {
-      const doc = await this.notificationPolicySavedObjectService.get(id);
-      return { attributes: doc.attributes, version: doc.version };
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Notification policy with id "${id}" not found`);
-      }
-      throw e;
-    }
   }
 
   private async getUserProfileUid(): Promise<string | null> {
