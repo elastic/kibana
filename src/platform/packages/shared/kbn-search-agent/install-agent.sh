@@ -7,6 +7,6 @@ echo "  - Extracting configuration files into current directory"
 unzip -q elastic-agent.zip && rm elastic-agent.zip
 echo "  - Appending Elasticsearch reference to AGENTS.md"
 touch AGENTS.md
-cat AGENT-elasticsearch-append.md >> AGENTS.md
-rm AGENT-elasticsearch-append.md
+cat AGENTS-elasticsearch-append.md >> AGENTS.md
+rm AGENTS-elasticsearch-append.md
 echo "Done. Agent configuration installed."
