@@ -58,6 +58,7 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   if (!isActionBlock(step)) return null;
 
   const stepDescription = getStepDescription(step);
+  const actionDisplayName = step.action.toUpperCase();
 
   const handleTitleClick = () => {
     stepRef.send({ type: 'step.edit' });
@@ -93,45 +94,68 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 margin-right: ${euiTheme.size.s};
               `}
             >
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiToolTip
-                  position="top"
-                  content={
-                    <p>
-                      {i18n.translate(
-                        'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
-                        {
-                          defaultMessage: 'Edit {stepAction} processor',
-                          values: {
-                            stepAction: step.action,
-                          },
-                        }
-                      )}
-                    </p>
-                  }
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="xs"
+                css={css`
+                  min-width: 0;
+                `}
+              >
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    min-width: 0;
+                    max-width: 100%;
+                  `}
                 >
-                  <EuiButtonEmpty
-                    onClick={handleTitleClick}
-                    color="text"
-                    aria-label={i18n.translate(
-                      'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
-                      { defaultMessage: 'Edit processor' }
-                    )}
-                    size="xs"
-                    data-test-subj="streamsAppProcessorTitleEditButton"
+                  <EuiToolTip
+                    position="top"
+                    content={
+                      <>
+                        <p>
+                          <strong>{actionDisplayName}</strong>
+                        </p>
+                        <p>
+                          {i18n.translate(
+                            'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
+                            {
+                              defaultMessage: 'Edit {stepAction} processor',
+                              values: {
+                                stepAction: step.action,
+                              },
+                            }
+                          )}
+                        </p>
+                      </>
+                    }
                   >
-                    <EuiText
-                      size="s"
-                      style={{ fontWeight: euiTheme.font.weight.bold }}
+                    <EuiButtonEmpty
+                      onClick={handleTitleClick}
+                      color="text"
+                      aria-label={i18n.translate(
+                        'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
+                        { defaultMessage: 'Edit processor' }
+                      )}
+                      size="xs"
+                      data-test-subj="streamsAppProcessorTitleEditButton"
                       css={css`
-                        display: block;
-                        ${euiTextTruncate()}
+                        max-width: 100%;
                       `}
                     >
-                      {step.action.toUpperCase()}
-                    </EuiText>
-                  </EuiButtonEmpty>
-                </EuiToolTip>
+                      <EuiText
+                        size="s"
+                        component="span"
+                        style={{ fontWeight: euiTheme.font.weight.bold }}
+                        css={css`
+                          display: block;
+                          ${euiTextTruncate()}
+                        `}
+                      >
+                        {actionDisplayName}
+                      </EuiText>
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (

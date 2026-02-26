@@ -26,7 +26,7 @@
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: 'affaf17569853b40868f907f0d6ea4f2a13f55c1f264e29ae59244b45596af28',
+    handlerHash: '800765ba855e1e4a93d5bb7a6fce558ec5e369ed416bfb763047305c5d7f40ca',
   },
   {
     id: 'ai.classify',
@@ -43,6 +43,14 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   {
     id: 'data.dedupe',
     handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
+  },
+  {
+    id: 'data.filter',
+    handlerHash: '829a245561a33b2f8349755a4ff6b4a2953774b6f862a7a0228b93f517742c9a',
+  },
+  {
+    id: 'data.find',
+    handlerHash: 'b23058c153f427b8a8cb4a9ee1ed8c06881e3d2ed291ea7e78846e113aa0301d',
   },
   {
     id: 'data.map',
