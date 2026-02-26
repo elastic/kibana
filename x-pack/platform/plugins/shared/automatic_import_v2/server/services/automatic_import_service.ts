@@ -305,7 +305,8 @@ export class AutomaticImportService {
   ): Promise<BuildIntegrationPackageResult> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
     const integration = await this.savedObjectService.getIntegration(integrationId);
-    return buildIntegrationPackage(integration);
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+    return buildIntegrationPackage(integration, dataStreams);
   }
 
   public async createDataStream(

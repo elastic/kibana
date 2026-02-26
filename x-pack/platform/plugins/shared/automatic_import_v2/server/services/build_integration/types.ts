@@ -39,3 +39,28 @@ export interface IntegrationManifest {
     type: string;
   };
 }
+
+export interface DataStreamManifestVar {
+  name: string;
+  type: string;
+  title: string;
+  description?: string;
+  multi?: boolean;
+  required?: boolean;
+  show_user?: boolean;
+  default?: unknown;
+}
+
+export interface DataStreamManifestStream {
+  input: string;
+  template_path: string;
+  title: string;
+  description: string;
+  vars: DataStreamManifestVar[];
+}
+
+export interface DataStreamManifest {
+  title: string;
+  type: string;
+  streams: DataStreamManifestStream[];
+}
