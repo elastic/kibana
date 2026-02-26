@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
+import { createRuleSoAttributes } from '../test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -41,23 +42,6 @@ import {
 } from './steps';
 import type { AlertEpisode, AlertEpisodeSuppression } from './types';
 
-const createMockRuleSoAttributes = (
-  overrides: Partial<RuleSavedObjectAttributes> = {}
-): RuleSavedObjectAttributes => ({
-  kind: 'alert',
-  metadata: { name: 'Test rule' },
-  time_field: '@timestamp',
-  schedule: { every: '1m' },
-  evaluation: { query: { base: 'FROM logs-*' } },
-  notification_policies: [{ ref: 'policy_456' }],
-  enabled: true,
-  createdBy: null,
-  updatedBy: null,
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-  ...overrides,
-});
-
 const createMockRulesSoService = (
   ruleIds: string[],
   overrides?: Partial<RuleSavedObjectAttributes>
@@ -65,7 +49,10 @@ const createMockRulesSoService = (
   bulkGetByIds: jest.fn().mockResolvedValue(
     ruleIds.map((id) => ({
       id,
-      attributes: createMockRuleSoAttributes(overrides),
+      attributes: createRuleSoAttributes({
+        notification_policies: [{ ref: 'policy_456' }],
+        ...overrides,
+      }),
     }))
   ),
   create: jest.fn(),
