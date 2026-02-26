@@ -25,6 +25,13 @@ When guidance from different sources conflicts:
 
 - **ON FLAKY TESTS:** flaky-test-doctor (co-located in this plugin's `.agents/skills/`, when source test is flaky/skipped)
 
+## Triage: flakiness risk assessment (Gate 4)
+
+The general skill's Gate 4 has two parts — use the flaky-test-doctor for deeper analysis:
+
+- **Gate 4a (current status):** If the test is skipped or known-flaky, read the `flaky-test-doctor` skill and follow its analysis framework (Steps 0-5) to determine root cause before deciding whether to migrate, fix, or delete.
+- **Gate 4b (risk scan):** Use the general skill's `references/flakiness-risk-patterns.md` for the pattern catalog. Additionally, check the flaky-test-doctor's `references/common-flaky-patterns.md` for Cypress-specific anti-patterns — if any are present in the source test, they indicate app-level timing issues that should be fixed before migration, not papered over in the Scout rewrite.
+
 ## Security Solution paths and packages
 
 | What | Path / Package |
@@ -153,3 +160,5 @@ Ensure ALL of these are cleaned in `afterAll`/`afterEach`.
 - Missing `loginAsPlatformEngineer()` — don't default to `loginAsAdmin()` when platform_engineer suffices
 - Not cleaning Security-specific resources (Risk Engine, Entity Store, detection rules)
 - Following general Scout conventions over Security Solution conventions when they conflict
+- Migrating a flaky/skipped test without running the flaky-test-doctor analysis first — you may port an app bug into Scout
+- Ignoring Gate 4b risk patterns in Cypress tasks/screens — flakiness hides in shared helpers, not just the test file

@@ -90,12 +90,31 @@ Delete without migrating if the test:
 - Has been skipped for 3+ months with no progress
 - Tests deprecated or soon-to-be-removed functionality
 
-### Gate 4: Is it flaky?
+### Gate 4: Flakiness risk assessment
 
-If currently skipped or chronically flaky:
+Two checks — current status and source code risk scan.
+
+#### 4a: Current status
+
+If the test is currently skipped (`.skip`, `@skipInServerless`, etc.) or chronically flaky:
 1. Determine if flakiness is a test problem or an app bug
 2. App bug → fix the app first, then write the Scout test
 3. Cypress-specific issue (timing, selectors) → migrate with proper patterns
+
+If the solution has a flaky-test-doctor skill, use it for deeper root cause analysis.
+
+#### 4b: Source code risk scan
+
+Even if the Cypress test passes reliably today, its source code may contain patterns that would produce a flaky Scout test. Scan the Cypress file **and its imported tasks/screens** against the pattern catalog in `references/flakiness-risk-patterns.md`.
+
+| Risk level | Action |
+|------------|--------|
+| No risky patterns | Proceed to migration |
+| Medium-risk patterns | Proceed — address each pattern during rewrite (note planned remediation) |
+| High/critical-risk patterns | Assess effort — may be simpler to write the test from scratch |
+| App-level timing issues detected | Fix the app first, then write the Scout test |
+
+For tests with 3+ critical/high-risk patterns, strongly consider writing the Scout test from scratch using the feature spec rather than porting the Cypress logic.
 
 ## PR strategy
 
@@ -204,6 +223,7 @@ After the Scout test is verified:
 - Porting Cypress code line-by-line instead of rewriting with Scout patterns
 - Migrating tests that belong at API/unit layer
 - Forgetting triage gates and migrating flaky/invalid/duplicate tests
+- Skipping the Gate 4b risk scan — Cypress patterns that seem harmless produce flaky Scout tests
 - Using `page.waitForTimeout()` — forbidden, same as `cy.wait(ms)`
 - Missing Scout tags (validated at runtime)
 - Using `esArchiver` for system indices (use `kbnClient`)
@@ -219,3 +239,4 @@ Open only what you need:
 
 - Key differences between Cypress and Scout (auth, CI, MKI, tags, execution model): `references/cypress-vs-scout-differences.md`
 - Best practices for writing Scout tests (fixtures, page objects, parallelism): `references/migration-best-practices.md`
+- Flakiness risk patterns to scan for during Gate 4b (hard-coded waits, missing cleanup, force clicks, etc.): `references/flakiness-risk-patterns.md`
