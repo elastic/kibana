@@ -18,13 +18,15 @@ test.describe('Core Web Vitals', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('Check Core Web Vitals labels', async () => {
+      await page.testSubj.locator('lcp-core-vital').scrollIntoViewIfNeeded();
+      await pageObjects.uxDashboard.waitForChartData();
       await expect(page.getByText('Largest contentful paint')).toBeVisible();
       await expect(page.getByText('Interaction to next paint')).toBeVisible();
       await expect(page.getByText('Cumulative layout shift')).toBeVisible();
     });
 
     await test.step('Check traffic summary', async () => {
-      const cwvSummary = page.getByText('of the traffic represented');
+      const cwvSummary = page.testSubj.locator('uxCoreVitalsTrafficSummary');
       await expect(cwvSummary).toBeVisible();
       await expect(cwvSummary).toHaveText(/[0-9]{1,3}% of the traffic represented/);
     });
