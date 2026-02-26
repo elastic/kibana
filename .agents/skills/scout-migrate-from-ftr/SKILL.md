@@ -62,8 +62,8 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
    - For staged migrations, mark the remaining FTR suite as `describe.skip` to avoid duplicate coverage.
 9. Verify tests pass locally (look at tags to see where they should be run).
 
-- Use `node scripts/scout.js run-tests --stateful --testFiles <path>` and
-  `node scripts/scout.js run-tests --serverless=oblt --testFiles <path>` (adjust serverless target).
+- Use `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>` and
+  `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
 - If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config dir from the Playwright config path (use `--config-dir <configSet>` only to override, or when using `start-server`).
 
 ## Common patterns
