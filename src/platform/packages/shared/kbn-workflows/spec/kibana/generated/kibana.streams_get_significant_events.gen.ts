@@ -40,6 +40,7 @@ Read the significant events<br/><br/>[Required authorization] Route required pri
   patterns: ['/api/streams/{name}/significant_events'],
   documentation:
     'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams-name-significant-events',
+  stability: 'tech_preview',
   parameterTypes: {
     headerParams: [],
     pathParams: ['name'],

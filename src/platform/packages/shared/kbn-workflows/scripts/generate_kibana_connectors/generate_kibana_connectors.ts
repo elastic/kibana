@@ -37,6 +37,7 @@ import {
   getRequestSchemaName,
   getResponseSchemaName,
   getSchemaNamePrefix,
+  parseXState,
   StaticImports,
   toSnakeCase,
 } from '../shared';
@@ -287,6 +288,8 @@ function generateContractMetasFromPath(
       ...(outputSchemaString.includes(responseName) ? [responseName] : []),
     ];
 
+    const stability = parseXState(operation);
+
     contractMetas.push({
       type,
       summary,
@@ -294,6 +297,7 @@ function generateContractMetasFromPath(
       methods: [method.toUpperCase() as HttpMethod],
       patterns: [path],
       documentation: getDocumentationUrl(operation),
+      stability,
       parameterTypes,
 
       fileName: `kibana.${toSnakeCase(camelToSnake(typeBaseName))}.gen.ts`,

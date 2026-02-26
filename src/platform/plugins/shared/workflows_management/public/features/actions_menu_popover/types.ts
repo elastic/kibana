@@ -15,6 +15,7 @@ interface ActionBase {
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
+  isTechPreview?: boolean;
 }
 
 export interface ActionGroup extends ActionBase {

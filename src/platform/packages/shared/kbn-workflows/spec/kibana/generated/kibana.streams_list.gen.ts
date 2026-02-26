@@ -39,6 +39,7 @@ Fetches list of all streams<br/><br/>[Required authorization] Route required pri
   methods: ['GET'],
   patterns: ['/api/streams'],
   documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams',
+  stability: 'tech_preview',
   parameterTypes: {
     headerParams: [],
     pathParams: [],

@@ -188,6 +188,54 @@ describe('getActionOptions', () => {
     }
   });
 
+  it('should mark kibana connectors with tech_preview stability as isTechPreview', () => {
+    const mockConnector = {
+      type: 'kibana.streams.list',
+      summary: 'Get stream list',
+      description: 'Fetches list of all streams',
+      methods: ['GET'],
+      patterns: ['/api/streams'],
+      stability: 'tech_preview' as const,
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(1);
+      const option = kibanaGroup.options[0];
+      expect(option.id).toBe('kibana.streams.list');
+      expect(option.isTechPreview).toBe(true);
+    }
+  });
+
+  it('should not mark kibana connectors without stability as isTechPreview', () => {
+    const mockConnector = {
+      type: 'kibana.saved_object',
+      summary: 'Kibana Saved Object',
+      description: 'A saved object',
+      methods: ['GET'],
+      patterns: ['/api/saved_objects'],
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(1);
+      const option = kibanaGroup.options[0];
+      expect(option.isTechPreview).toBeUndefined();
+    }
+  });
+
   it('should add dynamic connectors to external group', () => {
     const mockConnector = {
       type: 'slack.api',

@@ -39,6 +39,7 @@ Fetches a stream definition and associated dashboards<br/><br/>[Required authori
   methods: ['GET'],
   patterns: ['/api/streams/{name}'],
   documentation: 'https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-streams-name',
+  stability: 'tech_preview',
   parameterTypes: {
     headerParams: [],
     pathParams: ['name'],

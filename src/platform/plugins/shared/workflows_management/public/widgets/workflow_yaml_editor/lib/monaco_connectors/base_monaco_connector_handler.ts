@@ -8,6 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import type { ConnectorStability } from '@kbn/workflows';
 import type {
   ConnectorExamples,
   HoverContext,
@@ -137,6 +138,16 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     }
 
     return lines.join('\n');
+  }
+
+  /**
+   * Returns a markdown blockquote stability note when the connector is in technical preview.
+   */
+  protected getStabilityNote(stability: ConnectorStability | undefined): string {
+    if (stability === 'tech_preview') {
+      return `\n\n> ⚠️ **Technical Preview** — This functionality is in technical preview and may be changed or removed in a future release.`;
+    }
+    return '';
   }
 
   /**
