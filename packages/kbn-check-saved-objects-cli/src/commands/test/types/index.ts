@@ -11,7 +11,7 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import { OLD_TYPE_NO_MIGRATIONS } from './no_migrations';
 import { OLD_TYPE_WITH_MIGRATIONS } from './migrations';
-import { PERSON_SO_TYPE } from './person';
+import { PERSON_SO_TYPE_V1, PERSON_SO_TYPE_V2 } from './person';
 
 function createSavedObjectType<T>(properties: Partial<SavedObjectsType<T>>): SavedObjectsType<T> {
   return {
@@ -30,8 +30,15 @@ function createSavedObjectType<T>(properties: Partial<SavedObjectsType<T>>): Sav
   };
 }
 
-export const TEST_TYPES: SavedObjectsType<any>[] = [
+const COMMON_TEST_TYPES: Array<Partial<SavedObjectsType<any>>> = [
   OLD_TYPE_NO_MIGRATIONS,
   OLD_TYPE_WITH_MIGRATIONS,
-  PERSON_SO_TYPE,
-].map((partial) => createSavedObjectType(partial));
+];
+
+export const TEST_TYPES_V1: SavedObjectsType<any>[] = [...COMMON_TEST_TYPES, PERSON_SO_TYPE_V1].map(
+  (partial) => createSavedObjectType(partial)
+);
+
+export const TEST_TYPES_V2: SavedObjectsType<any>[] = [...COMMON_TEST_TYPES, PERSON_SO_TYPE_V2].map(
+  (partial) => createSavedObjectType(partial)
+);

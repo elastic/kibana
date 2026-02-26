@@ -8,30 +8,16 @@
  */
 
 import type { ListrTask } from 'listr2';
-import { resolve } from 'path';
 import type { Task, TaskContext } from '../types';
-import { TEST_TYPES, getTestSnapshots } from '../test';
-import { updateBaselineHashes } from '../../util';
+import { TEST_TYPES_V2, getTestSnapshots } from '../test';
 import { validateSOChanges } from './validate_so_changes';
 
 export const validateTestFlow: Task = (ctx, task) => {
-  const baselineSnapshotPath = resolve(__dirname, '../test/baseline_snapshot.json');
   const subtasks: ListrTask<TaskContext>[] = [
-    {
-      title: 'Refresh baseline snapshot hashes',
-      task: async (_, subtask) => {
-        const { updated, path } = await updateBaselineHashes(TEST_TYPES, baselineSnapshotPath);
-        if (updated.length > 0) {
-          subtask.title += `: Updated hashes for ${
-            updated.length
-          } type(s) in baseline_snapshot.json: ${updated.join(', ')}; file: ${path}`;
-        }
-      },
-    },
     {
       title: 'Obtain type registry (test mode)',
       task: async () => {
-        ctx.registeredTypes = TEST_TYPES;
+        ctx.registeredTypes = TEST_TYPES_V2;
       },
     },
     {
