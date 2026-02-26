@@ -1,0 +1,1 @@
+zip -r -FS elastic-agent.zip AGENT-elasticsearch-append.md .elasticsearch-agent
