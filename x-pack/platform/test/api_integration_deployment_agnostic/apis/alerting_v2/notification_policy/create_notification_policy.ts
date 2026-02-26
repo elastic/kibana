@@ -38,7 +38,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send({
           name: 'my-policy',
           description: 'my-policy description',
-          workflow_id: 'my-workflow-id',
+          destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
+          matcher: "env == 'production' && region == 'us-east-1'",
+          group_by: ['service.name', 'environment'],
+          throttle: { interval: '1m' },
         });
 
       expect(response.status).to.be(200);
@@ -46,7 +49,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.version).to.be.a('string');
       expect(response.body.name).to.be('my-policy');
       expect(response.body.description).to.be('my-policy description');
-      expect(response.body.workflow_id).to.be('my-workflow-id');
+      expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'my-workflow-id' }]);
+      expect(response.body.matcher).to.be("env == 'production' && region == 'us-east-1'");
+      expect(response.body.group_by).to.eql(['service.name', 'environment']);
+      expect(response.body.throttle).to.eql({ interval: '1m' });
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
     });
@@ -61,14 +67,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send({
           name: 'another-policy',
           description: 'another-policy description',
-          workflow_id: 'another-workflow-id',
+          destinations: [{ type: 'workflow', id: 'another-workflow-id' }],
+          matcher: "env == 'staging' && region == 'eu-west-1'",
+          group_by: ['kubernetes.namespace'],
+          throttle: { interval: '5m' },
         });
 
       expect(response.status).to.be(200);
       expect(response.body.id).to.be(customId);
       expect(response.body.name).to.be('another-policy');
       expect(response.body.description).to.be('another-policy description');
-      expect(response.body.workflow_id).to.be('another-workflow-id');
+      expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'another-workflow-id' }]);
+      expect(response.body.matcher).to.be("env == 'staging' && region == 'eu-west-1'");
+      expect(response.body.group_by).to.eql(['kubernetes.namespace']);
+      expect(response.body.throttle).to.eql({ interval: '5m' });
     });
 
     it('should return 409 when creating a notification policy with an existing id', async () => {
@@ -79,7 +91,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${existingId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'policy-1', description: 'policy-1 description', workflow_id: 'workflow-1' });
+        .send({
+          name: 'policy-1',
+          description: 'policy-1 description',
+          destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        });
 
       expect(firstResponse.status).to.be(200);
 
@@ -88,7 +104,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(`${NOTIFICATION_POLICY_API_PATH}/${existingId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'policy-2', description: 'policy-2 description', workflow_id: 'workflow-2' });
+        .send({
+          name: 'policy-2',
+          description: 'policy-2 description',
+          destinations: [{ type: 'workflow', id: 'workflow-2' }],
+        });
 
       expect(secondResponse.status).to.be(409);
     });
@@ -98,7 +118,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ description: 'my-policy description', workflow_id: 'my-workflow-id' });
+        .send({
+          description: 'my-policy description',
+          destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
+        });
 
       expect(response.status).to.be(400);
     });
@@ -108,17 +131,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ name: 'my-policy', workflow_id: 'my-workflow-id' });
+        .send({
+          name: 'my-policy',
+          destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
+        });
 
       expect(response.status).to.be(400);
     });
 
-    it('should return 400 when workflow_id is missing', async () => {
+    it('should return 400 when destinations are missing', async () => {
       const response = await supertestWithoutAuth
         .post(NOTIFICATION_POLICY_API_PATH)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({ name: 'my-policy', description: 'my-policy description' });
+
+      expect(response.status).to.be(400);
+    });
+
+    it('should return 400 when throttle interval is invalid', async () => {
+      const response = await supertestWithoutAuth
+        .post(NOTIFICATION_POLICY_API_PATH)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          name: 'my-policy',
+          description: 'my-policy description',
+          destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
+          throttle: { interval: 'invalid-interval' },
+        });
 
       expect(response.status).to.be(400);
     });
