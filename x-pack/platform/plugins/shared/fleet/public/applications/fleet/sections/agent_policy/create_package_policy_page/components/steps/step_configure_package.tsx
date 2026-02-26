@@ -25,7 +25,12 @@ import {
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
-import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
+import type {
+  PackageInfo,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  RegistryInput,
+} from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
