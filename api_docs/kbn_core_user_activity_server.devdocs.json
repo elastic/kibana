@@ -185,7 +185,7 @@
               "Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search'"
             ],
             "signature": [
-              "\"dashboard_created\""
+              "\"user_logged_in\""
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
             "lineNumber": 56,
@@ -428,10 +428,10 @@
           "Closed union derived from the keys of {@link userActivityActions}. @public"
         ],
         "signature": [
-          "\"dashboard_created\""
+          "\"user_logged_in\""
         ],
         "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
-        "lineNumber": 40,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -472,7 +472,7 @@
           "\nCentral registry of all known user-activity actions.\nTo add a new action, add an entry with a `description`, `ownerTeam`, `groupName` and `versionAddedAt`."
         ],
         "signature": [
-          "{ readonly dashboard_created: { readonly description: \"[THIS IS AN EXAMPLE AND WILL BE REMOVED LATER] User created a dashboard in Kibana.\"; readonly ownerTeam: \"@elastic/kibana-core\"; readonly groupName: \"Dashboards\"; readonly versionAddedAt: \"9.4\"; }; }"
+          "{ readonly user_logged_in: { readonly description: \"User logged in to Kibana.\"; readonly ownerTeam: \"@elastic/kibana-core\"; readonly groupName: \"Authentication\"; readonly versionAddedAt: \"9.4\"; }; }"
         ],
         "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
         "lineNumber": 30,
