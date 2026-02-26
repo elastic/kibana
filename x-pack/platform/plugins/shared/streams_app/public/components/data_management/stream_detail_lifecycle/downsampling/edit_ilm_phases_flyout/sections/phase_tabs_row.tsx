@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import {
@@ -45,6 +45,26 @@ export const PhaseTabsRow = ({
 }: PhaseTabsRowProps) => {
   const tabsScrollCss = useEuiOverflowScroll('x', true);
   const { tabsErrorSelectedUnderlineStyles } = useStyles();
+  const tabsContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!selectedPhase) return;
+    const containerEl = tabsContainerRef.current;
+    if (!containerEl) return;
+
+    // Wait for EuiTabs/EuiTab to render before attempting to scroll
+    const id = window.requestAnimationFrame(() => {
+      const selector = `[data-test-subj="${dataTestSubj}Tab-${selectedPhase}"]`;
+      const selectedTabEl = containerEl.querySelector<HTMLElement>(selector);
+      selectedTabEl?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    });
+
+    return () => window.cancelAnimationFrame(id);
+  }, [dataTestSubj, enabledPhases.length, selectedPhase]);
 
   const canSelectFrozen = canCreateRepository || searchableSnapshotRepositories.length > 0;
   const excludedPhases = useMemo(
@@ -88,7 +108,11 @@ export const PhaseTabsRow = ({
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={false} css={[tabsScrollCss, tabsErrorSelectedUnderlineStyles]}>
+      <EuiFlexItem
+        grow={false}
+        ref={tabsContainerRef}
+        css={[tabsScrollCss, tabsErrorSelectedUnderlineStyles]}
+      >
         <EuiTabs bottomBorder={false}>{tabs}</EuiTabs>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

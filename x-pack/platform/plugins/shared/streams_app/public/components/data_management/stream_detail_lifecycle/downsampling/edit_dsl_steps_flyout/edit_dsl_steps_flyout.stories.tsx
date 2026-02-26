@@ -111,10 +111,10 @@ export const StepSyncing: Story = {
       const [isOpen, setIsOpen] = useState(false);
       const [steps, setSteps] = useState<IngestStreamLifecycleDSL>({
         dsl: {
-          data_retention: '30d',
+          data_retention: '90d',
           downsample: [
-            { after: '30d', fixed_interval: '1h' },
-            { after: '40d', fixed_interval: '5d' },
+            { after: '1h', fixed_interval: '1h' },
+            { after: '2h', fixed_interval: '2h' },
           ],
         },
       });
