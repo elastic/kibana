@@ -70,6 +70,64 @@ describe('UsersGridPage', () => {
     });
   });
 
+  it('renders the loading indication on the table when fetching user with data', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockResolvedValue([
+      {
+        username: 'foo',
+        email: 'foo@bar.net',
+        full_name: 'foo bar',
+        roles: ['kibana_user'],
+        enabled: true,
+      },
+      {
+        username: 'reserved',
+        email: 'reserved@bar.net',
+        full_name: '',
+        roles: ['superuser'],
+        enabled: true,
+        metadata: { _reserved: true },
+      },
+    ]);
+
+    const { container } = renderWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(container.querySelector('.euiBasicTable-loading')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(container.querySelector('.euiBasicTable-loading')).not.toBeInTheDocument();
+    });
+  });
+
+  it('renders the loading indication on the table when fetching user with no data', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockResolvedValue([]);
+
+    const { container } = renderWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+      />
+    );
+
+    expect(container.querySelector('.euiBasicTable-loading')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(container.querySelector('.euiBasicTable-loading')).not.toBeInTheDocument();
+    });
+  });
+
   it('generates valid links when usernames contain special characters', async () => {
     const apiClientMock = userAPIClientMock.create();
     apiClientMock.getUsers.mockResolvedValue([
