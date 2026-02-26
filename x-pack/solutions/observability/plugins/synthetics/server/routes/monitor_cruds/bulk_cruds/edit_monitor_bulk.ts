@@ -71,6 +71,24 @@ export const syncEditedMonitorBulk = async ({
 }) => {
   const { server, monitorConfigRepository } = routeContext;
 
+  // Compute expected policy IDs upfront
+  const referenceUpdates = monitorsToUpdate
+    .map(({ normalizedMonitor, decryptedPreviousMonitor }) => {
+      const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
+        (loc) => !loc.isServiceManaged
+      );
+      return {
+        monitorId: decryptedPreviousMonitor.id,
+        packagePolicyIds: monitorPrivateLocations.map(
+          (loc) => `${decryptedPreviousMonitor.id}-${loc.id}`
+        ),
+        savedObjectType: decryptedPreviousMonitor.type,
+      };
+    })
+    .filter((update) => update.packagePolicyIds.length > 0);
+
+  const namespace = spaceId !== routeContext.spaceId ? spaceId : undefined;
+
   try {
     const data = monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
       id: decryptedPreviousMonitor.id,
@@ -85,41 +103,15 @@ export const syncEditedMonitorBulk = async ({
     const [editedMonitorSavedObjects, editSyncResponse] = await Promise.all([
       monitorConfigRepository.bulkUpdate({
         monitors: data,
-        namespace: spaceId !== routeContext.spaceId ? spaceId : undefined,
+        namespace,
       }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
+      referenceUpdates.length > 0
+        ? monitorConfigRepository.bulkUpdatePackagePolicyReferences(referenceUpdates, namespace)
+        : Promise.resolve(),
     ]);
 
-    const { failedPolicyUpdates, publicSyncErrors, activePolicyIds } = editSyncResponse;
-
-    // Update monitor references with active package policies
-    // Policy IDs are in format: {configId}-{locationId}
-    if (activePolicyIds && activePolicyIds.length > 0) {
-      const monitorIds = monitorsToUpdate.map((m) => m.decryptedPreviousMonitor.id);
-      const policyIdsByMonitor = new Map<string, string[]>();
-
-      for (const policyId of activePolicyIds) {
-        // Find which monitor this policy belongs to by checking if policy ID starts with monitor ID
-        const monitorId = monitorIds.find((id) => policyId.startsWith(id + '-'));
-        if (monitorId) {
-          if (!policyIdsByMonitor.has(monitorId)) {
-            policyIdsByMonitor.set(monitorId, []);
-          }
-          policyIdsByMonitor.get(monitorId)!.push(policyId);
-        }
-      }
-
-      const updates = [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) => ({
-        monitorId,
-        packagePolicyIds: policyIds,
-        savedObjectType: monitorsToUpdate.find((m) => m.decryptedPreviousMonitor.id === monitorId)
-          ?.decryptedPreviousMonitor.type,
-      }));
-
-      const namespace = spaceId !== routeContext.spaceId ? spaceId : undefined;
-
-      await monitorConfigRepository.bulkUpdatePackagePolicyReferences(updates, namespace);
-    }
+    const { failedPolicyUpdates, publicSyncErrors } = editSyncResponse;
 
     monitorsToUpdate.forEach(({ normalizedMonitor, decryptedPreviousMonitor }) => {
       const editedMonitorSavedObject = editedMonitorSavedObjects?.saved_objects.find(

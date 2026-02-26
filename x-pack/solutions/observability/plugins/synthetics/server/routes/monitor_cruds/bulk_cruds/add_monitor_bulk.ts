@@ -55,6 +55,20 @@ export const syncNewMonitorBulk = async ({
     };
   });
 
+  // Compute expected policy IDs upfront
+  const referenceUpdates = monitorsToCreate
+    .map(({ id, monitor }) => {
+      const monitorPrivateLocations = monitor[ConfigKey.LOCATIONS].filter(
+        (loc) => !loc.isServiceManaged
+      );
+      return {
+        monitorId: id,
+        packagePolicyIds: monitorPrivateLocations.map((loc) => `${id}-${loc.id}`),
+        savedObjectType: query.savedObjectType,
+      };
+    })
+    .filter((update) => update.packagePolicyIds.length > 0);
+
   try {
     const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
       monitorConfigRepository.createBulk({
@@ -62,6 +76,9 @@ export const syncNewMonitorBulk = async ({
         savedObjectType: query.savedObjectType,
       }),
       syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
+      referenceUpdates.length > 0
+        ? monitorConfigRepository.bulkUpdatePackagePolicyReferences(referenceUpdates)
+        : Promise.resolve(),
     ]);
 
     let failedMonitors: FailedMonitorConfig[] = [];
@@ -72,32 +89,6 @@ export const syncNewMonitorBulk = async ({
 
     if (failedPolicies && failedPolicies?.length > 0 && newMonitors) {
       failedMonitors = await handlePrivateConfigErrors(routeContext, newMonitors, failedPolicies);
-    }
-
-    // Update monitor references with created package policies
-    // Policy IDs are in format: {configId}-{locationId}
-    if (policiesResult?.created && policiesResult.created.length > 0 && newMonitors) {
-      const monitorIds = monitorsToCreate.map((m) => m.id);
-      const policyIdsByMonitor = new Map<string, string[]>();
-
-      for (const policy of policiesResult.created) {
-        // Find which monitor this policy belongs to by checking if policy ID starts with monitor ID
-        const monitorId = monitorIds.find((id) => policy.id.startsWith(id + '-'));
-        if (monitorId) {
-          if (!policyIdsByMonitor.has(monitorId)) {
-            policyIdsByMonitor.set(monitorId, []);
-          }
-          policyIdsByMonitor.get(monitorId)!.push(policy.id);
-        }
-      }
-
-      const updates = [...policyIdsByMonitor.entries()].map(([monitorId, policyIds]) => ({
-        monitorId,
-        packagePolicyIds: policyIds,
-        savedObjectType: query.savedObjectType,
-      }));
-
-      await monitorConfigRepository.bulkUpdatePackagePolicyReferences(updates);
     }
 
     sendNewMonitorTelemetry(server, newMonitors, syncErrors);

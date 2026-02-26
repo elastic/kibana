@@ -76,8 +76,43 @@ export class SyntheticsPrivateLocation {
    * Format: `${configId}-${locationId}`
    * This removes the spaceId dependency to support multispace monitors.
    */
-  getPolicyId(config: { origin?: string; id: string }, locId: string, _spaceId?: string) {
+  getPolicyId(config: { origin?: string; id: string }, locId: string) {
     return `${config.id}-${locId}`;
+  }
+
+  getPolicyName(config: { id: string; origin?: string; name: string }, locName: string) {
+    if (config.origin === SourceType.PROJECT) {
+      return `${config.id}-${locName}`;
+    }
+    return `${config.name}-${locName}`;
+  }
+
+  /**
+   * Determines the policy status for a given monitor config and private location
+   * by inspecting existing policies.
+   */
+  getPolicyStatus(
+    config: { id: string },
+    locationId: string,
+    existingPolicies: Array<{ id: string }> | undefined
+  ): { hasNewFormatPolicy: boolean; hasAnyLegacyPolicy: boolean; legacyPolicyIds: string[] } {
+    const newId = this.getPolicyId(config, locationId);
+    const legacyIdPrefix = `${config.id}-${locationId}-`;
+
+    const hasNewFormatPolicy = existingPolicies?.some((policy) => policy.id === newId) ?? false;
+    // Note: prefix matching can produce false positives when monitor2.id === monitor1.id + '-' + locationId.
+    // e.g. Monitor 1 ID = "monitor-a", location = "loc-b" -> prefix = "monitor-a-loc-b-"
+    //      Monitor 2 ID = "monitor-a-loc-b" -> its legacy policies also start with "monitor-a-loc-b-"
+    // In that case, Monitor 2's legacy policies would be incorrectly matched and deleted during
+    // Monitor 1's edit, leaving Monitor 2 without a policy until the next sync task runs.
+    // This edge case only affects project monitors with custom IDs (UI monitors use UUIDs).
+    const legacyPolicyIds =
+      existingPolicies
+        ?.filter((policy) => policy.id.startsWith(legacyIdPrefix))
+        .map((policy) => policy.id) ?? [];
+    const hasAnyLegacyPolicy = legacyPolicyIds.length > 0;
+
+    return { hasNewFormatPolicy, hasAnyLegacyPolicy, legacyPolicyIds };
   }
 
   /**
@@ -87,6 +122,10 @@ export class SyntheticsPrivateLocation {
    */
   getLegacyPolicyId(configId: string, locId: string, spaceId: string) {
     return `${configId}-${locId}-${spaceId}`;
+  }
+
+  getLegacyPolicyIdsForAllSpaces(configId: string, locId: string, allSpaces: Set<string>) {
+    return [...allSpaces].map((space) => this.getLegacyPolicyId(configId, locId, space));
   }
 
   /**
@@ -129,7 +168,9 @@ export class SyntheticsPrivateLocation {
         spaces.add(bucket.key);
       });
     } catch (e) {
-      this.server.logger.error(`Error fetching spaces with monitors: ${e.message}`);
+      this.server.logger.error(
+        `Error fetching spaces with monitors. Legacy package policies will not be removed: ${e.message}`
+      );
     }
 
     return [...spaces];
@@ -157,11 +198,7 @@ export class SyntheticsPrivateLocation {
         newPolicy.name =
           config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
       } else {
-        if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
-          newPolicy.name = `${config.id}-${locName}`;
-        } else {
-          newPolicy.name = `${config[ConfigKey.NAME]}-${locName}`;
-        }
+        newPolicy.name = this.getPolicyName(config, locName);
       }
       const configNamespace = config[ConfigKey.NAMESPACE];
 
@@ -358,14 +395,11 @@ export class SyntheticsPrivateLocation {
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
         const newId = this.getPolicyId(config, privateLocation.id);
-        const legacyIdPrefix = `${config.id}-${privateLocation.id}-`;
-
-        const hasNewFormatPolicy = existingPolicies?.some((policy) => policy.id === newId);
-        const legacyPolicyIds =
+        const { hasNewFormatPolicy, hasAnyLegacyPolicy, legacyPolicyIds } = this.getPolicyStatus(
+          config,
+          privateLocation.id,
           existingPolicies
-            ?.filter((policy) => policy.id.startsWith(legacyIdPrefix) && policy.id !== newId)
-            .map((policy) => policy.id) || [];
-        const hasAnyLegacyPolicy = legacyPolicyIds.length > 0;
+        );
         const hasPolicy = hasNewFormatPolicy || hasAnyLegacyPolicy;
 
         try {
@@ -434,14 +468,8 @@ export class SyntheticsPrivateLocation {
       };
     });
 
-    const activePolicyIds = [
-      ...policiesToCreate.map((p) => p.id),
-      ...policiesToUpdate.map((p) => p.id),
-    ].filter((id): id is string => id !== undefined);
-
     return {
       failedUpdates,
-      activePolicyIds,
     };
   }
 
@@ -463,9 +491,9 @@ export class SyntheticsPrivateLocation {
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
         policyIdsToFetch.add(this.getPolicyId(config, privateLocation.id));
-        for (const space of allSpaces) {
-          policyIdsToFetch.add(this.getLegacyPolicyId(config.id, privateLocation.id, space));
-        }
+        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
+          (id) => policyIdsToFetch.add(id)
+        );
       }
     }
 
@@ -539,9 +567,9 @@ export class SyntheticsPrivateLocation {
 
       for (const privateLocation of monitorPrivateLocations) {
         policyIdsToDelete.add(this.getPolicyId(config, privateLocation.id));
-        for (const space of allSpaces) {
-          policyIdsToDelete.add(this.getLegacyPolicyId(config.id, privateLocation.id, space));
-        }
+        this.getLegacyPolicyIdsForAllSpaces(config.id, privateLocation.id, allSpaces).forEach(
+          (id) => policyIdsToDelete.add(id)
+        );
       }
     }
 

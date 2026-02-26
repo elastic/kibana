@@ -44,28 +44,26 @@ describe('syncNewMonitorBulk', () => {
   });
 
   describe('package policy references', () => {
-    it('should update monitor references with created package policies', async () => {
+    it('should update references optimistically based on private locations', async () => {
       const normalizedMonitors = [
-        { name: 'Monitor 1', [ConfigKey.LOCATIONS]: [] },
-        { name: 'Monitor 2', [ConfigKey.LOCATIONS]: [] },
+        {
+          name: 'Monitor 1',
+          [ConfigKey.LOCATIONS]: [
+            { id: 'loc-1', isServiceManaged: false },
+            { id: 'loc-2', isServiceManaged: false },
+          ],
+        },
+        {
+          name: 'Monitor 2',
+          [ConfigKey.LOCATIONS]: [{ id: 'loc-1', isServiceManaged: false }],
+        },
       ] as any;
 
-      const createdMonitors = [
+      mockMonitorConfigRepository.createBulk.mockResolvedValue([
         { id: 'monitor-1', attributes: { name: 'Monitor 1' } },
         { id: 'monitor-2', attributes: { name: 'Monitor 2' } },
-      ];
-
-      const createdPolicies = [
-        { id: 'monitor-1-loc-1', name: 'Policy 1' },
-        { id: 'monitor-1-loc-2', name: 'Policy 2' },
-        { id: 'monitor-2-loc-1', name: 'Policy 3' },
-      ];
-
-      mockMonitorConfigRepository.createBulk.mockResolvedValue(createdMonitors);
-      mockSyntheticsMonitorClient.addMonitors.mockResolvedValue([
-        { created: createdPolicies, failed: [] },
-        [],
       ]);
+      mockSyntheticsMonitorClient.addMonitors.mockResolvedValue([{ created: [], failed: [] }, []]);
       mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences.mockResolvedValue({
         saved_objects: [],
       });
@@ -80,7 +78,6 @@ describe('syncNewMonitorBulk', () => {
       expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledTimes(
         1
       );
-
       expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledWith(
         expect.arrayContaining([
           {
@@ -97,8 +94,13 @@ describe('syncNewMonitorBulk', () => {
       );
     });
 
-    it('should not update references if no policies were created', async () => {
-      const normalizedMonitors = [{ name: 'Monitor 1', [ConfigKey.LOCATIONS]: [] }] as any;
+    it('should not update references when monitors have no private locations', async () => {
+      const normalizedMonitors = [
+        {
+          name: 'Monitor 1',
+          [ConfigKey.LOCATIONS]: [{ id: 'loc-1', isServiceManaged: true }],
+        },
+      ] as any;
 
       mockMonitorConfigRepository.createBulk.mockResolvedValue([
         { id: 'monitor-1', attributes: { name: 'Monitor 1' } },
@@ -113,45 +115,6 @@ describe('syncNewMonitorBulk', () => {
       });
 
       expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).not.toHaveBeenCalled();
-    });
-
-    it('should handle policies that do not match any monitor', async () => {
-      const normalizedMonitors = [{ name: 'Monitor 1', [ConfigKey.LOCATIONS]: [] }] as any;
-
-      mockMonitorConfigRepository.createBulk.mockResolvedValue([
-        { id: 'monitor-1', attributes: { name: 'Monitor 1' } },
-      ]);
-      mockSyntheticsMonitorClient.addMonitors.mockResolvedValue([
-        {
-          created: [
-            { id: 'monitor-1-loc-1', name: 'Policy 1' },
-            { id: 'unknown-monitor-loc-1', name: 'Orphan Policy' },
-          ],
-          failed: [],
-        },
-        [],
-      ]);
-      mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences.mockResolvedValue({
-        saved_objects: [],
-      });
-
-      await syncNewMonitorBulk({
-        routeContext: mockRouteContext,
-        normalizedMonitors,
-        privateLocations: [],
-        spaceId: 'default',
-      });
-
-      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledTimes(
-        1
-      );
-      expect(mockMonitorConfigRepository.bulkUpdatePackagePolicyReferences).toHaveBeenCalledWith([
-        {
-          monitorId: 'monitor-1',
-          packagePolicyIds: ['monitor-1-loc-1'],
-          savedObjectType: undefined,
-        },
-      ]);
     });
   });
 });

@@ -7,7 +7,12 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MonitorFields, HeartbeatConfig } from '../../../common/runtime_types';
-import { MonitorTypeEnum, ScheduleUnit, SourceType } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  ScheduleUnit,
+  SourceType,
+} from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
@@ -114,10 +119,10 @@ describe('SyntheticsPrivateLocation', () => {
       expect(result).toEqual('project-monitor-123-location-456');
     });
 
-    it('ignores spaceId parameter (backward compatibility)', () => {
+    it('does not include spaceId in policy ID (space-agnostic)', () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
       const config = { id: 'monitor-123', origin: SourceType.UI };
-      const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456', 'space-789');
+      const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456');
       expect(result).toEqual('monitor-123-location-456');
     });
   });
@@ -131,6 +136,31 @@ describe('SyntheticsPrivateLocation', () => {
         'space-789'
       );
       expect(result).toEqual('monitor-123-location-456-space-789');
+    });
+  });
+
+  describe('getPolicyName', () => {
+    it('returns correct policy name for UI monitors', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = {
+        ...testConfig,
+        [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
+        [ConfigKey.NAME]: 'My Monitor',
+      } as unknown as HeartbeatConfig;
+      const result = syntheticsPrivateLocation.getPolicyName(config, 'US East');
+      expect(result).toEqual('My Monitor-US East');
+    });
+
+    it('returns correct policy name for project monitors', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = {
+        ...testConfig,
+        id: 'project-monitor-123',
+        [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+        [ConfigKey.NAME]: 'My Monitor',
+      } as unknown as HeartbeatConfig;
+      const result = syntheticsPrivateLocation.getPolicyName(config, 'US East');
+      expect(result).toEqual('project-monitor-123-US East');
     });
   });
 

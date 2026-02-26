@@ -90,9 +90,20 @@ export class AddEditMonitorAPI {
         spaceId
       );
 
+      // Compute expected policy IDs upfront
+      const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
+        (loc) => !loc.isServiceManaged
+      );
+      const packagePolicyIds = monitorPrivateLocations.map((loc) => `${newMonitorId}-${loc.id}`);
+
       const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
         newMonitorPromise,
         syncErrorsPromise,
+        packagePolicyIds.length > 0
+          ? this.routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences([
+              { monitorId: newMonitorId, packagePolicyIds, savedObjectType },
+            ])
+          : Promise.resolve(),
       ]);
 
       if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
@@ -101,17 +112,6 @@ export class AddEditMonitorAPI {
       }
 
       monitorSavedObject = monitorSavedObjectN;
-
-      if (packagePolicyResult?.created && packagePolicyResult.created.length > 0) {
-        const policyIds = packagePolicyResult.created.map((policy) => policy.id);
-        await this.routeContext.monitorConfigRepository.bulkUpdatePackagePolicyReferences([
-          {
-            monitorId: newMonitorId,
-            packagePolicyIds: policyIds,
-            savedObjectType,
-          },
-        ]);
-      }
 
       sendTelemetryEvents(
         server.logger,

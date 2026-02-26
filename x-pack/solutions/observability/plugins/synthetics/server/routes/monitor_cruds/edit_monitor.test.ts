@@ -86,17 +86,29 @@ describe('syncEditedMonitor', () => {
     );
   });
 
-  it('updates monitor references with active package policies', async () => {
-    const activePolicyIds = ['7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1'];
+  it('updates monitor references optimistically for private locations', async () => {
+    const monitorWithPrivateLocation = {
+      ...editedMonitor,
+      locations: [
+        { id: 'loc-1', label: 'loc-1', agentPolicyId: 'agent-1', isServiceManaged: false },
+      ],
+    } as unknown as SyntheticsMonitor;
+
+    (serverMock.authSavedObjectsClient?.update as jest.Mock).mockResolvedValue({
+      id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      type: 'synthetics-monitor',
+      attributes: {},
+      references: [],
+    });
 
     routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
       failedPolicyUpdates: [],
       publicSyncErrors: [],
-      activePolicyIds,
+      activePolicyIds: [],
     });
 
     await syncEditedMonitor({
-      normalizedMonitor: editedMonitor,
+      normalizedMonitor: monitorWithPrivateLocation,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
       routeContext,
@@ -108,19 +120,14 @@ describe('syncEditedMonitor', () => {
     ).toHaveBeenCalledWith([
       {
         monitorId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
-        packagePolicyIds: activePolicyIds,
+        packagePolicyIds: ['7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1'],
         savedObjectType: 'synthetics-monitor',
       },
     ]);
   });
 
-  it('does not update references when no active policies are returned', async () => {
-    routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
-      failedPolicyUpdates: [],
-      publicSyncErrors: [],
-      activePolicyIds: [],
-    });
-
+  it('does not update references when monitor has no private locations', async () => {
+    // editedMonitor only has a service-managed (public) location
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
       decryptedPreviousMonitor:
