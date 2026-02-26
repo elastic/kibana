@@ -14,8 +14,23 @@ export {
   type DataDedupeStepOutputSchema,
 } from './data_dedupe_step';
 export {
+  DataFilterStepTypeId,
+  dataFilterStepCommonDefinition,
+  type DataFilterStepInputSchema,
+  type DataFilterStepOutputSchema,
+} from './data_filter_step';
+export {
+  DataFindStepTypeId,
+  dataFindStepCommonDefinition,
+  type DataFindStepInputSchema,
+  type DataFindStepOutputSchema,
+} from './data_find_step';
+export {
   DataMapStepTypeId,
   dataMapStepCommonDefinition,
+  MAP_DIRECTIVE,
+  type FieldsNode,
+  type MapDirectiveValue,
   type DataMapStepInputSchema,
   type DataMapStepOutputSchema,
 } from './data_map_step';

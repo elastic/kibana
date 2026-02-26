@@ -41,4 +41,6 @@ export const connectorTypes: string[] = [
   '.cases',
   '.workflows',
   '.observability-ai-assistant',
+  '.http',
+  '.http-system',
 ];
