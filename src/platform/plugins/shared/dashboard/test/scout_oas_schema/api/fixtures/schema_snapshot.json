@@ -506,6 +506,74 @@
     "additionalProperties": false
   },
   {
+    "description": "Lens embeddable schema",
+    "anyOf": [
+      {
+        "additionalProperties": true,
+        "description": "Lens by-value embeddable schema",
+        "properties": {
+          "attributes": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/metricChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/legacyMetricChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/xyChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/gaugeChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/heatmapChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/tagcloudChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/regionMapChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/datatableChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/pieChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/mosaicChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/treemapChartSchema"
+              },
+              {
+                "$ref": "#/components/schemas/waffleChartSchema"
+              }
+            ]
+          }
+        },
+        "required": [
+          "attributes"
+        ],
+        "type": "object"
+      },
+      {
+        "additionalProperties": true,
+        "description": "Lens by-ref embeddable schema",
+        "properties": {
+          "savedObjectId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "savedObjectId"
+        ],
+        "type": "object"
+      }
+    ]
+  },
+  {
     "type": "object",
     "properties": {},
     "additionalProperties": true

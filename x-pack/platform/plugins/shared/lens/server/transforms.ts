@@ -45,7 +45,12 @@ const lensByValuePanelSchema = schema.object(
     // TODO: add missing config properties
     attributes: lensApiStateSchema,
   },
-  { unknowns: 'allow' }
+  {
+    unknowns: 'allow',
+    meta: {
+      description: 'Lens by-value embeddable schema',
+    },
+  }
 );
 
 const lensByRefPanelSchema = schema.object(
@@ -53,7 +58,16 @@ const lensByRefPanelSchema = schema.object(
     // TODO: add missing config properties
     savedObjectId: schema.string(),
   },
-  { unknowns: 'allow' }
+  {
+    unknowns: 'allow',
+    meta: {
+      description: 'Lens by-ref embeddable schema',
+    },
+  }
 );
 
-export const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSchema]);
+export const lensPanelSchema = schema.oneOf([lensByValuePanelSchema, lensByRefPanelSchema], {
+  meta: {
+    description: 'Lens embeddable schema',
+  },
+});
