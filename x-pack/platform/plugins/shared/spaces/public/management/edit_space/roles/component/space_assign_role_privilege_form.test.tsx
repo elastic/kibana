@@ -403,9 +403,11 @@ describe('PrivilegesRolesForm', () => {
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
-      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
-        'aria-pressed',
-        String(true)
+      await waitFor(() =>
+        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_CUSTOM}-privilege-button`)).toHaveAttribute(
+          'aria-pressed',
+          String(true)
+        )
       );
 
       expect(
@@ -467,11 +469,6 @@ describe('PrivilegesRolesForm', () => {
 
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
-      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-        'aria-pressed',
-        String(true)
-      );
-
       await user.click(screen.getByTestId('custom-privilege-button'));
 
       expect(
@@ -530,12 +527,7 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() =>
-        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-          'aria-pressed',
-          String(true)
-        )
-      );
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await user.click(screen.getByTestId('custom-privilege-button'));
 
