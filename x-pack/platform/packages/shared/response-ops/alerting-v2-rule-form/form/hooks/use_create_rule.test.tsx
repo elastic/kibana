@@ -66,7 +66,7 @@ describe('useCreateRule', () => {
     evaluation: {
       query: {
         base: 'FROM logs | LIMIT 10',
-        condition: '',
+        condition: undefined,
       },
     },
     grouping: { fields: ['host.name'] },
@@ -368,7 +368,7 @@ describe('useCreateRule', () => {
       evaluation: {
         query: {
           base: 'FROM metrics | WHERE cpu > 90',
-          condition: '',
+          condition: undefined,
         },
       },
       grouping: { fields: ['host.name', 'service.name'] },
