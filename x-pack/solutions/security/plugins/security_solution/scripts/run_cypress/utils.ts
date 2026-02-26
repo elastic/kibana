@@ -33,8 +33,15 @@ const FILTERED_RUNNER_WEIGHTS: Record<string, number> = {
 };
 
 /**
+ * Minimum weight for any spec file. Even a 1-test spec incurs Cypress boot,
+ * browser init, and test setup overhead that typically takes 30-60s.
+ */
+const MIN_SPEC_WEIGHT = 3;
+
+/**
  * Estimate spec file weight for load-balanced ordering across parallel CI agents.
  * Weight = inline `it(` count + estimated dynamic tests from shared runners.
+ * A minimum floor is applied so single-test specs with heavy setup aren't underweighted.
  */
 const getSpecFileWeight = (filePath: string): number => {
   try {
@@ -57,9 +64,9 @@ const getSpecFileWeight = (filePath: string): number => {
       }
     }
 
-    return testCount;
+    return Math.max(testCount, MIN_SPEC_WEIGHT);
   } catch {
-    return 0;
+    return MIN_SPEC_WEIGHT;
   }
 };
 
@@ -108,11 +115,19 @@ export const retrieveIntegrations = (integrationsPaths: string[]) => {
 };
 
 /**
- * Stack setup cost expressed in weight units (~4 min setup ≈ 22 weight units at ~0.18 min/weight).
- * Used by the config-aware load balancer to penalize assigning a spec whose ftrConfig
- * would require spinning up an additional stack on the target agent.
+ * Stack setup cost expressed in weight units. Each distinct ftrConfig requires a
+ * full ES + Kibana + Fleet stack setup (~4 min). Raising this penalty makes the
+ * LB more aggressive about keeping specs with the same config together.
  */
-const SETUP_COST_WEIGHT = 22;
+const SETUP_COST_WEIGHT = 40;
+
+/**
+ * Per-spec overhead in weight units. Each additional spec on an agent adds Cypress
+ * boot, browser init, and test framework overhead (~20-30s) that isn't captured
+ * by the test-count-based weight. This prevents agents from accumulating too many
+ * specs even when individual weights are small.
+ */
+const PER_SPEC_OVERHEAD = 3;
 
 /**
  * Config-aware spec distribution for parallel CI agents.
@@ -160,7 +175,12 @@ export const retrieveIntegrationsConfigAware = (integrationsPaths: string[]): st
 
   const getAgentCost = (agent: (typeof agents)[number], specConfigKey: string): number => {
     const newConfigPenalty = agent.configs.has(specConfigKey) ? 0 : SETUP_COST_WEIGHT;
-    return agent.totalWeight + agent.configs.size * SETUP_COST_WEIGHT + newConfigPenalty;
+    return (
+      agent.totalWeight +
+      agent.paths.length * PER_SPEC_OVERHEAD +
+      agent.configs.size * SETUP_COST_WEIGHT +
+      newConfigPenalty
+    );
   };
 
   for (const spec of specs) {
