@@ -61,3 +61,13 @@ export const ENTITY_STORE_ROUTES = {
   CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
 } as const satisfies Record<string, string>;
+
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+};

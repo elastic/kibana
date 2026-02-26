@@ -1796,7 +1796,7 @@
     "@parcel/watcher": "2.5.1",
     "@playwright/test": "1.56.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.1",
-    "@redocly/cli": "2.16.0",
+    "@redocly/cli": "2.18.0",
     "@statoscope/webpack-plugin": "5.28.2",
     "@storybook/addon-a11y": "8.6.15",
     "@storybook/addon-actions": "8.6.15",
