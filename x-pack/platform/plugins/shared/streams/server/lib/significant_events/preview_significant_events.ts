@@ -7,10 +7,10 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { BasicPrettyPrinter } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
+import type { ESQLCommand } from '@kbn/esql-language';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { SignificantEventsPreviewResponse, StreamQuery, Streams } from '@kbn/streams-schema';
-import { extractWhereExpression, getIndexPatternsForStream } from '@kbn/streams-schema';
+import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 
 const ESQL_UNITS: Record<string, string> = {
   s: 'seconds',
@@ -32,23 +32,66 @@ function parseBucketSize(raw: string): { value: number; unit: string } {
   return { value: parseInt(match[1], 10), unit: match[2] };
 }
 
-function buildEsqlQuery(
+/**
+ * Takes the user's ES|QL query (which already contains FROM + WHERE), strips
+ * everything after the WHERE clause, and appends STATS … BY BUCKET(…) and
+ * optionally CHANGE_POINT.
+ */
+function buildHistogramQuery(
   esqlQuery: string,
-  indices: string[],
   bucketSize: string,
   withChangePoint: boolean
 ): string {
+  const { root } = Parser.parse(esqlQuery);
   const { value, unit } = parseBucketSize(bucketSize);
-  const whereExpr = extractWhereExpression(esqlQuery);
-  const fromPart = `FROM ${indices.join(',')}`;
-  const wherePart = whereExpr ? `| WHERE ${BasicPrettyPrinter.expression(whereExpr)}` : '';
-  const interval = `${value} ${ESQL_UNITS[unit] || unit}`;
 
-  let query = `${fromPart} ${wherePart} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${interval})`;
+  const fromCmd = root.commands.find(
+    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'from'
+  );
+  const whereCmd = root.commands.find(
+    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'where'
+  );
+
+  const statsCommand = Builder.command({
+    name: 'stats',
+    args: [
+      Builder.expression.func.binary('=', [
+        Builder.expression.column('count'),
+        Builder.expression.func.call('COUNT', [Builder.expression.column('*')]),
+      ]),
+      Builder.option({
+        name: 'by',
+        args: [
+          Builder.expression.func.binary('=', [
+            Builder.expression.column('bucket'),
+            Builder.expression.func.call('BUCKET', [
+              Builder.expression.column('@timestamp'),
+              Builder.expression.literal.timespan(value, ESQL_UNITS[unit] || unit),
+            ]),
+          ]),
+        ],
+      }),
+    ],
+  });
+
+  const commands: ESQLCommand[] = [];
+  if (fromCmd) commands.push(fromCmd);
+  if (whereCmd) commands.push(whereCmd);
+  commands.push(statsCommand);
+
   if (withChangePoint) {
-    query += ' | CHANGE_POINT count ON bucket';
+    commands.push(
+      Builder.command({
+        name: 'change_point',
+        args: [
+          Builder.expression.column('count'),
+          Builder.option({ name: 'on', args: [Builder.expression.column('bucket')] }),
+        ],
+      })
+    );
   }
-  return query;
+
+  return BasicPrettyPrinter.print(Builder.expression.query(commands));
 }
 
 /**
@@ -82,8 +125,7 @@ function fillBucketGaps(
 
 export async function previewSignificantEvents(
   params: {
-    definition: Streams.all.Definition;
-    query: Pick<StreamQuery, 'esql'>;
+    esqlQuery: string;
     from: Date;
     to: Date;
     bucketSize: string;
@@ -92,10 +134,8 @@ export async function previewSignificantEvents(
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsPreviewResponse> {
-  const { bucketSize, from, to, definition, query } = params;
+  const { esqlQuery, bucketSize, from, to } = params;
   const { scopedClusterClient } = dependencies;
-
-  const indices = getIndexPatternsForStream(definition);
 
   const filter: QueryDslQueryContainer = {
     bool: {
@@ -115,12 +155,12 @@ export async function previewSignificantEvents(
   let response: ESQLSearchResponse;
   try {
     response = (await scopedClusterClient.asCurrentUser.esql.query({
-      query: buildEsqlQuery(query.esql!.query, indices, bucketSize, true),
+      query: buildHistogramQuery(esqlQuery, bucketSize, true),
       filter,
     })) as unknown as ESQLSearchResponse;
   } catch {
     response = (await scopedClusterClient.asCurrentUser.esql.query({
-      query: buildEsqlQuery(query.esql!.query, indices, bucketSize, false),
+      query: buildHistogramQuery(esqlQuery, bucketSize, false),
       filter,
       drop_null_columns: true,
     })) as unknown as ESQLSearchResponse;
@@ -158,7 +198,7 @@ export async function previewSignificantEvents(
   }
 
   return {
-    ...query,
+    esql: { query: esqlQuery },
     change_points: changePoints,
     occurrences,
   };

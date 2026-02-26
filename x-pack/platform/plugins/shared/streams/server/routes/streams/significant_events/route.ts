@@ -73,15 +73,14 @@ const previewSignificantEventsRoute = createServerRoute({
       query: { bucketSize, from, to },
     } = params;
 
-    const definition = await streamsClient.getStream(name);
+    await streamsClient.ensureStream(name);
 
     return await previewSignificantEvents(
       {
-        definition,
+        esqlQuery: query.esql.query,
         bucketSize,
         from,
         to,
-        query,
       },
       {
         scopedClusterClient,
