@@ -9,7 +9,9 @@ import type { ScoutPage } from '@kbn/scout';
 import type { SecurityPageObjects } from '@kbn/scout-security';
 import { EndpointListPage } from './endpoint_list_page';
 import { PolicyPage } from './policy_page';
-import { TrustedAppsPage, EventFiltersPage, BlocklistPage } from './artifacts_page';
+import { TrustedAppsPage } from './trusted_apps_page';
+import { EventFiltersPage } from './event_filters_page';
+import { BlocklistPage } from './blocklist_page';
 import { ResponderPage } from './responder_page';
 import { ResponseActionsPage } from './response_actions_page';
 
