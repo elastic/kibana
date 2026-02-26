@@ -7,14 +7,13 @@
 
 import type { CSSProperties } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { css } from '@emotion/react';
 
 const PlaygroundBodySectionStyle = css({
   display: 'flex',
-  flexGrow: 1,
-  position: 'absolute',
-  inset: 0,
+  height: '100%',
+  overflowX: 'auto',
 });
 
 export const PlaygroundBodySection = ({
@@ -32,6 +31,7 @@ export const PlaygroundBodySection = ({
     css={{
       position: 'relative',
       backgroundColor: color,
+      justifyContent: 'center',
     }}
     contentProps={{ css: PlaygroundBodySectionStyle }}
     paddingSize="none"

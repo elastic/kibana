@@ -516,7 +516,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+              "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
             "lineNumber": 64,
@@ -1069,7 +1069,7 @@
         "label": "StepStatus",
         "description": [],
         "signature": [
-          "\"success\" | \"disabled\" | \"running\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
+          "\"disabled\" | \"running\" | \"success\" | \"skipped\" | \"pending\" | \"failure\" | \"successWithWarnings\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/types.ts",
         "lineNumber": 47,
