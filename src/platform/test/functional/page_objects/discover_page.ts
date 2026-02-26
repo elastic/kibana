@@ -58,6 +58,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getChartTimespan() {
+    await this.retry.waitFor('chart timespan to finish loading', async () => {
+      const timespan = await this.testSubjects.getAttribute(
+        'unifiedHistogramChart',
+        'data-time-range'
+      );
+      return !timespan?.includes('Loading');
+    });
     return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }
 
