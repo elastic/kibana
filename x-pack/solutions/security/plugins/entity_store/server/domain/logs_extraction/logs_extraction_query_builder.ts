@@ -250,6 +250,8 @@ function castSrcType(field: EntityField) {
       return `TO_LONG(${field.source})`;
     case 'integer':
       return `TO_INTEGER(${field.source})`;
+    case 'float':
+      return `TO_DOUBLE(${field.source})`;
     case 'ip':
       return `TO_IP(${field.source})`;
     // explicit no cast because it doesn't exist in ESQl
