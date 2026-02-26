@@ -350,7 +350,7 @@ describe(`#runUiamContainer()`, () => {
     await expect(
       runUiamContainer(new ToolingLog(), cosmosDbContainer)
     ).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running. Check the logs with docker logs -f uiam-cosmosdb]`
+      `[Error: The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
@@ -364,7 +364,7 @@ describe(`#runUiamContainer()`, () => {
       .mockResolvedValue({ stdout: ` running ` });
 
     await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam" container failed to start within the expected time. Last known status: running. Check the logs with docker logs -f uiam]`
+      `[Error: The "uiam" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
