@@ -21,6 +21,10 @@ export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApm
     dashboardId: currentDashboard?.dashboardSavedObjectId,
   });
 
+  if (!url) {
+    return null;
+  }
+
   return (
     <EuiButtonEmpty
       data-test-subj="apmGotoDashboardGoToDashboardButton"
