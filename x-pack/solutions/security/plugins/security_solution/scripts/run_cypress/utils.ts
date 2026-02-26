@@ -21,7 +21,7 @@ import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
  */
 const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
   getArtifactMockedDataTests: 8,
-  getArtifactTabsTests: 12,
+  getArtifactTabsTests: 72,
   createRbacPoliciesExistSuite: 1,
   createRbacHostsExistSuite: 1,
   createRbacEmptyStateSuite: 1,
@@ -46,9 +46,8 @@ const getSpecFileWeight = (filePath: string): number => {
     let testCount = (itMatches?.length ?? 0) + (itSkipMatches?.length ?? 0);
 
     for (const [runner, weight] of Object.entries(DYNAMIC_RUNNER_WEIGHTS)) {
-      if (content.includes(runner)) {
-        testCount += weight;
-      }
+      const occurrences = content.split(runner).length - 1;
+      testCount += occurrences * weight;
     }
 
     return SETUP_OVERHEAD_WEIGHT + testCount;

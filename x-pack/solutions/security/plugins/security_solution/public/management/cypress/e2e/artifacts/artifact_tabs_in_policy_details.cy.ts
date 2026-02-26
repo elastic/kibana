@@ -9,7 +9,7 @@ import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_pa
 import { getArtifactTabsTests } from '../../support/artifact_tabs_in_policy_details_runner';
 
 describe(
-  'Artifact tabs in Policy Details - Endpoint exceptions',
+  'Artifact tabs in Policy Details',
   {
     env: {
       ftrConfig: {
@@ -22,5 +22,12 @@ describe(
     },
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
-  getArtifactTabsTests([getArtifactsListTestDataForArtifact('endpointExceptions')])
+  getArtifactTabsTests([
+    getArtifactsListTestDataForArtifact('blocklists'),
+    getArtifactsListTestDataForArtifact('endpointExceptions'),
+    getArtifactsListTestDataForArtifact('eventFilters'),
+    getArtifactsListTestDataForArtifact('hostIsolationExceptions'),
+    getArtifactsListTestDataForArtifact('trustedApps'),
+    getArtifactsListTestDataForArtifact('trustedDevices'),
+  ])
 );
