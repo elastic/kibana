@@ -15,12 +15,11 @@
  */
 
 import { z } from '@kbn/zod';
+
 import {
   ReplacementsSetResponse,
   DeanonymizeRequest,
   DeanonymizeResponse,
-  ImportReplacementsRequest,
-  ImportReplacementsResponse,
 } from '../common_attributes.gen';
 
 export type DeanonymizeWithReplacementsRequestBody = z.infer<
@@ -50,16 +49,3 @@ export type GetAnonymizationReplacementsResponse = z.infer<
   typeof GetAnonymizationReplacementsResponse
 >;
 export const GetAnonymizationReplacementsResponse = ReplacementsSetResponse;
-
-export type ImportAnonymizationReplacementsRequestBody = z.infer<
-  typeof ImportAnonymizationReplacementsRequestBody
->;
-export const ImportAnonymizationReplacementsRequestBody = ImportReplacementsRequest;
-export type ImportAnonymizationReplacementsRequestBodyInput = z.input<
-  typeof ImportAnonymizationReplacementsRequestBody
->;
-
-export type ImportAnonymizationReplacementsResponse = z.infer<
-  typeof ImportAnonymizationReplacementsResponse
->;
-export const ImportAnonymizationReplacementsResponse = ImportReplacementsResponse;

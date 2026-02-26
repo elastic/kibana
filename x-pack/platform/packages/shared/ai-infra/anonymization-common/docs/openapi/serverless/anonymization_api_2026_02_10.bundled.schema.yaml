@@ -246,43 +246,6 @@ paths:
       summary: Deanonymize text using replacements
       tags:
         - Anonymization API
-  /api/inference/anonymization/replacements/_import:
-    post:
-      operationId: ImportAnonymizationReplacements
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ImportReplacementsRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ImportReplacementsResponse'
-          description: Successfully imported replacements.
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Source or destination replacements set not found.
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Import conflict.
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Server error.
-      summary: Import and merge replacements
-      tags:
-        - Anonymization API
   /api/inference/anonymization/replacements/{id}:
     get:
       operationId: GetAnonymizationReplacements
@@ -497,30 +460,6 @@ components:
         - perPage
         - total
         - data
-    ImportReplacementsRequest:
-      type: object
-      properties:
-        destinationId:
-          example: replacements-dest
-          type: string
-        sourceId:
-          example: replacements-src
-          type: string
-      required:
-        - sourceId
-        - destinationId
-    ImportReplacementsResponse:
-      type: object
-      properties:
-        id:
-          example: replacements-dest
-          type: string
-        merged:
-          example: true
-          type: boolean
-      required:
-        - id
-        - merged
     NerEntityClass:
       enum:
         - PER

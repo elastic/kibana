@@ -157,15 +157,3 @@ export type DeanonymizeResponse = z.infer<typeof DeanonymizeResponse>;
 export const DeanonymizeResponse = z.object({
   text: z.string(),
 });
-
-export type ImportReplacementsRequest = z.infer<typeof ImportReplacementsRequest>;
-export const ImportReplacementsRequest = z.object({
-  sourceId: z.string(),
-  destinationId: z.string(),
-});
-
-export type ImportReplacementsResponse = z.infer<typeof ImportReplacementsResponse>;
-export const ImportReplacementsResponse = z.object({
-  id: z.string(),
-  merged: z.boolean(),
-});

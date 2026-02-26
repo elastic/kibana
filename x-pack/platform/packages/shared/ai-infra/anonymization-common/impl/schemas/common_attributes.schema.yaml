@@ -311,28 +311,3 @@ components:
           type: string
           example: Investigate server-1
 
-    ImportReplacementsRequest:
-      type: object
-      required:
-        - sourceId
-        - destinationId
-      properties:
-        sourceId:
-          type: string
-          example: replacements-src
-        destinationId:
-          type: string
-          example: replacements-dest
-
-    ImportReplacementsResponse:
-      type: object
-      required:
-        - id
-        - merged
-      properties:
-        id:
-          type: string
-          example: replacements-dest
-        merged:
-          type: boolean
-          example: true
