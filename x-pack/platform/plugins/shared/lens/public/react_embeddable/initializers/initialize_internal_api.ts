@@ -75,6 +75,7 @@ export function initializeInternalApi(
     : new BehaviorSubject<ESQLControlVariable[]>([]);
 
   const isEditingInProgress$ = new BehaviorSubject<boolean>(false);
+  const baselineState$ = new BehaviorSubject<LensRuntimeState | undefined>(undefined);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
@@ -95,6 +96,8 @@ export function initializeInternalApi(
     validationMessages$,
     isEditingInProgress: () => isEditingInProgress$.getValue(),
     updateEditingState: (inProgress: boolean) => isEditingInProgress$.next(inProgress),
+    getBaselineState: () => baselineState$.getValue(),
+    updateBaselineState: (state: LensRuntimeState | undefined) => baselineState$.next(state),
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);

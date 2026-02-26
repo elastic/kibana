@@ -248,14 +248,15 @@ export function hasAnnotationGroupReference(state: LensRuntimeState, groupId: st
 }
 
 /**
- * Returns updated attributes with fresh annotation group data for all by-reference
+ * Returns updated state with fresh annotation group data for all by-reference
  * annotation layers that reference the given group ID, or undefined if no layers matched.
  */
 export function updateAttributesWithAnnotation(
-  attributes: LensRuntimeState['attributes'],
+  state: LensRuntimeState,
   groupId: string,
   freshGroup: EventAnnotationGroupConfig
-): LensRuntimeState['attributes'] | undefined {
+): LensRuntimeState | undefined {
+  const { attributes } = state;
   if (attributes.visualizationType !== 'lnsXY') return undefined;
 
   const vizState = attributes.state.visualization as XYState | undefined;
@@ -276,6 +277,12 @@ export function updateAttributesWithAnnotation(
   });
 
   return changed
-    ? { ...attributes, state: { ...attributes.state, visualization: { ...vizState, layers } } }
+    ? {
+        ...state,
+        attributes: {
+          ...attributes,
+          state: { ...attributes.state, visualization: { ...vizState, layers } },
+        },
+      }
     : undefined;
 }

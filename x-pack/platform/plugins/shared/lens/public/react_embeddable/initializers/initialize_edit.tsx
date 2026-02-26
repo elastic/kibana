@@ -233,13 +233,15 @@ export function initializeEditApi(
       // prevent serializing incomplete state during editing
       internalApi.updateEditingState(true);
     }
-    // save the initial state in case it needs to revert later on
-    const firstState = getState();
+    internalApi.updateBaselineState(getState());
     const ConfigPanel = await getInlineEditor({
-      // restore the first state found when the panel opened
       onCancel: () => {
         internalApi.updateEditingState(false);
-        updateState({ ...firstState });
+        const baseline = internalApi.getBaselineState();
+        if (baseline) {
+          updateState({ ...baseline });
+        }
+        internalApi.updateBaselineState(undefined);
       },
       // the getState() here contains the wrong filters references but the input attributes
       // are correct as getInlineEditor() handler is using the getModifiedState() function
@@ -248,6 +250,7 @@ export function initializeEditApi(
         : (attributes: LensRuntimeState['attributes']) => {
             internalApi.updateEditingState(false);
             updateState({ ...getState(), attributes });
+            internalApi.updateBaselineState(undefined);
           },
       closeFlyout: () => {
         internalApi.updateEditingState(false);

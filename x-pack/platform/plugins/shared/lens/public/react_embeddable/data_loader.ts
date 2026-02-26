@@ -333,22 +333,33 @@ export function loadEmbeddableData(
         reload('viewMode');
       }
     }),
-    // When a library annotation group is updated, check if it's used by the current visualization
-    // and if used, update attributes$ with updated group data to trigger a reload
+    // When a library annotation group is updated, fetch the latest data, push it
+    // into attributes$ so the chart re-renders, and update the editing baseline.
     services.eventAnnotationService.annotationGroupUpdated$
       .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
       .subscribe(async (updatedGroupId) => {
         try {
-          const updatedGroup = await services.eventAnnotationService.loadAnnotationGroup(
+          const freshGroup = await services.eventAnnotationService.loadAnnotationGroup(
             updatedGroupId
           );
-          const updatedAttributes = updateAttributesWithAnnotation(
-            getState().attributes,
-            updatedGroupId,
-            updatedGroup
-          );
-          if (updatedAttributes) {
-            internalApi.updateAttributes(updatedAttributes);
+          const currentState = getState();
+          const updated = updateAttributesWithAnnotation(currentState, updatedGroupId, freshGroup);
+          if (updated) {
+            internalApi.updateAttributes(updated.attributes);
+          }
+
+          const baseline = internalApi.getBaselineState();
+          if (baseline) {
+            // When by reference annotations are saved to library, those changes should now be
+            // reflected in the baseline (so that cancel/reset behaviors work as expected).
+            const baselineWithUpdatedAnnotation = updateAttributesWithAnnotation(
+              baseline,
+              updatedGroupId,
+              freshGroup
+            );
+            if (baselineWithUpdatedAnnotation) {
+              internalApi.updateBaselineState(baselineWithUpdatedAnnotation);
+            }
           }
         } catch (err) {
           addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);
