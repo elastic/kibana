@@ -95,7 +95,7 @@ const ActionsTableComponent = () => {
     isHistoryEnabled ? actionItems : EMPTY_ARRAY
   );
 
-   const onTableChange = useCallback(
+  const onTableChange = useCallback(
     ({ page }: CriteriaWithPagination<SearchHit>) => {
       setPageIndex(page.index);
       setPageSize(page.size);
