@@ -104,7 +104,7 @@ export function DateRangePickerControl() {
     if (event.key === keys.ESCAPE && isEditing) {
       setIsEditing(false);
     }
-    if (event.key === keys.ARROW_DOWN && isEditing) {
+    if ((event.key === keys.ARROW_DOWN || event.key === keys.ARROW_UP) && isEditing) {
       event.preventDefault();
       resolveInitialFocus(panelRef, initialFocus)?.focus();
     }

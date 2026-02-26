@@ -11,6 +11,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
+import { FOCUSABLE_SELECTOR } from './constants';
 import { DateRangePicker, type DateRangePickerProps } from './date_range_picker';
 
 const defaultProps: DateRangePickerProps = {
@@ -129,6 +130,44 @@ describe('DateRangePickerControl', () => {
         'Last 20 minutes'
       );
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+    });
+
+    it.each(['ArrowDown', 'ArrowUp'] as const)(
+      'moves focus into the dialog on %s and back to button on Escape',
+      (arrowKey) => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+        const input = openEditing();
+        fireEvent.keyDown(input, { key: arrowKey });
+
+        const dialog = screen.getByRole('dialog');
+        expect(dialog).toHaveFocus();
+
+        fireEvent.keyDown(dialog, { key: 'Escape' });
+
+        expect(screen.getByTestId('dateRangePickerControlButton')).toHaveFocus();
+      }
+    );
+
+    it('traps focus within the dialog panel on Tab', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      const dialog = screen.getByRole('dialog');
+      const tabbables = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      expect(tabbables.length).toBeGreaterThan(0);
+
+      const first = tabbables[0];
+      const last = tabbables[tabbables.length - 1];
+
+      last.focus();
+      fireEvent.keyDown(last, { key: 'Tab' });
+      expect(first).toHaveFocus();
+
+      fireEvent.keyDown(first, { key: 'Tab', shiftKey: true });
+      expect(last).toHaveFocus();
     });
 
     it('opens popover when entering editing mode and closes it when exiting', async () => {

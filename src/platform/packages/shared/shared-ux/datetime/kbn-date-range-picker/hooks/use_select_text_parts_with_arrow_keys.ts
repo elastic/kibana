@@ -160,12 +160,14 @@ export function useSelectTextPartsWithArrowKeys({
             }
             return;
           case 'ArrowUp':
-            modifyPart('increase');
+            const modifiedUp = modifyPart('increase');
+            // Allow propagation if no modification was made
+            if (modifiedUp) event.stopImmediatePropagation();
             return;
           case 'ArrowDown':
-            const modified = modifyPart('decrease');
+            const modifiedDown = modifyPart('decrease');
             // Allow propagation if no modification was made
-            if (modified) event.stopImmediatePropagation();
+            if (modifiedDown) event.stopImmediatePropagation();
             return;
         }
       }
