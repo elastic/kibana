@@ -16,7 +16,7 @@ import type {
   DispatcherPipelineState,
   DispatcherStep,
 } from './types';
-import { DispatcherExecutionStepsToken } from './tokens';
+import { DispatcherExecutionStepsToken } from './steps/tokens';
 import { withDispatcherSpan } from './with_dispatcher_span';
 
 export interface DispatcherPipelineResult {

@@ -6,11 +6,12 @@
  */
 
 import type { ServiceIdentifier } from 'inversify';
-import type { DispatcherService } from './dispatcher';
+import type { DispatcherStep } from '../types';
 
 /**
- * DispatcherService singleton
+ * Token for multi-injecting the ordered dispatcher execution steps.
+ * Binding order defines execution order.
  */
-export const DispatcherServiceInternalToken = Symbol.for(
-  'alerting_v2.DispatcherServiceInternal'
-) as ServiceIdentifier<DispatcherService>;
+export const DispatcherExecutionStepsToken = Symbol.for(
+  'alerting_v2.DispatcherExecutionSteps'
+) as ServiceIdentifier<DispatcherStep>;

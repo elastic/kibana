@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectServiceInternalToken } from '../tokens';
+import { RulesSavedObjectServiceInternalToken } from '../../services/rules_saved_object_service/tokens';
 import type {
   DispatcherPipelineState,
   DispatcherStep,

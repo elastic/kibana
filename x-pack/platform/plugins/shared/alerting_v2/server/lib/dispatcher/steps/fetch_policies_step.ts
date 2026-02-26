@@ -14,7 +14,7 @@ import type {
   DispatcherStepOutput,
 } from '../types';
 import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectServiceInternalToken } from '../tokens';
+import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
 
 @injectable()
 export class FetchPoliciesStep implements DispatcherStep {

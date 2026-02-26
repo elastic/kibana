@@ -7,7 +7,7 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherPipeline } from '../lib/dispatcher/execution_pipeline';
-import { DispatcherExecutionStepsToken } from '../lib/dispatcher/tokens';
+import { DispatcherExecutionStepsToken } from '../lib/dispatcher/steps/tokens';
 import {
   FetchEpisodesStep,
   FetchSuppressionsStep,

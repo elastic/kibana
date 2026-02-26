@@ -15,11 +15,9 @@ import { CountTimeframeStrategy } from '../lib/director/strategies/count_timefra
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import {
-  DispatcherServiceInternalToken,
-  NotificationPolicySavedObjectServiceInternalToken,
-  RulesSavedObjectServiceInternalToken,
-} from '../lib/dispatcher/tokens';
+import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
+import { NotificationPolicySavedObjectServiceInternalToken } from '../lib/services/notification_policy_saved_object_service/tokens';
+import { RulesSavedObjectServiceInternalToken } from '../lib/services/rules_saved_object_service/tokens';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
 import { RulesClient } from '../lib/rules_client';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
