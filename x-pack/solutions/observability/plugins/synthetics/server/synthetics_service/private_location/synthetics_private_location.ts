@@ -88,18 +88,18 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * Determines the policy status for a given monitor config and private location
-   * by inspecting existing policies.
+   * For a given monitor and location, checks existing policies to determine
+   * whether a new (space-agnostic) or legacy (space-scoped) format policy ID exists.
    */
-  getPolicyStatus(
+  getPolicyIdFormatInfo(
     config: { id: string },
     locationId: string,
     existingPolicies: Array<{ id: string }> | undefined
-  ): { hasNewFormatPolicy: boolean; hasAnyLegacyPolicy: boolean; legacyPolicyIds: string[] } {
+  ): { hasNewFormatPolicyId: boolean; hasAnyLegacyPolicyId: boolean; legacyPolicyIds: string[] } {
     const newId = this.getPolicyId(config, locationId);
     const legacyIdPrefix = `${config.id}-${locationId}-`;
 
-    const hasNewFormatPolicy = existingPolicies?.some((policy) => policy.id === newId) ?? false;
+    const hasNewFormatPolicyId = existingPolicies?.some((policy) => policy.id === newId) ?? false;
     // Note: prefix matching can produce false positives when monitor2.id === monitor1.id + '-' + locationId.
     // e.g. Monitor 1 ID = "monitor-a", location = "loc-b" -> prefix = "monitor-a-loc-b-"
     //      Monitor 2 ID = "monitor-a-loc-b" -> its legacy policies also start with "monitor-a-loc-b-"
@@ -110,9 +110,9 @@ export class SyntheticsPrivateLocation {
       existingPolicies
         ?.filter((policy) => policy.id.startsWith(legacyIdPrefix))
         .map((policy) => policy.id) ?? [];
-    const hasAnyLegacyPolicy = legacyPolicyIds.length > 0;
+    const hasAnyLegacyPolicyId = legacyPolicyIds.length > 0;
 
-    return { hasNewFormatPolicy, hasAnyLegacyPolicy, legacyPolicyIds };
+    return { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds };
   }
 
   /**
@@ -395,12 +395,9 @@ export class SyntheticsPrivateLocation {
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
         const newId = this.getPolicyId(config, privateLocation.id);
-        const { hasNewFormatPolicy, hasAnyLegacyPolicy, legacyPolicyIds } = this.getPolicyStatus(
-          config,
-          privateLocation.id,
-          existingPolicies
-        );
-        const hasPolicy = hasNewFormatPolicy || hasAnyLegacyPolicy;
+        const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
+          this.getPolicyIdFormatInfo(config, privateLocation.id, existingPolicies);
+        const hasPolicy = hasNewFormatPolicyId || hasAnyLegacyPolicyId;
 
         try {
           if (hasLocation) {
@@ -417,17 +414,17 @@ export class SyntheticsPrivateLocation {
               throwAddEditError(hasPolicy, privateLocation.label);
             }
 
-            if (hasNewFormatPolicy) {
+            if (hasNewFormatPolicyId) {
               policiesToUpdate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
               policiesToDelete.push(...legacyPolicyIds);
-            } else if (hasAnyLegacyPolicy) {
+            } else if (hasAnyLegacyPolicyId) {
               policiesToDelete.push(...legacyPolicyIds);
               policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             } else {
               policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             }
           } else {
-            if (hasNewFormatPolicy) {
+            if (hasNewFormatPolicyId) {
               policiesToDelete.push(newId);
             }
             policiesToDelete.push(...legacyPolicyIds);

@@ -504,7 +504,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('should not delete any policies if all are expected', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
-          yield ['monitor1-loc1-space1'];
+          yield ['monitor1-loc1'];
         })()
       );
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
@@ -515,7 +515,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     it('should delete unexpected policies and set performCleanupSync true', async () => {
       mockFleet.packagePolicyService.fetchAllItemIds.mockResolvedValue(
         (async function* () {
-          yield ['monitor1-loc1-space1', 'unexpected-policy'];
+          yield ['monitor1-loc1', 'unexpected-policy'];
         })()
       );
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, {} as any);
