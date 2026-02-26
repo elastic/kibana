@@ -1083,7 +1083,7 @@
             "section": "def-common.ShorthandBinaryFilterCondition",
             "text": "ShorthandBinaryFilterCondition"
           },
-          ") => \"includes\" | \"endsWith\" | \"startsWith\" | \"range\" | \"lte\" | \"gt\" | \"gte\" | \"lt\" | \"eq\" | \"contains\" | \"neq\" | undefined"
+          ") => \"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\" | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/conditions/helpers.ts",
         "lineNumber": 30,
@@ -2077,7 +2077,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">(value: TValue) => value is Extract<TValue, { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
+          ">(value: TValue) => value is Extract<TValue, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 213,
@@ -2335,7 +2335,7 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">(value: TValue) => value is Extract<TValue, { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; } | { field: string; exists?: boolean | undefined; }>"
+          ">(value: TValue) => value is Extract<TValue, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; } | { field: string; exists?: boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 221,
@@ -4497,9 +4497,7 @@
             "label": "processors",
             "description": [],
             "signature": [
-              "Partial<Record<keyof ",
-              "IngestProcessorContainer",
-              ", unknown>>[]"
+              "Partial<Record<\"enrich\" | \"inference\" | \"sort\" | \"geo_grid\" | \"script\" | \"split\" | \"trim\" | \"date\" | \"join\" | \"append\" | \"set\" | \"lowercase\" | \"circle\" | \"user_agent\" | \"pipeline\" | \"json\" | \"csv\" | \"cef\" | \"remove\" | \"attachment\" | \"rename\" | \"drop\" | \"bytes\" | \"uppercase\" | \"fail\" | \"grok\" | \"reroute\" | \"fingerprint\" | \"dissect\" | \"convert\" | \"redact\" | \"network_direction\" | \"community_id\" | \"date_index_name\" | \"dot_expander\" | \"foreach\" | \"ip_location\" | \"geoip\" | \"gsub\" | \"html_strip\" | \"kv\" | \"registered_domain\" | \"set_security_user\" | \"terminate\" | \"urldecode\" | \"uri_parts\", unknown>>[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "lineNumber": 77,
@@ -6582,6 +6580,24 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.StreamlangValidationOptions.skipNamespaceValidation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skipNamespaceValidation",
+            "description": [
+              "\nWhen true, skip namespace validation for processor-generated fields.\nUse for logs.ecs streams which follow ECS conventions (direct field names like host.name,\nservice.name) rather than OTEL namespacing (attributes.*, resource.attributes.*, etc.)."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6594,7 +6610,7 @@
         "label": "StreamlangValidationResult",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/types.ts",
-        "lineNumber": 44,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6607,7 +6623,7 @@
             "label": "isValid",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6630,7 +6646,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6656,7 +6672,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/validation/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6951,7 +6967,7 @@
         "label": "ARRAY_OPERATORS",
         "description": [],
         "signature": [
-          "(\"includes\" | \"endsWith\" | \"startsWith\" | \"range\" | \"lte\" | \"gt\" | \"gte\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
+          "(\"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 39,
@@ -6968,7 +6984,7 @@
         "label": "BINARY_OPERATORS",
         "description": [],
         "signature": [
-          "(\"includes\" | \"endsWith\" | \"startsWith\" | \"range\" | \"lte\" | \"gt\" | \"gte\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
+          "(\"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\")[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 23,
@@ -6985,7 +7001,7 @@
         "label": "BinaryOperatorKeys",
         "description": [],
         "signature": [
-          "\"includes\" | \"endsWith\" | \"startsWith\" | \"range\" | \"lte\" | \"gt\" | \"gte\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
+          "\"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 19,
@@ -7150,7 +7166,7 @@
         "label": "ElasticsearchProcessor",
         "description": [],
         "signature": [
-          "{ enrich?: unknown; inference?: unknown; sort?: unknown; split?: unknown; trim?: unknown; date?: unknown; join?: unknown; bytes?: unknown; circle?: unknown; append?: unknown; set?: unknown; lowercase?: unknown; script?: unknown; user_agent?: unknown; pipeline?: unknown; json?: unknown; csv?: unknown; remove?: unknown; attachment?: unknown; rename?: unknown; drop?: unknown; uppercase?: unknown; geo_grid?: unknown; fail?: unknown; grok?: unknown; reroute?: unknown; fingerprint?: unknown; dissect?: unknown; convert?: unknown; redact?: unknown; network_direction?: unknown; community_id?: unknown; date_index_name?: unknown; dot_expander?: unknown; foreach?: unknown; ip_location?: unknown; geoip?: unknown; gsub?: unknown; html_strip?: unknown; kv?: unknown; registered_domain?: unknown; set_security_user?: unknown; terminate?: unknown; urldecode?: unknown; uri_parts?: unknown; }"
+          "{ enrich?: unknown; inference?: unknown; sort?: unknown; geo_grid?: unknown; script?: unknown; split?: unknown; trim?: unknown; date?: unknown; join?: unknown; append?: unknown; set?: unknown; lowercase?: unknown; circle?: unknown; user_agent?: unknown; pipeline?: unknown; json?: unknown; csv?: unknown; cef?: unknown; remove?: unknown; attachment?: unknown; rename?: unknown; drop?: unknown; bytes?: unknown; uppercase?: unknown; fail?: unknown; grok?: unknown; reroute?: unknown; fingerprint?: unknown; dissect?: unknown; convert?: unknown; redact?: unknown; network_direction?: unknown; community_id?: unknown; date_index_name?: unknown; dot_expander?: unknown; foreach?: unknown; ip_location?: unknown; geoip?: unknown; gsub?: unknown; html_strip?: unknown; kv?: unknown; registered_domain?: unknown; set_security_user?: unknown; terminate?: unknown; urldecode?: unknown; uri_parts?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "lineNumber": 73,
@@ -7386,7 +7402,7 @@
         "label": "OperatorKeys",
         "description": [],
         "signature": [
-          "\"exists\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"range\" | \"lte\" | \"gt\" | \"gte\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
+          "\"exists\" | \"range\" | \"includes\" | \"endsWith\" | \"startsWith\" | \"gte\" | \"lte\" | \"gt\" | \"lt\" | \"eq\" | \"contains\" | \"neq\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 21,
@@ -9977,7 +9993,7 @@
           "ZodBoolean",
           "]>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; includes: ",
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; includes: ",
           "ZodOptional",
           "<",
           "ZodUnion",
@@ -9989,7 +10005,7 @@
           "ZodBoolean",
           "]>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, ",
+          ", { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, ",
           "ZodObject",
           "<{ field: ",
           "ZodEffects",
@@ -10454,7 +10470,7 @@
           "ZodBoolean",
           "]>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>"
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 81,
@@ -10614,7 +10630,7 @@
           "ZodBoolean",
           "]>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; includes: ",
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; includes: ",
           "ZodOptional",
           "<",
           "ZodUnion",
@@ -10626,7 +10642,7 @@
           "ZodBoolean",
           "]>>; }, \"strip\", ",
           "ZodTypeAny",
-          ", { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; range?: { lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
+          ", { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; includes?: string | number | boolean | undefined; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "lineNumber": 90,

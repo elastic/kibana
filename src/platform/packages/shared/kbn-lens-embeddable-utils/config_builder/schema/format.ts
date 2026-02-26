@@ -42,7 +42,7 @@ const numericFormatSchema = schema.object(
       },
     }),
   },
-  { meta: { id: 'numericFormatSchema' } }
+  { meta: { id: 'numericFormat', title: 'Numeric Format' } }
 );
 
 const byteFormatSchema = schema.object(
@@ -68,7 +68,7 @@ const byteFormatSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'byteFormatSchema' } }
+  { meta: { id: 'byteFormat', title: 'Byte Format' } }
 );
 
 const durationFormatSchema = schema.object(
@@ -101,7 +101,7 @@ const durationFormatSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'durationFormatSchema' } }
+  { meta: { id: 'durationFormat', title: 'Duration Format' } }
 );
 
 const customFormatSchema = schema.object(
@@ -116,7 +116,7 @@ const customFormatSchema = schema.object(
       },
     }),
   },
-  { meta: { id: 'customFormatSchema' } }
+  { meta: { id: 'customFormat', title: 'Custom Format' } }
 );
 
 /**
@@ -124,7 +124,7 @@ const customFormatSchema = schema.object(
  */
 export const formatTypeSchema = schema.oneOf(
   [numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema],
-  { meta: { id: 'formatTypeSchema' } }
+  { meta: { id: 'formatType', title: 'Format Type' } }
 );
 
 export const formatSchema = {
