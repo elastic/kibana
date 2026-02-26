@@ -48,18 +48,6 @@ import { CanvasProvider } from './attachments/canvas_context';
 import { CanvasFlyout } from './attachments/canvas_flyout';
 import { ExternalLinkModal } from './external_link_modal';
 
-const isInternalLink = (href: string, serverBasePath: string): boolean => {
-  try {
-    const url = new URL(href, window.location.href);
-    const isHttp = url.protocol === 'http:' || url.protocol === 'https:';
-    const isSameOrigin = url.origin === window.location.origin;
-    const isSameBasePath = !serverBasePath || url.pathname.startsWith(serverBasePath);
-    return isHttp && isSameOrigin && isSameBasePath;
-  } catch {
-    return false;
-  }
-};
-
 interface Props {
   content: string;
   steps: ConversationRoundStep[];
@@ -102,11 +90,10 @@ export function ChatMessageText({
   } = useKibana();
 
   const [pendingExternalUrl, setPendingExternalUrl] = useState<string | null>(null);
-  const serverBasePath = http.basePath.serverBasePath;
 
   const handleLinkClick = useCallback(
     (href: string, e: React.MouseEvent) => {
-      const internal = isInternalLink(href, serverBasePath);
+      const internal = http.externalUrl.isInternalUrl(href);
       if (!internal) {
         // External links always show the confirmation modal
         e.preventDefault();
@@ -118,7 +105,7 @@ export function ChatMessageText({
       }
       // Internal link in full page: target="_blank" handles navigation
     },
-    [isSidebar, serverBasePath, application]
+    [isSidebar, http.externalUrl, application]
   );
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
