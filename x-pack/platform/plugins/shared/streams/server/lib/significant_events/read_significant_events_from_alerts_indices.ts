@@ -15,7 +15,6 @@ import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-sch
 import { get, isArray, isEmpty, keyBy } from 'lodash';
 import { LEGACY_RULE_BACKED_FALLBACK, type QueryLink } from '../../../common/queries';
 import type { QueryClient } from '../streams/assets/query/query_client';
-import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
@@ -37,7 +36,7 @@ export async function readSignificantEventsFromAlertsIndices(
     return { significant_events: [], aggregated_occurrences: [] };
   }
 
-  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
+  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => queryLink.rule_id);
   const ruleIds = Object.keys(queryLinkByRuleId);
 
   const response = await scopedClusterClient.asCurrentUser

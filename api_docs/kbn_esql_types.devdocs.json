@@ -1555,7 +1555,7 @@
             "label": "task_type",
             "description": [],
             "signature": [
-              "\"completion\" | \"rerank\" | \"sparse_embedding\" | \"text_embedding\" | \"chat_completion\""
+              "\"completion\" | \"rerank\" | \"text_embedding\" | \"sparse_embedding\" | \"chat_completion\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/inference_endpoint_autocomplete_types.ts",
             "lineNumber": 17,
