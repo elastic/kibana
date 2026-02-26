@@ -20,6 +20,7 @@ import {
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { RunningQuery } from '../../../common/types';
+import { useRunningQueriesAppContext } from '../app_context';
 import { QueryDetailFlyout } from './query_detail_flyout';
 import { RunTimeFilter } from './run_time_filter';
 import { StopQueryConfirmationModal } from './stop_query_confirmation_modal';
@@ -38,6 +39,9 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
   queries,
   onCancelQuery,
 }) => {
+  const { capabilities } = useRunningQueriesAppContext();
+  const canCancelTasks = capabilities.canCancelTasks;
+
   const [selectedQuery, setSelectedQuery] = useState<RunningQuery | null>(null);
   const [runTimeValue, setRunTimeValue] = useState<number | null>(null);
   const [runTimeUnit, setRunTimeUnit] = useState('m');
@@ -180,6 +184,10 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
             return null;
           }
 
+          if (!canCancelTasks) {
+            return null;
+          }
+
           return (
             <EuiButtonIcon
               aria-label={i18n.translate('xpack.runningQueries.table.stopQueryAriaLabel', {
@@ -193,7 +201,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         },
       },
     ],
-    [requestStopQuery, stopRequestedTaskIds]
+    [canCancelTasks, requestStopQuery, stopRequestedTaskIds]
   );
 
   const uniqueSources = useMemo(() => [...new Set(queries.map((q) => q.source))], [queries]);

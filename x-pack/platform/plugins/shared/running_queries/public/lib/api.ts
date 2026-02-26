@@ -31,6 +31,13 @@ export class RunningQueriesApiService {
     });
   }
 
+  public useLoadPrivileges() {
+    return this.useRequest<{ canCancelTasks: boolean }>({
+      path: `${API_BASE_PATH}/privileges`,
+      method: 'get',
+    });
+  }
+
   public cancelTask(taskId: string) {
     return this.sendRequest({
       path: `${API_BASE_PATH}/cancel`,

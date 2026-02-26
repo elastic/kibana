@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import React, { useContext, type PropsWithChildren } from 'react';
+import React, { useContext, useMemo, type PropsWithChildren } from 'react';
 import type { ChromeStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { RunningQueriesApiService } from '../lib/api';
+
+export interface RunningQueriesCapabilities {
+  canCancelTasks: boolean;
+  isLoading: boolean;
+}
 
 export interface RunningQueriesAppContextValue {
   chrome: ChromeStart;
@@ -16,6 +21,7 @@ export interface RunningQueriesAppContextValue {
   notifications: NotificationsStart;
   apiService: RunningQueriesApiService;
   url: SharePluginStart['url'];
+  capabilities: RunningQueriesCapabilities;
 }
 
 const RunningQueriesAppContext = React.createContext<RunningQueriesAppContextValue | undefined>(
@@ -23,10 +29,20 @@ const RunningQueriesAppContext = React.createContext<RunningQueriesAppContextVal
 );
 
 export const RunningQueriesAppContextProvider: React.FC<
-  PropsWithChildren<RunningQueriesAppContextValue>
+  PropsWithChildren<Omit<RunningQueriesAppContextValue, 'capabilities'>>
 > = ({ children, ...contextValue }) => {
+  const { data, isLoading } = contextValue.apiService.useLoadPrivileges();
+
+  const capabilities = useMemo<RunningQueriesCapabilities>(
+    () => ({
+      canCancelTasks: Boolean(data?.canCancelTasks),
+      isLoading,
+    }),
+    [data?.canCancelTasks, isLoading]
+  );
+
   return (
-    <RunningQueriesAppContext.Provider value={contextValue}>
+    <RunningQueriesAppContext.Provider value={{ ...contextValue, capabilities }}>
       {children}
     </RunningQueriesAppContext.Provider>
   );

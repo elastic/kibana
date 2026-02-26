@@ -67,7 +67,8 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
   onClose,
   onStopQuery,
 }) => {
-  const { url } = useRunningQueriesAppContext();
+  const { url, capabilities } = useRunningQueriesAppContext();
+  const canCancelTasks = capabilities.canCancelTasks;
 
   const { rangeFrom, rangeTo } = useMemo(() => {
     const from = new Date(query.startTime);
@@ -260,7 +261,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {(isStopRequested || (query.cancellable && !query.cancelled)) && (
+            {(isStopRequested || (canCancelTasks && query.cancellable && !query.cancelled)) && (
               <EuiButton
                 color="danger"
                 fill
