@@ -55,6 +55,18 @@ export interface ServerStepDefinition<
    * Input and output types are automatically inferred from the schemas.
    */
   handler: StepHandler<Input, Output, Config>;
+
+  /**
+   * Optional cancellation cleanup handler.
+   *
+   * Called after the step's abort signal fires and `run()` completes, giving the
+   * step a guaranteed cleanup entry point (e.g. cancelling spawned child operations).
+   * Only invoked when the workflow is being cancelled — normal completions skip it.
+   *
+   * Implementations must be idempotent. Errors thrown here are logged but do not
+   * disrupt the cancellation flow.
+   */
+  onCancel?: OnCancelHandler<Input, Config>;
 }
 
 /**
@@ -98,6 +110,24 @@ export type StepHandler<
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject
 > = (context: StepHandlerContext<Input, Config>) => Promise<StepHandlerResult<Output>>;
+
+/**
+ * Cancellation cleanup handler for custom workflow steps.
+ * Receives a lightweight context with logger, abort signal, and step identifiers.
+ */
+export type OnCancelHandler<
+  Input extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> = (context: OnCancelContext<Input, Config>) => Promise<void> | void;
+
+/**
+ * Context provided to the onCancel handler.
+ * A subset of StepHandlerContext with just the services needed for cleanup.
+ */
+export type OnCancelContext<
+  TInput = z.ZodType,
+  TConfig = z.ZodObject
+> = Pick<StepHandlerContext<TInput, TConfig>, 'logger' | 'abortSignal' | 'stepId' | 'stepType' | 'contextManager'>;
 
 /**
  * Context provided to custom step handlers during execution.

@@ -9,8 +9,12 @@
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
-import type { BaseStep, RunStepResult } from './node_implementation';
+import type {
+  OnCancelContext,
+  ServerStepDefinition,
+  StepHandlerContext,
+} from '@kbn/workflows-extensions/server';
+import type { BaseStep, CancellableNode, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -23,6 +27,10 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * This class executes custom step types registered via the registerStepType API.
  * It validates input against the step's schema, executes the handler function,
  * and validates the output.
+ *
+ * When the step definition provides an `onCancel` handler, instances expose
+ * the `CancellableNode.onCancel` method so the execution engine can invoke
+ * cleanup on cancellation.
  */
 export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
@@ -40,6 +48,14 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
       spaceId: '', // Will be available from context
     };
     super(baseStep, stepExecutionRuntime, connectorExecutor, workflowExecutionRuntime);
+
+    if (stepDefinition.onCancel) {
+      const onCancelFn = stepDefinition.onCancel;
+      (this as unknown as CancellableNode).onCancel = async () => {
+        const context = this.createOnCancelContext();
+        await onCancelFn(context);
+      };
+    }
   }
 
   /**
@@ -67,6 +83,33 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
       const error = ExecutionError.fromError(err).toSerializableObject();
       return { input, output: undefined, error };
     }
+  }
+
+  /**
+   * Create the lightweight context for onCancel handlers.
+   */
+  private createOnCancelContext(): OnCancelContext {
+    return {
+      contextManager: {
+        getContext: () => this.stepExecutionRuntime.contextManager.getContext(),
+        getScopedEsClient: () => this.stepExecutionRuntime.contextManager.getEsClientAsUser(),
+        renderInputTemplate: (value, additionalContext) =>
+          this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+            value,
+            additionalContext
+          ),
+        getFakeRequest: () => this.stepExecutionRuntime.contextManager.getFakeRequest(),
+      },
+      logger: {
+        debug: (message, meta) => this.workflowLogger.logDebug(message, meta),
+        info: (message, meta) => this.workflowLogger.logInfo(message, meta),
+        warn: (message, meta) => this.workflowLogger.logWarn(message, meta),
+        error: (message, error) => this.workflowLogger.logError(message, error),
+      },
+      abortSignal: this.stepExecutionRuntime.abortController.signal,
+      stepId: this.node.stepId,
+      stepType: this.node.stepType,
+    };
   }
 
   /**
