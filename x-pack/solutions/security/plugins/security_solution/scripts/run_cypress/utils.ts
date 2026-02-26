@@ -224,15 +224,22 @@ export const groupSpecsByFtrConfig = (filePaths: string[]): SpecGroup[] => {
     const config = parseTestFileConfig(filePath);
     const key = ftrConfigToKey(config);
 
-    if (!groupMap.has(key)) {
-      groupMap.set(key, { configKey: key, ftrConfig: config, specFilePaths: [] });
+    const existing = groupMap.get(key);
+    if (existing) {
+      existing.specFilePaths.push(filePath);
+    } else {
+      groupMap.set(key, { configKey: key, ftrConfig: config, specFilePaths: [filePath] });
       groupOrder.push(key);
     }
-
-    groupMap.get(key)!.specFilePaths.push(filePath);
   }
 
-  return groupOrder.map((key) => groupMap.get(key)!);
+  return groupOrder.reduce<SpecGroup[]>((acc, key) => {
+    const group = groupMap.get(key);
+    if (group) {
+      acc.push(group);
+    }
+    return acc;
+  }, []);
 };
 
 export const getOnBeforeHook = (module: unknown, beforeSpecFilePath: string): Function => {
