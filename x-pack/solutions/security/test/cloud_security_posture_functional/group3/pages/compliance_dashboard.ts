@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const browser = getService('browser');
   const pageObjects = getPageObjects(['common', 'cspSecurity', 'cloudPostureDashboard', 'header']);
   const chance = new Chance();
 
@@ -50,6 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cspDashboard.waitForPluginInitialized();
 
       await cspDashboard.index.add(data);
+      await cspDashboard.waitForKspmStatsData();
       await cspDashboard.navigateToComplianceDashboardPage();
       await retry.waitFor(
         'Cloud posture integration dashboard to be displayed',
@@ -64,17 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Kubernetes Dashboard', () => {
       it('displays accurate summary compliance score', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
-
-        const scoreElement = await retry.tryForTime(60000, async () => {
-          try {
-            return await dashboard.getKubernetesComplianceScore();
-          } catch {
-            await browser.refresh();
-            await pageObjects.header.waitUntilLoadingHasFinished();
-            throw new Error('Dashboard summary not yet available, retrying after refresh');
-          }
-        });
-
+        const scoreElement = await dashboard.getKubernetesComplianceScore();
         expect((await scoreElement.getVisibleText()) === '0%').to.be(true);
       });
     });
