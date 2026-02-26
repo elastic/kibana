@@ -89,15 +89,15 @@ Follow these steps to run your Scout tests on a real ![logo cloud](https://doc-i
 
 ::::::{stepper}
 
-:::::{step} Create Elastic Cloud users
-
-Follow our [internal guide to provision internal users](https://docs.elastic.dev/appex-qa/create-cloud-users) (Elasticians only) to then populate the `<kibana-root>/.ftr/role_users.json` file.
-
-:::::
-
 :::::{step} Create Elastic Cloud project or deployment
 
 Use the Elastic Cloud UI or [create them with QAF](https://docs.elastic.dev/appex-qa/kibana-cloud-testing#create-an-elastic-cloud-deployment-or-project) (internal guide, Elasticians only).
+
+:::::
+
+:::::{step} Create Elastic Cloud users
+
+Follow our [internal guide to provision internal users](https://docs.elastic.dev/appex-qa/create-cloud-users) (Elasticians only) to then populate the `<kibana-root>/.ftr/role_users.json` file.
 
 :::::
 
