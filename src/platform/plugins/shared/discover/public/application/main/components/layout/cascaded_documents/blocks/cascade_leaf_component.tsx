@@ -184,6 +184,7 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   getScrollMargin,
   getScrollOffset,
   initialVirtualizationMetadata,
+  propagateVirtualizationMetadata,
   resultsCount,
   onOpenInDiscoverTab,
 }: {
@@ -198,6 +199,9 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   getScrollMargin: () => number;
   getScrollOffset: () => number;
   initialVirtualizationMetadata?: CascadedDocumentsDataGridUiState['virtualizationMetadata'];
+  propagateVirtualizationMetadata?: (
+    meta: NonNullable<CascadedDocumentsDataGridUiState['virtualizationMetadata']>
+  ) => void;
   resultsCount: number;
   onOpenInDiscoverTab: () => void;
 }) {
@@ -222,7 +226,6 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
     initialOffset: getScrollOffset,
     scrollMargin: getScrollMargin(),
     getScrollElement,
-    // Lightweight mode: avoid provider updates during scroll to keep interactions stable and fast.
     onStateChange: undefined,
     initialRect: initialVirtualizationMetadata?.scrollRect,
     initialAnchorItemIndex: initialVirtualizationMetadata?.initialDisplayedItemIndex ?? 0,
@@ -230,6 +233,27 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
 
   const items = virtualizer.getVirtualItems();
   const translateY = items.length > 0 ? items[0].start - getScrollMargin() : 0;
+
+  const firstVisibleIndexRef = useRef(0);
+  if (items.length > 0) {
+    firstVisibleIndexRef.current = items[0].index;
+  }
+  const latestPropagateMetadata = useRef(propagateVirtualizationMetadata);
+  latestPropagateMetadata.current = propagateVirtualizationMetadata;
+  useEffect(
+    () => () => {
+      const propagate = latestPropagateMetadata.current;
+      if (!propagate) return;
+      const scrollEl = getScrollElement();
+      propagate({
+        initialDisplayedItemIndex: firstVisibleIndexRef.current,
+        scrollRect: scrollEl
+          ? { width: scrollEl.clientWidth, height: scrollEl.clientHeight }
+          : { width: 0, height: 0 },
+      });
+    },
+    [getScrollElement]
+  );
   const measureRowHeightOnce = useCallback((element: HTMLDivElement | null) => {
     if (!element || hasMeasuredRowHeightRef.current) {
       return;
@@ -560,6 +584,17 @@ export const ESQLDataCascadeLeafCell = React.memo(
       onUpdateDataGridDensity?.(cascadeDataGridDensityState);
     }, [cascadeDataGridDensityState, onUpdateDataGridDensity]);
 
+    const latestSetDataGridUiState = useRef(setDataGridUiState);
+    latestSetDataGridUiState.current = setDataGridUiState;
+    useEffect(
+      () => () => {
+        latestSetDataGridUiState.current(cellId, {
+          virtualizationMetadata: initialVirtualizationMetadata.current,
+        });
+      },
+      [cellId]
+    );
+
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
 
     const setExpandedDocFn = useCallback(
@@ -644,6 +679,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
             getScrollMargin={getScrollMargin}
             getScrollOffset={getScrollOffset}
             initialVirtualizationMetadata={initialGridState?.virtualizationMetadata}
+            propagateVirtualizationMetadata={setInitialInViewVirtualItemIndex}
             resultsCount={cellData.length}
             onOpenInDiscoverTab={() => {
               openInNewTab({
