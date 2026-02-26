@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment/moment';
+
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
@@ -107,6 +109,38 @@ export function defineCommonRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       const { security: coreSecurity } = await context.core;
       return response.ok({ body: coreSecurity.authc.getCurrentUser()! });
+    })
+  );
+
+  router.get(
+    {
+      path: '/api/security/performant_me',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's security service; there must be an authenticated user for this route to return information`,
+        },
+        authc: {
+          enabled: 'minimal',
+          sessionCache: moment.duration(5, 's'),
+        },
+      },
+      validate: false,
+      options: {
+        access: 'public',
+        excludeFromOAS: true,
+      },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      const { security: coreSecurity, elasticsearch } = await context.core;
+      return response.ok({
+        body: {
+          principal: coreSecurity.authc.getCurrentUser()!,
+          hasManage: await elasticsearch.client.asCurrentUser.security.hasPrivileges({
+            cluster: ['manage'],
+          }),
+        },
+      });
     })
   );
 
