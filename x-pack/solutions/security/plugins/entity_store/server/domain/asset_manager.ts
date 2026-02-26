@@ -14,6 +14,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { scheduleEntityMaintainerTasks } from '../tasks/entity_maintainer';
+import { scheduleStoreUsageTask, stopStoreUsageTask } from '../tasks/store_usage_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import {
   EngineDescriptorTypeName,
@@ -107,6 +108,13 @@ export class AssetManager {
           request,
         }),
 
+        scheduleStoreUsageTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
+
         installEuidStoredScripts({
           esClient: this.esClient,
           logger: this.logger,
@@ -182,6 +190,11 @@ export class AssetManager {
         deleteEuidStoredScripts({
           esClient: this.esClient,
           logger: this.logger,
+        }),
+        stopStoreUsageTask({
+          taskManager: this.taskManager,
+          logger: this.logger,
+          namespace: this.namespace,
         }),
       ]);
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
