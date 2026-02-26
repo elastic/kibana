@@ -20,11 +20,14 @@ import assert from 'assert';
 import type { KueryNode } from '@kbn/es-query';
 import * as esKuery from '@kbn/es-query';
 import type { File } from '@kbn/files-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
+import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 import { KUERY_FIELD_TO_SO_FIELD_MAP } from '../../../../common/endpoint/service/scripts_library';
 import type { ListScriptsRequestQuery } from '../../../../common/api/endpoint/scripts_library/list_scripts';
 import {
   ENDPOINT_DEFAULT_PAGE_SIZE,
   SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE,
+  SUPPORTED_HOST_OS_TYPE,
 } from '../../../../common/endpoint/constants';
 import type { HapiReadableStream } from '../../../types';
 import {
@@ -52,6 +55,11 @@ export interface ScriptsLibraryClientOptions {
   spaceId: string;
   username: string;
   endpointService: EndpointAppContextService;
+  /**
+   * Rules client is used only by certain methods (ex. delete) so its optional, but the methods
+   * that depend on it will fail if the client is not initialized with it
+   */
+  rulesClient?: RulesClient;
 }
 
 export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
@@ -60,11 +68,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   protected readonly esClient: ElasticsearchClient;
   protected readonly soClient: SavedObjectsClientContract;
   protected readonly username: string;
+  protected readonly rulesClient: RulesClient | undefined;
 
   constructor(options: ScriptsLibraryClientOptions) {
     this.logger = options.endpointService.createLogger('ScriptsLibraryClient');
     this.username = options.username;
     this.esClient = options.endpointService.getInternalEsClient();
+    this.rulesClient = options.rulesClient;
     this.soClient = options.endpointService.savedObjects.createInternalScopedSoClient({
       spaceId: options.spaceId,
       readonly: false,
@@ -301,6 +311,54 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     return fileStorage;
   }
 
+  protected async findRulesUsingScrips(scriptIds: string | string[]): ReturnType<typeof findRules> {
+    if (!this.rulesClient) {
+      throw new ScriptLibraryError('Unable to query for rules - no Rules client available!');
+    }
+
+    const scriptList = (Array.isArray(scriptIds) ? scriptIds : [scriptIds])
+      .map((id) => `"${id}"`)
+      .join(' OR ');
+
+    const kuery = `alert.attributes.params.responseActions.actionTypeId:".endpoint" AND (${SUPPORTED_HOST_OS_TYPE.map(
+      (os) => `alert.attributes.params.responseActions.params.config.${os}.scriptId:(${scriptList})`
+    ).join(' OR ')})`;
+
+    this.logger.debug(() => `Searching for rules using scripts with KQL: ${kuery}`);
+
+    try {
+      const rulesResults = await findRules({
+        rulesClient: this.rulesClient,
+        filter: kuery,
+        perPage: 1000,
+        page: undefined,
+        fields: undefined,
+        sortField: undefined,
+        sortOrder: undefined,
+        hasReference: undefined,
+      });
+
+      this.logger.debug(
+        () =>
+          `Found ${rulesResults.total} rules referencing scripts IDs [${scriptList}]: ${stringify(
+            rulesResults
+          )}`
+      );
+
+      return rulesResults;
+    } catch (err) {
+      const error = new ScriptLibraryError(
+        `Error while attempting to find rules using script ID(s) [${scriptList}]: ${err.message}`,
+        500,
+        err
+      );
+
+      this.logger.error(error);
+
+      throw error;
+    }
+  }
+
   public async create({
     file: _file,
     ...scriptDefinition
@@ -498,6 +556,15 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
   public async delete(scriptId: string): Promise<void> {
     const scriptSo = await this.getScriptSavedObject(scriptId);
+    const rulesUsingScript = await this.findRulesUsingScrips(scriptId);
+
+    if (rulesUsingScript.total > 0) {
+      throw new ScriptLibraryError(
+        `Cannot delete script [${scriptId}] because it is referenced by the following rules:\n${rulesUsingScript.data
+          .map((rule) => `${rule.name} (ID: ${rule.id})`)
+          .join('\n')}`
+      );
+    }
 
     await this.soClient
       .delete(SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE, scriptId)
