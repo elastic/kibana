@@ -90,6 +90,7 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
       login();
       visit(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
+      cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
 
       // Make sure we have Endpoint Security Exception List
       importExceptionLists(ENDPOINT_LIST_TO_IMPORT_FILENAME);
