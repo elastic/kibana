@@ -16,11 +16,34 @@ import {
 } from '@kbn/esql-language';
 
 /**
- * Ensures that an ES|QL query has `METADATA _id` in the FROM command
- * and that any downstream KEEP command also includes `_id`.
+ * Injects `METADATA _id` into the FROM command of an ES|QL query and performs
+ * best-effort fixups so `_id` survives through the pipeline.
  *
  * The caller is responsible for skipping aggregating queries — this function
- * performs the transformation unconditionally.
+ * transforms unconditionally.
+ *
+ * **What it does:**
+ * 1. Upserts `METADATA _id` into FROM (no-op if already present).
+ * 2. Appends `_id` to any KEEP command that would otherwise exclude it.
+ *
+ * **When KEEP injection stops (conservatively):**
+ * - `DROP _id` / `DROP _*` / any wildcard DROP — column removed
+ * - `RENAME _id AS …` — column exists under a new name
+ * - `EVAL _id = …` — metadata value overwritten
+ * - `DISSECT` / `GROK` — may create columns unpredictably
+ * - `KEEP` with any wildcard (`*`, `agent.*`) — can't determine if `_id` is included
+ *
+ * **Examples:**
+ * ```
+ * "FROM logs*"                          → "FROM logs* METADATA _id"
+ * "FROM logs* METADATA _index"          → "FROM logs* METADATA _index, _id"
+ * "FROM logs* | KEEP host"              → "FROM logs* METADATA _id | KEEP host, _id"
+ * "FROM logs* | KEEP host, _id"         → "FROM logs* METADATA _id | KEEP host, _id"  (no-op)
+ * "FROM logs* METADATA _id"             → "FROM logs* METADATA _id"                    (no-op)
+ * "FROM logs* | DROP _id | KEEP host"   → "FROM logs* METADATA _id | DROP _id | KEEP host"
+ * "FROM logs* | KEEP agent.*"           → "FROM logs* METADATA _id | KEEP agent.*"
+ * "FROM logs* | DISSECT msg … | KEEP x" → "FROM logs* METADATA _id | DISSECT msg … | KEEP x"
+ * ```
  *
  * DROP _id is intentionally left untouched — removing a user's explicit DROP
  * would be surprising. This remains an accepted limitation.
@@ -37,17 +60,14 @@ export const injectMetadataId = (query: string): string => {
 };
 
 /**
- * Walks the pipeline in order and appends `_id` to KEEP commands that don't
- * already include it (or a `*` wildcard). Stops injecting once a command that
- * invalidates the `_id` column is encountered:
- *
- * - `DROP _id`        — removes the column entirely
- * - `RENAME _id AS …` — the column exists under a new name; `_id` is gone
- * - `EVAL _id = …`    — overwrites the metadata value with a computed one
+ * Walks the pipeline and appends `_id` to KEEP commands that don't already
+ * include it. Stops at the first command where `_id` may no longer be the
+ * original metadata value (DROP, RENAME, EVAL, DISSECT, GROK) or where a
+ * wildcard in KEEP makes it ambiguous whether `_id` is already included.
  */
 function addIdToKeepCommands(root: ESQLAstQueryExpression): void {
   for (const cmd of root.commands) {
-    if (cmd.name === 'drop' && cmd.args.some((arg) => isColumn(arg) && arg.name === '_id')) {
+    if (cmd.name === 'drop' && hasColumnMatchingId(cmd.args)) {
       break;
     }
 
@@ -59,11 +79,15 @@ function addIdToKeepCommands(root: ESQLAstQueryExpression): void {
       break;
     }
 
+    if (cmd.name === 'dissect' || cmd.name === 'grok') {
+      break;
+    }
+
     if (cmd.name === 'keep') {
-      const alreadyHasId = cmd.args.some(
-        (arg) => isColumn(arg) && (arg.name === '_id' || arg.name === '*')
-      );
-      if (!alreadyHasId) {
+      if (cmd.args.some((arg) => isColumn(arg) && arg.name.includes('*'))) {
+        break;
+      }
+      if (!cmd.args.some((arg) => isColumn(arg) && arg.name === '_id')) {
         cmd.args.push(Builder.expression.column('_id'));
       }
     }
@@ -86,4 +110,12 @@ function hasRenameOfId(args: ESQLAstItem[]): boolean {
 
 function hasAssignmentToId(args: ESQLAstItem[]): boolean {
   return args.some((arg) => isTargetingColumn(arg, '_id') && arg.name === '=');
+}
+
+/**
+ * Returns `true` when any column arg is `_id` or contains a wildcard (e.g. `_*`, `*`).
+ * Wildcards could match `_id`, so we conservatively stop injection.
+ */
+function hasColumnMatchingId(args: readonly ESQLAstItem[]): boolean {
+  return args.some((arg) => isColumn(arg) && (arg.name === '_id' || arg.name.includes('*')));
 }

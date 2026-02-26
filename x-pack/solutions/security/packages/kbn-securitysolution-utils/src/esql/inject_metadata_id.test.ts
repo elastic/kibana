@@ -65,9 +65,9 @@ describe('injectMetadataId', () => {
       );
     });
 
-    it('adds _id to KEEP with non-global wildcard', () => {
+    it('stops injection when KEEP contains any wildcard', () => {
       expect(injectMetadataId('FROM logs* | KEEP agent.*')).toBe(
-        'FROM logs* METADATA _id | KEEP agent.*, _id'
+        'FROM logs* METADATA _id | KEEP agent.*'
       );
     });
 
@@ -116,6 +116,18 @@ describe('injectMetadataId', () => {
     it('DROP without _id does not affect KEEP injection', () => {
       expect(injectMetadataId('FROM logs* | DROP agent.type | KEEP agent.name')).toBe(
         'FROM logs* METADATA _id | DROP agent.type | KEEP agent.name, _id'
+      );
+    });
+
+    it('DROP with wildcard _* stops KEEP injection', () => {
+      expect(injectMetadataId('FROM logs* | DROP _* | KEEP agent.name')).toBe(
+        'FROM logs* METADATA _id | DROP _* | KEEP agent.name'
+      );
+    });
+
+    it('DROP with global wildcard * stops KEEP injection', () => {
+      expect(injectMetadataId('FROM logs* | DROP * | KEEP agent.name')).toBe(
+        'FROM logs* METADATA _id | DROP * | KEEP agent.name'
       );
     });
   });
@@ -172,10 +184,40 @@ describe('injectMetadataId', () => {
     });
   });
 
-  describe('complex queries', () => {
-    it('handles realistic rule query with KEEP, wildcard, and EVAL', () => {
-      expect(injectMetadataId('FROM auditbeat-* | KEEP agent.*, _id | EVAL test_id = _id')).toBe(
-        'FROM auditbeat-* METADATA _id | KEEP agent.*, _id | EVAL test_id = _id'
+  describe('DISSECT/GROK (stops KEEP injection)', () => {
+    it('does not inject _id into KEEP after DISSECT', () => {
+      expect(injectMetadataId('FROM logs* | DISSECT message "%{parsed}" | KEEP parsed')).toBe(
+        'FROM logs* METADATA _id | DISSECT message "%{parsed}" | KEEP parsed'
+      );
+    });
+
+    it('does not inject _id into KEEP after GROK', () => {
+      expect(injectMetadataId('FROM logs* | GROK message "%{WORD:parsed}" | KEEP parsed')).toBe(
+        'FROM logs* METADATA _id | GROK message "%{WORD:parsed}" | KEEP parsed'
+      );
+    });
+
+    it('injects _id into KEEP before DISSECT', () => {
+      expect(injectMetadataId('FROM logs* | KEEP agent.name | DISSECT message "%{parsed}"')).toBe(
+        'FROM logs* METADATA _id | KEEP agent.name, _id | DISSECT message "%{parsed}"'
+      );
+    });
+  });
+
+  describe('KEEP with wildcards', () => {
+    it('does not add _id to KEEP * (already includes all fields)', () => {
+      expect(injectMetadataId('FROM logs* | KEEP *')).toBe('FROM logs* METADATA _id | KEEP *');
+    });
+
+    it('does not add _id to KEEP _* (wildcard covers _id)', () => {
+      expect(injectMetadataId('FROM logs* | KEEP _*')).toBe('FROM logs* METADATA _id | KEEP _*');
+    });
+  });
+
+  describe('multiple KEEP commands', () => {
+    it('injects _id into both KEEP commands', () => {
+      expect(injectMetadataId('FROM logs* | KEEP a, b | KEEP a')).toBe(
+        'FROM logs* METADATA _id | KEEP a, b, _id | KEEP a, _id'
       );
     });
   });
