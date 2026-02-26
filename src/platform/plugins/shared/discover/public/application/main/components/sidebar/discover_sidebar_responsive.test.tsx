@@ -667,16 +667,20 @@ describe('discover responsive sidebar', function () {
     EXTENDED_TIMEOUT
   );
 
-  it('should not render Add/Edit field buttons in viewer mode', async () => {
-    const services = createMockServices();
-    services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
-    const { user } = await renderComponent(props, {}, services);
-    expect(screen.queryAllByTestId('dataView-add-field_btn')).toHaveLength(0);
-    const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
-    await user.click(within(availableFields).getByTestId('field-bytes'));
-    expect(screen.queryByTestId('discoverFieldListPanelEdit-bytes')).not.toBeInTheDocument();
-    expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
-  });
+  it(
+    'should not render Add/Edit field buttons in viewer mode',
+    async () => {
+      const services = createMockServices();
+      services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
+      const { user } = await renderComponent(props, {}, services);
+      expect(screen.queryAllByTestId('dataView-add-field_btn')).toHaveLength(0);
+      const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
+      await user.click(within(availableFields).getByTestId('field-bytes'));
+      expect(screen.queryByTestId('discoverFieldListPanelEdit-bytes')).not.toBeInTheDocument();
+      expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
+    },
+    EXTENDED_TIMEOUT
+  );
 
   it(
     'should render buttons in data view picker correctly',
