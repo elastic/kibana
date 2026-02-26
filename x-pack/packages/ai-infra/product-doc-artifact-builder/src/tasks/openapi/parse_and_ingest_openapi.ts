@@ -138,9 +138,6 @@ async function createOpenAPIIndex({
         description: semanticTextMapping,
         endpoint: semanticTextMapping,
         summary: semanticTextMapping,
-        // Text fields for lexical search
-        description_text: { type: 'text' },
-        summary_text: { type: 'text' },
         operationId: { type: 'text' },
         // Keyword fields for exact and prefix matching
         method: { type: 'keyword' },
@@ -174,14 +171,7 @@ function removeEmptyTextFields(document: Record<string, any>): Record<string, an
   const cleanedDoc = { ...document };
 
   // List of text fields that should be removed if empty
-  const textFields = [
-    'description',
-    'summary',
-    'endpoint',
-    'description_text',
-    'summary_text',
-    'operationId',
-  ];
+  const textFields = ['description', 'summary', 'endpoint', 'operationId'];
 
   for (const field of textFields) {
     if (cleanedDoc[field] === '' || cleanedDoc[field] === null || cleanedDoc[field] === undefined) {
@@ -202,9 +192,6 @@ function transformDocumentsToIndexFormat(documents: Document[]): Array<Record<st
       method: doc.method ?? '',
       path: doc.path ?? '',
       tags: doc.tags ?? [],
-      // Text versions for lexical search
-      description_text: doc.description ?? '',
-      summary_text: doc.summary ?? '',
       // Store complete data for tool generation (but don't index deeply)
       parameters: doc.parameters ?? [],
       responses: doc.responses ?? {},

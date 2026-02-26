@@ -53,9 +53,6 @@ const OPENAPI_SPEC_MAPPING = {
       type: 'semantic_text',
       inference_id: '.multilingual-e5-small-elasticsearch',
     },
-    // Text fields for lexical search
-    description_text: { type: 'text' },
-    summary_text: { type: 'text' },
     operationId: { type: 'text' },
     // Keyword fields for exact and prefix matching
     method: { type: 'keyword' },
