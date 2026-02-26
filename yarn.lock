@@ -6705,7 +6705,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-common@link:x-pack/platform/packages/shared/kbn-evals-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-phoenix-executor@link:x-pack/platform/packages/shared/kbn-evals-phoenix-executor":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-plugin@link:x-pack/platform/plugins/shared/evals":
   version "0.0.0"
   uid ""
 
