@@ -19,6 +19,16 @@ export const connectorTokenModelVersions: SavedObjectsModelVersionMap = {
       create: rawConnectorTokenSchemaV1,
     },
   },
+};
+
+export const connectorTokenModelVersionsWithRefreshToken: SavedObjectsModelVersionMap = {
+  '1': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawConnectorTokenSchemaV1.extends({}, { unknowns: 'ignore' }),
+      create: rawConnectorTokenSchemaV1,
+    },
+  },
   '2': {
     changes: [], // backwards-compatible schema evolution
     schemas: {
