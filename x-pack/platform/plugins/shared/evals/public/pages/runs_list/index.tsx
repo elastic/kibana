@@ -22,6 +22,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import type { EvaluationRunSummary } from '@kbn/evals-common';
 import { useEvaluationRuns } from '../../hooks/use_evals_api';
+import * as i18n from './translations';
 
 export const RunsListPage: React.FC = () => {
   const history = useHistory();
@@ -39,7 +40,7 @@ export const RunsListPage: React.FC = () => {
     () => [
       {
         field: 'run_id',
-        name: 'Run ID',
+        name: i18n.COLUMN_RUN_ID,
         sortable: true,
         truncateText: true,
         width: '200px',
@@ -49,45 +50,45 @@ export const RunsListPage: React.FC = () => {
       },
       {
         field: 'timestamp',
-        name: 'Timestamp',
+        name: i18n.COLUMN_TIMESTAMP,
         sortable: true,
         render: (timestamp: string) => (timestamp ? new Date(timestamp).toLocaleString() : '-'),
       },
       {
         field: 'suite_id',
-        name: 'Suite',
+        name: i18n.COLUMN_SUITE,
         render: (suiteId: string | undefined) =>
           suiteId ? <EuiBadge color="hollow">{suiteId}</EuiBadge> : '-',
       },
       {
         field: 'task_model',
-        name: 'Task Model',
+        name: i18n.COLUMN_TASK_MODEL,
         render: (model: EvaluationRunSummary['task_model']) =>
           model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
         field: 'evaluator_model',
-        name: 'Evaluator Model',
+        name: i18n.COLUMN_EVALUATOR_MODEL,
         render: (model: EvaluationRunSummary['evaluator_model']) =>
           model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
       },
       {
         field: 'git_branch',
-        name: 'Branch',
+        name: i18n.COLUMN_BRANCH,
         render: (branch: string | null) => branch ?? '-',
       },
       {
         field: 'total_repetitions',
-        name: 'Reps',
+        name: i18n.COLUMN_REPS,
         width: '60px',
       },
       {
         field: 'ci',
-        name: 'CI',
+        name: i18n.COLUMN_CI,
         render: (ci: EvaluationRunSummary['ci']) =>
           ci?.build_url ? (
             <EuiLink href={ci.build_url} target="_blank" external>
-              Build
+              {i18n.CI_BUILD_LINK}
             </EuiLink>
           ) : (
             '-'
@@ -113,12 +114,12 @@ export const RunsListPage: React.FC = () => {
 
   return (
     <EuiPageTemplate>
-      <EuiPageTemplate.Header pageTitle="Evaluations" />
+      <EuiPageTemplate.Header pageTitle={i18n.PAGE_TITLE} />
       <EuiPageTemplate.Section>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldSearch
-              placeholder="Filter by branch..."
+              placeholder={i18n.SEARCH_PLACEHOLDER}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               isClearable

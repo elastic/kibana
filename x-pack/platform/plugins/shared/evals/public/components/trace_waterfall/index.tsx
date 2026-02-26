@@ -25,6 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { TraceSpan } from '@kbn/evals-common';
 import { useTrace } from '../../hooks/use_evals_api';
 import {
@@ -34,6 +35,11 @@ import {
   getSpanCategory,
   type SpanCategory,
 } from './waterfall_item';
+import * as i18n from './translations';
+
+// ---------------------------------------------------------------------------
+// Types & helpers
+// ---------------------------------------------------------------------------
 
 export interface SpanNode extends TraceSpan {
   children: SpanNode[];
@@ -133,11 +139,11 @@ const formatDuration = (ms: number): string => {
 };
 
 const LEGEND_ITEMS: Array<{ category: SpanCategory; label: string }> = [
-  { category: 'llm', label: 'LLM' },
-  { category: 'tool', label: 'Tool' },
-  { category: 'search', label: 'Search' },
-  { category: 'http', label: 'HTTP' },
-  { category: 'other', label: 'Other' },
+  { category: 'llm', label: i18n.LEGEND_LLM },
+  { category: 'tool', label: i18n.LEGEND_TOOL },
+  { category: 'search', label: i18n.LEGEND_SEARCH },
+  { category: 'http', label: i18n.LEGEND_HTTP },
+  { category: 'other', label: i18n.LEGEND_OTHER },
 ];
 
 interface TraceWaterfallProps {
@@ -228,7 +234,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
 
   if (error) {
     return (
-      <EuiCallOut title="Error loading trace" color="danger" iconType="error">
+      <EuiCallOut title={i18n.ERROR_LOADING_TRACE_TITLE} color="danger" iconType="error">
         <p>{String(error)}</p>
       </EuiCallOut>
     );
@@ -236,12 +242,23 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
 
   if (!data || data.spans.length === 0) {
     return (
-      <EuiCallOut title="No spans found" color="warning" iconType="help">
-        <p>No spans were found for trace ID: {traceId}</p>
+      <EuiCallOut title={i18n.NO_SPANS_FOUND_TITLE} color="warning" iconType="help">
         <p>
-          This usually means the trace was created before OTEL tracing was enabled, or the spans
-          have not been exported yet. Ensure <strong>telemetry.tracing.enabled: true</strong> is set
-          in <code>kibana.yml</code> and the EDOT collector is running.
+          <FormattedMessage
+            id="xpack.evals.traceWaterfall.noSpansFoundMessage"
+            defaultMessage="No spans were found for trace ID: {traceId}"
+            values={{ traceId }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.evals.traceWaterfall.noSpansFoundHelp"
+            defaultMessage="This usually means the trace was created before OTEL tracing was enabled, or the spans have not been exported yet. Ensure {configKey} is set in {configFile} and the EDOT collector is running."
+            values={{
+              configKey: <strong>telemetry.tracing.enabled: true</strong>,
+              configFile: <code>kibana.yml</code>,
+            }}
+          />
         </p>
       </EuiCallOut>
     );
@@ -269,16 +286,16 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
       <div className={timeAxisStyle}>
         <div style={{ flex: `0 0 ${LABEL_WIDTH}px` }} />
         <div className={tickAreaStyle}>
-          {tickLabels.map((label, i) => (
+          {tickLabels.map((label, idx) => (
             <span
-              key={i}
+              key={idx}
               style={{
                 position: 'absolute',
-                left: `${tickPercents[i]}%`,
+                left: `${tickPercents[idx]}%`,
                 transform:
-                  i === 0
+                  idx === 0
                     ? 'none'
-                    : i === tickLabels.length - 1
+                    : idx === tickLabels.length - 1
                     ? 'translateX(-100%)'
                     : 'translateX(-50%)',
                 fontSize: 10,
@@ -321,19 +338,19 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <strong>{flatSpans.length} spans</strong>
+              <strong>{i18n.getSpanCount(flatSpans.length)}</strong>
               {hideNoise && noiseCount > 0 && (
                 <>
                   {' '}
-                  <EuiBadge color="hollow">{noiseCount} hidden</EuiBadge>
+                  <EuiBadge color="hollow">{i18n.getHiddenCount(noiseCount)}</EuiBadge>
                 </>
               )}{' '}
-              &middot; {(data.duration_ms ?? 0).toFixed(1)}ms total
+              &middot; {i18n.getTotalDuration((data.duration_ms ?? 0).toFixed(1))}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSwitch
-              label="Hide noise"
+              label={i18n.HIDE_NOISE_LABEL}
               checked={hideNoise}
               onChange={(e) => setHideNoise(e.target.checked)}
               compressed
@@ -516,7 +533,12 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon iconType="cross" aria-label="Close detail" onClick={onClose} size="s" />
+          <EuiButtonIcon
+            iconType="cross"
+            aria-label={i18n.CLOSE_DETAIL_ARIA}
+            onClick={onClose}
+            size="s"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -524,17 +546,17 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <strong>Duration:</strong> {span.duration_ms.toFixed(1)}ms
+            <strong>{i18n.DURATION_LABEL}</strong> {span.duration_ms.toFixed(1)}ms
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <strong>Kind:</strong> {span.kind ?? '-'}
+            <strong>{i18n.KIND_LABEL}</strong> {span.kind ?? '-'}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <strong>Status:</strong> {span.status ?? '-'}
+            <strong>{i18n.STATUS_LABEL}</strong> {span.status ?? '-'}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -542,7 +564,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
             {(copy) => (
               <EuiButtonIcon
                 iconType="copy"
-                aria-label="Copy span ID"
+                aria-label={i18n.COPY_SPAN_ID_ARIA}
                 onClick={copy}
                 size="xs"
                 color="text"
@@ -561,7 +583,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
               <EuiFlexItem>
                 <EuiStat
                   title={String(categorized.tokens.input)}
-                  description="Input tokens"
+                  description={i18n.INPUT_TOKENS_DESC}
                   titleSize="xxs"
                   isLoading={false}
                 />
@@ -571,7 +593,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
               <EuiFlexItem>
                 <EuiStat
                   title={String(categorized.tokens.output)}
-                  description="Output tokens"
+                  description={i18n.OUTPUT_TOKENS_DESC}
                   titleSize="xxs"
                   isLoading={false}
                 />
@@ -581,7 +603,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
               <EuiFlexItem>
                 <EuiStat
                   title={String(categorized.tokens.total)}
-                  description="Total tokens"
+                  description={i18n.TOTAL_TOKENS_DESC}
                   titleSize="xxs"
                   isLoading={false}
                 />
@@ -596,7 +618,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs">
-            <h5>Tool Input</h5>
+            <h5>{i18n.TOOL_INPUT_HEADING}</h5>
           </EuiText>
           <EuiSpacer size="xs" />
           <EuiCodeBlock
@@ -614,7 +636,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs">
-            <h5>Tool Output</h5>
+            <h5>{i18n.TOOL_OUTPUT_HEADING}</h5>
           </EuiText>
           <EuiSpacer size="xs" />
           <EuiCodeBlock
@@ -634,7 +656,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
         <>
           <EuiSpacer size="s" />
           <EuiText size="xs">
-            <h5>LLM Attributes</h5>
+            <h5>{i18n.LLM_ATTRIBUTES_HEADING}</h5>
           </EuiText>
           <EuiSpacer size="xs" />
           <AttrTable attrs={categorized.llm} />
@@ -647,7 +669,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
           <EuiSpacer size="s" />
           <EuiAccordion
             id={`http-${span.span_id}`}
-            buttonContent="HTTP Attributes"
+            buttonContent={i18n.HTTP_ATTRIBUTES_HEADING}
             paddingSize="xs"
           >
             <AttrTable attrs={categorized.http} />
@@ -661,7 +683,7 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
           <EuiSpacer size="s" />
           <EuiAccordion
             id={`other-${span.span_id}`}
-            buttonContent={`Other Attributes (${Object.keys(categorized.other).length})`}
+            buttonContent={i18n.getOtherAttributesHeading(Object.keys(categorized.other).length)}
             paddingSize="xs"
           >
             <AttrTable attrs={categorized.other} />
@@ -675,7 +697,9 @@ const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, o
           <EuiSpacer size="s" />
           <EuiAccordion
             id={`resource-${span.span_id}`}
-            buttonContent={`Resource Attributes (${Object.keys(categorized.resource).length})`}
+            buttonContent={i18n.getResourceAttributesHeading(
+              Object.keys(categorized.resource).length
+            )}
             paddingSize="xs"
           >
             <AttrTable attrs={categorized.resource} />
@@ -713,7 +737,7 @@ const AttrTable: React.FC<{ attrs: Record<string, unknown> }> = ({ attrs }) => (
                     {(copy) => (
                       <EuiButtonIcon
                         iconType="copy"
-                        aria-label={`Copy ${key}`}
+                        aria-label={i18n.getCopyAttributeAriaLabel(key)}
                         onClick={copy}
                         size="xs"
                         color="text"

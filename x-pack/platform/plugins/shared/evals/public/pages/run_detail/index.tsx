@@ -28,6 +28,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { useEvaluationRun, useEvaluationRunScores } from '../../hooks/use_evals_api';
 import { TraceWaterfall } from '../../components/trace_waterfall';
+import * as i18n from './translations';
 
 export const RunDetailPage: React.FC = () => {
   const { runId } = useParams<{ runId: string }>();
@@ -35,6 +36,8 @@ export const RunDetailPage: React.FC = () => {
   const { data: runDetail, isLoading: runLoading, error: runError } = useEvaluationRun(runId);
   const { data: scoresData, isLoading: scoresLoading } = useEvaluationRunScores(runId);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+
+  const runIdShort = runId.slice(0, 12);
 
   const uniqueTraceIds = useMemo(() => {
     if (!scoresData?.scores) return [];
@@ -50,44 +53,44 @@ export const RunDetailPage: React.FC = () => {
     () => [
       {
         field: 'dataset_name',
-        name: 'Dataset',
+        name: i18n.COLUMN_DATASET,
         sortable: true,
       },
       {
         field: 'evaluator_name',
-        name: 'Evaluator',
+        name: i18n.COLUMN_EVALUATOR,
         sortable: true,
         render: (name: string) => <EuiBadge color="hollow">{name}</EuiBadge>,
       },
       {
         field: 'stats.mean',
-        name: 'Mean',
+        name: i18n.COLUMN_MEAN,
         sortable: true,
         render: (value: number) => value.toFixed(3),
       },
       {
         field: 'stats.median',
-        name: 'Median',
+        name: i18n.COLUMN_MEDIAN,
         render: (value: number) => value.toFixed(3),
       },
       {
         field: 'stats.std_dev',
-        name: 'Std Dev',
+        name: i18n.COLUMN_STD_DEV,
         render: (value: number) => value.toFixed(3),
       },
       {
         field: 'stats.min',
-        name: 'Min',
+        name: i18n.COLUMN_MIN,
         render: (value: number) => value.toFixed(3),
       },
       {
         field: 'stats.max',
-        name: 'Max',
+        name: i18n.COLUMN_MAX,
         render: (value: number) => value.toFixed(3),
       },
       {
         field: 'stats.count',
-        name: 'Count',
+        name: i18n.COLUMN_COUNT,
         width: '70px',
       },
     ],
@@ -97,10 +100,10 @@ export const RunDetailPage: React.FC = () => {
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Header
-        pageTitle={`Run: ${runId.slice(0, 12)}...`}
+        pageTitle={i18n.getPageTitle(runIdShort)}
         breadcrumbs={[
-          { text: 'Evaluations', onClick: () => history.push('/') },
-          { text: `Run ${runId.slice(0, 12)}...` },
+          { text: i18n.BREADCRUMB_EVALUATIONS, onClick: () => history.push('/') },
+          { text: i18n.getBreadcrumbRun(runIdShort) },
         ]}
       />
       <EuiPageTemplate.Section>
@@ -120,7 +123,7 @@ export const RunDetailPage: React.FC = () => {
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
                     title={runDetail.task_model?.id ?? '-'}
-                    description="Task Model"
+                    description={i18n.STAT_TASK_MODEL}
                     titleSize="xs"
                   />
                 </EuiPanel>
@@ -129,7 +132,7 @@ export const RunDetailPage: React.FC = () => {
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
                     title={runDetail.evaluator_model?.id ?? '-'}
-                    description="Evaluator Model"
+                    description={i18n.STAT_EVALUATOR_MODEL}
                     titleSize="xs"
                   />
                 </EuiPanel>
@@ -138,7 +141,7 @@ export const RunDetailPage: React.FC = () => {
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
                     title={String(runDetail.total_repetitions ?? '-')}
-                    description="Repetitions"
+                    description={i18n.STAT_REPETITIONS}
                     titleSize="xs"
                   />
                 </EuiPanel>
@@ -147,7 +150,7 @@ export const RunDetailPage: React.FC = () => {
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
                     title={String(scoresData?.total ?? '-')}
-                    description="Total Scores"
+                    description={i18n.STAT_TOTAL_SCORES}
                     titleSize="xs"
                     isLoading={scoresLoading}
                   />
@@ -157,7 +160,7 @@ export const RunDetailPage: React.FC = () => {
                 <EuiPanel hasShadow={false} hasBorder>
                   <EuiStat
                     title={String(uniqueTraceIds.length)}
-                    description="Traces"
+                    description={i18n.STAT_TRACES}
                     titleSize="xs"
                   />
                 </EuiPanel>
@@ -170,7 +173,7 @@ export const RunDetailPage: React.FC = () => {
         {uniqueTraceIds.length > 0 && (
           <>
             <EuiText size="s">
-              <h3>Traces</h3>
+              <h3>{i18n.SECTION_TRACES}</h3>
             </EuiText>
             <EuiSpacer size="s" />
             <EuiFlexGroup wrap>
@@ -191,7 +194,7 @@ export const RunDetailPage: React.FC = () => {
         )}
 
         <EuiText size="s">
-          <h3>Evaluator Statistics</h3>
+          <h3>{i18n.SECTION_EVALUATOR_STATS}</h3>
         </EuiText>
         <EuiSpacer size="s" />
         <EuiBasicTable<EvaluatorStats>
@@ -213,7 +216,7 @@ export const RunDetailPage: React.FC = () => {
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
               <h2 id="traceWaterfallTitle" style={{ wordBreak: 'break-all' }}>
-                Trace: {selectedTraceId}
+                {i18n.getTraceFlyoutTitle(selectedTraceId)}
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
