@@ -63,8 +63,45 @@ describe('SecurityNavControl', () => {
 
     expect(useUserProfileMock).toHaveBeenCalledTimes(1);
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('userMenuButton')).toBeInTheDocument();
-    expect(screen.getByTestId('userMenuAvatar')).toBeInTheDocument();
+    expect(screen.getByTestId('userMenuButton')).toMatchInlineSnapshot(`
+      <button
+        aria-controls="headerUserMenu"
+        aria-expanded="false"
+        aria-haspopup="true"
+        aria-label="Account menu"
+        class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+        data-test-subj="userMenuButton"
+        style="line-height: normal;"
+        type="button"
+      >
+        <span
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate euiButtonEmpty__text"
+          >
+            <span
+              class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
+            >
+              <div
+                aria-label="some@email"
+                class="euiAvatar euiAvatar--s euiAvatar--user emotion-euiAvatar-user-s-uppercase"
+                data-test-subj="userMenuAvatar"
+                role="img"
+                style="background-color: rgb(255, 199, 219); color: rgb(0, 0, 0);"
+                title="some@email"
+              >
+                <span
+                  aria-hidden="true"
+                >
+                  s
+                </span>
+              </div>
+            </span>
+          </span>
+        </span>
+      </button>
+    `);
   });
 
   it('should render a spinner while loading', () => {
@@ -81,8 +118,36 @@ describe('SecurityNavControl', () => {
 
     expect(useUserProfileMock).toHaveBeenCalledTimes(1);
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('userMenuButton')).toBeInTheDocument();
-    expect(screen.queryByTestId('userMenuAvatar')).not.toBeInTheDocument();
+    expect(screen.getByTestId('userMenuButton')).toMatchInlineSnapshot(`
+      <button
+        aria-controls="headerUserMenu"
+        aria-expanded="false"
+        aria-haspopup="true"
+        aria-label="Account menu"
+        class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+        data-test-subj="userMenuButton"
+        style="line-height: normal;"
+        type="button"
+      >
+        <span
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate euiButtonEmpty__text"
+          >
+            <span
+              class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
+            >
+              <span
+                aria-label="Loading"
+                class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                role="progressbar"
+              />
+            </span>
+          </span>
+        </span>
+      </button>
+    `);
   });
 
   it('should open popover when avatar is clicked', async () => {
