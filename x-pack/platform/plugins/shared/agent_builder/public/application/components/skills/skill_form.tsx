@@ -18,6 +18,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiMarkdownEditor,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -438,19 +439,14 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                   isInvalid={!!contentError}
                   error={contentError}
                 >
-                  <EuiTextArea
+                  <EuiMarkdownEditor
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    isInvalid={!!contentError}
-                    disabled={isViewMode}
-                    rows={16}
+                    onChange={setContent}
+                    readOnly={isViewMode}
                     data-test-subj="agentBuilderSkillFormContentInput"
-                    placeholder={i18n.translate(
-                      'xpack.agentBuilder.skills.form.contentPlaceholder',
-                      {
-                        defaultMessage:
-                          'Write markdown instructions for the skill...',
-                      }
+                    aria-label={i18n.translate(
+                      'xpack.agentBuilder.skills.form.contentEditorLabel',
+                      { defaultMessage: 'Skill instructions editor' }
                     )}
                   />
                 </EuiFormRow>
