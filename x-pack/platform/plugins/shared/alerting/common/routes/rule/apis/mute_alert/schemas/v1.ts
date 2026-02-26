@@ -104,6 +104,9 @@ export const muteAlertBodySchema = schema.maybe(
       },
       {
         validate: (value) => {
+          if (value == null || typeof value !== 'object') {
+            return;
+          }
           const hasExpiresAt = value.expires_at != null && value.expires_at !== '';
           const hasConditions = Array.isArray(value.conditions) && value.conditions.length > 0;
           const isEmptyBody = Object.keys(value).length === 0;
