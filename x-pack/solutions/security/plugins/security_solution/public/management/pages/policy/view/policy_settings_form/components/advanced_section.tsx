@@ -120,10 +120,9 @@ const SEARCH_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'Search by setting name or description' }
 );
 
-const FILTER_ALL = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.advanced.filterAll',
-  { defaultMessage: 'All' }
-);
+const FILTER_ALL = i18n.translate('xpack.securitySolution.endpoint.policy.advanced.filterAll', {
+  defaultMessage: 'All',
+});
 
 const OS_LINUX = i18n.translate('xpack.securitySolution.endpoint.policy.advanced.osLinux', {
   defaultMessage: 'Linux',
@@ -216,15 +215,15 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
     const filteredAndGroupedSettings = useMemo(() => {
       const query = searchQuery.trim().toLowerCase();
 
-      let items = AdvancedPolicySchema.filter((entry) => {
+      const items = AdvancedPolicySchema.filter((entry) => {
         if (!isPlatinumPlus && entry.license === 'platinum') return false;
         if (selectedOS !== 'all') {
           const prefix =
             selectedOS === 'linux'
               ? 'linux.advanced.'
               : selectedOS === 'mac'
-                ? 'mac.advanced.'
-                : 'windows.advanced.';
+              ? 'mac.advanced.'
+              : 'windows.advanced.';
           if (!entry.key.startsWith(prefix)) return false;
         }
         if (selectedCategory !== 'all' && getCategory(entry.key) !== selectedCategory) {
@@ -259,7 +258,12 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
 
     const renderSettingRow = useCallback(
       (entry: (typeof AdvancedPolicySchema)[number]) => {
-        const { key, documentation, first_supported_version: firstVersion, last_supported_version: lastVersion } = entry;
+        const {
+          key,
+          documentation,
+          first_supported_version: firstVersion,
+          last_supported_version: lastVersion,
+        } = entry;
         const configPath = key.split('.');
         const value = getValue(policy as unknown as Record<string, unknown>, configPath);
         return (
@@ -410,7 +414,11 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                 </EuiText>
               </EuiPanel>
             ) : (
-              <EuiFlexGroup gutterSize="m" direction="column" data-test-subj={getTestId('settings')}>
+              <EuiFlexGroup
+                gutterSize="m"
+                direction="column"
+                data-test-subj={getTestId('settings')}
+              >
                 {CATEGORY_ORDER.map((category) => {
                   const entries = filteredAndGroupedSettings.get(category)!;
                   if (entries.length === 0) return null;
