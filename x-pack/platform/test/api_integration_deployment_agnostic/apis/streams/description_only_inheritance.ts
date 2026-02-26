@@ -34,12 +34,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('does not persist type for description-only overrides and keeps inherited mappings dynamic', async () => {
-      const parentName = 'logs.descriptiononlyparent';
+      const parentName = 'logs.otel.descriptiononlyparent';
       const childName = `${parentName}.child`;
       const fieldName = 'attributes.abc';
 
       // Create a parent/child hierarchy using the fork API to ensure proper routing linkage.
-      await forkStream(apiClient, 'logs', { stream: { name: parentName }, where: { always: {} } });
+      await forkStream(apiClient, 'logs.otel', {
+        stream: { name: parentName },
+        where: { always: {} },
+      });
       await forkStream(apiClient, parentName, {
         stream: { name: childName },
         where: { always: {} },
