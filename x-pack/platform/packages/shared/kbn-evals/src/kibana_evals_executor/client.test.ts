@@ -50,14 +50,13 @@ describe('KibanaEvalsClient', () => {
     (getCurrentTraceId as jest.Mock).mockReturnValue('default-trace-id');
   });
 
-  it('computes a stable datasetId across equivalent datasets', async () => {
+  it('computes a stable datasetId for datasets with the same name', async () => {
     const client = createClient();
 
     const datasetA: EvaluationDataset = {
       name: 'ds',
       description: 'desc',
       examples: [
-        // undefined output should normalize to null for datasetId hashing
         { input: { q: 1 }, metadata: {} },
         { input: { q: 2 }, output: { a: 2 } },
       ],
@@ -65,11 +64,8 @@ describe('KibanaEvalsClient', () => {
 
     const datasetB: EvaluationDataset = {
       name: 'ds',
-      description: 'desc',
-      examples: [
-        { input: { q: 1 }, output: null, metadata: { empty: {} } },
-        { input: { q: 2 }, output: { a: 2 }, metadata: null },
-      ],
+      description: 'different description',
+      examples: [{ input: { q: 99 }, output: { a: 99 } }],
     };
 
     const expA = await client.runExperiment(
@@ -84,28 +80,31 @@ describe('KibanaEvalsClient', () => {
     expect(expA.datasetId).toBe(expB.datasetId);
   });
 
-  it('changes datasetId when dataset content changes', async () => {
+  it('produces different datasetIds for datasets with different names', async () => {
     const client = createClient();
 
-    const base: EvaluationDataset = {
-      name: 'ds',
+    const datasetA: EvaluationDataset = {
+      name: 'dataset-alpha',
       description: 'desc',
       examples: [{ input: { q: 1 }, output: { a: 1 } }],
     };
 
-    const exp1 = await client.runExperiment(
-      { dataset: base, task: async () => ({ ok: true }) },
+    const datasetB: EvaluationDataset = {
+      name: 'dataset-beta',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { a: 1 } }],
+    };
+
+    const expA = await client.runExperiment(
+      { dataset: datasetA, task: async () => ({ ok: true }) },
       []
     );
-    const exp2 = await client.runExperiment(
-      {
-        dataset: { ...base, examples: [{ input: { q: 2 }, output: { a: 1 } }] },
-        task: async () => ({ ok: true }),
-      },
+    const expB = await client.runExperiment(
+      { dataset: datasetB, task: async () => ({ ok: true }) },
       []
     );
 
-    expect(exp1.datasetId).not.toBe(exp2.datasetId);
+    expect(expA.datasetId).not.toBe(expB.datasetId);
   });
 
   it('respects repetitions and produces expected RanExperiment shape', async () => {

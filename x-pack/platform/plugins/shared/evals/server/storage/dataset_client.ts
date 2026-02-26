@@ -13,12 +13,11 @@ import type {
   StorageClientBulkOperation,
   StorageIndexAdapter,
 } from '@kbn/storage-adapter';
+import { DATASET_UUID_NAMESPACE } from '@kbn/evals-common';
 import type { DatasetStorageProperties } from './datasets_storage';
 import type { datasetsStorageSettings } from './datasets_storage';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { datasetExamplesStorageSettings } from './examples_storage';
-
-const DATASET_UUID_NAMESPACE = 'f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0';
 
 type DatasetStorageDocument = DatasetStorageProperties & { _id?: string };
 type DatasetExampleStorageDocument = DatasetExampleStorageProperties & { _id?: string };

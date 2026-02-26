@@ -27,3 +27,5 @@ export const API_VERSIONS = {
 } as const;
 
 export const INTERNAL_API_ACCESS = 'internal' as const;
+
+export const DATASET_UUID_NAMESPACE = 'f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0' as const;

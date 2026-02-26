@@ -6,39 +6,25 @@
  */
 
 import pLimit from 'p-limit';
-import objectHash from 'object-hash';
-import { omitBy, isEmpty } from 'lodash';
+import { v5 as uuidv5 } from 'uuid';
 import { randomUUID } from 'crypto';
 import { withInferenceContext } from '@kbn/inference-tracing';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
+import { DATASET_UUID_NAMESPACE } from '@kbn/evals-common';
 import type {
   EvalsExecutorClient,
   Evaluator,
   EvaluationDataset,
   EvaluationDatasetWithId,
   ExperimentTask,
-  Example,
   RanExperiment,
   TaskOutput,
 } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 
-function normalizeExample(example: Example) {
-  return {
-    input: example.input,
-    output: example.output ?? null,
-    // keep parity with prior normalization: drop empty metadata keys
-    metadata: omitBy(example.metadata ?? {}, isEmpty),
-  };
-}
-
-function computeDatasetId(dataset: EvaluationDataset): string {
-  return objectHash({
-    name: dataset.name,
-    description: dataset.description,
-    examples: dataset.examples.map(normalizeExample),
-  });
+function computeDatasetId(name: string): string {
+  return uuidv5(name, DATASET_UUID_NAMESPACE);
 }
 
 export class KibanaEvalsClient implements EvalsExecutorClient {
@@ -109,7 +95,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const resolvedDataset = await this.resolveDataset(dataset, trustUpstreamDataset);
       await this.options.upsertDataset?.(resolvedDataset);
 
-      const datasetId = computeDatasetId(resolvedDataset);
+      const datasetId = computeDatasetId(resolvedDataset.name);
       const experimentId = randomUUID();
       const repetitions = this.options.repetitions ?? 3;
       const runConcurrency = Math.max(1, concurrency ?? 5);
