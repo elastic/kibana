@@ -103,7 +103,7 @@ export function ActionsContextMenu({
               name: subItem.name,
               icon: subItem.icon,
               ...(subItem.href
-                ? { href: subItem.href, target: '_self' as const }
+                ? { href: subItem.href, target: '_self' }
                 : {
                     onClick: () => {
                       subItem.onClick?.();
@@ -118,7 +118,7 @@ export function ActionsContextMenu({
             name: action.name,
             icon: action.icon,
             ...(action.href
-              ? { href: action.href, target: '_self' as const }
+              ? { href: action.href, target: '_self' }
               : {
                   onClick: action.onClick
                     ? () => {
