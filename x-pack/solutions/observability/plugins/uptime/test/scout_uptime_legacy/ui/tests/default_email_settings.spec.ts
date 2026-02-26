@@ -48,9 +48,9 @@ test.describe('DefaultEmailSettings', { tag: '@local-stateful-classic' }, () => 
     });
 
     await test.step('select email connector and validate required fields', async () => {
-      await expect(page.getByText('Bcc')).toBeHidden();
+      await expect(page.testSubj.locator('emailAddBccButton')).toBeHidden();
       await pageObjects.uptimeSettings.selectDefaultConnector(name);
-      await expect(page.getByText('Bcc')).toBeVisible();
+      await expect(page.testSubj.locator('emailAddBccButton')).toBeVisible();
       await expect(page.locator('.euiFormErrorText')).toHaveText(
         'To email is required for email connector'
       );
