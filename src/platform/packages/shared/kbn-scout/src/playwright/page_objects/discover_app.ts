@@ -339,6 +339,84 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  async runRecommendedEsqlQuery(queryLabel: string, fallbackQueryLabel?: string): Promise<string> {
+    await this.openRecommendedQueriesPanel();
+
+    const recommendedQueriesDialog = this.page.testSubj
+      .locator('esql-menu-popover')
+      .or(this.page.locator('[role="dialog"]'));
+
+    const primaryQueryOption = recommendedQueriesDialog.getByRole('button', {
+      exact: true,
+      name: queryLabel,
+    });
+    const fallbackQueryOption = fallbackQueryLabel
+      ? recommendedQueriesDialog.getByRole('button', {
+          exact: true,
+          name: fallbackQueryLabel,
+        })
+      : null;
+
+    if (await primaryQueryOption.isVisible()) {
+      await primaryQueryOption.click();
+      await this.waitUntilSearchingHasFinished();
+      return queryLabel;
+    } else if (
+      fallbackQueryLabel &&
+      fallbackQueryOption &&
+      (await fallbackQueryOption.isVisible())
+    ) {
+      await fallbackQueryOption.click();
+      await this.waitUntilSearchingHasFinished();
+      return fallbackQueryLabel;
+    } else {
+      throw new Error(
+        `Neither recommended query "${queryLabel}" nor fallback "${fallbackQueryLabel}" is available`
+      );
+    }
+  }
+
+  async openRecommendedQueriesPanel() {
+    const menuPopover = this.page.testSubj.locator('esql-menu-popover');
+    if (!(await menuPopover.isVisible())) {
+      await this.page.testSubj.click('esql-help-popover-button');
+    }
+
+    await expect(menuPopover).toBeVisible();
+    const selectedPanelTitleButton = this.page.testSubj.locator('contextMenuPanelTitleButton');
+    if (await selectedPanelTitleButton.isVisible()) {
+      return;
+    }
+
+    const recommendedQueriesCategoryButton = this.page.testSubj.locator('esql-recommended-queries');
+    await expect(recommendedQueriesCategoryButton).toBeVisible();
+    await recommendedQueriesCategoryButton.click({ force: true });
+    await expect(selectedPanelTitleButton).toBeVisible();
+  }
+
+  async addBreakdownFieldFromSidebar(field: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) {
+      await sidebarToggleButton.click();
+    }
+
+    await this.page.testSubj.waitForSelector(`field-${field}`);
+    const fieldListItem = this.page.testSubj.locator(`field-${field}`);
+    await expect(fieldListItem).toBeVisible();
+    const addBreakdownField = this.page.testSubj.locator(
+      `fieldPopoverHeader_addBreakdownField-${field}`
+    );
+
+    if (!(await addBreakdownField.isVisible())) {
+      await fieldListItem.scrollIntoViewIfNeeded();
+      await fieldListItem.click();
+    }
+
+    await expect(addBreakdownField).toBeVisible();
+    await addBreakdownField.click();
+    await this.waitUntilSearchingHasFinished();
+  }
+
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();

@@ -32,6 +32,7 @@ export class MetricsExperiencePage {
   public readonly container: Locator;
   public readonly grid: Locator;
   public readonly cards: Locator;
+  public readonly breakdownSelectorButton: Locator;
   public readonly pagination: MetricsPagination;
   public readonly searchButton: Locator;
   public readonly searchInput: Locator;
@@ -41,6 +42,9 @@ export class MetricsExperiencePage {
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
     this.cards = this.grid.locator('[data-chart-index]');
+    this.breakdownSelectorButton = page.testSubj.locator(
+      'metricsExperienceBreakdownSelectorButton'
+    );
     this.pagination = createPagination(this.container);
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
     this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');

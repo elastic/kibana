@@ -16,6 +16,15 @@ export const ESQL_QUERIES = {
   FROM: `FROM ${METRICS_TEST_INDEX_NAME}`,
 };
 
+export const RECOMMENDED_QUERY_LABELS = {
+  SEARCH_ALL_METRICS: 'Search all metrics',
+  SEARCH_ALL_FIELDS_FALLBACK: 'Search all fields',
+} as const;
+
+export const METRICS_DIMENSION_FIELDS = {
+  DEFAULT_BREAKDOWN: 'dimension_0',
+} as const;
+
 export const DATA_VIEW_NAME = METRICS_TEST_INDEX_NAME;
 
 export const KBN_ARCHIVE =
