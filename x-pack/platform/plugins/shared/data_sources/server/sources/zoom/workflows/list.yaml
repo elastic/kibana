@@ -1,0 +1,73 @@
+version: "1"
+name: "sources.zoom.list"
+description: "List Zoom resources. Actions and inputs: listUpcomingMeetings (optional user_id, optional type, optional page_size, optional next_page_token); listUserRecordings (optional user_id, optional from, optional to, optional page_size, optional next_page_token); listMeetingParticipants (meeting_id, optional page_size, optional next_page_token)."
+tags: ["agent-builder-tool"]
+enabled: true
+triggers:
+  - type: "manual"
+inputs:
+  - name: list_action
+    type: choice
+    options:
+      - "listUpcomingMeetings"
+      - "listUserRecordings"
+      - "listMeetingParticipants"
+    required: true
+  - name: user_id
+    type: string
+    required: false
+    default: "me"
+    description: "User ID or email address. Defaults to 'me' for the authenticated user. Used by listUpcomingMeetings and listUserRecordings."
+  - name: type
+    type: string
+    required: false
+    default: "upcoming"
+    description: "Meeting type filter for listUpcomingMeetings. Valid values: scheduled, live, upcoming, upcoming_meetings, previous_meetings."
+  - name: meeting_id
+    type: string
+    required: false
+    description: "Past meeting ID or UUID. Required for listMeetingParticipants."
+  - name: from
+    type: string
+    required: false
+    description: "Start date in YYYY-MM-DD format for listUserRecordings. Defaults to current date."
+  - name: to
+    type: string
+    required: false
+    description: "End date in YYYY-MM-DD format for listUserRecordings. Range cannot exceed 1 month."
+  - name: page_size
+    type: number
+    required: false
+    description: "Number of results per page (1-300)."
+  - name: next_page_token
+    type: string
+    required: false
+    description: "Pagination token from a previous response."
+steps:
+  - name: list-upcoming-meetings
+    type: zoom.listMeetings
+    if: "${{ inputs.list_action == 'listUpcomingMeetings' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      userId: "${{inputs.user_id}}"
+      type: "${{inputs.type}}"
+      pageSize: ${{inputs.page_size}}
+      nextPageToken: "${{inputs.next_page_token}}"
+  - name: list-user-recordings
+    type: zoom.listUserRecordings
+    if: "${{ inputs.list_action == 'listUserRecordings' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      userId: "${{inputs.user_id}}"
+      from: "${{inputs.from}}"
+      to: "${{inputs.to}}"
+      pageSize: ${{inputs.page_size}}
+      nextPageToken: "${{inputs.next_page_token}}"
+  - name: list-meeting-participants
+    type: zoom.getMeetingParticipants
+    if: "${{ inputs.list_action == 'listMeetingParticipants' and inputs.meeting_id }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      meetingId: "${{inputs.meeting_id}}"
+      pageSize: ${{inputs.page_size}}
+      nextPageToken: "${{inputs.next_page_token}}"
