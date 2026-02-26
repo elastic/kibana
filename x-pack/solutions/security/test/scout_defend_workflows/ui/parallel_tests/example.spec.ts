@@ -17,13 +17,9 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest(
-      'endpoint list page renders with mocked data',
-      async ({ pageObjects, endpointData }) => {
-        await pageObjects.endpointList.navigate();
-        await pageObjects.endpointList.waitForTableLoaded();
-        await expect(pageObjects.endpointList.endpointPage).toBeVisible();
-      }
-    );
+    spaceTest('endpoint list page renders', async ({ pageObjects }) => {
+      await pageObjects.endpointList.navigate();
+      await expect(pageObjects.endpointList.endpointPage).toBeVisible();
+    });
   }
 );

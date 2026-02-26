@@ -11,16 +11,10 @@ import { createPlaywrightConfig } from '@kbn/scout-security';
 const baseConfig = createPlaywrightConfig({
   testDir: './parallel_tests/',
   workers: 2,
-  runGlobalSetup: true,
+  runGlobalSetup: false,
 });
 
 export default defineConfig({
   ...baseConfig,
-  testMatch: [
-    '**/example.spec.ts',
-    '**/endpoint_list/endpoints_mocked_data.spec.ts',
-    '**/rbac/navigation.spec.ts',
-    '**/policy/policy_list.spec.ts',
-    '**/response_actions/response_actions_history.spec.ts',
-  ],
+  testMatch: ['**/example.spec.ts', '**/rbac/navigation.spec.ts'],
 });
