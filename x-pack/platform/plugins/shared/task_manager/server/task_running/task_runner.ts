@@ -1083,7 +1083,7 @@ export class TaskManagerRunner implements TaskRunner {
         },
       },
       message,
-      ...(errorDetails ? { error: errorDetails } : {}),
+      ...(error ? { error: errorDetails } : {}),
     });
   }
 }
