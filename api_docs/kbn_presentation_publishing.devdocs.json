@@ -615,7 +615,7 @@
           }
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-        "lineNumber": 41,
+        "lineNumber": 48,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -631,7 +631,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-            "lineNumber": 41,
+            "lineNumber": 48,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -902,6 +902,44 @@
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
             "lineNumber": 17,
             "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasPinnedPanels",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasPinnedPanels",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          "HasPinnedPanels"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasPinnedPanels.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
+            "lineNumber": 44,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -6532,8 +6570,19 @@
         "tags": [],
         "label": "CanPinPanels",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanPinPanels",
+            "text": "CanPinPanels"
+          },
+          " extends ",
+          "HasPinnedPanels"
+        ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-        "lineNumber": 32,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6549,7 +6598,7 @@
               "(panelId: string) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-            "lineNumber": 33,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6565,7 +6614,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-                "lineNumber": 33,
+                "lineNumber": 37,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6585,7 +6634,7 @@
               "(panelId: string) => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-            "lineNumber": 34,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6601,44 +6650,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-                "lineNumber": 34,
+                "lineNumber": 38,
                 "columnNumber": 16,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.CanPinPanels.panelIsPinned",
-            "type": "Function",
-            "tags": [],
-            "label": "panelIsPinned",
-            "description": [],
-            "signature": [
-              "(panelId: string) => boolean"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-            "lineNumber": 35,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.CanPinPanels.panelIsPinned.$1",
-                "type": "string",
-                "tags": [],
-                "label": "panelId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-                "lineNumber": 35,
-                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -6665,7 +6678,7 @@
               "<StateType>) => Promise<ApiType | undefined>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-            "lineNumber": 36,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6688,7 +6701,7 @@
                   "<StateType>"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/containers/panel_management.ts",
-                "lineNumber": 37,
+                "lineNumber": 40,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,

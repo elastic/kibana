@@ -1,13 +1,13 @@
 {
   "counts": {
-    "apiCount": 136,
+    "apiCount": 145,
     "missingExports": 2,
-    "missingComments": 64,
-    "paramDocMismatches": 13,
+    "missingComments": 65,
+    "paramDocMismatches": 14,
     "missingComplexTypeInfo": 15,
-    "missingReturns": 23,
+    "missingReturns": 24,
     "isAnyType": 1,
-    "noReferences": 135,
+    "noReferences": 144,
     "unnamedExports": 0
   },
   "missingComments": [
@@ -500,6 +500,14 @@
       "columnNumber": 1
     },
     {
+      "id": "def-public.overloadedFn.$1",
+      "label": "input",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "string",
+      "lineNumber": 80,
+      "columnNumber": 4
+    },
+    {
       "id": "def-common.commonFoo",
       "label": "commonFoo",
       "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/common/foo/index.ts",
@@ -628,6 +636,14 @@
       "type": "Function",
       "lineNumber": 62,
       "columnNumber": 3
+    },
+    {
+      "id": "def-public.overloadedFn",
+      "label": "overloadedFn",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Function",
+      "lineNumber": 98,
+      "columnNumber": 14
     }
   ],
   "missingComplexTypeInfo": [
@@ -936,6 +952,14 @@
       "type": "Type",
       "lineNumber": 65,
       "columnNumber": 1
+    },
+    {
+      "id": "def-public.overloadedFn",
+      "label": "overloadedFn",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Function",
+      "lineNumber": 98,
+      "columnNumber": 14
     }
   ],
   "isAnyType": [
@@ -2004,6 +2028,78 @@
       "type": "Type",
       "lineNumber": 65,
       "columnNumber": 1
+    },
+    {
+      "id": "def-public.OverloadedFunction.Unnamed.$1",
+      "label": "input",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "string",
+      "lineNumber": 80,
+      "columnNumber": 4
+    },
+    {
+      "id": "def-public.OverloadedFunction.Unnamed",
+      "label": "Unnamed",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Function",
+      "lineNumber": 75,
+      "columnNumber": 3
+    },
+    {
+      "id": "def-public.OverloadedFunction.Unnamed.$1",
+      "label": "input",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "number",
+      "lineNumber": 86,
+      "columnNumber": 4
+    },
+    {
+      "id": "def-public.OverloadedFunction.Unnamed",
+      "label": "Unnamed",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Function",
+      "lineNumber": 81,
+      "columnNumber": 3
+    },
+    {
+      "id": "def-public.OverloadedFunction.Unnamed.$1",
+      "label": "input",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Array",
+      "lineNumber": 92,
+      "columnNumber": 4
+    },
+    {
+      "id": "def-public.OverloadedFunction.Unnamed",
+      "label": "Unnamed",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Function",
+      "lineNumber": 87,
+      "columnNumber": 3
+    },
+    {
+      "id": "def-public.OverloadedFunction",
+      "label": "OverloadedFunction",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Interface",
+      "lineNumber": 67,
+      "columnNumber": 1
+    },
+    {
+      "id": "def-public.overloadedFn.$1",
+      "label": "input",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "string",
+      "lineNumber": 80,
+      "columnNumber": 4
+    },
+    {
+      "id": "def-public.overloadedFn",
+      "label": "overloadedFn",
+      "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/types.ts",
+      "type": "Function",
+      "lineNumber": 98,
+      "columnNumber": 14
     },
     {
       "id": "def-common.commonFoo",
