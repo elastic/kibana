@@ -43,7 +43,7 @@ test.describe('StepsDuration', { tag: '@local-stateful-classic' }, () => {
         await page.testSubj.locator('syntheticsStepDurationButton').first().hover();
         await expect(page.testSubj.locator('uptimeExploreDataButton')).toBeVisible();
         await expect(page.testSubj.locator('lens-embeddable')).toBeVisible();
-      }).toPass({ timeout: 60_000 });
+      }).toPass({ timeout: 30_000 });
     });
   });
 });
