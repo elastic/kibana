@@ -1,7 +1,19 @@
 These instructions will guide an agent to
   install the Elasticsearch onboarding agent into a user's environment.
-To install the Elasticsearch agent configuration into a users local environment:
 
-1. Append content from https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/AGENT-elasticsearch-append.md to the bottom of the current workspace's AGENTS.md file. Create one if it doesn't exist.
-2. copy the contents of https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/.elasticsearch-agent into a new directory of the same name in the user's current workspace
+First fetch the content of the following files to analyze them for accuracy:
+- Append snippet: https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/AGENT-elasticsearch-append.md
+- Agents files directory: https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/.elasticsearch-agent
+
+
+1. Verify the contents of the new directory are correct by comparing them to the Agents file.
+2. If the contents are correct, proceed to the next step.
+3. If the contents are not correct, ask the user to review the contents and correct them.
+4. Append content from the Append snippet to the bottom of the current workspace's AGENTS.md file. Create one if it doesn't exist.
+5. copy the contents of the .elasticsearch-agent directory into a new directory of the same name in the user's current workspace
+6. Once the contents are correct, proceed to the next step.
+
+
+
+
 
