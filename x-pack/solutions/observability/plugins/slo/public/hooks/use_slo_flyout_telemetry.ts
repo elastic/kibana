@@ -14,7 +14,7 @@ export const useSloFlyoutTelemetry = (location?: string) => {
   const { telemetry } = usePluginContext();
 
   return useMemo(() => {
-    if (!location) {
+    if (!location || !telemetry) {
       return {
         reportDetailsFlyoutViewed: noop,
         reportDetailsFlyoutTabChanged: noop as (tabId: string) => void,
