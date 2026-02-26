@@ -50,14 +50,17 @@ resolveCurrentServerlessReleaseSha() {
   local serverless_release_rev
   local serverless_release_sha
 
-  serverless_release_rev="$(node scripts/get_serverless_release_sha)"
-  if [[ $? -ne 0 ]]; then
+  if ! serverless_release_rev="$(node scripts/get_serverless_release_sha)"; then
     echo "❌ Couldn't determine current serverless release SHA. Aborting Saved Objects checks" >&2
     exit 1
   fi
 
-  serverless_release_sha="$(git rev-parse "$serverless_release_rev")"
-  if [[ $? -ne 0 || -z "$serverless_release_sha" ]]; then
+  if ! serverless_release_sha="$(git rev-parse "$serverless_release_rev")"; then
+    echo "❌ Couldn't expand current serverless release SHA. Aborting Saved Objects checks." >&2
+    exit 1
+  fi
+
+  if [[ -z "$serverless_release_sha" ]]; then
     echo "❌ Couldn't expand current serverless release SHA. Aborting Saved Objects checks." >&2
     exit 1
   fi
@@ -70,8 +73,7 @@ echo --- Check changes in Saved Objects
 if is_pr; then
   # We are on the 'pull_request' pipeline, the goal is to test against the merge-base commit.
   # First, we try to obtain its SHA (or one of its ancestors)
-  MERGE_BASE_REV="$(findExistingSnapshotSha "$GITHUB_PR_MERGE_BASE")"
-  if [[ $? -ne 0 ]]; then
+  if ! MERGE_BASE_REV="$(findExistingSnapshotSha "$GITHUB_PR_MERGE_BASE")"; then
     echo "❌ Could not find an existing snapshot to use as a baseline. Please rebase this PR branch onto the latest 'main' commit, then rerun CI." >&2
     exit 1
   fi
