@@ -57,10 +57,9 @@ describe('Zoom', () => {
         type: 'upcoming',
       })) as ZoomPaginatedResponse;
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.zoom.us/v2/users/me/meetings',
-        { params: { type: 'upcoming' } }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/users/me/meetings', {
+        params: { type: 'upcoming' },
+      });
       expect(result).toEqual(mockResponse.data);
       expect(result.meetings).toHaveLength(2);
     });
@@ -140,9 +139,7 @@ describe('Zoom', () => {
         meetingId: '111',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.zoom.us/v2/meetings/111/recordings'
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/meetings/111/recordings');
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -191,9 +188,7 @@ describe('Zoom', () => {
             {
               id: 111,
               topic: 'Standup',
-              recording_files: [
-                { id: 'rec-1', recording_type: 'audio_transcript' },
-              ],
+              recording_files: [{ id: 'rec-1', recording_type: 'audio_transcript' }],
             },
           ],
         },
@@ -206,10 +201,9 @@ describe('Zoom', () => {
         to: '2026-02-28',
       })) as ZoomPaginatedResponse;
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.zoom.us/v2/users/me/recordings',
-        { params: { from: '2026-02-01', to: '2026-02-28' } }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/users/me/recordings', {
+        params: { from: '2026-02-01', to: '2026-02-28' },
+      });
       expect(result.meetings).toHaveLength(1);
     });
 
@@ -219,10 +213,9 @@ describe('Zoom', () => {
 
       await Zoom.actions.listUserRecordings.handler(mockContext, { userId: 'me' });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://api.zoom.us/v2/users/me/recordings',
-        { params: {} }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/users/me/recordings', {
+        params: {},
+      });
     });
 
     it('should propagate API errors', async () => {
@@ -247,10 +240,9 @@ describe('Zoom', () => {
         downloadUrl: 'https://zoom.us/rec/download/transcript.vtt',
       })) as { contentType?: string; text: string };
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://zoom.us/rec/download/transcript.vtt',
-        { responseType: 'arraybuffer' }
-      );
+      expect(mockClient.get).toHaveBeenCalledWith('https://zoom.us/rec/download/transcript.vtt', {
+        responseType: 'arraybuffer',
+      });
       expect(result.contentType).toBe('text/vtt');
       expect(result.text).toBe(vttContent);
     });

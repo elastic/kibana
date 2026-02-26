@@ -121,10 +121,7 @@ export const Zoom: ConnectorSpec = {
           .default('upcoming')
           .describe('Meeting type filter'),
         pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
-        nextPageToken: z
-          .string()
-          .optional()
-          .describe('Pagination token from a previous response'),
+        nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
       }),
       output: ZoomPaginationOutputSchema.extend({
         meetings: z.array(z.any()).describe('Array of meeting objects'),
@@ -188,9 +185,7 @@ export const Zoom: ConnectorSpec = {
         const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom getting recordings for meeting ${typedInput.meetingId}`);
 
-        const response = await ctx.client.get(
-          `${ZOOM_API_BASE}/meetings/${encodedId}/recordings`
-        );
+        const response = await ctx.client.get(`${ZOOM_API_BASE}/meetings/${encodedId}/recordings`);
         return response.data;
       },
     },
@@ -209,19 +204,10 @@ export const Zoom: ConnectorSpec = {
           .string()
           .default('me')
           .describe('User ID or email. Use "me" for the authenticated user.'),
-        from: z
-          .string()
-          .optional()
-          .describe('Start date (YYYY-MM-DD). Defaults to current date.'),
-        to: z
-          .string()
-          .optional()
-          .describe('End date (YYYY-MM-DD). Range cannot exceed 1 month.'),
+        from: z.string().optional().describe('Start date (YYYY-MM-DD). Defaults to current date.'),
+        to: z.string().optional().describe('End date (YYYY-MM-DD). Range cannot exceed 1 month.'),
         pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
-        nextPageToken: z
-          .string()
-          .optional()
-          .describe('Pagination token from a previous response'),
+        nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
       }),
       output: ZoomPaginationOutputSchema.extend({
         from: z.string().optional(),
@@ -303,10 +289,7 @@ export const Zoom: ConnectorSpec = {
       input: z.object({
         meetingId: z.string().describe('Past meeting ID or UUID'),
         pageSize: z.number().min(1).max(300).optional().describe('Number of results per page'),
-        nextPageToken: z
-          .string()
-          .optional()
-          .describe('Pagination token from a previous response'),
+        nextPageToken: z.string().optional().describe('Pagination token from a previous response'),
       }),
       output: ZoomPaginationOutputSchema.extend({
         participants: z
