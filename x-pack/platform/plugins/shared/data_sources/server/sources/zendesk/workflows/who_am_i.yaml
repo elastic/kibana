@@ -11,3 +11,5 @@ steps:
   - name: who-am-i
     type: zendesk.whoAmI
     connector-id: <%= zendesk-stack-connector-id %>
+    with:
+      {}
