@@ -406,6 +406,7 @@ export const datatableStateSchemaNoESQL = schema.object(
     validate: validateSortBy,
     meta: {
       id: 'datatableNoESQL',
+      title: 'Datatable (DSL)',
       description: 'Datatable state configuration for standard queries',
     },
   }
@@ -424,7 +425,7 @@ export const datatableStateSchemaESQL = schema.object(
     metrics: schema.maybe(
       schema.arrayOf(
         esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
-          meta: { id: 'datatableESQLMetric' },
+          meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
         }),
         {
           minSize: 1,
@@ -469,6 +470,7 @@ export const datatableStateSchemaESQL = schema.object(
     },
     meta: {
       id: 'datatableESQL',
+      title: 'Datatable (ES|QL)',
       description: 'Datatable state configuration for ES|QL queries',
     },
   }
@@ -478,8 +480,9 @@ export const datatableStateSchema = schema.oneOf(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
     meta: {
+      id: 'datatableChart',
+      title: 'Datatable',
       description: 'Datatable chart configuration: DSL or ES|QL query based',
-      id: 'datatableChartSchema',
     },
   }
 );
