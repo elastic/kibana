@@ -190,6 +190,34 @@ describe('PromQL Parser', () => {
     });
   });
 
+  describe('subquery', () => {
+    it('parses a basic subquery with range and resolution', () => {
+      const result = PromQLParser.parse('rate(http_requests_total[5m])[30m:1m]');
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.root.expression?.type).toBe('subquery');
+
+      const subquery = result.root.expression as any;
+      expect(subquery.expr.type).toBe('function');
+      expect(subquery.expr.name).toBe('rate');
+      expect(subquery.range.value).toBe('30m');
+      expect(subquery.resolution.value).toBe('1m');
+    });
+
+    it('parses a subquery with arithmetic resolution', () => {
+      const result = PromQLParser.parse('http_requests_total[5m][30m:5m*2]');
+
+      expect(result.errors).toHaveLength(0);
+      expect(result.root.expression?.type).toBe('subquery');
+
+      const subquery = result.root.expression as any;
+      expect(subquery.resolution.type).toBe('binary-expression');
+      expect(subquery.resolution.name).toBe('*');
+      expect(subquery.resolution.left.value).toBe('5m');
+      expect(subquery.resolution.right.value).toBe(2);
+    });
+  });
+
   describe('error handling', () => {
     it('returns errors for invalid syntax', () => {
       const result = PromQLParser.parse('rate(');

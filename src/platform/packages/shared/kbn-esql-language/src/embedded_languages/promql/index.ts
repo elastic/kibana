@@ -18,3 +18,13 @@ export type { PromQLAstNodeTemplate } from './ast/builder/types';
 export { PromQLParser, type PromQLParseOptions } from './parser';
 export { PromQLErrorListener } from './parser/promql_error_listener';
 export { PromQLCstToAstConverter } from './parser/cst_to_ast_converter';
+
+// Walker
+export { PromqlWalker } from './ast/walker';
+export type { PromqlWalkerOptions } from './ast/walker';
+
+// Pretty Printer
+export { PromQLBasicPrettyPrinter, type PromQLBasicPrettyPrinterOptions } from './pretty_print';
+
+// Type Guard
+export { isPromqlNode } from './ast/is';

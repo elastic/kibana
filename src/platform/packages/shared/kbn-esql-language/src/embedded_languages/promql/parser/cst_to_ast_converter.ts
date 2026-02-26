@@ -15,8 +15,6 @@ import type { AstNodeParserFields } from '../../../ast/builder/types';
 import type * as ast from '../types';
 import type { PromQLParser } from './parser';
 
-// TODO: Handle `SubqueryResolutionContext`, `NonReservedContext`
-
 /**
  * Transforms an ANTLR PromQL Concrete Syntax Tree (CST) into a
  * Kibana Abstract Syntax Tree (AST).
@@ -500,11 +498,11 @@ export class PromQLCstToAstConverter {
       const groupLabelsCtx = ctx._groupLabels;
       const groupLabels = groupLabelsCtx ? this.fromLabelList(groupLabelsCtx) : [];
 
-      groupModifier = PromQLBuilder.groupModifier(joiningKind, groupLabels, {
-        text: joiningToken.text ?? '',
-        location: getPosition(joiningToken, joiningToken),
-        incomplete: false,
-      });
+      groupModifier = PromQLBuilder.groupModifier(
+        joiningKind,
+        groupLabels,
+        this.createParserFieldsFromToken(joiningToken, joiningToken.text ?? '')
+      );
 
       for (const label of groupLabels) {
         if (label.incomplete) {
@@ -576,17 +574,37 @@ export class PromQLCstToAstConverter {
       if (resDurationCtx) {
         resolution = this.fromDuration(resDurationCtx);
       } else {
-        // Check for TIME_VALUE_WITH_COLON (e.g., ":5m")
+        // Check for TIME_VALUE_WITH_COLON (e.g., ":5m", ":5m*2", ":5m^2")
         const timeValueWithColon = resolutionCtx.TIME_VALUE_WITH_COLON();
         if (timeValueWithColon) {
-          // TIME_VALUE_WITH_COLON includes the leading colon, e.g., ":5m"
-          // We need to strip the colon to get the time value
           const text = timeValueWithColon.getText();
           const timeValue = text.startsWith(':') ? text.slice(1) : text;
           resolution = PromQLBuilder.expression.literal.time(
             timeValue,
             this.createParserFieldsFromToken(timeValueWithColon.symbol, timeValue)
           );
+
+          const opToken = resolutionCtx._op;
+          const rightCtx = resolutionCtx.expression();
+
+          if (opToken && rightCtx) {
+            const operator = this.toBinaryOperator(opToken.text ?? '');
+            const right =
+              this.fromExpression(rightCtx) ??
+              PromQLBuilder.unknown(this.getParserFields(rightCtx));
+
+            resolution = PromQLBuilder.expression.binary(
+              operator,
+              resolution,
+              right,
+              {},
+              this.getParserFields(resolutionCtx)
+            );
+
+            if (right.incomplete) {
+              resolution.incomplete = true;
+            }
+          }
         }
       }
     }

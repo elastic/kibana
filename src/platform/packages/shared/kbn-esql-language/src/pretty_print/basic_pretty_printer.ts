@@ -17,6 +17,8 @@ import {
   isParamLiteral,
   isProperNode,
 } from '../ast/is';
+import { isPromqlNode } from '../embedded_languages/promql/ast/is';
+import { PromQLBasicPrettyPrinter } from '../embedded_languages/promql/pretty_print';
 import {
   BinaryExpressionGroup,
   binaryExpressionGroup,
@@ -270,10 +272,13 @@ export class BasicPrettyPrinter {
         return this.decorateWithComments(ctx.node, ctx.node.text || '<UNKNOWN>');
       }
 
+      if (isPromqlNode(ctx.node)) {
+        const text = PromQLBasicPrettyPrinter.print(ctx.node);
+        return this.decorateWithComments(ctx.node, text || '<UNKNOWN>');
+      }
+
       if (ctx.node.text) {
-        let text = ctx.node.text;
-        // TODO: this will be replaced by proper PromQL pretty-printing in subsequent PR
-        text = text.replace(/<EOF>/g, '').trim();
+        const text = ctx.node.text.replace(/<EOF>/g, '').trim();
 
         return this.decorateWithComments(ctx.node, text || '<UNKNOWN>');
       }
