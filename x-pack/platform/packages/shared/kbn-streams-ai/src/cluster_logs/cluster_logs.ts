@@ -46,6 +46,7 @@ function getFields(condition: Condition): string[] {
 export async function clusterLogs({
   index,
   partitions,
+  excludeConditions = [],
   esClient,
   start,
   end,
@@ -55,6 +56,7 @@ export async function clusterLogs({
 }: {
   index: string;
   partitions: Array<{ name: string; condition: Condition }>;
+  excludeConditions?: Condition[];
   esClient: ElasticsearchClient;
   start: number;
   end: number;
@@ -83,6 +85,7 @@ export async function clusterLogs({
 
   // extract used fields to create runtime_mappings
   const fieldsToMap = new Set<string>();
+  excludeConditions.flatMap(getFields).forEach((field) => fieldsToMap.add(field));
 
   // create requests for exclusive partitions (data only ends up in single bucket)
   partitions.forEach((partition, idx) => {
@@ -96,7 +99,10 @@ export async function clusterLogs({
       query: {
         bool: {
           filter: [conditionToQueryDsl(partition.condition), rangeQuery],
-          must_not: prevPartitions.map((prev) => conditionToQueryDsl(prev.condition)),
+          must_not: [
+            ...prevPartitions.map((prev) => conditionToQueryDsl(prev.condition)),
+            ...excludeConditions.map((condition) => conditionToQueryDsl(condition)),
+          ],
         },
       },
     });
