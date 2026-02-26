@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ELASTIC_SERVERLESS_SUPERUSER, ELASTIC_SERVERLESS_SUPERUSER_PASSWORD } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
@@ -146,8 +145,8 @@ export class Config {
                 }),
               },
               auth: {
-                username: ELASTIC_SERVERLESS_SUPERUSER,
-                password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+                username: this.get('servers.linkedElasticsearch.username'),
+                password: this.get('servers.linkedElasticsearch.password'),
               },
             },
           }

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LINKED_CLUSTER_PORT_OFFSET } from '@kbn/es';
+import {
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+  LINKED_CLUSTER_PORT_OFFSET,
+} from '@kbn/es';
 import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
@@ -18,6 +22,8 @@ export const servers: ScoutServerConfig = {
     linkedElasticsearch: {
       ...uiamConfig.servers.elasticsearch,
       port: (uiamConfig.servers.elasticsearch.port as number) + LINKED_CLUSTER_PORT_OFFSET,
+      username: ELASTIC_SERVERLESS_SUPERUSER,
+      password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
     },
   },
   esServerlessOptions: {

@@ -204,6 +204,8 @@ describe('Config.getScoutTestConfig', () => {
           protocol: 'https',
           hostname: 'localhost',
           port: 9230,
+          username: 'elastic_serverless',
+          password: 'changeme',
         },
         kibana: {
           protocol: 'http',
