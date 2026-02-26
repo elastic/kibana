@@ -20,7 +20,7 @@ import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service';
+import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type {
@@ -44,7 +44,7 @@ export class RulesClient {
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
     @inject(CoreStart('http')) private readonly http: HttpServiceStart,
-    @inject(RulesSavedObjectService)
+    @inject(RulesSavedObjectServiceScopedToken)
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
     @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
     @inject(UserService) private readonly userService: UserServiceContract

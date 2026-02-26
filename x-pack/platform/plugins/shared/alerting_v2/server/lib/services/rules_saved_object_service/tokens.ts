@@ -9,6 +9,13 @@ import type { ServiceIdentifier } from 'inversify';
 import type { RulesSavedObjectServiceContract } from './rules_saved_object_service';
 
 /**
+ * RulesSavedObjectService scoped to the current request
+ */
+export const RulesSavedObjectServiceScopedToken = Symbol.for(
+  'alerting_v2.RulesSavedObjectServiceScoped'
+) as ServiceIdentifier<RulesSavedObjectServiceContract>;
+
+/**
  * RulesSavedObjectService singleton (internal user, no request scope)
  */
 export const RulesSavedObjectServiceInternalToken = Symbol.for(

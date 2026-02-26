@@ -16,7 +16,7 @@ import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
@@ -24,7 +24,7 @@ import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } f
 @injectable()
 export class NotificationPolicyClient {
   constructor(
-    @inject(NotificationPolicySavedObjectService)
+    @inject(NotificationPolicySavedObjectServiceScopedToken)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract
   ) {}

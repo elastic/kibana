@@ -16,8 +16,14 @@ import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_r
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
-import { NotificationPolicySavedObjectServiceInternalToken } from '../lib/services/notification_policy_saved_object_service/tokens';
-import { RulesSavedObjectServiceInternalToken } from '../lib/services/rules_saved_object_service/tokens';
+import {
+  NotificationPolicySavedObjectServiceInternalToken,
+  NotificationPolicySavedObjectServiceScopedToken,
+} from '../lib/services/notification_policy_saved_object_service/tokens';
+import {
+  RulesSavedObjectServiceInternalToken,
+  RulesSavedObjectServiceScopedToken,
+} from '../lib/services/rules_saved_object_service/tokens';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
 import { RulesClient } from '../lib/rules_client';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
@@ -79,6 +85,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   );
 
   bind(RulesSavedObjectService).toSelf().inRequestScope();
+  bind(RulesSavedObjectServiceScopedToken).toService(RulesSavedObjectService);
   bind(RulesSavedObjectServiceInternalToken)
     .toDynamicValue(({ get }) => {
       const savedObjects = get(CoreStart('savedObjects'));
@@ -89,6 +96,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
 
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
+  bind(NotificationPolicySavedObjectServiceScopedToken).toService(
+    NotificationPolicySavedObjectService
+  );
   bind(NotificationPolicySavedObjectServiceInternalToken)
     .toDynamicValue(({ get }) => {
       const savedObjects = get(CoreStart('savedObjects'));
