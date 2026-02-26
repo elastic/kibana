@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { OnePasswordConnector } from './one_password';
 
@@ -16,12 +17,15 @@ const ACCOUNT_UUID = 'ACCT-UUID-1234';
 describe('OnePasswordConnector', () => {
   const mockClient = {
     get: jest.fn(),
+    post: jest.fn(),
     patch: jest.fn(),
-  };
+  } as unknown as jest.Mocked<AxiosInstance>;
 
   const mockContext = {
     client: mockClient,
-    config: { baseUrl: BASE_URL, accountUuid: ACCOUNT_UUID },
+    config: {
+      accountUuid: ACCOUNT_UUID,
+    },
     log: { debug: jest.fn() },
   } as unknown as ActionContext;
 
@@ -39,16 +43,40 @@ describe('OnePasswordConnector', () => {
   });
 
   describe('auth', () => {
-    it('should use oauth_client_credentials with openid scope', () => {
-      expect(OnePasswordConnector.auth?.types).toEqual([
-        { type: 'oauth_client_credentials', defaults: { scope: 'openid' } },
-      ]);
+    it('should use oauth_client_credentials with hidden tokenUrl and scope', () => {
+      const authTypes = OnePasswordConnector.auth?.types;
+      expect(authTypes).toHaveLength(1);
+
+      const authDef = authTypes?.[0] as {
+        type: string;
+        defaults: Record<string, unknown>;
+        overrides: { meta: Record<string, Record<string, unknown>> };
+      };
+
+      expect(authDef.type).toBe('oauth_client_credentials');
+      expect(authDef.defaults).toEqual({
+        tokenUrl: `${BASE_URL}/users/oauth2/token`,
+        scope: 'openid',
+        tokenEndpointAuthMethod: 'client_secret_basic',
+      });
+      expect(authDef.overrides.meta).toEqual({
+        tokenUrl: { hidden: true },
+        scope: { hidden: true },
+      });
     });
 
     it('should set User-Agent header', () => {
-      expect(OnePasswordConnector.auth?.headers).toEqual(
-        expect.objectContaining({ 'User-Agent': expect.stringContaining('Elastic') })
-      );
+      expect(OnePasswordConnector.auth?.headers).toEqual({
+        'User-Agent': 'ElasticKibana',
+      });
+    });
+  });
+
+  describe('schema', () => {
+    it('should not expose baseUrl in config', () => {
+      const shape = (OnePasswordConnector.schema as { shape: Record<string, unknown> }).shape;
+      expect(shape.baseUrl).toBeUndefined();
+      expect(shape.accountUuid).toBeDefined();
     });
   });
 
@@ -71,7 +99,7 @@ describe('OnePasswordConnector', () => {
     ];
 
     it('should list users without filters', async () => {
-      mockClient.get.mockResolvedValue({ data: usersList });
+      (mockClient.get as jest.Mock).mockResolvedValue({ data: usersList });
 
       const result = await OnePasswordConnector.actions.listUsers.handler(mockContext, {});
 
@@ -82,7 +110,7 @@ describe('OnePasswordConnector', () => {
     });
 
     it('should list users filtered by status', async () => {
-      mockClient.get.mockResolvedValue({ data: [usersList[0]] });
+      (mockClient.get as jest.Mock).mockResolvedValue({ data: [usersList[0]] });
 
       const result = await OnePasswordConnector.actions.listUsers.handler(mockContext, {
         status: 'ACTIVE',
@@ -95,10 +123,7 @@ describe('OnePasswordConnector', () => {
     });
 
     it('should support pagination parameters', async () => {
-      mockClient.get.mockResolvedValue({
-        data: usersList,
-        nextPageToken: 'CAIQAg',
-      });
+      (mockClient.get as jest.Mock).mockResolvedValue({ data: usersList });
 
       await OnePasswordConnector.actions.listUsers.handler(mockContext, {
         maxPageSize: 10,
@@ -116,7 +141,7 @@ describe('OnePasswordConnector', () => {
 
     it('should propagate API errors', async () => {
       const error = new Error('Unauthorized');
-      mockClient.get.mockRejectedValue(error);
+      (mockClient.get as jest.Mock).mockRejectedValue(error);
 
       await expect(OnePasswordConnector.actions.listUsers.handler(mockContext, {})).rejects.toThrow(
         'Unauthorized'
@@ -134,7 +159,7 @@ describe('OnePasswordConnector', () => {
     };
 
     it('should get a single user by UUID', async () => {
-      mockClient.get.mockResolvedValue({ data: userDetail });
+      (mockClient.get as jest.Mock).mockResolvedValue({ data: userDetail });
 
       const result = await OnePasswordConnector.actions.getUser.handler(mockContext, {
         uuid: 'USER1234567890ABCDEF12',
@@ -148,12 +173,10 @@ describe('OnePasswordConnector', () => {
 
     it('should propagate 404 errors', async () => {
       const error = new Error('Not found');
-      mockClient.get.mockRejectedValue(error);
+      (mockClient.get as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        OnePasswordConnector.actions.getUser.handler(mockContext, {
-          uuid: 'NONEXISTENT',
-        })
+        OnePasswordConnector.actions.getUser.handler(mockContext, { uuid: 'NONEXISTENT' })
       ).rejects.toThrow('Not found');
     });
   });
@@ -168,7 +191,7 @@ describe('OnePasswordConnector', () => {
     };
 
     it('should suspend an active user', async () => {
-      mockClient.patch.mockResolvedValue({ data: suspendedUser });
+      (mockClient.patch as jest.Mock).mockResolvedValue({ data: suspendedUser });
 
       const result = await OnePasswordConnector.actions.suspendUser.handler(mockContext, {
         uuid: 'USER1234567890ABCDEF12',
@@ -185,12 +208,10 @@ describe('OnePasswordConnector', () => {
 
     it('should propagate errors when suspending fails', async () => {
       const error = new Error('Cannot suspend account owner');
-      mockClient.patch.mockRejectedValue(error);
+      (mockClient.patch as jest.Mock).mockRejectedValue(error);
 
       await expect(
-        OnePasswordConnector.actions.suspendUser.handler(mockContext, {
-          uuid: 'OWNER-UUID',
-        })
+        OnePasswordConnector.actions.suspendUser.handler(mockContext, { uuid: 'OWNER-UUID' })
       ).rejects.toThrow('Cannot suspend account owner');
     });
   });
@@ -205,7 +226,7 @@ describe('OnePasswordConnector', () => {
     };
 
     it('should reactivate a suspended user', async () => {
-      mockClient.patch.mockResolvedValue({ data: reactivatedUser });
+      (mockClient.patch as jest.Mock).mockResolvedValue({ data: reactivatedUser });
 
       const result = await OnePasswordConnector.actions.reactivateUser.handler(mockContext, {
         uuid: 'USER1234567890ABCDEF12',
@@ -222,7 +243,7 @@ describe('OnePasswordConnector', () => {
 
     it('should propagate errors when reactivation fails', async () => {
       const error = new Error('User is not suspended');
-      mockClient.patch.mockRejectedValue(error);
+      (mockClient.patch as jest.Mock).mockRejectedValue(error);
 
       await expect(
         OnePasswordConnector.actions.reactivateUser.handler(mockContext, {
@@ -234,7 +255,7 @@ describe('OnePasswordConnector', () => {
 
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
-      mockClient.get.mockResolvedValue({ status: 200, data: [] });
+      (mockClient.get as jest.Mock).mockResolvedValue({ status: 200, data: [] });
 
       if (!OnePasswordConnector.test) {
         throw new Error('Test handler not defined');
@@ -252,7 +273,7 @@ describe('OnePasswordConnector', () => {
     });
 
     it('should return failure when API returns non-200', async () => {
-      mockClient.get.mockResolvedValue({ status: 401, data: {} });
+      (mockClient.get as jest.Mock).mockResolvedValue({ status: 401, data: {} });
 
       if (!OnePasswordConnector.test) {
         throw new Error('Test handler not defined');
@@ -264,7 +285,7 @@ describe('OnePasswordConnector', () => {
     });
 
     it('should propagate connection errors', async () => {
-      mockClient.get.mockRejectedValue(new Error('Network error'));
+      (mockClient.get as jest.Mock).mockRejectedValue(new Error('Network error'));
 
       if (!OnePasswordConnector.test) {
         throw new Error('Test handler not defined');

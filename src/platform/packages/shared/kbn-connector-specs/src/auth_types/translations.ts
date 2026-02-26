@@ -117,6 +117,13 @@ export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL = i18n.translate(
+  'connectorSpecs.oauthTokenEndpointAuthMethod.label',
+  {
+    defaultMessage: 'Token endpoint auth method',
+  }
+);
+
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {
   defaultMessage: 'SSL CRT and Key authentication',
 });

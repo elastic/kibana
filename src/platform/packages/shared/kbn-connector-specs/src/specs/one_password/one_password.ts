@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
-const BASE_URL_DEFAULT = 'https://api.1password.com/v1beta1';
+const BASE_URL = 'https://api.1password.com/v1beta1';
 
 export const OnePasswordConnector: ConnectorSpec = {
   metadata: {
@@ -27,22 +27,24 @@ export const OnePasswordConnector: ConnectorSpec = {
     types: [
       {
         type: 'oauth_client_credentials',
-        defaults: { scope: 'openid' },
+        defaults: {
+          tokenUrl: `${BASE_URL}/users/oauth2/token`,
+          scope: 'openid',
+          tokenEndpointAuthMethod: 'client_secret_basic',
+        },
+        overrides: {
+          meta: {
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
       },
     ],
     headers: {
-      'User-Agent': 'ElasticKibana/9.4.0',
+      'User-Agent': 'ElasticKibana',
     },
   },
   schema: z.object({
-    baseUrl: z
-      .url()
-      .default(BASE_URL_DEFAULT)
-      .meta({
-        label: i18n.translate('core.kibanaConnectorSpecs.onePassword.config.baseUrl', {
-          defaultMessage: 'API Base URL',
-        }),
-      }),
     accountUuid: z
       .string()
       .min(1, {
@@ -57,7 +59,6 @@ export const OnePasswordConnector: ConnectorSpec = {
         }),
       }),
   }),
-  validateUrls: { fields: ['baseUrl'] },
 
   actions: {
     listUsers: {
@@ -77,12 +78,9 @@ export const OnePasswordConnector: ConnectorSpec = {
           maxPageSize?: number;
           pageToken?: string;
         };
-        const { baseUrl, accountUuid } = ctx.config as {
-          baseUrl: string;
-          accountUuid: string;
-        };
+        const { accountUuid } = ctx.config as { accountUuid: string };
 
-        const response = await ctx.client.get(`${baseUrl}/users`, {
+        const response = await ctx.client.get(`${BASE_URL}/users`, {
           params: {
             accountUuid,
             ...(typedInput.status && { status: typedInput.status }),
@@ -106,12 +104,9 @@ export const OnePasswordConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const { uuid } = input as { uuid: string };
-        const { baseUrl, accountUuid } = ctx.config as {
-          baseUrl: string;
-          accountUuid: string;
-        };
+        const { accountUuid } = ctx.config as { accountUuid: string };
 
-        const response = await ctx.client.get(`${baseUrl}/users/${uuid}`, {
+        const response = await ctx.client.get(`${BASE_URL}/users/${uuid}`, {
           params: { accountUuid },
         });
 
@@ -133,12 +128,9 @@ export const OnePasswordConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const { uuid } = input as { uuid: string };
-        const { baseUrl, accountUuid } = ctx.config as {
-          baseUrl: string;
-          accountUuid: string;
-        };
+        const { accountUuid } = ctx.config as { accountUuid: string };
 
-        const response = await ctx.client.patch(`${baseUrl}/users/${uuid}/suspend`, null, {
+        const response = await ctx.client.patch(`${BASE_URL}/users/${uuid}/suspend`, null, {
           params: { accountUuid },
         });
 
@@ -157,12 +149,9 @@ export const OnePasswordConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const { uuid } = input as { uuid: string };
-        const { baseUrl, accountUuid } = ctx.config as {
-          baseUrl: string;
-          accountUuid: string;
-        };
+        const { accountUuid } = ctx.config as { accountUuid: string };
 
-        const response = await ctx.client.patch(`${baseUrl}/users/${uuid}/reactivate`, null, {
+        const response = await ctx.client.patch(`${BASE_URL}/users/${uuid}/reactivate`, null, {
           params: { accountUuid },
         });
 
@@ -177,12 +166,9 @@ export const OnePasswordConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('1Password test handler');
-      const { baseUrl, accountUuid } = ctx.config as {
-        baseUrl: string;
-        accountUuid: string;
-      };
+      const { accountUuid } = ctx.config as { accountUuid: string };
 
-      const response = await ctx.client.get(`${baseUrl}/users`, {
+      const response = await ctx.client.get(`${BASE_URL}/users`, {
         params: { accountUuid, max_page_size: 1 },
       });
 

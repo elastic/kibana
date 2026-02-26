@@ -24,7 +24,8 @@ export async function requestOAuthToken<T>(
   grantType: string,
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  bodyRequest: AsApiContract<T>
+  bodyRequest: AsApiContract<T>,
+  basicAuth?: { username: string; password: string }
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
 
@@ -40,6 +41,7 @@ export async function requestOAuthToken<T>(
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     },
+    ...(basicAuth ? { auth: basicAuth } : {}),
     configurationUtilities,
     validateStatus: () => true,
   });
