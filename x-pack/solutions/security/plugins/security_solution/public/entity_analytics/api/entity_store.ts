@@ -15,6 +15,7 @@ import type {
   EntityType,
   InitEntityEngineResponse,
   ListEntityEnginesResponse,
+  StartEntityEngineResponse,
   StopEntityEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
@@ -56,6 +57,17 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
+    const startEntityEngine = async (entityType: EntityType) => {
+      return http.fetch<StartEntityEngineResponse>(
+        `/api/entity_store/engines/${entityType}/start`,
+        {
+          method: 'POST',
+          version: API_VERSIONS.public.v1,
+          body: JSON.stringify({}),
+        }
+      );
+    };
+
     const deleteEntityEngine = async (entityType: EntityType, deleteData: boolean) => {
       return http.fetch<DeleteEntityEngineResponse>(`/api/entity_store/engines/${entityType}`, {
         method: 'DELETE',
@@ -75,6 +87,7 @@ export const useEntityStoreRoutes = () => {
       enableEntityStore,
       getEntityStoreStatus,
       initEntityEngine,
+      startEntityEngine,
       stopEntityEngine,
       deleteEntityEngine,
       listEntityEngines,

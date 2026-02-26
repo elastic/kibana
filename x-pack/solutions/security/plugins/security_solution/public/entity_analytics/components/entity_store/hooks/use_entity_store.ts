@@ -17,6 +17,7 @@ import type {
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import {
   type DeleteEntityEngineResponse,
+  type StartEntityEngineResponse,
   type StopEntityEngineResponse,
   type EntityType,
 } from '../../../../../common/api/entity_analytics';
@@ -81,6 +82,27 @@ export const useEnableEntityStoreMutation = (
 };
 
 export const INIT_ENTITY_ENGINE_STATUS_KEY = ['POST', 'INIT_ENTITY_ENGINE'];
+
+export const START_ENTITY_ENGINE_STATUS_KEY = ['POST', 'START_ENTITY_ENGINE'];
+export const useStartEntityEngineMutation = (entityTypes: EntityType[]) => {
+  const { telemetry } = useKibana().services;
+  const queryClient = useQueryClient();
+
+  const { startEntityEngine } = useEntityStoreRoutes();
+  return useMutation<StartEntityEngineResponse[]>(
+    () => {
+      telemetry?.reportEvent(EntityEventTypes.EntityStoreEnablementToggleClicked, {
+        timestamp: new Date().toISOString(),
+        action: 'start',
+      });
+      return Promise.all(entityTypes.map((entityType) => startEntityEngine(entityType)));
+    },
+    {
+      mutationKey: START_ENTITY_ENGINE_STATUS_KEY,
+      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
+    }
+  );
+};
 
 export const STOP_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
 export const useStopEntityEngineMutation = (entityTypes: EntityType[]) => {

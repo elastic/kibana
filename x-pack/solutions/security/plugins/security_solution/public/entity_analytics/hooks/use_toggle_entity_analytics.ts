@@ -17,6 +17,7 @@ import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engi
 import {
   useEnableEntityStoreMutation,
   useEntityStoreStatus,
+  useStartEntityEngineMutation,
   useStopEntityEngineMutation,
 } from '../components/entity_store/hooks/use_entity_store';
 import { useEntityStoreTypes } from './use_enabled_entity_types';
@@ -75,6 +76,7 @@ export const useToggleEntityAnalytics = ({
   const enableRiskEngineMutation = useEnableRiskEngineMutation();
   const disableRiskEngineMutation = useDisableRiskEngineMutation();
   const enableEntityStoreMutation = useEnableEntityStoreMutation();
+  const startEntityEngineMutation = useStartEntityEngineMutation(entityTypes);
   const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);
 
   const [isToggling, setIsToggling] = useState(false);
@@ -85,6 +87,7 @@ export const useToggleEntityAnalytics = ({
     enableRiskEngineMutation.isLoading ||
     disableRiskEngineMutation.isLoading ||
     enableEntityStoreMutation.isLoading ||
+    startEntityEngineMutation.isLoading ||
     stopEntityEngineMutation.isLoading ||
     saveSelectedSettingsMutation.isLoading;
 
@@ -158,7 +161,11 @@ export const useToggleEntityAnalytics = ({
           entityStoreStatus !== 'running' &&
           entityStoreStatus !== 'installing'
         ) {
-          await enableEntityStoreMutation.mutateAsync({});
+          if (entityStoreStatus === 'stopped' || entityStoreStatus === 'error') {
+            await startEntityEngineMutation.mutateAsync();
+          } else {
+            await enableEntityStoreMutation.mutateAsync({});
+          }
         }
 
         addSuccess(i18n.RISK_ENGINE_TURNED_ON, TOAST_OPTIONS);
@@ -179,6 +186,7 @@ export const useToggleEntityAnalytics = ({
     enableRiskEngineMutation,
     disableRiskEngineMutation,
     enableEntityStoreMutation,
+    startEntityEngineMutation,
     stopEntityEngineMutation,
     addSuccess,
   ]);
