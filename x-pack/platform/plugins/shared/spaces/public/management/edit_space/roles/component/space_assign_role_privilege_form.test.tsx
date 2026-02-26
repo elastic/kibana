@@ -465,11 +465,11 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() =>
-        expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
-          'aria-pressed',
-          String(true)
-        )
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
       );
 
       await user.click(screen.getByTestId('custom-privilege-button'));
