@@ -146,7 +146,7 @@ export class BackgroundSearchNotifier {
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.completedToastText"
-            defaultMessage='"{name}" is completed. <link>Open in {appId}.</link>'
+            defaultMessage='"{name}" is complete. <link>Open in {appId}.</link>'
             values={{
               link: (chunks: React.ReactNode) => (
                 <EuiLink
@@ -173,7 +173,7 @@ export class BackgroundSearchNotifier {
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.failedToastText"
-            defaultMessage='There was a problem with "{name}". <link>Go to management area.</link>'
+            defaultMessage='There was a problem with "{name}". <link>Go to management.</link>'
             values={{
               name: failedSession.name,
               link: (chunks: React.ReactNode) => (
