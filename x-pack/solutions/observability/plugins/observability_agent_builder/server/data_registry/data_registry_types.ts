@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 type ServiceHealthStatus = 'healthy' | 'warning' | 'critical' | 'unknown';
@@ -219,6 +220,13 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     query: Record<string, unknown> | undefined;
     hostNames?: string[];
   }) => Promise<InfraHostsResponse>;
+
+  sloDetails: (params: {
+    request: KibanaRequest;
+    sloId: string;
+    sloInstanceId?: GetSLOParams['instanceId'];
+    remoteName?: GetSLOParams['remoteName'];
+  }) => Promise<GetSLOResponse>;
 
   apmTraceSampleIds: (params: {
     request: KibanaRequest;

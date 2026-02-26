@@ -27,7 +27,9 @@ import type { inputsModel } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
 
 // check to see if the query is a known "empty" shape
-export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
+export function isKnownEmptyQuery(
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>
+) {
   const queries = [
     // the default query used by the job wizards
     { bool: { must: [{ match_all: {} }] } },
@@ -46,7 +48,9 @@ export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
   return false;
 }
 
-function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] {
+function getFiltersForDSLQuery(
+  datafeedQuery: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>
+): Filter[] {
   if (isKnownEmptyQuery(datafeedQuery)) {
     return [];
   }

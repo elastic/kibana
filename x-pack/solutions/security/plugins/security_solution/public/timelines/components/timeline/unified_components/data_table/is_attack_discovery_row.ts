@@ -8,7 +8,6 @@
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
-  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
 } from '@kbn/elastic-assistant-common';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -40,6 +39,5 @@ export const isAttackDiscoveryRow = (eventData: DataTableRecord & TimelineItem):
     return true;
   }
 
-  const indexName = eventData.ecs._index ?? '';
-  return indexName.includes(ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX);
+  return false;
 };
