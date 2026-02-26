@@ -13,6 +13,7 @@ import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
+import { entityStoreSearchTool } from './entity_store_search_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -29,4 +30,5 @@ export const registerTools = async (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(entityStoreSearchTool(core, logger));
 };
