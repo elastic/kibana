@@ -31,6 +31,7 @@ import type { PackResultCounts } from '../../common/search_strategy/osquery/acti
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
 import { RunByColumn } from './components/run_by_column';
+import { SourceColumn } from './components/source_column';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 
 const EMPTY_ARRAY: SearchHit[] = [];
@@ -80,7 +81,7 @@ const ActionsTableComponent = () => {
   } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    kuery: 'user_id: *',
+    ...(!isHistoryEnabled ? { kuery: 'user_id: *' } : {}),
     withResultCounts: isHistoryEnabled,
   });
 
@@ -175,6 +176,12 @@ const ActionsTableComponent = () => {
     },
     [profilesMap, isLoadingProfiles]
   );
+
+  const renderSourceColumn = useCallback((_: unknown, item: SearchHit) => {
+    const userId = (item.fields?.user_id as string[] | undefined)?.[0];
+
+    return <SourceColumn userId={userId} />;
+  }, []);
 
   const renderTimestampColumn = useCallback(
     (_: any, item: any) => <>{formatDate(item.fields['@timestamp'][0])}</>,
@@ -317,6 +324,18 @@ const ActionsTableComponent = () => {
         width: '60%',
         render: renderQueryColumn,
       },
+      ...(isHistoryEnabled
+        ? [
+            {
+              field: 'source',
+              name: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumnTitle', {
+                defaultMessage: 'Source',
+              }),
+              width: '120px',
+              render: renderSourceColumn,
+            },
+          ]
+        : []),
       ...resultsColumn,
       {
         field: 'agents',
@@ -368,6 +387,7 @@ const ActionsTableComponent = () => {
       renderPlayButton,
       renderQueryColumn,
       renderRunByColumn,
+      renderSourceColumn,
       renderTimestampColumn,
       resultsColumn,
     ]
