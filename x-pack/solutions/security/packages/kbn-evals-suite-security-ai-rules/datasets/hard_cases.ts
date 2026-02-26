@@ -44,6 +44,8 @@ export const hardCases: HardCase[] = [
     output: {
       id: 'complex-apt-detection',
       name: 'Complex APT Detection',
+      prompt:
+        'Create a rule for detecting advanced persistent threat actors using zero-day exploits with polymorphic malware and anti-forensics techniques',
       description: 'Detects advanced persistent threats',
       query: 'FROM .alerts-security.* | WHERE event.kind == "signal" | LIMIT 100',
       threat: [],
