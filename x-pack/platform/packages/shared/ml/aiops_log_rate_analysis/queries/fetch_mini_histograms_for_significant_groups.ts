@@ -66,6 +66,7 @@ export const fetchMiniHistogramsForSignificantGroups = async (
       size: 0,
       query: histogramQuery,
       aggs: wrap(histogramAggs),
+      ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

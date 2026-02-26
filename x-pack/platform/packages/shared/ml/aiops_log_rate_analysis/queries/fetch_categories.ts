@@ -120,7 +120,10 @@ export const fetchCategories = async (
   const result: FetchCategoriesResponse[] = [];
 
   const searches: estypes.MsearchRequestItem[] = fieldNames.flatMap((fieldName) => [
-    { index: params.index },
+    {
+      index: params.index,
+      ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
+    },
     omit(getCategoryRequest(params, fieldName, randomSamplerWrapper), ['index']),
   ]);
 
