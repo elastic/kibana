@@ -46,12 +46,19 @@ export function resolveOverlapsAndMask({
     fieldMatches.forEach((matches, fieldName) => {
       const originalText = state.records[recordIndex][fieldName];
 
-      // Resolve overlaps (first rule wins)
+      // Sort by position first, then by rule priority (lower ruleIndex = higher priority)
+      const sorted = [...matches].sort((a, b) => {
+        if (a.start !== b.start) {
+          return a.start - b.start;
+        }
+        return a.ruleIndex - b.ruleIndex;
+      });
+
+      // Resolve overlaps: for overlapping ranges, earlier rule wins (lower ruleIndex)
       const nonOverlappingMatches: DetectedMatch[] = [];
       let lastEnd = -1;
 
-      for (const match of matches) {
-        // Skip if this match overlaps with a higher priority match
+      for (const match of sorted) {
         if (match.start < lastEnd) {
           continue;
         }

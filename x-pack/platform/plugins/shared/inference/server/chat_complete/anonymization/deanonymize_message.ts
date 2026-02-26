@@ -102,7 +102,7 @@ export function deanonymizeMessage(
           const completeChunk: ChatCompletionChunkEvent = {
             type: ChatCompletionEventType.ChatCompletionChunk,
             content: deanonymizedContent,
-            tool_calls: deanonymizedToolCalls.map((tc, idx) => ({
+            tool_calls: (deanonymizedToolCalls ?? []).map((tc, idx) => ({
               index: idx,
               toolCallId: tc.toolCallId,
               function: {

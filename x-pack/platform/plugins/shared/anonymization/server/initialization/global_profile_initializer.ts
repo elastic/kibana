@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { type NerRule, type RegexRule } from '@kbn/anonymization-common';
+import type { NerRule, RegexRule } from '@kbn/anonymization-common';
 import type { ProfilesRepository } from '../repository';
 
 const INTERNAL_GLOBAL_PROFILE_TARGET_TYPE = 'index' as const;
@@ -23,26 +23,10 @@ export const isGlobalProfileTarget = (targetType: string, targetId: string): boo
   targetType === INTERNAL_GLOBAL_PROFILE_TARGET_TYPE &&
   targetId === INTERNAL_GLOBAL_PROFILE_TARGET_ID;
 
-const mergeRegexRules = (
-  existingRules: RegexRule[],
-  incomingRules: RegexRule[]
-): { merged: RegexRule[]; changed: boolean } => {
-  const existingById = new Map(existingRules.map((rule) => [rule.id, rule]));
-  let changed = false;
-
-  for (const rule of incomingRules) {
-    if (!existingById.has(rule.id)) {
-      existingById.set(rule.id, rule);
-      changed = true;
-    }
-  }
-
-  return { merged: [...existingById.values()], changed };
-};
-const mergeNerRules = (
-  existingRules: NerRule[],
-  incomingRules: NerRule[]
-): { merged: NerRule[]; changed: boolean } => {
+const mergeRulesById = <T extends { id: string }>(
+  existingRules: T[],
+  incomingRules: T[]
+): { merged: T[]; changed: boolean } => {
   const existingById = new Map(existingRules.map((rule) => [rule.id, rule]));
   let changed = false;
 
@@ -95,8 +79,8 @@ export const ensureGlobalAnonymizationProfile = async ({
       return;
     }
 
-    const regexMerge = mergeRegexRules(existing.rules.regexRules ?? [], regexRules);
-    const nerMerge = mergeNerRules(existing.rules.nerRules ?? [], nerRules);
+    const regexMerge = mergeRulesById(existing.rules.regexRules ?? [], regexRules);
+    const nerMerge = mergeRulesById(existing.rules.nerRules ?? [], nerRules);
     const shouldNormalizeFieldRules = existing.rules.fieldRules.length > 0;
     const hasChanges = regexMerge.changed || nerMerge.changed || shouldNormalizeFieldRules;
 

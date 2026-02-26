@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { FieldRule, FindAnonymizationProfilesRequestQuery } from '@kbn/anonymization-common';
 import {
   createAnonymizationProfileRequestSchema,
@@ -25,38 +25,6 @@ import {
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
 } from '../initialization';
 
-const fieldRuleSchema = schema.object({
-  field: schema.string(),
-  allowed: schema.boolean(),
-  anonymized: schema.boolean(),
-  entityClass: schema.maybe(schema.string()),
-});
-
-const regexRuleSchema = schema.object({
-  id: schema.string(),
-  type: schema.literal('regex'),
-  entityClass: schema.string(),
-  pattern: schema.string(),
-  enabled: schema.boolean(),
-});
-
-const nerRuleSchema = schema.object({
-  id: schema.string(),
-  type: schema.literal('ner'),
-  modelId: schema.maybe(schema.string()),
-  allowedEntityClasses: schema.arrayOf(schema.string()),
-  enabled: schema.boolean(),
-});
-
-const rulesSchema = schema.object({
-  fieldRules: schema.arrayOf(fieldRuleSchema),
-  regexRules: schema.maybe(schema.arrayOf(regexRuleSchema)),
-  nerRules: schema.maybe(schema.arrayOf(nerRuleSchema)),
-});
-
-/**
- * Validates that every field rule with anonymized=true has an entityClass.
- */
 const validateFieldRules = (fieldRules: FieldRule[]): string | undefined => {
   for (const rule of fieldRules) {
     if (rule.anonymized && !rule.entityClass) {
@@ -69,6 +37,15 @@ const validateGlobalProfileRules = (fieldRules: FieldRule[]): string | undefined
   if (fieldRules.length > 0) {
     return 'Global anonymization profile cannot contain fieldRules';
   }
+};
+
+const resolveRouteContext = async (context: RequestHandlerContext) => {
+  const coreContext = await context.core;
+  const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const repo = new ProfilesRepository(esClient);
+  const username = coreContext.security.authc.getCurrentUser()?.username ?? 'unknown';
+  return { coreContext, namespace, esClient, repo, username };
 };
 
 export const registerProfileRoutes = (router: IRouter, logger: Logger): void => {
@@ -88,17 +65,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
         version: ANONYMIZATION_API_VERSION,
         validate: {
           request: {
-            body: schema.object({
-              name: schema.string(),
-              description: schema.maybe(schema.string()),
-              targetType: schema.oneOf([
-                schema.literal('data_view'),
-                schema.literal('index_pattern'),
-                schema.literal('index'),
-              ]),
-              targetId: schema.string(),
-              rules: rulesSchema,
-            }),
+            body: schema.any(),
           },
         },
       },
@@ -120,18 +87,13 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
             }
           }
 
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
+          const { namespace, esClient, repo, username } = await resolveRouteContext(context);
           await ensureProfilesIndex({ esClient, logger });
-
-          const repo = new ProfilesRepository(esClient);
 
           const profile = await repo.create({
             ...body,
             namespace,
-            createdBy: coreContext.security.authc.getCurrentUser()?.username ?? 'unknown',
+            createdBy: username,
           });
 
           return response.ok({ body: profile });
@@ -187,13 +149,8 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       async (context, request, response) => {
         try {
           const query = request.query as FindAnonymizationProfilesRequestQuery;
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
+          const { coreContext, namespace, esClient, repo } = await resolveRouteContext(context);
           await ensureProfilesIndex({ esClient, logger });
-
-          const repo = new ProfilesRepository(esClient);
           await ensureGlobalProfileForNamespace({
             namespace,
             profilesRepo: repo,
@@ -248,11 +205,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-          const repo = new ProfilesRepository(esClient);
+          const { namespace, repo } = await resolveRouteContext(context);
           const profile = await repo.get(namespace, request.params.id);
 
           if (!profile) {
@@ -287,11 +240,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
         validate: {
           request: {
             params: schema.object({ id: schema.string() }),
-            body: schema.object({
-              name: schema.maybe(schema.string()),
-              description: schema.maybe(schema.string()),
-              rules: schema.maybe(rulesSchema),
-            }),
+            body: schema.any(),
           },
         },
       },
@@ -310,11 +259,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
             }
           }
 
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-          const repo = new ProfilesRepository(esClient);
+          const { namespace, repo, username } = await resolveRouteContext(context);
           const existing = await repo.get(namespace, request.params.id);
           if (!existing) {
             return response.notFound({ body: { message: 'Profile not found' } });
@@ -332,7 +277,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           const profile = await repo.update(namespace, request.params.id, {
             ...body,
-            updatedBy: coreContext.security.authc.getCurrentUser()?.username ?? 'unknown',
+            updatedBy: username,
           });
 
           if (!profile) {
@@ -372,11 +317,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-          const repo = new ProfilesRepository(esClient);
+          const { namespace, repo } = await resolveRouteContext(context);
           const deleted = await repo.delete(namespace, request.params.id);
 
           if (!deleted) {

@@ -18,15 +18,11 @@ import type {
 } from '@kbn/inference-common';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import { deanonymizeMessage } from './deanonymize_message';
-import { chunkEvent, messageEvent, tokensEvent } from '../../test_utils';
+import { chunkEvent, messageEvent, tokensEvent, createMask } from '../../test_utils';
 import { anonymizeMessages } from './anonymize_messages';
 import { RegexWorkerService } from './regex_worker_service';
 import type { AnonymizationWorkerConfig } from '../../config';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-
-function createMask(entityClass: string, value: string) {
-  return `${entityClass}_${Buffer.from(value).toString('hex').slice(0, 40)}`;
-}
 const testConfig = {
   enabled: false,
 } as AnonymizationWorkerConfig;

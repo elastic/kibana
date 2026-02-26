@@ -9,8 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { partition } from 'lodash';
-import type { AnonymizationState } from './types';
-import { executeRegexRules } from './execute_regex_rules';
+import { unescapePointerToken, type AnonymizationState } from './types';
 import { executeNerRule } from './execute_ner_rule';
 import type { RegexWorkerService } from './regex_worker_service';
 import { resolveOverlapsAndMask } from './resolve_overlaps_and_mask';
@@ -25,9 +24,6 @@ const shouldIgnoreNerModelError = (error: unknown): boolean => {
     (message.includes('was not found') || message.includes('is not deployed'))
   );
 };
-
-const unescapePointerToken = (token: string): string =>
-  token.replace(/~1/g, '/').replace(/~0/g, '~');
 
 const pointerToDotPath = (pointer: string): string => {
   const normalized = pointer.startsWith('/') ? pointer.slice(1) : pointer;
@@ -261,10 +257,9 @@ export async function anonymizeRecords({
     (rule): rule is RegexAnonymizationRule => rule.type === 'RegExp'
   );
 
-  const detectedRegexEntities = await executeRegexRules({
-    records: state.records,
+  const detectedRegexEntities = await regexWorker.run({
     rules: regexRules,
-    regexWorker,
+    records: state.records,
   });
 
   // Process detected regex matches to resolve overlaps and apply masks

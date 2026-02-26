@@ -19,31 +19,6 @@ const ensuredStateByNamespace = new Map<
   }
 >();
 
-export const ensureAndMigrateGlobalProfile = async ({
-  namespace,
-  profilesRepo,
-  logger,
-  settingsString,
-}: {
-  namespace: string;
-  profilesRepo: ProfilesRepository;
-  logger: Logger;
-  settingsString?: string;
-}): Promise<void> => {
-  await ensureGlobalAnonymizationProfile({
-    namespace,
-    profilesRepo,
-    logger,
-  });
-
-  await migrateLegacyUiSettingsIntoGlobalProfile({
-    namespace,
-    settingsString,
-    profilesRepo,
-    logger,
-  });
-};
-
 export const ensureGlobalProfileForNamespace = async ({
   namespace,
   profilesRepo,
@@ -62,11 +37,12 @@ export const ensureGlobalProfileForNamespace = async ({
 
   if (!currentState?.migratedLegacySettings && getLegacySettingsString) {
     const settingsString = await getLegacySettingsString();
-    await ensureAndMigrateGlobalProfile({
+    await ensureGlobalAnonymizationProfile({ namespace, profilesRepo, logger });
+    await migrateLegacyUiSettingsIntoGlobalProfile({
       namespace,
+      settingsString,
       profilesRepo,
       logger,
-      settingsString,
     });
 
     ensuredStateByNamespace.set(namespace, {

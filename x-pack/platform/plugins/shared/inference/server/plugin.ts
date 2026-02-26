@@ -103,59 +103,48 @@ export class InferencePlugin
       return [...regexRules, ...nerRules];
     };
 
+    const getAnonymizationOptions = (request: KibanaRequest) => {
+      const namespace =
+        core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+      const policyService = pluginsStart.anonymization?.getPolicyService();
+      return {
+        namespace,
+        anonymizationRulesPromise: createAnonymizationRulesPromise(request),
+        regexWorker: this.regexWorker!,
+        esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
+        replacementsEsClient: core.elasticsearch.client.asInternalUser,
+        saltPromise: policyService?.getSalt(namespace),
+        resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
+          if (!policyService || !target) {
+            return undefined;
+          }
+          return policyService.resolveEffectivePolicy(namespace, {
+            type: target.targetType,
+            id: target.targetId,
+          });
+        },
+        replacementsEncryptionKey: this.config.replacements.encryptionKey,
+      };
+    };
+
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
-        const namespace =
-          core.savedObjects.getScopedClient(options.request).getCurrentNamespace() ?? 'default';
-        const policyService = pluginsStart.anonymization?.getPolicyService();
         return createInferenceClient({
           ...options,
-          namespace,
-          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
-          regexWorker: this.regexWorker!,
+          ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
-          esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
-          replacementsEsClient: core.elasticsearch.client.asInternalUser,
-          saltPromise: policyService?.getSalt(namespace),
-          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
-            if (!policyService || !target) {
-              return undefined;
-            }
-            return policyService.resolveEffectivePolicy(namespace, {
-              type: target.targetType,
-              id: target.targetId,
-            });
-          },
-          replacementsEncryptionKey: this.config.replacements.encryptionKey,
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
       getChatModel: async (options) => {
-        const namespace =
-          core.savedObjects.getScopedClient(options.request).getCurrentNamespace() ?? 'default';
-        const policyService = pluginsStart.anonymization?.getPolicyService();
         return createChatModel({
           request: options.request,
           connectorId: options.connectorId,
           chatModelOptions: options.chatModelOptions,
           callbacks: options.callbacks,
+          ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
-          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
-          regexWorker: this.regexWorker!,
-          esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
-          replacementsEsClient: core.elasticsearch.client.asInternalUser,
-          saltPromise: policyService?.getSalt(namespace),
-          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
-            if (!policyService || !target) {
-              return undefined;
-            }
-            return policyService.resolveEffectivePolicy(namespace, {
-              type: target.targetType,
-              id: target.targetId,
-            });
-          },
-          replacementsEncryptionKey: this.config.replacements.encryptionKey,
           logger: this.logger,
         });
       },

@@ -114,21 +114,36 @@ export class ProfilesRepository {
     return statusCode === 409 || metaStatusCode === 409;
   }
 
+  private rulesToEsDoc(rules: AnonymizationProfileRules): EsProfileDocument['rules'] {
+    return {
+      field_rules: rules.fieldRules.map((r) => ({
+        field: r.field,
+        allowed: r.allowed,
+        anonymized: r.anonymized,
+        entity_class: r.entityClass,
+      })),
+      regex_rules: (rules.regexRules ?? []).map((r) => ({
+        id: r.id,
+        type: r.type,
+        entity_class: r.entityClass,
+        pattern: r.pattern,
+        enabled: r.enabled,
+      })),
+      ner_rules: (rules.nerRules ?? []).map((r) => ({
+        id: r.id,
+        type: r.type,
+        model_id: r.modelId,
+        allowed_entity_classes: r.allowedEntityClasses,
+        enabled: r.enabled,
+      })),
+    };
+  }
+
   /**
    * Creates a new profile. Enforces uniqueness per (namespace, target_type, target_id).
    * @throws ConflictError if a profile for the same target already exists in the space.
    */
   async create(params: CreateProfileParams): Promise<AnonymizationProfile> {
-    // Check uniqueness: (namespace, target_type, target_id)
-    const existing = await this.findByTarget(params.namespace, params.targetType, params.targetId);
-    if (existing) {
-      const err = new Error(
-        `A profile already exists for target (${params.targetType}, ${params.targetId}) in space ${params.namespace}`
-      );
-      (err as any).statusCode = 409;
-      throw err;
-    }
-
     const now = new Date().toISOString();
     const id = this.buildProfileId(params.namespace, params.targetType, params.targetId);
 
@@ -138,28 +153,7 @@ export class ProfilesRepository {
       description: params.description,
       target_type: params.targetType,
       target_id: params.targetId,
-      rules: {
-        field_rules: params.rules.fieldRules.map((r) => ({
-          field: r.field,
-          allowed: r.allowed,
-          anonymized: r.anonymized,
-          entity_class: r.entityClass,
-        })),
-        regex_rules: (params.rules.regexRules ?? []).map((r) => ({
-          id: r.id,
-          type: r.type,
-          entity_class: r.entityClass,
-          pattern: r.pattern,
-          enabled: r.enabled,
-        })),
-        ner_rules: (params.rules.nerRules ?? []).map((r) => ({
-          id: r.id,
-          type: r.type,
-          model_id: r.modelId,
-          allowed_entity_classes: r.allowedEntityClasses,
-          enabled: r.enabled,
-        })),
-      },
+      rules: this.rulesToEsDoc(params.rules),
       namespace: params.namespace,
       created_at: now,
       updated_at: now,
@@ -239,31 +233,11 @@ export class ProfilesRepository {
       updateDoc.description = params.description;
     }
     if (params.rules !== undefined) {
-      const regexRules = params.rules.regexRules ?? existing.rules.regexRules ?? [];
-      const nerRules = params.rules.nerRules ?? existing.rules.nerRules ?? [];
-
-      updateDoc.rules = {
-        field_rules: params.rules.fieldRules.map((r) => ({
-          field: r.field,
-          allowed: r.allowed,
-          anonymized: r.anonymized,
-          entity_class: r.entityClass,
-        })),
-        regex_rules: regexRules.map((r) => ({
-          id: r.id,
-          type: r.type,
-          entity_class: r.entityClass,
-          pattern: r.pattern,
-          enabled: r.enabled,
-        })),
-        ner_rules: nerRules.map((r) => ({
-          id: r.id,
-          type: r.type,
-          model_id: r.modelId,
-          allowed_entity_classes: r.allowedEntityClasses,
-          enabled: r.enabled,
-        })),
-      };
+      updateDoc.rules = this.rulesToEsDoc({
+        fieldRules: params.rules.fieldRules,
+        regexRules: params.rules.regexRules ?? existing.rules.regexRules ?? [],
+        nerRules: params.rules.nerRules ?? existing.rules.nerRules ?? [],
+      });
     }
 
     await this.esClient.update({

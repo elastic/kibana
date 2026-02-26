@@ -187,6 +187,30 @@ describe('processMatches', () => {
     });
   });
 
+  it('handles unsorted matches where a later rule matches at an earlier position', () => {
+    const state = createInitialState([
+      { content: 'Visit example.com or email admin@example.com today' },
+    ]);
+    // Matches arrive in rule order (not position order): email rule first at pos 30,
+    // domain rule second at pos 6. Without sorting, the domain match at pos 6 would be
+    // incorrectly skipped because it appears after the email match in the array.
+    const detectedMatches = [
+      createEmailMatch(0, 'content', 30, 'admin@example.com', 0),
+      createDomainMatch(0, 'content', 6, 'example.com', 1),
+    ];
+
+    const result = resolveOverlapsAndMask({
+      detectedMatches,
+      state,
+      rules: [emailRule, domainRule],
+    });
+
+    const domainMask = getEntityMask({ value: 'example.com', class_name: 'HOST_NAME' });
+    const emailMask = getEntityMask({ value: 'admin@example.com', class_name: 'EMAIL' });
+    expect(result.records[0].content).toBe(`Visit ${domainMask} or email ${emailMask} today`);
+    expect(result.anonymizations).toHaveLength(2);
+  });
+
   it('preserves existing anonymizations in state', () => {
     const state: AnonymizationState = {
       records: [{ content: 'Email luis@test.com' }],

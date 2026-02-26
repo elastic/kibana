@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import {
   replaceTokensWithOriginals,
   type DeanonymizeWithReplacementsRequestBody,
@@ -16,6 +16,17 @@ import { ReplacementsRepository } from './replacements_repository';
 
 const API_VERSION = '1';
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
+
+const resolveReplacementsContext = async (
+  context: RequestHandlerContext,
+  options: { encryptionKey: string }
+) => {
+  const coreContext = await context.core;
+  const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const repo = new ReplacementsRepository(esClient, options);
+  return { namespace, repo };
+};
 
 export const registerReplacementsRoutes = (
   router: IRouter,
@@ -46,11 +57,7 @@ export const registerReplacementsRoutes = (
       },
       async (context, request, response) => {
         try {
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-          const repo = new ReplacementsRepository(esClient, options);
+          const { namespace, repo } = await resolveReplacementsContext(context, options);
           const replacements = await repo.get(namespace, request.params.id);
 
           if (!replacements) {
@@ -100,11 +107,7 @@ export const registerReplacementsRoutes = (
       async (context, request, response) => {
         try {
           const body = request.body as DeanonymizeWithReplacementsRequestBody;
-          const coreContext = await context.core;
-          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
-          const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-          const repo = new ReplacementsRepository(esClient, options);
+          const { namespace, repo } = await resolveReplacementsContext(context, options);
           const replacements = await repo.get(namespace, body.replacementsId);
 
           if (!replacements) {

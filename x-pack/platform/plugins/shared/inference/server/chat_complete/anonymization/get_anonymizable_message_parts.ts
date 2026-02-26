@@ -27,6 +27,7 @@ export function getAnonymizableMessageParts(message: Message) {
       content: message.content,
       toolCalls: message.toolCalls?.map((toolCall) => {
         return {
+          toolCallId: toolCall.toolCallId,
           function: toolCall.function,
         };
       }),
