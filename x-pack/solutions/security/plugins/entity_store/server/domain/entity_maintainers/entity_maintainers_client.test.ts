@@ -42,8 +42,12 @@ const { getTaskId, scheduleEntityMaintainerTask, stopEntityMaintainer } = jest.r
   '../../tasks/entity_maintainers'
 ) as {
   getTaskId: jest.MockedFunction<(id: string, namespace: string) => string>;
-  scheduleEntityMaintainerTask: jest.MockedFunction<typeof import('../../tasks/entity_maintainers').scheduleEntityMaintainerTask>;
-  stopEntityMaintainer: jest.MockedFunction<typeof import('../../tasks/entity_maintainers').stopEntityMaintainer>;
+  scheduleEntityMaintainerTask: jest.MockedFunction<
+    typeof import('../../tasks/entity_maintainers').scheduleEntityMaintainerTask
+  >;
+  stopEntityMaintainer: jest.MockedFunction<
+    typeof import('../../tasks/entity_maintainers').stopEntityMaintainer
+  >;
 };
 
 const { entityMaintainersRegistry } = jest.requireMock(
@@ -173,7 +177,9 @@ describe('EntityMaintainersClient', () => {
       entityMaintainersRegistry.getAll.mockReturnValue([
         { id: 'm1', interval: '5m', taskStatus: EntityMaintainerTaskStatus.NOT_STARTED },
       ]);
-      (scheduleEntityMaintainerTask as jest.Mock).mockRejectedValueOnce(new Error('schedule failed'));
+      (scheduleEntityMaintainerTask as jest.Mock).mockRejectedValueOnce(
+        new Error('schedule failed')
+      );
       const client = createClient();
       const request = createMockRequest();
 
