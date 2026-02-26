@@ -15,6 +15,7 @@ import {
   mockIndexPatternWithoutTimeField,
   mockDateRange,
 } from './__mocks__/esql_query_mocks';
+import { normalizeEsql } from './generate_esql_query.test_helpers';
 
 // Helper to create static_value column with proper typing
 const createStaticValueColumn = (
@@ -36,9 +37,6 @@ describe('generateEsqlQuery metric max (static_value)', () => {
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });
-
-  /** Normalize ESQL for comparison (query.print('wrapping') may output multi-line; composer may omit backticks for simple identifiers). */
-  const normalizeEsql = (s: string) => s.replace(/\s+/g, ' ').trim();
 
   it('should convert static_value columns to EVAL statements', () => {
     const result = generateEsqlQuery(

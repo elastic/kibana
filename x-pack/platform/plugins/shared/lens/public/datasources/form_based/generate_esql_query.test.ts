@@ -15,15 +15,13 @@ import {
   mockIndexPatternWithoutTimeField,
   mockDateRange,
 } from './__mocks__/esql_query_mocks';
+import { normalizeEsql } from './generate_esql_query.test_helpers';
 
 describe('generateEsqlQuery', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
   });
-
-  /** Normalize ESQL string for comparison (query.print('wrapping') may output multi-line). */
-  const normalizeEsql = (s: string) => s.replace(/\s+/g, ' ').trim();
 
   it('should produce valid esql for date histogram and count', () => {
     const result = generateEsqlQuery(
