@@ -607,6 +607,8 @@ export class ActionsPlugin
     };
 
     const getUnsecuredActionsClient = () => {
+      const authorizationCodeEnabled =
+        this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
       const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
         ACTION_SAVED_OBJECT_TYPE,
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -626,6 +628,7 @@ export class ActionsPlugin
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
         connectorTypeRegistry: actionTypeRegistry!,
+        authorizationCodeEnabled,
       });
     };
 
