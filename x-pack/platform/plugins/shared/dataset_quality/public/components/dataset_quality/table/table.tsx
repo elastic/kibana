@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiHorizontalRule,
+  EuiLiveAnnouncer,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   fullDatasetNameDescription,
@@ -43,8 +45,54 @@ export const Table = () => {
     toggleFullDatasetNames,
   } = useDatasetQualityTable();
 
+  const [liveAnnouncement, setLiveAnnouncement] = useState<string>('');
+  const previousToggleState = useRef({
+    showInactiveDatasets,
+    showFullDatasetNames,
+  });
+
+  useEffect(() => {
+    const previous = previousToggleState.current;
+
+    const announcementParts: string[] = [];
+
+    if (previous.showFullDatasetNames !== showFullDatasetNames) {
+      announcementParts.push(
+        showFullDatasetNames
+          ? i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesShown', {
+              defaultMessage: 'Table updated. Full dataset names shown.',
+            })
+          : i18n.translate('xpack.datasetQuality.tableUpdated.fullDatasetNamesHidden', {
+              defaultMessage: 'Table updated. Full dataset names hidden.',
+            })
+      );
+    }
+
+    if (previous.showInactiveDatasets !== showInactiveDatasets) {
+      announcementParts.push(
+        showInactiveDatasets
+          ? i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsShown', {
+              defaultMessage: 'Table updated. Inactive datasets shown.',
+            })
+          : i18n.translate('xpack.datasetQuality.tableUpdated.inactiveDatasetsHidden', {
+              defaultMessage: 'Table updated. Inactive datasets hidden.',
+            })
+      );
+    }
+
+    if (announcementParts.length > 0) {
+      setLiveAnnouncement(announcementParts.join(' '));
+    }
+
+    previousToggleState.current = {
+      showInactiveDatasets,
+      showFullDatasetNames,
+    };
+  }, [showFullDatasetNames, showInactiveDatasets]);
+
   return (
     <>
+      <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiText size="xs">
           <FormattedMessage
@@ -77,6 +125,9 @@ export const Table = () => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <EuiBasicTable
+        tableCaption={i18n.translate('xpack.datasetQuality.tableCaption', {
+          defaultMessage: 'Dataset quality table',
+        })}
         tableLayout="auto"
         sorting={sort}
         onChange={onTableChange}
