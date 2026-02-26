@@ -15,7 +15,6 @@ import { from, type Subscription } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
@@ -69,12 +68,11 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
 
-  const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
+  const [tabStateVersion, setTabStateVersion] = useState(0);
 
   const discoverAppStateSubscription = useRef<Subscription>();
   const discoverInternalStateSubscription = useRef<Subscription>();
-  const discoverSavedSearchStateSubscription = useRef<Subscription>();
-  const discoverTimerangeSubscription = useRef<Subscription>();
+  const discoverTabStateSubscription = useRef<Subscription>();
 
   // TODO: (DV_PICKER) should not be here, used to make discover container work I suppose
   useEffect(() => {
@@ -91,13 +89,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     defaultDiscoverAppState,
   } = useDiscoverInTimelineContext();
 
-  const {
-    discoverAppState,
-    discoverSavedSearchState,
-    setDiscoverSavedSearchState,
-    setDiscoverInternalState,
-    setDiscoverAppState,
-  } = useDiscoverState();
+  const { discoverAppState, setDiscoverInternalState, setDiscoverAppState } = useDiscoverState();
 
   const discoverCustomizationCallbacks = useSetDiscoverCustomizationCallbacks();
 
@@ -116,10 +108,13 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     queryFn: () => (savedSearchId ? savedSearchService.get(savedSearchId) : Promise.resolve(null)),
   });
 
-  const getCombinedDiscoverSavedSearchState: () => SavedSearch | undefined = useCallback(() => {
-    if (!discoverSavedSearchState) return;
+  const getCombinedDiscoverSavedSearchState = useCallback(async (): Promise<
+    SavedSearch | undefined
+  > => {
+    const savedSearch = await discoverStateContainer.current?.getSavedSearchFromCurrentTab();
+    if (!savedSearch) return;
     return {
-      ...(discoverStateContainer.current?.savedSearchState.getState() ?? discoverSavedSearchState),
+      ...savedSearch,
       timeRange: discoverDataService.query.timefilter.timefilter.getTime(),
       refreshInterval: discoverStateContainer.current?.getCurrentTab().globalState.refreshInterval,
       breakdownField: discoverStateContainer.current?.getCurrentTab().appState.breakdownField,
@@ -127,13 +122,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(title),
       description,
     };
-  }, [
-    discoverSavedSearchState,
-    discoverStateContainer,
-    discoverDataService.query.timefilter.timefilter,
-    title,
-    description,
-  ]);
+  }, [discoverStateContainer, discoverDataService.query.timefilter.timefilter, title, description]);
 
   const combinedDiscoverSavedSearchStateRef = useRef<SavedSearch | undefined>();
   useEffect(() => {
@@ -146,24 +135,29 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     }
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
-    const latestState = getCombinedDiscoverSavedSearchState();
-    const index = latestState?.searchSource.getField('index');
-    /* when a new timeline is loaded, a new discover instance is loaded which first emits
-     * discover's initial state which is then updated in the saved search. We want to avoid that.*/
-    if (!index) return;
-    if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
-    if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
     if (!canSaveTimeline) return;
-    updateSavedSearch(latestState, timelineId, function onUpdate() {
-      combinedDiscoverSavedSearchStateRef.current = latestState;
-    });
+
+    const syncSavedSearch = async () => {
+      const latestState = await getCombinedDiscoverSavedSearchState();
+      const index = latestState?.searchSource.getField('index');
+      /* when a new timeline is loaded, a new discover instance is loaded which first emits
+       * discover's initial state which is then updated in the saved search. We want to avoid that.*/
+      if (!index) return;
+      if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
+      if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
+      await updateSavedSearch(latestState, timelineId, function onUpdate() {
+        combinedDiscoverSavedSearchStateRef.current = latestState;
+      });
+    };
+
+    syncSavedSearch();
   }, [
     getCombinedDiscoverSavedSearchState,
     savedSearchById,
     updateSavedSearch,
     activeTab,
     status,
-    discoverTimerange,
+    tabStateVersion,
     savedObjectId,
     isFetching,
     timelineId,
@@ -178,8 +172,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       [
         discoverAppStateSubscription.current,
         discoverInternalStateSubscription.current,
-        discoverSavedSearchStateSubscription.current,
-        discoverTimerangeSubscription.current,
+        discoverTabStateSubscription.current,
       ].forEach((sub) => {
         if (sub) sub.unsubscribe();
       });
@@ -245,33 +238,22 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverInternalState,
       });
 
-      const savedSearchStateSub = stateContainer.savedSearchState.getCurrent$().subscribe({
-        next: (latestSavedSearchState) => {
-          setDiscoverSavedSearchState(latestSavedSearchState);
+      const tabStateSub = stateContainer.createTabPersistableStateObservable().subscribe({
+        next: () => {
+          setTabStateVersion((prev) => prev + 1);
         },
       });
 
-      const timeRangeSub = discoverDataService.query.timefilter.timefilter
-        .getTimeUpdate$()
-        .subscribe({
-          next: () => {
-            setDiscoverTimerange(discoverDataService.query.timefilter.timefilter.getTime());
-          },
-        });
-
       discoverAppStateSubscription.current = unsubscribeState;
       discoverInternalStateSubscription.current = internalStateSubscription;
-      discoverSavedSearchStateSubscription.current = savedSearchStateSub;
-      discoverTimerangeSubscription.current = timeRangeSub;
+      discoverTabStateSubscription.current = tabStateSub;
     },
     [
       discoverAppState,
-      setDiscoverSavedSearchState,
       setDiscoverInternalState,
       setDiscoverAppState,
       setDiscoverStateContainer,
       getAppStateFromSavedSearch,
-      discoverDataService.query.timefilter.timefilter,
       savedSearchId,
       savedSearchService,
       defaultDiscoverAppState,

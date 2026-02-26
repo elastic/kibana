@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { faker } from '@faker-js/faker';
 import type { ScoutPage } from '@kbn/scout';
 
 export class InterceptsPageObject {
@@ -41,9 +42,17 @@ export class InterceptsPageObject {
     await this.page.testSubj.click('productInterceptProgressionButton');
   }
 
-  async clickRandomNpsButton() {
-    const rating = Math.floor(Math.random() * 4) + 1;
+  async clickNpsButton(rating: number) {
     await this.page.testSubj.click(`nps-${rating}`);
+  }
+
+  async clickRandomNpsButton(maxRating: number = 5) {
+    await this.clickNpsButton(faker.number.int({ min: 1, max: maxRating }));
+  }
+
+  async getSurveyLinkHref(): Promise<string> {
+    const locator = this.page.testSubj.locator('productInterceptSurveyLink');
+    return (await locator.getAttribute('href')) || '';
   }
 
   async isProgressionButtonVisible(): Promise<boolean> {
