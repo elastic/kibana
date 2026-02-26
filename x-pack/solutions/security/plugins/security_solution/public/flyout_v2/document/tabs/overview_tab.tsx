@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { AboutSection } from '../components/about_section';
 
 const OVERVIEW_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.document.overview.overviewContentAriaLabel',
@@ -27,13 +28,8 @@ export interface OverviewTabProps {
  */
 export const OverviewTab = memo(({ hit }: OverviewTabProps) => {
   return (
-    <EuiPanel
-      hasBorder={false}
-      hasShadow={false}
-      paddingSize="none"
-      aria-label={OVERVIEW_ARIA_LABEL}
-    >
-      {hit.id}
+    <EuiPanel hasBorder={false} hasShadow={false} aria-label={OVERVIEW_ARIA_LABEL}>
+      <AboutSection hit={hit} />
     </EuiPanel>
   );
 });
