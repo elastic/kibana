@@ -97,11 +97,10 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/automatic-import-plugin'
+  - '@kbn/automatic-import-v2-plugin'
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
-  - '@kbn/reporting-public'
-  - '@kbn/field-formats-plugin'
   - '@kbn/core-security-server'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/handlebars'
@@ -119,6 +118,12 @@ dependsOn:
   - '@kbn/fs'
   - '@kbn/kql'
   - '@kbn/scout'
+  - '@kbn/reporting-common'
+  - '@kbn/reporting-plugin'
+  - '@kbn/user-profile-components'
+  - '@kbn/css-utils'
+  - '@kbn/rison'
+  - '@kbn/rule-data-utils'
 tags:
   - plugin
   - prod

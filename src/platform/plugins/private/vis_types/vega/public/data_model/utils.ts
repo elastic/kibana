@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import compactStringify from 'json-stringify-pretty-compact';
+import { prettyCompactStringify } from '@kbn/std';
 import type { CoreTheme } from '@kbn/core/public';
 import { getEuiThemeVars } from '@kbn/ui-theme';
 import { normalizeObject } from '../vega_view/utils';
@@ -16,7 +16,7 @@ function normalizeAndStringify(value: unknown) {
   if (typeof value === 'string') {
     return value;
   }
-  return compactStringify(normalizeObject(value), { maxLength: 70 });
+  return prettyCompactStringify(normalizeObject(value), { maxLength: 70 });
 }
 
 export class Utils {

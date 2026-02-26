@@ -32,6 +32,10 @@ const feedbackRegistry: FeedbackRegistry = new Map([
       {
         id: DEFAULT_GENERAL_QUESTION_ID,
         order: 2,
+        placeholder: {
+          i18nId: 'xpack.feedbackRegistry.defaultGeneralPlaceholder',
+          defaultMessage: 'Add more thoughts',
+        },
         label: {
           i18nId: 'xpack.feedbackRegistry.defaultGeneralLabel',
           defaultMessage: 'Anything else you would like to share about Elastic overall?',

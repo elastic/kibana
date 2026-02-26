@@ -58,7 +58,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getChartTimespan() {
-    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
+    const getHistogramChartDataTimeRange = async () =>
+      await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
+
+    await this.retry.waitFor('chart timespan to finish loading', async () => {
+      const timespan = await getHistogramChartDataTimeRange();
+      return !timespan?.includes('Loading');
+    });
+
+    return await getHistogramChartDataTimeRange();
   }
 
   public async saveSearch(
@@ -146,12 +154,14 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,
     });
-    // TODO: Should we add a check for `discoverDataGridUpdating` too?
   }
 
   public async waitUntilTabIsLoaded() {
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
+    await this.testSubjects.missingOrFail('discoverDataGridUpdating', {
+      timeout: this.defaultFindTimeout * 10,
+    });
   }
 
   public async getColumnHeaders() {
@@ -522,8 +532,12 @@ export class DiscoverPageObject extends FtrService {
     return this.dataGrid.clickDocViewerTab(id);
   }
 
-  public async expectSourceViewerToExist() {
+  public async isInEsqlMode() {
     return await this.find.byClassName('monaco-editor');
+  }
+
+  public async isInClassicMode() {
+    return await this.testSubjects.existOrFail('discover-dataView-switch-link');
   }
 
   public async expectDocTableToBeLoaded() {
@@ -696,7 +710,14 @@ export class DiscoverPageObject extends FtrService {
 
     // If not visible, try the overflow menu
     if (await this.testSubjects.exists('app-menu-overflow-button')) {
-      await this.testSubjects.click('app-menu-overflow-button');
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.moveMouseTo('kbnQueryBar');
+        } catch {
+          // Ignore if query bar is not present
+        }
+        await this.testSubjects.click('app-menu-overflow-button');
+      });
 
       if (await this.testSubjects.exists('select-text-based-language-btn')) {
         await this.testSubjects.click('select-text-based-language-btn');
@@ -711,7 +732,7 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async selectDataViewMode() {
+  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
     // Find the selected tab and open its menu
     const tabElements = await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
     for (const tabElement of tabElements) {
@@ -727,6 +748,13 @@ export class DiscoverPageObject extends FtrService {
         await this.testSubjects.click('unifiedTabs_tabMenuItem_switchToClassic');
         await this.header.waitUntilLoadingHasFinished();
         await this.waitUntilSearchingHasFinished();
+        if (options?.discardModal) {
+          await this.testSubjects.exists('discover-esql-to-dataview-modal');
+          await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
+          await this.retry.waitFor('the modal to close', async () => {
+            return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
+          });
+        }
         return;
       }
     }

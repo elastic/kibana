@@ -8,28 +8,11 @@
 import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import parse from 'joi-to-json';
-
-import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
-import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
-import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
-import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
-import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
-import type { VisualizationConfig } from './types';
-import { guessChartType } from './guess_chart_type';
-import { createVisualizationGraph } from './graph_lens';
-
-const metricSchema = parse(esqlMetricState.getSchema()) as object;
-const gaugeSchema = parse(gaugeStateSchemaESQL.getSchema()) as object;
-const tagcloudSchema = parse(tagcloudStateSchemaESQL.getSchema()) as object;
-const xySchema = parse(xyStateSchema.getSchema()) as object;
-const regionMapSchema = parse(regionMapStateSchemaESQL.getSchema()) as object;
-const heatmapSchema = parse(heatmapStateSchemaESQL.getSchema()) as object;
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
 /** Attachment type for visualization configurations */
 const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
@@ -49,14 +32,7 @@ const createVisualizationSchema = z.object({
       '(optional) ID of an existing visualization attachment to update. If provided, the tool will read the existing configuration and modify it based on the query.'
     ),
   chartType: z
-    .enum([
-      SupportedChartType.Metric,
-      SupportedChartType.Gauge,
-      SupportedChartType.Tagcloud,
-      SupportedChartType.XY,
-      SupportedChartType.RegionMap,
-      SupportedChartType.Heatmap,
-    ])
+    .nativeEnum(SupportedChartType)
     .optional()
     .describe(
       '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
@@ -89,7 +65,9 @@ This tool will:
     availability: {
       cacheMode: 'space',
       handler: async ({ uiSettings }) => {
-        const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID);
+        const enabled = await uiSettings.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
         return { status: enabled ? 'available' : 'unavailable' };
       },
     },
@@ -117,62 +95,19 @@ This tool will:
           }
         }
 
-        // Step 2: Determine chart type if not provided
-        let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
-
-        if (!chartType) {
-          logger.debug('Chart type not provided, using LLM to suggest one');
-          selectedChartType = await guessChartType(
-            modelProvider,
-            nlQuery,
-            parsedExistingConfig?.type
-          );
-        }
-
-        // Step 3: Generate visualization configuration using langgraph with validation retry
-        const model = await modelProvider.getDefaultModel();
-        // Select appropriate schema based on chart type
-        let schema: object;
-        if (selectedChartType === SupportedChartType.Gauge) {
-          schema = gaugeSchema;
-        } else if (selectedChartType === SupportedChartType.Tagcloud) {
-          schema = tagcloudSchema;
-        } else if (selectedChartType === SupportedChartType.XY) {
-          schema = xySchema;
-        } else if (selectedChartType === SupportedChartType.RegionMap) {
-          schema = regionMapSchema;
-        } else if (selectedChartType === SupportedChartType.Heatmap) {
-          schema = heatmapSchema;
-        } else {
-          schema = metricSchema;
-        }
-
-        // Create and invoke the validation retry graph
-        const graph = createVisualizationGraph(model, logger, events, esClient);
-
-        const finalState = await graph.invoke({
+        // Step 2: Generate visualization configuration with shared chart-type + graph flow
+        const { selectedChartType, validatedConfig, esqlQuery } = await buildVisualizationConfig({
           nlQuery,
           index,
-          chartType: selectedChartType,
-          schema,
+          chartType,
+          esql,
           existingConfig,
           parsedExistingConfig,
-          esqlQuery: esql || '',
-          currentAttempt: 0,
-          actions: [],
-          validatedConfig: null,
-          error: null,
+          modelProvider,
+          logger,
+          events,
+          esClient,
         });
-
-        const { validatedConfig, error, currentAttempt, esqlQuery } = finalState;
-
-        if (!validatedConfig) {
-          throw new Error(
-            `Failed to generate valid configuration after ${currentAttempt} attempts. Last error: ${
-              error || 'Unknown error'
-            }`
-          );
-        }
 
         const visualizationData = {
           query: nlQuery,
@@ -181,32 +116,42 @@ This tool will:
           esql: esqlQuery,
         };
 
-        let resultAttachmentId: string;
-        let version: number;
+        // Step 4: Try to store as attachment (optional - may fail if visualization type not registered)
+        let resultAttachmentId: string | undefined;
+        let version: number | undefined;
         let isUpdate = false;
 
-        if (attachmentId && attachments.getAttachmentRecord(attachmentId)) {
-          const updated = await attachments.update(attachmentId, {
-            data: visualizationData,
-            description: `Visualization: ${nlQuery.slice(0, 50)}${
-              nlQuery.length > 50 ? '...' : ''
-            }`,
-          });
-          resultAttachmentId = attachmentId;
-          version = updated?.current_version ?? 1;
-          isUpdate = true;
-          logger.debug(`Updated visualization attachment ${attachmentId} to version ${version}`);
-        } else {
-          const newAttachment = await attachments.add({
-            type: VISUALIZATION_ATTACHMENT_TYPE,
-            data: visualizationData,
-            description: `Visualization: ${nlQuery.slice(0, 50)}${
-              nlQuery.length > 50 ? '...' : ''
-            }`,
-          });
-          resultAttachmentId = newAttachment.id;
-          version = newAttachment.current_version;
-          logger.debug(`Created new visualization attachment ${resultAttachmentId}`);
+        try {
+          if (attachmentId && attachments.getAttachmentRecord(attachmentId)) {
+            const updated = await attachments.update(attachmentId, {
+              data: visualizationData,
+              description: `Visualization: ${nlQuery.slice(0, 50)}${
+                nlQuery.length > 50 ? '...' : ''
+              }`,
+            });
+            resultAttachmentId = attachmentId;
+            version = updated?.current_version ?? 1;
+            isUpdate = true;
+            logger.debug(`Updated visualization attachment ${attachmentId} to version ${version}`);
+          } else {
+            const newAttachment = await attachments.add({
+              type: VISUALIZATION_ATTACHMENT_TYPE,
+              data: visualizationData,
+              description: `Visualization: ${nlQuery.slice(0, 50)}${
+                nlQuery.length > 50 ? '...' : ''
+              }`,
+            });
+            resultAttachmentId = newAttachment.id;
+            version = newAttachment.current_version;
+            logger.debug(`Created new visualization attachment ${resultAttachmentId}`);
+          }
+        } catch (attachmentError) {
+          // Attachment creation is optional - continue without it
+          logger.warn(
+            `Could not create visualization attachment (type may not be registered): ${
+              attachmentError instanceof Error ? attachmentError.message : String(attachmentError)
+            }`
+          );
         }
 
         return {
@@ -215,13 +160,13 @@ This tool will:
               type: ToolResultType.visualization,
               tool_result_id: getToolResultId(),
               data: {
-                attachment_id: resultAttachmentId,
-                version,
-                is_update: isUpdate,
                 query: nlQuery,
                 visualization: validatedConfig,
                 chart_type: selectedChartType,
                 esql: esqlQuery,
+                ...(resultAttachmentId && { attachment_id: resultAttachmentId }),
+                ...(version !== undefined && { version }),
+                ...(isUpdate && { is_update: isUpdate }),
               },
             },
           ],

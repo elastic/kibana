@@ -105,6 +105,16 @@ exports[`FieldIcon renders known field types date is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types date_nanos is rendered 1`] = `
+<EuiToken
+  aria-label="date_nanos"
+  className="kbnFieldIcon"
+  iconType="tokenDate"
+  size="s"
+  title="date_nanos"
+/>
+`;
+
 exports[`FieldIcon renders known field types date_range is rendered 1`] = `
 <EuiToken
   aria-label="date_range"

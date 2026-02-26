@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
@@ -13,7 +14,6 @@ import { getDetailedErrorMessage } from '../../errors';
 import { ROUTE_TAG_ACCEPT_JWT } from '../../routes/tags';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 
 /**
  * A type-string of the Elasticsearch JWT realm.

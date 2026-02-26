@@ -48,8 +48,10 @@ export {
   selectRecentlyClosedTabs,
   selectTab,
   selectTabAppState,
+  selectTabCombinedFilters,
   selectIsTabsBarHidden,
   selectHasUnsavedChanges,
+  selectTabSavedSearch,
 } from './selectors';
 
 export {

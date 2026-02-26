@@ -26,7 +26,6 @@ import {
   validateCardinality,
   validateDatafeedPreview,
 } from '../models/job_validation';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
 import type { CombinedJob } from '../../common/types/anomaly_detection_jobs';
 
@@ -206,7 +205,6 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
             client,
             mlClient,
             request.body,
-            getAuthorizationHeader(request),
             mlLicense.isSecurityEnabled() === false
           );
 
@@ -246,13 +244,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
             body: { job, start, end },
           } = request;
 
-          const resp = await validateDatafeedPreview(
-            mlClient,
-            getAuthorizationHeader(request),
-            job as CombinedJob,
-            start,
-            end
-          );
+          const resp = await validateDatafeedPreview(mlClient, job as CombinedJob, start, end);
 
           return response.ok({
             body: resp,
