@@ -31,6 +31,14 @@ const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | '
   percentage: 'percent',
 };
 
+const LEGACY_PALETTE_PREFIX = 'LEGACY_PALETTE_';
+
+export function isLegacyColorPalette(
+  color: { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined
+): color is { palette: PaletteOutput } {
+  return 'palette' in (color ?? {});
+}
+
 export function fromColorByValueAPIToLensState(
   color: ColorByValueType | undefined
 ): PaletteOutput<CustomPaletteParams> | undefined {
@@ -182,7 +190,11 @@ export function fromColorMappingLensStateToAPI(
   legacyPalette?: PaletteOutput
 ): ColorMappingType | undefined {
   if (legacyPalette && !colorMapping) {
-    return { mode: 'categorical', palette: `LEGACY_PALETTE_${legacyPalette.name}`, mapping: [] };
+    return {
+      mode: 'categorical',
+      palette: `${LEGACY_PALETTE_PREFIX}${legacyPalette.name}`,
+      mapping: [],
+    };
   }
   if (!colorMapping) {
     return;
@@ -286,21 +298,15 @@ function fromAPIMappingToAssignments(
   });
 }
 
-export function isLegacyColorPalette(
-  color: { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined
-): color is { palette: PaletteOutput } {
-  return 'palette' in (color ?? {});
-}
-
 export function fromColorMappingAPIToLensState(
   colorMapping: ColorMappingType | undefined
 ): { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined {
   if (!colorMapping) {
     return;
   }
-  if (colorMapping.palette.includes('LEGACY_PALETTE_')) {
+  if (colorMapping.palette.includes(LEGACY_PALETTE_PREFIX)) {
     return {
-      palette: { type: 'palette', name: colorMapping.palette.replace('LEGACY_PALETTE_', '') },
+      palette: { type: 'palette', name: colorMapping.palette.replace(LEGACY_PALETTE_PREFIX, '') }, // remove the prefix
     };
   }
   const specialAssignments: ColorMapping.SpecialAssignment[] = [

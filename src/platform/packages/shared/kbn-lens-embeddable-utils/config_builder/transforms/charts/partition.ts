@@ -55,6 +55,7 @@ import {
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
+  isLegacyColorPalette,
 } from '../coloring';
 
 type PartitionLens = Extract<
@@ -294,19 +295,19 @@ function buildVisualizationState(
     getAccessorName('group_by', index)
   );
   const { colorMapping, ...sharedState } = computeSharedPartitionLayerState(config);
-  const isLegacyColorMode = 'palette' in (colorMapping ?? {});
+  const isLegacyColor = isLegacyColorPalette(colorMapping);
 
   if (isAPIPieChartLayer(config)) {
     return {
       shape: config.type,
-      ...(isLegacyColorMode && { ...colorMapping }),
+      ...(isLegacyColor && { ...colorMapping }), // legacy colors are included outside of the layer
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...sharedState,
-          ...(!isLegacyColorMode && { ...colorMapping }),
+          ...(!isLegacyColor && { ...colorMapping }), // modern colors are included at the layer level
           categoryDisplay: convertAPICategoryDisplayOption(config.label_position),
           ...getEmptySizeRatioFromDonutHoleOption(config.donut_hole),
         },
@@ -317,14 +318,14 @@ function buildVisualizationState(
   if (isAPITreemapChartLayer(config)) {
     return {
       shape: config.type,
-      ...(isLegacyColorMode && { ...colorMapping }),
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...sharedState,
-          ...(!isLegacyColorMode && { ...colorMapping }),
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -334,14 +335,14 @@ function buildVisualizationState(
   if (isAPIWaffleChartLayer(config)) {
     return {
       shape: config.type,
-      ...(isLegacyColorMode && { ...colorMapping }),
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...sharedState,
-          ...(!isLegacyColorMode && { ...colorMapping }),
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -351,7 +352,7 @@ function buildVisualizationState(
   if (isAPIMosaicChartLayer(config)) {
     return {
       shape: config.type,
-      ...(isLegacyColorMode && { ...colorMapping }),
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
@@ -363,7 +364,7 @@ function buildVisualizationState(
           // there's no multiple metrics support in mosaic charts
           allowMultipleMetrics: false,
           ...sharedState,
-          ...(!isLegacyColorMode && { ...colorMapping }),
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -534,7 +535,6 @@ function convertLensStateToAPIGrouping(
   legacyPalette?: PaletteOutput
 ) {
   const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
-  // console.log('convertLensStateToAPIGrouping', { colorMapping });
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(
       (id, index) =>

@@ -191,6 +191,7 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
   }
 
   const attributes = builder.fromAPIFormat(state.attributes);
+
   return {
     ...state,
     attributes,

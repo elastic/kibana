@@ -32,7 +32,7 @@ function buildColorProps(
     const color = fromColorMappingAPIToLensState(config.color);
     return {
       colorMode,
-      colorMapping: !isLegacyColorPalette(color) ? color?.colorMapping : undefined,
+      colorMapping: isLegacyColorPalette(color) ? undefined : color?.colorMapping,
     };
   }
 
