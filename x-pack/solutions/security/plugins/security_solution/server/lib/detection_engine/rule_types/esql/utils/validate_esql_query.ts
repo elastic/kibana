@@ -27,7 +27,7 @@ export const validateEsqlQuery = async ({
     if (errors.length > 0) {
       const messages = errors.map((e) => ('text' in e ? e.text : e.message)).join('; ');
       ruleExecutionLogger.warn(
-        `AST validation failed for transformed ES|QL query, falling back to original query. Errors: ${messages}`
+        `AST validation failed for transformed ES|QL query. Errors: ${messages}`
       );
       return false;
     }
@@ -35,7 +35,7 @@ export const validateEsqlQuery = async ({
     return true;
   } catch (error) {
     ruleExecutionLogger.warn(
-      `AST validation threw for transformed ES|QL query, falling back to original query. Error: ${error?.message}`
+      `AST validation threw for transformed ES|QL query. Error: ${error?.message}`
     );
     return false;
   }
