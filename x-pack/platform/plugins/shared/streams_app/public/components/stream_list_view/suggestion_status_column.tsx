@@ -39,7 +39,7 @@ export function SuggestionStatusColumn({
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <span aria-label={NO_SUGGESTION_ARIA_LABEL}>-</span>
+          <EuiLoadingSpinner size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
