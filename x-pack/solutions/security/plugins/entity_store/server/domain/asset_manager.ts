@@ -443,9 +443,7 @@ export class AssetManager {
 }
 
 export const getEntityStoreStatus = (engines: EngineDescriptor[]): EntityStoreStatus => {
-  if (engines.length === 0) {
-    return ENTITY_STORE_STATUS.NOT_INSTALLED;
-  }
+  if (engines.length === 0) return ENTITY_STORE_STATUS.NOT_INSTALLED;
 
   const hasStatus = (s: EngineDescriptor['status']) => engines.some(({ status }) => status === s);
   const allStatus = (s: EngineDescriptor['status']) => engines.every(({ status }) => status === s);
