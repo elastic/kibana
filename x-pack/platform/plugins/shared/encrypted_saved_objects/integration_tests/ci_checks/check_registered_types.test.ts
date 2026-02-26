@@ -109,7 +109,6 @@ describe('checking changes on all registered encrypted SO types', () => {
 
     expect(modelVersionMap).toMatchInlineSnapshot(`
       Array [
-        "action|2",
         "action|1",
         "action_task_params|2",
         "action_task_params|1",
@@ -128,7 +127,6 @@ describe('checking changes on all registered encrypted SO types', () => {
         "api_key_pending_invalidation|2",
         "api_key_pending_invalidation|1",
         "cloud-connect-api-key|1",
-        "connector_token|2",
         "connector_token|1",
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",
