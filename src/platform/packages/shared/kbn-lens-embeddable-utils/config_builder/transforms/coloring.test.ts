@@ -424,12 +424,14 @@ describe('Color util transforms', () => {
           mapping: [],
         })
       ).toEqual({
-        colorMode: { type: 'categorical' },
-        paletteId: 'kibana_palette',
-        assignments: [],
-        specialAssignments: [
-          { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
-        ],
+        colorMapping: {
+          colorMode: { type: 'categorical' },
+          paletteId: 'kibana_palette',
+          assignments: [],
+          specialAssignments: [
+            { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
+          ],
+        },
       });
     });
   });
