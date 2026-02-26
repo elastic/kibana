@@ -45,6 +45,10 @@ describe('getPathForFeedback ', () => {
       value: `/app/apm/settings`,
       result: '/app/apm/settings',
     },
+    {
+      value: undefined as any,
+      result: '/',
+    },
   ];
 
   it.each(testData)(
