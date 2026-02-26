@@ -36,7 +36,6 @@ export const EndpointsTab: React.FC = () => {
           })}
           color="warning"
           iconType="warning"
-          announceOnMount={false}
         >
           <p>
             {i18n.translate('cloud.connectionDetails.tab.endpoints.callout.message', {
