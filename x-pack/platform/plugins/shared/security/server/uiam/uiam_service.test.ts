@@ -658,9 +658,9 @@ describe('UiamService', () => {
         json: async () => mockResponse,
       });
 
-      await expect(
-        uiamService.convertApiKeys(['es-api-key-base64'])
-      ).resolves.toEqual(mockResponse);
+      await expect(uiamService.convertApiKeys(['es-api-key-base64'])).resolves.toEqual(
+        mockResponse
+      );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
@@ -707,9 +707,9 @@ describe('UiamService', () => {
         json: async () => mockResponse,
       });
 
-      await expect(
-        uiamService.convertApiKeys(['valid-key', 'invalid-key'])
-      ).resolves.toEqual(mockResponse);
+      await expect(uiamService.convertApiKeys(['valid-key', 'invalid-key'])).resolves.toEqual(
+        mockResponse
+      );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
@@ -744,9 +744,7 @@ describe('UiamService', () => {
         ).uiam
       );
 
-      await expect(
-        serviceWithoutUrl.convertApiKeys(['es-api-key'])
-      ).rejects.toThrowError(
+      await expect(serviceWithoutUrl.convertApiKeys(['es-api-key'])).rejects.toThrowError(
         'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
       );
 
@@ -761,9 +759,9 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Must authenticate using mTLS' } }),
       });
 
-      await expect(
-        uiamService.convertApiKeys(['es-api-key'])
-      ).rejects.toThrowError('Must authenticate using mTLS');
+      await expect(uiamService.convertApiKeys(['es-api-key'])).rejects.toThrowError(
+        'Must authenticate using mTLS'
+      );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_convert', {
@@ -773,9 +771,7 @@ describe('UiamService', () => {
           [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
         },
         body: JSON.stringify({
-          keys: [
-            { type: 'elasticsearch', key: 'es-api-key', endpoint: 'https://es.example.com' },
-          ],
+          keys: [{ type: 'elasticsearch', key: 'es-api-key', endpoint: 'https://es.example.com' }],
         }),
         dispatcher: AGENT_MOCK,
       });
