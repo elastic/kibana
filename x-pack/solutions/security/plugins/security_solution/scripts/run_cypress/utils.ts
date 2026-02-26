@@ -50,9 +50,7 @@ const getSpecFileWeight = (filePath: string, lbConfig?: LoadBalancerConfig): num
   const minWeight = lbConfig?.minSpecWeight ?? DEFAULT_MIN_SPEC_WEIGHT;
 
   if (lbConfig?.specWeightOverrides) {
-    const override = lbConfig.specWeightOverrides.find(({ pattern }) =>
-      filePath.includes(pattern)
-    );
+    const override = lbConfig.specWeightOverrides.find(({ pattern }) => filePath.includes(pattern));
     if (override) {
       return Math.max(override.weight, minWeight);
     }
