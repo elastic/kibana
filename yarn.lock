@@ -6161,7 +6161,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cps-test-endpoints-plugin@link:x-pack/platform/test/serverless/plugins/cps_test_endpoints":
+"@kbn/cps-test-endpoints-plugin@link:x-pack/platform/plugins/private/cps_test_endpoints":
   version "0.0.0"
   uid ""
 
