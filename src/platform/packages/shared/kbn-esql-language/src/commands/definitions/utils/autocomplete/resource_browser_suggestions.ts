@@ -21,13 +21,14 @@ export async function getIndicesBrowserSuggestion({
   context?: ICommandContext;
   innerText?: string;
 }): Promise<ISuggestionItem | undefined> {
-  const isResourceBrowserEnabled = (await callbacks?.isResourceBrowserEnabled?.()) ?? false;
-  if (!isResourceBrowserEnabled || context?.isCursorInSubquery) {
+  const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
+  if (!canSuggestResourceBrowser || context?.isCursorInSubquery) {
     return undefined;
   }
 
   const commandArgs = buildResourceBrowserCommandArgs({
-    sources: context?.sources,
+    // Do not show hidden sources in the resource browser
+    sources: context?.sources?.filter((source) => !source.hidden),
     timeSeriesSources: context?.timeSeriesSources,
   });
 
