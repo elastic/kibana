@@ -339,11 +339,15 @@ export function loadEmbeddableData(
       .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
       .subscribe(async (updatedGroupId) => {
         try {
-          const freshGroup = await services.eventAnnotationService.loadAnnotationGroup(
+          const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
             updatedGroupId
           );
           const currentState = getState();
-          const updated = updateAttributesWithAnnotation(currentState, updatedGroupId, freshGroup);
+          const updated = updateAttributesWithAnnotation(
+            currentState,
+            updatedGroupId,
+            libraryGroup
+          );
           if (updated) {
             internalApi.updateAttributes(updated.attributes);
           }
@@ -352,13 +356,14 @@ export function loadEmbeddableData(
           if (baseline) {
             // When by reference annotations are saved to library, those changes should now be
             // reflected in the baseline (so that cancel/reset behaviors work as expected).
-            const baselineWithUpdatedAnnotation = updateAttributesWithAnnotation(
+            const baselineWithUpdatedAnnotations = updateAttributesWithAnnotation(
               baseline,
               updatedGroupId,
-              freshGroup
+              libraryGroup,
+              { referenceOnly: true }
             );
-            if (baselineWithUpdatedAnnotation) {
-              internalApi.updateBaselineState(baselineWithUpdatedAnnotation);
+            if (baselineWithUpdatedAnnotations) {
+              internalApi.updateBaselineState(baselineWithUpdatedAnnotations);
             }
           }
         } catch (err) {

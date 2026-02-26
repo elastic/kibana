@@ -248,13 +248,17 @@ export function hasAnnotationGroupReference(state: LensRuntimeState, groupId: st
 }
 
 /**
- * Returns updated state with fresh annotation group data for all by-reference
+ * Returns updated state with library saved annotation group data for all by-reference
  * annotation layers that reference the given group ID, or undefined if no layers matched.
+ *
+ * When `referenceOnly` is true, only the `__lastSaved` snapshot is updated while
+ * local annotations are preserved.
  */
 export function updateAttributesWithAnnotation(
   state: LensRuntimeState,
   groupId: string,
-  freshGroup: EventAnnotationGroupConfig
+  libraryGroup: EventAnnotationGroupConfig,
+  { referenceOnly = false }: { referenceOnly?: boolean } = {}
 ): LensRuntimeState | undefined {
   const { attributes } = state;
   if (attributes.visualizationType !== 'lnsXY') return undefined;
@@ -267,12 +271,15 @@ export function updateAttributesWithAnnotation(
     if (!('annotationGroupId' in layer) || layer.annotationGroupId !== groupId) return layer;
     changed = true;
     const refLayer = layer as XYByReferenceAnnotationLayerConfig;
+    if (referenceOnly) {
+      return { ...refLayer, __lastSaved: libraryGroup };
+    }
     return {
       ...refLayer,
-      annotations: structuredClone(freshGroup.annotations),
-      ignoreGlobalFilters: freshGroup.ignoreGlobalFilters,
-      indexPatternId: freshGroup.indexPatternId,
-      __lastSaved: freshGroup,
+      annotations: structuredClone(libraryGroup.annotations),
+      ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
+      indexPatternId: libraryGroup.indexPatternId,
+      __lastSaved: libraryGroup,
     };
   });
 
