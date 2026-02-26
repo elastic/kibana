@@ -81,10 +81,13 @@ const ActionsTableComponent = () => {
     kuery: 'user_id: *',
   });
 
-  const onTableChange = useCallback(({ page }: CriteriaWithPagination<SearchHit>) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
-  }, [setPageSize]);
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<SearchHit>) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    },
+    [setPageSize]
+  );
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {
