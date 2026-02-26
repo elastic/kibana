@@ -31,6 +31,12 @@ export interface LoadBalancerConfig {
   perSpecOverhead: number;
   /** Minimum weight floor for any spec file. */
   minSpecWeight: number;
+  /**
+   * Override weights for specs where test count doesn't reflect actual runtime.
+   * Keys are path fragments matched against the full file path (e.g. `tamper_protection/`
+   * or `endpoint_operations.cy.ts`). The first matching entry wins.
+   */
+  specWeightOverrides?: Array<{ pattern: string; weight: number }>;
 }
 
 const DEFAULT_MIN_SPEC_WEIGHT = 1;
@@ -42,6 +48,16 @@ const DEFAULT_MIN_SPEC_WEIGHT = 1;
  */
 const getSpecFileWeight = (filePath: string, lbConfig?: LoadBalancerConfig): number => {
   const minWeight = lbConfig?.minSpecWeight ?? DEFAULT_MIN_SPEC_WEIGHT;
+
+  if (lbConfig?.specWeightOverrides) {
+    const override = lbConfig.specWeightOverrides.find(({ pattern }) =>
+      filePath.includes(pattern)
+    );
+    if (override) {
+      return Math.max(override.weight, minWeight);
+    }
+  }
+
   try {
     const content = fs.readFileSync(filePath, { encoding: 'utf8' });
     const itMatches = content.match(/\bit\s*\(/g);

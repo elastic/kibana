@@ -7,6 +7,11 @@ description: Analyze and optimize Kibana Security Solution Cypress CI performanc
 
 Optimize parallel Cypress test distribution in Kibana's Security Solution CI pipeline.
 
+> **See also:** The [`cypress-ci-audit`](../cypress-ci-audit/SKILL.md) skill provides a
+> comprehensive end-to-end audit workflow that uses these techniques to autonomously
+> analyze, rebalance, and optimize any Cypress suite. Use `cypress-ci-audit` for
+> periodic reviews; use this skill for targeted deep-dives on specific parameters.
+
 ## Architecture Overview
 
 ### Key Files
