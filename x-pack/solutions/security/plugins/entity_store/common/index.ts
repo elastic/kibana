@@ -47,8 +47,26 @@ export const EntityStoreStatus = z.enum([
   'error',
 ]);
 
+const ENTITY_STORE_BASE_ROUTE = '/internal/security/entity_store';
+
 export const ENTITY_STORE_ROUTES = {
-  INSTALL: '/internal/security/entity-store/install',
-  UNINSTALL: '/internal/security/entity-store/uninstall',
-  STATUS: '/internal/security/entity-store/status',
+  INSTALL: `${ENTITY_STORE_BASE_ROUTE}/install`,
+  UNINSTALL: `${ENTITY_STORE_BASE_ROUTE}/uninstall`,
+  STATUS: `${ENTITY_STORE_BASE_ROUTE}/status`,
+  START: `${ENTITY_STORE_BASE_ROUTE}/start`,
+  STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
+  FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
+  CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
+  CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
+  CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
 } as const satisfies Record<string, string>;
+
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return String(error);
+};
