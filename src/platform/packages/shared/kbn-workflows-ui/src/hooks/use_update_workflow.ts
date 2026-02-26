@@ -23,6 +23,11 @@ export interface UpdateWorkflowParams {
   isBulkAction?: boolean;
   /** Optional number of items affected in a bulk update action. */
   bulkActionCount?: number;
+  /**
+   * When true, the mutation will not refetch queries after a successful update.
+   * Useful for bulk operations where the caller handles a single refetch at the end.
+   */
+  skipRefetch?: boolean;
 }
 
 /**
