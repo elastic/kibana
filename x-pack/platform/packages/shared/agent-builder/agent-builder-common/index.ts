@@ -55,6 +55,7 @@ export {
   AgentBuilderErrorUtils,
   isInternalError,
   isToolNotFoundError,
+  isSkillNotFoundError,
   isAgentBuilderError,
   isAgentNotFoundError,
   isConversationNotFoundError,
@@ -67,6 +68,7 @@ export {
   createAgentBuilderError,
   createInternalError,
   createToolNotFoundError,
+  createSkillNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
   createBadRequestError,
@@ -76,6 +78,7 @@ export {
   type AgentBuilderError,
   type AgentBuilderInternalError,
   type AgentBuilderToolNotFoundError,
+  type AgentBuilderSkillNotFoundError,
   type AgentBuilderAgentNotFoundError,
   type AgentBuilderConversationNotFoundError,
   type AgentBuilderBadRequestError,
@@ -168,6 +171,16 @@ export {
   isToolProgressEvent,
   isPromptRequestEvent,
 } from './chat';
+export {
+  type PublicSkillDefinition,
+  type PersistedSkillCreateRequest,
+  type PersistedSkillUpdateRequest,
+  type SkillReferencedContent,
+  skillCreateRequestSchema,
+  skillUpdateRequestSchema,
+  validateSkillId,
+  skillIdMaxLength,
+  skillIdRegexp,
+} from './skills';
 export * from './telemetry';
-export { AGENT_WORKFLOWS_FEATURE_FLAG } from './feature_flags';
 export { getLatestVersion, type VersionedAttachment } from './attachments';
