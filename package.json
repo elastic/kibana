@@ -611,6 +611,8 @@
     "@kbn/esql-validation-example-plugin": "link:examples/esql_validation_example",
     "@kbn/eui-provider-dev-warning": "link:src/platform/test/plugin_functional/plugins/eui_provider_dev_warning",
     "@kbn/eval-kql": "link:src/platform/packages/shared/kbn-eval-kql",
+    "@kbn/evals-common": "link:x-pack/platform/packages/shared/kbn-evals-common",
+    "@kbn/evals-plugin": "link:x-pack/platform/plugins/shared/evals",
     "@kbn/event-annotation-common": "link:src/platform/packages/shared/kbn-event-annotation-common",
     "@kbn/event-annotation-components": "link:src/platform/packages/shared/kbn-event-annotation-components",
     "@kbn/event-annotation-listing-plugin": "link:src/platform/plugins/private/event_annotation_listing",

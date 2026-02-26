@@ -27,6 +27,7 @@ import {
   createCreateIndexStream,
   createIndexDocRecordsStream,
   migrateSavedObjectIndices,
+  isSavedObjectIndex,
   Progress,
   createDefaultSpace,
   type LoadActionPerfOptions,
@@ -61,6 +62,7 @@ export async function loadAction({
   log,
   kbnClient,
   performance,
+  dataOnly,
 }: {
   inputDir: string;
   skipExisting: boolean;
@@ -68,8 +70,9 @@ export async function loadAction({
   docsOnly?: boolean;
   client: Client;
   log: ToolingLog;
-  kbnClient: KbnClient;
+  kbnClient?: KbnClient;
   performance?: LoadActionPerfOptions;
+  dataOnly?: boolean;
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const isArchiveInExceptionList = soOverrideAllowedList.includes(name);
@@ -78,7 +81,7 @@ export async function loadAction({
   }
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+  const kibanaPluginIds = dataOnly ? [] : await kbnClient!.plugins.getEnabledIds();
   const targetsWithoutIdGeneration: string[] = [];
 
   // a single stream that emits records from all archive files, in
@@ -123,6 +126,17 @@ export async function loadAction({
   progress.deactivate();
   const result = stats.toJSON();
 
+  if (dataOnly) {
+    const soIndices = Object.keys(result).filter(isSavedObjectIndex);
+    if (soIndices.length > 0) {
+      throw new Error(
+        `esArchiver is in dataOnly mode and cannot load saved object indices (${soIndices.join(
+          ', '
+        )}). ` + 'Use kbnArchiver to manage Kibana saved objects instead.'
+      );
+    }
+  }
+
   const indicesWithDocs: string[] = [];
   for (const [index, { docs }] of Object.entries(result)) {
     if (docs && docs.indexed > 0) {
@@ -142,8 +156,8 @@ export async function loadAction({
   );
 
   // If we affected saved objects indices, we need to ensure they are migrated...
-  if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
-    await migrateSavedObjectIndices(kbnClient);
+  if (!dataOnly && Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
+    await migrateSavedObjectIndices(kbnClient!);
     log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
 
     if (kibanaPluginIds.includes('spaces')) {
