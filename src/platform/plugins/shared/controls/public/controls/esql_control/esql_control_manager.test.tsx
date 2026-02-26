@@ -70,7 +70,6 @@ describe('initializeESQLControlManager', () => {
             "option1",
           ],
           "single_select": true,
-          "title": "",
           "variable_name": "variable1",
           "variable_type": "values",
         }
@@ -108,7 +107,6 @@ describe('initializeESQLControlManager', () => {
             "option1",
           ],
           "single_select": true,
-          "title": "",
           "variable_name": "variable1",
           "variable_type": "values",
         }
