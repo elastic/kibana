@@ -22,7 +22,9 @@ test.describe(
     test('should properly show static values in form and results', async ({
       page,
       pageObjects,
+      config,
     }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(360_000);
 
       await test.step('Navigate to osquery', async () => {

@@ -63,7 +63,8 @@ test.describe(
       }
     });
 
-    test('should run live pack', async ({ page, pageObjects }) => {
+    test('should run live pack', async ({ page, pageObjects, config }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(300_000);
 
       await page.gotoApp('osquery');

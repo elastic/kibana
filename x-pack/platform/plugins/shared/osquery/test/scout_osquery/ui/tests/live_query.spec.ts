@@ -122,7 +122,8 @@ test.describe(
       });
     });
 
-    test('should run a live query and check results', async ({ page, pageObjects }) => {
+    test('should run a live query and check results', async ({ page, pageObjects, config }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(240_000); // Live queries can take time; serverless agents respond slowly
       const liveQuery = pageObjects.liveQuery;
 

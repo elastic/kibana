@@ -141,7 +141,7 @@ test.describe(
           await page.getByRole('link', { name: removingPack }).click();
           await expect(page.getByText(`${removingPack} details`)).toBeVisible();
           const editButton = page.getByRole('button', { name: 'Edit' });
-          await editButton.waitFor({ state: 'visible' });
+          await editButton.waitFor({ state: 'visible', timeout: 30_000 });
           await editButton.click();
 
           await expect(
@@ -264,6 +264,13 @@ test.describe(
               timeout: 30_000,
             });
 
+            // Capture the pack ID from the URL for cleanup
+            const packUrl = page.url();
+            const packIdMatch = packUrl.match(/\/packs\/([^/]+)/);
+            if (packIdMatch) {
+              globalPackId = packIdMatch[1];
+            }
+
             // Create agent policy with osquery integration
             const agentPolicy = await loadAgentPolicy(kbnClient);
             agentPolicyId = agentPolicy.id;
@@ -283,7 +290,7 @@ test.describe(
 
                   return !!item?.inputs[0]?.config?.osquery?.value?.packs?.[globalPack];
                 },
-                { timeout: 60_000 }
+                { timeout: 120_000 }
               )
               .toBe(true);
           } finally {

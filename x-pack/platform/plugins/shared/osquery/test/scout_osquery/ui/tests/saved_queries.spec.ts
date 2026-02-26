@@ -73,7 +73,9 @@ test.describe(
     test('should create a new query and verify hidden columns, full screen, sorting, pagination, and CRUD', async ({
       page,
       pageObjects,
+      config,
     }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(300_000);
       const suffix = `${Date.now()}`;
       const savedQueryIdLocal = `Saved-Query-Id-${suffix}`;
@@ -262,7 +264,12 @@ test.describe(
       await expect(page.testSubj.locator('resultsTypeField').getByText('Snapshot')).toBeVisible();
     });
 
-    test('user can run prebuilt saved query and add to case', async ({ page, pageObjects }) => {
+    test('user can run prebuilt saved query and add to case', async ({
+      page,
+      pageObjects,
+      config,
+    }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       await page.gotoApp('osquery/saved_queries');
       await pageObjects.packs.ensureAllPacksVisible();
       await page.locator(`[aria-label="Run users_elastic"]`).click();

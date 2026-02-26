@@ -485,7 +485,13 @@ test.describe(
       }
     });
 
-    test('should verify that packs are triggered', async ({ page, pageObjects, kbnClient }) => {
+    test('should verify that packs are triggered', async ({
+      page,
+      pageObjects,
+      kbnClient,
+      config,
+    }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(360_000); // Pack execution + 5-min result polling
       const policyIds = await getFirstPackagePolicyIds(kbnClient);
       const pack = await loadPack(kbnClient, {
