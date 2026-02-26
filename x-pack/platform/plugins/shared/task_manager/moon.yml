@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/logging-mocks'
   - '@kbn/spaces-utils'
+  - '@kbn/es-errors'
 tags:
   - plugin
   - prod

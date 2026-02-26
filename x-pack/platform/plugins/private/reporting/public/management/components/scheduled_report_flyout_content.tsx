@@ -280,6 +280,7 @@ export const ScheduledReportFlyoutContent = ({
                     fullWidth: true,
                     append: i18n.SCHEDULED_REPORT_FORM_FILE_NAME_SUFFIX,
                     readOnly,
+                    'data-test-subj': 'reportTitleInput',
                   },
                 }}
               />
@@ -413,6 +414,7 @@ export const ScheduledReportFlyoutContent = ({
                       : undefined,
                   euiFieldProps: {
                     compressed: true,
+                    'data-test-subj': 'sendByEmailToggle',
                     disabled:
                       readOnly ||
                       !reportingHealth.areNotificationsEnabled ||

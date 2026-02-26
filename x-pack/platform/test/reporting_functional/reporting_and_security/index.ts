@@ -17,9 +17,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await reportingFunctional.createDataAnalyst();
       await reportingFunctional.createTestReportingUserRole();
       await reportingFunctional.createTestReportingUser();
+      await reportingFunctional.createManageReportingUserRole();
+      await reportingFunctional.createManageReportingUser();
     });
 
     loadTestFile(require.resolve('./security_roles_privileges'));
     loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./scheduled_reports'));
   });
 }

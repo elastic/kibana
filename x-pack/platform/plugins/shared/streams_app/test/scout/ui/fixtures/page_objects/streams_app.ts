@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ScoutPage, expect } from '@kbn/scout';
+import { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class StreamsApp {
   constructor(private readonly page: ScoutPage) {}

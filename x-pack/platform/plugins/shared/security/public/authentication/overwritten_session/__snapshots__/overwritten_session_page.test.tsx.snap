@@ -25,14 +25,14 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
       >
         You previously logged in as a different user.
       </h1>
-      <div
-        class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
-      />
     </div>
   </header>
   <div
     class="secAuthenticationStatePage__content eui-textCenter"
   >
+    <div
+      class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
+    />
     <a
       class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
       href="/mock-base-path/"

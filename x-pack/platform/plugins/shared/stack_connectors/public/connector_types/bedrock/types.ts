@@ -16,6 +16,7 @@ export interface BedrockActionParams {
 
 export interface Config {
   apiUrl: string;
+  region?: string;
   defaultModel: string;
 }
 

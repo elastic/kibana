@@ -1,19 +1,26 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
+    - data_views
     - console
     - discover_enhanced
     - index_management
     - maps
     - observability_onboarding
     - painless_lab
+    - profiling
     - security_solution
     - spaces
     - streams_app
+    - transform
+    - dashboard
   disabled:
 
 packages:
   enabled:
   disabled:
-    - kbn-scout # Internal scout tests are run in advance to validate Scout integrity (see .buildkite/scripts/steps/test/scout_test_run_builder.sh)
+    # Scout's own tests are executed first to validate the Scout framework
+    # (see .buildkite/scripts/steps/test/scout/test_run_builder.sh). Excluded here
+    # so they don't rerun alongside plugin/package Scout tests discovered later.
+    - kbn-scout
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
