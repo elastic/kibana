@@ -43,6 +43,7 @@ Object {
   "logger": Any<Object>,
   "maxRedirects": undefined,
   "method": "POST",
+  "signal": undefined,
   "sslOverrides": Object {},
   "url": "https://abc.def/my-endpoint",
 }
@@ -90,6 +91,7 @@ Object {
   "logger": Any<Object>,
   "maxRedirects": undefined,
   "method": "POST",
+  "signal": undefined,
   "sslOverrides": Object {},
   "url": "https://abc.def/my-endpoint",
 }
@@ -137,6 +139,7 @@ Object {
   "logger": Any<Object>,
   "maxRedirects": undefined,
   "method": "POST",
+  "signal": undefined,
   "sslOverrides": Object {},
   "url": "https://abc.def/my-endpoint",
 }
