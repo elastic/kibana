@@ -75,7 +75,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  const PARENT_STREAM_NAME = 'logs.query-test';
+  const PARENT_STREAM_NAME = 'logs.otel.query-test';
 
   describe('Query Streams', function () {
     this.tags(['skipCloud', 'skipMKI', 'skipServerless']); // Whilst the views APIs aren't available
@@ -89,16 +89,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
       });
 
-      await forkStream(apiClient, 'logs', {
+      await forkStream(apiClient, 'logs.otel', {
         stream: { name: PARENT_STREAM_NAME },
         where: { field: 'attributes.test.type', eq: 'query-stream-test' },
       });
 
       await indexAndAssertTargetStream(esClient, PARENT_STREAM_NAME, {
         '@timestamp': new Date().toISOString(),
-        message: 'test document for query stream validation',
-        'log.level': 'info',
-        'test.type': 'query-stream-test',
+        message: JSON.stringify({
+          '@timestamp': new Date().toISOString(),
+          'log.level': 'info',
+          message: 'test document for query stream validation',
+          'test.type': 'query-stream-test',
+        }),
       });
 
       // Create ES|QL view for the wired stream (simulating upcoming feature)
@@ -201,7 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await putStream(
           apiClient,
           rootQueryStreamName,
-          createQueryStreamRequest('FROM logs | LIMIT 10', rootViewName),
+          createQueryStreamRequest('FROM logs.otel | LIMIT 10', rootViewName),
           200 // Should succeed (no parent view validation for root streams)
         );
 
