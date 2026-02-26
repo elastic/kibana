@@ -36,11 +36,12 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 
 ## Core workflow
 
-### 1) Decide UI vs API
+### 1) Decide the test type
 
-- UI tests: verify user flows and rendering.
-- API tests: validate server responses, data setup, or backend behaviors.
-- Data validation belongs in API tests, not UI tests.
+- **Component/unit test**: if the behavior can be tested in isolation (dropdowns, sorting, small components, hook logic, feature-flagged tabs), prefer RTL/Jest — skip Scout entirely.
+- **Scout API test**: if the suite validates server responses, data correctness, or backend behaviors, migrate to a Scout API test.
+- **Scout UI test**: if the suite validates user flows and rendering that require a real browser, migrate to a Scout UI test.
+- Data validation belongs in API tests (or unit tests), not UI tests.
 
 ### 2) Place files correctly
 
@@ -108,10 +109,9 @@ test('create and edit entity', async () => {
 - For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
 - If using synthtrace generators, add `@kbn/synthtrace-client` to the test tsconfig references.
 
-### 7) Prefer component/unit tests for isolated UI
+### 7) Extract component/unit tests where possible
 
-- If functionality can be tested in isolation (dropdown constraints, sorting, small UI components), add RTL/unit tests instead of e2e.
-- Consider unit tests for tab configuration, feature-flagged tabs, and hook logic.
+- While implementing, look for logic that can be pulled out of e2e into RTL/Jest (see step 1). Not every FTR `it` block needs a Scout equivalent.
 
 ### 8) Clean up FTR wiring
 
