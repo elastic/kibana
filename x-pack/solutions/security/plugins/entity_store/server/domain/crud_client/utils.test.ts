@@ -101,20 +101,20 @@ describe('crud_client utils', () => {
 
   it('assertOnlyNonForcedAttributesInReq: allows updates for allowAPIUpdate fields', () => {
     mockGetEntityDefinition.mockReturnValue(
-      createDefinition('generic', [createField('entity.attributes.privileged', true)])
+      createDefinition('generic', [createField('entity.attributes.watchlists', true)])
     );
 
-    const doc: Entity = {
+    const doc = {
       entity: {
         id: 'entity-allow-update',
         attributes: {
-          privileged: true,
+          watchlists: ['privileged_watchlist_id'],
         },
       },
-    };
+    } as Entity;
     const result = validateAndTransformDocForUpsert('generic', 'default', doc, false);
 
-    expect(result).toHaveProperty('entity.attributes.privileged', true);
+    expect(result).toHaveProperty('entity.attributes.watchlists', ['privileged_watchlist_id']);
   });
 
   it('getFieldDescriptions: throws for fields missing from definition', () => {
