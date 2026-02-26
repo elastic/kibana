@@ -105,11 +105,13 @@ export class SearchInferenceEndpointsPlugin
     docLinks.setDocLinks(core.docLinks.links);
 
     this.licenseSubscription = licensing.license$.subscribe((license) => {
-      const hasEnterpriseLicense =
-        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise');
+      const status: AppStatus =
+        license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise')
+          ? AppStatus.accessible
+          : AppStatus.inaccessible;
 
       this.appUpdater$.next(() => ({
-        status: hasEnterpriseLicense ? AppStatus.accessible : AppStatus.inaccessible,
+        status,
       }));
     });
 
