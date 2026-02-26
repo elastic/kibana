@@ -18,7 +18,7 @@ import {
 
 import * as i18n from '../../translations';
 
-import type { RiskScoreConfiguration } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
+import type { RiskScoreConfiguration } from './common';
 
 interface RiskScoreGeneralSectionProps {
   riskEngineSettings: RiskScoreConfiguration;

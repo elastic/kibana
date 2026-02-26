@@ -11,6 +11,8 @@ import { EngineStatus } from '.';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 
+import type { useDeleteEntityEngineMutation } from '../../hooks/use_entity_store';
+
 const mockUseEntityStore = jest.fn();
 jest.mock('../../hooks/use_entity_store', () => ({
   useEntityStoreStatus: () => mockUseEntityStore(),
@@ -25,6 +27,13 @@ jest.mock('../../../../../common/utils/download_blob', () => ({
   downloadBlob: () => mockDownloadBlob(),
 }));
 
+const mockDeleteEntityEngineMutation = {
+  isLoading: false,
+  isError: false,
+  mutate: jest.fn(),
+  mutateAsync: jest.fn(),
+} as unknown as ReturnType<typeof useDeleteEntityEngineMutation>;
+
 describe('EngineStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,7 +46,9 @@ describe('EngineStatus', () => {
       error: null,
     });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+      wrapper: TestProviders,
+    });
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
@@ -49,7 +60,9 @@ describe('EngineStatus', () => {
       error: new Error('Error'),
     });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+      wrapper: TestProviders,
+    });
 
     expect(screen.getByText('There was an error loading the engine status')).toBeInTheDocument();
   });
@@ -61,7 +74,9 @@ describe('EngineStatus', () => {
       error: null,
     });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+      wrapper: TestProviders,
+    });
 
     expect(screen.getByText('No engines found')).toBeInTheDocument();
   });
@@ -77,10 +92,13 @@ describe('EngineStatus', () => {
     };
     mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+      wrapper: TestProviders,
+    });
 
     expect(screen.getByText('User Store')).toBeInTheDocument();
     expect(screen.getByText('Download status')).toBeInTheDocument();
+    expect(screen.getByText('Clear Entity Data')).toBeInTheDocument();
   });
 
   it('calls downloadJson when download button is clicked', () => {
@@ -94,7 +112,9 @@ describe('EngineStatus', () => {
     };
     mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<EngineStatus />, { wrapper: TestProviders });
+    render(<EngineStatus deleteEntityEngineMutation={mockDeleteEntityEngineMutation} />, {
+      wrapper: TestProviders,
+    });
 
     const downloadButton = screen.getByText('Download status');
     fireEvent.click(downloadButton);

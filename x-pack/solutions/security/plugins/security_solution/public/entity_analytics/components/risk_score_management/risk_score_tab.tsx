@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
@@ -21,6 +22,7 @@ import { RiskScoreUsefulLinksSection } from './risk_score_useful_links_section';
 import { RiskScoreConfigurationSection } from './risk_score_configuration_section';
 import { RiskScoreSaveBar } from './risk_score_save_bar';
 import { RiskScoreGeneralSection } from './risk_score_general_section';
+import { RunRiskEngineButton } from './run_risk_engine_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import * as i18n from '../../translations';
 
@@ -53,6 +55,14 @@ export const RiskScoreTab: React.FC<RiskScoreTabProps> = ({
 
   return (
     <>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <RunRiskEngineButton riskEnginePrivileges={riskEnginePrivileges} />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         {!selectedRiskEngineSettings && (
           <EuiFlexItem>

@@ -158,6 +158,13 @@ describe('EntityAnalyticsToggle', () => {
     expect(mockToggle).toHaveBeenCalledTimes(1);
   });
 
+  it('disables the switch when status is error', () => {
+    mockUseToggleReturn.status = 'error';
+    render(<EntityAnalyticsToggle {...defaultProps} />, { wrapper: Wrapper });
+    const toggle = screen.getByTestId('entity-analytics-switch');
+    expect(toggle).toBeDisabled();
+  });
+
   it('disables the switch when privileges are missing', () => {
     const props = {
       ...defaultProps,

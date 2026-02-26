@@ -41,6 +41,7 @@ import { EnablementConfirmationModal } from './enablement_modal';
 import dashboardEnableImg from '../../../images/entity_store_dashboard.png';
 import { useEntityStoreTypes } from '../../../hooks/use_enabled_entity_types';
 import { useToggleEntityAnalytics } from '../../../hooks/use_toggle_entity_analytics';
+import { EntityAnalyticsErrorPanel } from '../../entity_analytics_toggle';
 import { useConfigurableRiskEngineSettings } from '../../risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 
 interface EnableEntityStorePanelProps {
@@ -70,7 +71,11 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     }
   });
 
-  const { toggle, isLoading: isToggling } = useToggleEntityAnalytics({
+  const {
+    toggle,
+    isLoading: isToggling,
+    errors: toggleErrors,
+  } = useToggleEntityAnalytics({
     selectedSettingsMatchSavedSettings,
     saveSelectedSettingsMutation: saveSettingsWrapperMutation,
   });
@@ -91,6 +96,8 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     storeEnablement.mutate({ entityTypes: uninstalledTypes });
   };
 
+  const hasToggleErrors = toggleErrors.riskEngine.length > 0 || toggleErrors.entityStore.length > 0;
+
   if (storeEnablement.error) {
     return (
       <EuiCallOut
@@ -106,6 +113,15 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
       >
         <p>{storeEnablement.error.body.message}</p>
       </EuiCallOut>
+    );
+  }
+
+  if (hasToggleErrors) {
+    return (
+      <EntityAnalyticsErrorPanel
+        riskEngineErrors={toggleErrors.riskEngine}
+        entityStoreErrors={toggleErrors.entityStore}
+      />
     );
   }
 

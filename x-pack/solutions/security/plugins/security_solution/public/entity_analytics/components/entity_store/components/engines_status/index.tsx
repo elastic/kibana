@@ -17,15 +17,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
 import { useEntityStoreTypes } from '../../../../hooks/use_enabled_entity_types';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
+import type { useDeleteEntityEngineMutation } from '../../hooks/use_entity_store';
 import { useEntityStoreStatus } from '../../hooks/use_entity_store';
 import { isEngineLoading } from './helpers';
 import { EngineStatusHeader } from './components/engine_status_header';
 import { EngineStatusHeaderAction } from './components/engine_status_header_action';
 import { EntityStoreErrorCallout } from '../entity_store_error_callout';
+import { ClearEntityDataButton } from '../clear_entity_data_button';
 
 const FILE_NAME = 'engines_status.json';
 
@@ -36,7 +39,11 @@ const errorMessage = i18n.translate(
   }
 );
 
-export const EngineStatus: React.FC = () => {
+interface EngineStatusProps {
+  deleteEntityEngineMutation: ReturnType<typeof useDeleteEntityEngineMutation>;
+}
+
+export const EngineStatus: React.FC<EngineStatusProps> = ({ deleteEntityEngineMutation }) => {
   const {
     data,
     isLoading: isStatusAPILoading,
@@ -74,7 +81,10 @@ export const EngineStatus: React.FC = () => {
     <EuiFlexGroup direction="column" gutterSize="none">
       {data?.engines?.length > 0 && (
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <ClearEntityDataButton deleteEntityEngineMutation={deleteEntityEngineMutation} />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="s" onClick={downloadJson}>
                 <FormattedMessage

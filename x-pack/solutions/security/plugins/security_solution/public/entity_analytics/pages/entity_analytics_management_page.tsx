@@ -24,10 +24,8 @@ import { ENTITY_ANALYTICS } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
-import { RunRiskEngineButton } from '../components/risk_score_management/run_risk_engine_button';
 import { RiskScoreTab } from '../components/risk_score_management/risk_score_tab';
 import { ImportEntitiesTab } from '../components/entity_store/components/import_entities_tab';
-import { ClearEntityDataButton } from '../components/entity_store/components/clear_entity_data_button';
 import { EntityStoreMissingPrivilegesCallout } from '../components/entity_store/components/entity_store_missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -43,9 +41,6 @@ enum TabId {
   Import = 'import',
   Status = 'status',
 }
-
-const canDeleteEntityEngine = (status?: string) =>
-  !['not_installed', 'installing'].includes(status || '');
 
 const isEntityStoreInstalled = (status?: string) => status && status !== 'not_installed';
 
@@ -96,18 +91,11 @@ export const EntityAnalyticsManagementPage = () => {
 
             <EuiFlexItem grow={false}>
               <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
-                <RunRiskEngineButton riskEnginePrivileges={riskEnginePrivileges} />
                 <EntityAnalyticsToggle
                   selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
                   saveSelectedSettingsMutation={saveSettingsWrapperMutation}
                   privileges={riskEnginePrivileges}
                 />
-                {!isEntityStoreFeatureFlagDisabled &&
-                  canDeleteEntityEngine(entityStoreStatus.data?.status) && (
-                    <ClearEntityDataButton
-                      deleteEntityEngineMutation={deleteEntityEngineMutation}
-                    />
-                  )}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -179,7 +167,9 @@ export const EntityAnalyticsManagementPage = () => {
         />
       )}
 
-      {selectedTabId === TabId.Status && <EngineStatus />}
+      {selectedTabId === TabId.Status && (
+        <EngineStatus deleteEntityEngineMutation={deleteEntityEngineMutation} />
+      )}
     </>
   );
 };

@@ -24,7 +24,7 @@ import { useEntityStoreTypes } from './use_enabled_entity_types';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
-import { useInvalidateRiskEngineSettingsQuery } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
+import { useInvalidateRiskEngineSettingsQuery } from '../components/risk_score_management/hooks/use_risk_engine_settings_query';
 import {
   useEntityAnalyticsStatus,
   type EntityAnalyticsStatus,
@@ -133,15 +133,16 @@ export const useToggleEntityAnalytics = ({
 
     setIsToggling(true);
     try {
-      const isCurrentlyEnabled =
-        riskEngineStatus === RiskEngineStatusEnum.ENABLED &&
-        (isEntityStoreFeatureFlagDisabled || entityStoreStatus === 'running');
+      const riskOn = riskEngineStatus === RiskEngineStatusEnum.ENABLED;
+      const storeOn = !isEntityStoreFeatureFlagDisabled && entityStoreStatus === 'running';
+      const isCurrentlyEnabled = riskOn || storeOn;
 
       if (isCurrentlyEnabled) {
-        const disablePromises: Promise<unknown>[] = [
-          disableRiskEngineMutation.mutateAsync(undefined),
-        ];
-        if (!isEntityStoreFeatureFlagDisabled && entityStoreStatus === 'running') {
+        const disablePromises: Promise<unknown>[] = [];
+        if (riskOn) {
+          disablePromises.push(disableRiskEngineMutation.mutateAsync(undefined));
+        }
+        if (storeOn) {
           disablePromises.push(stopEntityEngineMutation.mutateAsync());
         }
         await Promise.all(disablePromises);

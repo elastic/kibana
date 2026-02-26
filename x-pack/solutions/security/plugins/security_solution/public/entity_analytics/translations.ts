@@ -28,22 +28,22 @@ export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
   }
 );
 
-export const RISK_ENGINE_STATUS = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.status',
+export const ENTITY_ANALYTICS_STATUS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.status',
   {
     defaultMessage: 'Status',
   }
 );
 
-export const RISK_ENGINE_STATUS_ON = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.statusOn',
+export const ENTITY_ANALYTICS_STATUS_ON = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusOn',
   {
     defaultMessage: 'On',
   }
 );
 
-export const RISK_ENGINE_STATUS_OFF = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.statusOff',
+export const ENTITY_ANALYTICS_STATUS_OFF = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusOff',
   {
     defaultMessage: 'Off',
   }
@@ -217,10 +217,10 @@ export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
     values: { timeInMinutes },
   });
 
-export const RISK_ENGINE_STATUS_SWITCH_LABEL = i18n.translate(
-  'xpack.securitySolution.riskScore.riskEngineStatus',
+export const ENTITY_ANALYTICS_STATUS_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.statusSwitchLabel',
   {
-    defaultMessage: 'Risk engine status',
+    defaultMessage: 'Entity analytics',
   }
 );
 

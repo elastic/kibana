@@ -33,7 +33,7 @@ export const EntityAnalyticsHealth: React.FC<{ status: EntityAnalyticsStatus }> 
       color={isOn ? 'success' : 'subdued'}
       data-test-subj="entity-analytics-health"
     >
-      {isOn ? i18n.RISK_ENGINE_STATUS_ON : i18n.RISK_ENGINE_STATUS_OFF}
+      {isOn ? i18n.ENTITY_ANALYTICS_STATUS_ON : i18n.ENTITY_ANALYTICS_STATUS_OFF}
     </EuiHealth>
   );
 };
@@ -121,7 +121,7 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSwitch
-              label={i18n.RISK_ENGINE_STATUS_SWITCH_LABEL}
+              label={i18n.ENTITY_ANALYTICS_STATUS}
               data-test-subj="entity-analytics-switch"
               checked={isChecked}
               onChange={toggle}
