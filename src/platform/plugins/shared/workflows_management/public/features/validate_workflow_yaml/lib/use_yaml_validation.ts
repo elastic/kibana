@@ -18,6 +18,7 @@ import { validateCustomProperties } from './validate_custom_properties';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
+import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
@@ -129,6 +130,7 @@ export function useYamlValidation(
       if (workflowGraph && workflowDefinition) {
         const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
         validationResults.push(
+          ...validateTriggerConditions(workflowDefinition, yamlDocument),
           ...validateVariablesInternal(
             variableItems,
             workflowGraph,
