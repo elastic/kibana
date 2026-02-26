@@ -16,15 +16,38 @@ import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 
 /**
- * Estimate spec file weight by counting `it(` and `it.skip(` occurrences (proxy for test count / duration).
- * Used for load-balanced ordering so round-robin chunking gives each CI agent a similar mix of heavy/light specs.
+ * Approximate test counts for shared runner functions that dynamically generate `it()` calls.
+ * Files importing these runners show 0 inline `it(` but actually produce many tests at runtime.
+ */
+const DYNAMIC_RUNNER_WEIGHTS: Record<string, number> = {
+  getArtifactMockedDataTests: 8,
+  getArtifactTabsTests: 12,
+};
+
+/**
+ * Every spec incurs a fixed overhead for spinning up ES + Kibana (+ Fleet Server).
+ * This constant ensures the load balancer accounts for that ~4 min setup cost per spec.
+ */
+const SETUP_OVERHEAD_WEIGHT = 4;
+
+/**
+ * Estimate spec file weight for load-balanced ordering across parallel CI agents.
+ * Weight = fixed setup overhead + inline `it(` count + estimated dynamic tests from shared runners.
  */
 const getSpecFileWeight = (filePath: string): number => {
   try {
     const content = fs.readFileSync(filePath, { encoding: 'utf8' });
     const itMatches = content.match(/\bit\s*\(/g);
     const itSkipMatches = content.match(/\bit\.skip\s*\(/g);
-    return (itMatches?.length ?? 0) + (itSkipMatches?.length ?? 0);
+    let testCount = (itMatches?.length ?? 0) + (itSkipMatches?.length ?? 0);
+
+    for (const [runner, weight] of Object.entries(DYNAMIC_RUNNER_WEIGHTS)) {
+      if (content.includes(runner)) {
+        testCount += weight;
+      }
+    }
+
+    return SETUP_OVERHEAD_WEIGHT + testCount;
   } catch {
     return 0;
   }
