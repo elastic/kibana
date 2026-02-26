@@ -61,11 +61,6 @@ export interface CascadeRowCellNestedVirtualizationAnchorProps<G extends GroupNo
   extends Pick<CascadeVirtualizerProps<G>, 'getScrollElement'> {
   getScrollOffset: () => number;
   getScrollMargin: () => number;
-  /**
-   * Function used to signal to the parent virtualizer that this row's size changes should not be propagated to it.
-   * This is only required if the nested virtualization implementation used here measures its rows.
-   */
-  preventSizeChangePropagation: () => () => void;
 }
 
 export interface CascadeRowCellRendererProps<G extends GroupNode, L extends LeafNode>
