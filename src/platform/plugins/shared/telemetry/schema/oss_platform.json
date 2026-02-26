@@ -10601,7 +10601,7 @@
         "securitySolution:alertCloseReasons": {
           "type": "keyword",
           "_meta": {
-            "description": "Additional custom close reasons for security alerts"
+            "description": "Default value of the setting was changed."
           }
         },
         "securitySolution:newsFeedUrl": {
