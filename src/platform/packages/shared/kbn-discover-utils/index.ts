@@ -45,6 +45,7 @@ export {
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getAvailableResourceFields,
+  getAvailableTraceFields,
   getLogLevelFieldWithFallback,
   getLogEventTypeFieldWithFallback,
   getLogExceptionTypeFieldWithFallback,
@@ -71,6 +72,7 @@ export {
   getSortForSearchSource,
   getEsQuerySort,
   getTieBreakerFieldName,
+  escapeAndPreserveHighlightTags,
   severityOrder,
 } from './src';
 

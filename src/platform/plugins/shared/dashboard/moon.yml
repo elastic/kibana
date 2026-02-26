@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/core-chrome-layout-utils'
   - '@kbn/cps'
   - '@kbn/scout'
+  - '@kbn/test'
 tags:
   - plugin
   - prod

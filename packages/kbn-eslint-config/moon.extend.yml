@@ -6,7 +6,7 @@ tasks:
     command: node
     args:
      - $workspaceRoot/scripts/extract_version_dependencies.js
-     - $projectRoot/version_dependencies.txt
+     - packages/kbn-eslint-config/version_dependencies.txt
      - --collect
      - eslint
     env:
