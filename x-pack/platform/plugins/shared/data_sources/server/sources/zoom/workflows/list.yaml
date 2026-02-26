@@ -71,3 +71,25 @@ steps:
       meetingId: "${{inputs.meeting_id}}"
       pageSize: ${{inputs.page_size}}
       nextPageToken: "${{inputs.next_page_token}}"
+  - name: set-list-result
+    type: if
+    condition: "${{ inputs.list_action == 'listUpcomingMeetings' }}"
+    steps:
+      - name: set-meetings-output
+        type: data.set
+        with:
+          result: "${{ steps.list-upcoming-meetings.output }}"
+    else:
+      - name: check-recordings-or-participants
+        type: if
+        condition: "${{ inputs.list_action == 'listUserRecordings' }}"
+        steps:
+          - name: set-recordings-output
+            type: data.set
+            with:
+              result: "${{ steps.list-user-recordings.output }}"
+        else:
+          - name: set-participants-output
+            type: data.set
+            with:
+              result: "${{ steps.list-meeting-participants.output }}"
