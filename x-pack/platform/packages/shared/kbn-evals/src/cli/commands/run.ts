@@ -102,6 +102,10 @@ export const runSuiteCmd: Command<void> = {
       EVALUATION_CONNECTOR_ID: evaluationConnectorId,
     };
 
+    if (suite) {
+      envOverrides.EVAL_SUITE_ID = suite.id;
+    }
+
     if (executor === 'phoenix') {
       envOverrides.KBN_EVALS_EXECUTOR = 'phoenix';
     }
