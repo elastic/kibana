@@ -203,6 +203,12 @@ export const retrieveIntegrationsConfigAware = (integrationsPaths: string[]): st
   return agents[chunkIndex].paths;
 };
 
+/**
+ * Dynamic runner function names that generate `it()` calls at runtime.
+ * Used by both weight estimation and skip detection.
+ */
+const DYNAMIC_RUNNER_NAMES = new Set(Object.keys(DYNAMIC_RUNNER_WEIGHTS));
+
 export const isSkipped = (filePath: string): boolean => {
   const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
 
@@ -218,7 +224,70 @@ export const isSkipped = (filePath: string): boolean => {
   const callExpression = expressionStatement?.expression;
 
   // @ts-expect-error
-  return callExpression?.callee?.property?.name === 'skip';
+  if (callExpression?.callee?.property?.name === 'skip') {
+    return true;
+  }
+
+  return hasAllTestsSkipped(ast);
+};
+
+/**
+ * Walk the AST to check if every test source is either:
+ * - an `it.skip(...)` call,
+ * - an `it()` / dynamic runner call inside a `describe.skip(...)` block, or
+ * - absent entirely (no `it()` or dynamic runner calls at all).
+ * Returns true when the file would produce zero running tests.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const hasAllTestsSkipped = (ast: any): boolean => {
+  let totalRunnable = 0;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const walk = (node: any, insideSkip: boolean): void => {
+    if (!node || typeof node !== 'object') return;
+
+    if (node.type === 'CallExpression') {
+      const callee = node.callee;
+
+      const isDescribeSkip =
+        callee?.type === 'MemberExpression' &&
+        callee?.object?.name === 'describe' &&
+        callee?.property?.name === 'skip';
+
+      const isItCall = callee?.name === 'it';
+      const isItSkip =
+        callee?.type === 'MemberExpression' &&
+        callee?.object?.name === 'it' &&
+        callee?.property?.name === 'skip';
+      const isDynamicRunner = callee?.name && DYNAMIC_RUNNER_NAMES.has(callee.name);
+
+      if ((isItCall || isDynamicRunner) && !insideSkip) {
+        totalRunnable++;
+      }
+
+      if (isItSkip) {
+        // it.skip is always skipped regardless of parent context
+      } else if (isDescribeSkip) {
+        for (const arg of node.arguments ?? []) {
+          walk(arg, true);
+        }
+        return;
+      }
+    }
+
+    for (const key of Object.keys(node)) {
+      if (key === 'type' || key === 'start' || key === 'end' || key === 'loc') continue;
+      const child = node[key];
+      if (Array.isArray(child)) {
+        for (const item of child) walk(item, insideSkip);
+      } else if (child && typeof child === 'object' && child.type) {
+        walk(child, insideSkip);
+      }
+    }
+  };
+
+  walk(ast, false);
+  return totalRunnable === 0;
 };
 
 export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeBlockFtrConfig => {
