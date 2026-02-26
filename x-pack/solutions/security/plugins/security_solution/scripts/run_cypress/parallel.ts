@@ -337,6 +337,10 @@ ${JSON.stringify(
               let fleetServer: StartedFleetServer | undefined;
               let shutdownEs;
 
+              const esFromEnv = process.env.CYPRESS_ES_FROM;
+              const configEsFrom = config.get('esTestCluster.from');
+              const esFrom = esFromEnv || (configEsFrom === 'serverless' ? 'serverless' : 'docker');
+
               try {
                 shutdownEs = await pRetry(
                   async () =>
@@ -344,7 +348,7 @@ ${JSON.stringify(
                       config,
                       log,
                       name: `ftr-${esPort}`,
-                      esFrom: config.get('esTestCluster')?.from || 'snapshot',
+                      esFrom,
                       onEarlyExit,
                     }),
                   { retries: 2, forever: false }

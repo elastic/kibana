@@ -10,7 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import React from 'react';
-import { commonCustomTriggerDefinition } from '../../common/triggers/custom_trigger';
+import {
+  CUSTOM_TRIGGER_ID,
+  commonCustomTriggerDefinition,
+} from '../../common/triggers/custom_trigger';
 
 export const customTriggerPublicDefinition: PublicTriggerDefinition = {
   ...commonCustomTriggerDefinition,
@@ -24,4 +27,45 @@ export const customTriggerPublicDefinition: PublicTriggerDefinition = {
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/star').then(({ icon }) => ({ default: icon }))
   ),
+  documentation: {
+    details: i18n.translate('workflowsExtensionsExample.customTrigger.documentation.details', {
+      defaultMessage:
+        'Emitted when a custom event occurs. Used by the workflows extensions example plugin. In the `with` block, add a condition (KQL) to filter when this workflow runs using event properties such as `event.message` and `event.source`.',
+    }),
+    examples: [
+      i18n.translate('workflowsExtensionsExample.customTrigger.documentation.exampleMatchMessage', {
+        defaultMessage: `## Match any message
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    with:
+      condition: 'event.message: *'
+\`\`\``,
+        values: { triggerId: CUSTOM_TRIGGER_ID },
+      }),
+      i18n.translate('workflowsExtensionsExample.customTrigger.documentation.exampleMatchSource', {
+        defaultMessage: `## Match events from a specific source
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    with:
+      condition: 'event.source: "api"'
+\`\`\``,
+        values: { triggerId: CUSTOM_TRIGGER_ID },
+      }),
+      i18n.translate('workflowsExtensionsExample.customTrigger.documentation.exampleMatchError', {
+        defaultMessage: `## Match message containing "error"
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    with:
+      condition: 'event.message: *error*'
+\`\`\``,
+        values: { triggerId: CUSTOM_TRIGGER_ID },
+      }),
+    ],
+  },
+  snippets: {
+    condition: 'event.source:ui and event.message:*important*',
+  },
 };

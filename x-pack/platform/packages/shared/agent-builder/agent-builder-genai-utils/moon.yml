@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/std'
   - '@kbn/esql-language'
+  - '@kbn/lens-embeddable-utils'
   - '@kbn/utility-types'
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
