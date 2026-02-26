@@ -135,15 +135,21 @@ const extractRetentionInfo = (
  * Extract standalone indices (not part of data streams)
  * Includes all standalone indices regardless of retention configuration
  * Standalone indices can only have ILM retention, not DSL
+ *
+ * Note: We iterate over standaloneIndexNames (from resolveIndex) rather than
+ * indexSettings because the settings query uses filter_path which only returns
+ * indices that HAVE lifecycle.name set. This ensures indices without ILM
+ * policies are still included in the results.
  */
 const extractStandaloneIndices = (
+  standaloneIndexNames: string[],
   indexSettings: IndicesGetSettingsResponse,
   ilmPolicies: IlmGetLifecycleResponse
 ): RetentionInfo[] => {
-  const results: RetentionInfo[] = [];
-
-  Object.entries(indexSettings).forEach(([indexName, settings]) => {
-    const ilmPolicyName = settings.settings?.index?.lifecycle?.name ?? null;
+  return standaloneIndexNames.map((indexName) => {
+    // Settings may be undefined if index has no ILM policy (due to filter_path)
+    const settings = indexSettings[indexName];
+    const ilmPolicyName = settings?.settings?.index?.lifecycle?.name ?? null;
 
     let ilmRetention: string | null = null;
     if (ilmPolicyName) {
@@ -152,17 +158,15 @@ const extractStandaloneIndices = (
     }
 
     const retentionDays = parseRetentionToDays(ilmRetention);
-    results.push({
+    return {
       indexName,
       retentionType: ilmPolicyName ? 'ilm' : null,
       retentionPeriod: ilmRetention,
       retentionDays,
       policyName: ilmPolicyName,
       status: getRetentionStatus(retentionDays),
-    });
+    };
   });
-
-  return results;
 };
 
 export const getReadinessRetentionRoute = (
@@ -207,6 +211,8 @@ export const getReadinessRetentionRoute = (
           const standaloneIndexNames = resolveIndexResponse.indices.map((i) => i.name);
 
           // 4. Get settings for standalone indices only
+          // Note: filter_path only returns indices WITH lifecycle.name set,
+          // but we iterate over standaloneIndexNames to include all indices
           let indexSettingsResponse: IndicesGetSettingsResponse = {};
           if (standaloneIndexNames.length > 0) {
             indexSettingsResponse = await esClient.indices.getSettings({
@@ -237,6 +243,7 @@ export const getReadinessRetentionRoute = (
 
           // 6. Process standalone indices (not part of data streams)
           const standaloneItems = extractStandaloneIndices(
+            standaloneIndexNames,
             indexSettingsResponse,
             ilmPoliciesResponse
           );
