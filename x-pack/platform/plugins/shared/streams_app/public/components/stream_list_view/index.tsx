@@ -196,9 +196,12 @@ export function StreamListView() {
                     size="s"
                     disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
                   >
-                    {i18n.translate('xpack.streams.streamsListView.createClassicStreamButtonLabel', {
-                      defaultMessage: 'Create classic stream',
-                    })}
+                    {i18n.translate(
+                      'xpack.streams.streamsListView.createClassicStreamButtonLabel',
+                      {
+                        defaultMessage: 'Create classic stream',
+                      }
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
                 {queryStreams?.enabled && (
