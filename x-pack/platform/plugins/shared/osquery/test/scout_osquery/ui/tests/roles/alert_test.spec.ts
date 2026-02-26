@@ -83,6 +83,10 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     });
 
     await pageObjects.liveQuery.clickSubmit();
-    await expect(page.getByText('Forbidden')).toBeVisible({ timeout: 30_000 });
+    await expect(page.testSubj.locator('euiToastHeader__title').getByText('Forbidden')).toBeVisible(
+      {
+        timeout: 30_000,
+      }
+    );
   });
 });
