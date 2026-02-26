@@ -37,7 +37,7 @@ import { SearchEmbeddableGridComponent } from './components/search_embeddable_gr
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import type { SearchEmbeddableState } from '../../common/embeddable/types';
+import type { DiscoverSessionEmbeddableState } from '../../server';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { BaseAppWrapper } from '../context_awareness';
@@ -57,7 +57,7 @@ export const getSearchEmbeddableFactory = ({
   const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
 
   const savedSearchEmbeddableFactory: EmbeddableFactory<
-    SearchEmbeddableState,
+    DiscoverSessionEmbeddableState,
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
@@ -100,9 +100,9 @@ export const getSearchEmbeddableFactory = ({
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       /** Build API */
-      const titleManager = initializeTitleManager(initialState);
-      const timeRangeManager = initializeTimeRangeManager(initialState);
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const titleManager = initializeTitleManager(runtimeState);
+      const timeRangeManager = initializeTimeRangeManager(runtimeState);
+      const drilldownsManager = await initializeDrilldownsManager(uuid, runtimeState);
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,
       });
@@ -118,7 +118,7 @@ export const getSearchEmbeddableFactory = ({
           savedObjectId,
         });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
+      const unsavedChangesApi = initializeUnsavedChanges<DiscoverSessionEmbeddableState>({
         uuid,
         parentApi,
         serializeState: () => serialize(savedObjectId$.getValue()),

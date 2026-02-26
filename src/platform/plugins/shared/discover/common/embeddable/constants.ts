@@ -9,6 +9,9 @@
 
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 
+/** Reference name used for the saved search saved object when the embeddable is by-reference */
+export const SAVED_SEARCH_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
+
 /** This constant refers to the parts of the saved search state that can be edited from a dashboard */
 export const EDITABLE_SAVED_SEARCH_KEYS = [
   'sort',

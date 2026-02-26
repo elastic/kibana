@@ -11,9 +11,14 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { DataGridDensity } from '@kbn/discover-utils';
 import { aggregateQuerySchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  type SerializedTitles,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
+import type { SerializedTimeRange } from '@kbn/presentation-publishing';
 
 const columnSchema = schema.object({
   name: schema.string({
@@ -102,11 +107,23 @@ export const dataViewSpecSchema = schema.object(
            * The type of the runtime field (e.g., 'keyword', 'long', 'date').
            * Example: 'keyword'
            */
-          type: schema.string({
-            meta: {
-              description: 'The type of the runtime field (e.g., "keyword", "long", "date").',
-            },
-          }),
+          type: schema.oneOf(
+            [
+              schema.literal('keyword'),
+              schema.literal('long'),
+              schema.literal('double'),
+              schema.literal('date'),
+              schema.literal('ip'),
+              schema.literal('boolean'),
+              schema.literal('geo_point'),
+              schema.literal('composite'),
+            ],
+            {
+              meta: {
+                description: 'The type of the runtime field (e.g., "keyword", "long", "date").',
+              },
+            }
+          ),
           /**
            * The name of the runtime field.
            * Example: 'my_runtime_field'
@@ -242,6 +259,7 @@ const dataTableSchema = schema.object(
         schema.literal('auto'),
       ],
       {
+        defaultValue: 3,
         meta: {
           description: 'Header row height. Use a number (1–5) or "auto" to size based on content.',
         },
@@ -330,12 +348,20 @@ export const discoverSessionEmbeddableSchema = schema.oneOf([
   discoverSessionByReferenceEmbeddableSchema,
 ]);
 
+export type DiscoverSessionDataViewReference = TypeOf<typeof dataViewReferenceSchema>;
+export type DiscoverSessionDataViewSpec = TypeOf<typeof dataViewSpecSchema>;
+export type DiscoverSessionDataset = TypeOf<typeof dataViewSchema>;
+export type DiscoverSessionClassicTab = TypeOf<typeof classicTabSchema>;
+export type DiscoverSessionEsqlTab = TypeOf<typeof esqlTabSchema>;
+export type DiscoverSessionTab = DiscoverSessionClassicTab | DiscoverSessionEsqlTab;
+
 export type DiscoverSessionEmbeddableByValueState = TypeOf<
   typeof discoverSessionByValueEmbeddableSchema
 >;
 export type DiscoverSessionEmbeddableByReferenceState = TypeOf<
   typeof discoverSessionByReferenceEmbeddableSchema
 >;
-export type DiscoverSessionEmbeddableState =
-  | DiscoverSessionEmbeddableByValueState
-  | DiscoverSessionEmbeddableByReferenceState;
+export type DiscoverSessionEmbeddableState = SerializedDrilldowns &
+  SerializedTitles &
+  SerializedTimeRange &
+  (DiscoverSessionEmbeddableByValueState | DiscoverSessionEmbeddableByReferenceState);

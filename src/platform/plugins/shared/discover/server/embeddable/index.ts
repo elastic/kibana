@@ -8,3 +8,14 @@
  */
 
 export { createSearchEmbeddableFactory } from './search_embeddable_factory';
+export type {
+  DiscoverSessionDataViewReference,
+  DiscoverSessionDataViewSpec,
+  DiscoverSessionDataset,
+  DiscoverSessionClassicTab,
+  DiscoverSessionEsqlTab,
+  DiscoverSessionTab,
+  DiscoverSessionEmbeddableByValueState,
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableState,
+} from './schema';

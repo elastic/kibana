@@ -40,6 +40,17 @@ export interface DiscoverServerPluginStart {
 }
 
 export { config } from './config';
+export type {
+  DiscoverSessionDataViewReference,
+  DiscoverSessionDataViewSpec,
+  DiscoverSessionDataset,
+  DiscoverSessionClassicTab,
+  DiscoverSessionEsqlTab,
+  DiscoverSessionTab,
+  DiscoverSessionEmbeddableByValueState,
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableState,
+} from './embeddable';
 
 export const plugin = async (context: PluginInitializerContext) => {
   const { DiscoverServerPlugin } = await import('./plugin');
