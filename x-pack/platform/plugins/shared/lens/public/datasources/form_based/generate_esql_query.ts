@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql } from '@kbn/esql-language';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
@@ -122,12 +122,10 @@ export function generateEsqlQuery(
   // Build query parts as strings, then combine with esql() for proper parameterization
   // ES|QL composer docs: src/platform/packages/shared/kbn-esql-language/src/composer/README.md
   const queryParts: string[] = [`FROM ${indexPattern.title}`];
-  const queryParams: Record<string, string | number> = {};
 
   if (indexPattern.timeFieldName) {
-    // This way we later replace timeFieldName but keep _tstart and _tend as parameters
-    queryParts.push(`WHERE ??timeFieldName >= ?_tstart AND ??timeFieldName <= ?_tend`);
-    queryParams.timeFieldName = indexPattern.timeFieldName;
+    const timeField = sanitazeESQLInput(indexPattern.timeFieldName);
+    queryParts.push(`WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`);
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
@@ -186,14 +184,10 @@ export function generateEsqlQuery(
     staticValueEvals.push(`${esAggsId} = ${value}`);
   });
 
-  // Collect all params from metrics and buckets
-  const allParamObjects: Array<Record<string, string | number>> = [];
-
   // Process metrics (excluding static_value which is handled above)
   const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
-    // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'formula') {
       return getEsqlQueryFailedResult('formula_not_supported');
     }
@@ -202,7 +196,6 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
     const wrapInTimeFilter =
       def.canReduceTimeRange &&
@@ -214,12 +207,8 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('reduced_time_range_not_supported');
     }
 
-    const esAggsId = `bucket_${index}_${aggId}`;
-
     const format =
-      // 1. User-configured format in Lens (highest priority)
       (isColumnFormatted(col) ? col.params?.format : undefined) ??
-      // 2. Operation-specific format
       operationDefinitionMap[col.operationType].getSerializedFormat?.(
         col,
         col,
@@ -227,22 +216,11 @@ export function generateEsqlQuery(
         uiSettings,
         dateRange
       ) ??
-      // 3. Field's default format from data view
       ('sourceField' in col
         ? col.sourceField === '___records___'
           ? { id: 'number' }
           : undefined
         : undefined);
-
-    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
-      col,
-      colId,
-      format,
-      layer,
-      indexPattern,
-      uiSettings,
-      dateRange,
-    });
 
     const rawResult = def.toESQL(
       {
@@ -265,11 +243,7 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    if (rawResult.params) {
-      allParamObjects.push(rawResult.params);
-    }
-
-    let metricESQL = `${esAggsId} = ${rawResult.template}`;
+    let metricESQL = rawResult.template;
 
     if (wrapInFilter) {
       if (col.filter?.language === 'kuery') {
@@ -280,6 +254,18 @@ export function generateEsqlQuery(
         return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
     }
+
+    const esAggsId = metricESQL;
+
+    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
+      col,
+      colId,
+      format,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+    });
 
     return { esql: metricESQL } satisfies EsqlConversionResult;
   });
@@ -297,10 +283,10 @@ export function generateEsqlQuery(
   }
 
   // Process buckets
+  const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
 
-    // Check for specific unsupported operations before general toESQL check
     if (col.operationType === 'terms') {
       return getEsqlQueryFailedResult('terms_not_supported');
     }
@@ -309,15 +295,12 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    const aggId = String(index);
     const wrapInFilter = Boolean(def.filterable && col.filter?.query);
     const wrapInTimeFilter =
       def.canReduceTimeRange &&
       !hasDateHistogram &&
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
-
-    let esAggsId = `col_${index}_${aggId}`;
 
     let interval: number | undefined;
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
@@ -340,7 +323,6 @@ export function generateEsqlQuery(
             return i;
         }
       };
-      esAggsId = dateHistogramColumn.sourceField;
       const kibanaInterval =
         dateHistogramColumn.params?.interval === 'auto'
           ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
@@ -349,37 +331,10 @@ export function generateEsqlQuery(
       interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
     }
 
-    const format =
-      // 1. User-configured format in Lens (highest priority)
-      (isColumnFormatted(col) ? col.params?.format : undefined) ??
-      // 2. Operation-specific format
-      operationDefinitionMap[col.operationType].getSerializedFormat?.(
-        col,
-        col,
-        indexPattern,
-        uiSettings,
-        dateRange
-      ) ??
-      // 3. Field's default format from data view (buckets don't need fallback)
-      undefined;
-
-    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
-      col,
-      colId,
-      format,
-      interval,
-      layer,
-      indexPattern,
-      uiSettings,
-      dateRange,
-      includeSourceField: true,
-    });
-
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const column = col;
       if (
         column.params?.dropPartials &&
-        // set to false when detached from time picker
         (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
           !column.params?.ignoreTimeRange)
       ) {
@@ -412,11 +367,33 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    if (rawResult.params) {
-      allParamObjects.push(rawResult.params);
-    }
+    const esAggsId = rawResult.template;
+    resolvedBucketExprs.set(index, esAggsId);
 
-    return { esql: `${esAggsId} = ${rawResult.template}` };
+    const format =
+      (isColumnFormatted(col) ? col.params?.format : undefined) ??
+      operationDefinitionMap[col.operationType].getSerializedFormat?.(
+        col,
+        col,
+        indexPattern,
+        uiSettings,
+        dateRange
+      ) ??
+      undefined;
+
+    esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
+      col,
+      colId,
+      format,
+      interval,
+      layer,
+      indexPattern,
+      uiSettings,
+      dateRange,
+      includeSourceField: true,
+    });
+
+    return { esql: rawResult.template };
   });
 
   // Check for bucket conversion errors with type guard
@@ -435,24 +412,17 @@ export function generateEsqlQuery(
   const validMetrics = metricsResult.map((m) => m.esql);
   const validBuckets = bucketsResult.map((b) => b.esql);
 
-  // Merge all params from metrics and buckets
-  const allParams = Object.assign({}, queryParams, ...allParamObjects);
-
   if (validBuckets.length > 0) {
     if (validMetrics.length > 0) {
       const statsBody = `${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`;
       queryParts.push(`STATS ${statsBody}`);
     }
 
-    // Build sort fields, excluding date fields (date_histogram columns)
-    // The first .map() attaches the original index so we can reference
-    // the correct esAggsId in the final string.
     const sortFields = bucketEsAggsEntries
       .map(([, col], index) => ({ col, index }))
       .filter(({ col }) => col.dataType !== 'date')
-      // Applying the index twice to match the correct esAggsId
-      // TODO: revisit this once we want to improve column names
-      .map(({ index }) => `col_${index}_${index} ASC`);
+      .filter(({ index }) => resolvedBucketExprs.has(index))
+      .map(({ index }) => `\`${resolvedBucketExprs.get(index)}\` ASC`);
 
     // Only add SORT clause if there are non-date fields to sort by
     if (sortFields.length > 0) {
@@ -472,15 +442,9 @@ export function generateEsqlQuery(
 
   try {
     const queryString = queryParts.join(' | ');
-    const query =
-      Object.keys(allParams).length > 0 ? esql(queryString, allParams) : esql(queryString);
-
-    // Inline parameters to produce final query string with resolved values
-    query.inlineParams();
-
     return {
       success: true,
-      esql: query.print(),
+      esql: queryString,
       partialRows,
       esAggsIdMap,
     };

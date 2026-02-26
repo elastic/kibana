@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
-import { snakeCase } from 'lodash';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -241,13 +241,8 @@ export const dateHistogramOperation: OperationDefinition<
           )
         : mapToEsqlInterval(dateRange, interval);
 
-    // Use columnId to make param name unique
-    const fieldKey = `field_${snakeCase(columnId)}`;
-    // The interval is a safe string like '30 minutes' or '1h' - it doesn't need parameter escaping
-    // and should be directly in the template (not as a string parameter which would be quoted)
     return {
-      template: `BUCKET(??${fieldKey}, ${resolvedInterval})`,
-      params: { [fieldKey]: column.sourceField },
+      template: `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${resolvedInterval})`,
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
