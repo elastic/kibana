@@ -22,6 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Reference } from '@kbn/content-management-utils';
 import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
@@ -108,29 +109,35 @@ export function LensEditConfigurationFlyout({
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
-    const previousAttrs = previousAttributes.current;
+    const datasource = datasourceMap[datasourceId];
+
     const rawState = datasourceStates[datasourceId].state;
-    const currentPersistable = rawState
-      ? datasourceMap[datasourceId].getPersistableState(rawState)
-      : null;
+    const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
+
+    const previousAttrs = previousAttributes.current;
     const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
     // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
     // formBased attributes are already persistable and getPersistableState expects private state.
-    const previousPersistable =
-      previousDsState && datasourceId === 'textBased'
-        ? datasourceMap[datasourceId].getPersistableState(previousDsState)
-        : previousDsState
-        ? { state: previousDsState, references: previousAttrs.references }
-        : null;
+    let previousPersistable: { state: unknown; references: Reference[] } | null = null;
+    if (previousDsState) {
+      previousPersistable =
+        datasourceId === 'textBased'
+          ? datasource.getPersistableState(previousDsState)
+          : {
+              state: previousDsState,
+              references: previousAttrs.references,
+            };
+    }
+
     const datasourceStatesAreSame =
-      currentPersistable && previousPersistable
-        ? datasourceMap[datasourceId].isEqual(
-            previousPersistable.state,
-            previousPersistable.references,
-            currentPersistable.state,
-            currentPersistable.references
-          )
-        : false;
+      currentPersistable != null &&
+      previousPersistable != null &&
+      datasource.isEqual(
+        previousPersistable.state,
+        previousPersistable.references,
+        currentPersistable.state,
+        currentPersistable.references
+      );
 
     if (!datasourceStatesAreSame) return true;
 

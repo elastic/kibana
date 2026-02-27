@@ -150,14 +150,11 @@ const startDependencies = {
 const datasourceMap = mockDatasourceMap();
 const visualizationMap = mockVisualizationMap();
 
-/** Test overrides: may include datasourceMap for Provider (not on EditConfigPanelProps). */
-type LensConfigFlyoutTestOverrides = Partial<EditConfigPanelProps> & {
-  datasourceMap?: ReturnType<typeof mockDatasourceMap>;
-};
-
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
-    propsOverrides: LensConfigFlyoutTestOverrides = {},
+    propsOverrides: Partial<EditConfigPanelProps> & {
+      datasourceMap?: ReturnType<typeof mockDatasourceMap>;
+    } = {},
     query?: Query | AggregateQuery,
     stateOverrides: { hideTextBasedEditor?: boolean } & Partial<{
       datasourceStates: Record<string, { isLoading: boolean; state: unknown }>;
@@ -368,7 +365,8 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       attributes: lensAttributes,
     };
-    // Set formBased to match the preloaded Redux state so no changes are detected. For formBased we compare current (from getPersistableState(Redux state)) with previous (attributes state + refs) as-is.
+    // Set formBased to match the preloaded Redux state so no changes are detected.
+    // For formBased we compare current (from getPersistableState(Redux state)) with previous (attributes state + refs) as-is.
     newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
     expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
@@ -396,8 +394,7 @@ describe('LensEditConfigurationFlyout', () => {
     expect(formBasedWithSpy.getPersistableState).toHaveBeenCalledWith(mockFormBasedState);
   });
 
-  it('Apply and close is disabled for textBased when runtime state differs only by private fields (e.g. indexPatternRefs)', async () => {
-    // Verifies textBased normalizes both current and previous to persistable so private fields (e.g. indexPatternRefs) do not mark the panel dirty.
+  it(`"Apply and close" is disabled for textBased when runtime state differs only by private fields (e.g. indexPatternRefs)`, async () => {
     const textBasedPersistableState = {
       layers: {
         layerA: {
@@ -464,7 +461,7 @@ describe('LensEditConfigurationFlyout', () => {
   it('save button should be disabled if expression cannot be generated', async () => {
     const updateByRefInputSpy = jest.fn();
     const saveByRefSpy = jest.fn();
-    const newProps: LensConfigFlyoutTestOverrides = {
+    const newProps = {
       closeFlyout: jest.fn(),
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',

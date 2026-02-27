@@ -96,7 +96,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
       const panel = dashboard.getPanelByEmbeddableId(testData.INLINE_METRIC_PANEL_ID);
       await expect(panel).toContainText('Converted metric');
 
-      await lens.clickOnSecondaryFlyoutBackButton();
+      await lens.getSecondaryFlyoutBackButton().click();
       await lens.getApplyFlyoutButton().click();
 
       // The button is disabled after clicking on "Apply and close" button
