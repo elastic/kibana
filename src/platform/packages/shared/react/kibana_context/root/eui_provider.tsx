@@ -60,17 +60,30 @@ const sharedCacheOptions = {
   speedy: true, // Enable speedy mode for better performance
 };
 
+const EMOTION_DEBUG_PREFIX = '[Kibana Emotion]';
+
 /**
  * Resolves the Emotion cache container: prefers stable div by id (new template), falls back to meta (legacy).
  * Stable containers avoid insertBefore crashes when multiple flyouts unmount and the sheet holds stale tag refs.
  * Returns undefined when run outside the browser (e.g. SSR).
  */
 function getEmotionContainer(containerId: string, metaNameFallback: string): HTMLElement | undefined {
-  if (typeof document === 'undefined') return undefined;
+  if (typeof document === 'undefined') {
+    console.debug(EMOTION_DEBUG_PREFIX, 'getEmotionContainer: no document (SSR)', { containerId, metaNameFallback });
+    return undefined;
+  }
   const byId = document.getElementById(containerId);
-  if (byId) return byId;
+  if (byId) {
+    console.debug(EMOTION_DEBUG_PREFIX, 'getEmotionContainer: using stable div by id', { containerId, metaNameFallback });
+    return byId;
+  }
   const byMeta = document.querySelector<HTMLElement>(`meta[name="${metaNameFallback}"]`);
-  return byMeta ?? document.head;
+  if (byMeta) {
+    console.debug(EMOTION_DEBUG_PREFIX, 'getEmotionContainer: fallback to meta', { containerId, metaNameFallback });
+    return byMeta;
+  }
+  console.debug(EMOTION_DEBUG_PREFIX, 'getEmotionContainer: fallback to document.head', { containerId, metaNameFallback });
+  return document.head;
 }
 
 /**
@@ -80,6 +93,7 @@ function getEmotionContainer(containerId: string, metaNameFallback: string): HTM
  * is to be inserted is not a child of this node." We fall back to appending and clear stale tag refs.
  */
 function wrapSheetInsertTag(
+  sheetKey: string,
   sheet: {
     container: Node;
     tags: HTMLStyleElement[];
@@ -103,12 +117,22 @@ function wrapSheetInsertTag(
     }
     const validBefore = before === null || before.parentNode === container;
     if (!validBefore) {
+      const prevCount = sheet.tags.length;
       sheet.tags = sheet.tags.filter((t) => t.parentNode === container);
+      const afterCount = sheet.tags.length;
+      console.debug(EMOTION_DEBUG_PREFIX, 'insertTag: invalid before, cleared stale tags', {
+        sheetKey,
+        prevTagCount: prevCount,
+        afterTagCount: afterCount,
+        beforeParentNode: before?.parentNode?.nodeName,
+        containerNodeName: container.nodeName,
+      });
       before = sheet.tags.length > 0 ? sheet.tags[sheet.tags.length - 1].nextSibling : null;
     }
     (container as HTMLElement).insertBefore(tag, before);
     sheet.tags.push(tag);
   };
+  console.debug(EMOTION_DEBUG_PREFIX, 'wrapSheetInsertTag: wrapped sheet', { sheetKey });
 }
 
 const emotionCache = createCache({
@@ -130,9 +154,14 @@ const utilitiesCache = createCache({
 });
 
 if (typeof document !== 'undefined') {
-  wrapSheetInsertTag(emotionCache.sheet as Parameters<typeof wrapSheetInsertTag>[0]);
-  wrapSheetInsertTag(globalCache.sheet as Parameters<typeof wrapSheetInsertTag>[0]);
-  wrapSheetInsertTag(utilitiesCache.sheet as Parameters<typeof wrapSheetInsertTag>[0]);
+  console.debug(EMOTION_DEBUG_PREFIX, 'init: wrapping Emotion sheets (browser)', {
+    cssContainer: getEmotionContainer(KBN_EMOTION_CONTAINER_CSS_ID, 'emotion')?.id ?? 'head',
+    globalContainer: getEmotionContainer(KBN_EMOTION_CONTAINER_GLOBAL_ID, EUI_STYLES_GLOBAL)?.id ?? 'head',
+    utilsContainer: getEmotionContainer(KBN_EMOTION_CONTAINER_UTILS_ID, EUI_STYLES_UTILS)?.id ?? 'head',
+  });
+  wrapSheetInsertTag('css', emotionCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
+  wrapSheetInsertTag(EUI_STYLES_GLOBAL, globalCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
+  wrapSheetInsertTag(EUI_STYLES_UTILS, utilitiesCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
 }
 
 // Enable "compat mode" in Emotion caches.
