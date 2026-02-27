@@ -6,14 +6,15 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
-import type { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
@@ -35,9 +36,14 @@ export interface AppPluginStartDependencies {
 }
 
 export interface AppPluginSetupDependencies {
-  share: SharePluginSetup;
+  actions: ActionsPublicPluginSetup;
+  cloud?: CloudSetup;
+  console?: ConsolePluginSetup;
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
+  ml: MlPluginSetup;
+  share: SharePluginSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
