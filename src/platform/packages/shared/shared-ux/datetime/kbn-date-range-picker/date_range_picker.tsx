@@ -132,7 +132,7 @@ export function DateRangePicker({ panels = [], ...props }: DateRangePickerProps)
               <Component />
             </DateRangePickerPanel>
           ))}
-          {/* Example panels, can be removed after initial development finishes */}
+          {/* TODO Example panels, can be removed after initial development finishes */}
           <DateRangePickerPanel id={ExamplePanel.PANEL_ID}>
             <ExamplePanel />
           </DateRangePickerPanel>
