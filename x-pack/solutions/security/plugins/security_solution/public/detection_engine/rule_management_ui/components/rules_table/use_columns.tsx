@@ -21,6 +21,7 @@ import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
@@ -65,7 +66,7 @@ import {
   gapStatusTooltipUnfilled,
   gapStatusTooltipFilled,
 } from './translations';
-import { getRuleDetailsUrl } from '../../../../common/components/link_to';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -145,8 +146,6 @@ const useRuleSnoozeColumn = (): TableColumn => {
 };
 
 export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
-  const ruleDetailsUrl = getRuleDetailsUrl(id);
-
   return (
     <EuiToolTip content={name} anchorClassName="eui-textTruncate">
       <SecuritySolutionLinkAnchor
