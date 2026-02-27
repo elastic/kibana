@@ -65,6 +65,8 @@ export interface RulesClientFactoryOpts {
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
   shouldGrantUiam: boolean;
+  isServerless: boolean;
+  featureFlags: CoreStart['featureFlags'];
 }
 
 export class RulesClientFactory {
@@ -93,6 +95,8 @@ export class RulesClientFactory {
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
   private shouldGrantUiam: boolean = false;
+  private isServerless: boolean = false;
+  private featureFlags!: CoreStart['featureFlags'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -123,6 +127,8 @@ export class RulesClientFactory {
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
     this.shouldGrantUiam = options.shouldGrantUiam;
+    this.isServerless = options.isServerless;
+    this.featureFlags = options.featureFlags;
   }
 
   /**
@@ -211,6 +217,8 @@ export class RulesClientFactory {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
       shouldGrantUiam: this.shouldGrantUiam,
+      isServerless: this.isServerless,
+      featureFlags: this.featureFlags,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
