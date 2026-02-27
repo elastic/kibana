@@ -82,10 +82,12 @@ const baseQuery = {
 };
 
 describe('TransactionDetails', () => {
-  const mockLink = jest.fn((path: string, opts: { path: { serviceName: string }; query: object }) => {
-    const qs = new URLSearchParams(opts.query as Record<string, string>).toString();
-    return `/app/apm${path.replace('{serviceName}', opts.path.serviceName)}${qs ? `?${qs}` : ''}`;
-  });
+  const mockLink = jest.fn(
+    (path: string, opts: { path: { serviceName: string }; query: object }) => {
+      const qs = new URLSearchParams(opts.query as Record<string, string>).toString();
+      return `/app/apm${path.replace('{serviceName}', opts.path.serviceName)}${qs ? `?${qs}` : ''}`;
+    }
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
