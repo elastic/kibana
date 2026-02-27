@@ -47,7 +47,7 @@ test.describe('AlertingDefaults', { tag: tags.stateful.classic }, () => {
       await page.testSubj.fill('nameInput', 'Test email');
       await page.testSubj.fill('emailFromInput', 'test@gmail.com');
       await page.testSubj.locator('emailServiceSelectInput').selectOption('gmail');
-      await page.testSubj.click('input');
+      await page.testSubj.click('emailHasAuthSwitch');
       await pageObjects.syntheticsApp.saveConnectorInFlyout();
     });
 
