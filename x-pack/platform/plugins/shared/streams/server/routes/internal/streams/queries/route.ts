@@ -282,7 +282,7 @@ const getQueriesOccurrencesRoute = createServerRoute({
 });
 
 const getQueryOccurrencesRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_queries/{queryId}/_occurrences',
+  endpoint: 'GET /internal/streams/_queries/{queryId}/_occurrences_histogram',
   params: z.object({
     path: z.object({
       queryId: z.string(),

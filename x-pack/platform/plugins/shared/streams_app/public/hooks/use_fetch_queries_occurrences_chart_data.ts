@@ -66,7 +66,7 @@ export const useFetchQueryOccurrencesChartData = (
     const intervalString = `${bucketSize.asSeconds()}s`;
 
     const response: QueriesOccurrencesGetResponse = await streamsRepositoryClient.fetch(
-      'GET /internal/streams/_queries/{queryId}/_occurrences',
+      'GET /internal/streams/_queries/{queryId}/_occurrences_histogram',
       {
         params: {
           path: { queryId },
