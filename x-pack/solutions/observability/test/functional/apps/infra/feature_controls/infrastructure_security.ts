@@ -111,6 +111,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.existOrFail('waffleDatePicker');
           });
 
+          expect(await testSubjects.exists('waffleMap')).to.be(false);
+
           await retry.tryForTime(60000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
             await PageObjects.infraHome.getWaffleMap();
@@ -226,6 +228,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await retry.tryForTime(30000, async () => {
             await testSubjects.existOrFail('waffleDatePicker');
           });
+
+          expect(await testSubjects.exists('waffleMap')).to.be(false);
 
           await retry.tryForTime(60000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
