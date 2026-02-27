@@ -313,15 +313,20 @@ function createSyntheticsServices(
   };
 
   const cleanUpAlerts = async () => {
-    const listOfIndices = await esClient.cat.indices({ format: 'json' });
-    for (const index of listOfIndices) {
-      if (index.index?.startsWith('.internal.alerts-observability.uptime.alerts')) {
-        await esClient.deleteByQuery({
-          index: index.index,
-          query: { match_all: {} },
-        });
-      }
-    }
+    await esClient.deleteByQuery({
+      index: '.alerts-observability.*',
+      query: {
+        bool: {
+          should: [
+            { term: { 'kibana.alert.rule.consumer': 'uptime' } },
+            { term: { 'kibana.alert.rule.consumer': 'synthetics' } },
+          ],
+        },
+      },
+      conflicts: 'proceed',
+      refresh: true,
+      ignore_unavailable: true,
+    });
   };
 
   const deleteConnectors = async () => {

@@ -314,7 +314,8 @@ export class SyntheticsAppPage {
   }
 
   async navigateToAlertsPage() {
-    await this.page.testSubj.click('observability-nav-observability-overview-alerts');
+    await this.page.goto(this.kbnUrl.get('/app/observability/alerts'));
+    await this.page.testSubj.waitForSelector('querySubmitButton');
   }
 
   async refreshOverview() {
