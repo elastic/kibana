@@ -200,8 +200,10 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
                 })}
               </EuiText>
               <EuiSpacer size="xs" />
-              <EuiText size="s">
-                <strong>{moment(query.startTime).format('MMM D YYYY, HH:mm:ss')}</strong>
+              <EuiText>
+                <h4>
+                  <strong>{moment(query.startTime).format('MMM D YYYY, HH:mm:ss')}</strong>
+                </h4>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -211,8 +213,10 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
                 })}
               </EuiText>
               <EuiSpacer size="xs" />
-              <EuiText size="s">
-                <strong>{formatRuntime(query.startTime)}</strong>
+              <EuiText>
+                <h4>
+                  <strong>{formatRuntime(query.startTime)}</strong>
+                </h4>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -222,8 +226,10 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
                 })}
               </EuiText>
               <EuiSpacer size="xs" />
-              <EuiText size="s">
-                <strong>{query.indices}</strong>
+              <EuiText>
+                <h4>
+                  <strong>{query.indices}</strong>
+                </h4>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
