@@ -22,7 +22,7 @@ import type {
   UpdateToolResponse,
 } from '../../common/http_api/tools';
 import { publicApiPath } from '../../common/constants';
-import { AGENT_BUILDER_READ_SECURITY, MANAGE_TOOLS_SECURITY } from './route_security';
+import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
 
@@ -117,7 +117,7 @@ export function registerToolsRoutes({
   router.versioned
     .post({
       path: `${publicApiPath}/tools`,
-      security: MANAGE_TOOLS_SECURITY,
+      security: TOOLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create a tool',
       description:
@@ -203,7 +203,7 @@ export function registerToolsRoutes({
   router.versioned
     .put({
       path: `${publicApiPath}/tools/{toolId}`,
-      security: MANAGE_TOOLS_SECURITY,
+      security: TOOLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update a tool',
       description:
@@ -285,7 +285,7 @@ export function registerToolsRoutes({
   router.versioned
     .delete({
       path: `${publicApiPath}/tools/{toolId}`,
-      security: MANAGE_TOOLS_SECURITY,
+      security: TOOLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete a tool',
       description:

@@ -33,7 +33,7 @@ import type {
   ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
 import { internalApiPath } from '../../../common/constants';
-import { AGENT_BUILDER_READ_SECURITY, MANAGE_TOOLS_SECURITY } from '../route_security';
+import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_security';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
 import { toConnectorItem } from '../utils';
 
@@ -57,7 +57,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: MANAGE_TOOLS_SECURITY,
+      security: TOOLS_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { ids, force } = request.body;
@@ -140,7 +140,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: MANAGE_TOOLS_SECURITY,
+      security: TOOLS_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const {

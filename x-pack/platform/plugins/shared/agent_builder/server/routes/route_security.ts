@@ -8,17 +8,30 @@
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { apiPrivileges } from '../../common/features';
 
+/**
+ * Security configuration object for read-only access to Agent Builder APIs.
+ */
 export const AGENT_BUILDER_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
 };
 
+/**
+ * Security configuration object for write access to Agent Builder APIs.
+ */
 export const AGENT_BUILDER_WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.writeAgentBuilder] },
 };
 
-export const MANAGE_AGENTS_SECURITY: RouteSecurity = {
+/**
+ * Security configuration object for write access to agents.
+ */
+export const AGENTS_WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.manageAgents] },
 };
-export const MANAGE_TOOLS_SECURITY: RouteSecurity = {
+
+/**
+ * Security configuration object for write access to tools.
+ */
+export const TOOLS_WRITE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.manageTools] },
 };

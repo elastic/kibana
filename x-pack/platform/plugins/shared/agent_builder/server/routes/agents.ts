@@ -10,7 +10,7 @@ import path from 'node:path';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
-import { AGENT_BUILDER_READ_SECURITY, MANAGE_AGENTS_SECURITY } from './route_security';
+import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
 import type {
   GetAgentResponse,
   CreateAgentResponse,
@@ -123,7 +123,7 @@ export function registerAgentRoutes({
   router.versioned
     .post({
       path: `${publicApiPath}/agents`,
-      security: MANAGE_AGENTS_SECURITY,
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create an agent',
       description:
@@ -235,7 +235,7 @@ export function registerAgentRoutes({
   router.versioned
     .put({
       path: `${publicApiPath}/agents/{id}`,
-      security: MANAGE_AGENTS_SECURITY,
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update an agent',
       description:
@@ -353,7 +353,7 @@ export function registerAgentRoutes({
   router.versioned
     .delete({
       path: `${publicApiPath}/agents/{id}`,
-      security: MANAGE_AGENTS_SECURITY,
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete an agent',
       description:
