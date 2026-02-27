@@ -110,7 +110,6 @@
     "@kbn/unified-data-table",
     "@kbn/shared-ux-markdown",
     "@kbn/licensing-plugin",
-    "@kbn/as-code-export-source",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/es-types",

@@ -134,8 +134,6 @@
       "@kbn/app-link-test-plugin/*": ["src/platform/test/plugin_functional/plugins/app_link_test/*"],
       "@kbn/application-usage-test-plugin": ["x-pack/platform/test/usage_collection/plugins/application_usage_test"],
       "@kbn/application-usage-test-plugin/*": ["x-pack/platform/test/usage_collection/plugins/application_usage_test/*"],
-      "@kbn/as-code-export-source": ["src/platform/packages/shared/as-code/export-source"],
-      "@kbn/as-code-export-source/*": ["src/platform/packages/shared/as-code/export-source/*"],
       "@kbn/as-code-filters-constants": ["src/platform/packages/shared/as-code/filters-constants"],
       "@kbn/as-code-filters-constants/*": ["src/platform/packages/shared/as-code/filters-constants/*"],
       "@kbn/as-code-filters-schema": ["src/platform/packages/shared/as-code/filters-schema"],
