@@ -79,7 +79,6 @@ export const registerNLtoESQLRoute = (
       validate: {
         body: schema.object({
           query: schema.string(),
-          sources: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
       security: {
@@ -92,7 +91,7 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { query, sources } = request.body;
+        const { query } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
@@ -120,7 +119,6 @@ export const registerNLtoESQLRoute = (
           esClient: client,
           logger,
           nlQuery: query,
-          index: sources?.length ? sources.join(',') : undefined,
           executeQuery: false,
         });
 
@@ -128,7 +126,8 @@ export const registerNLtoESQLRoute = (
           body: { content: result.query },
         });
       } catch (error) {
-        logger.debug(error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`NL to ES|QL failed: ${errorMessage}`);
         if (
           error instanceof Error &&
           'reason' in error &&
@@ -136,10 +135,13 @@ export const registerNLtoESQLRoute = (
           (error as { reason: string }).reason.startsWith('license_')
         ) {
           return response.forbidden({
-            body: { message: error.message },
+            body: { message: errorMessage },
           });
         }
-        throw error;
+        return response.customError({
+          statusCode: 500,
+          body: { message: errorMessage },
+        });
       }
     }
   );
