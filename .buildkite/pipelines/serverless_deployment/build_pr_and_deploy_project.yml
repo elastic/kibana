@@ -5,12 +5,12 @@ env:
 
 steps:
   - group: 'Notify if missing labels'
-    if: "build.env('GITHUB_PR_LABELS') !~ /ci:project-deploy-(elasticsearch|observability|log_essentials|security)/"
+    if: "build.env('GITHUB_PR_LABELS') !~ /ci:project-deploy-(elasticsearch|observability|log_essentials|security|workplace_ai)/"
 
     steps:
       - command: |
           ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
-            --message "Project deployments require a Github label, please add one or more of \`ci:project-deploy-(elasticsearch|observability|security)\` and trigger the job through the checkbox again." \
+            --message "Project deployments require a Github label, please add one or more of \`ci:project-deploy-(elasticsearch|observability|log_essentials|security|workplace_ai)\` and trigger the job through the checkbox again." \
             --context "project-deploy-job" \
             --clear-previous
         label: Comment missing labels
@@ -22,7 +22,7 @@ steps:
         timeout_in_minutes: 5
 
   - group: 'Project Deployment'
-    if: "build.env('GITHUB_PR_LABELS') =~ /ci:project-deploy-(elasticsearch|observability|log_essentials|security|ai4soc)/"
+    if: "build.env('GITHUB_PR_LABELS') =~ /ci:project-deploy-(elasticsearch|observability|log_essentials|security|workplace_ai|ai4soc)/"
 
     steps:
       - command: .buildkite/scripts/lifecycle/pre_build.sh
