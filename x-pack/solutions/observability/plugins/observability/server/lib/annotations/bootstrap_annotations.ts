@@ -59,7 +59,7 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
       client: internalClient,
       logger,
     });
-    logger.info(`Installed index template for ${index}`);
+    logger.debug(`Installed index template for ${index}`);
   } catch (e) {
     logger.error(`Failed to install index template for ${index}`, { error: e });
   }
