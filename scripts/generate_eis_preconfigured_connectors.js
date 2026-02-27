@@ -55,9 +55,10 @@ function toConnectorId(modelId) {
  */
 function toDisplayName(modelId) {
   var withSpaces = modelId.replace(/[-._]/g, ' ');
+  var withVersions = withSpaces.replace(/\b(\d+)\s+(\d+)\b/g, '$1.$2');
   return (
     'EIS ' +
-    withSpaces.replace(/\b\w/g, function (c) {
+    withVersions.replace(/\b\w/g, function (c) {
       return c.toUpperCase();
     })
   );
@@ -110,17 +111,24 @@ function main() {
     })
     .then(function (body) {
       var endpoints = body.endpoints || [];
-      if (endpoints.length === 0) {
-        console.error('No chat_completion endpoints found.');
+
+      var eisEndpoints = endpoints.filter(function (ep) {
+        return ep.service === 'elastic';
+      });
+
+      if (eisEndpoints.length === 0) {
+        console.error('No chat_completion endpoints with service "elastic" found.');
         process.exit(1);
       }
-      endpoints.sort(function (a, b) {
+
+      eisEndpoints.sort(function (a, b) {
         return (a.inference_id || '').localeCompare(b.inference_id || '');
       });
+
       var seen = Object.create(null);
       var entries = [];
-      for (var i = 0; i < endpoints.length; i++) {
-        var endpoint = endpoints[i];
+      for (var i = 0; i < eisEndpoints.length; i++) {
+        var endpoint = eisEndpoints[i];
         var modelId =
           endpoint.service_settings && endpoint.service_settings.model_id
             ? endpoint.service_settings.model_id
