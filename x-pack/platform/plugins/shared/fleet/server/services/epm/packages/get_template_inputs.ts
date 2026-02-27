@@ -211,7 +211,7 @@ export async function getTemplateInputs(
             stream.processors.unshift({
               add_fields: {
                 target: '@metadata',
-                fields: { raw_index: 'logs' },
+                fields: { raw_index: 'logs.ecs' },
               },
             });
           }

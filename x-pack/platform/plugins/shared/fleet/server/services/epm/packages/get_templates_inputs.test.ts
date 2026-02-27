@@ -411,7 +411,7 @@ describe('Fleet - getTemplateInputs', () => {
           expect(stream.processors![0]).toEqual({
             add_fields: {
               target: '@metadata',
-              fields: { raw_index: 'logs' },
+              fields: { raw_index: 'logs.ecs' },
             },
           });
         }
