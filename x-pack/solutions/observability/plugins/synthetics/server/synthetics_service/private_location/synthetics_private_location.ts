@@ -88,27 +88,35 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * For a given monitor and location, checks existing policies to determine
-   * whether a new (space-agnostic) or legacy (space-scoped) format policy ID exists.
+   * Checks whether new-format or legacy-format policy IDs exist for a given monitor + location.
+   *
+   * Finds legacy IDs (`{configId}-{locationId}-{spaceId}`) via prefix match + suffix
+   * validation against known spaces. Suffix validation uses O(1) Set lookup, keeping
+   * performance identical to plain prefix matching regardless of space count.
+   *
+   * This prevents most false positives — e.g. monitor "monitor-a" / location "loc-b"
+   * won't match policies for monitor "monitor-a-loc-b", because the suffix after
+   * "monitor-a-loc-b-" won't be a known space. A residual ambiguity remains when space IDs contain dashes (inherent to
+   * the dash-separated legacy format), but is unlikely in practice since it
+   * requires monitor IDs, location IDs, and space names to overlap in a specific way.
    */
   getPolicyIdFormatInfo(
     config: { id: string },
     locationId: string,
-    existingPolicies: Array<{ id: string }> | undefined
+    existingPolicies: Array<{ id: string }> | undefined,
+    allSpaces: Set<string>
   ): { hasNewFormatPolicyId: boolean; hasAnyLegacyPolicyId: boolean; legacyPolicyIds: string[] } {
     const newId = this.getPolicyId(config, locationId);
-    const legacyIdPrefix = `${config.id}-${locationId}-`;
-
     const hasNewFormatPolicyId = existingPolicies?.some((policy) => policy.id === newId) ?? false;
-    // Note: prefix matching can produce false positives when monitor2.id === monitor1.id + '-' + locationId.
-    // e.g. Monitor 1 ID = "monitor-a", location = "loc-b" -> prefix = "monitor-a-loc-b-"
-    //      Monitor 2 ID = "monitor-a-loc-b" -> its legacy policies also start with "monitor-a-loc-b-"
-    // In that case, Monitor 2's legacy policies would be incorrectly matched and deleted during
-    // Monitor 1's edit, leaving Monitor 2 without a policy until the next sync task runs.
-    // This edge case only affects project monitors with custom IDs (UI monitors use UUIDs).
+
+    const legacyIdPrefix = `${config.id}-${locationId}-`;
     const legacyPolicyIds =
       existingPolicies
-        ?.filter((policy) => policy.id.startsWith(legacyIdPrefix))
+        ?.filter((policy) => {
+          if (!policy.id.startsWith(legacyIdPrefix)) return false;
+          const spaceId = policy.id.slice(legacyIdPrefix.length);
+          return allSpaces.has(spaceId);
+        })
         .map((policy) => policy.id) ?? [];
     const hasAnyLegacyPolicyId = legacyPolicyIds.length > 0;
 
@@ -374,7 +382,7 @@ export class SyntheticsPrivateLocation {
       };
     }
 
-    const [newPolicyTemplate, existingPolicies] = await Promise.all([
+    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }] = await Promise.all([
       this.buildNewPolicy(),
       this.getExistingPolicies(
         configs.map(({ config }) => config),
@@ -396,7 +404,7 @@ export class SyntheticsPrivateLocation {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
         const newId = this.getPolicyId(config, privateLocation.id);
         const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
-          this.getPolicyIdFormatInfo(config, privateLocation.id, existingPolicies);
+          this.getPolicyIdFormatInfo(config, privateLocation.id, existingPolicies, allSpaces);
         const hasPolicy = hasNewFormatPolicyId || hasAnyLegacyPolicyId;
 
         try {
@@ -494,9 +502,13 @@ export class SyntheticsPrivateLocation {
       }
     }
 
-    return await this.server.fleet.packagePolicyService.getByIDs(soClient, [...policyIdsToFetch], {
-      ignoreMissing: true,
-    });
+    const policies = await this.server.fleet.packagePolicyService.getByIDs(
+      soClient,
+      [...policyIdsToFetch],
+      { ignoreMissing: true }
+    );
+
+    return { policies, allSpaces };
   }
 
   async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {

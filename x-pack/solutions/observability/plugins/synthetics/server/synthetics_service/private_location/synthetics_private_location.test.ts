@@ -164,6 +164,134 @@ describe('SyntheticsPrivateLocation', () => {
     });
   });
 
+  describe('getPolicyIdFormatInfo', () => {
+    it('detects new format policy', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const existingPolicies = [{ id: 'monitor-1-loc-1' }];
+      const allSpaces = new Set(['default']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(true);
+      expect(result.hasAnyLegacyPolicyId).toBe(false);
+      expect(result.legacyPolicyIds).toEqual([]);
+    });
+
+    it('detects legacy format policy for known space', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const existingPolicies = [{ id: 'monitor-1-loc-1-space-a' }];
+      const allSpaces = new Set(['default', 'space-a']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(false);
+      expect(result.hasAnyLegacyPolicyId).toBe(true);
+      expect(result.legacyPolicyIds).toEqual(['monitor-1-loc-1-space-a']);
+    });
+
+    it('does not match legacy policies from unknown spaces', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const existingPolicies = [{ id: 'monitor-1-loc-1-unknown-space' }];
+      const allSpaces = new Set(['default', 'space-a']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(false);
+      expect(result.hasAnyLegacyPolicyId).toBe(false);
+      expect(result.legacyPolicyIds).toEqual([]);
+    });
+
+    it('avoids false positives from prefix collisions', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-a' };
+      const existingPolicies = [{ id: 'monitor-a-loc-b-default' }];
+      const allSpaces = new Set(['default']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-b',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(false);
+      expect(result.hasAnyLegacyPolicyId).toBe(true);
+      expect(result.legacyPolicyIds).toEqual(['monitor-a-loc-b-default']);
+
+      // Monitor "monitor-a-loc-b" should NOT match the same policy
+      const otherConfig = { id: 'monitor-a-loc-b' };
+      const otherResult = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        otherConfig,
+        'default',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(otherResult.hasAnyLegacyPolicyId).toBe(false);
+      expect(otherResult.legacyPolicyIds).toEqual([]);
+    });
+
+    it('detects both new and legacy format policies', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const existingPolicies = [
+        { id: 'monitor-1-loc-1' },
+        { id: 'monitor-1-loc-1-default' },
+        { id: 'monitor-1-loc-1-space-a' },
+      ];
+      const allSpaces = new Set(['default', 'space-a']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(true);
+      expect(result.hasAnyLegacyPolicyId).toBe(true);
+      expect(result.legacyPolicyIds).toEqual([
+        'monitor-1-loc-1-default',
+        'monitor-1-loc-1-space-a',
+      ]);
+    });
+
+    it('handles undefined existingPolicies', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const allSpaces = new Set(['default']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        undefined,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(false);
+      expect(result.hasAnyLegacyPolicyId).toBe(false);
+      expect(result.legacyPolicyIds).toEqual([]);
+    });
+  });
+
   it.each([['Unable to create Synthetics package policy template for private location']])(
     'throws errors for create monitor',
     async (error) => {
