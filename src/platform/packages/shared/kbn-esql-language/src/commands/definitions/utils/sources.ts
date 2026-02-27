@@ -228,12 +228,16 @@ export async function additionalSourcesSuggestions(
             text: fragment + ' METADATA ',
             rangeToReplace,
           },
-          ...recommendedQuerySuggestions.map((suggestion) => ({
-            ...suggestion,
-            rangeToReplace,
-            filterText: fragment,
-            text: fragment + suggestion.text,
-          })),
+          ...recommendedQuerySuggestions.map((suggestion) =>
+            suggestion.text
+              ? {
+                  ...suggestion,
+                  rangeToReplace,
+                  filterText: fragment,
+                  text: fragment + suggestion.text,
+                }
+              : suggestion
+          ),
         ];
         return _suggestions;
       }
