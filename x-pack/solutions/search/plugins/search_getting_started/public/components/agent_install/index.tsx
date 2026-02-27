@@ -102,7 +102,7 @@ const USE_CASE_INITIAL_MESSAGES: Record<UseCaseId, string> = {
   'general-search': 'Help me get started with Elasticsearch.',
   'semantic-search': 'I want to build semantic search with Elasticsearch.',
   'vector-database': 'I want to use Elasticsearch as a vector database for my AI app.',
-  'rag-chatbot': 'I want to build a RAG chatbot that answers questions from my docs.',
+  'rag-chatbot': 'I want to build a RAG chatbot that answers questions from my data.',
   'keyword-search': 'I want to build keyword search with filters and autocomplete.',
   'hybrid-search': 'I want to build hybrid search combining keyword and semantic.',
   'catalog-ecommerce':
@@ -176,9 +176,10 @@ export const AgentInstallSection = () => {
   const handleOpenInAgentBuilder = useCallback(() => {
     closePopover();
     const initialMessage = buildPrompt(selectedUseCase, 'agent-builder');
+    localStorage.setItem('agentBuilder.agentId', JSON.stringify(SEARCH_AGENT_ID));
     services.application.navigateToApp(AGENT_BUILDER_APP_ID, {
       path: `/conversations/new?agent_id=${SEARCH_AGENT_ID}`,
-      state: { initialMessage },
+      state: { initialMessage, autoSendInitialMessage: false },
     });
   }, [closePopover, selectedUseCase, services.application]);
 

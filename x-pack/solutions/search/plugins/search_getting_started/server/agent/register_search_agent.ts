@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { searchAgentInstructionsAgentBuilder } from '@kbn/search-agent';
+import { searchAgentInstructions } from '@kbn/search-agent';
 import { SEARCH_AGENT_ID } from '../../common/constants';
 import type { SearchGettingStartedSetupDependencies } from '../types';
 
@@ -38,7 +38,7 @@ export const registerSearchAgent = ({
     labels: ['search'],
     configuration: {
       replace_default_instructions: true,
-      instructions: searchAgentInstructionsAgentBuilder,
+      instructions: searchAgentInstructions,
       tools: [{ tool_ids: SEARCH_AGENT_TOOL_IDS }],
     },
   };

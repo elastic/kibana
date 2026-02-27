@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { searchAgentInstructionsAgentBuilder } from './search_agent_instructions_agent_builder';
+export { searchAgentInstructions } from './search_agent_instructions';

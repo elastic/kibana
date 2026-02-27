@@ -43,10 +43,11 @@ Then help me get started with Elasticsearch.
 
 ## Development
 
-- Main agent instructions live in `AGENTS.md`. Make updates there and to the
-  skill files in `.elasticsearch-agent`.
-- Agent Builder instructions live in `search_agent_instructions_agent_builder.ts`.
-- Run `./build` to regenerate the zip file for usage outside of kibana
+- Main agent instructions live in `search_agent_instructions.ts` (the source of
+  truth). The `.elasticsearch-agent/AGENTS.md` file is **generated** — do not
+  edit it directly.
+- Run `./build` to regenerate `AGENTS.md` from the TypeScript source and
+  package the zip file for usage outside of Kibana.
 
 Prompt during development (points to pr branch):
 

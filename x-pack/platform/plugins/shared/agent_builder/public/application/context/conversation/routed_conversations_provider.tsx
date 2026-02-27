@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useQueryClient } from '@kbn/react-query';
@@ -36,7 +36,10 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
-  const initialMessage = location.state?.initialMessage;
+  const autoSendInitialMessage = location.state?.autoSendInitialMessage ?? true;
+
+  const [initialMessage, setInitialMessage] = useState(location.state?.initialMessage);
+  const resetInitialMessage = useCallback(() => setInitialMessage(undefined), []);
 
   // Get search params for agent ID syncing
   const [searchParams] = useSearchParams();
@@ -116,9 +119,17 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       isEmbeddedContext: false,
       conversationActions,
       initialMessage,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage,
+      resetInitialMessage,
     }),
-    [conversationId, shouldStickToBottom, conversationActions, initialMessage]
+    [
+      conversationId,
+      shouldStickToBottom,
+      conversationActions,
+      initialMessage,
+      autoSendInitialMessage,
+      resetInitialMessage,
+    ]
   );
 
   return (
