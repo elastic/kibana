@@ -14,7 +14,9 @@ import {
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiDescriptionListDescription,
   EuiDescriptionList,
+  EuiDescriptionListTitle,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,7 +37,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
@@ -67,7 +69,21 @@ interface QueryDetailsFlyoutProps {
   onDelete: (queryId: string, streamName: string) => Promise<void>;
 }
 
+interface QueryInformationRowProps {
+  title: string;
+  children: React.ReactNode;
+}
+
 const DEFAULT_QUERY_PLACEHOLDER = '--';
+
+function QueryInformationRow({ title, children }: QueryInformationRowProps) {
+  return (
+    <EuiDescriptionList type="column" columnWidths={[1, 2]} compressed>
+      <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>{children}</EuiDescriptionListDescription>
+    </EuiDescriptionList>
+  );
+}
 
 export function QueryDetailsFlyout({
   item,
@@ -143,94 +159,6 @@ export function QueryDetailsFlyout({
   const model = item.model?.trim();
   const evidence = (item.evidence ?? []).map((value) => value.trim()).filter(Boolean);
   const source = item.source;
-
-  const infoListItems: Array<{
-    title: NonNullable<React.ReactNode>;
-    description: NonNullable<React.ReactNode>;
-  }> = [
-    {
-      title: QUERY_LABEL,
-      description: (
-        <EuiCodeBlock language="kql" paddingSize="none" transparentBackground>
-          {getDisplayQueryValue(item)}
-        </EuiCodeBlock>
-      ),
-    },
-    ...(description
-      ? [
-          {
-            title: DESCRIPTION_LABEL,
-            description: <EuiText size="s">{description}</EuiText>,
-          },
-        ]
-      : []),
-    ...(model
-      ? [
-          {
-            title: MODEL_LABEL,
-            description: <EuiText size="s">{model}</EuiText>,
-          },
-        ]
-      : []),
-    ...(evidence.length > 0
-      ? [
-          {
-            title: EVIDENCE_LABEL,
-            description: (
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                {evidence.map((evidenceItem, index) => (
-                  <React.Fragment key={`${evidenceItem}-${index}`}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">{evidenceItem}</EuiText>
-                    </EuiFlexItem>
-                    {index < evidence.length - 1 ? <EuiHorizontalRule margin="xs" /> : null}
-                  </React.Fragment>
-                ))}
-              </EuiFlexGroup>
-            ),
-          },
-        ]
-      : []),
-    ...(source
-      ? [
-          {
-            title: SOURCE_LABEL,
-            description: <EuiBadge color="hollow">{getSourceDisplayName(source)}</EuiBadge>,
-          },
-        ]
-      : []),
-    {
-      title: IMPACT_COLUMN,
-      description: <SeverityBadge score={item.severity_score} />,
-    },
-    {
-      title: LAST_OCCURRED_COLUMN,
-      description: <EuiText size="s">{lastOccurredAt}</EuiText>,
-    },
-    {
-      title: STREAM_COLUMN,
-      description: (
-        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-          {item.affected_streams.map((streamName) => (
-            <EuiFlexItem grow={false} key={streamName}>
-              <EuiBadge color="hollow">{streamName}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ),
-    },
-    {
-      title: BACKED_STATUS_COLUMN,
-      description: (
-        <EuiToolTip content={isBacked ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}>
-          <span tabIndex={0}>
-            {isBacked && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
-            {!isBacked && <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>}
-          </span>
-        </EuiToolTip>
-      ),
-    },
-  ];
 
   return (
     <>
@@ -320,17 +248,85 @@ export function QueryDetailsFlyout({
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
                 <InfoPanel title={QUERY_INFORMATION_TITLE}>
-                  {infoListItems.map((listItem, index) => (
-                    <React.Fragment key={listItem.title.toString()}>
-                      <EuiDescriptionList
-                        type="column"
-                        columnWidths={[1, 2]}
-                        compressed
-                        listItems={[listItem]}
-                      />
-                      {index < infoListItems.length - 1 && <EuiHorizontalRule margin="m" />}
-                    </React.Fragment>
-                  ))}
+                  <QueryInformationRow title={QUERY_LABEL}>
+                    <EuiCodeBlock language="kql" paddingSize="none" transparentBackground>
+                      {getDisplayQueryValue(item)}
+                    </EuiCodeBlock>
+                  </QueryInformationRow>
+                  {description && (
+                    <>
+                      <EuiHorizontalRule margin="m" />
+                      <QueryInformationRow title={DESCRIPTION_LABEL}>
+                        <EuiText size="s">{description}</EuiText>
+                      </QueryInformationRow>
+                    </>
+                  )}
+                  {model && (
+                    <>
+                      <EuiHorizontalRule margin="m" />
+                      <QueryInformationRow title={MODEL_LABEL}>
+                        <EuiText size="s">{model}</EuiText>
+                      </QueryInformationRow>
+                    </>
+                  )}
+                  {evidence.length > 0 && (
+                    <>
+                      <EuiHorizontalRule margin="m" />
+                      <QueryInformationRow title={EVIDENCE_LABEL}>
+                        <EuiFlexGroup direction="column" gutterSize="xs">
+                          {evidence.map((evidenceItem, index) => (
+                            <Fragment key={`${evidenceItem}-${index}`}>
+                              <EuiFlexItem grow={false}>
+                                <EuiText size="s">{evidenceItem}</EuiText>
+                              </EuiFlexItem>
+                              {index < evidence.length - 1 ? (
+                                <EuiHorizontalRule margin="xs" />
+                              ) : null}
+                            </Fragment>
+                          ))}
+                        </EuiFlexGroup>
+                      </QueryInformationRow>
+                    </>
+                  )}
+                  {source && (
+                    <>
+                      <EuiHorizontalRule margin="m" />
+                      <QueryInformationRow title={SOURCE_LABEL}>
+                        <EuiBadge color="hollow">{getSourceDisplayName(source)}</EuiBadge>
+                      </QueryInformationRow>
+                    </>
+                  )}
+                  <EuiHorizontalRule margin="m" />
+                  <QueryInformationRow title={IMPACT_COLUMN}>
+                    <SeverityBadge score={item.severity_score} />
+                  </QueryInformationRow>
+                  <EuiHorizontalRule margin="m" />
+                  <QueryInformationRow title={LAST_OCCURRED_COLUMN}>
+                    <EuiText size="s">{lastOccurredAt}</EuiText>
+                  </QueryInformationRow>
+                  <EuiHorizontalRule margin="m" />
+                  <QueryInformationRow title={STREAM_COLUMN}>
+                    <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+                      {item.affected_streams.map((streamName) => (
+                        <EuiFlexItem grow={false} key={streamName}>
+                          <EuiBadge color="hollow">{streamName}</EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </QueryInformationRow>
+                  <EuiHorizontalRule margin="m" />
+                  <QueryInformationRow title={BACKED_STATUS_COLUMN}>
+                    <EuiToolTip
+                      content={isBacked ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
+                    >
+                      <span tabIndex={0}>
+                        {isBacked && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
+                        {!isBacked && (
+                          <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>
+                        )}
+                      </span>
+                    </EuiToolTip>
+                  </QueryInformationRow>
                 </InfoPanel>
               </EuiFlexItem>
               <EuiFlexItem>

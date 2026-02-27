@@ -12,7 +12,7 @@ import {
   streamQueryCategorySchema,
   streamQuerySourceSchema,
   streamQueryTypeSchema,
-} from '@kbn/streams-schema/src/queries';
+} from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
