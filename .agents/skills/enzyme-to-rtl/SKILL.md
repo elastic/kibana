@@ -137,8 +137,8 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-const MockedAreaSeries = AreaSeries as jest.MockedFunction<typeof AreaSeries>;
-const MockedAxis = Axis as jest.MockedFunction<typeof Axis>;
+const MockedAreaSeries = jest.mocked(AreaSeries);
+const MockedAxis = jest.mocked(Axis);
 
 it('passes yScaleType to AreaSeries', () => {
   render(<MyChart {...defaultProps} />);
