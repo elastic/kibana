@@ -84,6 +84,23 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await pageObjects.dashboard.saveChangesToExistingDashboard();
   });
 
+  test('should duplicate an existing dashboard', async ({ page, pageObjects }) => {
+    const logsDashboardTitle = '[Logs] Web Traffic';
+    const duplicatedDashboardTitle = `${logsDashboardTitle} (1)`;
+
+    await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
+
+    const isInViewMode = await pageObjects.dashboard.getIsInViewMode();
+    if (!isInViewMode) {
+      await pageObjects.dashboard.clickCancelOutOfEditMode();
+    }
+
+    await pageObjects.dashboard.saveDashboard(duplicatedDashboardTitle);
+
+    const heading = page.testSubj.locator('breadcrumb last');
+    await expect(heading).toHaveText(duplicatedDashboardTitle);
+  });
+
   test('Add Dashboard link type and URL link types to a dashboard', async ({
     page,
     pageObjects,
