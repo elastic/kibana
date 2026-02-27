@@ -49,8 +49,6 @@ import type {
   NavigationItemInfo,
 } from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
@@ -61,7 +59,6 @@ interface StartDeps {
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
   logger: Logger;
-  featureFlags: FeatureFlagsStart;
   uiSettings: IUiSettingsClient;
 }
 
@@ -73,7 +70,6 @@ export class ProjectNavigationService {
   private logger: Logger | undefined;
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
-  private feedbackUrlParams$ = new BehaviorSubject<URLSearchParams | undefined>(undefined);
   private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
     undefined
   );
@@ -150,17 +146,11 @@ export class ProjectNavigationService {
       setCloudUrls: (cloudUrls: CloudURLs) => {
         this.cloudLinks$.next(getCloudLinks(cloudUrls));
       },
-      setFeedbackUrlParams: (feedbackUrlParams: URLSearchParams) => {
-        this.feedbackUrlParams$.next(feedbackUrlParams);
-      },
       setKibanaName: (kibanaName: string) => {
         this.kibanaName$.next(kibanaName);
       },
       getKibanaName$: () => {
         return this.kibanaName$.asObservable();
-      },
-      getFeedbackUrlParams$: () => {
-        return this.feedbackUrlParams$.asObservable();
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
@@ -306,13 +296,13 @@ export class ProjectNavigationService {
 
   private findActiveNodes({
     location: _location,
-    flattendTree = this.projectNavigationNavTreeFlattened,
+    flattenedTree = this.projectNavigationNavTreeFlattened,
   }: {
     location?: Location;
-    flattendTree?: Record<string, ChromeProjectNavigationNode>;
+    flattenedTree?: Record<string, ChromeProjectNavigationNode>;
   } = {}): ChromeProjectNavigationNode[][] {
     if (!this.application) return [];
-    if (!Object.keys(flattendTree).length) return [];
+    if (!Object.keys(flattenedTree).length) return [];
 
     const location = _location ?? this.application.history.location;
     let currentPathname = this.http?.basePath.prepend(location.pathname) ?? location.pathname;
@@ -321,7 +311,7 @@ export class ProjectNavigationService {
     // e.g. /app/kibana#/management
     currentPathname = stripQueryParams(`${currentPathname}${location.hash}`);
 
-    return findActiveNodes(currentPathname, flattendTree, location, this.http?.basePath.prepend);
+    return findActiveNodes(currentPathname, flattenedTree, location, this.http?.basePath.prepend);
   }
 
   /**

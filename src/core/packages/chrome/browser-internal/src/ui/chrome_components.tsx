@@ -150,7 +150,6 @@ export const createChromeComponents = ({
       activeNodes$: projectNavigation.activeNodes$,
       navLinks$,
       dataTestSubj$: projectNavigation.activeDataTestSubj$,
-      feedbackUrlParams$: state.feedback.urlParams$,
       onToggleCollapsed: state.sideNav.collapsed.set,
       isFeedbackEnabled$: state.feedback.isEnabled$,
       isEditing$: projectNavigation.isEditing$,
@@ -161,7 +160,8 @@ export const createChromeComponents = ({
 
     return (
       <GridLayoutProjectSideNav
-        isCollapsed$={state.sideNav.collapsed.subject$}
+        isCollapsed$={state.sideNav.collapsed.$}
+        initialIsCollapsed={state.sideNav.collapsed.get()}
         navProps={navProps}
       />
     );
