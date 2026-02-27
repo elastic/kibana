@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export const OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM = 'openFlyout';
-export const SELECTED_SYSTEMS_URL_PARAM = 'selectedSystems';
+/** Maximum number of retry attempts for sending usage records. */
+export const METERING_RETRY_ATTEMPTS = 3;
+
+/** Base delay between retries in milliseconds (exponential backoff applied). */
+export const METERING_RETRY_BASE_DELAY_MS = 1000;
