@@ -30,7 +30,6 @@ interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
   query: StreamQuery;
   onSave: (query: StreamQuery) => void;
-  systems: Omit<System, 'description'>[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
 }
@@ -41,18 +40,12 @@ export function GeneratedEventPreview({
   isEditing,
   setIsEditing,
   onSave,
-  systems,
 }: GeneratedEventPreviewProps) {
   const { euiTheme } = useEuiTheme();
 
   const [query, setQuery] = useState<StreamQuery>(initialQuery);
 
-  const options = [
-    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...systems.map((system) => ({ value: system, inputDisplay: system.name })),
-  ];
-
-  const [touched, setTouched] = useState({ title: false, feature: false, esql: false });
+  const [touched, setTouched] = useState({ title: false, esql: false });
   const validation = validateQuery(query);
 
   return (
@@ -91,7 +84,6 @@ export function GeneratedEventPreview({
                         setQuery(initialQuery);
                         setTouched({
                           title: false,
-                          feature: false,
                           esql: false,
                         });
                       }}
@@ -113,7 +105,6 @@ export function GeneratedEventPreview({
                         onSave(query);
                         setTouched({
                           title: false,
-                          feature: false,
                           esql: false,
                         });
                       }}

@@ -73,7 +73,6 @@ export function SignificantEventsGeneratedTable({
           isEditing={eventsInEditMode.includes(query.id)}
           setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
           onSave={onEditQuery}
-          systems={systems}
         />
       );
     }
@@ -92,7 +91,6 @@ export function SignificantEventsGeneratedTable({
           isEditing={eventsInEditMode.includes(query.id)}
           setIsEditing={(nextIsEditing) => setIsEditing(nextIsEditing, query)}
           onSave={onEditQuery}
-          systems={systems}
         />
       );
     }
@@ -133,16 +131,20 @@ export function SignificantEventsGeneratedTable({
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
         defaultMessage: 'Title',
       }),
-      render: (_, query) => <EuiText size="s">{query.title}</EuiText>,
+      render: (title: StreamQuery['title']) => <EuiText size="s">{title}</EuiText>,
     },
     {
       width: '35%',
-      field: 'kql',
+      field: 'esql',
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.queryColumn', {
         defaultMessage: 'Query',
       }),
-      render: (_, item: StreamQuery) => {
-        return <EuiCodeBlock paddingSize="none">{item.esql.query}</EuiCodeBlock>;
+      render: (esql: StreamQuery['esql']) => {
+        return (
+          <EuiCodeBlock language="esql" paddingSize="none">
+            {esql.query}
+          </EuiCodeBlock>
+        );
       },
     },
     {
@@ -151,7 +153,7 @@ export function SignificantEventsGeneratedTable({
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.severityScoreColumn', {
         defaultMessage: 'Severity',
       }),
-      render: (score: number) => {
+      render: (score: StreamQuery['severity_score']) => {
         return <SeverityBadge score={score} />;
       },
     },

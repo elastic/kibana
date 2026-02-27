@@ -21,7 +21,6 @@ import { SignificantEventsHistogramChart } from './significant_events_histogram'
 import { buildDiscoverParams } from '../significant_events_discovery/utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { SeverityBadge } from '../significant_events_discovery/components/severity_badge/severity_badge';
-import { ConditionDisplay } from '../data_management/shared/condition_display';
 
 export function SignificantEventsTable({
   definition,
