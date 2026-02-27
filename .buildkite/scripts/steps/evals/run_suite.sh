@@ -122,7 +122,6 @@ EOF
 
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${connector_id}"
-        cancel_on_build_failing: true
         key: "kbn-evals-${group_key_safe}-${key_safe}"
         command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
         env:
