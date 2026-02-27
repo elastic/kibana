@@ -633,40 +633,40 @@
           "attributes": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/metricChartSchema"
+                "$ref": "#/components/schemas/metricChart"
               },
               {
-                "$ref": "#/components/schemas/legacyMetricChartSchema"
+                "$ref": "#/components/schemas/legacyMetricChart"
               },
               {
-                "$ref": "#/components/schemas/xyChartSchema"
+                "$ref": "#/components/schemas/xyChart"
               },
               {
-                "$ref": "#/components/schemas/gaugeChartSchema"
+                "$ref": "#/components/schemas/gaugeChart"
               },
               {
-                "$ref": "#/components/schemas/heatmapChartSchema"
+                "$ref": "#/components/schemas/heatmapChart"
               },
               {
-                "$ref": "#/components/schemas/tagcloudChartSchema"
+                "$ref": "#/components/schemas/tagcloudChart"
               },
               {
-                "$ref": "#/components/schemas/regionMapChartSchema"
+                "$ref": "#/components/schemas/regionMapChart"
               },
               {
-                "$ref": "#/components/schemas/datatableChartSchema"
+                "$ref": "#/components/schemas/datatableChart"
               },
               {
-                "$ref": "#/components/schemas/pieChartSchema"
+                "$ref": "#/components/schemas/pieChart"
               },
               {
-                "$ref": "#/components/schemas/mosaicChartSchema"
+                "$ref": "#/components/schemas/mosaicChart"
               },
               {
-                "$ref": "#/components/schemas/treemapChartSchema"
+                "$ref": "#/components/schemas/treemapChart"
               },
               {
-                "$ref": "#/components/schemas/waffleChartSchema"
+                "$ref": "#/components/schemas/waffleChart"
               }
             ]
           }
