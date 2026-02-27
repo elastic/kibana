@@ -40,7 +40,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 ```
 
-Keep `@kbn/test-jest-helpers` only for non-enzyme utilities (e.g. `nextTick`, `StubBrowserStorage`, `renderWithI18n(<Comp />)`,`renderWithI18n(<Comp />)`  ). Remove `findTestSubject` — use `screen.getByTestId` instead. 
+Keep `@kbn/test-jest-helpers` only for non-enzyme utilities (e.g. `nextTick`, `StubBrowserStorage`) and RTL render helpers (`renderWithKibanaRenderContext`, `renderWithI18n`, `renderWithEuiTheme`). Remove `findTestSubject` — use `screen.getByTestId` instead.
 
 When the component needs i18n or EUI theme context, prefer the RTL helpers from `@kbn/test-jest-helpers` instead of manually wrapping in providers:
 
@@ -137,8 +137,8 @@ expect(Array.from(items).at(-1)).toHaveTextContent('last');
 |---|---|
 | `expect(wrapper).toMatchSnapshot()` | `expect(container.children[0]).toMatchSnapshot()` |
 | `wrapper.text()` | `screen.getByText('...')` or `element.textContent` |
-| `wrapper.find(X).exists()` | `screen.queryByTestId('x') !== null` |
-| `wrapper.find(X).length` | `container.querySelectorAll(X).length` |
+| `wrapper.find(X).exists()` | If `X` is a test subject: `screen.queryByTestId('x') !== null`. If `X` is a CSS selector string: `container.querySelector(X) !== null`. If `X` is a React component (e.g. `wrapper.find(EuiCallOut)`), assert on DOM output (role/text/test subject) instead of component selectors. |
+| `wrapper.find(X).length` | If `X` is a CSS selector string: `container.querySelectorAll(X).length`. If `X` is a React component (e.g. `wrapper.find(EuiCallOut)`), assert on DOM output (role/text/test subject) instead of component selectors. |
 | `wrapper.find(X).prop('foo')` | See "Testing component props" below |
 | `wrapper.find(X).props()` | See "Testing component props" below |
 | `wrapper.find(X).simulate('click')` | `fireEvent.click(element)` |
