@@ -6551,6 +6551,20 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DataGridDensity",
+        "type": "Enum",
+        "tags": [],
+        "label": "DataGridDensity",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DiscoverFlyouts",
         "type": "Enum",
         "tags": [],
