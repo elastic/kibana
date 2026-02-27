@@ -9,7 +9,6 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import type { TimeRangeBoundsOption } from '../types';
