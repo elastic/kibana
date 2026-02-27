@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement } from 'react';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { capitalize } from 'lodash';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -195,6 +195,10 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
   } = useKibana();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [sources]);
 
   const availableTypes = useMemo(() => {
     return Array.from(new Set(sources.map((s) => s.type))).sort();

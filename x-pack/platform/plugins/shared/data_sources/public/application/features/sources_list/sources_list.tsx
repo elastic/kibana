@@ -24,12 +24,12 @@ import { ConfirmDeleteActiveSourceModal } from '../../components/confirm_delete_
 export const SourcesList: React.FC = () => {
   const { activeSources, isLoading } = useActiveSources();
   const [selectedSources, setSelectedSources] = useState<ActiveSource[]>([]);
-  const [selectedSource, setSelectedSource] = useState<ActiveSource | null>(null);
+  const [sourceToDelete, setSourceToDelete] = useState<ActiveSource | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [sourceToEdit, setSourceToEdit] = useState<ActiveSource | null>(null);
 
   const handleCancelDelete = useCallback(() => {
-    setSelectedSource(null);
+    setSourceToDelete(null);
     setShowDeleteModal(false);
   }, []);
 
@@ -54,15 +54,15 @@ export const SourcesList: React.FC = () => {
   );
 
   const handleDelete = useCallback((source: ActiveSource) => {
-    setSelectedSource(source);
+    setSourceToDelete(source);
     setShowDeleteModal(true);
   }, []);
 
   const handleConfirmDelete = useCallback(() => {
-    if (selectedSource) {
-      deleteActiveSource(selectedSource.id);
+    if (sourceToDelete) {
+      deleteActiveSource(sourceToDelete.id);
     }
-  }, [selectedSource, deleteActiveSource]);
+  }, [sourceToDelete, deleteActiveSource]);
 
   if (isLoading) {
     return (
@@ -109,9 +109,9 @@ export const SourcesList: React.FC = () => {
         onSelectionChange={setSelectedSources}
       />
 
-      {showDeleteModal && selectedSource && (
+      {showDeleteModal && sourceToDelete && (
         <ConfirmDeleteActiveSourceModal
-          activeSource={selectedSource}
+          activeSource={sourceToDelete}
           onConfirm={handleConfirmDelete}
           onCancel={handleCancelDelete}
           isDeleting={isDeleting}
