@@ -164,15 +164,6 @@ export const WatchlistsFlyoutPanel = ({
               )}
             />
           </EuiFormRow>
-          <EuiFormRow label="Custom query">
-            <FiltersGlobal>
-              <SiemSearchBar
-                dataView={dataView}
-                id={InputsModelId.global}
-                sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-              />
-            </FiltersGlobal>
-          </EuiFormRow>
         </EuiForm>
       </FlyoutHeader>
       <EuiFlyoutBody />
