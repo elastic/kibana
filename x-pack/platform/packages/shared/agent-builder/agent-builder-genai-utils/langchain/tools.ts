@@ -118,10 +118,7 @@ export const toolToLangchain = async ({
 
   const schema = await tool.getSchema();
 
-  const normalizedSchema =
-    schema instanceof z.ZodObject
-      ? schema
-      : z.object({});
+  const normalizedSchema = schema instanceof z.ZodObject ? schema : z.object({});
 
   return toTool(
     async (rawInput: Record<string, unknown>, config): Promise<[string, RunToolReturn]> => {
@@ -163,12 +160,12 @@ export const toolToLangchain = async ({
       schema:
         addReasoningParam && 'shape' in normalizedSchema
           ? z.object({
-            _reasoning: z
-              .string()
-              .optional()
-              .describe('Brief reasoning of why you are calling this tool'),
-            ...(normalizedSchema.shape as Record<string, z.ZodTypeAny>),
-          })
+              _reasoning: z
+                .string()
+                .optional()
+                .describe('Brief reasoning of why you are calling this tool'),
+              ...(normalizedSchema.shape as Record<string, z.ZodTypeAny>),
+            })
           : normalizedSchema,
       description,
       verboseParsingErrors: true,

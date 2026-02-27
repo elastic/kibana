@@ -222,8 +222,9 @@ export const getMcpToolType = ({
                   {
                     type: ToolResultType.error,
                     data: {
-                      message: `Failed to execute MCP tool: ${error instanceof Error ? error.message : String(error)
-                        }`,
+                      message: `Failed to execute MCP tool: ${
+                        error instanceof Error ? error.message : String(error)
+                      }`,
                     },
                   },
                 ],
