@@ -55,7 +55,6 @@ export const CertificatesPage: React.FC = () => {
 
   return (
     <>
-      <EuiSpacer size="m" />
       <CertificateSearch setSearch={setSearch} />
       <EuiSpacer size="m" />
       <CertificateList

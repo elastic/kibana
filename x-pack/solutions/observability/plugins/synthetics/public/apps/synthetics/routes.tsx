@@ -19,7 +19,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import { CertRefreshBtn, CertificateTitle, CertificatesPage } from './components/certificates';
+import { CertificatesPage } from './components/certificates';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import type { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
@@ -158,10 +158,6 @@ const getRoutes = (
       path: CERTIFICATES_ROUTE,
       component: CertificatesPage,
       dataTestSubj: 'uptimeCertificatesPage',
-      pageHeader: {
-        pageTitle: <CertificateTitle />,
-        rightSideItems: [<CertRefreshBtn />],
-      },
     },
   ];
 };
