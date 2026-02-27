@@ -49,14 +49,8 @@ const KEY = 'about';
  */
 export const AboutSection = memo(() => {
   const { telemetry } = useKibana().services;
-  const {
-    dataFormattedForFieldBrowser,
-    eventId,
-    indexName,
-    isRulePreview,
-    scopeId,
-    searchHit,
-  } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, eventId, indexName, isRulePreview, scopeId, searchHit } =
+    useDocumentDetailsContext();
   const { rulesPrivileges } = useUserPrivileges();
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
