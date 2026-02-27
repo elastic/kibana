@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createInterface } from 'readline';
-import execa from 'execa';
 import { SingleBar } from 'cli-progress';
 import stripAnsi from 'strip-ansi';
-import type { SomeDevLog } from '@kbn/some-dev-log';
 
 /**
- * Spawns `tsc -b --verbose` and drives a `cli-progress` bar by parsing the
- * per-project progress lines from tsc's verbose output.
+ * Tracks progress of a `tsc --verbose` run by parsing its output line-by-line
+ * and driving a `cli-progress` bar.
  *
  * Progress is tracked by counting two kinds of tsc verbose messages:
  *   - "Building project '...'"       (project needs to be compiled)
@@ -24,46 +21,21 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
  * The total project count is extracted from the "Projects in this build:"
  * header that tsc prints at the very start of --verbose output.
  *
- * Error and diagnostic lines are buffered and replayed after the bar finishes.
- *
- * Returns `true` if tsc exited with code 0, `false` otherwise.
+ * Error and diagnostic lines are buffered and replayed via `printErrors()`
+ * after the bar finishes.
  */
-export async function runTscWithProgress(options: {
-  cmd: string;
-  args: string[];
-  env: Record<string, string>;
-  cwd: string;
-  type: string;
-  log: SomeDevLog;
-}): Promise<boolean> {
-  const { cmd, args, env, cwd, log, type } = options;
+export class TscProgressTracker {
+  private totalProjects = 0;
+  private completedProjects = 0;
+  private builtProjects = 0;
+  private skippedProjects = 0;
+  private parsingProjectList = false;
+  private barStarted = false;
+  private readonly errorLines: string[] = [];
+  private readonly startTime = Date.now();
+  private timer: ReturnType<typeof setInterval> | null = null;
 
-  const child = execa(cmd, [...args, '--verbose'], {
-    cwd,
-    env: { ...process.env, ...env },
-    stdio: ['pipe', 'pipe', 'pipe'],
-    preferLocal: true,
-    reject: false,
-  });
-
-  let totalProjects = 0;
-  let completedProjects = 0;
-  let builtProjects = 0;
-  let skippedProjects = 0;
-  let parsingProjectList = false;
-  let barStarted = false;
-  const errorLines: string[] = [];
-
-  const startTime = Date.now();
-
-  const formatElapsed = () => {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    const mins = Math.floor(elapsed / 60);
-    const secs = elapsed % 60;
-    return mins > 0 ? `${mins}m ${secs.toString().padStart(2, '0')}s` : `${secs}s`;
-  };
-
-  const bar = new SingleBar({
+  private readonly bar = new SingleBar({
     barsize: 30,
     format:
       ' Type checking [{bar}] {value}/{total} projects | {elapsed} | {built} needed to be rechecked | Checking {project}',
@@ -71,7 +43,24 @@ export async function runTscWithProgress(options: {
     clearOnComplete: true,
   });
 
-  const processLine = (line: string) => {
+  private formatElapsed(): string {
+    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    return mins > 0 ? `${mins}m ${secs.toString().padStart(2, '0')}s` : `${secs}s`;
+  }
+
+  /** Start the elapsed-time tick so the bar updates even between project completions. */
+  start() {
+    this.timer = setInterval(() => {
+      if (this.barStarted) {
+        this.bar.update({ elapsed: this.formatElapsed() });
+      }
+    }, 1000);
+  }
+
+  /** Feed a stdout line from tsc into the tracker. */
+  processLine(line: string) {
     const plain = stripAnsi(line);
 
     // Detect the project list header and count entries.
@@ -81,43 +70,43 @@ export async function runTscWithProgress(options: {
     //       * path/to/tsconfig2.json
     //   ...
     if (plain.includes('Projects in this build:')) {
-      parsingProjectList = true;
-      totalProjects = 0;
+      this.parsingProjectList = true;
+      this.totalProjects = 0;
       return;
     }
 
-    if (parsingProjectList) {
+    if (this.parsingProjectList) {
       if (/^\s+\*\s+/.test(plain)) {
-        totalProjects++;
+        this.totalProjects++;
         return;
       }
       // First non-"*" line after the header ends the project list.
-      parsingProjectList = false;
+      this.parsingProjectList = false;
 
-      if (totalProjects > 0 && !barStarted) {
-        bar.start(totalProjects, 0, {
-          elapsed: formatElapsed(),
+      if (this.totalProjects > 0 && !this.barStarted) {
+        this.bar.start(this.totalProjects, 0, {
+          elapsed: this.formatElapsed(),
           project: '',
           status: '',
           built: 0,
           skipped: 0,
         });
-        barStarted = true;
+        this.barStarted = true;
       }
     }
 
     // Track per-project progress.
     const buildingMatch = plain.match(/Building project '([^']+)'/);
     if (buildingMatch) {
-      completedProjects++;
-      builtProjects++;
-      if (barStarted) {
-        bar.update(completedProjects, {
-          elapsed: formatElapsed(),
+      this.completedProjects++;
+      this.builtProjects++;
+      if (this.barStarted) {
+        this.bar.update(this.completedProjects, {
+          elapsed: this.formatElapsed(),
           project: extractProjectName(buildingMatch[1]),
           status: 'checking',
-          built: builtProjects,
-          skipped: skippedProjects,
+          built: this.builtProjects,
+          skipped: this.skippedProjects,
         });
       }
       return;
@@ -125,15 +114,15 @@ export async function runTscWithProgress(options: {
 
     const upToDateMatch = plain.match(/Project '([^']+)' is up to date/);
     if (upToDateMatch) {
-      completedProjects++;
-      skippedProjects++;
-      if (barStarted) {
-        bar.update(completedProjects, {
-          elapsed: formatElapsed(),
+      this.completedProjects++;
+      this.skippedProjects++;
+      if (this.barStarted) {
+        this.bar.update(this.completedProjects, {
+          elapsed: this.formatElapsed(),
           project: extractProjectName(upToDateMatch[1]),
           status: 'cache hit - no rebuild needed',
-          built: builtProjects,
-          skipped: skippedProjects,
+          built: this.builtProjects,
+          skipped: this.skippedProjects,
         });
       }
       return;
@@ -143,63 +132,43 @@ export async function runTscWithProgress(options: {
     // Skip timestamp-only verbose lines that don't carry useful info.
     const trimmed = plain.trim();
     if (trimmed.length > 0 && !isVerboseNoise(trimmed)) {
-      errorLines.push(line);
+      this.errorLines.push(line);
     }
-  };
-
-  // Read stdout and stderr line-by-line.
-  if (child.stdout) {
-    const rl = createInterface({ input: child.stdout });
-    rl.on('line', processLine);
   }
 
-  if (child.stderr) {
-    const rl = createInterface({ input: child.stderr });
-    rl.on('line', (line) => {
-      errorLines.push(line);
-    });
+  /** Feed a stderr line from tsc into the tracker. */
+  addStderrLine(line: string) {
+    this.errorLines.push(line);
   }
 
-  // Tick every second so the elapsed timer updates even when no projects are completing.
-  const timer = setInterval(() => {
-    if (barStarted) {
-      bar.update({ elapsed: formatElapsed() });
+  /** Stop the timer and finalize the progress bar. */
+  stop() {
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+      this.timer = null;
     }
-  }, 1000);
-
-  const result = await child;
-
-  clearInterval(timer);
-
-  if (barStarted) {
-    bar.update(totalProjects, { elapsed: formatElapsed() });
-    bar.stop();
+    if (this.barStarted) {
+      this.bar.update(this.totalProjects, { elapsed: this.formatElapsed() });
+      this.bar.stop();
+    }
   }
 
-  // Replay any error / diagnostic output so the user can see what went wrong.
-  if (errorLines.length > 0) {
-    for (const line of errorLines) {
+  /** Replay any buffered error / diagnostic output to stdout. */
+  printErrors() {
+    for (const line of this.errorLines) {
       process.stdout.write(line + '\n');
     }
   }
 
-  const elapsed = formatElapsed();
-
-  if (result.killed || result.signal) {
-    log.warning(
-      `[${type}] Type check cancelled after ${elapsed} (${completedProjects}/${totalProjects} projects).`
-    );
-  } else if (result.exitCode === 0) {
-    log.info(
-      `[${type}] Type checked ${totalProjects} projects successfully in ${elapsed} (${builtProjects} built, ${skippedProjects} up-to-date).`
-    );
-  } else {
-    log.error(
-      `[${type}] Type check failed after ${elapsed} (${completedProjects}/${totalProjects} projects).`
-    );
+  getSummary() {
+    return {
+      totalProjects: this.totalProjects,
+      completedProjects: this.completedProjects,
+      builtProjects: this.builtProjects,
+      skippedProjects: this.skippedProjects,
+      elapsed: this.formatElapsed(),
+    };
   }
-
-  return result.exitCode === 0;
 }
 
 /**

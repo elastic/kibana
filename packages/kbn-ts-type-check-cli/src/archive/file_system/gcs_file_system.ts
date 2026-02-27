@@ -37,8 +37,7 @@ export class GcsFileSystem extends AbstractFileSystem {
 
   /**
    * @param accessToken  OAuth2 access token used for all GCS operations via
-   *   native `fetch`, eliminating the ~2-3 s Python CLI startup overhead that
-   *   `gcloud` commands incur.  Obtain one with `getGcloudAccessToken()`.
+   *   native `fetch`.  Obtain one with `getGcloudAccessToken()`.
    */
   constructor(log: SomeDevLog, accessToken: string) {
     super(log);
@@ -49,9 +48,9 @@ export class GcsFileSystem extends AbstractFileSystem {
     return join(GCS_BUCKET_URI, archiveId);
   }
 
-  // ---------------------------------------------------------------------------
-  // Archive creation (unchanged — only used on CI via gcloud service account)
-  // ---------------------------------------------------------------------------
+  /*
+   * Archive creation (unchanged — only used on CI via gcloud service account)
+   */
 
   protected async archive(archivePath: string, fileListPath: string): Promise<void> {
     const tarProcess = execa('tar', getTarCreateArgs('-', fileListPath), {
@@ -80,9 +79,9 @@ export class GcsFileSystem extends AbstractFileSystem {
     await Promise.all([tarProcess, uploadProcess]);
   }
 
-  // ---------------------------------------------------------------------------
-  // Extract — stream HTTP response directly through tar extraction
-  // ---------------------------------------------------------------------------
+  /*
+   * Extract — stream HTTP response directly through tar extraction
+   */
 
   /**
    * Streams the GCS archive directly into `tar.x()` without writing a temp
@@ -142,9 +141,9 @@ export class GcsFileSystem extends AbstractFileSystem {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // hasArchive (unchanged — skipped when skipExistenceCheck is true)
-  // ---------------------------------------------------------------------------
+  /*
+   * hasArchive (unchanged — skipped when skipExistenceCheck is true)
+   */
 
   protected async hasArchive(archivePath: string): Promise<boolean> {
     const url = gsUriToHttpsUrl(archivePath);
@@ -166,9 +165,9 @@ export class GcsFileSystem extends AbstractFileSystem {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Read metadata — fetch the small JSON metadata file for a given archive
-  // ---------------------------------------------------------------------------
+  /*
+   * Read metadata — fetch the small JSON metadata file for a given archive
+   */
 
   protected async readMetadata(metadataPath: string): Promise<ArchiveMetadata | undefined> {
     const url = gsUriToHttpsUrl(metadataPath);
@@ -193,9 +192,9 @@ export class GcsFileSystem extends AbstractFileSystem {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Write metadata (unchanged — only used on CI)
-  // ---------------------------------------------------------------------------
+  /*
+   * Write metadata (unchanged — only used on CI)
+   */
 
   protected async writeMetadata(metadataPath: string, data: ArchiveMetadata): Promise<void> {
     const objectPath = metadataPath.replace(`gs://${GCS_BUCKET_NAME}/`, '');
@@ -217,9 +216,9 @@ export class GcsFileSystem extends AbstractFileSystem {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // List available commit SHAs in GCS
-  // ---------------------------------------------------------------------------
+  /*
+   * List available commit SHAs in GCS
+   */
 
   /**
    * Lists commit SHAs with archived artifacts in GCS using the JSON API.
