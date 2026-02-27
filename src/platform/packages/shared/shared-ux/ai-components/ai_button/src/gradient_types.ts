@@ -12,7 +12,6 @@ import type { AiButtonVariant } from './types';
 
 /** Options for the gradient hooks (shared by button and SVG gradient). */
 export interface AiButtonGradientOptions {
-  readonly isFilled?: boolean;
   readonly variant?: AiButtonVariant;
   readonly iconOnly?: boolean;
 }

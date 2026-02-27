@@ -20,15 +20,14 @@ import type { AiButtonIconType, AiButtonProps, AiButtonVariant } from './types';
 const resolvedIconType = (iconType: AiButtonIconType): IconType =>
   iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
+// Per design: only xs uses small icon; s and m both use medium icon.
 const getSyncedIconSize = (size?: string): 's' | 'm' => (size === 'xs' ? 's' : 'm');
 
 export const AiButtonBase = (props: AiButtonProps) => {
   const variant: AiButtonVariant = props.variant ?? 'base';
-  const isFilled = variant === 'accent';
 
   const euiButtonXsSizeCss = useAiButtonXsSizeCss();
   const { buttonCss, labelCss } = useAiButtonGradientStyles({
-    isFilled,
     variant,
     iconOnly: props.iconOnly,
   });

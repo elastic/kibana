@@ -19,6 +19,16 @@ import type {
   SvgAiGradient,
 } from './gradient_types';
 
+// EUI icons always use viewBox="0 0 16 16" regardless of rendered CSS size (s=12px, m=16px).
+// userSpaceOnUse coordinates target the viewBox, so these work at every rendered size.
+const ICON_GRADIENT_GEOMETRY = {
+  gradientUnits: 'userSpaceOnUse' as const,
+  x1: '-0.5',
+  y1: '-2.5',
+  x2: '15.5',
+  y2: '9.5',
+};
+
 const diagonalGradientStartPercent = 2.98;
 const diagonalGradientEndPercent = 66.24;
 const diagonalGradientAngle = 130;
@@ -85,7 +95,8 @@ const gradientTextCss = (cssGradient: string, hoverGradient?: string) => css`
   -webkit-text-fill-color: transparent !important;
 
   ${hoverGradient
-    ? `button:hover:not(:disabled) & {
+    ? `button:hover:not(:disabled) &,
+      button:focus-visible:not(:disabled) & {
         background: ${hoverGradient} !important;
         background-clip: text !important;
         -webkit-background-clip: text !important;
@@ -101,6 +112,7 @@ const solidTextCss = (color: string) => css`
   -webkit-text-fill-color: currentColor !important;
 `;
 
+// Uses ::after so it doesn't collide with EUI's ::before interaction overlay.
 const outlinedBorderRingCss = (borderGradient: string) => css`
   position: relative;
   border: none;
@@ -211,17 +223,15 @@ const resolveVariantStyles = (
 };
 
 export const useAiButtonGradientStyles = ({
-  isFilled,
-  variant,
+  variant = 'base',
   iconOnly,
 }: AiButtonGradientOptions = {}): AiButtonGradientStyles => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const resolvedVariant = (variant ?? (isFilled ? 'accent' : 'base')) as AiButtonVariant;
-    const buttonGradientAngle = resolveGradientAngle({ iconOnly, variant: resolvedVariant });
+    const buttonGradientAngle = resolveGradientAngle({ iconOnly, variant });
     const { buttonBackground, hoverBackground, borderGradient, foregroundColor, labelCss } =
-      resolveVariantStyles(resolvedVariant, euiTheme, buttonGradientAngle);
+      resolveVariantStyles(variant, euiTheme, buttonGradientAngle);
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
@@ -229,12 +239,14 @@ export const useAiButtonGradientStyles = ({
       color: ${foregroundColor} !important;
       ${borderGradient ? outlinedBorderRingCss(borderGradient) : ''}
 
-      &:hover:not(:disabled) {
+      &:hover:not(:disabled),
+      &:focus-visible:not(:disabled) {
         background: ${hoverBackground} !important;
-        /* EUI applies hover via an opaque ::before overlay (see _interactionStyles in _button.js),
-           which covers our gradient background. Hide it so our custom hover gradient is visible. */
+        /* EUI applies hover/active via an opaque ::before overlay
+           (euiButtonInteractionStyles in global_styling/mixins/_button).
+           Neutralising it so our custom gradient background is visible. */
         &::before {
-          display: none;
+          background-color: transparent !important;
         }
       }
       &:disabled {
@@ -243,7 +255,7 @@ export const useAiButtonGradientStyles = ({
     `;
 
     return { buttonCss, labelCss };
-  }, [isFilled, variant, iconOnly, euiTheme]);
+  }, [variant, iconOnly, euiTheme]);
 };
 
 export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): SvgAiGradient => {
@@ -271,15 +283,7 @@ export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): Svg
     return {
       iconGradientCss,
       gradientId,
-      defs: useIconGradient
-        ? {
-            gradientUnits: 'userSpaceOnUse',
-            x1: '-0.5',
-            y1: '-2.5',
-            x2: '15.5',
-            y2: '9.5',
-          }
-        : undefined,
+      defs: useIconGradient ? ICON_GRADIENT_GEOMETRY : undefined,
       colors: foregroundColors,
     };
   }, [gradientId, variant, euiTheme]);
