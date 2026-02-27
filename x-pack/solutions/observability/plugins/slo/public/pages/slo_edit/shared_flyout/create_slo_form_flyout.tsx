@@ -9,13 +9,12 @@ import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 import type { RecursivePartial } from '@kbn/utility-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
-import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
-import { SloTelemetryEventTypes } from '../../../services/telemetry';
 import { SloEditForm } from '../components/slo_edit_form';
 import { transformPartialSLODataToFormState } from '../helpers/process_slo_form_values';
 import type { FormSettings } from '../types';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export const sloEditFormFooterPortal = createHtmlPortalNode();
 
@@ -30,12 +29,13 @@ export default function CreateSLOFormFlyout({
   formSettings?: FormSettings;
 }) {
   const formInitialValues = transformPartialSLODataToFormState(initialValues);
+  const { telemetry } = usePluginContext();
 
-  useTrackMetric({
-    app: 'slo',
-    metric: SloTelemetryEventTypes.SLO_CREATE_FLYOUT_VIEWED,
-    metricType: METRIC_TYPE.COUNT,
-  });
+  useEffect(() => {
+    if (telemetry) {
+      telemetry.reportSloCreateFlyoutViewed({ sloType: formInitialValues?.indicator?.type });
+    }
+  }, [telemetry, formInitialValues?.indicator?.type]);
 
   return (
     <EuiFlyout

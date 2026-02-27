@@ -20,6 +20,11 @@ export class TelemetryClient implements ITelemetryClient {
   public reportSearchQuerySubmitted = (params: SearchQuerySubmittedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, params);
   };
+
+  public reportSloOverviewFlyoutViewed = () => {
+    this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED, {});
+  };
+
   public reportSloOverviewFlyoutSearchQueried = (params: SloOverviewFlyoutSearchQueriedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED, params);
   };

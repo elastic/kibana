@@ -34,6 +34,11 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
+const sloOverviewFlyoutViewedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED,
+  schema: {},
+};
+
 const sloOverviewFlyoutSearchQueriedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED,
   schema: {
@@ -61,6 +66,7 @@ const sloOverviewFlyoutStatusFilteredEventType: TelemetryEvent = {
 
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
+  sloOverviewFlyoutViewedEventType,
   sloOverviewFlyoutSearchQueriedEventType,
   sloOverviewFlyoutStatusFilteredEventType,
 ];

@@ -6,15 +6,25 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
+import type { IndicatorType } from '@kbn/slo-schema';
 
 export interface SloDetailsFlyoutTabChangedParams {
   tabId: string;
 }
 
-export type SloTelemetryEventParams = SloDetailsFlyoutTabChangedParams;
+export interface SloCreateFlyoutViewedParams {
+  sloType?: IndicatorType;
+}
+
+export type SloTelemetryEventParams =
+  | SloDetailsFlyoutTabChangedParams
+  | SloCreateFlyoutViewedParams
+  | Record<string, never>;
 
 export interface ISloTelemetryClient {
+  reportSloDetailsFlyoutViewed(): void;
   reportSloDetailsFlyoutTabChanged(params: SloDetailsFlyoutTabChangedParams): void;
+  reportSloCreateFlyoutViewed(params: SloCreateFlyoutViewedParams): void;
 }
 
 export enum SloTelemetryEventTypes {
@@ -26,5 +36,5 @@ export enum SloTelemetryEventTypes {
 
 export interface SloTelemetryEvent {
   eventType: SloTelemetryEventTypes;
-  schema: RootSchema<SloTelemetryEventParams>;
+  schema: RootSchema<SloTelemetryEventParams> | Record<string, never>;
 }

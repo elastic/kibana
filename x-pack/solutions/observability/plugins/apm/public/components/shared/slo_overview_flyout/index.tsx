@@ -36,7 +36,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -45,8 +45,6 @@ import { AgentIcon } from '@kbn/custom-icons';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
-import { TelemetryEventTypes } from '../../../services/telemetry';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -120,11 +118,9 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
-  useTrackMetric({
-    app: 'apm',
-    metric: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_VIEWED,
-    metricType: METRIC_TYPE.COUNT,
-  });
+  useEffect(() => {
+    telemetry.reportSloOverviewFlyoutViewed();
+  }, [telemetry]);
 
   useDebounce(
     () => {

@@ -22,15 +22,14 @@ import {
 import type { SloTabId, SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { sloDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useCallback } from 'react';
-import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-shared-plugin/public';
-import { SloTelemetryEventTypes } from '../../../services/telemetry';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   SloOverviewDetailsContent,
   SloOverviewDetailsFlyoutFooter,
 } from '../../../embeddable/slo/common/slo_overview_details';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export interface SLODetailsFlyoutProps {
   sloId: string;
@@ -65,10 +64,16 @@ export default function SLODetailsFlyout({
   initialTabId,
 }: SLODetailsFlyoutProps) {
   const { share } = useKibana().services;
-
+  const { telemetry } = usePluginContext();
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',
   });
+
+  useEffect(() => {
+    if (telemetry) {
+      telemetry.reportSloDetailsFlyoutViewed();
+    }
+  }, [telemetry]);
 
   const {
     data: slo,
@@ -79,12 +84,6 @@ export default function SLODetailsFlyout({
     sloId,
     instanceId: sloInstanceId,
     shouldRefetch: false,
-  });
-
-  useTrackMetric({
-    app: 'slo',
-    metric: SloTelemetryEventTypes.SLO_DETAILS_FLYOUT_VIEWED,
-    metricType: METRIC_TYPE.COUNT,
   });
 
   const isNotFound = isSuccess && !slo;

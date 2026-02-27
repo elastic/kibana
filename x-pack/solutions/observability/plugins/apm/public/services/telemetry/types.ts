@@ -32,10 +32,12 @@ export interface SloOverviewFlyoutStatusFilteredParams {
 export type TelemetryEventParams =
   | SearchQuerySubmittedParams
   | SloOverviewFlyoutSearchQueriedParams
-  | SloOverviewFlyoutStatusFilteredParams;
+  | SloOverviewFlyoutStatusFilteredParams
+  | Record<string, never>;
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
+  reportSloOverviewFlyoutViewed(): void;
   reportSloOverviewFlyoutSearchQueried(params: SloOverviewFlyoutSearchQueriedParams): void;
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
 }
@@ -53,5 +55,5 @@ export enum TelemetryEventTypes {
 
 export interface TelemetryEvent {
   eventType: TelemetryEventTypes;
-  schema: RootSchema<TelemetryEventParams>;
+  schema: RootSchema<TelemetryEventParams> | Record<string, never>;
 }
