@@ -113,3 +113,12 @@ export const GetAttachmentInputSchema = z.object({
   sysId: z.string().describe('The sys_id of the attachment (from the sys_attachment table)'),
 });
 export type GetAttachmentInput = z.infer<typeof GetAttachmentInputSchema>;
+
+export const DescribeTableInputSchema = z.object({
+  table: z
+    .string()
+    .describe(
+      'The name of the ServiceNow table to describe (e.g., incident, kb_knowledge, change_request)'
+    ),
+});
+export type DescribeTableInput = z.infer<typeof DescribeTableInputSchema>;

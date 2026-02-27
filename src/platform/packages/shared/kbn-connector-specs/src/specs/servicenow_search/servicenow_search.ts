@@ -31,6 +31,7 @@ import {
   ListKnowledgeBasesInputSchema,
   GetCommentsInputSchema,
   GetAttachmentInputSchema,
+  DescribeTableInputSchema,
 } from './types';
 import type {
   SearchInput,
@@ -40,6 +41,7 @@ import type {
   ListKnowledgeBasesInput,
   GetCommentsInput,
   GetAttachmentInput,
+  DescribeTableInput,
 } from './types';
 
 export const ServicenowSearch: ConnectorSpec = {
@@ -265,6 +267,25 @@ export const ServicenowSearch: ConnectorSpec = {
           contentType,
           base64: buffer.toString('base64'),
         };
+      },
+    },
+
+    describeTable: {
+      isTool: true,
+      description:
+        'Describe the schema of a ServiceNow table by listing all its fields (including inherited fields), ' +
+        'their types, labels, and constraints. Use this to understand the structure of a table before ' +
+        'querying it — for example, to know which fields to request or filter on.',
+      input: DescribeTableInputSchema,
+      handler: async (ctx, input: DescribeTableInput) => {
+        const { instanceUrl } = ctx.config as { instanceUrl: string };
+        // The /api/now/doc/table/schema endpoint returns the full flattened schema
+        // including inherited fields from parent tables, and is accessible to non-admin users.
+        const url = `${instanceUrl}/api/now/doc/table/schema/${input.table}`;
+
+        const response = await ctx.client.get(url, {});
+
+        return response.data;
       },
     },
   },

@@ -627,6 +627,54 @@ describe('ServicenowSearch', () => {
     });
   });
 
+  describe('describeTable action', () => {
+    it('should describe a table using the schema API', async () => {
+      const mockResponse = {
+        data: {
+          result: {
+            columns: {
+              assigned_to: {
+                label: 'Assigned to',
+                type: 'reference',
+                max_length: 32,
+                mandatory: false,
+                reference: 'sys_user',
+              },
+              number: {
+                label: 'Number',
+                type: 'string',
+                max_length: 40,
+                mandatory: false,
+              },
+            },
+          },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = (await ServicenowSearch.actions.describeTable.handler(mockContext, {
+        table: 'incident',
+      })) as { result: { columns: Record<string, unknown> } };
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/doc/table/schema/incident',
+        {}
+      );
+      expect(result.result.columns).toHaveProperty('assigned_to');
+      expect(result.result.columns).toHaveProperty('number');
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Access denied'));
+
+      await expect(
+        ServicenowSearch.actions.describeTable.handler(mockContext, {
+          table: 'incident',
+        })
+      ).rejects.toThrow('Access denied');
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       const mockResponse = {
