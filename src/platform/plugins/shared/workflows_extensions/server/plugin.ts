@@ -74,7 +74,10 @@ export class WorkflowsExtensionsServerPlugin
           request.url.pathname,
           coreStart.http.basePath.serverBasePath
         );
-        const emitEventFn = this.emitEventFn!;
+        const emitEventFn = this.emitEventFn;
+        if (!emitEventFn) {
+          throw new Error('Workflows extensions plugin not started: emitEvent is not available.');
+        }
         return {
           getWorkflowsClient: () => ({
             emitEvent: (triggerId: string, payload: Record<string, unknown>) =>
