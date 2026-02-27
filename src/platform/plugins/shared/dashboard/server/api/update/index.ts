@@ -9,4 +9,3 @@
 
 export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
 export { registerUpdateRoute } from './register_update_route';
-export { registerDashboardAppUpdateRoute } from './register_dashboard_app_update_route';

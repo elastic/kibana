@@ -9,4 +9,3 @@
 
 export type { DashboardReadResponseBody } from './types';
 export { registerReadRoute } from './register_read_route';
-export { registerDashboardAppReadRoute } from './register_dashboard_app_read_route';

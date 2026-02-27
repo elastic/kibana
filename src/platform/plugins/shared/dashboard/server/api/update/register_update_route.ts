@@ -14,11 +14,14 @@ import { INTERNAL_API_VERSION, commonRouteConfig } from '../constants';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
+import { DASHBOARD_API_PATH, DASHBOARD_APP_API_PATH } from '../../../common/constants';
 
-export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerUpdateRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  isDashboardAppRequest: boolean
+) {
   const updateRoute = router.put({
-    path: `${DASHBOARD_API_PATH}/{id}`,
+    path: `${isDashboardAppRequest ? DASHBOARD_APP_API_PATH : DASHBOARD_API_PATH}/{id}`,
     summary: `Replace current dashboard state with the dashboard state from request body.`,
     ...commonRouteConfig,
   });
@@ -38,18 +41,18 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
               allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
             })
           ),
-          body: getUpdateRequestBodySchema(false),
+          body: getUpdateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
           200: {
-            body: () => getUpdateResponseBodySchema(false),
+            body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const result = await update(ctx, req.params.id, req.body, false);
+        const result = await update(ctx, req.params.id, req.body, isDashboardAppRequest);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {

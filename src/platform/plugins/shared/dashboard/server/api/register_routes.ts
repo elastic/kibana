@@ -9,11 +9,11 @@
 
 import type { HttpServiceSetup } from '@kbn/core/server';
 
-import { registerCreateRoute, registerDashboardAppCreateRoute } from './create';
-import { registerDashboardAppUpdateRoute, registerUpdateRoute } from './update';
+import { registerCreateRoute } from './create';
+import { registerUpdateRoute } from './update';
 import { registerDeleteRoute } from './delete';
 import { registerSearchRoute } from './search';
-import { registerDashboardAppReadRoute, registerReadRoute } from './read';
+import { registerReadRoute } from './read';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const { versioned: versionedRouter } = http.createRouter();
@@ -23,9 +23,9 @@ export function registerRoutes(http: HttpServiceSetup) {
   // Only allows panel.type value with registered embeddable schema
   // Validate panel.config at route level
   //
-  registerCreateRoute(versionedRouter);
-  registerReadRoute(versionedRouter);
-  registerUpdateRoute(versionedRouter);
+  registerCreateRoute(versionedRouter, false);
+  registerReadRoute(versionedRouter, false);
+  registerUpdateRoute(versionedRouter, false);
   registerDeleteRoute(versionedRouter);
   registerSearchRoute(versionedRouter);
 
@@ -36,7 +36,7 @@ export function registerRoutes(http: HttpServiceSetup) {
   //
   // TODO remove these routes when all embeddable schemas are registered
   //
-  registerDashboardAppCreateRoute(versionedRouter);
-  registerDashboardAppReadRoute(versionedRouter);
-  registerDashboardAppUpdateRoute(versionedRouter);
+  registerCreateRoute(versionedRouter, true);
+  registerReadRoute(versionedRouter, true);
+  registerUpdateRoute(versionedRouter, true);
 }

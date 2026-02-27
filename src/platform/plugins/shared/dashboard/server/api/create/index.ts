@@ -9,4 +9,3 @@
 
 export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './types';
 export { registerCreateRoute } from './register_create_route';
-export { registerDashboardAppCreateRoute } from './register_dashboard_app_create_route';

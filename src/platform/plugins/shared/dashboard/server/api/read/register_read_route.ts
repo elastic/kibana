@@ -14,11 +14,14 @@ import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { stripUnmappedKeys } from '../scope_tooling';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
+import { DASHBOARD_API_PATH, DASHBOARD_APP_API_PATH } from '../../../common/constants';
 
-export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerReadRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  isDashboardAppRequest: boolean
+) {
   const readRoute = router.get({
-    path: `${DASHBOARD_API_PATH}/{id}`,
+    path: `${isDashboardAppRequest ? DASHBOARD_APP_API_PATH : DASHBOARD_API_PATH}/{id}`,
     summary: `Get a dashboard`,
     ...commonRouteConfig,
   });
@@ -38,7 +41,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         },
         response: {
           200: {
-            body: () => getReadResponseBodySchema(false),
+            body: () => getReadResponseBodySchema(isDashboardAppRequest),
           },
         },
       }),
@@ -46,7 +49,9 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
     async (ctx, req, res) => {
       try {
         const result = await read(ctx, req.params.id);
-        const { data, warnings } = stripUnmappedKeys(result.data);
+        const { data, warnings } = !isDashboardAppRequest
+          ? stripUnmappedKeys(result.data)
+          : { data: result.data, warnings: [] };
         return res.ok({
           body: {
             ...result,
