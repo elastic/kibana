@@ -352,5 +352,16 @@ describe('ResolutionClient', () => {
 
       await expect(client.getResolutionGroup('nonexistent')).rejects.toThrow(EntitiesNotFoundError);
     });
+
+    it('should throw EntitiesNotFoundError when alias points to non-existent target', async () => {
+      const aliasDoc = createEntityDoc('alias-1', 'user', 'deleted-target');
+
+      // fetchEntitiesByIds returns the alias
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
+      // search for group — target not found, only alias returned
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
+
+      await expect(client.getResolutionGroup('alias-1')).rejects.toThrow(EntitiesNotFoundError);
+    });
   });
 });
