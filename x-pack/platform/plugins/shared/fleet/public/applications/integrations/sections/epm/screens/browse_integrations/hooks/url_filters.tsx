@@ -21,7 +21,7 @@ import type {
 } from '../types';
 
 const VALID_STATUSES: IntegrationStatusFilterType[] = ['deprecated'];
-const VALID_SETUP_METHODS: SetupMethodFilterType[] = ['agentless', 'elastic_agent', 'beats'];
+const VALID_SETUP_METHODS: SetupMethodFilterType[] = ['agentless', 'elastic_agent'];
 const VALID_SIGNALS: SignalFilterType[] = Object.values(dataTypes);
 const INTEGRATIONS_QUERYPARAM_Q = 'q';
 const INTEGRATIONS_QUERYPARAM_SORT = 'sort';

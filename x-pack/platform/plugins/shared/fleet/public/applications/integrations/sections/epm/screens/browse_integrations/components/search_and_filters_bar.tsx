@@ -30,7 +30,7 @@ import type {
   SetupMethodFilterType,
   SignalFilterType,
 } from '../types';
-import { SETUP_METHOD_AGENTLESS, SETUP_METHOD_ELASTIC_AGENT, SETUP_METHOD_BEATS } from '../types';
+import { SETUP_METHOD_AGENTLESS, SETUP_METHOD_ELASTIC_AGENT } from '../types';
 import { dataTypes } from '../../../../../../../../common/constants';
 import { StatusFilter } from '../../../components/status_filter';
 
@@ -172,15 +172,6 @@ const SetupMethodFilter: React.FC<{
         key: SETUP_METHOD_ELASTIC_AGENT,
         checked: selectedMethods.includes(SETUP_METHOD_ELASTIC_AGENT) ? 'on' : undefined,
         'data-test-subj': 'browseIntegrations.searchBar.setupMethodElasticAgentOption',
-      },
-      {
-        label: i18n.translate(
-          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodBeatsOption',
-          { defaultMessage: 'Beats' }
-        ),
-        key: SETUP_METHOD_BEATS,
-        checked: selectedMethods.includes(SETUP_METHOD_BEATS) ? 'on' : undefined,
-        'data-test-subj': 'browseIntegrations.searchBar.setupMethodBeatsOption',
       },
     ],
     [selectedMethods]

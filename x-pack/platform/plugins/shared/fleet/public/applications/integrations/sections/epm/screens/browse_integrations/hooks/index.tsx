@@ -97,9 +97,7 @@ export function useBrowseIntegrationHook({
             case 'agentless':
               return card.supportsAgentless === true;
             case 'elastic_agent':
-              return card.type !== 'ui_link';
-            case 'beats':
-              return card.type === 'ui_link';
+              return card.type === 'integration' || card.type === 'input';
             default:
               return false;
           }
