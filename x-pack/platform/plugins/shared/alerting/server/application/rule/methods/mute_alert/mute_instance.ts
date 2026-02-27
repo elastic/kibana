@@ -31,7 +31,7 @@ export async function muteInstance(
   try {
     muteAlertQuerySchema.validate(query);
   } catch (error) {
-    throw Boom.badRequest(`Failed to validate body: ${error.message}`);
+    throw Boom.badRequest(`Failed to validate query: ${error.message}`);
   }
 
   const hasConditionalSnooze =

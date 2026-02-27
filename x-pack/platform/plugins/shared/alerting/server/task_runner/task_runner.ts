@@ -48,6 +48,7 @@ import type {
 } from '../../common';
 import { RuleLastRunOutcomeOrderMap } from '../../common';
 import type { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 import type { InMemoryMetrics } from '../monitoring';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -493,7 +494,7 @@ export class TaskRunner<
           `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
         );
         this.alertingEventLogger.logAlert({
-          action: 'auto-unsnooze',
+          action: EVENT_LOG_ACTIONS.autoUnsnooze,
           id: alertInstanceId,
           uuid: uuid ?? alertInstanceId,
           message: `${ruleLabel} auto-unsnoozed alert '${alertInstanceId}': ${reason}`,

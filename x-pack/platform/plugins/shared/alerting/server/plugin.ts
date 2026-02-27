@@ -129,6 +129,7 @@ export const EVENT_LOG_ACTIONS = {
   gap: 'gap',
   deleteAlerts: 'delete-alerts',
   gapAutoFillSchedule: 'gap-auto-fill-schedule',
+  autoUnsnooze: 'auto-unsnooze',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
