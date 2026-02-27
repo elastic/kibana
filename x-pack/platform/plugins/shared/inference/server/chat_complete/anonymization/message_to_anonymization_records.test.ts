@@ -55,7 +55,7 @@ describe('messageToAnonymizationRecords', () => {
     });
   });
 
-  it('Assistant message /content and /toolCalls/*/function/arguments with toolCallId', () => {
+  it('Assistant message /content and /toolCalls/*/function/arguments (toolCallId excluded)', () => {
     const msg: Message = {
       role: MessageRole.Assistant,
       content: 'See results',
@@ -74,7 +74,6 @@ describe('messageToAnonymizationRecords', () => {
 
     expect(rec).toEqual({
       '/content': 'See results',
-      '/toolCalls/0/toolCallId': 'call-1',
       '/toolCalls/0/function/arguments': 'a@example.com',
       '/toolCalls/0/function/name': 'doThing',
     });

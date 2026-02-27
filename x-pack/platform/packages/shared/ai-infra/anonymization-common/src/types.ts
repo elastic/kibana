@@ -7,6 +7,7 @@
 
 import type { z } from '@kbn/zod';
 import type {
+  AnonymizationEntityClass,
   anonymizationProfileSchema,
   anonymizationProfileRulesSchema,
   createAnonymizationProfileRequestSchema,
@@ -69,7 +70,7 @@ export type TokenSourceRef = z.infer<typeof tokenSourceRefSchema>;
 export type EffectiveFieldPolicy =
   | { action: 'deny' }
   | { action: 'allow' }
-  | { action: 'anonymize'; entityClass: string };
+  | { action: 'anonymize'; entityClass: AnonymizationEntityClass };
 
 /**
  * The effective policy for all fields after resolving one or more profiles.

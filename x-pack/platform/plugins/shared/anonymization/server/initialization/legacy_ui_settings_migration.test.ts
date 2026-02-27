@@ -26,6 +26,12 @@ describe('legacy_ui_settings_migration', () => {
     jest.clearAllMocks();
   });
 
+  it('returns empty rules when settings string is invalid JSON', () => {
+    const result = extractEnabledLegacyRules('not valid json {');
+    expect(result.regexRules).toHaveLength(0);
+    expect(result.nerRules).toHaveLength(0);
+  });
+
   it('extracts only enabled legacy regex and NER rules', () => {
     const settings = JSON.stringify({
       rules: [

@@ -81,14 +81,16 @@ export const ensureAlertsDataViewProfile = async ({
     }
   } catch (err) {
     // If another node created it concurrently, that's fine
-    if ((err as any).statusCode === 409) {
+    if ((err as { statusCode?: number })?.statusCode === 409) {
       logger.debug(
         `Security alerts data view anonymization profile already exists in space: ${namespace} (concurrent creation)`
       );
       return;
     }
     logger.error(
-      `Failed to initialize security alerts data view anonymization profile in space ${namespace}: ${err.message}`
+      `Failed to initialize security alerts data view anonymization profile in space ${namespace}: ${
+        err instanceof Error ? err.message : String(err)
+      }`
     );
     throw err;
   }

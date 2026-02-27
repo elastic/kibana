@@ -151,7 +151,7 @@ export class AnonymizationPlugin
         }
         this.logger.warn(
           `Failed resolving data view ${dataViewId} in space ${namespace}: ${
-            (err as Error).message
+            err instanceof Error ? err.message : String(err)
           }`
         );
         return [];

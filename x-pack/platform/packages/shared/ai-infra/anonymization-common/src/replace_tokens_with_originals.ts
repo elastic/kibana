@@ -24,19 +24,18 @@ export const replaceTokensWithOriginals = (
   text: string,
   tokenToOriginal: Record<string, string>
 ): string => {
-  const tokens = Object.keys(tokenToOriginal);
+  const tokens = Object.keys(tokenToOriginal).filter((t) => t.length > 0);
 
   if (tokens.length === 0) {
     return text;
   }
 
-  // Sort longest-first to prevent partial replacements
-  const sortedTokens = tokens.sort((a, b) => b.length - a.length);
+  // Sort longest-first to prevent partial replacements (spread to avoid mutating)
+  const sortedTokens = [...tokens].sort((a, b) => b.length - a.length);
 
   let result = text;
   for (const token of sortedTokens) {
     const original = tokenToOriginal[token];
-    // Replace all occurrences of the token
     result = result.split(token).join(original);
   }
 

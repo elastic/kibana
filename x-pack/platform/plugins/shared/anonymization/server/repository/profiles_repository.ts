@@ -215,11 +215,25 @@ export class ProfilesRepository {
     profileId: string,
     params: UpdateProfileParams
   ): Promise<AnonymizationProfile | null> {
-    const existing = await this.get(namespace, profileId);
-    if (!existing) {
+    let getResult: { _source?: EsProfileDocument; _seq_no?: number; _primary_term?: number };
+    try {
+      getResult = await this.esClient.get<EsProfileDocument>({
+        index: ANONYMIZATION_PROFILES_INDEX,
+        id: profileId,
+      });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return null;
+      }
+      throw err;
+    }
+
+    const existing = getResult._source;
+    if (!existing || existing.namespace !== namespace) {
       return null;
     }
 
+    const existingProfile = this.toProfile(existing);
     const now = new Date().toISOString();
     const updateDoc: Partial<EsProfileDocument> = {
       updated_at: now,
@@ -235,14 +249,16 @@ export class ProfilesRepository {
     if (params.rules !== undefined) {
       updateDoc.rules = this.rulesToEsDoc({
         fieldRules: params.rules.fieldRules,
-        regexRules: params.rules.regexRules ?? existing.rules.regexRules ?? [],
-        nerRules: params.rules.nerRules ?? existing.rules.nerRules ?? [],
+        regexRules: params.rules.regexRules ?? existingProfile.rules.regexRules ?? [],
+        nerRules: params.rules.nerRules ?? existingProfile.rules.nerRules ?? [],
       });
     }
 
     await this.esClient.update({
       index: ANONYMIZATION_PROFILES_INDEX,
       id: profileId,
+      if_seq_no: getResult._seq_no,
+      if_primary_term: getResult._primary_term,
       doc: updateDoc,
       refresh: 'wait_for',
     });
@@ -284,7 +300,7 @@ export class ProfilesRepository {
     if (targetId) {
       must.push({ term: { target_id: targetId } });
     }
-    if (filter) {
+    if (filter?.trim()) {
       must.push({
         multi_match: {
           query: filter,
@@ -344,7 +360,7 @@ export class ProfilesRepository {
       targetType: doc.target_type as 'data_view' | 'index_pattern' | 'index',
       targetId: doc.target_id,
       rules: {
-        fieldRules: doc.rules.field_rules.map((r) => ({
+        fieldRules: (doc.rules.field_rules ?? []).map((r) => ({
           field: r.field,
           allowed: r.allowed,
           anonymized: r.anonymized,

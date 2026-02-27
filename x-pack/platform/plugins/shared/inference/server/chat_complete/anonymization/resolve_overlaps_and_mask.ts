@@ -28,6 +28,10 @@ export function resolveOverlapsAndMask({
     return state;
   }
 
+  // Work on copies to avoid mutating the input state
+  const nextRecords = state.records.map((r) => ({ ...r }));
+  const newAnonymizations: AnonymizationState['anonymizations'] = [];
+
   // Group matches by record and field
   const matchesByRecordAndField = detectedMatches.reduce((acc, match) => {
     if (!acc.has(match.recordIndex)) {
@@ -44,7 +48,10 @@ export function resolveOverlapsAndMask({
   // Process each record and field
   matchesByRecordAndField.forEach((fieldMatches, recordIndex) => {
     fieldMatches.forEach((matches, fieldName) => {
-      const originalText = state.records[recordIndex][fieldName];
+      const originalText = nextRecords[recordIndex]?.[fieldName];
+      if (typeof originalText !== 'string') {
+        return;
+      }
 
       // Sort by position first, then by rule priority (lower ruleIndex = higher priority)
       const sorted = [...matches].sort((a, b) => {
@@ -73,10 +80,8 @@ export function resolveOverlapsAndMask({
         let lastIndex = 0;
 
         for (const match of nonOverlappingMatches) {
-          // Add text before the match
           result += originalText.substring(lastIndex, match.start);
 
-          // Create and add the mask
           const mask = getEntityMask(
             {
               value: match.matchValue,
@@ -87,8 +92,7 @@ export function resolveOverlapsAndMask({
           );
           result += mask;
 
-          // Add to anonymizations
-          state.anonymizations.push({
+          newAnonymizations.push({
             rule: {
               type: rules[match.ruleIndex].type,
             },
@@ -102,14 +106,14 @@ export function resolveOverlapsAndMask({
           lastIndex = match.end;
         }
 
-        // Add remaining text after the last match
         result += originalText.substring(lastIndex);
-
-        // Update the record with masked text
-        state.records[recordIndex][fieldName] = result;
+        nextRecords[recordIndex][fieldName] = result;
       }
     });
   });
 
-  return state;
+  return {
+    records: nextRecords,
+    anonymizations: [...state.anonymizations, ...newAnonymizations],
+  };
 }

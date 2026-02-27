@@ -50,6 +50,10 @@ describe('createChatCompleteApi', () => {
     }),
     index: jest.fn().mockResolvedValue({}),
     update: jest.fn().mockResolvedValue({}),
+    indices: {
+      exists: jest.fn().mockResolvedValue(true),
+      create: jest.fn().mockResolvedValue({}),
+    },
     ml: {
       inferTrainedModel: jest.fn(),
     },

@@ -6,7 +6,7 @@
  */
 
 import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-common';
-import type { EffectivePolicy } from '@kbn/anonymization-common';
+import type { EffectiveFieldPolicy, EffectivePolicy } from '@kbn/anonymization-common';
 import dedent from 'dedent';
 
 /**
@@ -45,7 +45,8 @@ export function addAnonymizationInstruction(
         ...new Set(
           Object.values(effectivePolicy)
             .filter(
-              (p): p is { action: 'anonymize'; entityClass: string } => p.action === 'anonymize'
+              (p): p is Extract<EffectiveFieldPolicy, { action: 'anonymize' }> =>
+                p.action === 'anonymize'
             )
             .map((p) => p.entityClass)
         ),

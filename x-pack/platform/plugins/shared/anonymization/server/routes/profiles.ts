@@ -25,6 +25,12 @@ import {
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
 } from '../initialization';
 
+const toErrorMessage = (err: unknown): string =>
+  err instanceof Error ? err.message : String(err);
+
+const toStatusCode = (err: unknown): number =>
+  (err as { statusCode?: number })?.statusCode ?? 500;
+
 const validateFieldRules = (fieldRules: FieldRule[]): string | undefined => {
   for (const rule of fieldRules) {
     if (rule.anonymized && !rule.entityClass) {
@@ -98,13 +104,13 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: profile });
         } catch (err) {
-          if ((err as any).statusCode === 409) {
-            return response.conflict({ body: { message: err.message } });
+          if (toStatusCode(err) === 409) {
+            return response.conflict({ body: { message: toErrorMessage(err) } });
           }
-          logger.error(`Failed to create profile: ${err.message}`);
+          logger.error(`Failed to create profile: ${toErrorMessage(err)}`);
           return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
+            body: { message: toErrorMessage(err) },
+            statusCode: toStatusCode(err),
           });
         }
       }
@@ -128,7 +134,13 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           request: {
             query: schema.object({
               filter: schema.maybe(schema.string()),
-              target_type: schema.maybe(schema.string()),
+              target_type: schema.maybe(
+                schema.oneOf([
+                  schema.literal('data_view'),
+                  schema.literal('index_pattern'),
+                  schema.literal('index'),
+                ])
+              ),
               target_id: schema.maybe(schema.string()),
               sort_field: schema.maybe(
                 schema.oneOf([
@@ -174,10 +186,10 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: result });
         } catch (err) {
-          logger.error(`Failed to find profiles: ${err.message}`);
+          logger.error(`Failed to find profiles: ${toErrorMessage(err)}`);
           return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
+            body: { message: toErrorMessage(err) },
+            statusCode: toStatusCode(err),
           });
         }
       }
@@ -214,10 +226,10 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: profile });
         } catch (err) {
-          logger.error(`Failed to get profile: ${err.message}`);
+          logger.error(`Failed to get profile: ${toErrorMessage(err)}`);
           return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
+            body: { message: toErrorMessage(err) },
+            statusCode: toStatusCode(err),
           });
         }
       }
@@ -286,10 +298,10 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: profile });
         } catch (err) {
-          logger.error(`Failed to update profile: ${err.message}`);
+          logger.error(`Failed to update profile: ${toErrorMessage(err)}`);
           return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
+            body: { message: toErrorMessage(err) },
+            statusCode: toStatusCode(err),
           });
         }
       }
@@ -326,10 +338,10 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           return response.ok({ body: { deleted: true } });
         } catch (err) {
-          logger.error(`Failed to delete profile: ${err.message}`);
+          logger.error(`Failed to delete profile: ${toErrorMessage(err)}`);
           return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
+            body: { message: toErrorMessage(err) },
+            statusCode: toStatusCode(err),
           });
         }
       }

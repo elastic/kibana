@@ -19,6 +19,7 @@ export function getAnonymizableMessageParts(message: Message) {
   if (message.role === MessageRole.Tool) {
     return {
       response: message.response,
+      ...(message.data !== undefined ? { data: message.data } : {}),
     };
   }
 
@@ -27,7 +28,6 @@ export function getAnonymizableMessageParts(message: Message) {
       content: message.content,
       toolCalls: message.toolCalls?.map((toolCall) => {
         return {
-          toolCallId: toolCall.toolCallId,
           function: toolCall.function,
         };
       }),

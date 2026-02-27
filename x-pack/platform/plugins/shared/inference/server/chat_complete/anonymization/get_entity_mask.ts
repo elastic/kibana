@@ -34,6 +34,7 @@ export function getEntityMask(
   const hash = objectHash({
     value: entity.value,
     class_name: entity.class_name,
+    field: entity.field ?? entity.class_name,
   });
   return `${entity.class_name}_${hash}`;
 }

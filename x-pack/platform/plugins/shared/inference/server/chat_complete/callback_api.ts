@@ -41,6 +41,7 @@ import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
+import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -162,9 +163,9 @@ export function createChatCompleteCallbackApi({
               }
 
               const carriedReplacementsId = metadata?.anonymization?.replacementsId;
-              // Replacements are stored in a hidden `.kibana-*` system index. Use an internal client
-              // for persistence so authorized Kibana users don't also need direct ES index privileges.
-              const repo = new ReplacementsRepository(replacementsEsClient ?? esClient, {
+              const replacementsClient = replacementsEsClient ?? esClient;
+              await ensureReplacementsIndex({ esClient: replacementsClient, logger });
+              const repo = new ReplacementsRepository(replacementsClient, {
                 encryptionKey: replacementsEncryptionKey,
               });
               let replacementsId = carriedReplacementsId;

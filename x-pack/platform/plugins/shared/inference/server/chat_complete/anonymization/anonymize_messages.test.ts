@@ -363,6 +363,7 @@ describe('anonymizeMessages', () => {
       regexWorker,
       esClient,
     });
+    const jorgeMask = getEntityMask({ class_name: 'PER', value: 'jorge', field: 'system' });
     expect(result.system).toBe(
       '<ConversationHistory>\n' +
         '  [\n' +
@@ -370,7 +371,7 @@ describe('anonymizeMessages', () => {
         '     "@timestamp": "2025-07-01T15:48:59.044Z",\n' +
         '     "message": {\n' +
         '       "role": "user",\n' +
-        '       "content": "my name is PER_ee4587b4ba681e38996a1b716facbf375786bff7"\n' +
+        `       "content": "my name is ${jorgeMask}"\n` +
         '     }\n' +
         '   }\n' +
         '  ]\n' +
@@ -421,9 +422,8 @@ describe('anonymizeMessages', () => {
 
     const maskedContent = (maskedMsgs[0] as UserMessage).content;
 
-    expect(maskedContent).toBe(
-      'my name is PER_ee4587b4ba681e38996a1b716facbf375786bff7 and I live in los angeles'
-    );
+    const perMask = getEntityMask({ class_name: 'PER', value: 'jorge', field: '/content' });
+    expect(maskedContent).toBe(`my name is ${perMask} and I live in los angeles`);
   });
 
   it('mixed text/image content preserves indices and masks correct leaf', async () => {

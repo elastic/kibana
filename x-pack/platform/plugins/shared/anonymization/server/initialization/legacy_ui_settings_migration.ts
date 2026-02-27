@@ -82,7 +82,12 @@ const toNerRule = (rule: LegacyNerRule): NerRule => {
 export const extractEnabledLegacyRules = (
   settingsString: string
 ): { regexRules: RegexRule[]; nerRules: NerRule[] } => {
-  const parsed: unknown = JSON.parse(settingsString);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(settingsString);
+  } catch {
+    return { regexRules: [], nerRules: [] };
+  }
   const ruleList = isRecord(parsed) && Array.isArray(parsed.rules) ? parsed.rules : [];
 
   const enabledRules: LegacyRule[] = [];
@@ -139,7 +144,7 @@ export const migrateLegacyUiSettingsIntoGlobalProfile = async ({
   } catch (err) {
     logger.warn(
       `Failed migrating legacy anonymization UI settings in space ${namespace}: ${
-        (err as Error).message
+        err instanceof Error ? err.message : String(err)
       }`
     );
     return false;

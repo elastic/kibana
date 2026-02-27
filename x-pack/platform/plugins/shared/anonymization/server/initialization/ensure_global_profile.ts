@@ -11,6 +11,7 @@ import { ensureGlobalAnonymizationProfile } from './global_profile_initializer';
 import { migrateLegacyUiSettingsIntoGlobalProfile } from './legacy_ui_settings_migration';
 
 const ENSURE_GLOBAL_PROFILE_CACHE_MS = 60_000;
+const MAX_CACHED_NAMESPACES = 1000;
 const ensuredStateByNamespace = new Map<
   string,
   {
@@ -18,6 +19,23 @@ const ensuredStateByNamespace = new Map<
     migratedLegacySettings: boolean;
   }
 >();
+
+const evictOldestIfNeeded = () => {
+  if (ensuredStateByNamespace.size < MAX_CACHED_NAMESPACES) {
+    return;
+  }
+  let oldestKey: string | undefined;
+  let oldestTime = Infinity;
+  for (const [key, state] of ensuredStateByNamespace) {
+    if (state.lastEnsuredAt < oldestTime) {
+      oldestTime = state.lastEnsuredAt;
+      oldestKey = key;
+    }
+  }
+  if (oldestKey) {
+    ensuredStateByNamespace.delete(oldestKey);
+  }
+};
 
 export const ensureGlobalProfileForNamespace = async ({
   namespace,
@@ -45,6 +63,7 @@ export const ensureGlobalProfileForNamespace = async ({
       logger,
     });
 
+    evictOldestIfNeeded();
     ensuredStateByNamespace.set(namespace, {
       lastEnsuredAt: now,
       migratedLegacySettings,
@@ -66,6 +85,7 @@ export const ensureGlobalProfileForNamespace = async ({
     logger,
   });
 
+  evictOldestIfNeeded();
   ensuredStateByNamespace.set(namespace, {
     lastEnsuredAt: now,
     migratedLegacySettings: currentState?.migratedLegacySettings ?? false,

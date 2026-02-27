@@ -13,17 +13,32 @@ import {
 } from '@kbn/anonymization-common';
 import { apiPrivileges } from '@kbn/anonymization-plugin/common';
 import { ReplacementsRepository } from './replacements_repository';
+import { ensureReplacementsIndex } from './replacements_index';
 
 const API_VERSION = '1';
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
 
+const toErrorMessage = (err: unknown): string =>
+  err instanceof Error ? err.message : String(err);
+
+const toStatusCode = (err: unknown): number =>
+  (err as { statusCode?: number })?.statusCode ?? 500;
+
+let replacementsIndexEnsured = false;
+
 const resolveReplacementsContext = async (
   context: RequestHandlerContext,
-  options: { encryptionKey: string }
+  options: { encryptionKey: string; logger: Logger }
 ) => {
   const coreContext = await context.core;
   const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  if (!replacementsIndexEnsured) {
+    await ensureReplacementsIndex({ esClient, logger: options.logger });
+    replacementsIndexEnsured = true;
+  }
+
   const repo = new ReplacementsRepository(esClient, options);
   return { namespace, repo };
 };
@@ -57,7 +72,10 @@ export const registerReplacementsRoutes = (
       },
       async (context, request, response) => {
         try {
-          const { namespace, repo } = await resolveReplacementsContext(context, options);
+          const { namespace, repo } = await resolveReplacementsContext(context, {
+            ...options,
+            logger,
+          });
           const replacements = await repo.get(namespace, request.params.id);
 
           if (!replacements) {
@@ -72,10 +90,10 @@ export const registerReplacementsRoutes = (
             },
           });
         } catch (err) {
-          logger.error(`Failed to resolve replacements: ${err.message}`);
+          logger.error(`Failed to resolve replacements: ${toErrorMessage(err)}`);
           return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
+            body: { message: toErrorMessage(err) },
+            statusCode: toStatusCode(err),
           });
         }
       }
@@ -107,7 +125,10 @@ export const registerReplacementsRoutes = (
       async (context, request, response) => {
         try {
           const body = request.body as DeanonymizeWithReplacementsRequestBody;
-          const { namespace, repo } = await resolveReplacementsContext(context, options);
+          const { namespace, repo } = await resolveReplacementsContext(context, {
+            ...options,
+            logger,
+          });
           const replacements = await repo.get(namespace, body.replacementsId);
 
           if (!replacements) {
@@ -121,10 +142,10 @@ export const registerReplacementsRoutes = (
 
           return response.ok({ body: { text: deanonymizedText } });
         } catch (err) {
-          logger.error(`Failed to deanonymize text: ${err.message}`);
+          logger.error(`Failed to deanonymize text: ${toErrorMessage(err)}`);
           return response.customError({
-            body: { message: err.message },
-            statusCode: err.statusCode ?? 500,
+            body: { message: toErrorMessage(err) },
+            statusCode: toStatusCode(err),
           });
         }
       }

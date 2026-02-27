@@ -26,7 +26,16 @@ const NER_DOCS_URL_DEPLOY_MODEL =
 function chunkText(text: string, maxChars = MAX_TOKENS_PER_DOC): string[] {
   const chunks: string[] = [];
   for (let i = 0; i < text.length; i += maxChars) {
-    chunks.push(text.slice(i, i + maxChars));
+    let end = Math.min(i + maxChars, text.length);
+    // Avoid splitting a UTF-16 surrogate pair: if the boundary falls between
+    // a high surrogate (0xD800–0xDBFF) and its low surrogate, back up one unit.
+    if (end < text.length) {
+      const code = text.charCodeAt(end - 1);
+      if (code >= 0xd800 && code <= 0xdbff) {
+        end--;
+      }
+    }
+    chunks.push(text.slice(i, end));
   }
   return chunks;
 }

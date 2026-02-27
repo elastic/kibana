@@ -7,13 +7,13 @@
 
 import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationProfile } from '@kbn/anonymization-common';
 import { ProfilesRepository } from './profiles_repository';
 
 const createRepository = () => {
   const esClientMock = {
     search: jest.fn(),
     index: jest.fn(),
+    get: jest.fn(),
     update: jest.fn(),
   };
 
@@ -90,50 +90,57 @@ describe('ProfilesRepository.create', () => {
 describe('ProfilesRepository.update', () => {
   it('preserves regex and NER rules when omitted from update payload', async () => {
     const { repository, esClientMock } = createRepository();
-    const getSpy = jest.spyOn(repository, 'get');
 
-    const existingProfile: AnonymizationProfile = {
+    const esDoc = {
       id: 'profile-id',
       name: 'Existing Profile',
-      targetType: 'data_view',
-      targetId: 'security-solution-default',
+      target_type: 'data_view',
+      target_id: 'security-solution-default',
       rules: {
-        fieldRules: [{ field: 'host.name', allowed: true, anonymized: false }],
-        regexRules: [
+        field_rules: [{ field: 'host.name', allowed: true, anonymized: false }],
+        regex_rules: [
           {
             id: 'regex-1',
-            type: 'regex' as const,
-            entityClass: 'EMAIL',
+            type: 'regex',
+            entity_class: 'EMAIL',
             pattern: '.*',
             enabled: true,
           },
         ],
-        nerRules: [
+        ner_rules: [
           {
             id: 'ner-1',
-            type: 'ner' as const,
-            allowedEntityClasses: ['PER'],
+            type: 'ner',
+            allowed_entity_classes: ['PER'],
             enabled: true,
           },
         ],
       },
-      saltId: 'salt-default',
       namespace: 'default',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: 'tester',
-      updatedBy: 'tester',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      created_by: 'tester',
+      updated_by: 'tester',
     };
 
-    const updatedProfile = {
-      ...existingProfile,
+    const updatedEsDoc = {
+      ...esDoc,
       rules: {
-        ...existingProfile.rules,
-        fieldRules: [{ field: 'host.name', allowed: false, anonymized: false }],
+        ...esDoc.rules,
+        field_rules: [{ field: 'host.name', allowed: false, anonymized: false }],
       },
     };
 
-    getSpy.mockResolvedValueOnce(existingProfile).mockResolvedValueOnce(updatedProfile);
+    esClientMock.get
+      .mockResolvedValueOnce({
+        _source: esDoc,
+        _seq_no: 1,
+        _primary_term: 1,
+      })
+      .mockResolvedValueOnce({
+        _source: updatedEsDoc,
+      });
+
     esClientMock.update.mockResolvedValueOnce({});
 
     await repository.update('default', 'profile-id', {
@@ -145,6 +152,8 @@ describe('ProfilesRepository.update', () => {
 
     expect(esClientMock.update).toHaveBeenCalledWith(
       expect.objectContaining({
+        if_seq_no: 1,
+        if_primary_term: 1,
         doc: expect.objectContaining({
           rules: expect.objectContaining({
             field_rules: [

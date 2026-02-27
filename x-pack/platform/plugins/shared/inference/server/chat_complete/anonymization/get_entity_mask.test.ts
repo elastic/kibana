@@ -61,5 +61,16 @@ describe('getEntityMask', () => {
 
       expect(mask1).not.toBe(mask2);
     });
+
+    it('returns different masks for same value when field differs (legacy hash includes field)', () => {
+      const mask1 = getEntityMask({ class_name: 'HOST_NAME', value: 'server-a', field: 'host.name' });
+      const mask2 = getEntityMask({
+        class_name: 'HOST_NAME',
+        value: 'server-a',
+        field: 'source.host',
+      });
+
+      expect(mask1).not.toBe(mask2);
+    });
   });
 });
