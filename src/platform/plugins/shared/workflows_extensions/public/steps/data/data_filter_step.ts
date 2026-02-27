@@ -12,6 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { dataFilterStepCommonDefinition, DataFilterStepTypeId } from '../../../common/steps/data';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
+/** Wrap markdown/code content so ICU treats it as literal (avoids FORMAT_ERROR on # and {}) */
+const literal = (s: string) => `'${s.replace(/'/g, "''")}'`;
+
 export const dataFilterStepDefinition: PublicStepDefinition = {
   ...dataFilterStepCommonDefinition,
   icon: React.lazy(() =>
@@ -37,7 +40,7 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
     }),
     examples: [
       i18n.translate('workflowsExtensions.dataFilterStep.documentation.example1', {
-        defaultMessage: `## Filter by single field
+        defaultMessage: literal(`## Filter by single field
 \`\`\`yaml
 - name: get-active-incidents
   type: ${DataFilterStepTypeId}
@@ -46,11 +49,11 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
     condition: "item.state: active"
 
 # Output: Array of items where state equals "active"
-\`\`\``,
+\`\`\``),
       }),
 
       i18n.translate('workflowsExtensions.dataFilterStep.documentation.example2', {
-        defaultMessage: `## Filter with complex KQL condition
+        defaultMessage: literal(`## Filter with complex KQL condition
 \`\`\`yaml
 - name: filter-critical-alerts
   type: ${DataFilterStepTypeId}
@@ -59,11 +62,11 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
     condition: "item.status: active AND item.severity > 2"
 
 # Output: Array of active alerts with severity greater than 2
-\`\`\``,
+\`\`\``),
       }),
 
       i18n.translate('workflowsExtensions.dataFilterStep.documentation.example3', {
-        defaultMessage: `## Filter with limit for performance
+        defaultMessage: literal(`## Filter with limit for performance
 \`\`\`yaml
 - name: get-recent-errors
   type: ${DataFilterStepTypeId}
@@ -73,11 +76,11 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
     limit: 10
 
 # Output: First 10 matching items (early exit optimization)
-\`\`\``,
+\`\`\``),
       }),
 
       i18n.translate('workflowsExtensions.dataFilterStep.documentation.example4', {
-        defaultMessage: `## Chain filter with count using Liquid
+        defaultMessage: literal(`## Chain filter with count using Liquid
 \`\`\`yaml
 - name: filter-enabled
   type: ${DataFilterStepTypeId}
@@ -89,11 +92,11 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
   type: console
   with:
     message: "Matched {{steps.filter-enabled.output | size}} out of {{steps.fetch_data.output | size}} items"
-\`\`\``,
+\`\`\``),
       }),
 
       i18n.translate('workflowsExtensions.dataFilterStep.documentation.example5', {
-        defaultMessage: `## Filter using index
+        defaultMessage: literal(`## Filter using index
 \`\`\`yaml
 - name: get-first-ten
   type: ${DataFilterStepTypeId}
@@ -102,11 +105,11 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
     condition: "index < 10"
 
 # Output: First 10 items from the array
-\`\`\``,
+\`\`\``),
       }),
 
       i18n.translate('workflowsExtensions.dataFilterStep.documentation.example6', {
-        defaultMessage: `## Filter with wildcards
+        defaultMessage: literal(`## Filter with wildcards
 \`\`\`yaml
 - name: find-error-messages
   type: ${DataFilterStepTypeId}
@@ -115,7 +118,7 @@ export const dataFilterStepDefinition: PublicStepDefinition = {
     condition: "item.message: *error* OR item.message: *failed*"
 
 # Output: Items where message contains "error" or "failed"
-\`\`\``,
+\`\`\``),
       }),
     ],
   },
