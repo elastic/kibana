@@ -37,10 +37,32 @@ function buildSecretsFromConnectorSpec(
     return typeId === 'bearer';
   });
 
+  const hasAzureSharedKeyAuth = connectorSpec.auth?.types.some((authType) => {
+    const typeId = typeof authType === 'string' ? authType : authType.type;
+    return typeId === 'azure_shared_key';
+  });
+
   const secrets: Record<string, string> = {};
   if (hasBearerAuth) {
     secrets.authType = 'bearer';
     secrets.token = credentials;
+  } else if (hasAzureSharedKeyAuth) {
+    const colonIndex = credentials.indexOf(':');
+    if (colonIndex < 0) {
+      throw new Error(
+        'Azure Blob credentials must be in the form accountName:accountKey (storage account name and key separated by a colon).'
+      );
+    }
+    const accountName = credentials.slice(0, colonIndex).trim();
+    const accountKey = credentials.slice(colonIndex + 1).trim();
+    if (!accountName || !accountKey) {
+      throw new Error(
+        'Azure Blob credentials must be in the form accountName:accountKey; both account name and key must be non-empty.'
+      );
+    }
+    secrets.authType = 'azure_shared_key';
+    secrets.accountName = accountName;
+    secrets.accountKey = accountKey;
   } else {
     const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
       const typeId = typeof authType === 'string' ? authType : authType.type;
@@ -114,6 +136,7 @@ export const createStackConnector = async (
     connectorConfig = mcpConnectorConfig;
     secrets = buildSecretsFromMCPConnectorConfig(mcpConnectorConfig, credentials);
   } else {
+    connectorConfig = (stackConnectorConfig.config as Record<string, unknown>) ?? {};
     secrets = buildSecretsFromConnectorSpec(connectorType, credentials);
   }
 

@@ -22,8 +22,8 @@ Azure Blob Storage connectors have the following configuration properties:
 Storage account URL
 :   The blob service endpoint for your storage account (e.g. `https://myaccount.blob.core.windows.net`). Find this in the Azure Portal under your storage account **Endpoints**.
 
-Bearer Token (Azure AD / Entra ID)
-:   An OAuth 2.0 access token from Microsoft Entra ID (formerly Azure AD) with permission to access the storage account. The connector sends this in the `Authorization: Bearer` header. See [Get API credentials](#azure-blob-api-credentials) for how to obtain a token.
+Storage account name and key (Shared Key)
+:   The connector uses **Shared Key** authentication. Provide your storage account name and one of its account keys (from Azure Portal → Storage account → **Access keys**). The connector signs each request with HMAC-SHA256 per the [Azure REST API](https://learn.microsoft.com/en-us/rest/api/storageservices/authorize-with-shared-key). When creating a connector via the data source API, credentials must be in the form `accountName:accountKey` (one line, first colon separates name from key; the key is base64 and must not contain colons). See [Get API credentials](#azure-blob-api-credentials).
 
 ## Test connectors [azure-blob-action-configuration]
 
@@ -56,12 +56,11 @@ Get blob properties
 
 ## Get API credentials [azure-blob-api-credentials]
 
-To use the Azure Blob Storage connector, you need a **Microsoft Entra ID (Azure AD) access token** with the appropriate role on your storage account (e.g. **Storage Blob Data Reader** or **Storage Blob Data Contributor**).
+The connector uses **Shared Key** (storage account key) authentication.
 
 1. In the [Azure Portal](https://portal.azure.com), open your storage account.
-2. Assign the desired role to your user or app (e.g. **Access control (IAM)** > **Add role assignment** > **Storage Blob Data Reader**).
-3. Obtain an OAuth 2.0 access token:
-   - **For user auth**: Use [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/) (`az account get-access-token --resource https://storage.azure.com/`) or an interactive OAuth flow.
-   - **For app auth**: Use the [OAuth 2.0 client credentials flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow) with scope `https://storage.azure.com/.default`. Register an app in Entra ID, create a client secret, and request a token from `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token`.
+2. Go to **Security + networking** → **Access keys** (or **Storage account** → **Access keys**).
+3. Copy the **Storage account name** (e.g. `myaccount`) and one of the **Key** values (key1 or key2). The key is a base64-encoded string.
+4. When creating the connector via the UI, enter the account name and key in the configured fields. When using the data source creation API, pass credentials as a single string in the form `accountName:accountKey` (e.g. `myaccount:base64key...`); the first colon separates the name from the key, so the key itself must not contain colons.
 
-For details, see [Authorize with Microsoft Entra ID](https://learn.microsoft.com/en-us/rest/api/storageservices/authorize-with-azure-active-directory).
+For details, see [Authorize with Shared Key](https://learn.microsoft.com/en-us/rest/api/storageservices/authorize-with-shared-key).

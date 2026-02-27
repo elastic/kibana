@@ -473,5 +473,93 @@ describe('createStackConnector', () => {
 
       expect(result).toEqual(mockStackConnector);
     });
+
+    it('should create Azure Blob connector with colon-delimited accountName:accountKey', async () => {
+      const mockStackConnector = {
+        id: 'azure-blob-1',
+        name: '.azure-blob',
+        actionTypeId: '.azure-blob',
+      };
+
+      const azureBlobConnectorConfig: StackConnectorConfig = {
+        type: '.azure-blob',
+        config: { accountUrl: 'https://myaccount.blob.core.windows.net' },
+        importedTools: undefined,
+      };
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      const accountName = 'myaccount';
+      const accountKey = 'dGVzdC1rZXktMzItYnl0ZXMtbG9uZyEhISEhISEhISEhISE=';
+      const credentials = `${accountName}:${accountKey}`;
+
+      const result = await createStackConnector(
+        mockActions as any,
+        mockRequest,
+        MOCK_DATA_SOURCE_NAME,
+        azureBlobConnectorConfig,
+        credentials
+      );
+
+      expect(result).toEqual(mockStackConnector);
+      expect(mockActionsClient.create).toHaveBeenCalledWith({
+        action: {
+          name: MOCK_DATA_SOURCE_NAME,
+          actionTypeId: '.azure-blob',
+          config: { accountUrl: 'https://myaccount.blob.core.windows.net' },
+          secrets: {
+            authType: 'azure_shared_key',
+            accountName,
+            accountKey,
+          },
+        },
+      });
+    });
+
+    it('should throw when Azure Blob credentials have no colon', async () => {
+      const azureBlobConnectorConfig: StackConnectorConfig = {
+        type: '.azure-blob',
+        config: { accountUrl: 'https://myaccount.blob.core.windows.net' },
+        importedTools: undefined,
+      };
+
+      await expect(
+        createStackConnector(
+          mockActions as any,
+          mockRequest,
+          MOCK_DATA_SOURCE_NAME,
+          azureBlobConnectorConfig,
+          'no-colon-here'
+        )
+      ).rejects.toThrow(/accountName:accountKey/);
+    });
+
+    it('should throw when Azure Blob credentials have empty account name or key', async () => {
+      const azureBlobConnectorConfig: StackConnectorConfig = {
+        type: '.azure-blob',
+        config: { accountUrl: 'https://myaccount.blob.core.windows.net' },
+        importedTools: undefined,
+      };
+
+      await expect(
+        createStackConnector(
+          mockActions as any,
+          mockRequest,
+          MOCK_DATA_SOURCE_NAME,
+          azureBlobConnectorConfig,
+          ':keyonly'
+        )
+      ).rejects.toThrow(/both account name and key must be non-empty/);
+
+      await expect(
+        createStackConnector(
+          mockActions as any,
+          mockRequest,
+          MOCK_DATA_SOURCE_NAME,
+          azureBlobConnectorConfig,
+          'nameonly:'
+        )
+      ).rejects.toThrow(/both account name and key must be non-empty/);
+    });
   });
 });

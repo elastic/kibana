@@ -33,7 +33,7 @@ Fill in the generated spec stub with actions, handlers, auth config, and tests.
 - `'api_key_header'` — for services that use API key authentication via a custom header.
 - `'oauth_client_credentials'` — for services that use OAuth 2.0 Client Credentials flow (e.g., Microsoft/Azure services like SharePoint). **Note:** requires multi-field credential input (clientId, clientSecret, tenantId).
 
-**IMPORTANT:** Check which auth types the `buildSecretsFromConnectorSpec` function in `x-pack/platform/plugins/shared/data_sources/server/utils/create_stack_connector.ts` supports before choosing. Currently it only handles `bearer` and `api_key_header` for non-MCP connectors.
+**IMPORTANT:** Check which auth types the `buildSecretsFromConnectorSpec` function in `x-pack/platform/plugins/shared/data_sources/server/utils/create_stack_connector.ts` supports before choosing. It currently handles `bearer`, `azure_shared_key` (credentials as `accountName:accountKey`), and `api_key_header` for non-MCP connectors.
 
 ### SubActions
 

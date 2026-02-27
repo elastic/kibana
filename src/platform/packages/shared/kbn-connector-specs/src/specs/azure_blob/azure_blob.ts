@@ -12,7 +12,7 @@
  *
  * Integrates with Azure Blob Storage via the Blob Service REST API.
  * Supports listing containers, listing blobs, getting blob content/properties.
- * Auth: Bearer (Microsoft Entra ID / Azure AD token).
+ * Auth: Shared Key (storage account name + account key).
  *
  * @see https://learn.microsoft.com/en-us/rest/api/storageservices/blob-service-rest-api
  */
@@ -82,7 +82,7 @@ export const AzureBlob: ConnectorSpec = {
   },
 
   auth: {
-    types: ['bearer'],
+    types: ['azure_shared_key'],
     headers: {
       'x-ms-version': AZURE_BLOB_API_VERSION,
     },

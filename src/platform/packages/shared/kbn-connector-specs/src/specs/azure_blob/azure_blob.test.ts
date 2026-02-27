@@ -31,6 +31,7 @@ describe('AzureBlob', () => {
     expect(AzureBlob).toBeDefined();
     expect(AzureBlob.metadata.id).toBe('.azure-blob');
     expect(AzureBlob.metadata.displayName).toBe('Azure Blob Storage');
+    expect(AzureBlob.auth?.types).toEqual(['azure_shared_key']);
   });
 
   describe('listContainers action', () => {
