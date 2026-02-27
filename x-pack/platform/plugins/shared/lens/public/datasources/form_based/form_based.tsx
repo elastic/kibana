@@ -732,10 +732,9 @@ export function getFormBasedDatasource({
               fieldsPerColumn[visibleColumnId].push(column.sourceField);
             }
           });
-          return visibleColumnIds.map((colId) => ({
+          return visibleColumnIds.map((colId, i) => ({
             columnId: colId,
             fields: [...new Set(fieldsPerColumn[colId] || [])],
-            operationType: layer.columns[colId]?.operationType,
           }));
         },
         isTextBasedLanguage: () => false,
