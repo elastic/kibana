@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import type { UnifiedTabsProps } from '@kbn/unified-tabs';
+import { UnifiedTabs, type TabItem } from '@kbn/unified-tabs';
 import type { TextObject } from '../../../../common/text_object';
 
 import {
@@ -45,6 +47,34 @@ import { consoleEditorPanelStyles, useResizerButtonStyles } from '../styles';
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
 const DEBOUNCE_DELAY = 500;
+
+type EditorTabId = 'request' | 'response' | 'settings';
+
+const EDITOR_TABS: Array<{ readonly id: EditorTabId; readonly label: string }> = [
+  {
+    id: 'request',
+    label: i18n.translate('console.editor.tabs.requestLabel', {
+      defaultMessage: 'One',
+    }),
+  },
+  {
+    id: 'response',
+    label: i18n.translate('console.editor.tabs.responseLabel', {
+      defaultMessage: 'Two',
+    }),
+  },
+  {
+    id: 'settings',
+    label: i18n.translate('console.editor.tabs.settingsLabel', {
+      defaultMessage: 'Three',
+    }),
+  },
+];
+
+const UNIFIED_TAB_ITEMS: TabItem[] = EDITOR_TABS.map((tab) => ({
+  id: tab.id,
+  label: tab.label,
+}));
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -92,6 +122,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     services: { storage, objectStorageClient },
   } = useServicesContext();
   const styles = useStyles();
+  console.log('inputEditorValue', inputEditorValue);
 
   const { currentTextObject, customParsedRequestsProvider } = useEditorReadContext();
 
@@ -104,6 +135,14 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const editorDispatch = useEditorActionContext();
 
   const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
+  // const [selectedTabId, setSelectedTabId] = useState<EditorTabId>('request');
+  const [{ managedItems, managedSelectedItemId }, setState] = useState<{
+    managedItems: UnifiedTabsProps['items'];
+    managedSelectedItemId: UnifiedTabsProps['selectedItemId'];
+  }>({
+    managedItems: [{ label: 'Untitled', id: '1' }],
+    managedSelectedItemId: '1',
+  });
 
   useEffect(() => {
     const debouncedSetFechingAutocompleteEntities = debounce(
@@ -167,7 +206,29 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   return (
     <>
-      hi
+      <UnifiedTabs
+        items={managedItems}
+        selectedItemId={managedSelectedItemId}
+        recentlyClosedItems={[]}
+        maxItemsCount={UNIFIED_TAB_ITEMS.length}
+        services={{ core: {} }}
+        createItem={() => ({
+          id: `${Date.now()}`,
+          label: i18n.translate('console.editor.tabs.newTabLabel', {
+            defaultMessage: 'New tab',
+          }),
+        })}
+        onClearRecentlyClosed={() => {}}
+        onEBTEvent={() => {}}
+        onChanged={(nextState) => {
+          console.log('nextState', nextState);
+          setState({
+            managedItems: nextState.items,
+            managedSelectedItemId: nextState.selectedItem?.id,
+          });
+        }}
+        data-test-subj="consoleEditorTabs"
+      />
       {fetchingAutocompleteEntities ? (
         <div css={styles.requestProgressBarContainer}>
           <EuiProgress size="xs" color="accent" position="absolute" />
