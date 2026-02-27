@@ -8,7 +8,7 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { GetTokenOpts } from '@kbn/connector-specs';
+import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
@@ -51,6 +51,8 @@ async function handleOAuth401Error({
   logger,
   configurationUtilities,
   axiosInstance,
+  authMode,
+  profileUid,
 }: {
   error: AxiosErrorWithRetry;
   connectorId: string;
@@ -59,6 +61,8 @@ async function handleOAuth401Error({
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   axiosInstance: AxiosInstance;
+  authMode?: AuthMode;
+  profileUid?: string;
 }): Promise<never | AxiosInstance> {
   // Prevent retry loops - only attempt refresh once per request
   if (error.config._retry) {
@@ -92,6 +96,8 @@ async function handleOAuth401Error({
     },
     connectorTokenClient,
     scope,
+    authMode,
+    profileUid,
     forceRefresh: true,
   });
 
@@ -113,6 +119,8 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   connectorId: string;
   connectorTokenClient?: ConnectorTokenClientContract;
   secrets: ValidatedSecrets;
+  authMode?: AuthMode;
+  profileUid?: string;
 }
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
@@ -127,6 +135,8 @@ export const getAxiosInstanceWithAuth = ({
     connectorId,
     secrets,
     connectorTokenClient,
+    authMode,
+    profileUid,
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
@@ -184,6 +194,8 @@ export const getAxiosInstanceWithAuth = ({
                   logger,
                   configurationUtilities,
                   axiosInstance,
+                  authMode,
+                  profileUid,
                 });
               }
               return Promise.reject(error);
@@ -224,6 +236,8 @@ export const getAxiosInstanceWithAuth = ({
               },
               connectorTokenClient,
               scope: opts.scope,
+              authMode,
+              profileUid,
             });
           }
 

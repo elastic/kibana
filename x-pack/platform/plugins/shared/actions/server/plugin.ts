@@ -222,7 +222,6 @@ const includedHiddenTypes = [
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
 export class ActionsPlugin
@@ -328,15 +327,24 @@ export class ActionsPlugin
     this.security = plugins.security;
     this.spaces = plugins.spaces;
 
+    const authorizationCodeEnabled =
+      this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
+    if (authorizationCodeEnabled) {
+      includedHiddenTypes.push(USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE);
+    }
+
     this.authTypeRegistry = new AuthTypeRegistry();
-    registerAuthTypes(this.authTypeRegistry);
+    registerAuthTypes(this.authTypeRegistry, {
+      authorizationCodeEnabled,
+    });
 
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
       plugins.taskManager.index,
-      this.inMemoryConnectors
+      this.inMemoryConnectors,
+      authorizationCodeEnabled
     );
 
     const usageCollection = plugins.usageCollection;
@@ -401,8 +409,9 @@ export class ActionsPlugin
       });
     }
 
-    // Initialize OAuth state cleanup task
-    initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+    if (authorizationCodeEnabled) {
+      initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+    }
 
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
@@ -427,6 +436,7 @@ export class ActionsPlugin
       logger: this.logger,
       core,
       oauthRateLimiter,
+      authorizationCodeEnabled,
     });
 
     return {
@@ -526,6 +536,8 @@ export class ActionsPlugin
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       spaceId?: string;
     }) => {
+      const authorizationCodeEnabled =
+        this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
@@ -560,6 +572,8 @@ export class ActionsPlugin
         spaces: this.spaces?.spacesService,
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
+        getCurrentUserProfileIdFromAPIKey,
+        authorizationCodeEnabled,
       });
     };
 
@@ -640,6 +654,31 @@ export class ActionsPlugin
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
+    const getCurrentUserProfileIdFromAPIKey = async (
+      request: KibanaRequest
+    ): Promise<string | undefined> => {
+      try {
+        const response = await core.elasticsearch.client
+          .asScoped(request)
+          .asCurrentUser.security.getApiKey({
+            with_profile_uid: true,
+          });
+        if (response.api_keys && response.api_keys.length > 0) {
+          return response.api_keys[0].profile_uid;
+        }
+        logger.debug(
+          `No API keys were returned from query, cannot retrieve associated profile id.`
+        );
+      } catch (error) {
+        logger.debug(
+          `Failed to retrieve API key for user profile retrieval: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+      return undefined;
+    };
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
@@ -664,6 +703,7 @@ export class ActionsPlugin
         return instantiateAuthorization(request);
       },
       analyticsService: core.analytics,
+      getCurrentUserProfileIdFromAPIKey,
     });
 
     taskRunnerFactory!.initialize({
@@ -680,7 +720,11 @@ export class ActionsPlugin
     this.eventLogService!.isEsContextReady()
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
-        scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        const authorizationCodeEnabled =
+          this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
+        if (authorizationCodeEnabled) {
+          scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        }
       })
       .catch(() => {});
 
@@ -833,6 +877,7 @@ export class ActionsPlugin
       logger,
       getAxiosInstanceWithAuthHelper,
       spaces,
+      actionsConfig,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -842,6 +887,8 @@ export class ActionsPlugin
       const coreContext = await context.core;
       const inMemoryConnectors = getInMemoryConnectors();
 
+      const authorizationCodeEnabled =
+        actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
       return {
         getActionsClient: () => {
           if (isESOCanEncrypt !== true) {
@@ -890,6 +937,7 @@ export class ActionsPlugin
             spaces: spaces?.spacesService,
             isESOCanEncrypt: isESOCanEncrypt!,
             encryptedSavedObjectsClient,
+            authorizationCodeEnabled,
           });
         },
         listTypes: (featureId?: string) => {

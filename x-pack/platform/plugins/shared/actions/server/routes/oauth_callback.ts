@@ -27,56 +27,60 @@ import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authori
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 
-const querySchema = schema.object({
-  code: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate('xpack.actions.oauthCallback.codeParamDescription', {
-          defaultMessage: 'The authorization code returned by the OAuth provider.',
-        }),
-      },
-    })
-  ),
-  state: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate('xpack.actions.oauthCallback.stateParamDescription', {
-          defaultMessage: 'The state parameter for CSRF protection.',
-        }),
-      },
-    })
-  ),
-  error: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate('xpack.actions.oauthCallback.errorParamDescription', {
-          defaultMessage: 'Error code if the authorization failed.',
-        }),
-      },
-    })
-  ),
-  error_description: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate(
-          'xpack.actions.oauthCallback.errorDescriptionParamDescription',
-          {
-            defaultMessage: 'Human-readable error description.',
-          }
-        ),
-      },
-    })
-  ),
-  session_state: schema.maybe(
-    schema.string({
-      meta: {
-        description: i18n.translate('xpack.actions.oauthCallback.sessionStateParamDescription', {
-          defaultMessage: 'Session state from the OAuth provider (e.g., Microsoft).',
-        }),
-      },
-    })
-  ),
-});
+const querySchema = schema.object(
+  {
+    code: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate('xpack.actions.oauthCallback.codeParamDescription', {
+            defaultMessage: 'The authorization code returned by the OAuth provider.',
+          }),
+        },
+      })
+    ),
+    state: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate('xpack.actions.oauthCallback.stateParamDescription', {
+            defaultMessage: 'The state parameter for CSRF protection.',
+          }),
+        },
+      })
+    ),
+    error: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate('xpack.actions.oauthCallback.errorParamDescription', {
+            defaultMessage: 'Error code if the authorization failed.',
+          }),
+        },
+      })
+    ),
+    error_description: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate(
+            'xpack.actions.oauthCallback.errorDescriptionParamDescription',
+            {
+              defaultMessage: 'Human-readable error description.',
+            }
+          ),
+        },
+      })
+    ),
+    session_state: schema.maybe(
+      schema.string({
+        meta: {
+          description: i18n.translate('xpack.actions.oauthCallback.sessionStateParamDescription', {
+            defaultMessage: 'Session state from the OAuth provider (e.g., Microsoft).',
+          }),
+        },
+      })
+    ),
+  },
+  // Allow unknown query parameters to be passed in like scope, authuser, etc.
+  { unknowns: 'allow' }
+);
 
 interface OAuthConnectorSecrets {
   clientId?: string;
@@ -644,8 +648,23 @@ export const oauthCallbackScriptRoute = (router: IRouter<ActionsRequestHandlerCo
       security: DEFAULT_ACTION_ROUTE_SECURITY,
       options: {
         access: 'public',
+        description: i18n.translate('xpack.actions.oauthCallbackScript.routeDescription', {
+          defaultMessage: 'Returns the OAuth callback script',
+        }),
       },
-      validate: {},
+      validate: {
+        request: {},
+        response: {
+          200: {
+            description: i18n.translate(
+              'xpack.actions.oauthCallbackScript.response200Description',
+              {
+                defaultMessage: 'Returns the OAuth callback script',
+              }
+            ),
+          },
+        },
+      },
     },
     (_context, _req, res) => {
       return res.ok({

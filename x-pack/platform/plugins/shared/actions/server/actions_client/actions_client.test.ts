@@ -544,6 +544,11 @@ describe('create()', () => {
         authorize: { lookbackWindow: '1h', limit: 100 },
         callback: { lookbackWindow: '1h', limit: 100 },
       },
+      auth: {
+        oauth_authorization_code: {
+          enabled: false,
+        },
+      },
     });
 
     const localActionTypeRegistryParams = {
@@ -1897,6 +1902,58 @@ describe('delete()', () => {
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
+    describe('when connector has authMode per-user', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.get.mockReset();
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-action-delete',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+            authMode: 'per-user',
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode per-user to deleteConnectorTokens`, async () => {
+        await actionsClient.delete({ id: '1' });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: '1',
+          authMode: 'per-user',
+        });
+      });
+    });
+
+    describe('when connector has authMode shared', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.get.mockReset();
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-action-delete',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+            authMode: 'shared',
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode shared to deleteConnectorTokens`, async () => {
+        await actionsClient.delete({ id: '1' });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: '1',
+          authMode: 'shared',
+        });
+      });
+    });
+
     test(`failing to delete tokens logs error instead of throw`, async () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
@@ -2126,6 +2183,84 @@ describe('update()', () => {
     test(`deletes any existing authorization tokens`, async () => {
       await updateOperation();
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
+    });
+
+    describe('when connector has authMode per-user', () => {
+      beforeEach(() => {
+        actionTypeRegistry.register(getConnectorType());
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            authMode: 'per-user',
+          },
+          references: [],
+        });
+        unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'my-action',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            name: 'my name',
+            config: {},
+            secrets: {},
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode per-user to deleteConnectorTokens`, async () => {
+        await actionsClient.update({
+          id: 'my-action',
+          action: { name: 'my name', config: {}, secrets: {} },
+        });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: 'my-action',
+          authMode: 'per-user',
+        });
+      });
+    });
+
+    describe('when connector has authMode shared', () => {
+      beforeEach(() => {
+        actionTypeRegistry.register(getConnectorType());
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            authMode: 'shared',
+          },
+          references: [],
+        });
+        unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'my-action',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            name: 'my name',
+            config: {},
+            secrets: {},
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode shared to deleteConnectorTokens`, async () => {
+        await actionsClient.update({
+          id: 'my-action',
+          action: { name: 'my name', config: {}, secrets: {} },
+        });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: 'my-action',
+          authMode: 'shared',
+        });
+      });
     });
 
     test(`failing to delete tokens logs error instead of throw`, async () => {

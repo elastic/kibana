@@ -686,7 +686,7 @@
             "label": "seriesType",
             "description": [],
             "signature": [
-              "\"bar\" | \"area\" | \"line\""
+              "\"line\" | \"area\" | \"bar\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "lineNumber": 134,
@@ -1056,7 +1056,7 @@
               "\nPosition of the legend relative to the chart"
             ],
             "signature": [
-              "\"left\" | \"right\" | \"top\" | \"bottom\""
+              "\"right\" | \"top\" | \"bottom\" | \"left\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "lineNumber": 189,
@@ -1110,7 +1110,7 @@
               "\nHorizontal Alignment of the legend when it is set inside chart"
             ],
             "signature": [
-              "\"left\" | \"right\" | undefined"
+              "\"right\" | \"left\" | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "lineNumber": 201,
@@ -2244,9 +2244,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { title?: string | undefined; ticks?: number | undefined; position?: ",
-              "Position",
-              " | undefined; style?: ",
+              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2258,7 +2256,9 @@
               "RecursivePartial",
               "<Omit<",
               "AxisStyle",
-              ", \"gridLine\">> | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+              ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+              "Position",
+              " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2268,7 +2268,7 @@
               },
               "<",
               "YDomainRange",
-              " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
+              " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2278,7 +2278,7 @@
               },
               "<Partial<",
               "GridLineStyle",
-              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { legendSize?: number | undefined; onResize?: \"ignore\" | undefined; theme?: ",
+              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -2310,7 +2310,7 @@
               "MakeOverridesSerializable",
               "<",
               "LegendValue",
-              "[] | undefined>; legendMaxDepth?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
+              "[] | undefined>; legendMaxDepth?: number | undefined; legendSize?: number | undefined; flatLegend?: boolean | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; xDomain?: ",
               "MakeOverridesSerializable",
               "<",
               "CustomXDomain",
@@ -2503,9 +2503,7 @@
         "label": "AllowedXYOverrides",
         "description": [],
         "signature": [
-          "{ axisX?: { title?: string | undefined; ticks?: number | undefined; position?: ",
-          "Position",
-          " | undefined; style?: ",
+          "{ axisX?: { style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2517,7 +2515,9 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2527,7 +2527,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2537,9 +2537,7 @@
           },
           "<Partial<",
           "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { title?: string | undefined; ticks?: number | undefined; position?: ",
-          "Position",
-          " | undefined; style?: ",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2551,7 +2549,9 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2561,7 +2561,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2571,9 +2571,7 @@
           },
           "<Partial<",
           "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { title?: string | undefined; ticks?: number | undefined; position?: ",
-          "Position",
-          " | undefined; style?: ",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2585,7 +2583,9 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          "Position",
+          " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2595,7 +2595,7 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; gridLine?: ",
+          " | undefined>; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; ticks?: number | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2622,7 +2622,7 @@
         "label": "AvailableReferenceLineIcon",
         "description": [],
         "signature": [
-          "\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\" | \"empty\""
+          "\"alert\" | \"circle\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"triangle\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 78,
@@ -2680,7 +2680,7 @@
         "label": "AxisMode",
         "description": [],
         "signature": [
-          "\"percentage\" | \"normal\" | \"wiggle\" | \"silhouette\""
+          "\"normal\" | \"percentage\" | \"wiggle\" | \"silhouette\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 72,
@@ -3286,7 +3286,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"left\" | \"right\" | \"auto\" | \"above\" | \"below\""
+          "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 74,
@@ -3361,7 +3361,7 @@
         "label": "LayerType",
         "description": [],
         "signature": [
-          "\"annotations\" | \"data\" | \"referenceLine\""
+          "\"data\" | \"annotations\" | \"referenceLine\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 66,
@@ -3458,7 +3458,7 @@
         "label": "LineStyle",
         "description": [],
         "signature": [
-          "\"dotted\" | \"solid\" | \"dashed\" | \"dot-dashed\""
+          "\"dashed\" | \"solid\" | \"dotted\" | \"dot-dashed\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 67,
@@ -3509,7 +3509,7 @@
         "label": "PointVisibility",
         "description": [],
         "signature": [
-          "\"auto\" | \"always\" | \"never\""
+          "\"never\" | \"auto\" | \"always\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 79,
@@ -3735,7 +3735,7 @@
         "label": "SeriesType",
         "description": [],
         "signature": [
-          "\"bar\" | \"area\" | \"line\""
+          "\"line\" | \"area\" | \"bar\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 69,

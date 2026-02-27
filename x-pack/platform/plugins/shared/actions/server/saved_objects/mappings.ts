@@ -135,9 +135,6 @@ export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
     // redirectUri: {
     //   type: 'keyword',
     // },
-    // authorizationUrl: {
-    //   type: 'keyword',
-    // },
     // scope: {
     //   type: 'keyword',
     // },
@@ -148,6 +145,9 @@ export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
     //   type: 'keyword',
     // },
     // kibanaReturnUrl: {
+    //   type: 'keyword',
+    // },
+    // spaceId: {
     //   type: 'keyword',
     // },
   },

@@ -136,7 +136,6 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: simulatorConfig,
           is_connector_type_deprecated: false,
-          auth_mode: 'shared',
         });
       });
 
@@ -185,7 +184,6 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: newConfig,
           is_connector_type_deprecated: false,
-          auth_mode: 'shared',
         });
       });
 
@@ -993,9 +991,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'test')
           .expect(400);
 
-        expect(result.message).to.match(
-          /Connector must be one of the following types: \.webhook, \.cases-webhook, \.mcp/
-        );
+        expect(result.message).to.match(/Connector must be one of the following types/);
       });
 
       after(() => {

@@ -32,8 +32,8 @@ import {
   getViewModeSubject,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import type { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { type ActionExecutionMeta, triggers } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { uiActionsService } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
@@ -52,7 +52,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
       const action = await uiActionsService.getAction(ACTION_EDIT_PANEL);
       action.execute({
         embeddable: api,
-        trigger: { id: CONTEXT_MENU_TRIGGER },
+        trigger: triggers[ON_OPEN_PANEL_MENU],
       } as EmbeddableApiContext & ActionExecutionMeta);
     } catch (error) {
       // eslint-disable-next-line no-console

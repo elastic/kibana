@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorToken, ConnectorTokenClientContract } from '../types';
+import type { ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
 // Per-connector locks to prevent concurrent token refreshes for the same connector
@@ -43,6 +45,8 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
   };
   connectorTokenClient: ConnectorTokenClientContract;
   scope?: string;
+  authMode?: AuthMode;
+  profileUid?: string;
   /**
    * When true, skip the expiration check and force a token refresh.
    * Use this when you've received a 401 and know the token is invalid
@@ -50,6 +54,35 @@ interface GetOAuthAuthorizationCodeAccessTokenOpts {
    */
   forceRefresh?: boolean;
 }
+
+interface ExtractedStoredOAuthTokens {
+  accessToken: string | null;
+  refreshToken: string | undefined;
+}
+
+const getStringField = (obj: unknown, path: string): string | undefined => {
+  const value = get(obj, path);
+  return typeof value === 'string' ? value : undefined;
+};
+
+const extractStoredOAuthTokens = ({
+  connectorToken,
+  isPerUser,
+}: {
+  connectorToken: ConnectorToken | UserConnectorToken;
+  isPerUser: boolean;
+}): ExtractedStoredOAuthTokens => {
+  const accessToken = getStringField(
+    connectorToken,
+    isPerUser ? 'credentials.accessToken' : 'token'
+  );
+  const refreshToken = getStringField(
+    connectorToken,
+    isPerUser ? 'credentials.refreshToken' : 'refreshToken'
+  );
+
+  return { accessToken: accessToken ?? null, refreshToken };
+};
 
 /**
  * Get an access token for OAuth2 Authorization Code flow
@@ -62,6 +95,8 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   credentials,
   connectorTokenClient,
   scope,
+  authMode,
+  profileUid,
   forceRefresh = false,
 }: GetOAuthAuthorizationCodeAccessTokenOpts): Promise<string | null> => {
   const { clientId, tokenUrl, additionalFields, useBasicAuth } = credentials.config;
@@ -69,6 +104,15 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
 
   if (!clientId || !clientSecret) {
     logger.warn(`Missing required fields for requesting OAuth Authorization Code access token`);
+    return null;
+  }
+
+  const isPerUser = authMode === 'per-user';
+
+  if (isPerUser && !profileUid) {
+    logger.warn(
+      `Per-user authMode requires a profileUid for connectorId: ${connectorId}. Cannot retrieve token.`
+    );
     return null;
   }
 
@@ -80,10 +124,16 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
 
   return await lock(async () => {
     // Re-fetch token inside lock - another request may have already refreshed it
-    const { connectorToken, hasErrors } = await connectorTokenClient.get({
-      connectorId,
-      tokenType: 'access_token',
-    });
+    const { connectorToken, hasErrors } = isPerUser
+      ? await connectorTokenClient.get({
+          profileUid: profileUid!,
+          connectorId,
+          tokenType: 'access_token',
+        })
+      : await connectorTokenClient.get({
+          connectorId,
+          tokenType: 'access_token',
+        });
 
     if (hasErrors) {
       logger.warn(`Errors fetching connector token for connectorId: ${connectorId}`);
@@ -98,20 +148,31 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
       return null;
     }
 
-    const token = connectorToken as ConnectorToken;
-
     // Check if access token is still valid (may have been refreshed by another request)
     const now = Date.now();
-    const expiresAt = token.expiresAt ? Date.parse(token.expiresAt) : Infinity;
+    const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
+
+    const extractedTokens = extractStoredOAuthTokens({
+      connectorToken: connectorToken as ConnectorToken | UserConnectorToken,
+      isPerUser,
+    });
+
+    const { accessToken: storedAccessToken, refreshToken: storedRefreshToken } = extractedTokens;
 
     if (!forceRefresh && expiresAt > now) {
       // Token still valid
       logger.debug(`Using stored access token for connectorId: ${connectorId}`);
-      return token.token;
+      if (storedAccessToken === null) {
+        logger.warn(
+          `Stored token has unexpected shape for connectorId: ${connectorId} (authMode: ${
+            authMode ?? 'shared'
+          }). User must re-authorize.`
+        );
+      }
+      return storedAccessToken;
     }
 
-    const refreshToken = typeof token.refreshToken === 'string' ? token.refreshToken : undefined;
-    if (!refreshToken) {
+    if (!storedRefreshToken) {
       logger.warn(
         `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`
       );
@@ -119,7 +180,10 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
     }
 
     // Check if the refresh token is expired
-    if (token.refreshTokenExpiresAt && Date.parse(token.refreshTokenExpiresAt) <= now) {
+    if (
+      connectorToken.refreshTokenExpiresAt &&
+      Date.parse(connectorToken.refreshTokenExpiresAt) <= now
+    ) {
       logger.warn(`Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`);
       return null;
     }
@@ -131,7 +195,7 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
         tokenUrl,
         logger,
         {
-          refreshToken,
+          refreshToken: storedRefreshToken,
           clientId,
           clientSecret,
           scope,
@@ -143,11 +207,12 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
 
       const newAccessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 
-      const updatedRefreshToken: string | undefined = tokenResult.refreshToken ?? refreshToken;
+      const updatedRefreshToken: string | undefined =
+        tokenResult.refreshToken ?? storedRefreshToken;
 
       // Update stored token
       await connectorTokenClient.updateWithRefreshToken({
-        id: token.id!,
+        id: connectorToken.id!,
         token: newAccessToken,
         refreshToken: updatedRefreshToken,
         expiresIn: tokenResult.expiresIn,

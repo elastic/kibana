@@ -69,6 +69,16 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           auth_mode: 'shared',
         },
         {
+          id: 'system-connector-.http-system',
+          name: 'HTTP',
+          connector_type_id: '.http-system',
+          is_preconfigured: false,
+          is_deprecated: false,
+          referenced_by_count: 0,
+          is_system_action: true,
+          is_connector_type_deprecated: false,
+        },
+        {
           id: createdConnector.id,
           is_preconfigured: false,
           is_deprecated: false,
@@ -290,6 +300,16 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           referenced_by_count: 0,
           is_connector_type_deprecated: false,
           auth_mode: 'shared',
+        },
+        {
+          id: 'system-connector-.http-system',
+          name: 'HTTP',
+          connector_type_id: '.http-system',
+          is_preconfigured: false,
+          is_deprecated: false,
+          referenced_by_count: 0,
+          is_system_action: true,
+          is_connector_type_deprecated: false,
         },
         {
           connector_type_id: '.email',
