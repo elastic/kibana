@@ -19,7 +19,7 @@ import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 
 import { Loading } from '../../../../../../../components';
 
@@ -79,6 +79,15 @@ export interface Props {
   onCategoryChange: (category: CategoryFacet) => void;
 }
 
+const StickySidebar = styled(EuiFlexItem)`
+  position: sticky;
+  top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
+  padding-top: ${(props) => props.theme.euiTheme.size.m};
+  max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
+  overflow: scroll;
+  padding-right: ${(props) => props.theme.euiTheme.size.l};
+`;
+
 export interface SidebarProps extends Props {
   CreateIntegrationCardButton?: React.ComponentType;
   hasCreatedIntegrations?: boolean;
@@ -95,17 +104,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onManageIntegrationsClick,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const stickySidebarStyles = css`
-    position: sticky;
-    top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
-    padding-top: ${euiTheme.size.m};
-    max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
-    overflow: scroll;
-    padding-right: ${euiTheme.size.l};
-  `;
 
   return (
-    <EuiFlexItem css={stickySidebarStyles}>
+    <StickySidebar>
       {CreateIntegrationCardButton && (
         <>
           <EuiAccordion
@@ -176,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onCategoryChange={onCategoryChange}
         />
       </EuiAccordion>
-    </EuiFlexItem>
+    </StickySidebar>
   );
 };
 
