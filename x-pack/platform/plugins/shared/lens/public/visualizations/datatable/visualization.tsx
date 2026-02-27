@@ -53,11 +53,7 @@ import {
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
-import {
-  getPaletteDisplayColors,
-  getAccessorType,
-  getColorByValuePalette,
-} from '../../shared_components';
+import { getPaletteDisplayColors, getAccessorType } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
 import { convertToRuntimeState } from './runtime_state';
@@ -70,7 +66,12 @@ import {
   TableDimensionEditorAdditionalSection,
 } from './components';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
-import { hasIncompatibleColorConfig, getDataBoundsForAccessor, getColorDefaults } from './utils';
+import {
+  hasIncompatibleColorConfig,
+  getDataBoundsForAccessor,
+  getColorDefaults,
+  getColorByValuePalette,
+} from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',

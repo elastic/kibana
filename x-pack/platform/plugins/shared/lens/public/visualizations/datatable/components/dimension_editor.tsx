@@ -23,11 +23,11 @@ import type {
 } from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
 
-import { getAccessorType, getColorByValuePalette } from '../../../shared_components';
+import { getAccessorType } from '../../../shared_components';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
-import { getColumnAlignment, getDataBoundsForAccessor } from '../utils';
+import { getColumnAlignment, getDataBoundsForAccessor, getColorByValuePalette } from '../utils';
 import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 

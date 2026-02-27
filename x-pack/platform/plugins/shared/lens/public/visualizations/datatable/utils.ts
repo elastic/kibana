@@ -13,10 +13,10 @@ import type {
   PaletteOutput,
   PaletteRegistry,
 } from '@kbn/coloring';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { applyPaletteParams, CUSTOM_PALETTE, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { findMinMaxByColumnId, getColorByValuePalette } from '../../shared_components';
+import { defaultPaletteParams, findMinMaxByColumnId } from '../../shared_components';
 
 export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
   { alignment }: C,
@@ -37,7 +37,7 @@ export function hasIncompatibleColorConfig({
 }): boolean {
   const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
   const hasColorMappingOnNumeric = !colorByTerms && colorMapping != null;
-  // To avoid warnings on current SOs with both palette and color mapping defined
+  // To avoid warnings on current SOs with both palette and color mapping defined, we need to check if the palette is value based and if the color mapping is not defined.
   const hasValuePaletteOnBucket = colorByTerms && isValueBasedPalette && !colorMapping;
   return hasColorMappingOnNumeric || hasValuePaletteOnBucket;
 }
@@ -69,6 +69,40 @@ export function getDataBoundsForAccessor(
   const columnsToCheck = getColumnIds(accessor, currentData, stateColumns);
   const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
   return minMaxByColumnId.get(accessor);
+}
+
+export function getColorByValuePalette(
+  paletteService: PaletteRegistry,
+  dataBounds: DataBounds,
+  existingPalette?: PaletteOutput<CustomPaletteParams>
+): {
+  palette: PaletteOutput<CustomPaletteParams>;
+  displayStops: Array<{ color: string; stop: number }>;
+} {
+  // Use existing palette or create default
+  const activePalette: PaletteOutput<CustomPaletteParams> = existingPalette
+    ? {
+        type: 'palette',
+        name: existingPalette.name,
+        params: { ...existingPalette.params },
+      }
+    : {
+        type: 'palette',
+        name: defaultPaletteParams.name,
+        params: { ...defaultPaletteParams },
+      };
+
+  const displayStops = applyPaletteParams(paletteService, activePalette, dataBounds);
+
+  // For non-custom palettes -> update the stops with computed values
+  if (activePalette.name !== CUSTOM_PALETTE) {
+    activePalette.params = {
+      ...activePalette.params,
+      stops: displayStops,
+    };
+  }
+
+  return { palette: activePalette, displayStops };
 }
 
 /**

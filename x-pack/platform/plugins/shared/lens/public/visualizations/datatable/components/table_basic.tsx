@@ -51,11 +51,7 @@ import type {
   LensPagesizeAction,
 } from '@kbn/lens-common';
 import type { LensGridDirection } from '../../../../common/expressions';
-import {
-  findMinMaxByColumnId,
-  shouldColorByTerms,
-  getColorByValuePalette,
-} from '../../../shared_components';
+import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type { DataContextType, DatatableRenderProps } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
@@ -74,7 +70,7 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getColumnAlignment, hasIncompatibleColorConfig } from '../utils';
+import { getColumnAlignment, hasIncompatibleColorConfig, getColorByValuePalette } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
