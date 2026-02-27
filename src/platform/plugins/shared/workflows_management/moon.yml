@@ -83,7 +83,6 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/core-lifecycle-server-mocks'
   - '@kbn/scout'
-  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
