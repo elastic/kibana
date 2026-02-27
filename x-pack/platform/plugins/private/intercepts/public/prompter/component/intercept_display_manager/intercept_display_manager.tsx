@@ -229,6 +229,7 @@ function InterceptDisplayManager({
                   <EuiForm fullWidth>
                     {React.createElement(currentInterceptStep!.content, {
                       onValue: onInterceptStepInput.bind(currentInterceptStep),
+                      responseMap: feedbackStore.current,
                     })}
                   </EuiForm>
                 </EuiFlexItem>
