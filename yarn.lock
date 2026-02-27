@@ -2453,9 +2453,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_113.1.0-flyout-notfounderror-001.tgz":
-  version "113.1.0-flyouts-emotion-fix.1"
-  resolved "file:./elastic_eui_113.1.0-flyout-notfounderror-001.tgz#deaabcf81fb5df1840278e3b485a6e3d1c6e97dd"
+"@elastic/eui@file:./elastic_eui_113.1.0-flyout-notfounderror-002.tgz":
+  version "113.1.0-flyouts-emotion-fix.2"
+  resolved "file:./elastic_eui_113.1.0-flyout-notfounderror-002.tgz#d2c9798d31e981ac1df5fe3092559fadd2aff8e2"
   dependencies:
     "@elastic/eui-theme-common" "8.1.0"
     "@elastic/prismjs-esql" "^1.1.2"
