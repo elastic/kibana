@@ -55,9 +55,9 @@ apiTest.describe(
 
     apiTest(
       'should successfully convert multiple Elasticsearch API keys in a single request',
-      async ({ apiClient }) => {
-        const esApiKey1 = await grantNativeEsApiKey(apiClient);
-        const esApiKey2 = await grantNativeEsApiKey(apiClient);
+      async ({ apiClient, samlAuth }) => {
+        const esApiKey1 = await grantNativeEsApiKey(samlAuth, apiClient);
+        const esApiKey2 = await grantNativeEsApiKey(samlAuth, apiClient);
 
         const convertResponse = await apiClient.post('test_endpoints/uiam/api_keys/_convert', {
           headers: { ...COMMON_UNSAFE_HEADERS },
@@ -95,8 +95,8 @@ apiTest.describe(
 
     apiTest(
       'should handle a mix of valid and invalid keys in a single request',
-      async ({ apiClient }) => {
-        const esApiKey = await grantNativeEsApiKey(apiClient);
+      async ({ apiClient, samlAuth }) => {
+        const esApiKey = await grantNativeEsApiKey(samlAuth, apiClient);
 
         const convertResponse = await apiClient.post('test_endpoints/uiam/api_keys/_convert', {
           headers: { ...COMMON_UNSAFE_HEADERS },
