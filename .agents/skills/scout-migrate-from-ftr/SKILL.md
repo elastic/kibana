@@ -20,7 +20,11 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 ## Important note
 
 - If the suite mostly validates **data correctness**, migrate it to a Scout **API** test (or unit/integration) instead of a Scout UI test.
-- Prefer component/unit tests for isolated UI behaviors rather than Scout functional tests.
+- Prefer component/unit tests (RTL/Jest) for isolated UI behaviors rather than Scout functional tests. Strong candidates for RTL/Jest:
+  - Internal component logic: loading/error states, conditional rendering based on props or hooks.
+  - Table/list structure: column configuration, row rendering, sorting.
+  - Hover states, tooltips, popovers, and field validation — use RTL or Storybook.
+  - Filter behavior that doesn't require a running server.
 - Follow steps **1–10** below. Common migration failures: missing UI tags, wrong Scout package imports, relying on ordering/shared state, and ingestion/setup that isn't space/parallel-safe.
 
 ## Guardrails / gotchas (high signal)
@@ -28,6 +32,7 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 - Scout specs are **standalone**: don't rely on file execution order or `loadTestFile()` indexes.
 - Each Scout `test()` runs in a **fresh browser context**: if an FTR suite used multiple `it()` blocks as one journey, combine into one `test()` + `test.step()`. Do login/navigation in `beforeEach` (avoid `page`/`browserAuth`/`pageObjects` in `beforeAll`).
 - Keep **one suite per file**, avoid nested `describe`, and don't use `*.describe.configure()`.
+- Keep spec files **focused and small**: aim for **4–5 short test scenarios** or **2–3 long scenarios** per file. This is critical for parallel execution, where the test runner balances work at the spec-file level — oversized specs create bottlenecks.
 - UI tests: tags are **required** (validated at runtime).
 - `parallel_tests/`: ingest via `parallel_tests/global.setup.ts` + `globalSetupHook` (don't use `esArchiver` in spec files).
 - Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-security`/`@kbn/scout-oblt`/`@kbn/scout-search`) and import `expect` from `/ui` or `/api`.
@@ -38,7 +43,12 @@ Migrate FTR tests to Scout by deciding whether a test should be UI or API, mappi
 
 ### 1) Decide the test type
 
-- **Component/unit test**: if the behavior can be tested in isolation (dropdowns, sorting, small components, hook logic, feature-flagged tabs), prefer RTL/Jest — skip Scout entirely.
+- **Component/unit test (RTL/Jest)**: if the behavior can be tested in isolation, prefer RTL/Jest and skip Scout entirely. Strong candidates:
+  - Internal component logic: loading/error states, conditional rendering based on props or hooks.
+  - Table/list structure: column configuration, row rendering, data-driven assertions.
+  - Form fields and filters: input validation, field interactions, filter clearing.
+  - Hover states, tooltips, popovers, and toggle behaviors.
+  - Feature-flagged UI: tabs/sections that appear based on config, agent type, or license.
 - **Scout API test**: if the suite validates server responses, data correctness, or backend behaviors, migrate to a Scout API test.
 - **Scout UI test**: if the suite validates user flows and rendering that require a real browser, migrate to a Scout UI test.
 - Data validation belongs in API tests (or unit tests), not UI tests.
@@ -112,6 +122,13 @@ test('create and edit entity', async () => {
 ### 7) Extract component/unit tests where possible
 
 - While implementing, look for logic that can be pulled out of e2e into RTL/Jest (see step 1). Not every FTR `it` block needs a Scout equivalent.
+- Place RTL tests next to the component under test (e.g., `my_component.test.tsx` alongside `my_component.tsx`).
+- Good extraction candidates from FTR/Scout to RTL:
+  - Assertions on component props, loading/error states, or conditional rendering.
+  - Table structure, column configuration, and row data rendering.
+  - Form validation, filter interactions, and input clearing.
+  - Tooltip content, hover behavior, and popover rendering.
+- Keep Scout tests for what **requires a real browser and running server**: navigation, cross-page flows, permission-gated UI, and serverless-vs-stateful differences.
 
 ### 8) Clean up FTR wiring
 
@@ -160,3 +177,4 @@ test('create and edit entity', async () => {
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs instead).
 - Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
 - Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert).
+- Packing too many `test(...)` blocks into a single spec file. Keep specs focused: 4–5 short scenarios or 2–3 long scenarios per file. Oversized specs create bottlenecks in parallel execution.
