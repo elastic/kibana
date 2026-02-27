@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { WIRED_LOGS_DATA_VIEW_SPEC } from './wired_streams_data_view';
+import { WIRED_OTEL_DATA_VIEW_SPEC, WIRED_ECS_DATA_VIEW_SPEC } from './wired_streams_data_view';
 
-describe('WIRED_LOGS_DATA_VIEW_SPEC', () => {
-  it('should have the correct title pattern for wired streams logs', () => {
-    expect(WIRED_LOGS_DATA_VIEW_SPEC.title).toBe('logs,logs.*');
+describe('WIRED_OTEL_DATA_VIEW_SPEC', () => {
+  it('should have the correct title pattern for OTel wired streams', () => {
+    expect(WIRED_OTEL_DATA_VIEW_SPEC.title).toBe('logs.otel,logs.otel.*');
   });
 
   it('should use @timestamp as the time field', () => {
-    expect(WIRED_LOGS_DATA_VIEW_SPEC.timeFieldName).toBe('@timestamp');
+    expect(WIRED_OTEL_DATA_VIEW_SPEC.timeFieldName).toBe('@timestamp');
+  });
+});
+
+describe('WIRED_ECS_DATA_VIEW_SPEC', () => {
+  it('should have the correct title pattern for ECS wired streams', () => {
+    expect(WIRED_ECS_DATA_VIEW_SPEC.title).toBe('logs.ecs,logs.ecs.*');
   });
 
-  it('should match logs and logs.* indices for wired streams routing', () => {
-    const pattern = WIRED_LOGS_DATA_VIEW_SPEC.title;
-    expect(pattern).toContain('logs');
-    expect(pattern).toContain('logs.*');
+  it('should use @timestamp as the time field', () => {
+    expect(WIRED_ECS_DATA_VIEW_SPEC.timeFieldName).toBe('@timestamp');
   });
 });

@@ -51,7 +51,7 @@ import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
 import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
-import { WIRED_LOGS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
+import { WIRED_OTEL_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 export const OtelKubernetesPanel: React.FC = () => {
   useFlowBreadcrumb({
@@ -83,7 +83,7 @@ export const OtelKubernetesPanel: React.FC = () => {
   } = useWiredStreamsStatus();
   const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
   const useWiredStreams = ingestionMode === 'wired';
-  const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_LOGS_DATA_VIEW_SPEC } : {};
+  const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {};
 
   useEffect(() => {
     if (data) {
@@ -507,7 +507,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                           },
                         ]
                       : []),
-                    // Always show Explore logs link - in wired mode it uses logs,logs.* data view,
+                    // Always show Explore logs link - in wired mode it uses logs.otel,logs.otel.* data view,
                     // in classic mode it uses default logs data view
                     {
                       id: 'logs',

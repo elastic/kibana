@@ -107,9 +107,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
       expect(command).toContain(
         'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'
       );
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams'
-      );
+      expect(command).not.toContain('logs\\/apm');
     });
 
     it('routes daemon logs to wired streams when useWiredStreams is true (managed OTLP)', () => {
@@ -128,13 +126,21 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
       expect(command).toContain(
         'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'
       );
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams'
-      );
+      expect(command).not.toContain('logs\\/apm');
     });
 
-    it('does not inject logs/apm processor when metrics onboarding is disabled (logs-only mode)', () => {
-      const command = buildInstallStackCommand({
+    it('excludes APM logs from wired streams regardless of metrics onboarding setting', () => {
+      const withMetrics = buildInstallStackCommand({
+        isMetricsOnboardingEnabled: true,
+        isManagedOtlpServiceAvailable: true,
+        managedOtlpEndpointUrl: 'https://example.com/otlp',
+        elasticsearchUrl: 'https://example.com/elasticsearch',
+        apiKeyEncoded: 'encoded_api_key',
+        agentVersion: '9.1.0',
+        useWiredStreams: true,
+      });
+
+      const withoutMetrics = buildInstallStackCommand({
         isMetricsOnboardingEnabled: false,
         isManagedOtlpServiceAvailable: true,
         managedOtlpEndpointUrl: 'https://example.com/otlp',
@@ -144,10 +150,8 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
         useWiredStreams: true,
       });
 
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'
-      );
-      expect(command).not.toContain('logs\\/apm');
+      expect(withMetrics).not.toContain('logs\\/apm');
+      expect(withoutMetrics).not.toContain('logs\\/apm');
     });
 
     it('does not modify gateway config when useWiredStreams is true', () => {

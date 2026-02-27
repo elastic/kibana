@@ -42,7 +42,7 @@ import { SupportedIntegrationsList } from './supported_integrations_list';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
-import { WIRED_LOGS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
+import { WIRED_ECS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   useFlowBreadcrumb({
@@ -421,7 +421,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                     logsLocator?.getRedirectUrl(
                                       useWiredStreams
                                         ? {
-                                            dataViewSpec: WIRED_LOGS_DATA_VIEW_SPEC,
+                                            dataViewSpec: WIRED_ECS_DATA_VIEW_SPEC,
                                             query: {
                                               language: 'kuery',
                                               query: `service.name: "${integration.pkgName}"`,

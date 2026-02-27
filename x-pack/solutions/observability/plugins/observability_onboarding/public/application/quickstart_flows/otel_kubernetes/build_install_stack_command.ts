@@ -40,22 +40,19 @@ export function buildInstallStackCommand({
   const wiredStreamsConfig = (() => {
     if (!useWiredStreams) return '';
 
-    // Route container logs (and APM logs when available) to wired streams by
-    // injecting the resource/wired_streams processor on the daemon collector only.
+    // Route container logs to wired streams by injecting the
+    // resource/wired_streams processor on the daemon collector's node pipeline.
+    // APM logs are intentionally excluded — wired streams support for APM is
+    // tracked separately and not yet ready.
     // K8s event logs (from the cluster collector) are unaffected and keep
     // their classic routing (e.g. logs-k8sobjectsreceiver.otel-default).
     // The elasticsearch.index resource attribute works for both direct ES
     // (elasticsearch exporter) and managed OTLP (otlp/ingest exporter).
-    const logsApmOverride = isMetricsOnboardingEnabled
-      ? ` \\
-  --set 'collectors.daemon.config.service.pipelines.logs\\/apm.processors[2]=resource/wired_streams'`
-      : '';
-
     return ` \\
   --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].action=upsert' \\
   --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].key=elasticsearch.index' \\
   --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].value=logs.otel' \\
-  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'${logsApmOverride}`;
+  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'`;
   })();
 
   return `kubectl create namespace ${OTEL_STACK_NAMESPACE}

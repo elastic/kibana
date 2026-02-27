@@ -7,7 +7,12 @@
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
-export const WIRED_LOGS_DATA_VIEW_SPEC: DataViewSpec = {
-  title: 'logs,logs.*',
+export const WIRED_OTEL_DATA_VIEW_SPEC: DataViewSpec = {
+  title: 'logs.otel,logs.otel.*',
+  timeFieldName: '@timestamp',
+};
+
+export const WIRED_ECS_DATA_VIEW_SPEC: DataViewSpec = {
+  title: 'logs.ecs,logs.ecs.*',
   timeFieldName: '@timestamp',
 };

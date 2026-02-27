@@ -44,7 +44,7 @@ import { buildInstallCommand } from './build_install_command';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
-import { WIRED_LOGS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
+import { WIRED_OTEL_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -104,7 +104,7 @@ export const OtelLogsPanel: React.FC = () => {
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
   const logsLocatorParams = useMemo<LogsLocatorParams>(
-    () => (useWiredStreams ? { dataViewSpec: WIRED_LOGS_DATA_VIEW_SPEC } : {}),
+    () => (useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {}),
     [useWiredStreams]
   );
 

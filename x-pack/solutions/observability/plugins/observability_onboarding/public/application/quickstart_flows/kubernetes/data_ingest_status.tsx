@@ -21,7 +21,7 @@ import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
-import { WIRED_LOGS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
+import { WIRED_ECS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
 interface Props {
   onboardingId: string;
@@ -44,7 +44,7 @@ export function DataIngestStatus({ onboardingId, ingestionMode }: Props) {
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const useWiredStreams = ingestionMode === 'wired';
-  const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_LOGS_DATA_VIEW_SPEC } : {};
+  const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_ECS_DATA_VIEW_SPEC } : {};
 
   const { data, status, refetch } = useFetcher(
     (callApi) => {
