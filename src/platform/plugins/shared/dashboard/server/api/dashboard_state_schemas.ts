@@ -63,6 +63,15 @@ export function getPanelSchema() {
         meta: { description: 'The unique ID of the panel.' },
       })
     ),
+    version: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (config in this type).",
+          deprecated: true,
+        },
+      })
+    ),
   };
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
   const panelSchemas = Object.entries(embeddableSchemas).map(([type, configSchema]) =>
@@ -86,7 +95,7 @@ export function getPanelSchema() {
         }
       ),
     }),
-  ] as [ObjectType<{ grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>; uid: Type<string | undefined>; type: Type<string>; config: ObjectType<{}> }>]);
+  ] as [ObjectType<{ grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>; uid: Type<string | undefined>; version: Type<string | undefined>; type: Type<string>; config: ObjectType<{}> }>]);
 }
 
 const sectionGridSchema = schema.object({
