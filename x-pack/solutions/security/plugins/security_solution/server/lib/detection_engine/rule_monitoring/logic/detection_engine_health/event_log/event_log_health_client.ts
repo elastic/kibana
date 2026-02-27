@@ -17,6 +17,7 @@ import type {
   SpaceHealthParameters,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import * as f from '../../event_log/event_log_fields';
 import {
   ALERTING_PROVIDER,
@@ -69,79 +70,85 @@ export const createEventLogHealthClient = (
   const EVENT_PROVIDERS = [RULE_EXECUTION_LOG_PROVIDER, ALERTING_PROVIDER];
   const EVENT_PROVIDERS_FILTER = `${f.EVENT_PROVIDER}: (${kqlOr(EVENT_PROVIDERS)})`;
 
-  async function aggregateEventsForRules(
+  const aggregateEventsForRules = (
     ruleIds: string[],
     interval: HealthInterval,
     aggs: Record<string, estypes.AggregationsAggregationContainer>
-  ) {
-    const soType = RULE_SAVED_OBJECT_TYPE;
-    const soIds = ruleIds;
+  ) => {
+    return withSecuritySpan('IEventLogHealthClient.aggregateEventsForRules', async () => {
+      const soType = RULE_SAVED_OBJECT_TYPE;
+      const soIds = ruleIds;
 
-    const result = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
-      start: interval.from,
-      end: interval.to,
-      filter: EVENT_PROVIDERS_FILTER,
-      aggs,
-    });
-
-    return result;
-  }
-
-  async function aggregateEventsForSpaces(
-    spaceIds: string[],
-    interval: HealthInterval,
-    aggs: Record<string, estypes.AggregationsAggregationContainer>
-  ) {
-    const soType = RULE_SAVED_OBJECT_TYPE;
-    const authFilter = {} as KueryNode;
-
-    // The `aggregateEventsWithAuthFilter` method accepts "namespace ids" instead of "space ids".
-    // If you have two Kibana spaces with ids ['default', 'space-x'],
-    // it will only work properly if you pass [undefined, 'space-x'].
-    const namespaces = spaceIds.map((spaceId) => SavedObjectsUtils.namespaceStringToId(spaceId));
-
-    const result = await eventLog.aggregateEventsWithAuthFilter(
-      soType,
-      authFilter,
-      {
+      return eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
         start: interval.from,
         end: interval.to,
         filter: EVENT_PROVIDERS_FILTER,
         aggs,
-      },
-      namespaces
-    );
+      });
+    });
+  };
 
-    return result;
-  }
+  const aggregateEventsForSpaces = (
+    spaceIds: string[],
+    interval: HealthInterval,
+    aggs: Record<string, estypes.AggregationsAggregationContainer>
+  ) => {
+    return withSecuritySpan('IEventLogHealthClient.aggregateEventsForSpaces', async () => {
+      const soType = RULE_SAVED_OBJECT_TYPE;
+      const authFilter = {} as KueryNode;
+
+      // The `aggregateEventsWithAuthFilter` method accepts "namespace ids" instead of "space ids".
+      // If you have two Kibana spaces with ids ['default', 'space-x'],
+      // it will only work properly if you pass [undefined, 'space-x'].
+      const namespaces = spaceIds.map((spaceId) => SavedObjectsUtils.namespaceStringToId(spaceId));
+
+      return eventLog.aggregateEventsWithAuthFilter(
+        soType,
+        authFilter,
+        {
+          start: interval.from,
+          end: interval.to,
+          filter: EVENT_PROVIDERS_FILTER,
+          aggs,
+        },
+        namespaces
+      );
+    });
+  };
 
   return {
-    async calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealth> {
-      const { rule_id: ruleId, interval } = args;
+    calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealth> {
+      return withSecuritySpan('IEventLogHealthClient.calculateRuleHealth', async () => {
+        const { rule_id: ruleId, interval } = args;
 
-      const aggs = getRuleHealthAggregation(interval.granularity);
-      const result = await aggregateEventsForRules([ruleId], interval, aggs);
-      return normalizeRuleHealthAggregationResult(result, aggs);
+        const aggs = getRuleHealthAggregation(interval.granularity);
+        const result = await aggregateEventsForRules([ruleId], interval, aggs);
+        return normalizeRuleHealthAggregationResult(result, aggs);
+      });
     },
 
-    async calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
-      const { interval, num_of_top_rules: numOfTopRules } = args;
+    calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
+      return withSecuritySpan('IEventLogHealthClient.calculateSpaceHealth', async () => {
+        const { interval, num_of_top_rules: numOfTopRules } = args;
 
-      const spaceIds = [ruleSpacesClient.getCurrentSpaceId()];
+        const spaceIds = [ruleSpacesClient.getCurrentSpaceId()];
 
-      const aggs = getSpacesHealthAggregation(interval.granularity, numOfTopRules);
-      const result = await aggregateEventsForSpaces(spaceIds, interval, aggs);
-      return normalizeSpacesHealthAggregationResult(result, aggs);
+        const aggs = getSpacesHealthAggregation(interval.granularity, numOfTopRules);
+        const result = await aggregateEventsForSpaces(spaceIds, interval, aggs);
+        return normalizeSpacesHealthAggregationResult(result, aggs);
+      });
     },
 
-    async calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth> {
-      const { interval, num_of_top_rules: numOfTopRules } = args;
+    calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth> {
+      return withSecuritySpan('IEventLogHealthClient.calculateClusterHealth', async () => {
+        const { interval, num_of_top_rules: numOfTopRules } = args;
 
-      const spaceIds = await ruleSpacesClient.getAllSpaceIds();
+        const spaceIds = await ruleSpacesClient.getAllSpaceIds();
 
-      const aggs = getSpacesHealthAggregation(interval.granularity, numOfTopRules);
-      const result = await aggregateEventsForSpaces(spaceIds, interval, aggs);
-      return normalizeSpacesHealthAggregationResult(result, aggs);
+        const aggs = getSpacesHealthAggregation(interval.granularity, numOfTopRules);
+        const result = await aggregateEventsForSpaces(spaceIds, interval, aggs);
+        return normalizeSpacesHealthAggregationResult(result, aggs);
+      });
     },
   };
 };

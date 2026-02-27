@@ -13,6 +13,7 @@ import type {
   RuleHealthParameters,
   SpaceHealthParameters,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
 import { DETECTION_RULES_FILTER } from './filters';
 import {
@@ -82,53 +83,59 @@ export const createRuleObjectsHealthClient = (
   logger: Logger
 ): IRuleObjectsHealthClient => {
   return {
-    async calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealth> {
-      const rule = await fetchRuleById(rulesClient, args.rule_id);
-      return {
-        state_at_the_moment: { rule },
-        debug: {},
-      };
+    calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealth> {
+      return withSecuritySpan('IRuleObjectsHealthClient.calculateRuleHealth', async () => {
+        const rule = await fetchRuleById(rulesClient, args.rule_id);
+        return {
+          state_at_the_moment: { rule },
+          debug: {},
+        };
+      });
     },
 
-    async calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
-      const aggs = getSpaceHealthAggregation();
-      const aggregations = await rulesClient.aggregate({
-        options: {
+    calculateSpaceHealth(args: SpaceHealthParameters): Promise<SpaceHealth> {
+      return withSecuritySpan('IRuleObjectsHealthClient.calculateSpaceHealth', async () => {
+        const aggs = getSpaceHealthAggregation();
+        const aggregations = await rulesClient.aggregate({
+          options: {
+            filter: DETECTION_RULES_FILTER, // make sure to query only detection rules
+          },
+          aggs,
+        });
+
+        return {
+          state_at_the_moment: normalizeSpaceHealthAggregationResult(aggregations),
+          debug: {
+            rulesClient: {
+              request: { aggs },
+              response: { aggregations },
+            },
+          },
+        };
+      });
+    },
+
+    calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth> {
+      return withSecuritySpan('IRuleObjectsHealthClient.calculateClusterHealth', async () => {
+        const aggs = getClusterHealthAggregation();
+        const response = await internalSavedObjectsClient.find<unknown, Record<string, unknown>>({
+          type: RULE_SAVED_OBJECT_TYPE, // query rules
           filter: DETECTION_RULES_FILTER, // make sure to query only detection rules
-        },
-        aggs,
-      });
+          namespaces: ['*'], // aggregate rules in all Kibana spaces
+          perPage: 0, // don't return rules in the response, we only need aggs
+          aggs,
+        });
 
-      return {
-        state_at_the_moment: normalizeSpaceHealthAggregationResult(aggregations),
-        debug: {
-          rulesClient: {
-            request: { aggs },
-            response: { aggregations },
+        return {
+          state_at_the_moment: normalizeClusterHealthAggregationResult(response.aggregations),
+          debug: {
+            savedObjectsClient: {
+              request: { aggs },
+              response,
+            },
           },
-        },
-      };
-    },
-
-    async calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth> {
-      const aggs = getClusterHealthAggregation();
-      const response = await internalSavedObjectsClient.find<unknown, Record<string, unknown>>({
-        type: RULE_SAVED_OBJECT_TYPE, // query rules
-        filter: DETECTION_RULES_FILTER, // make sure to query only detection rules
-        namespaces: ['*'], // aggregate rules in all Kibana spaces
-        perPage: 0, // don't return rules in the response, we only need aggs
-        aggs,
+        };
       });
-
-      return {
-        state_at_the_moment: normalizeClusterHealthAggregationResult(response.aggregations),
-        debug: {
-          savedObjectsClient: {
-            request: { aggs },
-            response,
-          },
-        },
-      };
     },
   };
 };

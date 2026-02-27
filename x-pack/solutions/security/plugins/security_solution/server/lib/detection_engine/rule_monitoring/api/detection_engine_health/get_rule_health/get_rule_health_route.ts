@@ -16,6 +16,7 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { calculateHealthTimings } from '../health_timings';
@@ -53,24 +54,29 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const params = validateGetRuleHealthRequest(request.body);
+          return await withSecuritySpan(
+            'POST /internal/detection_engine/health/_rule',
+            async () => {
+              const params = validateGetRuleHealthRequest(request.body);
 
-          const ctx = await context.resolve(['securitySolution']);
-          const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
+              const ctx = await context.resolve(['securitySolution']);
+              const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
 
-          const ruleHealthParameters = { interval: params.interval, rule_id: params.ruleId };
-          const ruleHealth = await healthClient.calculateRuleHealth(ruleHealthParameters);
+              const ruleHealthParameters = { interval: params.interval, rule_id: params.ruleId };
+              const ruleHealth = await healthClient.calculateRuleHealth(ruleHealthParameters);
 
-          const responseBody: GetRuleHealthResponse = {
-            timings: calculateHealthTimings(params.requestReceivedAt),
-            parameters: ruleHealthParameters,
-            health: {
-              ...ruleHealth,
-              debug: params.debug ? ruleHealth.debug : undefined,
-            },
-          };
+              const responseBody: GetRuleHealthResponse = {
+                timings: calculateHealthTimings(params.requestReceivedAt),
+                parameters: ruleHealthParameters,
+                health: {
+                  ...ruleHealth,
+                  debug: params.debug ? ruleHealth.debug : undefined,
+                },
+              };
 
-          return response.ok({ body: responseBody });
+              return response.ok({ body: responseBody });
+            }
+          );
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

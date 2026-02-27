@@ -8,6 +8,7 @@
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -109,25 +110,27 @@ const handleSpaceHealthRequest = async (args: HandleSpaceHealthRequestArgs) => {
   const siemResponse = buildSiemResponse(response);
 
   try {
-    const params = resolveParameters();
-    const { healthClient } = await resolveDependencies();
+    return await withSecuritySpan('GET /internal/detection_engine/health/_space', async () => {
+      const params = resolveParameters();
+      const { healthClient } = await resolveDependencies();
 
-    const spaceHealthParameters = {
-      interval: params.interval,
-      num_of_top_rules: params.num_of_top_rules,
-    };
-    const spaceHealth = await healthClient.calculateSpaceHealth(spaceHealthParameters);
+      const spaceHealthParameters = {
+        interval: params.interval,
+        num_of_top_rules: params.num_of_top_rules,
+      };
+      const spaceHealth = await healthClient.calculateSpaceHealth(spaceHealthParameters);
 
-    const responseBody: GetSpaceHealthResponse = {
-      timings: calculateHealthTimings(params.requestReceivedAt),
-      parameters: spaceHealthParameters,
-      health: {
-        ...spaceHealth,
-        debug: params.debug ? spaceHealth.debug : undefined,
-      },
-    };
+      const responseBody: GetSpaceHealthResponse = {
+        timings: calculateHealthTimings(params.requestReceivedAt),
+        parameters: spaceHealthParameters,
+        health: {
+          ...spaceHealth,
+          debug: params.debug ? spaceHealth.debug : undefined,
+        },
+      };
 
-    return response.ok({ body: responseBody });
+      return response.ok({ body: responseBody });
+    });
   } catch (err) {
     const error = transformError(err);
     return siemResponse.error({

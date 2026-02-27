@@ -8,6 +8,7 @@
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -109,25 +110,27 @@ const handleClusterHealthRequest = async (args: HandleClusterHealthRequestArgs) 
   const siemResponse = buildSiemResponse(response);
 
   try {
-    const params = resolveParameters();
-    const { healthClient } = await resolveDependencies();
+    return await withSecuritySpan('GET /internal/detection_engine/health/_cluster', async () => {
+      const params = resolveParameters();
+      const { healthClient } = await resolveDependencies();
 
-    const clusterHealthParameters = {
-      interval: params.interval,
-      num_of_top_rules: params.num_of_top_rules,
-    };
-    const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
+      const clusterHealthParameters = {
+        interval: params.interval,
+        num_of_top_rules: params.num_of_top_rules,
+      };
+      const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
-    const responseBody: GetClusterHealthResponse = {
-      timings: calculateHealthTimings(params.requestReceivedAt),
-      parameters: clusterHealthParameters,
-      health: {
-        ...clusterHealth,
-        debug: params.debug ? clusterHealth.debug : undefined,
-      },
-    };
+      const responseBody: GetClusterHealthResponse = {
+        timings: calculateHealthTimings(params.requestReceivedAt),
+        parameters: clusterHealthParameters,
+        health: {
+          ...clusterHealth,
+          debug: params.debug ? clusterHealth.debug : undefined,
+        },
+      };
 
-    return response.ok({ body: responseBody });
+      return response.ok({ body: responseBody });
+    });
   } catch (err) {
     const error = transformError(err);
     return siemResponse.error({
