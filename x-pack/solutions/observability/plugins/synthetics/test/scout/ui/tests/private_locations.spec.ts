@@ -29,7 +29,6 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     page,
     browserAuth,
     syntheticsServices,
-    kbnUrl,
   }) => {
     await test.step('login and navigate to settings', async () => {
       await browserAuth.loginAsAdmin();
@@ -37,19 +36,18 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     });
 
     await test.step('create agent policy', async () => {
-      await page.click('text=Private Locations');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await page.click('text=No agent policies found');
       await page.click('text=Create agent policy');
       await page.fill('[placeholder="Choose a name"]', 'Test fleet policy');
       await page.click('text=Collect system logs and metrics');
       await page.click('div[role="dialog"] button:has-text("Create agent policy")');
-      await page.waitForTimeout(5_000);
       await pageObjects.syntheticsApp.waitForLoadingToFinish();
     });
 
     await test.step('create private location', async () => {
       await pageObjects.syntheticsApp.navigateToSettings();
-      await page.click('text=Private Locations');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await page.click('button:has-text("Create location")');
       await page.testSubj.fill('syntheticsLocationFormFieldText', 'Test private');
       await page.click('[aria-label="Select agent policy"]');
@@ -63,7 +61,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     });
 
     await test.step('verify and assign monitor', async () => {
-      await page.click('text=Private Locations');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       const privateLocations = await syntheticsServices.getPrivateLocations();
       expect(privateLocations).toHaveLength(1);
       locationId = privateLocations[0].id;
@@ -84,8 +82,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     });
 
     await test.step('verify Fleet integration', async () => {
-      await page.goto(kbnUrl.get('/app/integrations/detail/synthetics/policies'));
-      await expect(page.getByText('Elastic Synthetics')).toBeVisible();
+      await pageObjects.syntheticsApp.navigateToFleetIntegrationPolicies();
       await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}-default"`);
       await expect(
         page.getByText('This package policy is managed by the Synthetics app.')
@@ -102,15 +99,15 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
 
     await test.step('location cannot be deleted with assigned monitor', async () => {
       await page.testSubj.click('settings-page-link');
-      await page.click('text=Private Locations');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
       await expect(page.locator(`[data-test-subj="deleteLocation-${locationId}"]`)).toBeDisabled();
     });
 
     await test.step('delete location after removing monitor', async () => {
       await syntheticsServices.deleteMonitors();
-      await page.click('text=Data Retention');
-      await page.click('text=Private Locations');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Data Retention');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await page.click('[aria-label="Delete location"]');
       await page.click('button:has-text("Delete location")');
       await expect(page.getByText('Create your first private location')).toBeVisible();
@@ -119,7 +116,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     await test.step('viewer cannot create locations', async () => {
       await browserAuth.loginAsViewer();
       await pageObjects.syntheticsApp.navigateToSettings();
-      await page.click('text=Private Locations');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       const createBtn = page.getByRole('button', { name: 'Create location' });
       await expect(createBtn).toBeDisabled();
     });

@@ -45,6 +45,25 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('createConnectorButton');
   }
 
+  async navigateToParamsSettings() {
+    await this.page.goto(this.kbnUrl.get('/app/synthetics/settings/params'));
+    await this.page.testSubj.waitForSelector('syntheticsParamsTable-loaded');
+  }
+
+  async navigateToSettingsTab(tabText: string) {
+    await this.page.click(`text=${tabText}`);
+  }
+
+  async navigateToFleetIntegrationPolicies() {
+    await this.page.goto(this.kbnUrl.get('/app/integrations/detail/synthetics/policies'));
+    await expect(this.page.getByText('Elastic Synthetics')).toBeVisible();
+  }
+
+  async selectMonitorFromSelector(monitorName: string) {
+    await this.page.click('[aria-label="Select a different monitor to view its details"]');
+    await this.page.click(`text=${monitorName}`);
+  }
+
   async navigateToAddMonitor() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/add-monitor'));
     await this.page.testSubj.waitForSelector('syntheticsMonitorConfigName', { timeout: 30_000 });
@@ -64,6 +83,7 @@ export class SyntheticsAppPage {
     const locationQuery = locationId ? `?locationId=${locationId}` : '';
     const stepDetailsPath = `/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}${locationQuery}`;
     await this.page.goto(this.kbnUrl.get(stepDetailsPath));
+    await this.page.testSubj.waitForSelector('synth-step-metrics');
   }
 
   async waitForMonitorManagementLoadingToFinish() {

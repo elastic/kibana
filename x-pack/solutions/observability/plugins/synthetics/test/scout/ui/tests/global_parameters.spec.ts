@@ -20,16 +20,15 @@ test.describe('GlobalParameters', { tag: tags.stateful.classic }, () => {
 
   test('creates, edits, searches, and deletes global parameters', async ({
     page,
+    pageObjects,
     browserAuth,
-    kbnUrl,
   }) => {
     await test.step('login and navigate to params settings', async () => {
       await browserAuth.loginAsAdmin();
-      await page.goto(kbnUrl.get('/app/synthetics/settings/params'));
+      await pageObjects.syntheticsApp.navigateToParamsSettings();
     });
 
     await test.step('create parameter', async () => {
-      await page.click('text=No items found');
       await page.testSubj.click('syntheticsAddParamFlyoutButton');
       await page.fill('input[name="key"]', 'username');
       await page.testSubj.fill('syntheticsAddParamFormTextArea', 'elastic');
@@ -57,7 +56,7 @@ test.describe('GlobalParameters', { tag: tags.stateful.classic }, () => {
       await page.testSubj.typeWithDelay('syntheticsParamsSearchInput', 'extra', { delay: 100 });
       await page.testSubj.locator('syntheticsParamsSearchInput').press('Enter');
       await expect(page.testSubj.locator('syntheticsParamsTable-loaded')).toBeVisible();
-      await expect(page.locator('euiTableRow-isSelectable')).toHaveCount(0);
+      await expect(page.locator('.euiTableRow-isSelectable')).toHaveCount(0);
       await page.testSubj.locator('syntheticsParamsSearchInput').clear();
     });
 
@@ -75,7 +74,7 @@ test.describe('GlobalParameters', { tag: tags.stateful.classic }, () => {
     await test.step('delete parameter', async () => {
       await page.testSubj.click('action-delete');
       await page.testSubj.click('confirmModalConfirmButton');
-      await expect(page.locator('euiTableRow-isSelectable')).toHaveCount(0);
+      await expect(page.locator('.euiTableRow-isSelectable')).toHaveCount(0);
     });
   });
 });

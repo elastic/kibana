@@ -43,16 +43,11 @@ test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify metrics are displayed', async () => {
-      await page.testSubj.locator('synth-step-metrics').waitFor({ timeout: 20_000 });
-      await expect(
-        page.testSubj.locator('synth-step-metric-transfer-size').locator('.euiTitle')
-      ).toContainText('558 KB', {});
-      await expect(
-        page.testSubj.locator('synth-step-metric-fcp').locator('.euiTitle')
-      ).toContainText('402 ms');
-      await expect(
-        page.testSubj.locator('synth-step-metric-lcp').locator('.euiTitle')
-      ).toContainText('521 ms');
+      await expect(page.testSubj.locator('synth-step-metric-transfer-size')).toContainText(
+        '558 KB'
+      );
+      await expect(page.testSubj.locator('synth-step-metric-fcp')).toContainText('402 ms');
+      await expect(page.testSubj.locator('synth-step-metric-lcp')).toContainText('521 ms');
     });
   });
 });

@@ -43,8 +43,7 @@ test.describe('MonitorSelector', { tag: tags.stateful.classic }, () => {
     await test.step('switch monitors using selector', async () => {
       await expect(page.testSubj.locator('monitorNameTitle')).toHaveText(testMonitor1);
 
-      await page.click('[aria-label="Select a different monitor to view its details"]');
-      await page.click(`text=${testMonitor2}`);
+      await pageObjects.syntheticsApp.selectMonitorFromSelector(testMonitor2);
 
       await page.click('[aria-label="Select a different monitor to view its details"]');
       await page.click('text=Recently viewed');

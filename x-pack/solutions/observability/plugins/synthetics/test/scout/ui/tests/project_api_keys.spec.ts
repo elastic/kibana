@@ -21,7 +21,7 @@ test.describe('ProjectAPIKeys', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('generate project API key', async () => {
-      await page.click('text=Project API Keys');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Project API Keys');
       await page.click('button:has-text("Generate Project API key")');
       await expect(
         page.getByText(
@@ -34,7 +34,7 @@ test.describe('ProjectAPIKeys', { tag: tags.stateful.classic }, () => {
     await test.step('viewer cannot generate API keys', async () => {
       await browserAuth.loginAsViewer();
       await pageObjects.syntheticsApp.navigateToSettings();
-      await page.click('text=Project API Keys');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Project API Keys');
       const generateBtn = page.locator('button:has-text("Generate Project API key")');
       await expect(generateBtn).toBeDisabled();
     });

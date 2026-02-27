@@ -63,7 +63,7 @@ test.describe('AlertingDefaults', { tag: tags.stateful.classic }, () => {
     await test.step('verify viewer restrictions', async () => {
       await browserAuth.loginAsViewer();
       await pageObjects.syntheticsApp.navigateToSettings();
-      await page.click('text=Alerting');
+      await pageObjects.syntheticsApp.navigateToSettingsTab('Alerting');
       await expect(page.locator('button:has-text("Add connector")')).toBeDisabled();
     });
   });

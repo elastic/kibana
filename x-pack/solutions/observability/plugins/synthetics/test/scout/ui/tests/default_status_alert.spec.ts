@@ -116,7 +116,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
 
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');
-        await page.waitForTimeout(5_000);
+        await pageObjects.syntheticsApp.waitForLoadingToFinish();
         await expect(page.getByText('1 Alert')).toBeVisible({ timeout: 5_000 });
         const text = page.testSubj.locator('o11yGetRenderCellValueLink');
         await expect(text).toHaveText(reasonMessage);
