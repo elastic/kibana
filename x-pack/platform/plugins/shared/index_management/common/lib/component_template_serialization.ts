@@ -112,26 +112,24 @@ export function serializeComponentTemplate(
 ): ComponentTemplateSerialized {
   const { version, template, _meta, deprecated } = componentTemplateDeserialized;
 
+  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
+  // and strip the deprecated `_source.mode` from mappings.
+  const migratedSettings = buildTemplateSettings(template, undefined);
+  const migratedMappings = buildTemplateMappings(template as any);
+  const { mappings: _templateMappings, settings: _templateSettings, ...otherTemplate } = template;
+
   // If the existing component template contains data stream options, we need to persist them.
   // Otherwise, they will be lost when the component template is updated.
   const updatedTemplate = {
-    ...template,
-    ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
-  };
-
-  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
-  // and strip the deprecated `_source.mode` from mappings.
-  const migratedSettings = buildTemplateSettings(updatedTemplate as any, undefined);
-  const migratedMappings = buildTemplateMappings(updatedTemplate as any);
-  const migratedTemplate = {
-    ...updatedTemplate,
+    ...otherTemplate,
     ...(migratedMappings ? { mappings: migratedMappings } : {}),
     ...(migratedSettings ? { settings: migratedSettings } : {}),
+    ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
   };
 
   return {
     version,
-    template: migratedTemplate,
+    template: updatedTemplate,
     _meta,
     deprecated,
   };

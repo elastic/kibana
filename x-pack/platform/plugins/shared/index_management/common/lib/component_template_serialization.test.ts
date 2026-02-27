@@ -264,6 +264,33 @@ describe('Component template serialization', () => {
       });
     });
 
+    test('does not include _source.mode in mappings when it is the only mappings value', () => {
+      expect(
+        serializeComponentTemplate({
+          ...deserializedComponentTemplate,
+          template: {
+            ...deserializedComponentTemplate.template,
+            mappings: {
+              _source: {
+                mode: 'synthetic',
+              },
+            },
+          },
+        } as any)
+      ).toHaveProperty('template', {
+        settings: {
+          number_of_shards: 1,
+          index: {
+            mapping: {
+              source: {
+                mode: 'synthetic',
+              },
+            },
+          },
+        },
+      });
+    });
+
     test('does not migrate enabled _source property - it remains represented via _source.enabled', () => {
       expect(
         serializeComponentTemplate({

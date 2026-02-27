@@ -35,14 +35,15 @@ export const buildTemplateSettings = (
 
   // Remove mode from existing index settings as we'll set it from indexMode parameter
   const {
-    mode: _existingMode,
+    mode: existingMode,
     mapping: existingMappingSettings,
     ...otherIndexSettings
   } = existingIndexSettings || {};
 
   // Build index settings: include if we have indexMode to set or other index settings to preserve
   const hasIndexMode = indexMode !== undefined;
-  const hasOtherIndexSettings = Object.keys(otherIndexSettings).length > 0;
+  const hasOtherIndexSettings =
+    Object.keys(otherIndexSettings).length > 0 || existingMode !== undefined;
 
   const { source: existingSourceSettings, ...otherMappingSettings } = existingMappingSettings || {};
   const sourceModeFromMappings = template?.mappings?._source?.mode;
@@ -54,7 +55,7 @@ export const buildTemplateSettings = (
     hasIndexMode || hasOtherIndexSettings || hasSourceMode || hasOtherMappingSettings
       ? {
           ...otherIndexSettings,
-          ...(hasIndexMode && { mode: indexMode }),
+          ...(hasIndexMode ? { mode: indexMode } : existingMode && { mode: existingMode }),
           ...((sourceMode || hasOtherMappingSettings) && {
             mapping: {
               ...otherMappingSettings,
@@ -84,18 +85,10 @@ export const buildTemplateMappings = (
 
   // Remove mode from existing source mappings as we'll set it from template settings
   const { mode: existingSourceMode, ...otherSourceMappings } = existingSourceMappings || {};
-
-  // `disabled` source mode is represented via `_source.enabled: false` in mappings.
-  const normalizedSourceMappings =
-    existingSourceMode === 'disabled' && otherSourceMappings.enabled === undefined
-      ? { ...otherSourceMappings, enabled: false }
-      : otherSourceMappings;
-
-  const hasOtherSourceMappings = Object.keys(normalizedSourceMappings).length > 0;
-
+  const hasOtherSourceMappings = Object.keys(otherSourceMappings).length > 0;
   const sourceMappings = hasOtherSourceMappings
     ? {
-        ...normalizedSourceMappings,
+        ...otherSourceMappings,
       }
     : undefined;
 
