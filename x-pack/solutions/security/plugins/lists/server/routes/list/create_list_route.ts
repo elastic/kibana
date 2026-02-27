@@ -14,7 +14,7 @@ import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
-import { getDeprecatedParamWarnings } from '../utils/get_deprecated_param_warnings';
+import { getUnsupportedParamWarnings } from '../utils/get_unsupported_param_warnings';
 
 export const createListRoute = (router: ListsPluginRouter, kibanaVersion: string): void => {
   router.versioned
@@ -40,8 +40,8 @@ export const createListRoute = (router: ListsPluginRouter, kibanaVersion: string
         const siemResponse = buildSiemResponse(response);
         try {
           const { name, description, id, type, meta, version } = request.body;
-          // Check for deprecated query parameters and generate warning headers
-          const warningHeaders = getDeprecatedParamWarnings(request, kibanaVersion);
+          // Check for unsupported body parameters (serializer and deserializer) and generate warning headers
+          const warningHeaders = getUnsupportedParamWarnings(request, kibanaVersion);
 
           const lists = await getListClient(context);
           const dataStreamExists = await lists.getListDataStreamExists();

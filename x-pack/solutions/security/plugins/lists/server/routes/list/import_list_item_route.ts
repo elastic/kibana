@@ -21,7 +21,7 @@ import type { ListsPluginRouter } from '../../types';
 import type { ConfigType } from '../../config';
 import { buildSiemResponse } from '../utils';
 import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
-import { getDeprecatedParamWarnings } from '../utils/get_deprecated_param_warnings';
+import { getUnsupportedParamWarnings } from '../utils/get_unsupported_param_warnings';
 import { getListClient } from '..';
 
 const validFileExtensions = ['.csv', '.txt'];
@@ -66,8 +66,8 @@ export const importListItemRoute = (
         try {
           const { list_id: listId, type, refresh } = request.query;
 
-          // Check for deprecated query parameters and generate warning headers
-          const warningHeaders = getDeprecatedParamWarnings(request, kibanaVersion);
+          // Check for unsupported query parameters (seriarlizer or deserializer) and generate warning headers
+          const warningHeaders = getUnsupportedParamWarnings(request, kibanaVersion);
           const lists = await getListClient(context);
 
           const filename = await lists.getImportFilename({
