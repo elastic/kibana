@@ -48,6 +48,7 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.observability}.agent`,
+  `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
 ] as const;
 

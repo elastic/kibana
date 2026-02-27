@@ -18,7 +18,10 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 
+import { useKibana } from '../../hooks/use_kibana';
+import { SEARCH_AGENT_ID } from '../../../common/constants';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { PromptModal } from './prompt_modal';
 
@@ -95,6 +98,17 @@ const BASE_PROMPT_LINES_CLI = [
   'Then help me get started with Elasticsearch.',
 ];
 
+const USE_CASE_INITIAL_MESSAGES: Record<UseCaseId, string> = {
+  'general-search': 'Help me get started with Elasticsearch.',
+  'semantic-search': 'I want to build semantic search with Elasticsearch.',
+  'vector-database': 'I want to use Elasticsearch as a vector database for my AI app.',
+  'rag-chatbot': 'I want to build a RAG chatbot that answers questions from my docs.',
+  'keyword-search': 'I want to build keyword search with filters and autocomplete.',
+  'hybrid-search': 'I want to build hybrid search combining keyword and semantic.',
+  'catalog-ecommerce':
+    'I want to build product search for an e-commerce catalog with facets and autocomplete.',
+};
+
 const buildPrompt = (useCaseId: UseCaseId, environment: Environment) => {
   switch (environment) {
     case 'cursor':
@@ -102,8 +116,7 @@ const buildPrompt = (useCaseId: UseCaseId, environment: Environment) => {
     case 'cli':
       return addUseCaseSkill(useCaseId, BASE_PROMPT_LINES_CLI);
     case 'agent-builder':
-      // return buildAgentBuilderDeeplinkUrl(useCaseId);
-      return '';
+      return USE_CASE_INITIAL_MESSAGES[useCaseId];
     default:
       throw new Error(`Unsupported environment: ${environment}`);
   }
@@ -119,6 +132,7 @@ const addUseCaseSkill = (useCaseId: UseCaseId, basePromptLines: string[]): strin
 };
 
 export const AgentInstallSection = () => {
+  const { services } = useKibana();
   const [selectedUseCase, setSelectedUseCase] = useState<UseCaseId>('general-search');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
@@ -161,8 +175,12 @@ export const AgentInstallSection = () => {
 
   const handleOpenInAgentBuilder = useCallback(() => {
     closePopover();
-    // TODO: implement Agent Builder handler
-  }, [closePopover]);
+    const initialMessage = buildPrompt(selectedUseCase, 'agent-builder');
+    services.application.navigateToApp(AGENT_BUILDER_APP_ID, {
+      path: `/conversations/new?agent_id=${SEARCH_AGENT_ID}`,
+      state: { initialMessage },
+    });
+  }, [closePopover, selectedUseCase, services.application]);
 
   const launchButton = (
     <EuiButtonGroup
@@ -257,7 +275,7 @@ export const AgentInstallSection = () => {
                   data-test-subj="cursorAgentOpenInAgentBuilder"
                 >
                   {i18n.translate('xpack.gettingStarted.cursorAgent.menuAgentBuilder', {
-                    defaultMessage: 'Agent Builder',
+                    defaultMessage: 'Kibana Agent Builder',
                   })}
                 </EuiContextMenuItem>,
               ]}
@@ -265,9 +283,7 @@ export const AgentInstallSection = () => {
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isPromptModalOpen && (
-        <PromptModal prompt={modalPrompt} onClose={closePromptModal} />
-      )}
+      {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />}
     </>
   );
 };
