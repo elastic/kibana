@@ -11,6 +11,8 @@ import pMap from 'p-map';
 
 import { isEmpty, uniq } from 'lodash';
 
+import yaml from 'yaml';
+
 import {
   ALL_SPACES_ID,
   AGENT_POLICY_VERSION_SEPARATOR,
@@ -19,7 +21,7 @@ import {
 } from '../../../common/constants';
 import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
-import { fullAgentPolicyToYaml, toYaml } from '../../../common/services';
+import { fullAgentPolicyToYaml } from '../../../common/services';
 import {
   appContextService,
   agentPolicyService,
@@ -851,7 +853,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       });
     }
     const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, toYaml);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -893,7 +895,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, toYaml);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,

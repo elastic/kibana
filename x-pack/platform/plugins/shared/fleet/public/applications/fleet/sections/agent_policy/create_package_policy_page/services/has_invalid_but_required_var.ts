@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { parse } from 'yaml';
-
 import type {
   PackagePolicyConfigRecord,
   RegistryVarsEntry,
@@ -20,7 +18,10 @@ import {
   type VarGroupSelection,
 } from './var_group_helpers';
 
+export type YamlParseFn = (value: string) => unknown;
+
 export const hasInvalidButRequiredVar = (
+  parse: YamlParseFn,
   registryVars?: RegistryVarsEntry[],
   packagePolicyVars?: PackagePolicyConfigRecord,
   varGroups?: RegistryVarGroup[],

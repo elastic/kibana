@@ -7,18 +7,12 @@
 
 import type { FullAgentConfigMap } from '../types/models/agent_cm';
 
-import { createYamlKeysSorter } from './yaml_utils';
+import type { YamlModule } from './yaml_utils';
+import { createYamlKeysSorter, toYaml } from './yaml_utils';
 
 const CM_KEYS_ORDER = ['apiVersion', 'kind', 'metadata', 'data'];
 
-const _sortCmKeys = createYamlKeysSorter(CM_KEYS_ORDER);
-
-export const fullAgentConfigMapToYaml = (
-  policy: FullAgentConfigMap,
-  toYaml: (data: any, options: any) => string
-): string => {
-  return toYaml(policy, {
-    sortMapEntries: _sortCmKeys,
-    strict: false,
-  });
+export const fullAgentConfigMapToYaml = (policy: FullAgentConfigMap, yaml: YamlModule): string => {
+  const sortCmKeys = createYamlKeysSorter(CM_KEYS_ORDER, yaml);
+  return toYaml(policy, { sortMapEntries: sortCmKeys, strict: false }, yaml);
 };

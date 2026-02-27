@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { parse } from 'yaml';
 
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
@@ -217,7 +216,9 @@ export function validateLogstashHosts(value: string[]) {
   }
 }
 
-export function validateYamlConfig(value: string) {
+export type YamlParseFn = (value: string) => unknown;
+
+export const createValidateYamlConfig = (parse: YamlParseFn) => (value: string) => {
   try {
     parse(value);
     return;
@@ -225,11 +226,11 @@ export function validateYamlConfig(value: string) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.invalidYamlFormatErrorMessage', {
         defaultMessage: 'Invalid YAML: {reason}',
-        values: { reason: error.message },
+        values: { reason: (error as Error).message },
       }),
     ];
   }
-}
+};
 
 export function validateName(value: string) {
   if (!value || value === '') {

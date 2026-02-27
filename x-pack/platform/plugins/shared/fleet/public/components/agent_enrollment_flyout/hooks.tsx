@@ -35,7 +35,7 @@ import { sendCreateStandaloneAgentAPIKey } from '../../hooks';
 
 import type { FullAgentPolicy } from '../../../common';
 
-import { fullAgentPolicyToYaml, toYaml } from '../../services';
+import { getYamlFormatters } from '../../services/yaml_formatters';
 
 import type {
   K8sMode,
@@ -295,7 +295,9 @@ export function useFetchFullPolicy(agentPolicy: AgentPolicy | undefined, isK8s?:
       if (typeof fullAgentPolicy === 'string') {
         return;
       }
-      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, toYaml, apiKey));
+      getYamlFormatters().then((formatters) => {
+        setYaml(formatters.fullAgentPolicyToYaml(fullAgentPolicy, apiKey));
+      });
     }
   }, [apiKey, fullAgentPolicy, isK8s]);
 
