@@ -79,14 +79,13 @@ export const useAssetCriticalityData = ({
     useEntityAnalyticsRoutes();
 
   const privileges = useAssetCriticalityPrivileges(entity.name);
-  const query = useQuery<AssetCriticalityRecord | null, { body: { statusCode: number } }>({
+  const query = useQuery<AssetCriticalityRecord | null>({
     queryKey: QUERY_KEY,
     queryFn: () =>
       fetchAssetCriticality({
         idField: EntityTypeToIdentifierField[entity.type],
         idValue: entity.name,
       }),
-    retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
     enabled,
   });
 
@@ -119,9 +118,8 @@ export const useAssetCriticalityData = ({
     },
   });
 
-  const was404 = query.isError && query.error.body.statusCode === 404;
   const returnedData = query.isSuccess && query.data != null;
-  const status = was404 || !returnedData ? 'create' : 'update';
+  const status = returnedData ? 'update' : 'create';
 
   return {
     status,

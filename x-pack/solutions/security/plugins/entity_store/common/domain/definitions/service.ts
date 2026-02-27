@@ -17,7 +17,7 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     euidFields: [[{ field: 'service.entity.id' }], [{ field: 'service.name' }]],
   },
   indexPatterns: [],
-  entityTypeFallback: 'Service',
+  entityTypeFallback: 'service',
   fields: [
     newestValue({ destination: 'entity.name', source: 'service.name' }),
     oldestValue({ source: 'service.entity.id' }),

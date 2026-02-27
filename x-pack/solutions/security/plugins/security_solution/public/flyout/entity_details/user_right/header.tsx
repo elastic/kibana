@@ -18,7 +18,9 @@ import React, { useMemo } from 'react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import type { EntityIdentifiers } from '../../../common/components/link_to/redirect_to_users';
+import { getTabsOnUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
+import { UsersTableType } from '../../../explore/users/store/model';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
@@ -29,23 +31,28 @@ import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 interface UserPanelHeaderProps {
   userName: string;
   managedUser: ManagedUserData;
+  /** When provided, used to build the user details page URL with entityIdentifiers segment */
+  entityIdentifiers?: EntityIdentifiers;
   lastSeen: FirstLastSeenData;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
-
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const UserPanelHeader = ({ userName, managedUser, lastSeen }: UserPanelHeaderProps) => {
-  const observedUserLastSeenDate = lastSeen?.date;
-  const isLoading = lastSeen?.isLoading ?? false;
-
+export const UserPanelHeader = ({
+  userName,
+  managedUser,
+  entityIdentifiers,
+  lastSeen,
+}: UserPanelHeaderProps) => {
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
   const entraTimestamp = managedUser.data?.[ManagedUserDatasetKey.ENTRA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;
+  const observedUserLastSeenDate = lastSeen?.date;
+  const isLoading = lastSeen?.isLoading ?? false;
 
   const isManaged = !!oktaTimestamp || !!entraTimestamp;
   const lastSeenDate = useMemo(
@@ -56,6 +63,7 @@ export const UserPanelHeader = ({ userName, managedUser, lastSeen }: UserPanelHe
     [oktaTimestamp, entraTimestamp, observedUserLastSeenDate]
   );
 
+  console.log('entityIdentifiers', entityIdentifiers);
   return (
     <FlyoutHeader data-test-subj="user-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -76,7 +84,12 @@ export const UserPanelHeader = ({ userName, managedUser, lastSeen }: UserPanelHe
         <EuiFlexItem grow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.users}
-            path={getUsersDetailsUrl(userName)}
+            path={getTabsOnUsersDetailsUrl(
+              userName,
+              UsersTableType.events,
+              undefined,
+              entityIdentifiers
+            )}
             target={'_blank'}
             external={false}
             css={linkTitleCSS}

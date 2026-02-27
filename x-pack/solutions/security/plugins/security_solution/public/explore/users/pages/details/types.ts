@@ -22,6 +22,7 @@ interface UsersDetailsComponentReduxProps {
 
 interface UserBodyComponentDispatchProps {
   detailName: string;
+  entityIdentifiers: Record<string, string>;
   usersDetailsPagePath: string;
 }
 
@@ -30,8 +31,10 @@ interface UsersDetailsComponentDispatchProps extends UserBodyComponentDispatchPr
 }
 
 export interface UsersDetailsProps {
-  detailName: string;
+  entityIdentifiers: Record<string, string>;
   usersDetailsPagePath: string;
+  /** Encoded entityIdentifiers URL segment for breadcrumbs/SpyRoute state */
+  encodedEntityIdentifiersSegment?: string;
 }
 
 export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &

@@ -154,14 +154,23 @@ export const useLensAttributes = ({
         filters: [
           ...attrs.state.filters,
           ...(applyPageAndTabsFilters ? pageFilters : []),
-          ...(applyPageAndTabsFilters ? tabsFilters : []),
+          ...(applyPageAndTabsFilters
+            ? hasAdHocDataViews &&
+              (pageName === SecurityPageName.users || pageName === SecurityPageName.hosts)
+              ? [] // entity store is the data view; skip fieldNameExistsFilter (user.name / host.name exists)
+              : tabsFilters
+            : []),
           ...indexFilters,
           ...queryFilters,
         ],
       },
       references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
         ...ref,
-        id: dataViewId,
+        // Use entity store (ad-hoc data view) when ref points to one; otherwise use sourcerer data view
+        id:
+          ref.type === 'index-pattern' && ref.id in (attrs?.state?.adHocDataViews ?? {})
+            ? ref.id
+            : dataViewId,
       })),
     } as LensAttributes;
   }, [
@@ -181,6 +190,7 @@ export const useLensAttributes = ({
     tabsFilters,
     filters,
     dataViewId,
+    pageName,
   ]);
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
     ? lensAttrsWithInjectedData

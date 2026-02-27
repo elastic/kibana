@@ -106,8 +106,7 @@ export const hostIdRenderer = ({
               <>{id}</>
             ) : (
               <FlyoutLink
-                field={'host.name'}
-                value={hostName}
+                entityIdentifiers={{ 'host.name': hostName }}
                 scopeId={scopeId}
                 isFlyoutOpen={isFlyoutOpen}
               >
@@ -140,8 +139,7 @@ export const hostNameRenderer = ({
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <CellActionsRenderer field={'host.name'} value={host.name[0]} scopeId={scopeId}>
       <FlyoutLink
-        field={'host.name'}
-        value={host.name[0]}
+        entityIdentifiers={{ 'host.name': host.name[0] }}
         scopeId={scopeId}
         isFlyoutOpen={isFlyoutOpen}
       />

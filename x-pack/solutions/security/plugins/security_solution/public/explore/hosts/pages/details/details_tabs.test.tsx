@@ -140,7 +140,7 @@ describe('body', () => {
     [HostsTableType.events]: EventsQueryTabBodyMocked,
   };
 
-  const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
+  const mockHostDetailsPageFilters = getHostDetailsPageFilters({ 'host.name': 'host-1' });
 
   const filterQuery = JSON.stringify({
     bool: {

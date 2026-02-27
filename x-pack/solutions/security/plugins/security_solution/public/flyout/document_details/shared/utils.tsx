@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 
 /**
@@ -105,4 +106,116 @@ export const getEventTitle = ({
         },
       })
     : defaultTitle;
+};
+
+/**
+ * EntityIdentifiers - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
+ */
+export type EntityIdentifiers = Record<string, string>;
+
+/**
+ * Helper function to extract user entityIdentifiers as key-value pairs following entity store EUID logic
+ * Priority: user.entity.id > user.id > user.email > user.name (with related fields)
+ */
+export const getUserEntityIdentifiers = (
+  dataAsNestedObject: Ecs,
+  getFieldsData: GetFieldsData
+): EntityIdentifiers | null => {
+  const identifiers: EntityIdentifiers = {};
+
+  // Check fields in priority order (same as entity store EUID logic)
+  const userEntityId = getField(getFieldsData('user.entity.id'));
+  if (userEntityId) {
+    identifiers['user.entity.id'] = userEntityId;
+  }
+
+  const userId = getField(getFieldsData('user.id'));
+  if (userId) {
+    identifiers['user.id'] = userId;
+  }
+
+  const userEmail = getField(getFieldsData('user.email'));
+  if (userEmail) {
+    identifiers['user.email'] = userEmail;
+  }
+
+  const userName = getField(getFieldsData('user.name'));
+  if (userName) {
+    identifiers['user.name'] = userName;
+    // Add related fields that might be used for identification
+    const userDomain = getField(getFieldsData('user.domain'));
+    if (userDomain) {
+      identifiers['user.domain'] = userDomain;
+    }
+    const hostId = getField(getFieldsData('host.id'));
+    if (hostId) {
+      identifiers['host.id'] = hostId;
+    }
+    const hostDomain = getField(getFieldsData('host.domain'));
+    if (hostDomain) {
+      identifiers['host.domain'] = hostDomain;
+    }
+    const hostName = getField(getFieldsData('host.name'));
+    if (hostName) {
+      identifiers['host.name'] = hostName;
+    }
+    const hostHostname = getField(getFieldsData('host.hostname'));
+    if (hostHostname) {
+      identifiers['host.hostname'] = hostHostname;
+    }
+  }
+
+  return Object.keys(identifiers).length > 0 ? identifiers : null;
+};
+
+/**
+ * Helper function to extract host entityIdentifiers as key-value pairs following entity store EUID logic
+ * Priority: host.entity.id > host.id > host.name/hostname (with related fields)
+ */
+export const getHostEntityIdentifiers = (
+  dataAsNestedObject: Ecs,
+  getFieldsData: GetFieldsData
+): EntityIdentifiers | null => {
+  const identifiers: EntityIdentifiers = {};
+
+  // Check fields in priority order (same as entity store EUID logic)
+  const hostEntityId = getField(getFieldsData('host.entity.id'));
+  if (hostEntityId) {
+    identifiers['host.entity.id'] = hostEntityId;
+  }
+
+  const hostId = getField(getFieldsData('host.id'));
+  if (hostId) {
+    identifiers['host.id'] = hostId;
+  }
+
+  const hostName = getField(getFieldsData('host.name'));
+  if (hostName) {
+    identifiers['host.name'] = hostName;
+    // Add related fields that might be used for identification
+    const hostDomain = getField(getFieldsData('host.domain'));
+    if (hostDomain) {
+      identifiers['host.domain'] = hostDomain;
+    }
+    const hostMac = getField(getFieldsData('host.mac'));
+    if (hostMac) {
+      identifiers['host.mac'] = hostMac;
+    }
+  }
+
+  const hostHostname = getField(getFieldsData('host.hostname'));
+  if (hostHostname) {
+    identifiers['host.hostname'] = hostHostname;
+    // Add related fields that might be used for identification
+    const hostDomain = getField(getFieldsData('host.domain'));
+    if (hostDomain) {
+      identifiers['host.domain'] = hostDomain;
+    }
+    const hostMac = getField(getFieldsData('host.mac'));
+    if (hostMac) {
+      identifiers['host.mac'] = hostMac;
+    }
+  }
+
+  return Object.keys(identifiers).length > 0 ? identifiers : null;
 };

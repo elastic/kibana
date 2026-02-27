@@ -10,41 +10,46 @@ import * as i18n from './translations';
 import { UsersTableType } from '../store/model';
 import type { UsersNavTab } from './navigation/types';
 import { USERS_PATH } from '../../../../common/constants';
+import { getTabsOnUsersUrl } from '../../../common/components/link_to/redirect_to_users';
 
-const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}`;
+const getUsersTabHref = (tabName: UsersTableType, encodedEntityIdentifiers?: string) =>
+  `${USERS_PATH}${getTabsOnUsersUrl(tabName, undefined, encodedEntityIdentifiers)}`;
 
-export const navTabsUsers = (hasMlUserPermissions: boolean): UsersNavTab => {
+export const navTabsUsers = (
+  hasMlUserPermissions: boolean,
+  encodedEntityIdentifiers?: string
+): UsersNavTab => {
   const hiddenTabs = [];
 
   const userNavTabs = {
     [UsersTableType.events]: {
       id: UsersTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.events),
+      href: getUsersTabHref(UsersTableType.events, encodedEntityIdentifiers),
       disabled: false,
     },
     [UsersTableType.allUsers]: {
       id: UsersTableType.allUsers,
       name: i18n.NAVIGATION_ALL_USERS_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.allUsers),
+      href: getUsersTabHref(UsersTableType.allUsers, encodedEntityIdentifiers),
       disabled: false,
     },
     [UsersTableType.authentications]: {
       id: UsersTableType.authentications,
       name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.authentications),
+      href: getUsersTabHref(UsersTableType.authentications, encodedEntityIdentifiers),
       disabled: false,
     },
     [UsersTableType.anomalies]: {
       id: UsersTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.anomalies),
+      href: getUsersTabHref(UsersTableType.anomalies, encodedEntityIdentifiers),
       disabled: false,
     },
     [UsersTableType.risk]: {
       id: UsersTableType.risk,
       name: i18n.NAVIGATION_RISK_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.risk),
+      href: getUsersTabHref(UsersTableType.risk, encodedEntityIdentifiers),
       disabled: false,
     },
   };

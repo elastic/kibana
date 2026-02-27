@@ -25,7 +25,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       [{ field: 'user.name' }],
     ],
   },
-  entityTypeFallback: 'Identity',
+  entityTypeFallback: 'user',
   indexPatterns: [],
   fields: [
     newestValue({ destination: 'entity.name', source: 'user.name' }),

@@ -11,7 +11,7 @@ import { inspect } from '../model/inspect';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 
 export const relatedUsersRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  hostName: z.string(),
+  entityIdentifiers: z.record(z.string(), z.string()),
   skip: z.boolean().optional(),
   from: z.string(),
   inspect,

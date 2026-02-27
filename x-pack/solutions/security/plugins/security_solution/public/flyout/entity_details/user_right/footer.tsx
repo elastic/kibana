@@ -8,14 +8,22 @@
 import React from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TakeAction } from '../shared/components/take_action';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
-export const UserPanelFooter = ({ userName }: { userName: string }) => {
+export const UserPanelFooter = ({
+  entityIdentifiers,
+}: {
+  entityIdentifiers: EntityIdentifiers;
+}) => {
   return (
     <EuiFlyoutFooter>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            <TakeAction isDisabled={!userName} kqlQuery={`user.name: "${userName}"`} />
+            <TakeAction
+              isDisabled={!entityIdentifiers}
+              kqlQuery={`user.name: "${entityIdentifiers}"`}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

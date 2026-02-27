@@ -25,7 +25,7 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
       [{ field: 'host.hostname' }],
     ],
   },
-  entityTypeFallback: 'Host',
+  entityTypeFallback: 'host',
   indexPatterns: [],
   fields: [
     newestValue({ destination: 'entity.name', source: 'host.name' }),

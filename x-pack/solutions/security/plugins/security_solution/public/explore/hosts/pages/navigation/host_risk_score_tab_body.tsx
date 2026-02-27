@@ -14,7 +14,7 @@ import { RiskEnginePrivilegesCallOut } from '../../../../entity_analytics/compon
 import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
 import { HostRiskScoreQueryId } from '../../../../entity_analytics/common/utils';
 import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useHostRiskScoresFromEntityStore } from '../../../../entity_analytics/api/hooks/use_host_risk_scores_from_entity_store';
 import { EnableRiskScore } from '../../../../entity_analytics/components/enable_risk_score';
 import type { HostsComponentsQueryProps } from './types';
 import { manageQuery } from '../../../../common/components/page/manage_query';
@@ -64,14 +64,12 @@ export const HostRiskScoreQueryTabBody = ({
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   const privileges = useMissingRiskEnginePrivileges({ readonly: true });
-  const { data, inspect, isInspected, hasEngineBeenInstalled, loading, refetch, totalCount } =
-    useRiskScore({
+  const { data, inspect, hasEngineBeenInstalled, loading, refetch, totalCount } =
+    useHostRiskScoresFromEntityStore({
       filterQuery,
       pagination,
-      riskEntity: EntityType.host,
       skip: querySkip,
       sort,
-      timerange,
     });
 
   const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
@@ -120,7 +118,7 @@ export const HostRiskScoreQueryTabBody = ({
         data={data ?? []}
         id={HostRiskScoreQueryId.HOSTS_BY_RISK}
         inspect={inspect}
-        isInspect={isInspected}
+        isInspect={false}
         loading={loading || isKpiLoading}
         loadPage={noop} // It isn't necessary because PaginatedTable updates redux store and we load the page when activePage updates on the store
         refetch={refetch}

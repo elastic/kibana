@@ -9,9 +9,8 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import type { Inspect, Maybe } from '../../../common';
 
 export interface LastTimeDetails {
-  hostName?: Maybe<string>;
-  userName?: Maybe<string>;
   ip?: Maybe<string>;
+  entityIdentifiers?: Record<string, string>;
 }
 
 export interface TimelineEventsLastEventTimeStrategyResponse extends IEsSearchResponse {

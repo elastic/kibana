@@ -7,31 +7,55 @@
 
 import { EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 
-import type { LastEventIndexKey } from '../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { useTimelineLastEventTime } from '../../containers/events/last_event_time';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 
 export interface LastEventTimeProps {
-  hostName?: string;
-  userName?: string;
+  entityIdentifiers?: Record<string, string>;
   indexKey: LastEventIndexKey;
-  ip?: string;
   indexNames: string[];
+  ip?: string;
 }
 
+/**
+ * Extracts details from entityIdentifiers for the given indexKey
+ */
+const getDetailsFromEntityIdentifiers = (
+  indexKey: LastEventIndexKey,
+  entityIdentifiers?: Record<string, string>,
+  ip?: string
+) => {
+  const details: {
+    entityIdentifiers?: Record<string, string>;
+    ip?: string;
+  } = {
+    entityIdentifiers: entityIdentifiers || {},
+  };
+
+  if (indexKey === LastEventIndexKey.hostDetails || indexKey === LastEventIndexKey.userDetails) {
+    details.entityIdentifiers = entityIdentifiers || {};
+  } else if (indexKey === LastEventIndexKey.ipDetails) {
+    details.ip = ip;
+  }
+
+  return details;
+};
+
 export const LastEventTime = memo<LastEventTimeProps>(
-  ({ hostName, userName, indexKey, ip, indexNames }) => {
+  ({ entityIdentifiers, indexKey, indexNames, ip }) => {
+    const details = useMemo(
+      () => getDetailsFromEntityIdentifiers(indexKey, entityIdentifiers, ip),
+      [entityIdentifiers, indexKey, ip]
+    );
+
     const [loading, { lastSeen, errorMessage }] = useTimelineLastEventTime({
       indexKey,
       indexNames,
-      details: {
-        hostName,
-        ip,
-        userName,
-      },
+      details,
     });
 
     if (errorMessage != null) {

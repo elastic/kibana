@@ -16,29 +16,44 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { getHostDetailsUrl } from '../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 
 interface HostPanelHeaderProps {
-  hostName: string;
+  entityIdentifiers: EntityIdentifiers;
   lastSeen: FirstLastSeenData;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
-
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ hostName, lastSeen }: HostPanelHeaderProps) => {
+export const HostPanelHeader = ({ entityIdentifiers, lastSeen }: HostPanelHeaderProps) => {
+  const hostName = useMemo(
+    () =>
+      entityIdentifiers[EntityIdentifierFields.hostName] ||
+      Object.values(entityIdentifiers)[0] ||
+      '',
+    [entityIdentifiers]
+  );
+
   const lastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
   const lastSeenDateFormatted = useMemo(
     () => lastSeenDate && new Date(lastSeenDate),
     [lastSeenDate]
   );
+
+  const hostDetailsPath = useMemo(
+    () => getHostDetailsUrl(hostName, undefined, entityIdentifiers),
+    [hostName, entityIdentifiers]
+  );
+
   return (
     <FlyoutHeader data-test-subj="host-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -59,7 +74,7 @@ export const HostPanelHeader = ({ hostName, lastSeen }: HostPanelHeaderProps) =>
         <EuiFlexItem grow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.hosts}
-            path={getHostDetailsUrl(hostName)}
+            path={hostDetailsPath}
             target={'_blank'}
             external={false}
             css={linkTitleCSS}

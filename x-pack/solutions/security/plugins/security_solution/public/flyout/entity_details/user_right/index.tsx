@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { euid } from '../../../../../../plugins/entity_store/common';
+import type { ESQuery } from '../../../../common/typed_json';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
@@ -19,7 +21,6 @@ import { ManagedUserDatasetKey } from '../../../../common/search_strategy/securi
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelFooter } from './footer';
 import { UserPanelContent } from './content';
@@ -28,16 +29,20 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { useObservedUser } from './hooks/use_observed_user';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
-  userName: string;
   isPreviewMode: boolean;
+  /**
+   * Entity identifiers for the user (following entity store EUID logic)
+   */
+  entityIdentifiers: EntityIdentifiers;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -55,20 +60,25 @@ const FIRST_RECORD_PAGINATION = {
 export const UserPanel = ({
   contextID,
   scopeId,
-  userName,
   isPreviewMode = false,
+  entityIdentifiers,
 }: UserPanelProps) => {
   const { uiSettings } = useKibana().services;
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
 
-  const userNameFilterQuery = useMemo(
-    () => (userName ? buildUserNamesFilter([userName]) : undefined),
-    [userName]
-  );
+  // Extract userName from entityIdentifiers
+  // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
+  const effectiveUserName = useMemo<string>(() => {
+    const userNameFromIdentifiers =
+      entityIdentifiers['user.name'] || Object.values(entityIdentifiers)[0];
+    return userNameFromIdentifiers as string;
+  }, [entityIdentifiers]);
+
+  const entityFilters = euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers);
 
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
-    filterQuery: userNameFilterQuery,
+    filterQuery: entityFilters as ESQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
   });
@@ -76,9 +86,7 @@ export const UserPanel = ({
   const { inspect, refetch, loading } = riskScoreState;
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
 
-  const observedUser = useObservedUser(userName, scopeId);
-  const email = observedUser.details.user?.email;
-
+  const observedUser = useObservedUser(entityIdentifiers, scopeId);
   const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
@@ -93,15 +101,14 @@ export const UserPanel = ({
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
     EntityType.user,
-    userName,
+    effectiveUserName,
     { onSuccess: refetchRiskScore }
   );
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(entityIdentifiers);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.userName,
-    value: userName,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}USER_NAME_RIGHT`,
@@ -117,8 +124,7 @@ export const UserPanel = ({
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
-    userName,
-    email,
+    entityIdentifiers,
     scopeId,
     contextID,
     isRiskScoreExist,
@@ -151,12 +157,12 @@ export const UserPanel = ({
         isRulePreview={scopeId === TableId.rulePreview}
       />
       <UserPanelHeader
-        userName={userName}
-        managedUser={managedUser}
+        entityIdentifiers={entityIdentifiers}
         lastSeen={observedUser.lastSeen}
+        managedUser={managedUser}
+        userName={effectiveUserName}
       />
       <UserPanelContent
-        userName={userName}
         observedUser={observedUser}
         riskScoreState={riskScoreState}
         recalculatingScore={recalculatingScore}
@@ -165,10 +171,17 @@ export const UserPanel = ({
         scopeId={scopeId}
         openDetailsPanel={openDetailsPanel}
         isPreviewMode={isPreviewMode}
+        entityIdentifiers={entityIdentifiers}
       />
-      {!isPreviewMode && assetInventoryEnabled && <UserPanelFooter userName={userName} />}
+      {!isPreviewMode && assetInventoryEnabled && (
+        <UserPanelFooter entityIdentifiers={entityIdentifiers} />
+      )}
       {isPreviewMode && (
-        <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
+        <UserPreviewPanelFooter
+          entityIdentifiers={entityIdentifiers}
+          contextID={contextID}
+          scopeId={scopeId}
+        />
       )}
     </>
   );

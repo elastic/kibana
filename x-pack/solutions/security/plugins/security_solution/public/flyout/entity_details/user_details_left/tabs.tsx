@@ -21,9 +21,10 @@ import type {
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { DocumentDetailsProvider } from '../../document_details/shared/context';
-import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
@@ -31,7 +32,8 @@ export const useTabs = (
   isRiskScoreExist: boolean,
   scopeId: string,
   hasMisconfigurationFindings?: boolean,
-  hasNonClosedAlerts?: boolean
+  hasNonClosedAlerts?: boolean,
+  entityIdentifiers?: EntityIdentifiers
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
@@ -56,8 +58,8 @@ export const useTabs = (
       tabs.push(getEntraTab(entraManagedUser));
     }
 
-    if (hasMisconfigurationFindings || hasNonClosedAlerts) {
-      tabs.push(getInsightsInputTab({ name, fieldName: EntityIdentifierFields.userName, scopeId }));
+    if ((hasMisconfigurationFindings || hasNonClosedAlerts) && entityIdentifiers) {
+      tabs.push(getInsightsInputTab({ entityIdentifiers, scopeId }));
     }
 
     return tabs;
@@ -68,6 +70,7 @@ export const useTabs = (
     managedUser,
     name,
     scopeId,
+    entityIdentifiers,
   ]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({

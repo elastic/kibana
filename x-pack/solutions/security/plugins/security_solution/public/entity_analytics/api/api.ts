@@ -313,16 +313,24 @@ export const useEntityAnalyticsRoutes = () => {
     };
 
     /**
-     * Get asset criticality
+     * Get asset criticality. Returns null when no record exists (server returns 404).
      */
     const fetchAssetCriticality = async (
       params: Pick<AssetCriticality, 'idField' | 'idValue'>
-    ): Promise<AssetCriticalityRecord> => {
-      return http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_PUBLIC_URL, {
-        version: API_VERSIONS.public.v1,
-        method: 'GET',
-        query: { id_value: params.idValue, id_field: params.idField },
-      });
+    ): Promise<AssetCriticalityRecord | null> => {
+      try {
+        return await http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_PUBLIC_URL, {
+          version: API_VERSIONS.public.v1,
+          method: 'GET',
+          query: { id_value: params.idValue, id_field: params.idField },
+        });
+      } catch (error: unknown) {
+        const statusCode = (error as { body?: { statusCode?: number } })?.body?.statusCode;
+        if (statusCode === 404) {
+          return null;
+        }
+        throw error;
+      }
     };
 
     /**

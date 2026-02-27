@@ -19,13 +19,14 @@ import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { UserItem } from '../../../../common/search_strategy';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'>;
 
 interface UserPanelContentProps {
-  userName: string;
+  entityIdentifiers: EntityIdentifiers;
   observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;
@@ -37,7 +38,7 @@ interface UserPanelContentProps {
 }
 
 export const UserPanelContent = ({
-  userName,
+  entityIdentifiers,
   observedUser,
   riskScoreState,
   recalculatingScore,
@@ -50,6 +51,11 @@ export const UserPanelContent = ({
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
+
+  // Extract userName from entityIdentifiers for components that need a string
+  // Priority: entityIdentifiers['user.name'] > entityIdentifiers[first key]
+  const userName =
+    entityIdentifiers[EntityIdentifierFields.userName] || Object.values(entityIdentifiers)[0] || '';
 
   return (
     <FlyoutBody>
@@ -74,8 +80,7 @@ export const UserPanelContent = ({
         onChange={onAssetCriticalityChange}
       />
       <EntityInsight
-        value={userName}
-        field={EntityIdentifierFields.userName}
+        entityIdentifiers={entityIdentifiers}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />
