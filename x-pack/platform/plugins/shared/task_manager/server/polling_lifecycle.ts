@@ -13,7 +13,6 @@ import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
-import type { IEventLogger } from '@kbn/event-log-plugin/server';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -41,7 +40,7 @@ import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, TaskEventLogger } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
 import type { TaskRunner } from './task_running';
@@ -81,7 +80,7 @@ export interface TaskPollingLifecycleOpts {
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
-  eventLogger: IEventLogger;
+  eventLogger: TaskEventLogger;
 }
 
 export type TaskLifecycleEvent =
@@ -124,7 +123,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private currentPollInterval: number;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
 
-  private eventLogger: IEventLogger;
+  private eventLogger: TaskEventLogger;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,

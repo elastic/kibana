@@ -27,7 +27,6 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -61,6 +60,7 @@ import type {
   RruleSchedule,
   SuccessfulRunResult,
   TaskDefinition,
+  TaskEventLogger,
 } from '../task';
 import { isFailedRunResult, TaskStatus } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
@@ -132,7 +132,7 @@ type Opts = {
   allowReadingInvalidState: boolean;
   strategy: string;
   getPollInterval: () => number;
-  eventLogger: IEventLogger;
+  eventLogger: TaskEventLogger;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -187,7 +187,7 @@ export class TaskManagerRunner implements TaskRunner {
   private readonly taskValidator: TaskValidator;
   private readonly claimStrategy: string;
   private getPollInterval: () => number;
-  private eventLogger: IEventLogger;
+  private eventLogger: TaskEventLogger;
 
   /**
    * Creates an instance of TaskManagerRunner.

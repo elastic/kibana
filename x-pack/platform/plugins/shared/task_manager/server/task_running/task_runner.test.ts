@@ -23,7 +23,7 @@ import {
   TaskPersistence,
   asTaskManagerStatEvent,
 } from '../task_events';
-import type { ConcreteTaskInstance } from '../task';
+import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
 import { getDeleteTaskRunResult, TaskStatus } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
@@ -34,7 +34,6 @@ import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
 import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
@@ -51,7 +50,7 @@ const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const minutesFromDate = (date: Date, mins: number): Date => secondsFromDate(date, mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
-const eventLoggerMock = { logEvent: jest.fn() } as unknown as IEventLogger;
+const eventLoggerMock = { logEvent: jest.fn() } as unknown as TaskEventLogger;
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
