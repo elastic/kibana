@@ -112,6 +112,10 @@ export class EuiDataGridWrapper {
     );
   }
 
+  getAllCellLocatorByColId(colId: string): Locator {
+    return this.rows.locator(`[data-gridcell-column-id="${colId}"]`);
+  }
+
   async expandCell(rowIndex: number, columnIndex: number) {
     await this.ensureGridVisible();
 
