@@ -7,8 +7,16 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { assertNever } from '@kbn/std';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToQueryDsl } from '@kbn/streamlang';
+import {
+  conditionToQueryDsl,
+  isAndCondition,
+  isOrCondition,
+  isNotCondition,
+  isAlwaysCondition,
+  isNeverCondition,
+} from '@kbn/streamlang';
 import { format } from 'util';
 import pLimit from 'p-limit';
 import { compact, isEqual } from 'lodash';
@@ -31,17 +39,20 @@ export function getFields(condition: Condition): string[] {
     return [condition.field];
   }
 
-  if ('and' in condition) {
+  if (isAndCondition(condition)) {
     return condition.and.flatMap(getFields);
   }
-  if ('or' in condition) {
+  if (isOrCondition(condition)) {
     return condition.or.flatMap(getFields);
   }
-  if ('not' in condition) {
+  if (isNotCondition(condition)) {
     return getFields(condition.not);
   }
+  if (isAlwaysCondition(condition) || isNeverCondition(condition)) {
+    return [];
+  }
 
-  return [];
+  return assertNever(condition);
 }
 
 /**
