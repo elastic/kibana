@@ -57,24 +57,17 @@ const sharedCacheOptions = {
   speedy: true, // Enable speedy mode for better performance
 };
 
-const EMOTION_DEBUG_PREFIX = '[Kibana Emotion]';
-
 /**
- * Resolves the Emotion cache container: prefers stable div by id (new template), falls back to meta (legacy).
- * Stable containers avoid insertBefore crashes when multiple flyouts unmount and the sheet holds stale tag refs.
+ * Resolves the Emotion cache container (meta marker or document.head).
  * Returns undefined when run outside the browser (e.g. SSR).
  */
-function getEmotionContainer(containerId: string, metaNameFallback: string): HTMLElement | undefined {
+function getEmotionContainer(metaName: string): HTMLElement | undefined {
   if (typeof document === 'undefined') {
-    console.debug(EMOTION_DEBUG_PREFIX, 'getEmotionContainer: no document (SSR)', { containerId, metaNameFallback });
     return undefined;
   }
-  const byId = document.getElementById(containerId);
-  if (byId) {
-    console.debug(EMOTION_DEBUG_PREFIX, 'getEmotionContainer: using stable div by id', { containerId, metaNameFallback });
-    return byId;
-  }
-  const byMeta = document.querySelector<HTMLElement>(`meta[name="${metaNameFallback}"]`);
+  const el = document.querySelector<HTMLElement>(`meta[name="${metaName}"]`);
+  if (el) {
+    return el;
   }
   return document.head;
 }
@@ -84,12 +77,15 @@ function getEmotionContainer(containerId: string, metaNameFallback: string): HTM
  * When multiple flyouts close (e.g. closeAllFlyouts), the sheet can hold references to style tags
  * that were removed from the DOM; the next insert then throws "The node before which the new node
  * is to be inserted is not a child of this node." We fall back to appending and clear stale tag refs.
+ * When we clear stale tags we also reset the sheet's rule counter (ctr) so the next insert creates
+ * a fresh style element; otherwise Emotion would try insertRule on a tag that may be full or stale.
  */
 function wrapSheetInsertTag(
   sheetKey: string,
   sheet: {
     container: Node;
     tags: HTMLStyleElement[];
+    ctr?: number;
     insertionPoint?: HTMLElement;
     prepend?: boolean;
     before?: Node | null;
@@ -112,6 +108,9 @@ function wrapSheetInsertTag(
     if (!validBefore) {
       sheet.tags = sheet.tags.filter((t) => t.parentNode === container);
       before = sheet.tags.length > 0 ? sheet.tags[sheet.tags.length - 1].nextSibling : null;
+      // Emotion creates a new style tag when ctr % 65000 === 0 (speedy mode). Set ctr so the next
+      // insert() allocates a fresh tag instead of using a possibly full or stale one.
+      sheet.ctr = 64999;
     }
     (container as HTMLElement).insertBefore(tag, before);
     sheet.tags.push(tag);

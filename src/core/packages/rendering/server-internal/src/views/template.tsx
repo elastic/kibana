@@ -9,13 +9,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { createElement } from 'react';
-import {
-  EUI_STYLES_GLOBAL,
-  EUI_STYLES_UTILS,
-  KBN_EMOTION_CONTAINER_GLOBAL_ID,
-  KBN_EMOTION_CONTAINER_CSS_ID,
-  KBN_EMOTION_CONTAINER_UTILS_ID,
-} from '@kbn/core-base-common';
+import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { i18n } from '@kbn/i18n';
 import type { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
@@ -62,9 +56,9 @@ export const Template: FunctionComponent<Props> = ({
         <link rel="icon" type="image/svg+xml" href={favIcon} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content={colorScheme} />
-        {/* Stable containers for Emotion caches; never removed to avoid insertBefore crashes when flyouts unmount */}
-        <div id={KBN_EMOTION_CONTAINER_GLOBAL_ID} />
-        <div id={KBN_EMOTION_CONTAINER_CSS_ID} />
+        {/* Inject EUI reset and global styles before all other component styles */}
+        <meta name={EUI_STYLES_GLOBAL} />
+        <meta name="emotion" />
         <Styles
           darkMode={darkMode}
           themeName={injectedMetadata.theme.name}
@@ -76,8 +70,8 @@ export const Template: FunctionComponent<Props> = ({
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />
-        {/* Stable container for EUI utilities cache */}
-        <div id={KBN_EMOTION_CONTAINER_UTILS_ID} />
+        {/* Inject EUI CSS utilties after all other styles for CSS specificity */}
+        <meta name={EUI_STYLES_UTILS} />
       </head>
       <body>
         {createElement('kbn-csp', {
