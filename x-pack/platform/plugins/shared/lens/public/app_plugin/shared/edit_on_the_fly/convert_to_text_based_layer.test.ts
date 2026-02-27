@@ -11,6 +11,7 @@ import type {
   DatasourceStates,
   IndexPattern,
 } from '@kbn/lens-common';
+import { esql } from '@kbn/esql-language';
 import { createMockFramePublicAPI } from '../../../mocks';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 import type { ConvertibleLayer, EsqlConversionData } from './esql_conversion_types';
@@ -200,7 +201,10 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
     expect(result).toBeDefined();
     expect(result?.state.datasourceStates.textBased).toBeDefined();
-    expect(result?.state.query).toEqual({ esql: defaultConvertibleLayers[0].query });
+    // Conversion formats the query with the composer before adding to state
+    expect(result?.state.query).toEqual({
+      esql: esql(defaultConvertibleLayers[0].query).print('wrapping'),
+    });
   });
 
   it('preserves original column IDs in visualization state', () => {
@@ -216,11 +220,18 @@ describe('convertFormBasedToTextBasedLayer', () => {
     expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns).toEqual([
       {
         columnId: 'col2',
+        customLabel: true,
         fieldName: 'bucket_0_0',
         label: 'Count of records',
         meta: { type: 'number' },
       },
-      { columnId: 'col1', fieldName: '@timestamp', label: '@timestamp', meta: { type: 'date' } },
+      {
+        columnId: 'col1',
+        customLabel: true,
+        fieldName: '@timestamp',
+        label: '@timestamp',
+        meta: { type: 'date' },
+      },
     ]);
   });
 
@@ -270,6 +281,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
       expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0]).toEqual({
         columnId: 'col2',
+        customLabel: true,
         fieldName: 'my_count',
         label: 'My Label',
         meta: { type: 'number' },
@@ -294,7 +306,6 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
       const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0];
       expect(column).not.toHaveProperty('params');
-      expect(column).not.toHaveProperty('customLabel');
     });
   });
 
