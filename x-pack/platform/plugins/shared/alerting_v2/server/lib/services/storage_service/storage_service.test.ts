@@ -68,7 +68,7 @@ describe('StorageService', () => {
           { create: { _index: index } },
           mockDocs[1],
         ],
-        refresh: 'wait_for',
+        refresh: false,
       });
     });
 
@@ -86,7 +86,7 @@ describe('StorageService', () => {
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
         operations: [{ create: { _index: index } }, docs[0]],
-        refresh: 'wait_for',
+        refresh: false,
       });
     });
 

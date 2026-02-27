@@ -9,7 +9,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task'
 
 import { RuleExecutorTaskRunner } from './task_runner';
 import type { RuleExecutionPipelineContract } from './execution_pipeline';
-import { createRuleExecutionInput, createRulePipelineState } from './test_utils';
+import { createRulePipelineState } from './test_utils';
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
@@ -33,19 +33,19 @@ describe('RuleExecutorTaskRunner', () => {
 
   describe('extractExecutionInput', () => {
     it('constructs the pipeline input from task instance correctly', async () => {
-      const input = createRuleExecutionInput({
-        abortSignal: abortController.signal,
-        scheduledAt: taskInstance.scheduledAt?.toISOString(),
-      });
-
       pipeline.execute.mockResolvedValue({
         completed: true,
-        finalState: createRulePipelineState({ input }),
+        finalState: createRulePipelineState(),
       });
 
       await runner.run({ taskInstance, abortController });
 
-      expect(pipeline.execute).toHaveBeenCalledWith(input);
+      expect(pipeline.execute).toHaveBeenCalledWith({
+        ruleId: 'rule-1',
+        spaceId: 'default',
+        scheduledAt: taskInstance.scheduledAt?.toISOString(),
+        abortSignal: abortController.signal,
+      });
     });
 
     it('uses startedAt when scheduledAt is a string', async () => {

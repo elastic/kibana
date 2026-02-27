@@ -116,7 +116,7 @@ describe('DispatcherService', () => {
 
       expect(storageEsClient.bulk).toHaveBeenCalledWith({
         operations: expect.any(Array),
-        refresh: 'wait_for',
+        refresh: false,
       });
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
