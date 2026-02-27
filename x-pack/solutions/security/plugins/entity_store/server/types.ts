@@ -27,6 +27,7 @@ import type { AssetManager } from './domain/asset_manager';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction_client';
 import type { CRUDClient } from './domain/crud_client';
+import type { ResolutionClient } from './domain/resolution_client';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
 
 export interface EntityStoreSetupPlugins {
@@ -48,6 +49,7 @@ export interface EntityStoreApiRequestHandlerContext {
   logger: Logger;
   assetManager: AssetManager;
   crudClient: CRUDClient;
+  resolutionClient: ResolutionClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
   security: SecurityPluginStart;

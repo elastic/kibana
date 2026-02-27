@@ -98,6 +98,30 @@ components:
               type: array
               items:
                 type: string
+            resolution:
+              type: object
+              additionalProperties: false
+              properties:
+                resolved_to:
+                  type: string
+                  description: entity.id of the entity this one resolves to
+                risk:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    calculated_level:
+                      $ref: '#/components/schemas/EntityRiskLevels'
+                      description: Lexical description of the resolution group's aggregated risk.
+                    calculated_score:
+                      type: number
+                      format: double
+                      description: The raw numeric value of the resolution group's aggregated risk score.
+                    calculated_score_norm:
+                      type: number
+                      format: double
+                      minimum: 0
+                      maximum: 100
+                      description: The normalized numeric value of the resolution group's aggregated risk score.
         risk:
           type: object
           additionalProperties: false

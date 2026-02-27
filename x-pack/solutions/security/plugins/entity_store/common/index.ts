@@ -59,6 +59,9 @@ export const ENTITY_STORE_ROUTES = {
   CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
   CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
+  RESOLUTION_LINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/link`,
+  RESOLUTION_UNLINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/unlink`,
+  RESOLUTION_GROUP: `${ENTITY_STORE_BASE_ROUTE}/resolution/group`,
 } as const satisfies Record<string, string>;
 
 export const getErrorMessage = (error: unknown): string => {

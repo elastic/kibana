@@ -14,3 +14,6 @@ export { registerCRUDUpsert } from './crud/upsert';
 export { registerCRUDUpsertBulk } from './crud/upsert_bulk';
 export { registerCRUDDelete } from './crud/delete';
 export { registerStart } from './start';
+export { registerResolutionLink } from './resolution/link';
+export { registerResolutionUnlink } from './resolution/unlink';
+export { registerResolutionGroup } from './resolution/group';

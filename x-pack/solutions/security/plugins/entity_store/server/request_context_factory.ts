@@ -18,6 +18,7 @@ import { FeatureFlags } from './infra/feature_flags';
 import { EngineDescriptorClient } from './domain/definitions/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction_client';
 import { CRUDClient } from './domain/crud_client';
+import { ResolutionClient } from './domain/resolution_client';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -83,6 +84,11 @@ export async function createRequestHandlerContext({
       analytics,
     }),
     crudClient,
+    resolutionClient: new ResolutionClient({
+      logger,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      namespace,
+    }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
     security: startPlugins.security,
