@@ -86,7 +86,8 @@
     "x-pack/solutions/security/plugins/entity_store/public/hooks/useInstallEntityStoreV2.tsx": "'useInstallEntityStoreV2.tsx' should be snake_case"
   },
   "@elastic/experience-docs": {
-    "docs/reference/connectors-kibana/_snippets": "'_snippets' should be kebab-case"
+    "docs/reference/connectors-kibana/_snippets": "'_snippets' should be kebab-case",
+    "docs/reference/user-activity/_snippets": "'_snippets' should be kebab-case"
   },
   "@elastic/fleet": {
     "x-pack/platform/plugins/shared/fleet/cypress/packages/input_package-1.0.0.zip": "'input_package-1.0.0.zip' should be snake_case",
@@ -208,6 +209,7 @@
     "src/core/packages/test-helpers": "'test-helpers' should be snake_case",
     "src/core/packages/ui-settings": "'ui-settings' should be snake_case",
     "src/core/packages/usage-data": "'usage-data' should be snake_case",
+    "src/core/packages/user-activity": "'user-activity' should be snake_case",
     "src/core/packages/user-profile": "'user-profile' should be snake_case",
     "src/core/packages/user-settings": "'user-settings' should be snake_case",
     "src/core/test-helpers": "'test-helpers' should be snake_case",

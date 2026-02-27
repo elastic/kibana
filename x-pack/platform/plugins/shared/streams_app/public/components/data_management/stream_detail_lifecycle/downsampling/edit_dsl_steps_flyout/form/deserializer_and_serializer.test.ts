@@ -15,10 +15,27 @@ import { MAX_DOWNSAMPLE_STEPS } from './constants';
 
 const unknownValue = { some: 'value' };
 
+/** Lifecycle shape with preserved/unknown fields for serializer tests */
+type LifecycleWithPreserved = IngestStreamLifecycleDSL & {
+  unknown?: unknown;
+  dsl?: IngestStreamLifecycleDSL['dsl'] & {
+    enabled?: boolean;
+    downsampling_method?: string;
+    unknown?: unknown;
+  };
+};
+
+/** Downsample step with optional unknown fields (stripped on serialize) */
+type DownsampleStepWithExtras = IngestStreamLifecycleDSL['dsl'] extends { downsample?: infer D }
+  ? D extends Array<infer S>
+    ? S & { unknown_nested?: unknown }
+    : never
+  : never;
+
 describe('streams DSL steps flyout deserializer and serializer', () => {
   const deserializer = createDslStepsFlyoutDeserializer();
 
-  let lifecycle: IngestStreamLifecycleDSL;
+  let lifecycle: LifecycleWithPreserved;
   let serializer: ReturnType<typeof createDslStepsFlyoutSerializer>;
   let formInternal: DslStepsFlyoutFormInternal;
 
@@ -27,16 +44,20 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
       dsl: {
         data_retention: '30d',
         enabled: true,
-        downsampling_method: 'something' as any,
+        downsampling_method: 'something',
         downsample: [
-          { after: '30d', fixed_interval: '1h', unknown_nested: unknownValue } as any,
-          { after: '40d', fixed_interval: '5d' } as any,
+          {
+            after: '30d',
+            fixed_interval: '1h',
+            unknown_nested: unknownValue,
+          } as DownsampleStepWithExtras,
+          { after: '40d', fixed_interval: '5d' },
         ],
         // unknown fields should be preserved
         unknown: unknownValue,
-      } as any,
+      },
       unknown: unknownValue,
-    } as any;
+    };
 
     formInternal = deserializer(lifecycle);
     // clone here so we can mutate `lifecycle` while serializer keeps original reference semantics
@@ -55,12 +76,11 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
     const input = cloneDeep(lifecycle);
 
     const internal = deserializer(input);
-    const out = createDslStepsFlyoutSerializer(input)(internal);
-    const outAny = out as any;
-    expect(outAny.unknown).toEqual(unknownValue);
-    expect(outAny.dsl?.unknown).toEqual(unknownValue);
-    expect(outAny.dsl?.enabled).toEqual(true);
-    expect(outAny.dsl?.downsampling_method).toEqual('something');
+    const out = createDslStepsFlyoutSerializer(input)(internal) as LifecycleWithPreserved;
+    expect(out.unknown).toEqual(unknownValue);
+    expect(out.dsl?.unknown).toEqual(unknownValue);
+    expect(out.dsl?.enabled).toEqual(true);
+    expect(out.dsl?.downsampling_method).toEqual('something');
 
     // Per-step unknown fields must not be preserved (Elasticsearch only accepts `after`/`fixed_interval`).
     expect(out.dsl?.downsample?.[0]).toEqual({ after: '30d', fixed_interval: '1h' });
@@ -72,7 +92,7 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
   });
 
   it('deserializes empty lifecycle into schema-compatible defaults', () => {
-    const internal = deserializer({} as any);
+    const internal = deserializer({} as IngestStreamLifecycleDSL);
     expect(internal._meta.downsampleSteps).toEqual([]);
   });
 
@@ -82,7 +102,7 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
         data_retention: '30d',
         downsample: [{ after: '2d', fixed_interval: '2h' }],
       },
-    } as any);
+    });
 
     expect(internal._meta.downsampleSteps).toHaveLength(1);
     expect(internal._meta.downsampleSteps[0]).toEqual({
@@ -100,7 +120,7 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
         data_retention: '30d',
         downsample: [{ after: '1500ms', fixed_interval: '300000ms' }],
       },
-    } as any;
+    };
 
     const internal = deserializer(input);
     expect(internal._meta.downsampleSteps[0].afterValue).toBe('1500');
@@ -118,7 +138,7 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
       dsl: {
         downsample: [{ after: 'not_a_duration', fixed_interval: undefined }],
       },
-    } as any);
+    } as unknown as IngestStreamLifecycleDSL);
 
     expect(internal._meta.downsampleSteps).toHaveLength(1);
     expect(internal._meta.downsampleSteps[0]).toEqual({
@@ -142,8 +162,8 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
       fixedIntervalUnit: 'd',
     };
 
-    const out = serializer(internal) as any;
-    expect(out.dsl.downsample[0]).toEqual({
+    const out = serializer(internal) as LifecycleWithPreserved;
+    expect(out.dsl!.downsample![0]).toEqual({
       after: '41d',
       fixed_interval: '10d',
     });
@@ -151,15 +171,17 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
 
   it('removes dsl.downsample when there are no steps', () => {
     const internal: DslStepsFlyoutFormInternal = { _meta: { downsampleSteps: [] } };
-    const out = serializer(internal) as any;
+    const out = serializer(internal) as LifecycleWithPreserved;
 
-    expect(out.dsl.data_retention).toEqual('30d');
-    expect(out.dsl.downsample).toBeUndefined();
+    expect(out.dsl!.data_retention).toEqual('30d');
+    expect(out.dsl!.downsample).toBeUndefined();
   });
 
   it('does not create an empty dsl object when initial lifecycle has no dsl and there are no steps', () => {
     const internal: DslStepsFlyoutFormInternal = { _meta: { downsampleSteps: [] } };
-    const out = createDslStepsFlyoutSerializer({} as any)(internal) as any;
+    const out = createDslStepsFlyoutSerializer({} as IngestStreamLifecycleDSL)(
+      internal
+    ) as LifecycleWithPreserved;
     expect(out.dsl).toBeUndefined();
   });
 
@@ -178,11 +200,11 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
       },
     };
 
-    const out = createDslStepsFlyoutSerializer({ dsl: { data_retention: '30d' } } as any)(
+    const out = createDslStepsFlyoutSerializer({ dsl: { data_retention: '30d' } })(
       internal
-    ) as any;
+    ) as LifecycleWithPreserved;
 
-    expect(out.dsl.downsample[0]).toEqual({ after: '0s', fixed_interval: '1d' });
+    expect(out.dsl!.downsample![0]).toEqual({ after: '0s', fixed_interval: '1d' });
   });
 
   it('truncates to MAX_DOWNSAMPLE_STEPS on deserialize and serialize', () => {
@@ -193,15 +215,15 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
 
     const internal = deserializer({
       dsl: { data_retention: '30d', downsample: manySteps },
-    } as any);
+    });
 
     expect(internal._meta.downsampleSteps).toHaveLength(MAX_DOWNSAMPLE_STEPS);
 
     const out = createDslStepsFlyoutSerializer({
       dsl: { data_retention: '30d' },
-    } as any)(internal) as any;
+    })(internal) as LifecycleWithPreserved;
 
-    expect(out.dsl.downsample).toHaveLength(MAX_DOWNSAMPLE_STEPS);
+    expect(out.dsl!.downsample).toHaveLength(MAX_DOWNSAMPLE_STEPS);
   });
 
   it('normalizes numeric formatting of after via Number() cast', () => {
@@ -219,10 +241,10 @@ describe('streams DSL steps flyout deserializer and serializer', () => {
       },
     };
 
-    const out = createDslStepsFlyoutSerializer({ dsl: { data_retention: '30d' } } as any)(
+    const out = createDslStepsFlyoutSerializer({ dsl: { data_retention: '30d' } })(
       internal
-    ) as any;
+    ) as LifecycleWithPreserved;
 
-    expect(out.dsl.downsample[0]).toEqual({ after: '30d', fixed_interval: '2h' });
+    expect(out.dsl!.downsample![0]).toEqual({ after: '30d', fixed_interval: '2h' });
   });
 });
