@@ -7,7 +7,10 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillPersistedDefinition } from '../services/skills/persisted/client';
-import type { ReadonlySkillProvider, WritableSkillProvider } from '../services/skills/skill_provider';
+import type {
+  ReadonlySkillProvider,
+  WritableSkillProvider,
+} from '../services/skills/skill_provider';
 
 export type ReadonlySkillProviderMock = jest.Mocked<ReadonlySkillProvider>;
 export type WritableSkillProviderMock = jest.Mocked<WritableSkillProvider>;

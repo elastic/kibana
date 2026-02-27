@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { PersistedSkillCreateRequest, PersistedSkillUpdateRequest } from '@kbn/agent-builder-common';
+import type {
+  PersistedSkillCreateRequest,
+  PersistedSkillUpdateRequest,
+} from '@kbn/agent-builder-common';
 import type { SkillDocument } from './types';
 import type { SkillProperties } from './storage';
 import { createAttributes, fromEs, updateDocument } from './converters';

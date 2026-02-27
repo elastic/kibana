@@ -167,9 +167,7 @@ describe('SkillClient', () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
           total: { value: 1500 },
-          hits: Array.from({ length: 1000 }, (_, i) =>
-            createMockSkillDoc({ id: `skill-${i}` })
-          ),
+          hits: Array.from({ length: 1000 }, (_, i) => createMockSkillDoc({ id: `skill-${i}` })),
         },
       });
 
@@ -254,9 +252,7 @@ describe('SkillClient', () => {
     it('throws a skill-not-found error when the skill does not exist', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
 
-      const error = await client
-        .update('non-existent', { description: 'Updated' })
-        .catch((e) => e);
+      const error = await client.update('non-existent', { description: 'Updated' }).catch((e) => e);
 
       expect(isSkillNotFoundError(error)).toBe(true);
     });
