@@ -1506,9 +1506,13 @@ describe('Per-Alert Action Scheduler', () => {
       const activeCount = 100;
       const recoveredCount = 20;
       const snoozedCount = 10;
-      const activeAlerts = Array.from({ length: activeCount }, (_, i) =>
+      type AlertRecord = Record<
+        string,
+        Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>
+      >;
+      const activeAlerts: AlertRecord = Array.from({ length: activeCount }, (_, i) =>
         generateAlert({ id: i + 1, activeCount: 1 })
-      ).reduce((acc, a) => ({ ...acc, ...a }), {});
+      ).reduce((acc, a) => ({ ...acc, ...a }), {} as AlertRecord);
       const recoveredAlerts = Array.from({ length: recoveredCount }, (_, i) =>
         generateRecoveredAlert({ id: activeCount + i + 1 })
       ).reduce((acc, a) => ({ ...acc, ...a }), {});

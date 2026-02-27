@@ -182,6 +182,7 @@ describe('Legacy Alerts Client', () => {
       configuredMaxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      snoozedInstances: [],
     });
   });
 
@@ -237,6 +238,7 @@ describe('Legacy Alerts Client', () => {
       configuredMaxAlerts: 10000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      snoozedInstances: [],
     });
   });
 
