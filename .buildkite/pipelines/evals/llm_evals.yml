@@ -11,6 +11,18 @@ steps:
 
   - wait
 
+  - label: 'Store Cache for build'
+    command: .buildkite/scripts/steps/store_cache.sh
+    timeout_in_minutes: 10
+    id: store_cache
+    soft_fail: true
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-highcpu-8
+      diskSizeGb: 95
+
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
@@ -119,31 +131,7 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
-
-      - label: 'Evals: Observability AI Assistant'
-        key: kbn-evals-weekly-obs-ai-assistant
-        skip: 'Temporarily disabled (for the sake of cost reduction and low maturity of this eval suite; will be re-enabled in follow-up PR)'
-        command: bash .buildkite/scripts/steps/evals/run_suite.sh
-        env:
-          KBN_EVALS: '1'
-          FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'obs-ai-assistant'
-          EVAL_FANOUT: '1'
-          EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
-        timeout_in_minutes: 60
-        agents:
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-8
-          preemptible: true
-        retry:
-          automatic:
-            - exit_status: '-1'
-              limit: 3
-
-      - label: 'Evals: Observability AI Assistant (AI Insights)'
+      - label: 'Evals: Observability AI Insights'
         key: kbn-evals-weekly-obs-ai-assistant-ai-insights
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
