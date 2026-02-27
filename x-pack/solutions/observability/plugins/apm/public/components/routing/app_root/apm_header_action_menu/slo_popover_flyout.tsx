@@ -41,7 +41,7 @@ interface Props {
 }
 
 export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
-  const { slo, telemetry } = useKibana<ApmPluginStartDeps & ApmServices>().services;
+  const { slo } = useKibana<ApmPluginStartDeps & ApmServices>().services;
   const { query } = useApmParams('/*');
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutState, setFlyoutState] = useState<{
@@ -76,10 +76,6 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
               {
                 name: createLatencySloLabel,
                 onClick: () => {
-                  telemetry.reportSloCreateFlowStarted({
-                    sloType: 'sli.apm.transactionDuration',
-                    location: 'top_nav_button',
-                  });
                   openFlyout('sli.apm.transactionDuration');
                 },
                 'data-test-subj': 'apmSlosMenuItemCreateLatencySlo',
@@ -87,10 +83,6 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
               {
                 name: createAvailabilitySloLabel,
                 onClick: () => {
-                  telemetry.reportSloCreateFlowStarted({
-                    sloType: 'sli.apm.transactionErrorRate',
-                    location: 'top_nav_button',
-                  });
                   openFlyout('sli.apm.transactionErrorRate');
                 },
                 'data-test-subj': 'apmSlosMenuItemCreateAvailabilitySlo',
@@ -104,8 +96,6 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
                 href: manageSlosUrl,
                 icon: 'tableOfContents',
                 'data-test-subj': 'apmSlosMenuItemManageSlos',
-                onClick: () =>
-                  telemetry.reportSloAppRedirectClicked({ location: 'top_nav_button' }),
               },
             ]
           : []),
@@ -142,10 +132,7 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
             color="primary"
             iconType="arrowDown"
             iconSide="right"
-            onClick={() => {
-              telemetry.reportSloTopNavClicked();
-              setPopoverOpen((prevState) => !prevState);
-            }}
+            onClick={() => setPopoverOpen((prevState) => !prevState)}
             data-test-subj="apmSlosHeaderLink"
           >
             {sloLabel}

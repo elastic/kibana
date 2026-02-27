@@ -40,19 +40,15 @@ export function SloCallout({ dismissCallout, serviceName, environment }: Props) 
   const {
     core: { docLinks },
   } = useApmPluginContext();
-  const { slo: sloPlugin, telemetry } = useKibana<ApmPluginStartDeps & ApmServices>().services;
+  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps & ApmServices>().services;
 
   const [createSloFlyoutOpen, setCreateSloFlyoutOpen] = useState(false);
 
   useTrackMetric({ app: 'apm', metric: 'slo_callout_shown', metricType: METRIC_TYPE.LOADED });
 
   const openCreateSloFlyout = useCallback(() => {
-    telemetry.reportSloCreateFlowStarted({
-      location: 'service_view_slo_callout',
-      sloType: DEFAULT_INDICATOR_TYPE,
-    });
     setCreateSloFlyoutOpen(true);
-  }, [telemetry]);
+  }, []);
 
   const closeCreateSloFlyout = useCallback(() => {
     setCreateSloFlyoutOpen(false);

@@ -69,48 +69,10 @@ const sloInfoShownEventType: TelemetryEvent = {
   schema: {},
 };
 
-const sloCreateFlowStartedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_CREATE_FLOW_STARTED,
-  schema: {
-    sloType: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of SLO for which the create flow was started',
-      },
-    },
-    location: {
-      type: 'keyword',
-      _meta: {
-        description: 'The location from which the SLO create flow was started',
-      },
-    },
-  },
-};
-
-const sloAppRedirectClickedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_APP_REDIRECT_CLICKED,
-  schema: {
-    location: {
-      type: 'keyword',
-      _meta: {
-        description: 'The location from which the SLO app redirect was clicked',
-      },
-    },
-  },
-};
-
-const sloTopNavClickedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_TOP_NAV_CLICKED,
-  schema: {},
-};
-
 export const apmTelemetryEventBasedTypes = [
   searchQuerySubmittedEventType,
   sloOverviewFlyoutViewedEventType,
   sloOverviewFlyoutSearchQueriedEventType,
   sloOverviewFlyoutStatusFilteredEventType,
   sloInfoShownEventType,
-  sloCreateFlowStartedEventType,
-  sloAppRedirectClickedEventType,
-  sloTopNavClickedEventType,
 ];

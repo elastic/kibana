@@ -7,12 +7,7 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { apmTelemetryEventBasedTypes } from './telemetry_events';
 import { TelemetryService } from './telemetry_service';
-import {
-  SearchQueryActions,
-  TelemetryEventTypes,
-  type SloCreateFlowStartedParams,
-  type SloAppRedirectClickedParams,
-} from './types';
+import { SearchQueryActions, TelemetryEventTypes } from './types';
 
 describe('TelemetryService', () => {
   const service = new TelemetryService();
@@ -55,45 +50,6 @@ describe('TelemetryService', () => {
     expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
       TelemetryEventTypes.SLO_INFO_SHOWN,
-      {}
-    );
-  });
-
-  it('should report slo create flow started event with the properties', async () => {
-    const params: SloCreateFlowStartedParams = {
-      sloType: 'sli.apm.transactionDuration',
-      location: 'service_inventory_actions',
-    };
-
-    telemetry.reportSloCreateFlowStarted(params);
-
-    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.SLO_CREATE_FLOW_STARTED,
-      params
-    );
-  });
-
-  it('should report slo app redirect clicked event with the properties', async () => {
-    const params: SloAppRedirectClickedParams = {
-      location: 'top_nav_button',
-    };
-
-    telemetry.reportSloAppRedirectClicked(params);
-
-    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.SLO_APP_REDIRECT_CLICKED,
-      params
-    );
-  });
-
-  it('should report slo top nav clicked event with empty properties', async () => {
-    telemetry.reportSloTopNavClicked();
-
-    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.SLO_TOP_NAV_CLICKED,
       {}
     );
   });

@@ -288,12 +288,8 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const [createSloFlyoutOpen, setCreateSloFlyoutOpen] = useState(false);
 
   const openCreateSloFlyout = useCallback(() => {
-    telemetry.reportSloCreateFlowStarted({
-      location: 'empty_slo_overview_flyout',
-      sloType: DEFAULT_INDICATOR_TYPE,
-    });
     setCreateSloFlyoutOpen(true);
-  }, [telemetry]);
+  }, []);
 
   const closeCreateSloFlyout = useCallback(() => {
     setCreateSloFlyoutOpen(false);

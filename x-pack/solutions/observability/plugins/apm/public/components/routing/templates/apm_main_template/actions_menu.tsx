@@ -30,7 +30,7 @@ const actionsLabel = i18n.translate('xpack.apm.home.actionsMenu.actions', {
 });
 
 export function ActionsMenu() {
-  const { slo: sloPlugin, telemetry } = useKibana<ApmPluginStartDeps & ApmServices>().services;
+  const { slo: sloPlugin } = useKibana<ApmPluginStartDeps & ApmServices>().services;
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
   const { query } = useApmParams('/*');
@@ -142,10 +142,6 @@ export function ActionsMenu() {
                     defaultMessage: 'Create APM latency SLO',
                   }),
                   onClick: () => {
-                    telemetry.reportSloCreateFlowStarted({
-                      location: 'service_view_actions',
-                      sloType: 'sli.apm.transactionDuration',
-                    });
                     openSloFlyout('sli.apm.transactionDuration');
                   },
                 },
@@ -155,10 +151,6 @@ export function ActionsMenu() {
                     defaultMessage: 'Create APM availability SLO',
                   }),
                   onClick: () => {
-                    telemetry.reportSloCreateFlowStarted({
-                      location: 'service_view_actions',
-                      sloType: 'sli.apm.transactionErrorRate',
-                    });
                     openSloFlyout('sli.apm.transactionErrorRate');
                   },
                 },
@@ -173,8 +165,6 @@ export function ActionsMenu() {
                   }),
                   href: manageSlosUrl,
                   icon: 'tableOfContents',
-                  onClick: () =>
-                    telemetry.reportSloAppRedirectClicked({ location: 'service_view_actions' }),
                 },
               ]
             : []),
@@ -191,7 +181,6 @@ export function ActionsMenu() {
     canReadSlos,
     manageSlosUrl,
     openSloFlyout,
-    telemetry,
   ]);
 
   if (actionGroups.length === 0) {

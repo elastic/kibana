@@ -6,8 +6,6 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-import type { ApmIndicatorType } from '../../../common/slo_indicator_types';
-
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
 }
@@ -29,19 +27,6 @@ export interface SloOverviewFlyoutSearchQueriedParams {
 export interface SloOverviewFlyoutStatusFilteredParams {
   statuses: string[];
 }
-export interface SloCreateFlowStartedParams {
-  location:
-    | 'service_inventory_actions'
-    | 'top_nav_button'
-    | 'service_view_actions'
-    | 'service_view_slo_callout'
-    | 'empty_slo_overview_flyout';
-  sloType: ApmIndicatorType;
-}
-
-export interface SloAppRedirectClickedParams {
-  location: `service_inventory_actions` | `top_nav_button` | `service_view_actions`;
-}
 
 export interface ITelemetryClient {
   reportSearchQuerySubmitted(params: SearchQuerySubmittedParams): void;
@@ -49,9 +34,6 @@ export interface ITelemetryClient {
   reportSloOverviewFlyoutSearchQueried(params: SloOverviewFlyoutSearchQueriedParams): void;
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
   reportSloInfoShown(): void;
-  reportSloCreateFlowStarted(params: SloCreateFlowStartedParams): void;
-  reportSloAppRedirectClicked(params: SloAppRedirectClickedParams): void;
-  reportSloTopNavClicked(): void;
 }
 
 export enum TelemetryEventTypes {
@@ -59,10 +41,7 @@ export enum TelemetryEventTypes {
   SLO_OVERVIEW_FLYOUT_VIEWED = 'slo_overview_flyout_viewed',
   SLO_OVERVIEW_FLYOUT_SEARCH_QUERIED = 'slo_overview_flyout_search_queried',
   SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
-  SLO_INFO_SHOWN = 'SLO Info Shown',
-  SLO_CREATE_FLOW_STARTED = 'SLO Create Flow Started',
-  SLO_APP_REDIRECT_CLICKED = 'SLO App Redirect Clicked',
-  SLO_TOP_NAV_CLICKED = 'SLO Top Nav Clicked',
+  SLO_INFO_SHOWN = 'slo_info_shown',
 }
 
 export type TelemetryEvent =
@@ -82,13 +61,4 @@ export type TelemetryEvent =
       eventType: TelemetryEventTypes.SLO_OVERVIEW_FLYOUT_STATUS_FILTERED;
       schema: RootSchema<SloOverviewFlyoutStatusFilteredParams>;
     }
-  | { eventType: TelemetryEventTypes.SLO_INFO_SHOWN; schema: {} }
-  | {
-      eventType: TelemetryEventTypes.SLO_CREATE_FLOW_STARTED;
-      schema: RootSchema<SloCreateFlowStartedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.SLO_APP_REDIRECT_CLICKED;
-      schema: RootSchema<SloAppRedirectClickedParams>;
-    }
-  | { eventType: TelemetryEventTypes.SLO_TOP_NAV_CLICKED; schema: {} };
+  | { eventType: TelemetryEventTypes.SLO_INFO_SHOWN; schema: {} };
