@@ -251,6 +251,9 @@
      "hide_title": {
       "type": "boolean"
      },
+     "hide_border": {
+      "type": "boolean"
+     },
      "title": {
       "type": "string"
      }
@@ -274,6 +277,9 @@
      "hide_title": {
       "type": "boolean"
      },
+     "hide_border": {
+      "type": "boolean"
+     },
      "title": {
       "type": "string"
      }
@@ -293,6 +299,9 @@
     "type": "string"
    },
    "hide_title": {
+    "type": "boolean"
+   },
+   "hide_border": {
     "type": "boolean"
    },
    "title": {
@@ -603,6 +612,9 @@
     "type": "string"
    },
    "hide_title": {
+    "type": "boolean"
+   },
+   "hide_border": {
     "type": "boolean"
    },
    "title": {
