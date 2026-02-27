@@ -22,9 +22,6 @@ import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import {
   EUI_STYLES_GLOBAL,
   EUI_STYLES_UTILS,
-  KBN_EMOTION_CONTAINER_GLOBAL_ID,
-  KBN_EMOTION_CONTAINER_CSS_ID,
-  KBN_EMOTION_CONTAINER_UTILS_ID,
 } from '@kbn/core-base-common';
 import {
   getColorMode,
@@ -78,11 +75,7 @@ function getEmotionContainer(containerId: string, metaNameFallback: string): HTM
     return byId;
   }
   const byMeta = document.querySelector<HTMLElement>(`meta[name="${metaNameFallback}"]`);
-  if (byMeta) {
-    console.debug(EMOTION_DEBUG_PREFIX, 'getEmotionContainer: fallback to meta', { containerId, metaNameFallback });
-    return byMeta;
   }
-  console.debug(EMOTION_DEBUG_PREFIX, 'getEmotionContainer: fallback to document.head', { containerId, metaNameFallback });
   return document.head;
 }
 
@@ -117,48 +110,33 @@ function wrapSheetInsertTag(
     }
     const validBefore = before === null || before.parentNode === container;
     if (!validBefore) {
-      const prevCount = sheet.tags.length;
       sheet.tags = sheet.tags.filter((t) => t.parentNode === container);
-      const afterCount = sheet.tags.length;
-      console.debug(EMOTION_DEBUG_PREFIX, 'insertTag: invalid before, cleared stale tags', {
-        sheetKey,
-        prevTagCount: prevCount,
-        afterTagCount: afterCount,
-        beforeParentNode: before?.parentNode?.nodeName,
-        containerNodeName: container.nodeName,
-      });
       before = sheet.tags.length > 0 ? sheet.tags[sheet.tags.length - 1].nextSibling : null;
     }
     (container as HTMLElement).insertBefore(tag, before);
     sheet.tags.push(tag);
   };
-  console.debug(EMOTION_DEBUG_PREFIX, 'wrapSheetInsertTag: wrapped sheet', { sheetKey });
 }
 
 const emotionCache = createCache({
   ...sharedCacheOptions,
   key: 'css',
-  container: getEmotionContainer(KBN_EMOTION_CONTAINER_CSS_ID, 'emotion'),
+  container: getEmotionContainer('emotion'),
 });
 
 const globalCache = createCache({
   ...sharedCacheOptions,
   key: EUI_STYLES_GLOBAL,
-  container: getEmotionContainer(KBN_EMOTION_CONTAINER_GLOBAL_ID, EUI_STYLES_GLOBAL),
+  container: getEmotionContainer(EUI_STYLES_GLOBAL),
 });
 
 const utilitiesCache = createCache({
   ...sharedCacheOptions,
   key: EUI_STYLES_UTILS,
-  container: getEmotionContainer(KBN_EMOTION_CONTAINER_UTILS_ID, EUI_STYLES_UTILS),
+  container: getEmotionContainer(EUI_STYLES_UTILS),
 });
 
 if (typeof document !== 'undefined') {
-  console.debug(EMOTION_DEBUG_PREFIX, 'init: wrapping Emotion sheets (browser)', {
-    cssContainer: getEmotionContainer(KBN_EMOTION_CONTAINER_CSS_ID, 'emotion')?.id ?? 'head',
-    globalContainer: getEmotionContainer(KBN_EMOTION_CONTAINER_GLOBAL_ID, EUI_STYLES_GLOBAL)?.id ?? 'head',
-    utilsContainer: getEmotionContainer(KBN_EMOTION_CONTAINER_UTILS_ID, EUI_STYLES_UTILS)?.id ?? 'head',
-  });
   wrapSheetInsertTag('css', emotionCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
   wrapSheetInsertTag(EUI_STYLES_GLOBAL, globalCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
   wrapSheetInsertTag(EUI_STYLES_UTILS, utilitiesCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
