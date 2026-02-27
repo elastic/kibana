@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import type { CSSInterpolation } from '@emotion/serialize';
+import type { CSSInterpolation } from '@emotion/css';
 import type { UseEuiTheme } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 

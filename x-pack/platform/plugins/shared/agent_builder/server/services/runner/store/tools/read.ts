@@ -40,7 +40,7 @@ export const readTool = ({
     type: ToolType.builtin,
     schema,
     tags: ['filestore'],
-    handler: async ({ path, raw }, context) => {
+    handler: async ({ path, raw }) => {
       const entry = await filestore.read(path);
       if (!entry) {
         return {

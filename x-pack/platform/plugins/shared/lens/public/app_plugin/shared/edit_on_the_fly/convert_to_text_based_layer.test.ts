@@ -13,7 +13,7 @@ import type {
 } from '@kbn/lens-common';
 import { createMockFramePublicAPI } from '../../../mocks';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
-import type { ConvertibleLayer, EsqlConversionData } from './convert_to_esql_modal';
+import type { ConvertibleLayer, EsqlConversionData } from './esql_conversion_types';
 
 describe('convertFormBasedToTextBasedLayer', () => {
   const layerId = 'layer1';
@@ -137,7 +137,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
   const defaultConvertibleLayers: ConvertibleLayer[] = [
     createConvertibleLayer(
-      `FROM test-index | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes) | SORT @timestamp ASC`,
+      `FROM test-index | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS bucket_0_0 = COUNT(*) BY @timestamp = BUCKET(@timestamp, 30 minutes)`,
       {
         bucket_0_0: createColumnMapping('col2', 'Count of records', 'number'),
         '@timestamp': createColumnMapping('col1', '@timestamp', 'date', {

@@ -14,11 +14,12 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
-import { getFilesForCommit, checkFileCasing } from './precommit_hook';
+import { extname } from 'path';
+
+import { getFilesForCommit, runFileCasingCheck } from './precommit_hook';
 import { checkSemverRanges } from './no_pkg_semver_ranges';
 import { load as yamlLoad } from 'js-yaml';
 import { readFile } from 'fs/promises';
-import { extname } from 'path';
 
 class CheckResult {
   constructor(checkName) {
@@ -71,7 +72,7 @@ class FileCasingCheck extends PrecommitCheck {
   }
 
   async execute(log, files) {
-    await checkFileCasing(log, files);
+    await runFileCasingCheck(log, files);
   }
 }
 
@@ -165,7 +166,9 @@ run(
   async ({ log, flags }) => {
     process.env.IS_KIBANA_PRECOMIT_HOOK = 'true';
 
-    const files = await getFilesForCommit(flags.ref);
+    const files = await getFilesForCommit(flags.ref, {
+      includeUntracked: Boolean(flags['include-untracked']),
+    });
 
     const maxFilesCount = flags['max-files']
       ? Number.parseInt(String(flags['max-files']), 10)
@@ -214,16 +217,18 @@ run(
     Run checks on files that are staged for commit by default
   `,
     flags: {
-      boolean: ['fix', 'stage'],
+      boolean: ['fix', 'stage', 'include-untracked'],
       string: ['max-files', 'ref'],
       default: {
         fix: false,
         stage: true,
+        'include-untracked': false,
       },
       help: `
         --fix              Execute checks with possible fixes
         --max-files        Max files number to check against. If exceeded the script will skip the execution
         --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
+        --include-untracked Include untracked files in addition to diff files
         --no-stage         By default when using --fix the changes are staged, use --no-stage to disable that behavior
       `,
     },

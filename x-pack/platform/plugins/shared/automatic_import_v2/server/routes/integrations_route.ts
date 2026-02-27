@@ -65,10 +65,14 @@ const getAllIntegrationsRoute = (
             (integration) => ({
               integrationId: integration.integrationId,
               title: integration.title,
+              logo: integration.logo,
               totalDataStreamCount: integration.dataStreams.length,
               successfulDataStreamCount: integration.dataStreams.filter(
                 (dataStream) => dataStream.status === 'completed'
               ).length,
+              version: integration.version,
+              createdBy: integration.createdBy,
+              createdByProfileUid: integration.createdByProfileUid,
               status: integration.status,
             })
           ) as AllIntegrationsResponseIntegration[];
@@ -153,7 +157,15 @@ const createIntegrationRoute = (
       async (context, request, response) => {
         const { automaticImportService, getCurrentUser, esClient } =
           await context.automaticImportv2;
-        const { integrationId, title, logo, description, connectorId, dataStreams } = request.body;
+        const {
+          integrationId,
+          title,
+          logo,
+          description,
+          connectorId,
+          dataStreams,
+          langSmithOptions,
+        } = request.body;
         try {
           const authenticatedUser = await getCurrentUser();
 
@@ -183,6 +195,7 @@ const createIntegrationRoute = (
                     dataStreamParams,
                     esClient,
                     connectorId,
+                    langSmithOptions,
                   },
                   request
                 )

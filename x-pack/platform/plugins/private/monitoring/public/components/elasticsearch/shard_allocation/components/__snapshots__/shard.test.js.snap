@@ -2,7 +2,7 @@
 
 exports[`Shard should show for assigned primary shards 1`] = `
 <div
-  className="shard monShard primary started master"
+  css="unknown styles"
   data-shard-classification="shard monShard primary started master 0"
   data-shard-tooltip="Started"
   data-test-subj="shardIcon"
@@ -19,7 +19,7 @@ exports[`Shard should show for assigned primary shards 1`] = `
 
 exports[`Shard should show for assigned replica shards 1`] = `
 <div
-  className="shard monShard replica started master"
+  css="unknown styles"
   data-shard-classification="shard monShard replica started master 0"
   data-shard-tooltip="Started"
   data-test-subj="shardIcon"
@@ -36,7 +36,7 @@ exports[`Shard should show for assigned replica shards 1`] = `
 
 exports[`Shard should show for initializing shards 1`] = `
 <div
-  className="shard monShard primary initializing master"
+  css="unknown styles"
   data-shard-classification="shard monShard primary initializing master 0"
   data-shard-tooltip="Initializing"
   data-test-subj="shardIcon"
@@ -53,7 +53,7 @@ exports[`Shard should show for initializing shards 1`] = `
 
 exports[`Shard should show for relocating shards 1`] = `
 <div
-  className="shard monShard primary relocating master"
+  css="unknown styles"
   data-shard-classification="shard monShard primary relocating master 0"
   data-shard-tooltip="Relocating"
   data-test-subj="shardIcon"
@@ -70,7 +70,7 @@ exports[`Shard should show for relocating shards 1`] = `
 
 exports[`Shard should show unassigned primary shards 1`] = `
 <div
-  className="shard monShard primary unassigned emergency master"
+  css="unknown styles"
   data-shard-classification="shard monShard primary unassigned emergency master 0"
   data-shard-tooltip="Unassigned"
   data-test-subj="shardIcon"
@@ -87,7 +87,7 @@ exports[`Shard should show unassigned primary shards 1`] = `
 
 exports[`Shard should show unassigned replica shards 1`] = `
 <div
-  className="shard monShard replica unassigned"
+  css="unknown styles"
   data-shard-classification="shard monShard replica unassigned 0"
   data-shard-tooltip="Unassigned"
   data-test-subj="shardIcon"

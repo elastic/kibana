@@ -6,7 +6,12 @@
  */
 
 export type { StreamlangDSL, StreamType, StreamlangConditionBlock } from './types/streamlang';
-export { streamlangDSLSchema, isActionBlock, isConditionBlock } from './types/streamlang';
+export {
+  streamlangDSLSchema,
+  streamlangDSLSchemaStrict,
+  isActionBlock,
+  isConditionBlock,
+} from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export {
   transpile as transpileEsql,
@@ -34,3 +39,11 @@ export {
   getMathParameterNames,
 } from './src/transpilers/shared/math';
 export type { MathFunctionDefinition } from './src/transpilers/shared/math';
+export {
+  getAvailableGrokPatterns,
+  compileGrokPatternToRegex,
+  compileGrokPatternsToRegex,
+  isKnownGrokPattern,
+  BASE_GROK_PATTERNS,
+} from './types/utils/grok_to_regex';
+export type { CompiledRedactPattern } from './types/utils/grok_to_regex';

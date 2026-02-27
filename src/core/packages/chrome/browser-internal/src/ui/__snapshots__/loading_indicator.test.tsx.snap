@@ -2,7 +2,7 @@
 
 exports[`kbnLoadingIndicator is hidden by default 1`] = `
 <Fragment>
-  <ForwardRef
+  <EmotionGlobal
     styles={
       Object {
         "name": "11nwfnw-LoadingIndicator",
@@ -22,7 +22,7 @@ exports[`kbnLoadingIndicator is hidden by default 1`] = `
 
 exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
 <Fragment>
-  <ForwardRef
+  <EmotionGlobal
     styles={
       Object {
         "name": "11nwfnw-LoadingIndicator",
@@ -42,7 +42,7 @@ exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
 
 exports[`kbnLoadingIndicator shows logo image when customLogo is set 1`] = `
 <Fragment>
-  <ForwardRef
+  <EmotionGlobal
     styles={
       Object {
         "name": "11nwfnw-LoadingIndicator",
