@@ -1,34 +1,63 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 import globby from 'globby';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
-import { File } from './file';
+import { getPackages } from '@kbn/repo-packages';
 import { checkFileCasing } from './precommit_hook/check_file_casing';
+import { IGNORE_PATTERNS, getExpectedCasing } from './precommit_hook/casing_check_config';
 
-run(async ({ log }) => {
-  const paths = await globby('**/*', {
-    cwd: REPO_ROOT,
-    onlyFiles: true,
-    gitignore: true,
-    ignore: [
-      // the gitignore: true option makes sure that we don't
-      // include files from node_modules in the result, but it still
-      // loads all of the files from node_modules before filtering
-      // so it's still super slow. This prevents loading the files
-      // and still relies on gitignore to final ignores
-      '**/node_modules',
-    ],
-  });
+const RELATIVE_EXCEPTIONS_PATH = 'src/dev/precommit_hook/exceptions.json';
+const EXCEPTIONS_JSON_PATH = join(REPO_ROOT, RELATIVE_EXCEPTIONS_PATH);
 
-  const files = paths.map((path) => new File(path));
+run(
+  async ({ log, flagsReader }) => {
+    const generateExceptions = flagsReader.boolean('generate-exceptions');
 
-  await checkFileCasing(log, files);
-});
+    const paths = await globby('**/*', {
+      cwd: REPO_ROOT,
+      onlyFiles: true,
+      gitignore: true,
+      ignore: IGNORE_PATTERNS,
+    });
+
+    const packages = getPackages(REPO_ROOT);
+    const packageRootDirs = new Set(
+      packages
+        .filter((pkg) => !pkg.isPlugin())
+        .map((pkg) => pkg.normalizedRepoRelativeDir.replace(/\\/g, '/'))
+    );
+
+    const rawExceptions: Record<string, Record<string, string>> = JSON.parse(
+      readFileSync(EXCEPTIONS_JSON_PATH, 'utf8')
+    );
+    const exceptions: string[] = Object.values(rawExceptions).flatMap((teamObject) =>
+      Object.keys(teamObject)
+    );
+
+    await checkFileCasing(log, paths, getExpectedCasing, {
+      packageRootDirs,
+      exceptions,
+      generateExceptions,
+    });
+  },
+  {
+    flags: {
+      boolean: ['generate-exceptions'],
+      help: `
+        --generate-exceptions  Collect current violations and append them to exceptions.json, then exit successfully.
+      `,
+    },
+  }
+);

@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { default as borealisLight } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json';
+import { default as borealisDark } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_dark.json';
+
+const globals: any = typeof window === 'undefined' ? {} : window;
+
+export type Theme = typeof borealisLight;
+
+// in the Kibana app we can rely on this global being defined, but in
+// some cases (like jest) the global is undefined
+/** @deprecated theme can be dynamic now, access is discouraged */
+export const tag: string = globals.__kbnThemeTag__ || 'borealislight';
+/** @deprecated theme can be dynamic now, access is discouraged */
+export const version = 8;
+/** @deprecated theme can be dynamic now, access is discouraged */
+export const darkMode = tag.endsWith('dark');
+
+let isDarkMode = darkMode;
+export const _setDarkMode = (mode: boolean) => {
+  isDarkMode = mode;
+};
+
+const getThemeVars = (): { light: Theme; dark: Theme } => {
+  return {
+    light: borealisLight,
+    dark: borealisDark,
+  };
+};
+
+export const euiLightVars: Theme = getThemeVars().light;
+export const euiDarkVars: Theme = getThemeVars().dark;
+
+/**
+ * EUI Theme vars that automatically adjust to light/dark theme
+ */
+export const euiThemeVars: Theme = new Proxy(
+  isDarkMode ? getThemeVars().dark : getThemeVars().light,
+  {
+    get(accessedTarget, accessedKey, ...rest) {
+      return Reflect.get(
+        isDarkMode ? getThemeVars().dark : getThemeVars().light,
+        accessedKey,
+        ...rest
+      );
+    },
+  }
+);
+
+export function getEuiThemeVars(theme: { name: string; darkMode: boolean }) {
+  return theme.darkMode ? borealisDark : borealisLight;
+}

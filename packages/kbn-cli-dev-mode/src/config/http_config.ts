@@ -1,17 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
-import { ICorsConfig, IHttpConfig, ISslConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
-import { Duration } from 'moment';
+import type { ByteSizeValue, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ICorsConfig, IHttpConfig, ISslConfig } from '@kbn/server-http-tools';
+import { SslConfig, sslSchema } from '@kbn/server-http-tools';
+import type { Duration } from 'moment';
 
 export const httpConfigSchema = schema.object(
   {
+    protocol: schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+      defaultValue: 'http1',
+    }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
@@ -49,6 +55,7 @@ export const httpConfigSchema = schema.object(
 export type HttpConfigType = TypeOf<typeof httpConfigSchema>;
 
 export class HttpConfig implements IHttpConfig {
+  protocol: 'http1' | 'http2';
   basePath?: string;
   host: string;
   port: number;
@@ -62,6 +69,7 @@ export class HttpConfig implements IHttpConfig {
   restrictInternalApis: boolean;
 
   constructor(rawConfig: HttpConfigType) {
+    this.protocol = rawConfig.protocol;
     this.basePath = rawConfig.basePath;
     this.host = rawConfig.host;
     this.port = rawConfig.port;

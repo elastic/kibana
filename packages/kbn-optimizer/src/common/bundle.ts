@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -11,11 +12,12 @@ import Fs from 'fs';
 import { Jsonc } from '@kbn/repo-packages';
 
 import { BundleCache } from './bundle_cache';
-import { UnknownVals, isObj } from './ts_helpers';
+import type { UnknownVals } from './ts_helpers';
+import { isObj } from './ts_helpers';
 import { omit } from './obj_helpers';
 import { includes } from './array_helpers';
 import type { Hashes } from './hashes';
-import { ParsedDllManifest } from './dll_manifest';
+import type { ParsedDllManifest } from './dll_manifest';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
@@ -25,7 +27,7 @@ const toStringArray = (input: any): string[] | null =>
   Array.isArray(input) && input.every((x) => typeof x === 'string') ? input : null;
 
 export interface BundleSpec {
-  readonly type: typeof VALID_BUNDLE_TYPES[0];
+  readonly type: (typeof VALID_BUNDLE_TYPES)[0];
   /** Unique id for this bundle */
   readonly id: string;
   /** Absolute path to the plugin source directory */

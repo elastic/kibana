@@ -1,19 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer } from '@kbn/core-plugins-browser';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
-import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+
+import type { ConfigType } from './config';
 import { RoleSwitcher } from './role_switcher';
 
 export interface PluginSetupDependencies {
@@ -29,7 +33,7 @@ export const plugin: PluginInitializer<
   void,
   PluginSetupDependencies,
   PluginStartDependencies
-> = () => ({
+> = (initializerContext: PluginInitializerContext<ConfigType>) => ({
   setup(coreSetup, plugins) {
     // Register Mock IDP login page
     coreSetup.http.anonymousPaths.register(MOCK_IDP_LOGIN_PATH);
@@ -46,10 +50,10 @@ export const plugin: PluginInitializer<
         ]);
 
         ReactDOM.render(
-          <KibanaThemeProvider theme={coreStart.theme}>
+          <KibanaThemeProvider {...coreStart}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <LoginPage />
+                <LoginPage config={initializerContext.config.get()} />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,
@@ -66,7 +70,7 @@ export const plugin: PluginInitializer<
       order: 4000 + 1, // Make sure it comes after the user menu
       mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <KibanaThemeProvider theme={coreStart.theme}>
+          <KibanaThemeProvider {...coreStart}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
                 <RoleSwitcher />

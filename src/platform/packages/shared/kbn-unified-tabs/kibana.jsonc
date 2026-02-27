@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/unified-tabs",
+  "owner": "@elastic/kibana-data-discovery",
+  "group": "platform",
+  "visibility": "shared"
+}

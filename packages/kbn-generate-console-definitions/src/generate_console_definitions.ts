@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
 import Path, { join } from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   DefinitionUrlParams,
   EndpointDefinition,
@@ -43,6 +44,14 @@ const generatePatterns = (endpoint: SpecificationTypes.Endpoint): string[] => {
 const generateDocumentation = (endpoint: SpecificationTypes.Endpoint): string => {
   return endpoint.docUrl;
 };
+
+const generateServerlessDocumentation = (
+  endpoint: SpecificationTypes.Endpoint
+): string | undefined => {
+  const url = endpoint.docUrlServerless?.trim();
+  return url ? url : undefined;
+};
+
 interface GeneratedParameters {
   urlParams: DefinitionUrlParams;
   urlComponents: DefinitionUrlParams;
@@ -86,13 +95,21 @@ const generateDefinition = (
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
+  const documentationServerless = generateServerlessDocumentation(endpoint);
   const availability = generateAvailability(endpoint);
   let definition: EndpointDescription = {};
   const params = generateParameters(endpoint, schema);
   if (params) {
     definition = addParams(definition, params);
   }
-  definition = { ...definition, methods, patterns, documentation, availability };
+  definition = {
+    ...definition,
+    methods,
+    patterns,
+    documentation,
+    documentation_serverless: documentationServerless,
+    availability,
+  };
 
   return definition;
 };

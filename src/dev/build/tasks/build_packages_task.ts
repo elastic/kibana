@@ -1,23 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import * as Fsp from 'fs/promises';
 
-import { runBazel } from '@kbn/bazel-runner';
 import * as Peggy from '@kbn/peggy';
+import * as DotText from '@kbn/dot-text';
 import { asyncForEach } from '@kbn/std';
-import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
+import type { TransformConfig } from '@kbn/babel-transform';
+import { withFastAsyncTransform } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
-
-import { Task, scanCopy, write, deleteAll } from '../lib';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { StdioOption } from 'execa';
+import execa from 'execa';
+import type { Task } from '../lib';
+import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
 import { fleetBuildTasks } from './fleet';
 
@@ -99,25 +104,17 @@ function excludeDirsByName(name: string) {
 }
 
 export const BuildPackages: Task = {
-  description: 'Building distributable versions of Bazel packages',
+  description: 'Building distributable versions of packages',
   async run(config, log, build) {
     const packages = config.getDistPackagesFromRepo();
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
-    log.info(`Building Bazel artifacts which are necessary for the build`);
-    await runBazel(
-      [
-        'build',
-        '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
-        '//packages/kbn-ui-shared-deps-src:shared_built_assets',
-        '//packages/kbn-monaco:target_workers',
-        '--show_result=1',
-        '--define=dist=true',
-      ],
-      {
-        logPrefix: '   │     ',
-      }
-    );
+    log.info(`Building webpack artifacts which are necessary for the build`);
+    await buildWebpackBundles({
+      quiet: false,
+      dist: true,
+      noCache: true,
+    });
 
     const transformConfig: TransformConfig = {
       disableSourceMaps: true,
@@ -203,6 +200,18 @@ export const BuildPackages: Task = {
                   };
                 }
 
+                case '.text': {
+                  const result = await DotText.getJsSource({
+                    path: rec.source.abs,
+                  });
+
+                  return {
+                    ...rec,
+                    dest: rec.dest.withName(rec.dest.name + '.js'),
+                    content: result.source,
+                  };
+                }
+
                 case '.ts':
                 case '.tsx':
                 case '.js':
@@ -226,7 +235,8 @@ export const BuildPackages: Task = {
           ) {
             await scanCopy({
               source: config.resolveFromRepo(
-                'bazel-bin',
+                'target',
+                'build',
                 pkg.normalizedRepoRelativeDir,
                 'shared_built_assets'
               ),
@@ -239,7 +249,8 @@ export const BuildPackages: Task = {
           if (pkg.manifest.id === '@kbn/monaco') {
             await scanCopy({
               source: config.resolveFromRepo(
-                'bazel-bin',
+                'target',
+                'build',
                 pkg.normalizedRepoRelativeDir,
                 'target_workers'
               ),
@@ -312,3 +323,24 @@ export const BuildPackages: Task = {
     });
   },
 };
+
+export async function buildWebpackBundles({
+  quiet,
+  dist,
+  noCache,
+}: {
+  quiet: boolean;
+  dist: boolean;
+  noCache?: boolean;
+}) {
+  const options = [
+    quiet ? ['--quiet'] : [],
+    dist ? ['--dist'] : [],
+    noCache ? ['--no-cache'] : [],
+  ].flat();
+  const stdio: StdioOption[] = quiet
+    ? ['ignore', 'pipe', 'pipe']
+    : ['inherit', 'inherit', 'inherit'];
+
+  await execa('yarn', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
+}

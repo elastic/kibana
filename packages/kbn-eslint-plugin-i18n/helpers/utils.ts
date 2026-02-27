@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
 export function lowerCaseFirstLetter(str: string) {
   if (isUpperCase(str)) return str.toLowerCase();
@@ -55,5 +59,39 @@ export function getTranslatableValueFromString(str: string) {
     return '';
   }
 
-  return strTrimmed;
+  return strTrimmed.replace(/'/g, "\\'");
+}
+
+/**
+ * Helper to extract a string value from a node if it's a string Literal
+ */
+export function getStringValue(node: TSESTree.Node): string | false {
+  if (node.type === AST_NODE_TYPES.Literal && typeof node.value === 'string') {
+    return node.value;
+  }
+  return false;
+}
+
+/**
+ * Extract translatable string value from a JSX attribute value.
+ * Handles both label="foo" and label={'foo'} patterns.
+ */
+export function getValueFromJSXAttribute(attrValue: TSESTree.JSXAttribute['value']): string {
+  if (!attrValue) return '';
+
+  // label="foo" - direct string literal
+  if (attrValue.type === AST_NODE_TYPES.Literal && typeof attrValue.value === 'string') {
+    return getTranslatableValueFromString(attrValue.value);
+  }
+
+  // label={'foo'} - expression container with string literal
+  if (
+    attrValue.type === AST_NODE_TYPES.JSXExpressionContainer &&
+    attrValue.expression.type === AST_NODE_TYPES.Literal &&
+    typeof attrValue.expression.value === 'string'
+  ) {
+    return getTranslatableValueFromString(attrValue.expression.value);
+  }
+
+  return '';
 }

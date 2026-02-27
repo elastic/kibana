@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/triggers-actions-ui-example-plugin",
   "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "triggersActionsUiExample",
     "server": true,
@@ -13,8 +15,18 @@
       "developerExamples",
       "kibanaReact",
       "cases",
-      "actions"
+      "actions",
+      "charts",
+      "dataViews",
+      "dataViewEditor",
+      "unifiedSearch",
+      "taskManager",
+      "fieldFormats",
+      "licensing",
+      "fieldsMetadata"
     ],
-    "optionalPlugins": ["spaces"]
+    "optionalPlugins": [
+      "spaces"
+    ]
   }
 }

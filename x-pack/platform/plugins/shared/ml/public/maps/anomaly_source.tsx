@@ -1,0 +1,380 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { ReactElement } from 'react';
+import React from 'react';
+import type {
+  FieldFormatter,
+  TooltipFeatureAction,
+  VectorSourceRequestMeta,
+} from '@kbn/maps-plugin/common';
+import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '@kbn/maps-plugin/common';
+import type { MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
+import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
+import type { DataFilters } from '@kbn/maps-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { GeoJsonWithMeta, ITooltipProperty } from '@kbn/maps-plugin/public';
+import type { IField } from '@kbn/maps-plugin/public';
+import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';
+import type { SourceEditorArgs } from '@kbn/maps-plugin/public';
+import type { DataRequest } from '@kbn/maps-plugin/public';
+import type { GetFeatureActionsArgs, IVectorSource, SourceStatus } from '@kbn/maps-plugin/public';
+import {
+  AnomalySourceField,
+  AnomalySourceTooltipProperty,
+  ANOMALY_SOURCE_FIELDS,
+} from './anomaly_source_field';
+import { ML_PAGES } from '../../common/constants/locator';
+import type { MlAnomalyLayersType } from './util';
+import { getResultsForJobId, ML_ANOMALY_LAYERS } from './util';
+import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
+import type { MlApi } from '../application/services/ml_api_service';
+
+const RESULT_LIMIT = 1000;
+
+export type AnomalySourceDescriptor = SerializableRecord & {
+  jobId: string;
+  typicalActual: MlAnomalyLayersType;
+  type: SOURCE_TYPES.ES_ML_ANOMALIES;
+};
+
+export class AnomalySource implements IVectorSource {
+  static mlResultsService: MlApi['results'];
+  static mlLocator?: LocatorPublic<SerializableRecord>;
+
+  static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>): AnomalySourceDescriptor {
+    if (typeof descriptor.jobId !== 'string') {
+      throw new Error('Job id is required for anomaly layer creation');
+    }
+
+    return {
+      type: SOURCE_TYPES.ES_ML_ANOMALIES,
+      jobId: descriptor.jobId,
+      typicalActual: descriptor.typicalActual || ML_ANOMALY_LAYERS.ACTUAL,
+    };
+  }
+
+  private readonly _descriptor: AnomalySourceDescriptor;
+
+  constructor(sourceDescriptor: Partial<AnomalySourceDescriptor>, adapters?: Adapters) {
+    this._descriptor = AnomalySource.createDescriptor(sourceDescriptor);
+  }
+
+  async getGeoJsonWithMeta(
+    layerName: string,
+    searchFilters: VectorSourceRequestMeta,
+    registerCancelCallback: (callback: () => void) => void,
+    isRequestStillActive: () => boolean
+  ): Promise<GeoJsonWithMeta> {
+    const results = await getResultsForJobId(
+      AnomalySource.mlResultsService,
+      this._descriptor.jobId,
+      this._descriptor.typicalActual,
+      searchFilters
+    );
+
+    return {
+      data: results,
+      meta: {
+        // Set this to true if data is incomplete (e.g. capping number of results to first 1k)
+        areResultsTrimmed: results.features.length === RESULT_LIMIT,
+      },
+    };
+  }
+
+  canFormatFeatureProperties(): boolean {
+    return false;
+  }
+
+  cloneDescriptor(): AnomalySourceDescriptor {
+    return {
+      type: this._descriptor.type,
+      jobId: this._descriptor.jobId,
+      typicalActual: this._descriptor.typicalActual,
+    };
+  }
+
+  createField({ fieldName }: { fieldName: string }): IField {
+    if (fieldName !== 'record_score') {
+      throw new Error('Record score field name is required');
+    }
+    return new AnomalySourceField({ source: this, field: fieldName });
+  }
+
+  async createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
+    return null;
+  }
+
+  destroy(): void {}
+
+  getApplyGlobalQuery(): boolean {
+    return true;
+  }
+
+  getApplyForceRefresh(): boolean {
+    return false;
+  }
+
+  getApplyGlobalTime(): boolean {
+    return true;
+  }
+
+  async getAttributions(): Promise<Attribution[]> {
+    return [];
+  }
+
+  async getBoundsForFilters(
+    boundsFilters: object,
+    registerCancelCallback: (callback: () => void) => void
+  ): Promise<MapExtent | null> {
+    return null;
+  }
+
+  async getDisplayName(): Promise<string> {
+    return i18n.translate('xpack.ml.maps.anomalySource.displayLabel', {
+      defaultMessage: '{typicalActual} for {jobId}',
+      values: {
+        typicalActual: this._descriptor.typicalActual,
+        jobId: this._descriptor.jobId,
+      },
+    });
+  }
+
+  getFieldByName(fieldName: string): IField | null {
+    if (fieldName === 'record_score') {
+      return new AnomalySourceField({ source: this, field: fieldName });
+    }
+    return null;
+  }
+
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
+
+    if (meta?.areResultsTrimmed) {
+      return {
+        tooltipContent: i18n.translate('xpack.ml.maps.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to first {count} documents.`,
+          values: { count: RESULT_LIMIT },
+        }),
+        areResultsTrimmed: true,
+      };
+    }
+
+    return {
+      tooltipContent: null,
+      areResultsTrimmed: false,
+    };
+  }
+
+  getType(): string {
+    return this._descriptor.type;
+  }
+
+  isMvt() {
+    return false;
+  }
+
+  supportsJoins(): boolean {
+    return false;
+  }
+
+  async getFields(): Promise<IField[]> {
+    return Object.keys(ANOMALY_SOURCE_FIELDS).map(
+      (field) => new AnomalySourceField({ source: this, field })
+    );
+  }
+
+  getGeoGridPrecision(zoom: number): number {
+    return 0;
+  }
+
+  isBoundsAware(): boolean {
+    return false;
+  }
+
+  async getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]> {
+    let explorerLink: string | undefined;
+
+    try {
+      explorerLink = await AnomalySource.mlLocator?.getUrl({
+        page: ML_PAGES.ANOMALY_EXPLORER,
+        pageState: {
+          jobIds: [this._descriptor.jobId],
+          timeRange: dataFilters.timeFilters,
+        },
+      });
+    } catch (error) {
+      // ignore error if unable to get link
+    }
+
+    return [
+      {
+        label: i18n.translate('xpack.ml.maps.anomalySourcePropLabel', {
+          defaultMessage: 'Job Id',
+        }),
+        value: this._descriptor.jobId,
+        ...(explorerLink ? { link: explorerLink } : {}),
+      },
+    ];
+  }
+
+  async isTimeAware(): Promise<boolean> {
+    return true;
+  }
+
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
+    return (
+      <UpdateAnomalySourceEditor
+        onChange={onChange}
+        typicalActual={this._descriptor.typicalActual}
+      />
+    );
+  }
+
+  async supportsFitToBounds(): Promise<boolean> {
+    // Return true if you can compute bounds of data
+    return true;
+  }
+
+  async getLicensedFeatures(): Promise<[]> {
+    return [];
+  }
+
+  getMaxZoom(): number {
+    return MAX_ZOOM;
+  }
+
+  getMinZoom(): number {
+    return MIN_ZOOM;
+  }
+
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceStatus {
+    const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
+    return {
+      tooltipContent: i18n.translate('xpack.ml.maps.sourceTooltip', {
+        defaultMessage: 'Shows anomalies',
+      }),
+      // set to true if data is incomplete (we limit to first 1000 results)
+      areResultsTrimmed: meta?.areResultsTrimmed ?? false,
+    };
+  }
+
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
+    return this._descriptor.typicalActual === ML_ANOMALY_LAYERS.TYPICAL_TO_ACTUAL
+      ? [VECTOR_SHAPE_TYPE.LINE]
+      : [VECTOR_SHAPE_TYPE.POINT];
+  }
+
+  getSyncMeta(): object | null {
+    return {
+      jobId: this._descriptor.jobId,
+      typicalActual: this._descriptor.typicalActual,
+    };
+  }
+
+  async getTooltipProperties(properties: { [p: string]: any } | null): Promise<ITooltipProperty[]> {
+    const tooltipProperties: ITooltipProperty[] = [];
+    for (const key in properties) {
+      if (key === GEOJSON_FEATURE_ID_PROPERTY_NAME) {
+        continue;
+      }
+      if (Object.hasOwn(properties, key)) {
+        tooltipProperties.push(new AnomalySourceTooltipProperty(key, properties[key]));
+      }
+    }
+    return tooltipProperties;
+  }
+
+  isFieldAware(): boolean {
+    return true;
+  }
+
+  // This is for type-ahead support in the UX for by-value styling
+  async getValueSuggestions(field: IField, query: string): Promise<string[]> {
+    return [];
+  }
+
+  // -----------------
+  // API ML probably can ignore
+  getAttributionProvider() {
+    return null;
+  }
+
+  getInspectorAdapters(): Adapters | undefined {
+    // IGNORE: This is only relevant if your source is backed by an index-pattern
+    return undefined;
+  }
+
+  getJoinsDisabledReason(): string | null {
+    // IGNORE: This is only relevant if your source can be joined to other data
+    return null;
+  }
+
+  async getLeftJoinFields(): Promise<IField[]> {
+    // IGNORE: This is only relevant if your source can be joined to other data
+    return [];
+  }
+
+  getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    return [];
+  }
+
+  isFilterByMapBounds(): boolean {
+    // Only implement if you can query this data with a bounding-box
+    return false;
+  }
+
+  isGeoGridPrecisionAware(): boolean {
+    // Ignore: only implement if your data is scale-dependent (probably not)
+    return false;
+  }
+
+  isQueryAware(): boolean {
+    return true;
+  }
+
+  isRefreshTimerAware(): boolean {
+    // Allow force-refresh when user clicks "refresh" button in the global time-picker
+    return true;
+  }
+
+  async getTimesliceMaskFieldName() {
+    return null;
+  }
+
+  async supportsFeatureEditing() {
+    return false;
+  }
+
+  hasTooltipProperties() {
+    return true;
+  }
+
+  async addFeature() {
+    // should not be called
+  }
+
+  async deleteFeature() {
+    // should not be called
+  }
+
+  getUpdateDueToTimeslice() {
+    // TODO
+    return true;
+  }
+
+  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
+    return {};
+  }
+
+  getInspectorRequestIds() {
+    return [];
+  }
+}

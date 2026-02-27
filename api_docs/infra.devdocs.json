@@ -4,211 +4,9 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "infra",
-        "id": "def-public.InfraFormatterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "InfraFormatterType",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/public/lib/lib.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "infra",
-        "id": "def-public.FORMATTERS",
-        "type": "Object",
-        "tags": [],
-        "label": "FORMATTERS",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.number",
-            "type": "Function",
-            "tags": [],
-            "label": "number",
-            "description": [],
-            "signature": [
-              "(val: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.number.$1",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/number.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.abbreviatedNumber",
-            "type": "Function",
-            "tags": [],
-            "label": "abbreviatedNumber",
-            "description": [
-              "// Because the implimentation for formatting large numbers is the same as formatting\n// bytes we are re-using the same code, we just format the number using the abbreviated number format."
-            ],
-            "signature": [
-              "(bytes: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.abbreviatedNumber.$1",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/bytes.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.bytes",
-            "type": "Function",
-            "tags": [],
-            "label": "bytes",
-            "description": [
-              "// bytes in bytes formatted string out"
-            ],
-            "signature": [
-              "(bytes: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.bytes.$1",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/bytes.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.bits",
-            "type": "Function",
-            "tags": [],
-            "label": "bits",
-            "description": [
-              "// bytes in bits formatted string out"
-            ],
-            "signature": [
-              "(bytes: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.bits.$1",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/bytes.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.percent",
-            "type": "Function",
-            "tags": [],
-            "label": "percent",
-            "description": [],
-            "signature": [
-              "(val: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.percent.$1",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/percent.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.highPrecision",
-            "type": "Function",
-            "tags": [],
-            "label": "highPrecision",
-            "description": [],
-            "signature": [
-              "(val: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.highPrecision.$1",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/high_precision.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "start": {
       "parentPluginId": "infra",
       "id": "def-public.InfraClientStartExports",
@@ -216,7 +14,9 @@
       "tags": [],
       "label": "InfraClientStartExports",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
+      "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
+      "lineNumber": 63,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -230,7 +30,9 @@
           "signature": [
             "InventoryViewsServiceStart"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
+          "lineNumber": 64,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -245,7 +47,9 @@
             "MetricsExplorerViewsServiceStart",
             " | undefined"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
+          "lineNumber": 65,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -259,21 +63,9 @@
           "signature": [
             "ITelemetryClient"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "infra",
-          "id": "def-public.InfraClientStartExports.locators",
-          "type": "Object",
-          "tags": [],
-          "label": "locators",
-          "description": [],
-          "signature": [
-            "InfraLocators"
-          ],
-          "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/public/types.ts",
+          "lineNumber": 66,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -293,7 +85,9 @@
         "tags": [],
         "label": "InfraConfig",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+        "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -307,7 +101,9 @@
             "signature": [
               "{ inventory_threshold: { group_by_page_size: number; }; metric_threshold: { group_by_page_size: number; }; }"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -318,7 +114,9 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -332,7 +130,9 @@
             "signature": [
               "{ compositeSize: number; }"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -346,7 +146,9 @@
             "signature": [
               "{ default?: { fields?: { message?: string[] | undefined; } | undefined; } | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,9 +160,11 @@
             "label": "featureFlags",
             "description": [],
             "signature": [
-              "{ customThresholdAlertsEnabled: boolean; logsUIEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; inventoryThresholdAlertRuleEnabled: boolean; metricThresholdAlertRuleEnabled: boolean; logThresholdAlertRuleEnabled: boolean; alertsAndRulesDropdownEnabled: boolean; profilingEnabled: boolean; ruleFormV2Enabled: boolean; }"
+              "{ customThresholdAlertsEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; inventoryThresholdAlertRuleEnabled: boolean; metricThresholdAlertRuleEnabled: boolean; logThresholdAlertRuleEnabled: boolean; alertsAndRulesDropdownEnabled: boolean; profilingEnabled: boolean; ruleFormV2Enabled: boolean; }"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/common/plugin_config_types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -374,7 +178,9 @@
         "tags": [],
         "label": "InfraRequestHandlerContext",
         "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+        "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -396,7 +202,9 @@
               "MlDatafeedStats",
               "[]; }>; } | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -418,7 +226,9 @@
               "AggregationsAggregate",
               ">>>; } | undefined"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -429,7 +239,9 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -441,15 +253,11 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "SavedObjectsClientContract"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -461,17 +269,31 @@
             "label": "uiSettingsClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.getMetricsIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetricsIndices",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -487,7 +309,9 @@
       "tags": [],
       "label": "InfraPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+      "lineNumber": 31,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -501,7 +325,9 @@
           "signature": [
             "void"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+          "lineNumber": 32,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -515,7 +341,9 @@
           "signature": [
             "void | undefined"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -530,7 +358,9 @@
       "tags": [],
       "label": "InfraPluginStart",
       "description": [],
-      "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+      "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -544,7 +374,9 @@
           "signature": [
             "InventoryViewsServiceStart"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+          "lineNumber": 37,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -559,7 +391,9 @@
             "MetricsExplorerViewsServiceStart",
             " | undefined"
           ],
-          "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+          "path": "x-pack/solutions/observability/plugins/infra/server/types.ts",
+          "lineNumber": 38,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

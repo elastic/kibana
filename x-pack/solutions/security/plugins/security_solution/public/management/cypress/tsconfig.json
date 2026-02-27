@@ -1,0 +1,34 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "include": [
+    "**/*",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "cypress",
+      "node",
+    ],
+  },
+  "kbn_references": [
+    "@kbn/security-plugin",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/fleet-plugin",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/cypress-config",
+    "@kbn/test-subj-selector",
+    "@kbn/cases-plugin",
+    "@kbn/test",
+    "@kbn/repo-info",
+    "@kbn/tooling-log",
+    "@kbn/security-solution-serverless",
+    "@kbn/dev-utils",
+    "@kbn/spaces-plugin",
+    "@kbn/test-suites-xpack-security/security_solution_cypress/cypress",
+    "@kbn/elastic-assistant-common",
+    "@kbn/actions-plugin",
+  ]
+}

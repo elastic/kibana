@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Platform } from './platform';
@@ -50,5 +51,64 @@ describe('isMac()', () => {
     expect(new Platform('linux', 'x64', 'foo').isMac()).toBe(false);
     expect(new Platform('darwin', 'x64', 'foo').isMac()).toBe(true);
     expect(new Platform('darwin', 'arm64', 'foo').isMac()).toBe(true);
+  });
+});
+
+describe('isServerless()', () => {
+  it('returns true if serverless', () => {
+    expect(new Platform('linux', 'x64', 'test', 'serverless').isServerless()).toBe(true);
+    expect(new Platform('linux', 'x64', 'test').isServerless()).toBe(false);
+  });
+});
+
+describe('getSolutionId()', () => {
+  it('returns the solution id or undefined', () => {
+    expect(new Platform('linux', 'x64', 'test').getSolutionId()).toBeUndefined();
+    expect(
+      new Platform('linux', 'x64', 'test', 'serverless', {
+        id: 'search',
+        artifact: 'elasticsearch',
+      }).getSolutionId()
+    ).toBe('search');
+  });
+});
+
+describe('getSolutionArtifact()', () => {
+  it('returns the solution artifact or undefined', () => {
+    expect(new Platform('linux', 'x64', 'test').getSolutionArtifact()).toBeUndefined();
+    expect(
+      new Platform('linux', 'x64', 'test', 'serverless', {
+        id: 'search',
+        artifact: 'elasticsearch',
+      }).getSolutionArtifact()
+    ).toBe('elasticsearch');
+  });
+});
+
+describe('toString()', () => {
+  it('returns the correct string', () => {
+    expect(new Platform('linux', 'x64', 'test').toString()).toBe('linux-x64');
+    expect(new Platform('darwin', 'arm64', 'test').toString()).toBe('darwin-arm64');
+    expect(new Platform('linux', 'x64', 'test', 'serverless').toString()).toBe(
+      'linux-x64-serverless'
+    );
+    expect(
+      new Platform('linux', 'x64', 'test', 'serverless', {
+        id: 'workplaceai',
+        artifact: 'workplaceai',
+      }).toString()
+    ).toBe('linux-x64-serverless-workplaceai');
+    expect(
+      new Platform('linux', 'x64', 'test', undefined, {
+        id: 'observability',
+        artifact: 'observability',
+      }).toString()
+    ).toBe('linux-x64-observability');
+    expect(
+      new Platform('linux', 'x64', 'test', undefined, {
+        id: 'search',
+        artifact: 'elasticsearch',
+      }).toString()
+    ).toBe('linux-x64-elasticsearch');
   });
 });

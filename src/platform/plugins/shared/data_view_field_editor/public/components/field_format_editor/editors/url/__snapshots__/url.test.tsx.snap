@@ -1,0 +1,393 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UrlFormatEditor should render normally 1`] = `
+<div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Type
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout emotion-euiFormControlLayout"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
+        >
+          <select
+            class="euiSelect emotion-euiSelect"
+            data-test-subj="urlEditorType"
+            id="generated-id"
+          >
+            <option
+              value="a"
+            >
+              Link
+            </option>
+            <option
+              value="img"
+            >
+              Image
+            </option>
+            <option
+              value="audio"
+            >
+              Audio
+            </option>
+          </select>
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+          >
+            <span
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+            >
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Open in a new tab
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiSwitch emotion-euiSwitch"
+      >
+        <button
+          aria-checked="false"
+          aria-labelledby="generated-id"
+          class="euiSwitch__button emotion-euiSwitch__button"
+          id="generated-id"
+          role="switch"
+          type="button"
+        >
+          <span
+            class="euiSwitch__body emotion-euiSwitch__body-off"
+          >
+            <span
+              class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
+            >
+              <span
+                data-euiicon-type="check"
+              />
+              <span
+                data-euiicon-type="cross"
+              />
+            </span>
+          </span>
+          <span
+            class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+          />
+        </button>
+        <span
+          class="euiSwitch__label emotion-euiSwitch__label"
+          id="generated-id"
+        >
+          Off
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        aria-invalid="false"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        URL template
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout emotion-euiFormControlLayout"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            aria-describedby="generated-id-help-0"
+            class="euiFieldText emotion-euiFieldText"
+            data-test-subj="urlEditorUrlTemplate"
+            id="generated-id"
+            type="text"
+            value=""
+          />
+        </div>
+      </div>
+      <div
+        class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
+        id="generated-id-help-0"
+      >
+        <a
+          class="euiLink emotion-euiLink-primary"
+          href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views#string-field-formatters"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          URL template help
+          <span
+            class="emotion-EuiExternalLinkIcon"
+            data-euiicon-type="popout"
+            role="presentation"
+          />
+          <span
+            class="emotion-euiScreenReaderOnly"
+          >
+            (external, opens in a new tab or window)
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        aria-invalid="false"
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Label template
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiFormControlLayout emotion-euiFormControlLayout"
+      >
+        <div
+          class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            aria-describedby="generated-id-help-0"
+            class="euiFieldText emotion-euiFieldText"
+            data-test-subj="urlEditorLabelTemplate"
+            id="generated-id"
+            type="text"
+            value=""
+          />
+        </div>
+      </div>
+      <div
+        class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
+        id="generated-id-help-0"
+      >
+        <a
+          class="euiLink emotion-euiLink-primary"
+          href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views#string-field-formatters"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Label template help
+          <span
+            class="emotion-EuiExternalLinkIcon"
+            data-euiicon-type="popout"
+            role="presentation"
+          />
+          <span
+            class="emotion-euiScreenReaderOnly"
+          >
+            (external, opens in a new tab or window)
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    id="generated-id-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="generated-id"
+        id="generated-id-label"
+      >
+        Samples
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        class="euiBasicTable kbnFieldFormatEditor__samples css-p1tgq2-samples"
+        id="generated-id"
+      >
+        <table
+          class="euiTable emotion-euiTable-fixed-compressed-hasBackground-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
+        >
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_input_0"
+                role="columnheader"
+                scope="col"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Input"
+                  >
+                    Input
+                  </span>
+                </div>
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_output_1"
+                role="columnheader"
+                scope="col"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Output"
+                  >
+                    Output
+                  </span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
+          >
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  john
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div>
+                    converted url for john
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  /some/pathname/asset.png
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div>
+                    converted url for /some/pathname/asset.png
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  1234
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <div>
+                    converted url for 1234
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+`;

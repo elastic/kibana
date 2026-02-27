@@ -35,9 +35,11 @@
             "section": "def-common.FieldFormat",
             "text": "FieldFormat"
           },
-          ") => (rowA: Record<string, unknown>, rowB: Record<string, unknown>, direction: \"asc\" | \"desc\") => number"
+          ") => (rowA: Record<string, unknown> | null | undefined, rowB: Record<string, unknown> | null | undefined, direction: \"asc\" | \"desc\") => number"
         ],
-        "path": "packages/kbn-sort-predicates/src/sorting.ts",
+        "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+        "lineNumber": 245,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,7 +53,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+            "lineNumber": 246,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -66,7 +70,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+            "lineNumber": 247,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -87,7 +93,9 @@
                 "text": "FieldFormat"
               }
             ],
-            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+            "lineNumber": 248,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -98,7 +106,22 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/sort-predicates",
+        "id": "def-common.NonStringSortableFieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "NonStringSortableFieldType",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+        "lineNumber": 237,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": []
   }

@@ -29,7 +29,9 @@
         "description": [
           "\nLogger exposes all the necessary methods to log any type of information and\nthis is the interface used by the logging consumers including plugins.\n"
         ],
-        "path": "packages/kbn-logging/src/logger.ts",
+        "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,25 +61,43 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              ">(message: string, meta?: Meta | undefined) => void"
+              ">(message: ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LogMessageSource",
+                "text": "LogMessageSource"
+              },
+              ", meta?: Meta | undefined) => void"
             ],
-            "path": "packages/kbn-logging/src/logger.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
                 "id": "def-common.Logger.trace.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "message",
                 "description": [
-                  "- The log message"
+                  "- The log message, or a function returning the log message"
                 ],
                 "signature": [
-                  "string"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMessageSource",
+                    "text": "LogMessageSource"
+                  }
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 35,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -89,12 +109,14 @@
                 "tags": [],
                 "label": "meta",
                 "description": [
-                  "-"
+                  "- The ECS meta to attach to the log entry"
                 ],
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 35,
+                "columnNumber": 68,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -109,7 +131,7 @@
             "tags": [],
             "label": "debug",
             "description": [
-              "\nLog messages useful for debugging and interactive investigation"
+              "\nLog messages useful for debugging and interactive investigation\n"
             ],
             "signature": [
               "<Meta extends ",
@@ -128,25 +150,43 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              ">(message: string, meta?: Meta | undefined) => void"
+              ">(message: ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LogMessageSource",
+                "text": "LogMessageSource"
+              },
+              ", meta?: Meta | undefined) => void"
             ],
-            "path": "packages/kbn-logging/src/logger.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
                 "id": "def-common.Logger.debug.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "message",
                 "description": [
-                  "- The log message"
+                  "- The log message, or a function returning the log message"
                 ],
                 "signature": [
-                  "string"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMessageSource",
+                    "text": "LogMessageSource"
+                  }
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 46,
+                "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -158,12 +198,14 @@
                 "tags": [],
                 "label": "meta",
                 "description": [
-                  "-"
+                  "- The ECS meta to attach to the log entry"
                 ],
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 46,
+                "columnNumber": 68,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -178,7 +220,7 @@
             "tags": [],
             "label": "info",
             "description": [
-              "\nLogs messages related to general application flow"
+              "\nLogs messages related to general application flow\n"
             ],
             "signature": [
               "<Meta extends ",
@@ -197,25 +239,43 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              ">(message: string, meta?: Meta | undefined) => void"
+              ">(message: ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LogMessageSource",
+                "text": "LogMessageSource"
+              },
+              ", meta?: Meta | undefined) => void"
             ],
-            "path": "packages/kbn-logging/src/logger.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/logging",
                 "id": "def-common.Logger.info.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "message",
                 "description": [
-                  "- The log message"
+                  "- The log message, or a function returning the log message"
                 ],
                 "signature": [
-                  "string"
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMessageSource",
+                    "text": "LogMessageSource"
+                  }
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 57,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -227,12 +287,14 @@
                 "tags": [],
                 "label": "meta",
                 "description": [
-                  "-"
+                  "- The ECS meta to attach to the log entry"
                 ],
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 57,
+                "columnNumber": 67,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -247,7 +309,7 @@
             "tags": [],
             "label": "warn",
             "description": [
-              "\nLogs abnormal or unexpected errors or messages"
+              "\nLogs abnormal or unexpected errors or messages\n"
             ],
             "signature": [
               "<Meta extends ",
@@ -266,9 +328,19 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
+              ">(errorOrMessage: Error | ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LogMessageSource",
+                "text": "LogMessageSource"
+              },
+              ", meta?: Meta | undefined) => void"
             ],
-            "path": "packages/kbn-logging/src/logger.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -279,12 +351,21 @@
                 "tags": [],
                 "label": "errorOrMessage",
                 "description": [
-                  "- An Error object or message string to log"
+                  "- An Error object, message string, or function returning the log message"
                 ],
                 "signature": [
-                  "string | Error"
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMessageSource",
+                    "text": "LogMessageSource"
+                  }
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 68,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -296,12 +377,14 @@
                 "tags": [],
                 "label": "meta",
                 "description": [
-                  "-"
+                  "- The ECS meta to attach to the log entry"
                 ],
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 68,
+                "columnNumber": 82,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -335,9 +418,19 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
+              ">(errorOrMessage: Error | ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LogMessageSource",
+                "text": "LogMessageSource"
+              },
+              ", meta?: Meta | undefined) => void"
             ],
-            "path": "packages/kbn-logging/src/logger.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -348,12 +441,21 @@
                 "tags": [],
                 "label": "errorOrMessage",
                 "description": [
-                  "- An Error object or message string to log"
+                  "- An Error object, message string, or function returning the log message"
                 ],
                 "signature": [
-                  "string | Error"
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMessageSource",
+                    "text": "LogMessageSource"
+                  }
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 80,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -365,12 +467,14 @@
                 "tags": [],
                 "label": "meta",
                 "description": [
-                  "-"
+                  "- The ECS meta to attach to the log entry"
                 ],
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 81,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -404,9 +508,19 @@
                 "section": "def-common.LogMeta",
                 "text": "LogMeta"
               },
-              ">(errorOrMessage: string | Error, meta?: Meta | undefined) => void"
+              ">(errorOrMessage: Error | ",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LogMessageSource",
+                "text": "LogMessageSource"
+              },
+              ", meta?: Meta | undefined) => void"
             ],
-            "path": "packages/kbn-logging/src/logger.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -417,12 +531,21 @@
                 "tags": [],
                 "label": "errorOrMessage",
                 "description": [
-                  "- An Error object or message string to log"
+                  "- An Error object, message string, or function returning the log message"
                 ],
                 "signature": [
-                  "string | Error"
+                  "Error | ",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LogMessageSource",
+                    "text": "LogMessageSource"
+                  }
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 94,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -434,12 +557,14 @@
                 "tags": [],
                 "label": "meta",
                 "description": [
-                  "-"
+                  "- The ECS meta to attach to the log entry"
                 ],
                 "signature": [
                   "Meta | undefined"
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 95,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -461,7 +586,9 @@
               "LogLevelId",
               ") => boolean"
             ],
-            "path": "packages/kbn-logging/src/logger.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -477,7 +604,9 @@
                 "signature": [
                   "LogLevelId"
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 115,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -504,7 +633,9 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/kbn-logging/src/logger.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -518,7 +649,9 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-logging/src/logger.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+                "lineNumber": 126,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -538,7 +671,9 @@
         "description": [
           "\nThe single purpose of `LoggerFactory` interface is to define a way to\nretrieve a context-based logger instance.\n"
         ],
-        "path": "packages/kbn-logging/src/logger_factory.ts",
+        "path": "src/platform/packages/shared/kbn-logging/src/logger_factory.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -561,7 +696,9 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/kbn-logging/src/logger_factory.ts",
+            "path": "src/platform/packages/shared/kbn-logging/src/logger_factory.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -572,12 +709,14 @@
                 "tags": [],
                 "label": "contextParts",
                 "description": [
-                  "- Parts of the context to return logger for. For example\nget('plugins', 'pid') will return a logger for the `plugins.pid` context."
+                  "- Parts of the context to return logger for. For example"
                 ],
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-logging/src/logger_factory.ts",
+                "path": "src/platform/packages/shared/kbn-logging/src/logger_factory.ts",
+                "lineNumber": 25,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -591,6 +730,23 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/logging",
+        "id": "def-common.LogMessageSource",
+        "type": "Type",
+        "tags": [],
+        "label": "LogMessageSource",
+        "description": [],
+        "signature": [
+          "string | (() => string)"
+        ],
+        "path": "src/platform/packages/shared/kbn-logging/src/logger.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/logging",
         "id": "def-common.LogMeta",
@@ -669,7 +825,9 @@
           "EcsVulnerability",
           " | undefined; }"
         ],
-        "path": "packages/kbn-logging/src/log_meta.ts",
+        "path": "src/platform/packages/shared/kbn-logging/src/log_meta.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

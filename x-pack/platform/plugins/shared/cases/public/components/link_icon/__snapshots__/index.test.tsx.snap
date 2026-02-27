@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LinkIcon it renders 1`] = `
+<span
+  className="casesLinkIcon__label"
+>
+  Test link
+</span>
+`;

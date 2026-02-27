@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <EuiFilterButton
+      data-test-subj="groups-filter-popover-button"
+      hasActiveFilters={false}
+      iconType="arrowDown"
+      isSelected={false}
+      numActiveFilters={0}
+      numFilters={3}
+      onClick={[Function]}
+    >
+      Groups
+    </EuiFilterButton>
+  }
+  closePopover={[Function]}
+  display="inline-block"
+  hasArrow={false}
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+  repositionOnScroll={true}
+  repositionToCrossAxis={true}
+>
+  <EuiFilterSelectItemClass
+    key="0-auditbeat"
+    onClick={[Function]}
+  >
+    auditbeat (2)
+  </EuiFilterSelectItemClass>
+  <EuiFilterSelectItemClass
+    key="1-process"
+    onClick={[Function]}
+  >
+    process (3)
+  </EuiFilterSelectItemClass>
+  <EuiFilterSelectItemClass
+    key="2-winlogbeat"
+    onClick={[Function]}
+  >
+    winlogbeat (1)
+  </EuiFilterSelectItemClass>
+</EuiPopover>
+`;

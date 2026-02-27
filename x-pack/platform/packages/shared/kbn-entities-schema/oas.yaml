@@ -1,0 +1,616 @@
+openapi: 3.1.0
+info:
+  title: Elastic Entity Model (EEM) API
+  version: v1
+components:
+  schemas:
+    createEntityDefinitionQuerySchema:
+      type: object
+      properties:
+        installOnly:
+          anyOf:
+            - type: string
+              enum:
+                - "true"
+                - "false"
+            - type: boolean
+          default: false
+      additionalProperties: false
+    getEntityDefinitionQuerySchema:
+      type: object
+      properties:
+        page:
+          type: number
+        perPage:
+          type: number
+      additionalProperties: false
+    resetEntityDefinitionParamsSchema:
+      type: object
+      properties:
+        id:
+          type: string
+      required:
+        - id
+      additionalProperties: false
+    deleteEntityDefinitionParamsSchema:
+      type: object
+      properties:
+        id:
+          type: string
+      required:
+        - id
+      additionalProperties: false
+    deleteEntityDefinitionQuerySchema:
+      type: object
+      properties:
+        deleteData:
+          anyOf:
+            - type: string
+              enum:
+                - "true"
+                - "false"
+            - type: boolean
+          default: false
+      additionalProperties: false
+    entityDefinitionSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: ^[\w-]+$
+        version:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        filter:
+          type: string
+        indexPatterns:
+          type: array
+          items:
+            type: string
+        identityFields:
+          type: array
+          items:
+            anyOf:
+              - type: object
+                properties:
+                  field:
+                    type: string
+                  optional:
+                    type: boolean
+                required:
+                  - field
+                  - optional
+                additionalProperties: false
+              - type: string
+        displayNameTemplate:
+          type: string
+        metadata:
+          type: array
+          items:
+            anyOf:
+              - type: object
+                properties:
+                  source:
+                    type: string
+                  destination:
+                    type: string
+                  limit:
+                    type: number
+                    default: 1000
+                required:
+                  - source
+                additionalProperties: false
+              - type: string
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              metrics:
+                type: array
+                items:
+                  anyOf:
+                    - type: object
+                      properties:
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 1
+                          pattern: "[a-zA-Z]"
+                        aggregation:
+                          type: string
+                          enum:
+                            - avg
+                            - max
+                            - min
+                            - sum
+                            - value_count
+                            - cardinality
+                            - last_value
+                            - std_deviation
+                        field:
+                          type: string
+                        filter:
+                          type: string
+                      required:
+                        - name
+                        - aggregation
+                        - field
+                      additionalProperties: false
+                    - type: object
+                      properties:
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 1
+                          pattern: "[a-zA-Z]"
+                        aggregation:
+                          type: string
+                          enum:
+                            - doc_count
+                        filter:
+                          type: string
+                      required:
+                        - name
+                        - aggregation
+                      additionalProperties: false
+                    - type: object
+                      properties:
+                        name:
+                          type: string
+                          minLength: 1
+                          maxLength: 1
+                          pattern: "[a-zA-Z]"
+                        aggregation:
+                          type: string
+                          enum:
+                            - percentile
+                        field:
+                          type: string
+                        percentile:
+                          type: number
+                        filter:
+                          type: string
+                      required:
+                        - name
+                        - aggregation
+                        - field
+                        - percentile
+                      additionalProperties: false
+              equation:
+                type: string
+            required:
+              - name
+              - metrics
+              - equation
+            additionalProperties: false
+        staticFields:
+          type: object
+          additionalProperties:
+            type: string
+        managed:
+          type: boolean
+          default: false
+        history:
+          type: object
+          properties:
+            timestampField:
+              type: string
+            interval:
+              type: string
+              pattern: ^\d+[m|d|s|h]$
+            settings:
+              type: object
+              properties:
+                syncField:
+                  type: string
+                syncDelay:
+                  type: string
+                  pattern: ^\d+[m|d|s|h]$
+                lookbackPeriod:
+                  type: string
+                  pattern: ^\d+[m|d|s|h]$
+                  default: 1h
+                frequency:
+                  type: string
+                  pattern: ^\d+[m|d|s|h]$
+                backfillSyncDelay:
+                  type: string
+                  pattern: ^\d+[m|d|s|h]$
+                backfillLookbackPeriod:
+                  type: string
+                  pattern: ^\d+[m|d|s|h]$
+                backfillFrequency:
+                  type: string
+                  pattern: ^\d+[m|d|s|h]$
+              additionalProperties: false
+          required:
+            - timestampField
+            - interval
+          additionalProperties: false
+        latest:
+          type: object
+          properties:
+            settings:
+              type: object
+              properties:
+                syncField:
+                  type: string
+                syncDelay:
+                  type: string
+                  pattern: ^\d+[m|d|s|h]$
+                frequency:
+                  type: string
+                  pattern: ^\d+[m|d|s|h]$
+              additionalProperties: false
+          additionalProperties: false
+        installStatus:
+          anyOf:
+            - type: string
+              enum:
+                - installing
+            - type: string
+              enum:
+                - upgrading
+            - type: string
+              enum:
+                - installed
+            - type: string
+              enum:
+                - failed
+        installStartedAt:
+          type: string
+      required:
+        - id
+        - version
+        - name
+        - type
+        - indexPatterns
+        - identityFields
+        - displayNameTemplate
+        - history
+      additionalProperties: false
+    entitySummarySchema:
+      allOf:
+        - type: object
+          properties:
+            entity:
+              type: object
+              properties:
+                id:
+                  type: string
+                type:
+                  type: string
+                identityFields:
+                  type: array
+                  items:
+                    type: string
+                displayName:
+                  type: string
+                metrics:
+                  type: object
+                  additionalProperties:
+                    type: number
+                definitionVersion:
+                  type: string
+                schemaVersion:
+                  type: string
+                definitionId:
+                  type: string
+                lastSeenTimestamp:
+                  type: string
+                firstSeenTimestamp:
+                  type: string
+              required:
+                - id
+                - type
+                - identityFields
+                - displayName
+                - metrics
+                - definitionVersion
+                - schemaVersion
+                - definitionId
+                - lastSeenTimestamp
+                - firstSeenTimestamp
+              additionalProperties: false
+          required:
+            - entity
+        - anyOf:
+            - anyOf:
+                - type: string
+                - type: number
+                - type: boolean
+                - enum:
+                    - "null"
+                  nullable: true
+            - type: array
+              items: {}
+            - type: object
+              additionalProperties: {}
+    entityHistorySchema:
+      allOf:
+        - type: object
+          properties:
+            "@timestamp":
+              type: string
+            entity:
+              type: object
+              properties:
+                id:
+                  type: string
+                type:
+                  type: string
+                identityFields:
+                  type: array
+                  items:
+                    type: string
+                displayName:
+                  type: string
+                metrics:
+                  type: object
+                  additionalProperties:
+                    type: number
+                definitionVersion:
+                  type: string
+                schemaVersion:
+                  type: string
+                definitionId:
+                  type: string
+              required:
+                - id
+                - type
+                - identityFields
+                - displayName
+                - metrics
+                - definitionVersion
+                - schemaVersion
+                - definitionId
+              additionalProperties: false
+          required:
+            - "@timestamp"
+            - entity
+        - anyOf:
+            - anyOf:
+                - type: string
+                - type: number
+                - type: boolean
+                - enum:
+                    - "null"
+                  nullable: true
+            - type: array
+              items: {}
+            - type: object
+              additionalProperties: {}
+paths:
+  /internal/entities/managed/enablement:
+    get:
+      description: Check if managed (built-in) entity discovery is enabled. Enabled
+        entity discovery requires a valid api key and the latest version of the
+        builtin definitions installed and running.
+      tags:
+        - management
+      responses:
+        "200":
+          description: OK - Verify result in response body
+          content:
+            application/json:
+              schema:
+                type: object
+                required: enabled
+                properties:
+                  enabled:
+                    type: boolean
+                    example: false
+                  reason:
+                    type: string
+                    example: api_key_not_found
+    delete:
+      description: Disable managed (built-in) entity discovery. This stops and deletes
+        the transforms, ingest pipelines, definitions saved objects, and index
+        templates for this entity definition, as well as the stored API key for
+        entity discovery management.
+      tags:
+        - management
+      parameters:
+        - in: query
+          name: deleteData
+          description: If true, delete all entity data in the managed indices
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Built-in entity discovery successfully disabled
+          content:
+            application/json:
+              schema:
+                type: object
+                required: success
+                properties:
+                  success:
+                    type: boolean
+        "403":
+          description: The current user does not have the required permissions to disable
+            entity discovery
+    put:
+      description: Enable managed (built-in) entity discovery.
+      tags:
+        - management
+      parameters:
+        - in: query
+          name: installOnly
+          description: If true, the definition transforms will not be started
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: OK - Verify result in response body
+          content:
+            application/json:
+              schema:
+                type: object
+                required: success
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  reason:
+                    type: string
+                    example: api_key_service_disabled
+                  message:
+                    type: string
+                    example: API key service is not enabled; try configuring
+                      `xpack.security.authc.api_key.enabled` in your
+                      elasticsearch config
+        "403":
+          description: The current user does not have the required permissions to enable
+            entity discovery
+  /internal/entities/definition:
+    post:
+      description: Install an entity definition.
+      tags:
+        - definitions
+      parameters:
+        - in: query
+          name: installOnly
+          description: If true, the definition transforms will not be started
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: The entity definition to install
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/entityDefinitionSchema"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/entityDefinitionSchema"
+        "400":
+          description: The entity definition cannot be installed; see the error for more
+            details but commonly due to validation failures of the definition ID
+            or metrics format
+        "409":
+          description: An entity definition with this ID already exists
+    delete:
+      description: Uninstall an entity definition. This stops and deletes the
+        transforms, ingest pipelines, definitions saved objects, and index
+        templates for this entity definition.
+      tags:
+        - definitions
+      parameters:
+        - in: path
+          name: id
+          description: The entity definition ID
+          schema:
+            $ref: "#/components/schemas/deleteEntityDefinitionParamsSchema/properties/id"
+          required: true
+        - in: query
+          name: deleteData
+          description: If true, delete all entity data in the indices associated with this
+            entity definition
+          schema:
+            $ref: "#/components/schemas/deleteEntityDefinitionQuerySchema/properties/delete\
+              Data"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+        "400":
+          description: The entity definition cannot be removed; see the error for more
+            details
+        "404":
+          description: Entity definition with given ID not found
+    get:
+      description: Get all installed entity definitions.
+      tags:
+        - definitions
+      parameters:
+        - in: query
+          name: page
+          schema:
+            $ref: "#/components/schemas/getEntityDefinitionQuerySchema/properties/page"
+        - in: query
+          name: perPage
+          schema:
+            $ref: "#/components/schemas/getEntityDefinitionQuerySchema/properties/perPage"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  definitions:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: "#/components/schemas/entityDefinitionSchema"
+                        - type: object
+                          properties:
+                            state:
+                              type: object
+                              properties:
+                                installed:
+                                  type: boolean
+                                running:
+                                  type: boolean
+    patch:
+      description: Update an entity definition.
+      tags:
+        - definitions
+      parameters:
+        - in: query
+          name: installOnly
+          description: If true, the definition transforms will not be started
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: The definition properties to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/entityDefinitionUpdateSchema"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/entityDefinitionSchema"
+        "400":
+          description: The entity definition cannot be installed; see the error for more
+            details
+        "403":
+          description: User is not allowed to update the entity definition
+        "404":
+          description: The entity definition does not exist
+        "409":
+          description: The entity definition is being updated by another request
+tags: []

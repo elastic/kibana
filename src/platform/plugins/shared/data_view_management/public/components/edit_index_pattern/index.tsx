@@ -1,0 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export { EditIndexPattern } from './edit_index_pattern';
+export { EditIndexPatternContainer } from './edit_index_pattern_container';
+export { CreateEditField } from './create_edit_field';
+export { CreateEditFieldContainer } from './create_edit_field/create_edit_field_container';
+export type { RemoveDataViewProps } from '../delete_data_view_flyout/delete_data_view_flyout';

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -11,15 +12,19 @@ import supertest from 'supertest';
 import { omit } from 'lodash';
 
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { createCoreContext, createHttpServer } from '@kbn/core-http-server-mocks';
+import { createCoreContext } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
-import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '@kbn/core-status-common';
+import type { ServiceStatus, ServiceStatusLevel } from '@kbn/core-status-common';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { registerStatusRoute } from '@kbn/core-status-server-internal';
+import { createInternalHttpService } from '../../utilities';
 
 const coreId = Symbol('core');
 
@@ -48,11 +53,15 @@ describe('GET /api/status', () => {
     const coreContext = createCoreContext({ coreId });
     const contextService = new ContextService(coreContext);
 
-    server = createHttpServer(coreContext);
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService(coreContext);
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     metrics = metricsServiceMock.createSetupContract();

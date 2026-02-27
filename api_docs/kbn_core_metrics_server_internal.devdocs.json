@@ -11,29 +11,23 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-metrics-server-internal",
-        "id": "def-common.MetricsServiceSetupDeps",
+        "id": "def-server.MetricsServiceSetupDeps",
         "type": "Interface",
         "tags": [],
         "label": "MetricsServiceSetupDeps",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+        "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-common.MetricsServiceSetupDeps.http",
+            "id": "def-server.MetricsServiceSetupDeps.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -41,13 +35,15 @@
             "signature": [
               "InternalHttpServiceSetup"
             ],
-            "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+            "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-common.MetricsServiceSetupDeps.elasticsearchService",
+            "id": "def-server.MetricsServiceSetupDeps.elasticsearchService",
             "type": "Object",
             "tags": [],
             "label": "elasticsearchService",
@@ -55,7 +51,9 @@
             "signature": [
               "InternalElasticsearchServiceSetup"
             ],
-            "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+            "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -63,23 +61,42 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/core-metrics-server-internal",
+        "id": "def-server.EluTerm",
+        "type": "Enum",
+        "tags": [],
+        "label": "EluTerm",
+        "description": [
+          "\nThe period of time for the average ELU calculation."
+        ],
+        "path": "src/core/packages/metrics/server-internal/src/metrics_service.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-metrics-server-internal",
-        "id": "def-common.opsConfig",
+        "id": "def-server.opsConfig",
         "type": "Object",
         "tags": [],
         "label": "opsConfig",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+        "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-common.opsConfig.path",
+            "id": "def-server.opsConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -87,13 +104,15 @@
             "signature": [
               "\"ops\""
             ],
-            "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+            "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-internal",
-            "id": "def-common.opsConfig.schema",
+            "id": "def-server.opsConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -140,7 +159,9 @@
               },
               "<string | undefined>; }>; }>"
             ],
-            "path": "packages/core/metrics/core-metrics-server-internal/src/ops_config.ts",
+            "path": "src/core/packages/metrics/server-internal/src/ops_config.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -148,5 +169,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

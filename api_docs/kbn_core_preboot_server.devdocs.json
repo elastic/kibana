@@ -11,31 +11,25 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-preboot-server",
-        "id": "def-common.PrebootServicePreboot",
+        "id": "def-server.PrebootServicePreboot",
         "type": "Interface",
         "tags": [],
         "label": "PrebootServicePreboot",
         "description": [
           "\nKibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met.\n"
         ],
-        "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+        "path": "src/core/packages/preboot/server/src/contracts.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-preboot-server",
-            "id": "def-common.PrebootServicePreboot.isSetupOnHold",
+            "id": "def-server.PrebootServicePreboot.isSetupOnHold",
             "type": "Function",
             "tags": [],
             "label": "isSetupOnHold",
@@ -45,7 +39,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+            "path": "src/core/packages/preboot/server/src/contracts.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -53,7 +49,7 @@
           },
           {
             "parentPluginId": "@kbn/core-preboot-server",
-            "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved",
+            "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved",
             "type": "Function",
             "tags": [],
             "label": "holdSetupUntilResolved",
@@ -63,30 +59,34 @@
             "signature": [
               "(reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>) => void"
             ],
-            "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+            "path": "src/core/packages/preboot/server/src/contracts.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-preboot-server",
-                "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved.$1",
+                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$1",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
                 "description": [
-                  "A string that explains the reason why this promise should hold `setup`. It's supposed to be a human\nreadable string that will be recorded in the logs or standard output."
+                  "A string that explains the reason why this promise should hold `setup`. It's supposed to be a human"
                 ],
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+                "path": "src/core/packages/preboot/server/src/contracts.ts",
+                "lineNumber": 50,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-preboot-server",
-                "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved.$2",
+                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "promise",
@@ -96,7 +96,9 @@
                 "signature": [
                   "Promise<{ shouldReloadConfig: boolean; } | undefined>"
                 ],
-                "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
+                "path": "src/core/packages/preboot/server/src/contracts.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -108,6 +110,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

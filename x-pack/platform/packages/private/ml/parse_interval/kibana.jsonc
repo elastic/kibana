@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-parse-interval",
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

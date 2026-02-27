@@ -5,24 +5,6 @@
     "functions": [
       {
         "parentPluginId": "presentationPanel",
-        "id": "def-public.getEditPanelAction",
-        "type": "Function",
-        "tags": [],
-        "label": "getEditPanelAction",
-        "description": [],
-        "signature": [
-          "() => ",
-          "EditPanelAction"
-        ],
-        "path": "src/plugins/presentation_panel/public/panel_actions/panel_actions.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationPanel",
         "id": "def-public.PresentationPanel",
         "type": "Function",
         "tags": [],
@@ -41,9 +23,11 @@
             "section": "def-public.PresentationPanelProps",
             "text": "PresentationPanelProps"
           },
-          "<ApiType, PropsType>) => JSX.Element"
+          "<ApiType, PropsType>) => React.JSX.Element | null"
         ],
-        "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel.tsx",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,7 +48,9 @@
               },
               "<ApiType, PropsType>"
             ],
-            "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel.tsx",
+            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -81,19 +67,13 @@
         "label": "PresentationPanelError",
         "description": [],
         "signature": [
-          "({ api, error, }: { error: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ErrorLike",
-            "text": "ErrorLike"
-          },
-          "; api?: ",
-          "DefaultPresentationPanelApi",
-          " | undefined; }) => JSX.Element"
+          "(props: ",
+          "PresentationPanelErrorProps",
+          ") => React.JSX.Element"
         ],
-        "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -102,57 +82,17 @@
             "id": "def-public.PresentationPanelError.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  api,\n  error,\n}",
+            "label": "props",
             "description": [],
-            "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+            "signature": [
+              "PresentationPanelErrorProps"
+            ],
+            "path": "src/platform/plugins/private/presentation_panel/public/panel_component/presentation_panel_error.tsx",
+            "lineNumber": 25,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "presentationPanel",
-                "id": "def-public.PresentationPanelError.$1.error",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.SerializedError",
-                    "text": "SerializedError"
-                  },
-                  " & { original?: ",
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.SerializedError",
-                    "text": "SerializedError"
-                  },
-                  " | undefined; }"
-                ],
-                "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "presentationPanel",
-                "id": "def-public.PresentationPanelError.$1.api",
-                "type": "Object",
-                "tags": [],
-                "label": "api",
-                "description": [],
-                "signature": [
-                  "DefaultPresentationPanelApi",
-                  " | undefined"
-                ],
-                "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -172,7 +112,43 @@
         "signature": [
           "\"ACTION_CUSTOMIZE_PANEL\""
         ],
-        "path": "src/plugins/presentation_panel/public/panel_actions/customize_panel_action/customize_panel_action.tsx",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/customize_panel_action/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationPanel",
+        "id": "def-public.ACTION_EDIT_PANEL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_EDIT_PANEL",
+        "description": [],
+        "signature": [
+          "\"editPanel\""
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/edit_panel_action/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationPanel",
+        "id": "def-public.ACTION_REMOVE_PANEL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_REMOVE_PANEL",
+        "description": [],
+        "signature": [
+          "\"deletePanel\""
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_actions/remove_panel_action/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -199,13 +175,56 @@
           "PanelCompatibleComponent",
           "<ApiType, PropsType> | null>; }"
         ],
-        "path": "src/plugins/presentation_panel/public/panel_component/types.ts",
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/types.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "presentationPanel",
+        "id": "def-public.DEFAULT_QUICK_ACTION_IDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_QUICK_ACTION_IDS",
+        "description": [],
+        "signature": [
+          "{ view?: ",
+          "QuickActionIds",
+          " | undefined; edit?: ",
+          "QuickActionIds",
+          " | undefined; }"
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "presentationPanel",
+        "id": "def-public.PresentationPanelQuickActionContext",
+        "type": "Object",
+        "tags": [],
+        "label": "PresentationPanelQuickActionContext",
+        "description": [],
+        "signature": [
+          "React.Context<",
+          "PresentationPanelQuickActionIds",
+          " | undefined>"
+        ],
+        "path": "src/platform/plugins/private/presentation_panel/public/panel_component/panel_header/presentation_panel_quick_action_context.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -231,7 +250,9 @@
         "signature": [
           "\"presentationPanel\""
         ],
-        "path": "src/plugins/presentation_panel/common/index.ts",
+        "path": "src/platform/plugins/private/presentation_panel/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -246,7 +267,9 @@
         "signature": [
           "\"presentationPanel\""
         ],
-        "path": "src/plugins/presentation_panel/common/index.ts",
+        "path": "src/platform/plugins/private/presentation_panel/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

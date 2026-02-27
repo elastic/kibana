@@ -9,29 +9,23 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-i18n-server-internal",
-        "id": "def-common.I18nService",
+        "id": "def-server.I18nService",
         "type": "Class",
         "tags": [],
         "label": "I18nService",
         "description": [],
-        "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+        "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-i18n-server-internal",
-            "id": "def-common.I18nService.Unnamed",
+            "id": "def-server.I18nService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -39,13 +33,15 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+            "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
-                "id": "def-common.I18nService.Unnamed.$1",
+                "id": "def-server.I18nService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -53,7 +49,9 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+                "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+                "lineNumber": 46,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -63,7 +61,7 @@
           },
           {
             "parentPluginId": "@kbn/core-i18n-server-internal",
-            "id": "def-common.I18nService.preboot",
+            "id": "def-server.I18nService.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
@@ -71,15 +69,19 @@
             "signature": [
               "({ pluginPaths, http }: ",
               "PrebootDeps",
-              ") => Promise<void>"
+              ") => Promise<",
+              "InternalI18nServicePreboot",
+              ">"
             ],
-            "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+            "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
-                "id": "def-common.I18nService.preboot.$1",
+                "id": "def-server.I18nService.preboot.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ pluginPaths, http }",
@@ -87,7 +89,9 @@
                 "signature": [
                   "PrebootDeps"
                 ],
-                "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+                "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+                "lineNumber": 51,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -97,7 +101,7 @@
           },
           {
             "parentPluginId": "@kbn/core-i18n-server-internal",
-            "id": "def-common.I18nService.setup",
+            "id": "def-server.I18nService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -106,22 +110,18 @@
               "({ pluginPaths, http }: ",
               "SetupDeps",
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-i18n-server",
-                "scope": "common",
-                "docId": "kibKbnCoreI18nServerPluginApi",
-                "section": "def-common.I18nServiceSetup",
-                "text": "I18nServiceSetup"
-              },
+              "I18nServiceSetup",
               ">"
             ],
-            "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+            "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
-                "id": "def-common.I18nService.setup.$1",
+                "id": "def-server.I18nService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ pluginPaths, http }",
@@ -129,7 +129,9 @@
                 "signature": [
                   "SetupDeps"
                 ],
-                "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
+                "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+                "lineNumber": 63,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -141,13 +143,103 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-i18n-server-internal",
+        "id": "def-server.getKibanaTranslationFiles",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaTranslationFiles",
+        "description": [],
+        "signature": [
+          "(locale: string, pluginPaths: string[]) => Promise<string[]>"
+        ],
+        "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-server.getKibanaTranslationFiles.$1",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-server.getKibanaTranslationFiles.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "pluginPaths",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-i18n-server-internal",
+        "id": "def-server.InternalI18nServicePreboot",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalI18nServicePreboot",
+        "description": [],
+        "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-i18n-server-internal",
+            "id": "def-server.InternalI18nServicePreboot.getTranslationHash",
+            "type": "Function",
+            "tags": [],
+            "label": "getTranslationHash",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-i18n-server-internal",
-        "id": "def-common.I18nConfigType",
+        "id": "def-server.I18nConfigType",
         "type": "Type",
         "tags": [],
         "label": "I18nConfigType",
@@ -155,12 +247,41 @@
         "signature": [
           "{ readonly locale: string; }"
         ],
-        "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_config.ts",
+        "path": "src/core/packages/i18n/server-internal/src/i18n_config.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-i18n-server-internal",
+        "id": "def-server.supportedLocale",
+        "type": "Array",
+        "tags": [],
+        "label": "supportedLocale",
+        "description": [
+          "\nList of all locales that are officially supported."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/core/packages/i18n/server-internal/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

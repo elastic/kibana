@@ -1,21 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
-import {
-  ApiDeclaration,
-  ScopeApi,
-  TypeKind,
-  Lifecycle,
-  PluginApi,
-  ApiScope,
-  PluginOrPackage,
-} from './types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ApiDeclaration, ScopeApi, PluginApi, PluginOrPackage } from './types';
+import { TypeKind, Lifecycle, ApiScope } from './types';
 
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -72,7 +67,7 @@ function escapeRegExp(regexp: string) {
 /**
  * If the file is at the top level, returns undefined, otherwise returns the
  * name of the first nested folder in the plugin. For example a path of
- * 'src/plugins/data/public/search_services/file.ts' would return 'search_service' while
+ * 'src/platform/plugins/shared/data/public/search_services/file.ts' would return 'search_service' while
  * 'src/plugin/data/server/file.ts' would return undefined.
  * @param filePath
  */
@@ -197,9 +192,11 @@ export function removeBrokenLinks(
     });
   });
 
-  if (missingCnt > 0) {
+  const uniqueMissing = Object.keys(missingApiItems[pluginApi.id] ?? {}).length;
+
+  if (uniqueMissing > 0) {
     log.info(
-      `${pluginApi.id} had ${missingCnt} API item references removed to avoid broken links use the flag '--stats exports' to get a list of every missing export `
+      `${pluginApi.id} had ${uniqueMissing} missing exported API item(s). Removed ${missingCnt} reference(s) to avoid broken links. Use '--stats exports' to list missing exports.`
     );
   }
 }

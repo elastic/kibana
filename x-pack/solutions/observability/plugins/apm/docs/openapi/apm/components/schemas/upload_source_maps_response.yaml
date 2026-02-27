@@ -1,0 +1,6 @@
+allOf:
+  - type: object
+    properties:
+      body:
+        type: string
+  - $ref: 'base_source_map_object.yaml'

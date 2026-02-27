@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { createMarkdownVisFn } from './markdown_fn';
+import type { Arguments } from './types';
+
+describe('interpreter/functions#markdown', () => {
+  const fn = functionWrapper(createMarkdownVisFn());
+  const args = {
+    font: { spec: { fontSize: 12 } },
+    openLinksInNewTab: true,
+    markdown: '## hello _markdown_',
+  } as unknown as Arguments;
+
+  it('returns an object with the correct structure', async () => {
+    const actual = await fn(null, args, undefined);
+    expect(actual).toMatchSnapshot();
+  });
+});

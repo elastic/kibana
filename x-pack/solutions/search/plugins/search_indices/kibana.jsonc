@@ -1,0 +1,33 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-indices",
+  "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
+  "plugin": {
+    "id": "searchIndices",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchIndices"
+    ],
+    "requiredPlugins": [
+      "share",
+      "indexManagement",
+      "licensing",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "usageCollection",
+      "serverless",
+      "searchNavigation",
+      "sampleDataIngest"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

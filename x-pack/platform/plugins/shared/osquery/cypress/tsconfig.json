@@ -1,0 +1,30 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "include": [
+    "**/*",
+    "./cypress.config.ts",
+    "./serverless_cypress.config.ts",
+    "./serverless_cypress_qa.config.ts",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "cypress",
+      "node",
+    ],
+    "resolveJsonModule": true,
+  },
+  "kbn_references": [
+    "@kbn/cypress-config",
+    "@kbn/fleet-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/cypress-test-helper",
+    "@kbn/security-plugin",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/osquery-plugin",
+  ]
+}

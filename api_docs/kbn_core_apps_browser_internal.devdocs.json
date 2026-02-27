@@ -1,37 +1,23 @@
 {
   "id": "@kbn/core-apps-browser-internal",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-common.CoreAppsService",
+        "id": "def-public.CoreAppsService",
         "type": "Class",
         "tags": [],
         "label": "CoreAppsService",
         "description": [],
-        "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+        "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsService.Unnamed",
+            "id": "def-public.CoreAppsService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -39,13 +25,15 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-apps-browser-internal",
-                "id": "def-common.CoreAppsService.Unnamed.$1",
+                "id": "def-public.CoreAppsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -53,7 +41,9 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+                "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+                "lineNumber": 47,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -63,43 +53,35 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsService.setup",
+            "id": "def-public.CoreAppsService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
             "description": [],
             "signature": [
               "({ application, http, injectedMetadata, notifications }: ",
-              {
-                "pluginId": "@kbn/core-apps-browser-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                "section": "def-common.CoreAppsServiceSetupDeps",
-                "text": "CoreAppsServiceSetupDeps"
-              },
+              "CoreAppsServiceSetupDeps",
               ") => void"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-apps-browser-internal",
-                "id": "def-common.CoreAppsService.setup.$1",
+                "id": "def-public.CoreAppsService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ application, http, injectedMetadata, notifications }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-apps-browser-internal",
-                    "scope": "common",
-                    "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                    "section": "def-common.CoreAppsServiceSetupDeps",
-                    "text": "CoreAppsServiceSetupDeps"
-                  }
+                  "CoreAppsServiceSetupDeps"
                 ],
-                "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+                "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+                "lineNumber": 49,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -109,43 +91,35 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsService.start",
+            "id": "def-public.CoreAppsService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
             "description": [],
             "signature": [
-              "({ application, docLinks, http, notifications, uiSettings, }: ",
-              {
-                "pluginId": "@kbn/core-apps-browser-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                "section": "def-common.CoreAppsServiceStartDeps",
-                "text": "CoreAppsServiceStartDeps"
-              },
+              "({ application, docLinks, http, notifications, uiSettings, ...startDeps }: ",
+              "CoreAppsServiceStartDeps",
               ") => void"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-apps-browser-internal",
-                "id": "def-common.CoreAppsService.start.$1",
+                "id": "def-public.CoreAppsService.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n  }",
+                "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n    ...startDeps\n  }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-apps-browser-internal",
-                    "scope": "common",
-                    "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                    "section": "def-common.CoreAppsServiceStartDeps",
-                    "text": "CoreAppsServiceStartDeps"
-                  }
+                  "CoreAppsServiceStartDeps"
                 ],
-                "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+                "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+                "lineNumber": 77,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -155,7 +129,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsService.stop",
+            "id": "def-public.CoreAppsService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -163,7 +137,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -177,18 +153,20 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-common.CoreAppsServiceSetupDeps",
+        "id": "def-public.CoreAppsServiceSetupDeps",
         "type": "Interface",
         "tags": [],
         "label": "CoreAppsServiceSetupDeps",
         "description": [],
-        "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+        "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceSetupDeps.application",
+            "id": "def-public.CoreAppsServiceSetupDeps.application",
             "type": "Object",
             "tags": [],
             "label": "application",
@@ -196,37 +174,35 @@
             "signature": [
               "InternalApplicationSetup"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceSetupDeps.http",
+            "id": "def-public.CoreAppsServiceSetupDeps.http",
             "type": "CompoundType",
             "tags": [],
             "label": "http",
             "description": [],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              },
+              "HttpSetup",
               ", \"staticAssets\"> & { staticAssets: ",
               "InternalStaticAssets",
               "; }"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceSetupDeps.injectedMetadata",
+            "id": "def-public.CoreAppsServiceSetupDeps.injectedMetadata",
             "type": "Object",
             "tags": [],
             "label": "injectedMetadata",
@@ -234,27 +210,25 @@
             "signature": [
               "InternalInjectedMetadataSetup"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceSetupDeps.notifications",
+            "id": "def-public.CoreAppsServiceSetupDeps.notifications",
             "type": "Object",
             "tags": [],
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsSetup",
-                "text": "NotificationsSetup"
-              }
+              "NotificationsSetup"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -263,18 +237,20 @@
       },
       {
         "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-common.CoreAppsServiceStartDeps",
+        "id": "def-public.CoreAppsServiceStartDeps",
         "type": "Interface",
         "tags": [],
         "label": "CoreAppsServiceStartDeps",
         "description": [],
-        "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+        "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.application",
+            "id": "def-public.CoreAppsServiceStartDeps.application",
             "type": "Object",
             "tags": [],
             "label": "application",
@@ -282,91 +258,147 @@
             "signature": [
               "InternalApplicationStart"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.docLinks",
+            "id": "def-public.CoreAppsServiceStartDeps.docLinks",
             "type": "Object",
             "tags": [],
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-common.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.http",
+            "id": "def-public.CoreAppsServiceStartDeps.http",
             "type": "CompoundType",
             "tags": [],
             "label": "http",
             "description": [],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              },
+              "HttpSetup",
               ", \"staticAssets\"> & { staticAssets: ",
               "InternalStaticAssets",
               "; }"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.notifications",
+            "id": "def-public.CoreAppsServiceStartDeps.notifications",
             "type": "Object",
             "tags": [],
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
-                "text": "NotificationsStart"
-              }
+              "NotificationsStart"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-apps-browser-internal",
-            "id": "def-common.CoreAppsServiceStartDeps.uiSettings",
+            "id": "def-public.CoreAppsServiceStartDeps.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-public.CoreAppsServiceStartDeps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; }"
+            ],
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-public.CoreAppsServiceStartDeps.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [],
+            "signature": [
+              "I18nStart"
+            ],
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-public.CoreAppsServiceStartDeps.theme",
+            "type": "Object",
+            "tags": [],
+            "label": "theme",
+            "description": [],
+            "signature": [
+              "ThemeServiceSetup"
+            ],
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-apps-browser-internal",
+            "id": "def-public.CoreAppsServiceStartDeps.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -375,25 +407,23 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/core-apps-browser-internal",
-        "id": "def-common.URL_MAX_LENGTH",
-        "type": "CompoundType",
-        "tags": [],
-        "label": "URL_MAX_LENGTH",
-        "description": [
-          "\nThe max URL length allowed by the current browser. Should be used to display warnings to users when query parameters\ncause URL to exceed this limit."
-        ],
-        "signature": [
-          "2000 | 25000"
-        ],
-        "path": "packages/core/apps/core-apps-browser-internal/src/errors/url_overflow.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

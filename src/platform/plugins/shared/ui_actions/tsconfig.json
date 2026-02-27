@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": ["public/**/*", "common/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/ui-actions-browser",
+    "@kbn/expressions-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/std",
+    "@kbn/presentation-publishing",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

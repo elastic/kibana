@@ -1,0 +1,37 @@
+title: Create case request properties for a IBM Resilient connector
+required:
+  - fields
+  - id
+  - name
+  - type
+description: Defines properties for connectors when type is `.resilient`.
+type: object
+properties:
+  fields:
+    description: An object containing the connector fields. If you want to omit any individual field, specify null as its value.
+    type: object
+    nullable: true
+    required:
+      - issueTypes
+      - severityCode
+    properties:
+      issueTypes:
+        description: The type of incident.
+        type: array
+        items:
+          type: string
+      severityCode:
+        description: The severity code of the incident.
+        type: string
+  id:
+    description: The identifier for the connector.
+    type: string
+  name:
+    description: The name of the connector.
+    type: string
+  type:
+    description: The type of connector.
+    type: string
+    example: .resilient
+    enum:
+      - .resilient

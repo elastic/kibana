@@ -11,6 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { StartDependencies } from './plugin';
 
 export const mount =
@@ -21,13 +22,18 @@ export const mount =
     const preloadedVisualizationAttributes = history.location
       ?.state as TypedLensByValueInput['attributes'];
 
-    const dataView = await plugins.data.indexPatterns.getDefault();
+    const dataView = await plugins.data.dataViews.getDefault();
     const stateHelpers = await plugins.lens.stateHelperApi();
 
-    const i18nCore = core.i18n;
-
     const reactElement = (
-      <i18nCore.Context>
+      <KibanaRenderContextProvider
+        {...{
+          uiSettings: core.uiSettings,
+          settings: core.settings,
+          theme: core.theme,
+          i18n: core.i18n,
+        }}
+      >
         {dataView ? (
           <App
             core={core}
@@ -38,6 +44,7 @@ export const mount =
           />
         ) : (
           <EuiCallOut
+            announceOnMount
             title="Please define a default index pattern to use this demo"
             color="danger"
             iconType="warning"
@@ -45,7 +52,7 @@ export const mount =
             <p>This demo only works if your default index pattern is set and time based</p>
           </EuiCallOut>
         )}
-      </i18nCore.Context>
+      </KibanaRenderContextProvider>
     );
 
     render(reactElement, element);

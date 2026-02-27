@@ -27,7 +27,9 @@
         "tags": [],
         "label": "Abortable",
         "description": [],
-        "path": "packages/shared-ux/file/types/base_file_client.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +43,9 @@
             "signature": [
               "AbortSignal | undefined"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -65,7 +69,9 @@
           },
           "<M>"
         ],
-        "path": "packages/shared-ux/file/types/base_file_client.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -105,7 +111,9 @@
               },
               "<unknown>[]; total: number; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -136,7 +144,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 29,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -164,7 +174,9 @@
               },
               ") => Promise<{ succeeded: string[]; failed?: [id: string, reason: string][] | undefined; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -187,7 +199,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -223,7 +237,9 @@
               },
               "<M>; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -246,7 +262,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 54,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -274,7 +292,9 @@
               },
               ") => Promise<{ ok: true; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -297,7 +317,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 61,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -333,7 +355,9 @@
               },
               "<M>; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -356,7 +380,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 67,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -400,7 +426,9 @@
               },
               "<M>[]; total: number; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -431,7 +459,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 74,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -467,7 +497,9 @@
               },
               "<M>; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -490,7 +522,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 90,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -518,7 +552,9 @@
               },
               ") => Promise<{ ok: true; size: number; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -541,7 +577,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 98,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -569,7 +607,9 @@
               },
               ") => Promise<any>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -592,7 +632,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 118,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -620,7 +662,9 @@
               },
               "<unknown>, \"id\" | \"fileKind\">) => string"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -644,7 +688,9 @@
                   },
                   "<unknown>, \"id\" | \"fileKind\">"
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 125,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -682,7 +728,9 @@
               },
               ">"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -705,7 +753,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 135,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -733,7 +783,9 @@
               },
               ") => Promise<{ ok: true; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -756,7 +808,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 142,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -792,7 +846,9 @@
               },
               "; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -815,7 +871,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 148,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -859,7 +917,9 @@
               },
               "[]; }>"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -890,7 +950,9 @@
                     "text": "Abortable"
                   }
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 156,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -917,7 +979,9 @@
                 "text": "FileKindBase"
               }
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -933,7 +997,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+                "lineNumber": 162,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -953,7 +1019,9 @@
         "description": [
           "\nSet of metadata captured for every image uploaded via the file services'\npublic components."
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 276,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -969,7 +1037,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 281,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -982,7 +1052,9 @@
             "description": [
               "\nWidth, in px, of the original image"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 285,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -995,7 +1067,9 @@
             "description": [
               "\nHeight, in px, of the original image"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 289,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1021,7 +1095,9 @@
           },
           "<Meta>"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 162,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1034,7 +1110,9 @@
             "description": [
               "\nUnique file ID."
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1047,7 +1125,9 @@
             "description": [
               "\nISO string of when this file was created"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1060,7 +1140,9 @@
             "description": [
               "\nISO string of when the file was updated"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1075,7 +1157,9 @@
             "description": [
               "\nFile name.\n"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1091,7 +1175,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1107,7 +1193,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1125,7 +1213,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1141,7 +1231,9 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1157,7 +1249,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1172,7 +1266,9 @@
             "description": [
               "\nA unique kind that governs various aspects of the file. A consumer of the\nfiles service must register a file kind and link their files to a specific\nkind.\n"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 211,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1188,7 +1284,9 @@
             "signature": [
               "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1204,7 +1302,9 @@
             "signature": [
               "{ name?: string | undefined; id?: string | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 226,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1220,7 +1320,9 @@
             "signature": [
               "{ [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 230,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1234,7 +1336,9 @@
         "tags": [],
         "label": "FileKindBase",
         "description": [],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 236,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1247,7 +1351,9 @@
             "description": [
               "\nUnique file kind ID"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 237,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1265,7 +1371,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 242,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1296,7 +1404,9 @@
             "text": "FileKindBase"
           }
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 250,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1314,7 +1424,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1330,7 +1442,9 @@
             "signature": [
               "{ list?: { enabled: boolean; } | undefined; delete?: { enabled: boolean; reason?: string | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+            "lineNumber": 258,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1346,7 +1460,9 @@
         "description": [
           "\nAttributes of a file that represent a serialised version of the file."
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1359,7 +1475,9 @@
             "description": [
               "\nUnique ID share instance"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1372,7 +1490,9 @@
             "description": [
               "\nISO timestamp the share was created"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1385,7 +1505,9 @@
             "description": [
               "\nUnix timestamp (in milliseconds) of when this share expires"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1401,7 +1523,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1414,7 +1538,9 @@
             "description": [
               "\nThe ID of the file this share is linked to"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1428,7 +1554,9 @@
         "tags": [],
         "label": "Pagination",
         "description": [],
-        "path": "packages/shared-ux/file/types/base_file_client.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1442,7 +1570,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1456,7 +1586,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/base_file_client.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1494,7 +1626,9 @@
           },
           " | undefined; }"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1511,7 +1645,9 @@
         "signature": [
           "\"none\" | \"br\" | \"gzip\" | \"deflate\""
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1544,7 +1680,9 @@
           },
           " & { FileKind: string; Meta?: Meta | undefined; }"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1561,7 +1699,9 @@
         "signature": [
           "{ created: string; token: string; name?: string | undefined; valid_until: number; }"
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1587,7 +1727,9 @@
           },
           " & { token: string; }"
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1602,7 +1744,9 @@
         "signature": [
           "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

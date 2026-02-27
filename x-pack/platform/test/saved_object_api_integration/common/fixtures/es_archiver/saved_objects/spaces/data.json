@@ -1,0 +1,1042 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space_1",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the first test space",
+        "name": "Space 1"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space:space_2",
+    "index": ".kibana",
+    "source": {
+      "space": {
+        "description": "This is the second test space",
+        "name": "Space 2"
+      },
+      "type": "space",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:defaultspace-index-pattern-id",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "timeFieldName": "@timestamp",
+        "title": "logstash-*"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "config:7.0.0-alpha1",
+    "index": ".kibana",
+    "source": {
+      "config": {
+        "buildNum": 8467,
+        "defaultIndex": "defaultspace-index-pattern-id"
+      },
+      "type": "config",
+      "updated_at": "2017-09-21T18:49:16.302Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.9.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "isolatedtype:defaultspace-isolatedtype-id",
+    "index": ".kibana",
+    "source": {
+      "type": "isolatedtype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "isolatedtype": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"index\":\"defaultspace-index-pattern-id\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        },
+        "title": "Count of requests",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Count of requests\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"area\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}]}"
+      }
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dashboard:defaultspace-dashboard-id",
+    "index": ".kibana_analytics",
+    "source": {
+      "dashboard": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+        },
+        "optionsJSON": "{}",
+        "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"isolatedtype\",\"id\":\"defaultspace-isolatedtype-id\",\"col\":1,\"row\":1}]",
+        "refreshInterval": {
+          "display": "Off",
+          "pause": false,
+          "value": 0
+        },
+        "timeFrom": "Wed Sep 16 2015 22:52:17 GMT-0700",
+        "timeRestore": true,
+        "timeTo": "Fri Sep 18 2015 12:24:38 GMT-0700",
+        "title": "Requests",
+        "version": 1
+      },
+      "namespaces": [
+        "default"
+      ],
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:57:40.826Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:space1-index-pattern-id",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "timeFieldName": "@timestamp",
+        "title": "logstash-*"
+      },
+      "namespaces": [
+        "space_1"
+      ],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_1:config:7.0.0-alpha1",
+    "index": ".kibana",
+    "source": {
+      "config": {
+        "buildNum": 8467,
+        "defaultIndex": "defaultspace-index-pattern-id"
+      },
+      "namespace": "space_1",
+      "type": "config",
+      "updated_at": "2017-09-21T18:49:16.302Z",
+      "namespaces": [
+        "space_1"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.9.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_1:isolatedtype:space1-isolatedtype-id",
+    "index": ".kibana",
+    "source": {
+      "namespace": "space_1",
+      "type": "isolatedtype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "isolatedtype": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"index\":\"space1-index-pattern-id\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        },
+        "title": "Count of requests",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Count of requests\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"area\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}]}"
+      }
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dashboard:space1-dashboard-id",
+    "index": ".kibana_analytics",
+    "source": {
+      "dashboard": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+        },
+        "optionsJSON": "{}",
+        "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"isolatedtype\",\"id\":\"space1-isolatedtype-id\",\"col\":1,\"row\":1}]",
+        "refreshInterval": {
+          "display": "Off",
+          "pause": false,
+          "value": 0
+        },
+        "timeFrom": "Wed Sep 16 2015 22:52:17 GMT-0700",
+        "timeRestore": true,
+        "timeTo": "Fri Sep 18 2015 12:24:38 GMT-0700",
+        "title": "Requests",
+        "version": 1
+      },
+      "namespaces": [
+        "space_1"
+      ],
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:57:40.826Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:space2-index-pattern-id",
+    "index": ".kibana_analytics",
+    "source": {
+      "index-pattern": {
+        "timeFieldName": "@timestamp",
+        "title": "logstash-*"
+      },
+      "namespaces": [
+        "space_2"
+      ],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_2:config:7.0.0-alpha1",
+    "index": ".kibana",
+    "source": {
+      "config": {
+        "buildNum": 8467,
+        "defaultIndex": "defaultspace-index-pattern-id"
+      },
+      "namespace": "space_2",
+      "type": "config",
+      "updated_at": "2017-09-21T18:49:16.302Z",
+      "namespaces": [
+        "space_2"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.9.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "space_2:isolatedtype:space2-isolatedtype-id",
+    "index": ".kibana",
+    "source": {
+      "namespace": "space_2",
+      "type": "isolatedtype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "isolatedtype": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"index\":\"space2-index-pattern-id\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        },
+        "title": "Count of requests",
+        "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Count of requests\",\"type\":\"area\",\"params\":{\"type\":\"area\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"area\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"drawLinesBetweenPoints\":true,\"showCircles\":true,\"interpolate\":\"linear\",\"valueAxis\":\"ValueAxis-1\"}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"customInterval\":\"2h\",\"min_doc_count\":1,\"extended_bounds\":{}}}]}"
+      }
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dashboard:space2-dashboard-id",
+    "index": ".kibana_analytics",
+    "source": {
+      "dashboard": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+        },
+        "optionsJSON": "{}",
+        "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"isolatedtype\",\"id\":\"space2-isolatedtype-id\",\"col\":1,\"row\":1}]",
+        "refreshInterval": {
+          "display": "Off",
+          "pause": false,
+          "value": 0
+        },
+        "timeFrom": "Wed Sep 16 2015 22:52:17 GMT-0700",
+        "timeRestore": true,
+        "timeTo": "Fri Sep 18 2015 12:24:38 GMT-0700",
+        "title": "Requests",
+        "version": 1
+      },
+      "namespaces": [
+        "space_2"
+      ],
+      "type": "dashboard",
+      "updated_at": "2017-09-21T18:57:40.826Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "globaltype:globaltype-id",
+    "index": ".kibana",
+    "source": {
+      "globaltype": {
+        "title": "My favorite global object"
+      },
+      "type": "globaltype",
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:all_spaces",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "*"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:default_and_space_1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in the default and space_1 spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "default",
+        "space_1"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:only_space_1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object only in space_1"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "space_1"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:only_space_2",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object only in space_2"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "space_2"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_2a",
+    "index": ".kibana",
+    "source": {
+      "originId": "conflict_2",
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_2b",
+    "index": ".kibana",
+    "source": {
+      "originId": "conflict_2",
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_3",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:conflict_4a",
+    "index": ".kibana",
+    "source": {
+      "originId": "conflict_4",
+      "sharedtype": {
+        "title": "A shared saved-object in all spaces"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:exact-match",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "Resolve outcome exactMatch"
+      },
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:alias-match-newid",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "Resolve outcome aliasMatch"
+      },
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:default:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "default",
+        "targetType": "resolvetype",
+        "targetId": "alias-match-newid"
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_1:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "space_1",
+        "targetType": "resolvetype",
+        "targetId": "alias-match-newid"
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:all_spaces",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "This is used to test that 1. the 'disabled' alias does not resolve to this target (because the alias is disabled), and 2. when this object that exists in all spaces is deleted, the alias that targets it is deleted too (even though the alias is disabled)"
+      },
+      "namespaces": [
+        "*"
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:default:resolvetype:disabled",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "disabled",
+        "targetNamespace": "default",
+        "targetType": "resolvetype",
+        "targetId": "disabled-newid",
+        "disabled": true
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_1:resolvetype:disabled",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "disabled",
+        "targetNamespace": "space_1",
+        "targetType": "resolvetype",
+        "targetId": "disabled-newid",
+        "disabled": true
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_x:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "space_x",
+        "targetType": "resolvetype",
+        "targetId": "alias-match-newid"
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_y:resolvetype:alias-match",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "alias-match",
+        "targetNamespace": "space_y",
+        "targetType": "resolvetype",
+        "targetId": "alias-match-newid",
+        "disabled": true
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:conflict",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "Resolve outcome conflict (1 of 2)"
+      },
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "resolvetype:conflict-newid",
+    "source": {
+      "type": "resolvetype",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "resolvetype": {
+        "title": "Resolve outcome conflict (2 of 2)"
+      },
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:default:resolvetype:conflict",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "conflict",
+        "targetNamespace": "default",
+        "targetType": "resolvetype",
+        "targetId": "conflict-newid"
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "legacy-url-alias:space_1:resolvetype:conflict",
+    "source": {
+      "type": "legacy-url-alias",
+      "updated_at": "2017-09-21T18:51:23.794Z",
+      "legacy-url-alias": {
+        "sourceId": "conflict",
+        "targetNamespace": "space_1",
+        "targetType": "resolvetype",
+        "targetId": "conflict-newid"
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharecapabletype:only_default_space",
+    "index": ".kibana",
+    "source": {
+      "sharecapabletype": {
+        "title": "A share-capable (isolated) saved-object only in the default space"
+      },
+      "type": "sharecapabletype",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharecapabletype:only_space_1",
+    "index": ".kibana",
+    "source": {
+      "sharecapabletype": {
+        "title": "A share-capable (isolated) saved-object only in space_1"
+      },
+      "type": "sharecapabletype",
+      "namespaces": [
+        "space_1"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:inbound-reference-origin-match-1-newId",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "inbound-reference-origin-match-1",
+      "index-pattern": {
+        "title": "This is used to test if an imported object with a reference to this originId will be remapped properly"
+      },
+      "namespaces": [
+        "*"
+      ],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:inbound-reference-origin-match-2a",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "inbound-reference-origin-match-2",
+      "index-pattern": {
+        "title": "This is used to test if an imported object with a reference to this originId will *not* be remapped"
+      },
+      "namespaces": [
+        "*"
+      ],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:inbound-reference-origin-match-2b",
+    "index": ".kibana_analytics",
+    "source": {
+      "originId": "inbound-reference-origin-match-2",
+      "index-pattern": {
+        "title": "This is used to test if an imported object with a reference to this originId will *not* be remapped"
+      },
+      "namespaces": [
+        "*"
+      ],
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:outbound-missing-reference-conflict-1",
+    "index": ".kibana",
+    "source": {
+      "sharedtype": {
+        "title": "This is used to test if an imported object with a missing reference will have an exact match conflict when the missing reference is replaced"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "*"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharedtype:outbound-missing-reference-conflict-2a",
+    "index": ".kibana",
+    "source": {
+      "originId": "outbound-missing-reference-conflict-2",
+      "sharedtype": {
+        "title": "This is used to test if an imported object with a missing reference will have an inexact match conflict when the missing reference is replaced"
+      },
+      "type": "sharedtype",
+      "namespaces": [
+        "*"
+      ],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nestedtype:1",
+    "index": ".kibana",
+    "source": {
+      "nestedtype": {
+        "title": "elasticsearch",
+        "author": "John Doe",
+        "comments": [
+          {
+            "user": "bob",
+            "message": "very helpful",
+            "date": "2024-01-16",
+            "rating": 4
+          },
+          {
+            "user": "alice",
+            "message": "kibana and this one are great",
+            "date": "2024-01-15",
+            "rating": 5
+          }
+        ]
+      },
+      "type": "nestedtype",
+      "namespaces": ["*"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nestedtype:2",
+    "index": ".kibana",
+    "source": {
+      "nestedtype": {
+        "title": "kibana",
+        "author": "Jane Smith",
+        "comments": [
+          {
+            "user": "charlie",
+            "message": "excellent examples",
+            "date": "2024-02-10",
+            "rating": 5
+          },
+          {
+            "user": "diana",
+            "message": "could use more detail",
+            "date": "2024-02-12",
+            "rating": 3
+          }
+        ]
+      },
+      "type": "nestedtype",
+      "namespaces": ["*"],
+      "updated_at": "2024-02-15T14:23:45.180Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nestedtype:3",
+    "index": ".kibana",
+    "source": {
+      "nestedtype": {
+        "title": "logstash",
+        "author": "Mr Nobody",
+        "comments": [
+          {
+            "user": "frank",
+            "message": "perfect for beginners",
+            "date": "2024-03-05",
+            "rating": 4
+          },
+          {
+            "user": "bob",
+            "message": "charlie and diana's posts helped me",
+            "date": "2024-02-14",
+            "rating": 5
+          }
+        ]
+      },
+      "type": "nestedtype",
+      "namespaces": [
+        "*"
+      ],
+      "updated_at": "2024-03-11T09:15:32.450Z"
+    },
+    "type": "doc"
+  }
+}

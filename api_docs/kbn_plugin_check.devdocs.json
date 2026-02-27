@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/plugin-check",
-        "id": "def-common.runPluginCheckCli",
+        "id": "def-server.runPluginCheckCli",
         "type": "Function",
         "tags": [],
         "label": "runPluginCheckCli",
@@ -32,6 +24,8 @@
           "() => void"
         ],
         "path": "packages/kbn-plugin-check/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -39,6 +33,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

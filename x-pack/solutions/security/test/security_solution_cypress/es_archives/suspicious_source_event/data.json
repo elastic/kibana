@@ -1,0 +1,16 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "_eZE7mwBOpWiDweStB_c",
+    "index": "auditbeat-suspicious-source-event-001",
+    "source": {
+      "@timestamp": "2021-02-22T21:00:49.337Z",
+      "myhash": {
+        "mysha256": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"
+      },
+      "source": {
+        "ip": "192.168.1.1"
+      }
+    }
+  }
+}

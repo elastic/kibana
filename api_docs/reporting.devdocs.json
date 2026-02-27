@@ -25,7 +25,9 @@
           "text": "ReportingSetup"
         }
       ],
-      "path": "x-pack/plugins/reporting/public/index.ts",
+      "path": "x-pack/platform/plugins/private/reporting/public/index.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -57,7 +59,9 @@
           "text": "ReportingSetup"
         }
       ],
-      "path": "x-pack/plugins/reporting/server/types.ts",
+      "path": "x-pack/platform/plugins/private/reporting/server/types.ts",
+      "lineNumber": 65,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

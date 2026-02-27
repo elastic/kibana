@@ -18,13 +18,7 @@
             "text": "DevToolsPlugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "devTools",
@@ -33,9 +27,11 @@
             "section": "def-public.DevToolsSetup",
             "text": "DevToolsSetup"
           },
-          ", void, object, object>"
+          ", void, never, never>"
         ],
-        "path": "src/plugins/dev_tools/public/plugin.ts",
+        "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,7 +45,9 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -64,20 +62,16 @@
             "description": [],
             "signature": [
               "(coreSetup: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
+              "CoreSetup",
+              "<{}, unknown>, { urlForwarding }: { urlForwarding: { forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }; }) => { register: (devToolArgs: ",
               "CreateDevToolArgs",
               ") => ",
               "DevToolApp",
               "; }"
             ],
-            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -89,16 +83,12 @@
                 "label": "coreSetup",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>"
+                  "CoreSetup",
+                  "<{}, unknown>"
                 ],
-                "path": "src/plugins/dev_tools/public/plugin.ts",
+                "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+                "lineNumber": 58,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -110,7 +100,9 @@
                 "tags": [],
                 "label": "{ urlForwarding }",
                 "description": [],
-                "path": "src/plugins/dev_tools/public/plugin.ts",
+                "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+                "lineNumber": 58,
+                "columnNumber": 57,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -124,7 +116,9 @@
                     "signature": [
                       "{ forwardApp: (legacyAppId: string, newAppId: string, rewritePath?: ((legacyPath: string) => string) | undefined) => void; }"
                     ],
-                    "path": "src/plugins/dev_tools/public/plugin.ts",
+                    "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+                    "lineNumber": 58,
+                    "columnNumber": 59,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -143,7 +137,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -159,7 +155,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/dev_tools/public/plugin.ts",
+            "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -185,7 +183,9 @@
         "signature": [
           "\"devTools\""
         ],
-        "path": "src/plugins/dev_tools/common/constants.ts",
+        "path": "src/platform/plugins/shared/dev_tools/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -202,7 +202,9 @@
         "signature": [
           "\"devTools:enablePersistentConsole\""
         ],
-        "path": "src/plugins/dev_tools/common/constants.ts",
+        "path": "src/platform/plugins/shared/dev_tools/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -216,7 +218,9 @@
       "tags": [],
       "label": "DevToolsSetup",
       "description": [],
-      "path": "src/plugins/dev_tools/public/plugin.ts",
+      "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+      "lineNumber": 25,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -235,7 +239,9 @@
             ") => ",
             "DevToolApp"
           ],
-          "path": "src/plugins/dev_tools/public/plugin.ts",
+          "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+          "lineNumber": 26,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -251,7 +257,9 @@
               "signature": [
                 "CreateDevToolArgs"
               ],
-              "path": "src/plugins/dev_tools/public/plugin.ts",
+              "path": "src/platform/plugins/shared/dev_tools/public/plugin.ts",
+              "lineNumber": 36,
+              "columnNumber": 14,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -290,7 +298,9 @@
         "signature": [
           "\"devTools\""
         ],
-        "path": "src/plugins/dev_tools/common/constants.ts",
+        "path": "src/platform/plugins/shared/dev_tools/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -307,7 +317,9 @@
         "signature": [
           "\"devTools:enablePersistentConsole\""
         ],
-        "path": "src/plugins/dev_tools/common/constants.ts",
+        "path": "src/platform/plugins/shared/dev_tools/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

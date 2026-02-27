@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -21,7 +22,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
+import type { FieldListSidebarProps } from './field_list_sidebar';
+import { FieldListSidebar } from './field_list_sidebar';
 import { ExampleDropZone } from './example_drop_zone';
 
 interface UnifiedFieldListExampleAppProps {

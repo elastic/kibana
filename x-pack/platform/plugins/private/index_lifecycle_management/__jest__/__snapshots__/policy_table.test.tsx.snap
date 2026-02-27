@@ -1,0 +1,447 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`policy table changes pages when a pagination link is clicked on 1`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy101",
+  "testy103",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy5",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+]
+`;
+
+exports[`policy table changes pages when a pagination link is clicked on 2`] = `
+Array [
+  "testy7",
+  "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+]
+`;
+
+exports[`policy table filters based on content of search input 1`] = `
+Array [
+  "testy0",
+]
+`;
+
+exports[`policy table shows empty state when there are no policies 1`] = `
+<div>
+  <section
+    class="emotion-euiPageSection-grow-l-center-transparent"
+  >
+    <div
+      class="emotion-euiPageSection__content-l-center"
+    >
+      <div
+        class="euiPanel euiPanel--plain euiEmptyPrompt emotion-euiPanel-m-plain-hasShadow-euiEmptyPrompt-vertical"
+      >
+        <div
+          class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
+        >
+          <div
+            class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
+          >
+            <span
+              color="subdued"
+              data-euiicon-type="managementApp"
+            />
+          </div>
+          <div
+            class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
+          >
+            <h1
+              class="euiTitle emotion-euiTitle-m"
+            >
+              Create your first index lifecycle policy
+            </h1>
+            <div
+              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+            />
+            <div
+              class="euiText emotion-euiText-m-euiTextColor-subdued"
+            >
+              <p>
+                 An index lifecycle policy helps you manage your indices as they age.
+              </p>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+            />
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+              data-test-subj="createPolicyButton"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  color="inherit"
+                  data-euiicon-type="plusInCircle"
+                />
+                Create policy
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`policy table sorts when linked index templates header is clicked 1`] = `
+Array [
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+  "testy0",
+]
+`;
+
+exports[`policy table sorts when linked index templates header is clicked 2`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+]
+`;
+
+exports[`policy table sorts when linked indices header is clicked 1`] = `
+Array [
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+  "testy0",
+]
+`;
+
+exports[`policy table sorts when linked indices header is clicked 2`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+]
+`;
+
+exports[`policy table sorts when modified date header is clicked 1`] = `
+Array [
+  "testy0",
+  "testy103",
+  "testy101",
+  "testy97",
+  "testy95",
+  "testy91",
+  "testy89",
+  "testy85",
+  "testy83",
+  "testy79",
+  "testy77",
+  "testy73",
+  "testy71",
+  "testy67",
+  "testy65",
+  "testy61",
+  "testy59",
+  "testy55",
+  "testy53",
+  "testy49",
+  "testy47",
+  "testy43",
+  "testy41",
+  "testy37",
+  "testy35",
+  "testy31",
+  "testy29",
+  "testy25",
+  "testy23",
+  "testy19",
+  "testy17",
+  "testy13",
+  "testy11",
+  "testy7",
+  "testy5",
+  "testy1",
+]
+`;
+
+exports[`policy table sorts when modified date header is clicked 2`] = `
+Array [
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+  "testy0",
+]
+`;
+
+exports[`policy table sorts when name header is clicked 1`] = `
+Array [
+  "testy97",
+  "testy95",
+  "testy91",
+  "testy89",
+  "testy85",
+  "testy83",
+  "testy79",
+  "testy77",
+  "testy73",
+  "testy71",
+  "testy7",
+  "testy67",
+  "testy65",
+  "testy61",
+  "testy59",
+  "testy55",
+  "testy53",
+  "testy5",
+  "testy49",
+  "testy47",
+  "testy43",
+  "testy41",
+  "testy37",
+  "testy35",
+  "testy31",
+  "testy29",
+  "testy25",
+  "testy23",
+  "testy19",
+  "testy17",
+  "testy13",
+  "testy11",
+  "testy103",
+  "testy101",
+  "testy1",
+  "testy0",
+]
+`;
+
+exports[`policy table sorts when name header is clicked 2`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
+  "testy31",
+  "testy35",
+  "testy37",
+  "testy41",
+  "testy43",
+  "testy47",
+  "testy49",
+  "testy53",
+  "testy55",
+  "testy59",
+  "testy61",
+  "testy65",
+  "testy67",
+  "testy71",
+  "testy73",
+  "testy77",
+  "testy79",
+  "testy83",
+  "testy85",
+  "testy89",
+  "testy91",
+  "testy95",
+  "testy97",
+  "testy101",
+  "testy103",
+]
+`;

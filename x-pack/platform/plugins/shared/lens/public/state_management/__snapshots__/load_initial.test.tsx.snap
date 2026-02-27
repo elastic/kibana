@@ -1,0 +1,116 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Initializing the store should initialize all datasources with state from doc 1`] = `
+Object {
+  "lens": Object {
+    "activeDatasourceId": "formBased",
+    "annotationGroups": Object {},
+    "dataViews": Object {
+      "indexPatternRefs": Array [],
+      "indexPatterns": Object {},
+    },
+    "datasourceStates": Object {
+      "formBased": Object {
+        "isLoading": false,
+        "state": undefined,
+      },
+      "textBased": Object {
+        "isLoading": false,
+        "state": undefined,
+      },
+    },
+    "filters": Array [],
+    "hideTextBasedEditor": undefined,
+    "isFullscreenDatasource": false,
+    "isLinkedToOriginatingApp": false,
+    "isLoading": false,
+    "isSaveable": true,
+    "managed": false,
+    "persistedDoc": Object {
+      "exactMatchDoc": Object {
+        "attributes": Object {
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "index-pattern-0",
+              "type": "index-pattern",
+            },
+          ],
+          "savedObjectId": "1234",
+          "state": Object {
+            "datasourceStates": Object {
+              "formBased": Object {
+                "isLoading": false,
+                "state": Object {},
+              },
+            },
+            "filters": Array [
+              Object {
+                "meta": Object {
+                  "index": "index-pattern-0",
+                },
+                "query": Object {
+                  "match_phrase": Object {
+                    "src": "test",
+                  },
+                },
+              },
+            ],
+            "query": Object {
+              "language": "kuery",
+              "query": "test",
+            },
+            "visualization": Object {},
+          },
+          "title": "An extremely cool default document!",
+          "version": 2,
+          "visualizationType": "testVis",
+        },
+        "sharingSavedObjectProps": Object {
+          "outcome": "exactMatch",
+        },
+      },
+      "references": Array [],
+      "savedObjectId": "1234",
+      "state": Object {
+        "datasourceStates": Object {
+          "formBased": Object {
+            "datasource1": "",
+          },
+          "textBased": Object {
+            "datasource2": "",
+          },
+        },
+        "filters": Array [],
+        "query": Object {
+          "language": "lucene",
+          "query": "",
+        },
+        "visualization": "testVis initial state",
+      },
+      "title": "",
+      "type": "lens",
+      "visualizationType": "testVis",
+    },
+    "projectRouting": undefined,
+    "query": Object {
+      "language": "lucene",
+      "query": "",
+    },
+    "resolvedDateRange": Object {
+      "fromDate": "now-7d",
+      "toDate": "now",
+    },
+    "searchSessionId": "sessionId-1",
+    "sharingSavedObjectProps": Object {
+      "aliasTargetId": undefined,
+      "outcome": undefined,
+    },
+    "visualization": Object {
+      "activeId": "testVis",
+      "selectedLayerId": null,
+      "state": "testVis initial state",
+    },
+  },
+}
+`;

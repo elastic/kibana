@@ -1,0 +1,365 @@
+{
+  "queries": [
+    {
+      "id": "register_callback",
+      "title": "Register Callback",
+      "description": "Identifies log messages related to registering a callback.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "register callback",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "unregister_callback",
+      "title": "Unregister Callback",
+      "description": "Identifies log messages related to unregistering a callback.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "unregister callback",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "unregister_callback_null",
+      "title": "Unregister Callback Null",
+      "description": "Identifies log messages related to unregistering a callback for null.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "unregister callback null",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cleanup_application_record",
+      "title": "Clean Up Application Record",
+      "description": "Identifies log messages related to cleaning up an application record.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "cleanUpApplicationRecord",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cleanup_application_record_locked_restart_false",
+      "title": "Clean Up Application Record Locked (Restart False)",
+      "description": "Identifies log messages related to cleaning up an application record with restart set to false.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "cleanUpApplicationRecordLocked restart false",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cleanup_application_record_locked_reset_pid",
+      "title": "Clean Up Application Record Locked (Reset PID)",
+      "description": "Identifies log messages related to cleaning up an application record with reset PID.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "cleanUpApplicationRecordLocked reset pid",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "new_process_app",
+      "title": "New Process App",
+      "description": "Identifies log messages related to the creation of a new process app.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "new Process app=ProcessRecord",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "process_has_died",
+      "title": "Process Has Died",
+      "description": "Identifies log messages related to a process that has died.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Process has died",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "start_proc_for_service",
+      "title": "Start Process for Service",
+      "description": "Identifies log messages related to starting a process for a service.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Start proc for service",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cannot_be_cast_to_token",
+      "title": "Cannot Be Cast to Token",
+      "description": "Identifies log messages related to casting errors to a Token.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "cannot be cast to Token",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "must_execute_in_ui",
+      "title": "Must Execute in UI",
+      "description": "Identifies log messages related to execution requirements in the UI.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Must execute in UI",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bad_activity_token",
+      "title": "Bad Activity Token",
+      "description": "Identifies log messages related to bad activity tokens.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Bad activity token",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "unable_to_start_service_intent_not_found",
+      "title": "Unable to Start Service Intent (Not Found)",
+      "description": "Identifies log messages related to unable to start service intent not found.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Unable to start service Intent not found",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "skipping_app_window_token_going_to_hide",
+      "title": "Skipping App Window Token (Going to Hide)",
+      "description": "Identifies log messages related to skipping app window token going to hide.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Skipping AppWindowToken going to hide",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "skipping_with_excluded_false_tr_intent_intent",
+      "title": "Skipping with Excluded False (tr.intent:Intent)",
+      "description": "Identifies log messages related to skipping with excluded false tr.intent:Intent.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Skipping withExcluded false tr.intent:Intent",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "skipping_with_excluded_false_tr_intent_intent_typ",
+      "title": "Skipping with Excluded False (tr.intent:Intent with Type)",
+      "description": "Identifies log messages related to skipping with excluded false tr.intent:Intent with type.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Skipping withExcluded false tr.intent:Intent",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "skipping_with_excluded_false_tr_intent_intent_flg",
+      "title": "Skipping with Excluded False (tr.intent:Intent with Flag)",
+      "description": "Identifies log messages related to skipping with excluded false tr.intent:Intent with flag.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Skipping withExcluded false tr.intent:Intent",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "skipping_with_excluded_false_tr_intent_intent_flg_cmp",
+      "title": "Skipping with Excluded False (tr.intent:Intent with Flag and Component)",
+      "description": "Identifies log messages related to skipping with excluded false tr.intent:Intent with flag and component.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Skipping withExcluded false tr.intent:Intent",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "skipping_with_excluded_false_tr_intent_intent_flg_cmp_bnds",
+      "title": "Skipping with Excluded False (tr.intent:Intent with Flag, Component, and Bounds)",
+      "description": "Identifies log messages related to skipping with excluded false tr.intent:Intent with flag, component, and bounds.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Skipping withExcluded false tr.intent:Intent",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

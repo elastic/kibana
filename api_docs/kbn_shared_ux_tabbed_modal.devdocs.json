@@ -31,9 +31,11 @@
           "IModalContextProviderProps",
           "<T>, \"children\"> & ",
           "ITabbedModalInner",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+        "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+        "lineNumber": 189,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,7 +52,9 @@
               "<T>, \"children\"> & ",
               "ITabbedModalInner"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "lineNumber": 189,
+            "columnNumber": 73,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,7 +86,9 @@
           "ITabDeclaration",
           "<S>"
         ],
-        "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+        "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +102,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +118,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -124,9 +134,11 @@
             "signature": [
               "(props: { state: S; dispatch: ",
               "IDispatchFunction",
-              "; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "; }) => React.ReactElement<any>"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -143,7 +155,9 @@
                   "IDispatchFunction",
                   "; }"
                 ],
-                "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+                "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+                "lineNumber": 42,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -159,7 +173,9 @@
             "signature": [
               "IModalTabActionBtn<S> | undefined"
             ],
-            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

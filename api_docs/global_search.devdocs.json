@@ -13,7 +13,9 @@
         "description": [
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +32,9 @@
               "GlobalSearchResult",
               "[]"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -46,7 +50,9 @@
         "description": [
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}"
         ],
-        "path": "x-pack/plugins/global_search/public/services/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,7 +68,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/public/services/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -79,7 +87,9 @@
               "Observable",
               "<void> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/public/services/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -93,16 +103,12 @@
               "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              },
+              "IScopedClusterClient",
               " | undefined"
             ],
-            "path": "x-pack/plugins/global_search/public/services/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -118,7 +124,9 @@
         "description": [
           "\nSearch parameters for the {@link GlobalSearchPluginStart.find | `find` API}\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -134,7 +142,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -150,7 +160,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -166,7 +178,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -182,7 +196,9 @@
         "description": [
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -195,7 +211,9 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -212,7 +230,9 @@
               "Observable",
               "<void>"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,16 +246,12 @@
               "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              },
+              "IScopedClusterClient",
               " | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -248,7 +264,9 @@
             "description": [
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -264,7 +282,9 @@
         "description": [
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,7 +297,9 @@
             "description": [
               "an id that should be unique for an individual provider's results"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -290,7 +312,9 @@
             "description": [
               "the title/label of the result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -303,7 +327,9 @@
             "description": [
               "the type of result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -319,7 +345,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -335,7 +363,9 @@
             "signature": [
               "string | { path: string; prependBasePath: boolean; }"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -348,7 +378,9 @@
             "description": [
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,7 +404,9 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -388,7 +422,9 @@
         "description": [
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}"
         ],
-        "path": "x-pack/plugins/global_search/public/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -401,7 +437,9 @@
             "description": [
               "\nid of the provider"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -425,7 +463,9 @@
               "GlobalSearchProviderResult",
               "[]>"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -439,7 +479,9 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/public/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -454,7 +496,9 @@
                 "signature": [
                   "GlobalSearchProviderFindOptions"
                 ],
-                "path": "x-pack/plugins/global_search/public/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -474,7 +518,9 @@
             "signature": [
               "() => string[] | Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -496,7 +542,9 @@
         "signature": [
           "GlobalSearchFindParams"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -513,7 +561,9 @@
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -532,7 +582,9 @@
           "GlobalSearchProviderResult",
           ", \"url\"> & { url: string; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -557,7 +609,9 @@
         },
         ") => void; }"
       ],
-      "path": "x-pack/plugins/global_search/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -587,7 +641,9 @@
         "GlobalSearchBatchedResults",
         ">; getSearchableTypes: () => Promise<string[]>; }"
       ],
-      "path": "x-pack/plugins/global_search/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -607,7 +663,9 @@
         "description": [
           "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -624,7 +682,9 @@
               "GlobalSearchResult",
               "[]"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -640,7 +700,9 @@
         "description": [
           "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -656,7 +718,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -673,7 +737,9 @@
               "Observable",
               "<void> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -687,16 +753,12 @@
               "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              },
+              "IScopedClusterClient",
               " | undefined"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -712,7 +774,9 @@
         "description": [
           "\nContext passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -725,42 +789,20 @@
             "description": [],
             "signature": [
               "{ savedObjects: { client: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               "; typeRegistry: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              },
+              "ISavedObjectTypeRegistry",
               "; }; uiSettings: { client: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               "; }; capabilities: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ">; }"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -776,7 +818,9 @@
         "description": [
           "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -789,7 +833,9 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -806,7 +852,9 @@
               "Observable",
               "<void>"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -820,16 +868,12 @@
               "\nA ES client of type IScopedClusterClient is passed to the `find` call.\nWhen performing calls to ES, the interested provider can utilize this parameter to identify the specific cluster."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              },
+              "IScopedClusterClient",
               " | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -842,7 +886,9 @@
             "description": [
               "\nThe total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.\nAny result emitted exceeding this quota will be ignored by the service and not emitted to the consumer."
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -858,7 +904,9 @@
         "description": [
           "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -871,7 +919,9 @@
             "description": [
               "an id that should be unique for an individual provider's results"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -884,7 +934,9 @@
             "description": [
               "the title/label of the result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -897,7 +949,9 @@
             "description": [
               "the type of result"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -913,7 +967,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -929,7 +985,9 @@
             "signature": [
               "string | { path: string; prependBasePath: boolean; }"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -942,7 +1000,9 @@
             "description": [
               "the score of the result, from 1 (lowest) to 100 (highest)"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -966,7 +1026,9 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/global_search/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -982,7 +1044,9 @@
         "description": [
           "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -995,7 +1059,9 @@
             "description": [
               "\nid of the provider"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1027,7 +1093,9 @@
               "GlobalSearchProviderResult",
               "[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1041,7 +1109,9 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 131,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1056,7 +1126,9 @@
                 "signature": [
                   "GlobalSearchProviderFindOptions"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 132,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1077,7 +1149,9 @@
                     "text": "GlobalSearchProviderContext"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 133,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1105,7 +1179,9 @@
               },
               ") => string[] | Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1125,7 +1201,9 @@
                     "text": "GlobalSearchProviderContext"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 140,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1145,7 +1223,9 @@
         "description": [
           "\nglobalSearch route handler context.\n"
         ],
-        "path": "x-pack/plugins/global_search/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1175,7 +1255,9 @@
               "GlobalSearchBatchedResults",
               ">"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1189,7 +1271,9 @@
                 "signature": [
                   "GlobalSearchFindParams"
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 51,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1210,7 +1294,9 @@
                     "text": "GlobalSearchFindOptions"
                   }
                 ],
-                "path": "x-pack/plugins/global_search/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+                "lineNumber": 52,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1230,7 +1316,9 @@
             "signature": [
               "() => Promise<string[]>"
             ],
-            "path": "x-pack/plugins/global_search/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1254,7 +1342,9 @@
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1273,7 +1363,9 @@
           "GlobalSearchProviderResult",
           ", \"url\"> & { url: string; }"
         ],
-        "path": "x-pack/plugins/global_search/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1299,28 +1391,18 @@
           "text": "GlobalSearchFindOptions"
         },
         ", request: ",
-        {
-          "pluginId": "@kbn/core-http-server",
-          "scope": "common",
-          "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>) => ",
         "Observable",
         "<",
         "GlobalSearchBatchedResults",
         ">; getSearchableTypes: (request: ",
-        {
-          "pluginId": "@kbn/core-http-server",
-          "scope": "common",
-          "docId": "kibKbnCoreHttpServerPluginApi",
-          "section": "def-common.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"
       ],
-      "path": "x-pack/plugins/global_search/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1344,7 +1426,9 @@
         },
         ") => void; }"
       ],
-      "path": "x-pack/plugins/global_search/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",

@@ -1,0 +1,7 @@
+// 1. regex to extract from dns.question.registered_domain
+// Helpful when asking how to use GROK to extract values via REGEX
+from logs-*
+| where dns.question.name like "?*"
+| grok dns.question.name """(?<dns_registered_domain>[a-zA-Z0-9]+\.[a-z-A-Z]{2,3}$)"""
+| keep dns_registered_domain
+| limit 10 

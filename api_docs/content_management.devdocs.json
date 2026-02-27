@@ -9,7 +9,9 @@
         "tags": [],
         "label": "ContentClient",
         "description": [],
-        "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21,9 +23,17 @@
             "label": "queryClient",
             "description": [],
             "signature": [
-              "QueryClient"
+              {
+                "pluginId": "@kbn/react-query",
+                "scope": "common",
+                "docId": "kibKbnReactQueryPluginApi",
+                "section": "def-common.QueryClient",
+                "text": "QueryClient"
+              }
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,7 +79,9 @@
               },
               "<string, object>, O = unknown>(_input: I) => { queryKey: readonly [string, \"search\", unknown, object | undefined]; queryFn: () => Promise<O>; }; }"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -83,7 +95,9 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -104,7 +118,9 @@
                     "text": "CrudClient"
                   }
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 97,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -119,7 +135,9 @@
                 "signature": [
                   "ContentTypeRegistry"
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 98,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -153,7 +171,9 @@
               },
               "<string, object>, O = unknown>(input: I) => Promise<O>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -167,7 +187,9 @@
                 "signature": [
                   "I"
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 107,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -205,7 +227,9 @@
               "QueryObserverResult",
               "<O, unknown>>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -219,7 +243,9 @@
                 "signature": [
                   "I"
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 111,
+                "columnNumber": 46,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -245,7 +271,9 @@
               },
               "<string, object, object>, O = unknown>(input: I) => Promise<O>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -259,7 +287,9 @@
                 "signature": [
                   "I"
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 115,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -285,7 +315,9 @@
               },
               "<string, object, object>, O = unknown>(input: I) => Promise<O>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -299,7 +331,9 @@
                 "signature": [
                   "I"
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 121,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -325,7 +359,9 @@
               },
               "<string, object>, O = unknown>(input: I) => Promise<O>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -339,7 +375,9 @@
                 "signature": [
                   "I"
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 127,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -365,7 +403,9 @@
               },
               "<string, object>, O = unknown>(input: I) => Promise<O>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -379,7 +419,9 @@
                 "signature": [
                   "I"
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 133,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -409,7 +451,9 @@
               "QueryObserverResult",
               "<O, unknown>>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -423,7 +467,9 @@
                 "signature": [
                   "I"
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 139,
+                "columnNumber": 44,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -449,7 +495,9 @@
               },
               ") => Promise<{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -469,7 +517,9 @@
                     "text": "MSearchIn"
                   }
                 ],
-                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "path": "src/platform/plugins/shared/content_management/public/content_client/content_client.tsx",
+                "lineNumber": 146,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -490,7 +540,7 @@
         "label": "ContentClientProvider",
         "description": [],
         "signature": [
-          "({ contentClient, children, }: React.PropsWithChildren<{ contentClient: ",
+          "({ contentClient, children }: React.PropsWithChildren<{ contentClient: ",
           {
             "pluginId": "contentManagement",
             "scope": "public",
@@ -498,9 +548,11 @@
             "section": "def-public.ContentClient",
             "text": "ContentClient"
           },
-          "; }>) => JSX.Element"
+          "; }>) => React.JSX.Element"
         ],
-        "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_context.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -509,7 +561,7 @@
             "id": "def-public.ContentClientProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  contentClient,\n  children,\n}",
+            "label": "{ contentClient, children }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<{ contentClient: ",
@@ -522,7 +574,9 @@
               },
               "; }>"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_context.tsx",
+            "lineNumber": 27,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -548,7 +602,9 @@
             "text": "ContentClient"
           }
         ],
-        "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_context.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -583,7 +639,9 @@
           "UseMutationResult",
           "<O, unknown, I, unknown>"
         ],
-        "path": "src/plugins/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -618,7 +676,9 @@
           "UseMutationResult",
           "<O, unknown, I, unknown>"
         ],
-        "path": "src/plugins/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -663,7 +723,9 @@
           "UseQueryResult",
           "<O, unknown>"
         ],
-        "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -679,7 +741,9 @@
             "signature": [
               "I"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -703,7 +767,9 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -750,7 +816,9 @@
           "UseQueryResult",
           "<O, unknown>"
         ],
-        "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -766,7 +834,9 @@
             "signature": [
               "I"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -790,7 +860,9 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+            "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -827,7 +899,9 @@
           "UseMutationResult",
           "<O, unknown, I, unknown>"
         ],
-        "path": "src/plugins/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -843,7 +917,9 @@
         "tags": [],
         "label": "CrudClient",
         "description": [],
-        "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+        "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -865,7 +941,9 @@
               },
               "<string, object>) => Promise<unknown>"
             ],
-            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -886,7 +964,9 @@
                   },
                   "<string, object>"
                 ],
-                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 13,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -912,7 +992,9 @@
               },
               "<string, object, object>) => Promise<unknown>"
             ],
-            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -933,7 +1015,9 @@
                   },
                   "<string, object, object>"
                 ],
-                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 14,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -959,7 +1043,9 @@
               },
               "<string, object, object>) => Promise<unknown>"
             ],
-            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -980,7 +1066,9 @@
                   },
                   "<string, object, object>"
                 ],
-                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 15,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1006,7 +1094,9 @@
               },
               "<string, object>) => Promise<unknown>"
             ],
-            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1027,7 +1117,9 @@
                   },
                   "<string, object>"
                 ],
-                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 16,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1053,7 +1145,9 @@
               },
               "<string, object>) => Promise<unknown>"
             ],
-            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1074,7 +1168,9 @@
                   },
                   "<string, object>"
                 ],
-                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 17,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1100,7 +1196,9 @@
               },
               ") => Promise<unknown>) | undefined"
             ],
-            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1120,7 +1218,9 @@
                     "text": "MSearchIn"
                   }
                 ],
-                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "path": "src/platform/plugins/shared/content_management/public/crud_client/crud_client.ts",
+                "lineNumber": 18,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1146,7 +1246,9 @@
         "signature": [
           "{ enabled?: boolean | undefined; }"
         ],
-        "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+        "path": "src/platform/plugins/shared/content_management/public/content_client/content_client_query_hooks.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1160,7 +1262,9 @@
       "tags": [],
       "label": "ContentManagementPublicStart",
       "description": [],
-      "path": "src/plugins/content_management/public/types.ts",
+      "path": "src/platform/plugins/shared/content_management/public/types.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1180,7 +1284,9 @@
               "text": "ContentClient"
             }
           ],
-          "path": "src/plugins/content_management/public/types.ts",
+          "path": "src/platform/plugins/shared/content_management/public/types.ts",
+          "lineNumber": 24,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1198,7 +1304,9 @@
             "ContentType",
             "[]; }"
           ],
-          "path": "src/plugins/content_management/public/types.ts",
+          "path": "src/platform/plugins/shared/content_management/public/types.ts",
+          "lineNumber": 25,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1213,7 +1321,9 @@
       "tags": [],
       "label": "ContentManagementPublicSetup",
       "description": [],
-      "path": "src/plugins/content_management/public/types.ts",
+      "path": "src/platform/plugins/shared/content_management/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1231,7 +1341,9 @@
             "ContentType",
             "; }"
           ],
-          "path": "src/plugins/content_management/public/types.ts",
+          "path": "src/platform/plugins/shared/content_management/public/types.ts",
+          "lineNumber": 20,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1261,7 +1373,9 @@
           },
           "<T, U, TMSearchConfig>"
         ],
-        "path": "src/plugins/content_management/server/core/types.ts",
+        "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1285,7 +1399,9 @@
               },
               ", id: string, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1305,7 +1421,9 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1320,7 +1438,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1335,7 +1455,9 @@
                 "signature": [
                   "object | undefined"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1363,7 +1485,9 @@
               },
               ", ids: string[], options?: object | undefined) => Promise<{ hits: ({ item: T; meta?: undefined; } | { item: T; meta: any; })[]; }>"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1383,7 +1507,9 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1398,7 +1524,9 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1413,7 +1541,9 @@
                 "signature": [
                   "object | undefined"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1441,7 +1571,9 @@
               },
               ", data: object, options?: object | undefined) => Promise<{ item: T; meta?: undefined; } | { item: T; meta: any; }>"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1461,7 +1593,9 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1476,7 +1610,9 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1491,7 +1627,9 @@
                 "signature": [
                   "object | undefined"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1519,7 +1657,9 @@
               },
               ", id: string, data: object, options?: object | undefined) => Promise<{ item: U; meta?: undefined; } | { item: U; meta: any; }>"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1539,7 +1679,9 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 77,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1554,7 +1696,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 78,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1569,7 +1713,9 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 79,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1584,7 +1730,9 @@
                 "signature": [
                   "object | undefined"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 80,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1620,7 +1768,9 @@
               },
               ">"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1640,7 +1790,9 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 84,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1655,7 +1807,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 84,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1670,7 +1824,9 @@
                 "signature": [
                   "object | undefined"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 84,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1706,7 +1862,9 @@
               },
               ", options?: object | undefined) => Promise<{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }>"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1726,7 +1884,9 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1747,7 +1907,9 @@
                     "text": "SearchQuery"
                   }
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1762,7 +1924,9 @@
                 "signature": [
                   "object | undefined"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 87,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1782,7 +1946,9 @@
             "signature": [
               "TMSearchConfig | undefined"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1808,7 +1974,9 @@
           },
           "<T, TSavedObjectAttributes>"
         ],
-        "path": "src/plugins/content_management/server/core/types.ts",
+        "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1821,7 +1989,9 @@
             "description": [
               "\nThe saved object type that corresponds to this content type."
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1844,16 +2014,12 @@
                 "text": "StorageContext"
               },
               ", savedObject: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindResult",
-                "text": "SavedObjectsFindResult"
-              },
+              "SavedObjectsFindResult",
               "<TSavedObjectAttributes>) => T"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1873,7 +2039,9 @@
                     "text": "StorageContext"
                   }
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 121,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1886,16 +2054,12 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsFindResult",
-                    "text": "SavedObjectsFindResult"
-                  },
+                  "SavedObjectsFindResult",
                   "<TSavedObjectAttributes>"
                 ],
-                "path": "src/plugins/content_management/server/core/types.ts",
+                "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+                "lineNumber": 122,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1915,7 +2079,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1931,10 +2097,29 @@
         "description": [
           "Context that is sent to all storage instance methods"
         ],
-        "path": "src/plugins/content_management/server/core/types.ts",
+        "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "contentManagement",
             "id": "def-server.StorageContext.requestHandlerContext",
@@ -1945,15 +2130,11 @@
               "The Core HTTP request handler context"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              }
+              "RequestHandlerContext"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1967,7 +2148,9 @@
             "signature": [
               "{ request: number; latest: number; }"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1983,7 +2166,9 @@
               "StorageContextGetTransformFn",
               "; }"
             ],
-            "path": "src/plugins/content_management/server/core/types.ts",
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2012,10 +2197,29 @@
         " extends ",
         "CoreApi"
       ],
-      "path": "src/plugins/content_management/server/types.ts",
+      "path": "src/platform/plugins/shared/content_management/server/types.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "contentManagement",
+          "id": "def-server.ContentManagementServerSetup.favorites",
+          "type": "Object",
+          "tags": [],
+          "label": "favorites",
+          "description": [],
+          "signature": [
+            "{ registerFavoriteType: (type: string, config?: FavoriteTypeConfig) => void; }"
+          ],
+          "path": "src/platform/plugins/shared/content_management/server/types.ts",
+          "lineNumber": 24,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2026,7 +2230,9 @@
       "tags": [],
       "label": "ContentManagementServerStart",
       "description": [],
-      "path": "src/plugins/content_management/server/types.ts",
+      "path": "src/platform/plugins/shared/content_management/server/types.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -2055,7 +2261,9 @@
           },
           "<T, Options>"
         ],
-        "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2069,7 +2277,9 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2083,7 +2293,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2097,7 +2309,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2111,7 +2325,9 @@
             "signature": [
               "Options | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2135,7 +2351,9 @@
           },
           "<T, Data, Options>"
         ],
-        "path": "src/plugins/content_management/common/rpc/create.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2149,7 +2367,9 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2163,7 +2383,9 @@
             "signature": [
               "Data"
             ],
-            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2177,7 +2399,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2191,7 +2415,9 @@
             "signature": [
               "Options | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2215,7 +2441,9 @@
           },
           "<T, Options>"
         ],
-        "path": "src/plugins/content_management/common/rpc/delete.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2229,7 +2457,9 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2240,7 +2470,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2254,7 +2486,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2268,7 +2502,9 @@
             "signature": [
               "Options | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2282,7 +2518,9 @@
         "tags": [],
         "label": "DeleteResult",
         "description": [],
-        "path": "src/plugins/content_management/common/rpc/delete.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2293,7 +2531,9 @@
             "tags": [],
             "label": "success",
             "description": [],
-            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/delete.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2317,7 +2557,9 @@
           },
           "<T, Options>"
         ],
-        "path": "src/plugins/content_management/common/rpc/get.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2328,7 +2570,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2342,7 +2586,9 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2356,7 +2602,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2370,7 +2618,9 @@
             "signature": [
               "Options | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2384,7 +2634,9 @@
         "tags": [],
         "label": "MSearchIn",
         "description": [],
-        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2398,7 +2650,9 @@
             "signature": [
               "{ contentTypeId: string; version?: number | undefined; }[]"
             ],
-            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2418,7 +2672,9 @@
                 "text": "SearchQuery"
               }
             ],
-            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2442,7 +2698,9 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2456,7 +2714,9 @@
             "signature": [
               "{ contentTypeId: string; version?: number | undefined; }[]"
             ],
-            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2470,7 +2730,9 @@
             "signature": [
               "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
             ],
-            "path": "src/plugins/content_management/common/rpc/msearch.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2484,7 +2746,9 @@
         "tags": [],
         "label": "ProcedureSchemas",
         "description": [],
-        "path": "src/plugins/content_management/common/rpc/types.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2506,7 +2770,9 @@
               },
               "<any>"
             ],
-            "path": "src/plugins/content_management/common/rpc/types.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2528,7 +2794,9 @@
               },
               "<any> | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/types.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2552,7 +2820,9 @@
           },
           "<T, Options>"
         ],
-        "path": "src/plugins/content_management/common/rpc/search.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2566,7 +2836,9 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2586,7 +2858,9 @@
                 "text": "SearchQuery"
               }
             ],
-            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2600,7 +2874,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2614,7 +2890,9 @@
             "signature": [
               "Options | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2628,7 +2906,9 @@
         "tags": [],
         "label": "SearchQuery",
         "description": [],
-        "path": "src/plugins/content_management/common/rpc/search.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2644,7 +2924,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2660,7 +2942,9 @@
             "signature": [
               "{ included?: string[] | undefined; excluded?: string[] | undefined; } | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2676,7 +2960,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2692,7 +2978,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2716,7 +3004,9 @@
           },
           "<T, Data, Options>"
         ],
-        "path": "src/plugins/content_management/common/rpc/update.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2730,7 +3020,9 @@
             "signature": [
               "T"
             ],
-            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2741,7 +3033,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2755,7 +3049,9 @@
             "signature": [
               "Data"
             ],
-            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2769,7 +3065,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2783,7 +3081,9 @@
             "signature": [
               "Options | undefined"
             ],
-            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2803,7 +3103,9 @@
         "signature": [
           "\"/api/content_management/rpc\""
         ],
-        "path": "src/plugins/content_management/common/constants.ts",
+        "path": "src/platform/plugins/shared/content_management/common/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2822,7 +3124,9 @@
           "ItemResult",
           "<T, ItemMeta>[]; meta: ResultMeta; }"
         ],
-        "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2837,7 +3141,9 @@
         "signature": [
           "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
-        "path": "src/plugins/content_management/common/rpc/create.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/create.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2852,7 +3158,9 @@
         "signature": [
           "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
-        "path": "src/plugins/content_management/common/rpc/get.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/get.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2873,7 +3181,9 @@
             "text": "SearchQuery"
           }
         ],
-        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2888,7 +3198,9 @@
         "signature": [
           "{ hits: T[]; pagination: { total: number; cursor?: string | undefined; }; }"
         ],
-        "path": "src/plugins/content_management/common/rpc/msearch.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/msearch.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2903,7 +3215,9 @@
         "signature": [
           "\"contentManagement\""
         ],
-        "path": "src/plugins/content_management/common/constants.ts",
+        "path": "src/platform/plugins/shared/content_management/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2916,9 +3230,11 @@
         "label": "ProcedureName",
         "description": [],
         "signature": [
-          "\"search\" | \"create\" | \"update\" | \"get\" | \"delete\" | \"bulkGet\" | \"mSearch\""
+          "\"create\" | \"update\" | \"get\" | \"delete\" | \"search\" | \"bulkGet\" | \"mSearch\""
         ],
-        "path": "src/plugins/content_management/common/rpc/constants.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/constants.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2933,7 +3249,9 @@
         "signature": [
           "M extends void ? { hits: T[]; pagination: { total: number; cursor?: string | undefined; }; } : { hits: T[]; pagination: { total: number; cursor?: string | undefined; }; meta: M; }"
         ],
-        "path": "src/plugins/content_management/common/rpc/search.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/search.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2948,7 +3266,9 @@
         "signature": [
           "M extends void ? { item: T; meta?: undefined; } : { item: T; meta: M; }"
         ],
-        "path": "src/plugins/content_management/common/rpc/update.ts",
+        "path": "src/platform/plugins/shared/content_management/common/rpc/update.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

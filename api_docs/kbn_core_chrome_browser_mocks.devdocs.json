@@ -6,37 +6,23 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-chrome-browser-mocks",
-        "id": "def-common.chromeServiceMock",
+        "id": "def-public.chromeServiceMock",
         "type": "Object",
         "tags": [],
         "label": "chromeServiceMock",
         "description": [],
-        "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+        "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+        "lineNumber": 126,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser-mocks",
-            "id": "def-common.chromeServiceMock.create",
+            "id": "def-public.chromeServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +30,9 @@
             "signature": [
               "() => jest.Mocked<ChromeServiceContract>"
             ],
-            "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+            "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -52,7 +40,35 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser-mocks",
-            "id": "def-common.chromeServiceMock.createStartContract",
+            "id": "def-public.chromeServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
+              "<",
+              "ChromeSetup",
+              ">"
+            ],
+            "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-mocks",
+            "id": "def-public.chromeServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -70,7 +86,9 @@
               "InternalChromeStart",
               ">"
             ],
-            "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+            "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -80,5 +98,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

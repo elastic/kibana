@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Fs = require('fs');
+const fs = require('fs');
 const ts = require('typescript');
 const { getExportCode, getExportNamedNamespaceCode } = require('../helpers/codegen');
-const tsEstree = require('@typescript-eslint/typescript-estree');
 
 const { getExportNamesDeep } = require('../helpers/exports');
 
@@ -24,6 +24,8 @@ const { getExportNamesDeep } = require('../helpers/exports');
 const ERROR_MSG =
   '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs';
 
+const sourceFileCache = new Map();
+
 /** @type {Rule} */
 module.exports = {
   meta: {
@@ -33,19 +35,21 @@ module.exports = {
   create: (context) => {
     return {
       ExportAllDeclaration(node) {
-        const services = /** @type ParserServices */ (context.parserServices);
+        const services = /** @type ParserServices */ (context.sourceCode.parserServices);
         const esNode = /** @type EsTreeExportAllDeclaration */ (node);
         const tsnode = /** @type ExportDeclaration */ (services.esTreeNodeToTSNodeMap.get(esNode));
 
         /** @type Parser */
         const parser = (path) => {
-          const code = Fs.readFileSync(path, 'utf-8');
-          const result = tsEstree.parseAndGenerateServices(code, {
-            ...context.parserOptions,
-            comment: false,
-            filePath: path,
-          });
-          return result.services.program.getSourceFile(path);
+          if (sourceFileCache.has(path)) {
+            return sourceFileCache.get(path);
+          }
+
+          const code = fs.readFileSync(path, 'utf-8');
+          const sourceFile = ts.createSourceFile(path, code, ts.ScriptTarget.ESNext, true);
+
+          sourceFileCache.set(path, sourceFile);
+          return sourceFile;
         };
 
         const exportSet = getExportNamesDeep(parser, context.getFilename(), tsnode);

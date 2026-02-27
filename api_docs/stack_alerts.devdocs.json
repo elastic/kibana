@@ -11,27 +11,29 @@
         "label": "DataViewSelectPopover",
         "description": [],
         "signature": [
-          "({ dependencies: { dataViews, dataViewEditor }, metadata, dataView, onSelectDataView, onChangeMetaData, }: React.PropsWithChildren<",
+          "({ dependencies: { dataViews, dataViewEditor }, metadata, dataView, onSelectDataView, onChangeMetaData, }: ",
           "DataViewSelectPopoverProps",
-          ">) => JSX.Element | null"
+          ") => React.JSX.Element"
         ],
-        "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "stackAlerts",
             "id": "def-public.DataViewSelectPopover.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata = { adHocDataViewList: [], isManagementPage: true },\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
+            "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata,\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "DataViewSelectPopoverProps",
-              ">"
+              "DataViewSelectPopoverProps"
             ],
-            "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
+            "lineNumber": 60,
+            "columnNumber": 92,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +64,9 @@
         "signature": [
           "{}"
         ],
-        "path": "x-pack/plugins/stack_alerts/server/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/server/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +81,9 @@
         "signature": [
           "\".index-threshold\""
         ],
-        "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/server/rule_types/index_threshold/rule_type.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -101,7 +107,9 @@
           },
           "<{}>"
         ],
-        "path": "x-pack/plugins/stack_alerts/server/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/server/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,7 +131,9 @@
           "Comparator",
           ", threshold: number[], fieldName: string) => string"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -137,7 +147,9 @@
             "signature": [
               "Comparator"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -152,7 +164,9 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -167,7 +181,111 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.getEsqlQueryHits",
+        "type": "Function",
+        "tags": [],
+        "label": "getEsqlQueryHits",
+        "description": [],
+        "signature": [
+          "(table: ",
+          {
+            "pluginId": "stackAlerts",
+            "scope": "common",
+            "docId": "kibStackAlertsPluginApi",
+            "section": "def-common.EsqlTable",
+            "text": "EsqlTable"
+          },
+          ", query: string, isGroupAgg: boolean, isPreview?: boolean) => Promise<EsqlQueryHits>"
+        ],
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getEsqlQueryHits.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "table",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "stackAlerts",
+                "scope": "common",
+                "docId": "kibStackAlertsPluginApi",
+                "section": "def-common.EsqlTable",
+                "text": "EsqlTable"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getEsqlQueryHits.$2",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getEsqlQueryHits.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isGroupAgg",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getEsqlQueryHits.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPreview",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,7 +306,9 @@
           "Comparator",
           ") => string | undefined"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -202,7 +322,9 @@
             "signature": [
               "Comparator"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
+            "lineNumber": 58,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -221,7 +343,9 @@
         "signature": [
           "(columns: EsqlResultColumn[], row: EsqlResultRow) => EsqlDocument"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -235,7 +359,9 @@
             "signature": [
               "EsqlResultColumn[]"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 66,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -250,7 +376,9 @@
             "signature": [
               "EsqlResultRow"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 66,
+            "columnNumber": 60,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -261,66 +389,19 @@
       },
       {
         "parentPluginId": "stackAlerts",
-        "id": "def-common.toEsQueryHits",
+        "id": "def-common.transformToEsqlTable",
         "type": "Function",
         "tags": [],
-        "label": "toEsQueryHits",
+        "label": "transformToEsqlTable",
         "description": [],
         "signature": [
-          "(results: ",
+          "(datatable: ",
           {
-            "pluginId": "stackAlerts",
+            "pluginId": "@kbn/es-types",
             "scope": "common",
-            "docId": "kibStackAlertsPluginApi",
-            "section": "def-common.EsqlTable",
-            "text": "EsqlTable"
-          },
-          ") => { hits: EsqlHit[]; total: number; }"
-        ],
-        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "stackAlerts",
-            "id": "def-common.toEsQueryHits.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "results",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "stackAlerts",
-                "scope": "common",
-                "docId": "kibStackAlertsPluginApi",
-                "section": "def-common.EsqlTable",
-                "text": "EsqlTable"
-              }
-            ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.transformDatatableToEsqlTable",
-        "type": "Function",
-        "tags": [],
-        "label": "transformDatatableToEsqlTable",
-        "description": [],
-        "signature": [
-          "(results: ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
+            "docId": "kibKbnEsTypesPluginApi",
+            "section": "def-common.ESQLSearchResponse",
+            "text": "ESQLSearchResponse"
           },
           ") => ",
           {
@@ -331,27 +412,31 @@
             "text": "EsqlTable"
           }
         ],
-        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+        "lineNumber": 211,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "stackAlerts",
-            "id": "def-common.transformDatatableToEsqlTable.$1",
+            "id": "def-common.transformToEsqlTable.$1",
             "type": "Object",
             "tags": [],
-            "label": "results",
+            "label": "datatable",
             "description": [],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "@kbn/es-types",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ESQLSearchResponse",
+                "text": "ESQLSearchResponse"
               }
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 211,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -369,7 +454,9 @@
         "tags": [],
         "label": "EsqlTable",
         "description": [],
-        "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -383,7 +470,9 @@
             "signature": [
               "EsqlResultColumn[]"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -397,7 +486,43 @@
             "signature": [
               "EsqlResultRow[]"
             ],
-            "path": "x-pack/plugins/stack_alerts/common/esql_query_utils.ts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.EsqlTable.is_partial",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_partial",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.EsqlTable._clusters",
+            "type": "Object",
+            "tags": [],
+            "label": "_clusters",
+            "description": [],
+            "signature": [
+              "{ details?: { [key: string]: { failures?: ",
+              "EsqlEsqlShardFailure",
+              "[] | undefined; }; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -409,6 +534,40 @@
     "misc": [
       {
         "parentPluginId": "stackAlerts",
+        "id": "def-common.ALERT_ID_COLUMN",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_ID_COLUMN",
+        "description": [],
+        "signature": [
+          "\"Alert ID\""
+        ],
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.ALERT_ID_SUGGESTED_MAX",
+        "type": "number",
+        "tags": [],
+        "label": "ALERT_ID_SUGGESTED_MAX",
+        "description": [],
+        "signature": [
+          "10"
+        ],
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
         "id": "def-common.ES_QUERY_MAX_HITS_PER_EXECUTION",
         "type": "number",
         "tags": [],
@@ -417,7 +576,9 @@
         "signature": [
           "10000"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -432,49 +593,14 @@
         "signature": [
           "100"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
+        "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.ComparatorFnNames",
-        "type": "Object",
-        "tags": [],
-        "label": "ComparatorFnNames",
-        "description": [],
-        "signature": [
-          "Set<",
-          "Comparator",
-          ">"
-        ],
-        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.ComparatorFns",
-        "type": "Object",
-        "tags": [],
-        "label": "ComparatorFns",
-        "description": [],
-        "signature": [
-          "Map<",
-          "Comparator",
-          ", ",
-          "ComparatorFn",
-          ">"
-        ],
-        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

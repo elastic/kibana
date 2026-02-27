@@ -1,0 +1,183 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+import React, { useEffect } from 'react';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableFactory,
+  HasDrilldowns,
+} from '@kbn/embeddable-plugin/public';
+import type {
+  PublishesWritableTitle,
+  PublishesTitle,
+  HasEditCapabilities,
+  HasSupportedTriggers,
+} from '@kbn/presentation-publishing';
+import {
+  initializeTitleManager,
+  useBatchedPublishingSubjects,
+  fetch$,
+  titleComparators,
+} from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import type { ClientPluginsStart } from '../../../plugin';
+import { StatsOverviewComponent } from './stats_overview_component';
+import { openMonitorConfiguration } from '../common/monitors_open_configuration';
+import {
+  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+  SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/stats_overview/constants';
+import type { MonitorFilters, OverviewStatsEmbeddableState } from '../../../../common/types';
+
+export const getOverviewPanelTitle = () =>
+  i18n.translate('xpack.synthetics.statusOverview.list.displayName', {
+    defaultMessage: 'Synthetics Stats Overview',
+  });
+
+const DEFAULT_FILTERS: MonitorFilters = {
+  projects: [],
+  tags: [],
+  locations: [],
+  monitor_ids: [],
+  monitor_types: [],
+};
+
+export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
+  PublishesWritableTitle &
+  PublishesTitle &
+  HasEditCapabilities &
+  HasDrilldowns &
+  HasSupportedTriggers;
+
+export const getStatsOverviewEmbeddableFactory = (
+  getStartServices: StartServicesAccessor<ClientPluginsStart>
+) => {
+  const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
+    type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
+      const [coreStart, pluginStart] = await getStartServices();
+
+      // Client code uses REST API shape (snake_case) directly
+      // transformOut handles conversion from legacy camelCase if needed
+      const titleManager = initializeTitleManager(initialState);
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
+      const reload$ = new Subject<boolean>();
+      const filters$ = new BehaviorSubject({
+        ...DEFAULT_FILTERS,
+        ...(initialState?.filters || {}),
+      });
+
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+
+      function serializeState(): OverviewStatsEmbeddableState {
+        return {
+          ...titleManager.getLatestState(),
+          filters: filters$.getValue(),
+          ...drilldownsManager.getLatestState(),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<OverviewStatsEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          filters$,
+          drilldownsManager.anyStateChange$
+        ).pipe(map(() => undefined)),
+        getComparators: () => ({
+          ...titleComparators,
+          filters: 'referenceEquality',
+          ...drilldownsManager.comparators,
+        }),
+        defaultState: {
+          filters: DEFAULT_FILTERS,
+        },
+        onReset: (lastSaved) => {
+          drilldownsManager.reinitializeState(lastSaved ?? {});
+          titleManager.reinitializeState(lastSaved);
+          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
+        },
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...drilldownsManager.api,
+        ...unsavedChangesApi,
+        supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
+        defaultTitle$,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
+            defaultMessage: 'filters',
+          }),
+
+        isEditingEnabled: () => true,
+        onEdit: async () => {
+          try {
+            const result = await openMonitorConfiguration({
+              coreStart,
+              pluginStart,
+              initialState: {
+                filters: filters$.getValue() || DEFAULT_FILTERS,
+              },
+              title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
+                defaultMessage: 'Create monitor stats',
+              }),
+              type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+            });
+            filters$.next(result.filters);
+          } catch (e) {
+            return Promise.reject();
+          }
+        },
+        serializeState,
+      });
+
+      const fetchSubscription = fetch$(api)
+        .pipe()
+        .subscribe((next) => {
+          reload$.next(next.isReload);
+        });
+
+      return {
+        api,
+        Component: () => {
+          const [filters] = useBatchedPublishingSubjects(filters$);
+
+          useEffect(() => {
+            return () => {
+              drilldownsManager.cleanup();
+              fetchSubscription.unsubscribe();
+            };
+          }, []);
+          return (
+            <div
+              style={{
+                width: '100%',
+              }}
+              data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
+            >
+              <StatsOverviewComponent reload$={reload$} filters={filters || DEFAULT_FILTERS} />
+            </div>
+          );
+        },
+      };
+    },
+  };
+  return factory;
+};

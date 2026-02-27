@@ -1,0 +1,3 @@
+description: The description for the case.
+type: string
+maxLength: 30000

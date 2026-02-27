@@ -1,0 +1,96 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CalendarListsHeader renders header 1`] = `
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-baseline-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-baseline-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="emotion-euiTextColor-subdued"
+          >
+            <p>
+              3 in total
+            </p>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-baseline-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+            data-test-subj="mlCalendarListRefreshButton"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+            >
+              <span
+                color="inherit"
+                data-euiicon-type="refresh"
+              />
+              <span
+                class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
+              >
+                Refresh
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      <span
+        class="emotion-euiTextColor-subdued"
+      >
+        Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs.
+        <br />
+        <a
+          class="euiLink emotion-euiLink-primary"
+          href="calendars link"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Learn more
+          <span
+            class="emotion-EuiExternalLinkIcon"
+            data-euiicon-type="popout"
+            role="presentation"
+          />
+          <span
+            class="emotion-euiScreenReaderOnly"
+          >
+            (external, opens in a new tab or window)
+          </span>
+        </a>
+      </span>
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+</div>
+`;

@@ -9,31 +9,25 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-root-server-internal",
-        "id": "def-common.Root",
+        "id": "def-server.Root",
         "type": "Class",
         "tags": [],
         "label": "Root",
         "description": [
           "\nTop-level entry point to kick off the app and start the Kibana server."
         ],
-        "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+        "path": "src/core/packages/root/server-internal/src/root/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.logger",
+            "id": "def-server.Root.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -47,13 +41,15 @@
                 "text": "LoggerFactory"
               }
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.Unnamed",
+            "id": "def-server.Root.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -61,13 +57,15 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$1",
+                "id": "def-server.Root.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "rawConfigProvider",
@@ -75,20 +73,22 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.RawConfigurationProvider",
+                    "section": "def-server.RawConfigurationProvider",
                     "text": "RawConfigurationProvider"
                   }
                 ],
-                "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+                "path": "src/core/packages/root/server-internal/src/root/index.ts",
+                "lineNumber": 36,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$2",
+                "id": "def-server.Root.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "env",
@@ -96,20 +96,22 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/config",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnConfigPluginApi",
-                    "section": "def-common.Env",
+                    "section": "def-server.Env",
                     "text": "Env"
                   }
                 ],
-                "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+                "path": "src/core/packages/root/server-internal/src/root/index.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.Unnamed.$3",
+                "id": "def-server.Root.Unnamed.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "onShutdown",
@@ -117,7 +119,9 @@
                 "signature": [
                   "((reason?: string | Error | undefined) => void) | undefined"
                 ],
-                "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+                "path": "src/core/packages/root/server-internal/src/root/index.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -127,7 +131,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.preboot",
+            "id": "def-server.Root.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
@@ -137,7 +141,9 @@
               "InternalCorePreboot",
               " | undefined>"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -145,7 +151,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.setup",
+            "id": "def-server.Root.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -155,7 +161,9 @@
               "InternalCoreSetup",
               ">"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -163,7 +171,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.start",
+            "id": "def-server.Root.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -173,7 +181,9 @@
               "InternalCoreStart",
               ">"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -181,7 +191,7 @@
           },
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.Root.shutdown",
+            "id": "def-server.Root.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
@@ -189,13 +199,15 @@
             "signature": [
               "(reason?: any) => Promise<void>"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-root-server-internal",
-                "id": "def-common.Root.shutdown.$1",
+                "id": "def-server.Root.shutdown.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "reason",
@@ -203,7 +215,9 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/root/core-root-server-internal/src/root/index.ts",
+                "path": "src/core/packages/root/server-internal/src/root/index.ts",
+                "lineNumber": 81,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -218,7 +232,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-root-server-internal",
-        "id": "def-common.registerServiceConfig",
+        "id": "def-server.registerServiceConfig",
         "type": "Function",
         "tags": [],
         "label": "registerServiceConfig",
@@ -228,13 +242,15 @@
           "ConfigService",
           ") => void"
         ],
-        "path": "packages/core/root/core-root-server-internal/src/register_service_config.ts",
+        "path": "src/core/packages/root/server-internal/src/register_service_config.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-root-server-internal",
-            "id": "def-common.registerServiceConfig.$1",
+            "id": "def-server.registerServiceConfig.$1",
             "type": "Object",
             "tags": [],
             "label": "configService",
@@ -242,7 +258,9 @@
             "signature": [
               "ConfigService"
             ],
-            "path": "packages/core/root/core-root-server-internal/src/register_service_config.ts",
+            "path": "src/core/packages/root/server-internal/src/register_service_config.ts",
+            "lineNumber": 47,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -252,6 +270,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

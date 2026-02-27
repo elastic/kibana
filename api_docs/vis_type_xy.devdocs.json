@@ -13,7 +13,9 @@
         "signature": [
           "() => ({ text: string; value: \"top\"; } | { text: string; value: \"left\"; } | { text: string; value: \"right\"; } | { text: string; value: \"bottom\"; })[]"
         ],
-        "path": "src/plugins/vis_types/xy/public/editor/positions.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/editor/positions.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -38,7 +40,9 @@
           },
           "; }[]"
         ],
-        "path": "src/plugins/vis_types/xy/public/editor/scale_types.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/editor/scale_types.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -55,9 +59,11 @@
         "signature": [
           "({ disabled, value = null, setValue }: ",
           "TruncateLabelsOptionProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "src/plugins/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
+        "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -71,7 +77,9 @@
             "signature": [
               "TruncateLabelsOptionProps"
             ],
-            "path": "src/plugins/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
+            "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
+            "lineNumber": 21,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -89,7 +97,9 @@
         "tags": [],
         "label": "CategoryAxis",
         "description": [],
-        "path": "src/plugins/vis_types/xy/public/types/param.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,7 +110,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -120,7 +132,9 @@
                 "text": "Labels"
               }
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -132,9 +146,11 @@
             "label": "position",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"top\" | \"bottom\""
+              "\"right\" | \"top\" | \"bottom\" | \"left\""
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -148,7 +164,9 @@
             "signature": [
               "Scale"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -159,7 +177,9 @@
             "tags": [],
             "label": "show",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -173,7 +193,9 @@
             "signature": [
               "{ text?: string | undefined; }"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,7 +215,9 @@
                 "text": "AxisType"
               }
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -217,7 +241,9 @@
               },
               "> | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -231,7 +257,9 @@
         "tags": [],
         "label": "Dimensions",
         "description": [],
-        "path": "src/plugins/vis_types/xy/public/types/param.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -252,7 +280,9 @@
               },
               " | null"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,7 +303,9 @@
               },
               "[]"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -294,7 +326,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -315,7 +349,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,7 +372,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -357,7 +395,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,7 +418,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -392,7 +434,9 @@
         "tags": [],
         "label": "Grid",
         "description": [],
-        "path": "src/plugins/vis_types/xy/public/types/param.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -403,7 +447,9 @@
             "tags": [],
             "label": "categoryLines",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -417,7 +463,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -431,7 +479,9 @@
         "tags": [],
         "label": "SeriesParam",
         "description": [],
-        "path": "src/plugins/vis_types/xy/public/types/param.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -445,7 +495,9 @@
             "signature": [
               "{ label: string; id: string; }"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -459,7 +511,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -474,7 +528,9 @@
               "InterpolationMode",
               " | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -488,7 +544,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -502,7 +560,9 @@
             "signature": [
               "ChartMode"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -513,7 +573,9 @@
             "tags": [],
             "label": "show",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -524,7 +586,9 @@
             "tags": [],
             "label": "showCircles",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -535,7 +599,9 @@
             "tags": [],
             "label": "circlesRadius",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -555,7 +621,9 @@
                 "text": "ChartType"
               }
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -566,7 +634,9 @@
             "tags": [],
             "label": "valueAxis",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -580,7 +650,9 @@
         "tags": [],
         "label": "ThresholdLine",
         "description": [],
-        "path": "src/plugins/vis_types/xy/public/types/param.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -591,7 +663,9 @@
             "tags": [],
             "label": "show",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -605,7 +679,9 @@
             "signature": [
               "number | null"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -619,7 +695,9 @@
             "signature": [
               "number | null"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -633,7 +711,9 @@
             "signature": [
               "ThresholdLineStyle"
             ],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -644,7 +724,9 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -676,7 +758,9 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+        "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -690,7 +774,9 @@
             "signature": [
               "(paramName: string, isValid: boolean) => void"
             ],
-            "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+            "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -704,7 +790,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+                "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+                "lineNumber": 15,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -719,7 +807,9 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+                "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+                "lineNumber": 15,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -754,7 +844,9 @@
             "text": "CategoryAxis"
           }
         ],
-        "path": "src/plugins/vis_types/xy/public/types/param.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -765,7 +857,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/vis_types/xy/public/types/param.ts",
+            "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -781,7 +875,9 @@
         "tags": [],
         "label": "AxisType",
         "description": [],
-        "path": "src/plugins/vis_types/xy/public/types/constants.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -793,7 +889,9 @@
         "tags": [],
         "label": "ScaleType",
         "description": [],
-        "path": "src/plugins/vis_types/xy/public/types/constants.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -826,19 +924,33 @@
           },
           ">, \"params\"> & { params: {} | ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.DateHistogramParams",
             "text": "DateHistogramParams"
           },
           " | ",
-          "HistogramParams",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.HistogramParams",
+            "text": "HistogramParams"
+          },
           " | ",
-          "FakeParams",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.FakeParams",
+            "text": "FakeParams"
+          },
           "; }"
         ],
-        "path": "src/plugins/vis_types/xy/public/types/param.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -852,7 +964,9 @@
       "tags": [],
       "label": "VisTypeXyPluginSetup",
       "description": [],
-      "path": "src/plugins/vis_types/xy/public/plugin.ts",
+      "path": "src/platform/plugins/private/vis_types/xy/public/plugin.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -882,7 +996,9 @@
         "description": [
           "\nType of charts able to render"
         ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
+        "path": "src/platform/plugins/private/vis_types/xy/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

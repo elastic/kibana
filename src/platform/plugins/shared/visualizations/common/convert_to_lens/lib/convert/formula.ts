@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { SchemaConfig } from '../../..';
+import type { FormulaParams } from '../../types';
+import { createAggregationId, createColumn, getFormat } from './column';
+import type { FormulaColumn } from './types';
+
+const convertToFormulaParams = (formula: string): FormulaParams => ({
+  formula,
+});
+
+export const createFormulaColumn = (formula: string, agg: SchemaConfig): FormulaColumn | null => {
+  const params = convertToFormulaParams(formula);
+  return {
+    operationType: 'formula',
+    ...createColumn(agg),
+    references: [],
+    dataType: 'number',
+    params: { ...params, ...getFormat() },
+    timeShift: agg.aggParams?.timeShift,
+    meta: { aggId: createAggregationId(agg) },
+  };
+};

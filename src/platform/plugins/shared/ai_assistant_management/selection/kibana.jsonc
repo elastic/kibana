@@ -1,0 +1,31 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ai-assistant-management-plugin",
+  "owner": [
+    "@elastic/appex-ai-infra"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "aiAssistantManagementSelection",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "aiAssistantManagementSelection"
+    ],
+    "requiredPlugins": [
+      "management",
+      "licensing"
+    ],
+    "optionalPlugins": [
+      "home",
+      "serverless",
+      "features",
+      "cloud",
+      "spaces"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

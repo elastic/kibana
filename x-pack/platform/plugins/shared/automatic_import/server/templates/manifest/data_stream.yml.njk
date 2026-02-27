@@ -1,0 +1,5 @@
+title: |
+  {{ title }}
+type: logs
+streams:{% for data_stream in data_streams %}
+{{ data_stream | indent(2, true) }}{% endfor %}

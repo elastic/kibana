@@ -35,7 +35,9 @@
           },
           " & S, any>"
         ],
-        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +48,9 @@
             "tags": [],
             "label": "formatId",
             "description": [],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,7 +71,9 @@
               },
               " & S"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,7 +111,9 @@
               },
               "[]; }"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -126,7 +134,9 @@
                   },
                   "<{}>"
                 ],
-                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "lineNumber": 72,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -147,7 +157,9 @@
                     "text": "FormatEditorState"
                   }
                 ],
-                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "lineNumber": 72,
+                "columnNumber": 69,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -165,7 +177,9 @@
             "signature": [
               "(newParams?: Partial<{ type?: string | undefined; } & P>) => void"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -179,7 +193,9 @@
                 "signature": [
                   "Partial<{ type?: string | undefined; } & P>"
                 ],
-                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+                "lineNumber": 84,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -195,9 +211,11 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -225,7 +243,9 @@
           },
           " extends Error"
         ],
-        "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/open_delete_modal.tsx",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -239,7 +259,9 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/open_delete_modal.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -253,7 +275,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/open_delete_modal.tsx",
+                "lineNumber": 58,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -293,7 +317,9 @@
             "text": "RuntimeField"
           }
         ],
-        "path": "src/plugins/data_view_field_editor/public/types.ts",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -306,7 +332,9 @@
             "description": [
               "\nname / path used for the field"
             ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -322,7 +350,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data_view_field_editor/public/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -348,7 +378,9 @@
           },
           "<P>"
         ],
-        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -359,7 +391,9 @@
             "tags": [],
             "label": "fieldType",
             "description": [],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,7 +413,9 @@
                 "text": "FieldFormat"
               }
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -393,7 +429,9 @@
             "signature": [
               "{ type?: string | undefined; } & P"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -415,7 +453,9 @@
               },
               ") => void"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -435,7 +475,9 @@
                     "text": "SerializableRecord"
                   }
                 ],
-                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+                "lineNumber": 22,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -453,7 +495,9 @@
             "signature": [
               "(error?: string | undefined) => void"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -468,7 +512,9 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx",
+                "lineNumber": 32,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -484,7 +530,9 @@
         "tags": [],
         "label": "FormatEditorState",
         "description": [],
-        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,7 +554,9 @@
               },
               "<{}>> | null"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -520,7 +570,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/format_editor.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -536,7 +588,9 @@
         "description": [
           "\nOptions for opening the field editor"
         ],
-        "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/open_delete_modal.tsx",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -558,9 +612,19 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
               "; }"
             ],
-            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/open_delete_modal.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -576,7 +640,9 @@
             "signature": [
               "((fieldNames: string[]) => void) | undefined"
             ],
-            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/open_delete_modal.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -592,7 +658,9 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/open_delete_modal.tsx",
+                "lineNumber": 40,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -612,7 +680,9 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/open_delete_modal.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -628,7 +698,9 @@
         "description": [
           "\nOptions for opening the field editor"
         ],
-        "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/open_editor.tsx",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -650,9 +722,19 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
               "; }"
             ],
-            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/open_editor.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -676,7 +758,9 @@
               },
               "[]) => void) | undefined"
             ],
-            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/open_editor.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -699,7 +783,9 @@
                   },
                   "[]"
                 ],
-                "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/open_editor.tsx",
+                "lineNumber": 44,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -719,7 +805,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/open_editor.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -742,7 +830,9 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/open_editor.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -756,7 +846,9 @@
         "tags": [],
         "label": "Props",
         "description": [],
-        "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/components/delete_field_provider.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -770,7 +862,9 @@
             "signature": [
               "(deleteFieldHandler: DeleteFieldFunc) => React.ReactNode"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -784,7 +878,9 @@
                 "signature": [
                   "DeleteFieldFunc"
                 ],
-                "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/components/delete_field_provider.tsx",
+                "lineNumber": 18,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -810,7 +906,9 @@
                 "text": "DataView"
               }
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -826,7 +924,9 @@
             "signature": [
               "((fieldNames: string[]) => void) | undefined"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/delete_field_provider.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -842,7 +942,9 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "src/plugins/data_view_field_editor/public/components/delete_field_provider.tsx",
+                "path": "src/platform/plugins/shared/data_view_field_editor/public/components/delete_field_provider.tsx",
+                "lineNumber": 27,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -860,7 +962,9 @@
         "tags": [],
         "label": "Sample",
         "description": [],
-        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/types.ts",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -874,7 +978,9 @@
             "signature": [
               "object | React.ReactText | React.ReactText[] | Record<string, React.ReactText[]>"
             ],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -885,7 +991,9 @@
             "tags": [],
             "label": "output",
             "description": [],
-            "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/types.ts",
+            "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -915,7 +1023,9 @@
           },
           "<FormatParams>> & { formatId: string; }"
         ],
-        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -940,7 +1050,9 @@
           },
           "<FormatParams>>) & { formatId: string; }"
         ],
-        "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+        "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -958,7 +1070,9 @@
       "description": [
         "\nPublic setup contract of data view field editor"
       ],
-      "path": "src/plugins/data_view_field_editor/public/types.ts",
+      "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+      "lineNumber": 26,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -980,7 +1094,9 @@
             },
             "<{}>) => void; }"
           ],
-          "path": "src/plugins/data_view_field_editor/public/types.ts",
+          "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+          "lineNumber": 31,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -997,7 +1113,9 @@
       "description": [
         "\nPublic start contract of data view field editor"
       ],
-      "path": "src/plugins/data_view_field_editor/public/types.ts",
+      "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+      "lineNumber": 34,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1019,9 +1137,13 @@
               "section": "def-public.OpenFieldEditorOptions",
               "text": "OpenFieldEditorOptions"
             },
-            ") => () => void"
+            ") => Promise<",
+            "CloseEditor",
+            ">"
           ],
-          "path": "src/plugins/data_view_field_editor/public/types.ts",
+          "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1041,7 +1163,9 @@
                   "text": "OpenFieldEditorOptions"
                 }
               ],
-              "path": "src/plugins/data_view_field_editor/public/types.ts",
+              "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+              "lineNumber": 42,
+              "columnNumber": 14,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1067,9 +1191,13 @@
               "section": "def-public.OpenFieldDeleteModalOptions",
               "text": "OpenFieldDeleteModalOptions"
             },
-            ") => () => void"
+            ") => Promise<",
+            "CloseEditor",
+            ">"
           ],
-          "path": "src/plugins/data_view_field_editor/public/types.ts",
+          "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1091,7 +1219,9 @@
                   "text": "OpenFieldDeleteModalOptions"
                 }
               ],
-              "path": "src/plugins/data_view_field_editor/public/types.ts",
+              "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+              "lineNumber": 47,
+              "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1125,7 +1255,9 @@
             },
             "<P> | undefined; }"
           ],
-          "path": "src/plugins/data_view_field_editor/public/types.ts",
+          "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+          "lineNumber": 48,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1141,7 +1273,9 @@
           "signature": [
             "{ editIndexPattern: () => boolean; }"
           ],
-          "path": "src/plugins/data_view_field_editor/public/types.ts",
+          "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+          "lineNumber": 49,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1165,7 +1299,9 @@
             },
             ">"
           ],
-          "path": "src/plugins/data_view_field_editor/public/types.ts",
+          "path": "src/platform/plugins/shared/data_view_field_editor/public/types.ts",
+          "lineNumber": 58,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1173,14 +1309,16 @@
             {
               "parentPluginId": "dataViewFieldEditor",
               "id": "def-public.PluginStart.DeleteRuntimeFieldProvider.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 10,
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1194,7 +1332,9 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
+              "lineNumber": 1109,
+              "columnNumber": 20,
               "deprecated": false,
               "trackAdoption": false
             }

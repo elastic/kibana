@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders control with warning 1`] = `
+<div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    data-test-subj="inputControl0"
+    id="controlId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="controlId"
+        id="controlId-label"
+      >
+        <span
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
+        >
+          <span
+            data-euiicon-type="warning"
+            tabindex="0"
+          >
+            Info
+          </span>
+        </span>
+        test control
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        id="controlId"
+      >
+        My Control
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders disabled control with tooltip 1`] = `
+<div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    data-test-subj="inputControl0"
+    id="controlId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="controlId"
+        id="controlId-label"
+      >
+        test control
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <span
+        class="euiToolTipAnchor eui-displayBlock emotion-euiToolTipAnchor-inlineBlock"
+        id="controlId-wrapper"
+      >
+        <div>
+          My Control
+        </div>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders enabled control 1`] = `
+<div>
+  <div
+    class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
+    data-test-subj="inputControl0"
+    id="controlId-row"
+  >
+    <div
+      class="euiFormRow__labelWrapper"
+    >
+      <label
+        class="euiFormLabel euiFormRow__label emotion-euiFormLabel"
+        for="controlId"
+        id="controlId-label"
+      >
+        test control
+      </label>
+    </div>
+    <div
+      class="euiFormRow__fieldWrapper"
+    >
+      <div
+        id="controlId"
+      >
+        My Control
+      </div>
+    </div>
+  </div>
+</div>
+`;

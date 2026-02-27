@@ -1,0 +1,30 @@
+- name: input.type
+  type: keyword
+  description: Type of Filebeat input.
+- name: log.flags
+  type: keyword
+  description: Flags for the log file.
+- name: log.offset
+  type: long
+  description: Offset of the entry in the log file.
+- name: log.file
+  type: group
+  fields:
+    - name: device_id
+      type: keyword
+      description: ID of the device containing the filesystem where the file resides.
+    - name: fingerprint
+      type: keyword
+      description: The sha256 fingerprint identity of the file when fingerprinting is enabled.
+    - name: inode
+      type: keyword
+      description: Inode number of the log file.
+    - name: idxhi
+      type: keyword
+      description: The high-order part of a unique identifier that is associated with a file. (Windows-only)
+    - name: idxlo
+      type: keyword
+      description: The low-order part of a unique identifier that is associated with a file. (Windows-only)
+    - name: vol
+      type: keyword
+      description: The serial number of the volume that contains a file. (Windows-only)

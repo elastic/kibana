@@ -1,0 +1,275 @@
+{
+  "id": "@kbn/content-management-favorites-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-favorites-server",
+        "id": "def-server.registerFavorites",
+        "type": "Function",
+        "tags": [],
+        "label": "registerFavorites",
+        "description": [],
+        "signature": [
+          "({\n  logger,\n  core,\n  usageCollection,\n}: { core: ",
+          "CoreSetup",
+          "<{}, unknown>; logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          "; usageCollection?: ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.UsageCollectionSetup",
+            "text": "UsageCollectionSetup"
+          },
+          " | undefined; }) => ",
+          "FavoritesRegistrySetup"
+        ],
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-favorites-server",
+            "id": "def-server.registerFavorites.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  core,\n  usageCollection,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-favorites-server",
+                "id": "def-server.registerFavorites.$1.core",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreSetup",
+                  "<{}, unknown>"
+                ],
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+                "lineNumber": 43,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-favorites-server",
+                "id": "def-server.registerFavorites.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/content-management-favorites-server",
+                "id": "def-server.registerFavorites.$1.usageCollection",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "usageCollection",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "usageCollection",
+                    "scope": "server",
+                    "docId": "kibUsageCollectionPluginApi",
+                    "section": "def-server.UsageCollectionSetup",
+                    "text": "UsageCollectionSetup"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+                "lineNumber": 45,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-favorites-server",
+        "id": "def-server.AddFavoriteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "AddFavoriteResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-favorites-server",
+            "id": "def-server.AddFavoriteResponse.favoriteIds",
+            "type": "Array",
+            "tags": [],
+            "label": "favoriteIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-favorites-server",
+        "id": "def-server.GetFavoritesResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetFavoritesResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-favorites-server",
+            "id": "def-server.GetFavoritesResponse.favoriteIds",
+            "type": "Array",
+            "tags": [],
+            "label": "favoriteIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-favorites-server",
+            "id": "def-server.GetFavoritesResponse.favoriteMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "favoriteMetadata",
+            "description": [],
+            "signature": [
+              "Record<string, object> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-favorites-server",
+        "id": "def-server.RemoveFavoriteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RemoveFavoriteResponse",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-favorites-server",
+            "id": "def-server.RemoveFavoriteResponse.favoriteIds",
+            "type": "Array",
+            "tags": [],
+            "label": "favoriteIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/favorites_routes.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-management-favorites-server",
+        "id": "def-server.FavoritesSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "FavoritesSetup",
+        "description": [],
+        "signature": [
+          "{ registerFavoriteType: (type: string, config?: FavoriteTypeConfig) => void; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/favorites/favorites_server/src/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

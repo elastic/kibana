@@ -1,0 +1,625 @@
+{
+  "id": "@kbn/core-user-profile-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.UserProfileBulkGetParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileBulkGetParams",
+        "description": [
+          "\nParameters for the bulk get API."
+        ],
+        "path": "src/core/packages/user-profile/server/src/service.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileBulkGetParams.uids",
+            "type": "Object",
+            "tags": [],
+            "label": "uids",
+            "description": [
+              "\nList of user profile identifiers."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileBulkGetParams.dataPath",
+            "type": "string",
+            "tags": [],
+            "label": "dataPath",
+            "description": [
+              "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.UserProfileGetCurrentParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileGetCurrentParams",
+        "description": [
+          "\nParameters for the get user profile for the current user API."
+        ],
+        "path": "src/core/packages/user-profile/server/src/service.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileGetCurrentParams.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nUser request instance to get user profile for."
+            ],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileGetCurrentParams.dataPath",
+            "type": "string",
+            "tags": [],
+            "label": "dataPath",
+            "description": [
+              "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.UserProfileRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileRequestHandlerContext",
+        "description": [],
+        "path": "src/core/packages/user-profile/server/src/request_handler_context.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileRequestHandlerContext.getCurrent",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrent",
+            "description": [],
+            "signature": [
+              "<D extends ",
+              "UserProfileData",
+              ", L extends ",
+              "UserProfileLabels",
+              ">(options?: { dataPath?: string | undefined; } | undefined) => Promise<",
+              "UserProfileWithSecurity",
+              "<D, L> | null>"
+            ],
+            "path": "src/core/packages/user-profile/server/src/request_handler_context.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-server",
+                "id": "def-server.UserProfileRequestHandlerContext.getCurrent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/core/packages/user-profile/server/src/request_handler_context.ts",
+                "lineNumber": 17,
+                "columnNumber": 80,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-user-profile-server",
+                    "id": "def-server.UserProfileRequestHandlerContext.getCurrent.$1.dataPath",
+                    "type": "string",
+                    "tags": [],
+                    "label": "dataPath",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/core/packages/user-profile/server/src/request_handler_context.ts",
+                    "lineNumber": 18,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.UserProfileRequiredPrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileRequiredPrivileges",
+        "description": [
+          "\nThe set of privileges that users associated with the suggested user profile should have for a specified space id."
+        ],
+        "path": "src/core/packages/user-profile/server/src/service.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileRequiredPrivileges.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "\nThe id of the Kibana Space."
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileRequiredPrivileges.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [
+              "\nThe set of the Kibana specific application privileges."
+            ],
+            "signature": [
+              "{ kibana: string[]; }"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.UserProfileService",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileService",
+        "description": [
+          "\nA set of methods to work with Kibana user profiles."
+        ],
+        "path": "src/core/packages/user-profile/server/src/service.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileService.getCurrent",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrent",
+            "description": [
+              "\nRetrieves a user profile for the current user extracted from the specified request. If the profile isn't available,\ne.g. for the anonymous users or users authenticated via authenticating proxies, the `null` value is returned."
+            ],
+            "signature": [
+              "<D extends ",
+              "UserProfileData",
+              ", L extends ",
+              "UserProfileLabels",
+              ">(params: ",
+              "UserProfileGetCurrentParams",
+              ") => Promise<",
+              "UserProfileWithSecurity",
+              "<D, L> | null>"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-server",
+                "id": "def-server.UserProfileService.getCurrent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Get current user profile operation parameters."
+                ],
+                "signature": [
+                  "UserProfileGetCurrentParams"
+                ],
+                "path": "src/core/packages/user-profile/server/src/service.ts",
+                "lineNumber": 32,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileService.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [
+              "\nRetrieves multiple user profiles by their identifiers."
+            ],
+            "signature": [
+              "<D extends ",
+              "UserProfileData",
+              ">(params: ",
+              "UserProfileBulkGetParams",
+              ") => Promise<",
+              "UserProfile",
+              "<D>[]>"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-server",
+                "id": "def-server.UserProfileService.bulkGet.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Bulk get operation parameters."
+                ],
+                "signature": [
+                  "UserProfileBulkGetParams"
+                ],
+                "path": "src/core/packages/user-profile/server/src/service.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileService.suggest",
+            "type": "Function",
+            "tags": [],
+            "label": "suggest",
+            "description": [
+              "\nSuggests multiple user profiles by search criteria."
+            ],
+            "signature": [
+              "<D extends ",
+              "UserProfileData",
+              ">(params: ",
+              "UserProfileSuggestParams",
+              ") => Promise<",
+              "UserProfile",
+              "<D>[]>"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-server",
+                "id": "def-server.UserProfileService.suggest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Suggest operation parameters."
+                ],
+                "signature": [
+                  "UserProfileSuggestParams"
+                ],
+                "path": "src/core/packages/user-profile/server/src/service.ts",
+                "lineNumber": 56,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.UserProfileServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileServiceSetup",
+        "description": [
+          "\nSetup contract for Core's userProfile service.\n"
+        ],
+        "path": "src/core/packages/user-profile/server/src/contracts.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileServiceSetup.registerUserProfileDelegate",
+            "type": "Function",
+            "tags": [],
+            "label": "registerUserProfileDelegate",
+            "description": [
+              "\nRegister the userProfile implementation that will be used and re-exposed by Core.\n"
+            ],
+            "signature": [
+              "(delegate: ",
+              "CoreUserProfileDelegateContract",
+              ") => void"
+            ],
+            "path": "src/core/packages/user-profile/server/src/contracts.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-server",
+                "id": "def-server.UserProfileServiceSetup.registerUserProfileDelegate.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "delegate",
+                "description": [],
+                "signature": [
+                  "CoreUserProfileDelegateContract"
+                ],
+                "path": "src/core/packages/user-profile/server/src/contracts.ts",
+                "lineNumber": 24,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.UserProfileSuggestParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfileSuggestParams",
+        "description": [
+          "\nParameters for the suggest API."
+        ],
+        "path": "src/core/packages/user-profile/server/src/service.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileSuggestParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileSuggestParams.hint",
+            "type": "Object",
+            "tags": [],
+            "label": "hint",
+            "description": [
+              "\nExtra search criteria to improve relevance of the suggestion result. A profile matching the\nspecified hint is ranked higher in the response. But not-matching the hint does not exclude a\nprofile from the response as long as it matches the `name` field query."
+            ],
+            "signature": [
+              "{ uids: string[]; } | undefined"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileSuggestParams.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "\nDesired number of suggestion to return. The default value is 10."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileSuggestParams.dataPath",
+            "type": "string",
+            "tags": [],
+            "label": "dataPath",
+            "description": [
+              "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server",
+            "id": "def-server.UserProfileSuggestParams.requiredPrivileges",
+            "type": "Object",
+            "tags": [],
+            "label": "requiredPrivileges",
+            "description": [
+              "\nThe set of the privileges that users associated with the suggested user profile should have in the specified space.\nIf not specified, privileges check isn't performed and all matched profiles are returned irrespective to the\nprivileges of the associated users."
+            ],
+            "signature": [
+              "UserProfileRequiredPrivileges",
+              " | undefined"
+            ],
+            "path": "src/core/packages/user-profile/server/src/service.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.CoreUserProfileDelegateContract",
+        "type": "Type",
+        "tags": [],
+        "label": "CoreUserProfileDelegateContract",
+        "description": [],
+        "signature": [
+          "UserProfileService",
+          " & { update<D extends ",
+          "UserProfileData",
+          ">(uid: string, data: D): Promise<void>; }"
+        ],
+        "path": "src/core/packages/user-profile/server/src/api_provider.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server",
+        "id": "def-server.UserProfileServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "UserProfileServiceStart",
+        "description": [
+          "\nStart contract for Core's userProfile service.\n"
+        ],
+        "signature": [
+          "UserProfileService"
+        ],
+        "path": "src/core/packages/user-profile/server/src/contracts.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

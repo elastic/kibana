@@ -31,7 +31,9 @@
         "signature": [
           "React.FunctionComponent<Props>"
         ],
-        "path": "x-pack/packages/ml/data_grid/components/data_grid.tsx",
+        "path": "x-pack/platform/packages/private/ml/data_grid/components/data_grid.tsx",
+        "lineNumber": 114,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -39,14 +41,16 @@
           {
             "parentPluginId": "@kbn/ml-data-grid",
             "id": "def-common.DataGrid.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +64,9 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -89,7 +95,9 @@
           "MappingRuntimeFieldType",
           " | undefined) => string | undefined"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 189,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,7 +123,9 @@
               "MappingRuntimeFieldType",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -146,7 +156,9 @@
           },
           " | undefined) => string | undefined"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 234,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -169,7 +181,9 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -200,7 +214,9 @@
           },
           ", resultsField: string) => { id: string; schema: string | undefined; isSortable: boolean; }[]"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 133,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,7 +238,9 @@
                 "text": "FieldTypes"
               }
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 133,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -239,7 +257,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 133,
+            "columnNumber": 74,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -278,7 +298,9 @@
           },
           "[]"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 289,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,7 +322,9 @@
                 "text": "DataGridItem"
               }
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 290,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -317,7 +341,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 291,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -334,7 +360,9 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 292,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -365,7 +393,9 @@
           },
           ") => string[]"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 86,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -387,7 +417,9 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 86,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -418,7 +450,9 @@
           },
           " | undefined"
         ],
-        "path": "x-pack/packages/ml/data_grid/hooks/use_column_chart.tsx",
+        "path": "x-pack/platform/packages/private/ml/data_grid/hooks/use_column_chart.tsx",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -434,7 +468,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/hooks/use_column_chart.tsx",
+            "path": "x-pack/platform/packages/private/ml/data_grid/hooks/use_column_chart.tsx",
+            "lineNumber": 66,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -455,7 +491,9 @@
         "signature": [
           "(obj: unknown, sortId: string) => any"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 453,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -471,7 +509,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 453,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -488,10 +528,84 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 453,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-data-grid",
+        "id": "def-common.getPopulatedFieldsFromKibanaDataView",
+        "type": "Function",
+        "tags": [],
+        "label": "getPopulatedFieldsFromKibanaDataView",
+        "description": [
+          "\nRetrieves just the populated fields from a Kibana data view."
+        ],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", populatedFields?: string[] | undefined) => string[]"
+        ],
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 111,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getPopulatedFieldsFromKibanaDataView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "- The Kibana data view."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-data-grid",
+            "id": "def-common.getPopulatedFieldsFromKibanaDataView.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "populatedFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -509,7 +623,9 @@
         "signature": [
           "(originalObj: object, omitBy?: ((key: string) => boolean) | undefined) => { [key: string]: any; }"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 552,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -525,7 +641,9 @@
             "signature": [
               "object"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 552,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -536,13 +654,13 @@
             "type": "Function",
             "tags": [],
             "label": "omitBy",
-            "description": [
-              "- Optional callback."
-            ],
+            "description": [],
             "signature": [
               "((key: string) => boolean) | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 552,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -580,7 +698,9 @@
             "text": "TopClasses"
           }
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 323,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -602,7 +722,9 @@
                 "text": "DataGridItem"
               }
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 323,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -619,7 +741,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 323,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -649,7 +773,9 @@
             "text": "NumericChartData"
           }
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -665,7 +791,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 59,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -693,7 +821,9 @@
             "text": "OrdinalChartData"
           }
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 110,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -709,7 +839,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 110,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -737,7 +869,9 @@
             "text": "UnsupportedChartData"
           }
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 136,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -753,7 +887,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 136,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -782,7 +918,9 @@
           },
           "[]) => (a: any, b: any, sortingColumnIndex?: number) => number"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 484,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -805,7 +943,9 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 484,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -827,16 +967,12 @@
         ],
         "signature": [
           "(e: unknown, toastNotifications: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           ") => void"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 531,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -852,7 +988,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 532,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -867,15 +1005,11 @@
               "- The toast notifications service."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 533,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -905,7 +1039,9 @@
             "text": "UseDataGridReturnType"
           }
         ],
-        "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+        "path": "x-pack/platform/packages/private/ml/data_grid/hooks/use_data_grid.tsx",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -922,7 +1058,9 @@
               "EuiDataGridColumn",
               "[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+            "path": "x-pack/platform/packages/private/ml/data_grid/hooks/use_data_grid.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -933,13 +1071,13 @@
             "type": "number",
             "tags": [],
             "label": "defaultPageSize",
-            "description": [
-              "- Default page size"
-            ],
+            "description": [],
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+            "path": "x-pack/platform/packages/private/ml/data_grid/hooks/use_data_grid.tsx",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -950,13 +1088,13 @@
             "type": "number",
             "tags": [],
             "label": "defaultVisibleColumnsCount",
-            "description": [
-              "- Default count of visible columns"
-            ],
+            "description": [],
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+            "path": "x-pack/platform/packages/private/ml/data_grid/hooks/use_data_grid.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -967,13 +1105,13 @@
             "type": "Function",
             "tags": [],
             "label": "defaultVisibleColumnsFilter",
-            "description": [
-              "- Optional external columns filter"
-            ],
+            "description": [],
             "signature": [
               "((id: string) => boolean) | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
+            "path": "x-pack/platform/packages/private/ml/data_grid/hooks/use_data_grid.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1029,7 +1167,9 @@
             "text": "RenderCellValue"
           }
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 344,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1052,7 +1192,9 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 345,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1071,7 +1213,9 @@
               "EuiDataGridPaginationProps",
               ", \"pageSize\" | \"pageIndex\">>"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 346,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1095,7 +1239,9 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 347,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1106,13 +1252,13 @@
             "type": "string",
             "tags": [],
             "label": "resultsField",
-            "description": [
-              "- The results field."
-            ],
+            "description": [],
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 348,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1139,7 +1285,9 @@
               "EuiDataGridSetCellProps",
               ") => void) => void) | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 349,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1161,7 +1309,9 @@
         "description": [
           "\nRecord of ES field types."
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1182,7 +1332,9 @@
                 "text": "ES_FIELD_TYPES"
               }
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1198,7 +1350,9 @@
         "description": [
           "\nInterface definition for multi column sorter"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 459,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1211,7 +1365,9 @@
             "description": [
               "\nThe id."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 463,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1227,7 +1383,9 @@
             "signature": [
               "\"asc\" | \"desc\""
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 467,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1240,7 +1398,9 @@
             "description": [
               "\nThe type of the sorter."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+            "lineNumber": 471,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1256,7 +1416,9 @@
         "description": [
           "\nRepresents numeric chart data."
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1279,7 +1441,9 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1292,7 +1456,9 @@
             "description": [
               "\nIdentifier of the chart."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1305,7 +1471,9 @@
             "description": [
               "\nInterval value."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1321,7 +1489,9 @@
             "signature": [
               "[number, number]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1337,7 +1507,9 @@
             "signature": [
               "\"numeric\""
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1353,7 +1525,9 @@
         "description": [
           "\nRepresents a numeric data item."
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1366,7 +1540,9 @@
             "description": [
               "\nNumeric key."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1382,7 +1558,9 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1395,7 +1573,9 @@
             "description": [
               "\nNumber of documents."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1411,7 +1591,9 @@
         "description": [
           "\nRepresents ordinal chart data."
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 83,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1424,7 +1606,9 @@
             "description": [
               "\nCardinality value."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1447,7 +1631,9 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1460,7 +1646,9 @@
             "description": [
               "\nIdentifier of the chart."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1476,7 +1664,9 @@
             "signature": [
               "\"boolean\" | \"ordinal\""
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1492,7 +1682,9 @@
         "description": [
           "\nRepresents an ordinal data item."
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1505,7 +1697,9 @@
             "description": [
               "\nKey."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1521,7 +1715,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1534,7 +1730,9 @@
             "description": [
               "\nNumber of documents."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1550,7 +1748,9 @@
         "description": [
           "\nInformation about the row count."
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1563,7 +1763,9 @@
             "description": [
               "\nRow count."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1580,7 +1782,9 @@
               "SearchTotalHitsRelation",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1596,7 +1800,9 @@
         "description": [
           "\nRepresents unsupported chart data."
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 117,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1609,7 +1815,9 @@
             "description": [
               "\nIdentifier of the chart."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1625,7 +1833,9 @@
             "signature": [
               "\"unsupported\""
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1641,7 +1851,9 @@
         "description": [
           "\nReturn type of the `useDataGrid` custom hook."
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+        "lineNumber": 170,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1654,7 +1866,9 @@
             "description": [
               "\nBoolean flag for CCS warning."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1670,7 +1884,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1683,7 +1899,9 @@
             "description": [
               "\nBoolean flag for charts button visibily."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1700,7 +1918,9 @@
               "EuiDataGridColumn",
               "[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1713,7 +1933,9 @@
             "description": [
               "\nError message."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1729,7 +1951,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 194,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1742,7 +1966,9 @@
             "description": [
               "\nNo data message."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1758,7 +1984,9 @@
             "signature": [
               "(pageSize: number) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1770,7 +1998,9 @@
                 "tags": [],
                 "label": "pageSize",
                 "description": [],
-                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+                "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+                "lineNumber": 73,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1788,7 +2018,9 @@
             "signature": [
               "(pageIndex: number) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 206,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1800,7 +2032,9 @@
                 "tags": [],
                 "label": "pageIndex",
                 "description": [],
-                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+                "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+                "lineNumber": 79,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1818,7 +2052,9 @@
             "signature": [
               "(sortSettings: SortSettings) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 210,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1833,7 +2069,9 @@
                 "signature": [
                   "{ id: string; direction: \"asc\" | \"desc\"; }[]"
                 ],
-                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+                "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+                "lineNumber": 93,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1851,7 +2089,9 @@
             "signature": [
               "{ pageSize: number; pageIndex: number; }"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 214,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1867,7 +2107,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 218,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1882,7 +2124,9 @@
             "description": [
               "\nRow count."
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 222,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1899,7 +2143,9 @@
               "SearchTotalHitsRelation",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 226,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1915,7 +2161,9 @@
             "signature": [
               "(value: React.SetStateAction<boolean>) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 230,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1930,7 +2178,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1956,7 +2206,9 @@
               },
               "[]>) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 234,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1971,7 +2223,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1989,7 +2243,9 @@
             "signature": [
               "(value: React.SetStateAction<string>) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 238,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2004,7 +2260,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2022,7 +2280,9 @@
             "signature": [
               "(value: React.SetStateAction<string>) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 242,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2037,7 +2297,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2057,7 +2319,9 @@
               "EuiDataGridPaginationProps",
               ", \"pageSize\" | \"pageIndex\">>>) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 246,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2072,7 +2336,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2088,7 +2354,7 @@
               "\nSetter function for the row count info."
             ],
             "signature": [
-              "(value: React.SetStateAction<",
+              "(info: ",
               {
                 "pluginId": "@kbn/ml-data-grid",
                 "scope": "common",
@@ -2096,28 +2362,39 @@
                 "section": "def-common.RowCountInfo",
                 "text": "RowCountInfo"
               },
-              ">) => void"
+              ") => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 250,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/ml-data-grid",
                 "id": "def-common.UseDataGridReturnType.setRowCountInfo.$1",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
-                "label": "value",
+                "label": "info",
                 "description": [],
                 "signature": [
-                  "A"
+                  {
+                    "pluginId": "@kbn/ml-data-grid",
+                    "scope": "common",
+                    "docId": "kibKbnMlDataGridPluginApi",
+                    "section": "def-common.RowCountInfo",
+                    "text": "RowCountInfo"
+                  }
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+                "lineNumber": 253,
+                "columnNumber": 21,
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/ml-data-grid",
@@ -2133,7 +2410,9 @@
               "EuiDataGridColumnSortingConfig",
               "[]>) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 254,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2148,7 +2427,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2174,7 +2455,9 @@
               },
               ">) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 258,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2189,7 +2472,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2215,7 +2500,9 @@
               },
               "[]>) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 262,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2230,7 +2517,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2248,7 +2537,9 @@
             "signature": [
               "(value: React.SetStateAction<string[]>) => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 266,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2263,7 +2554,9 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2282,7 +2575,9 @@
               "EuiDataGridColumnSortingConfig",
               "[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2304,7 +2599,9 @@
                 "text": "INDEX_STATUS"
               }
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 274,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2327,7 +2624,9 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 278,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2343,7 +2642,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 282,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2361,7 +2662,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 286,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2384,7 +2687,9 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 290,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2400,7 +2705,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 294,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2416,7 +2723,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 298,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2448,9 +2757,11 @@
             "section": "def-common.UseDataGridReturnType",
             "text": "UseDataGridReturnType"
           },
-          ", \"status\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"pagination\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+          ", \"status\" | \"ccsWarning\" | \"errorMessage\" | \"rowCount\" | \"baseline\" | \"pagination\" | \"visibleColumns\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"predictionFieldName\" | \"resultsField\">"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+        "lineNumber": 126,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2466,7 +2777,9 @@
             "signature": [
               "(options: CellValue) => any"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2481,7 +2794,9 @@
                 "signature": [
                   "CellValue"
                 ],
-                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+                "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+                "lineNumber": 117,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2499,7 +2814,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2515,14 +2832,16 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-date-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
-                "section": "def-common.TimeRange",
+                "section": "def-public.TimeRange",
                 "text": "TimeRange"
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2540,7 +2859,9 @@
         "description": [
           "\nEnum for index status"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2581,7 +2902,9 @@
             "text": "UnsupportedChartData"
           }
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2612,7 +2935,9 @@
             "text": "OrdinalDataItem"
           }
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/field_histograms.ts",
+        "lineNumber": 140,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2629,7 +2954,9 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2646,7 +2973,9 @@
         "signature": [
           "Dictionary<{ order: \"asc\" | \"desc\"; }>"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2663,7 +2992,9 @@
         "signature": [
           "{ pageSize: number; pageIndex: number; }"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2680,7 +3011,9 @@
         "signature": [
           "10"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/common.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/common.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2697,7 +3030,9 @@
         "signature": [
           "(options: CellValue) => any"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2714,7 +3049,9 @@
             "signature": [
               "CellValue"
             ],
-            "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+            "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2734,7 +3071,9 @@
           "SearchTotalHitsRelation",
           " | undefined"
         ],
-        "path": "x-pack/packages/ml/data_grid/lib/types.ts",
+        "path": "x-pack/platform/packages/private/ml/data_grid/lib/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,148 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiExpression,
+  EuiPopover,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiFlexItem,
+  EuiFieldNumber,
+} from '@elastic/eui';
+import { getTimeUnitLabel } from '../lib/get_time_unit_label';
+import type { TIME_UNITS } from '../../application/constants';
+import { getTimeOptions } from '../lib/get_time_options';
+import { ClosablePopoverTitle } from './components';
+import type { IErrorObject } from '../../types';
+import RecommendedTimeSizeWarning from './components/recommended_time_size_warning';
+
+export interface ForLastExpressionProps {
+  description?: string;
+  timeWindowSize?: number;
+  timeWindowUnit?: string;
+  errors: IErrorObject;
+  isTimeSizeBelowRecommended?: boolean;
+  onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
+  onChangeWindowUnit: (selectedWindowUnit: string) => void;
+  popupPosition?:
+    | 'upCenter'
+    | 'upLeft'
+    | 'upRight'
+    | 'downCenter'
+    | 'downLeft'
+    | 'downRight'
+    | 'leftCenter'
+    | 'leftUp'
+    | 'leftDown'
+    | 'rightCenter'
+    | 'rightUp'
+    | 'rightDown';
+  display?: 'fullWidth' | 'inline';
+}
+
+const FOR_LAST_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.common.expressionItems.forTheLast.descriptionLabel',
+  {
+    defaultMessage: 'for the last',
+  }
+);
+
+export const ForLastExpression = ({
+  timeWindowSize,
+  timeWindowUnit = 's',
+  display = 'inline',
+  errors,
+  onChangeWindowSize,
+  onChangeWindowUnit,
+  popupPosition,
+  isTimeSizeBelowRecommended = false,
+  description = FOR_LAST_LABEL,
+}: ForLastExpressionProps) => {
+  const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
+
+  return (
+    <EuiPopover
+      button={
+        <EuiExpression
+          description={description}
+          data-test-subj="forLastExpression"
+          value={`${timeWindowSize ?? '?'} ${getTimeUnitLabel(
+            timeWindowUnit as TIME_UNITS,
+            (timeWindowSize ?? '').toString()
+          )}`}
+          isActive={alertDurationPopoverOpen}
+          onClick={() => {
+            setAlertDurationPopoverOpen(!alertDurationPopoverOpen);
+          }}
+          display={display === 'inline' ? 'inline' : 'columns'}
+          isInvalid={!timeWindowSize}
+        />
+      }
+      isOpen={alertDurationPopoverOpen}
+      closePopover={() => {
+        setAlertDurationPopoverOpen(false);
+      }}
+      ownFocus
+      display={display === 'fullWidth' ? 'block' : 'inline-block'}
+      anchorPosition={popupPosition ?? 'downLeft'}
+      repositionOnScroll
+    >
+      <div>
+        <ClosablePopoverTitle onClose={() => setAlertDurationPopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
+            defaultMessage="For the last"
+          />
+        </ClosablePopoverTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              isInvalid={Number(errors.timeWindowSize?.length) > 0}
+              error={errors.timeWindowSize as string[]}
+            >
+              <EuiFieldNumber
+                data-test-subj="timeWindowSizeNumber"
+                isInvalid={Number(errors.timeWindowSize?.length) > 0}
+                min={0}
+                value={timeWindowSize || ''}
+                onChange={(e) => {
+                  const { value } = e.target;
+                  const timeWindowSizeVal = value !== '' ? parseInt(value, 10) : undefined;
+                  onChangeWindowSize(timeWindowSizeVal);
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSelect
+              data-test-subj="timeWindowUnitSelect"
+              value={timeWindowUnit}
+              onChange={(e) => {
+                onChangeWindowUnit(e.target.value);
+              }}
+              options={getTimeOptions(timeWindowSize ?? 1)}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.common.expressionItems.forTheLast.timeWindowUnitAriaLabel',
+                {
+                  defaultMessage: 'Time unit',
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {isTimeSizeBelowRecommended && <RecommendedTimeSizeWarning />}
+      </div>
+    </EuiPopover>
+  );
+};
+
+// eslint-disable-next-line import/no-default-export
+export { ForLastExpression as default };

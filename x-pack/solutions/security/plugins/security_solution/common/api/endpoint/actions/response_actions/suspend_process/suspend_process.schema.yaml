@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: Suspend Process Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/suspend_process:
+    post:
+      summary: Suspend a process
+      operationId: EndpointSuspendProcessAction
+      description: Suspend a running process on an endpoint.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuspendProcessRouteResponse'
+
+components:
+  schemas:
+    SuspendProcessRouteRequestBody:
+      example:
+        endpoint_ids:
+          - "ed518850-681a-4d60-bb98-e22640cae2a8"
+        parameters:
+          entity_id: "abc123"
+        comment: "suspend the process"
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    pid:
+                      type: integer
+                      description: "The process ID (PID) of the process to suspend."
+                      example: 123
+                      minimum: 1
+                - type: object
+                  properties:
+                    entity_id:
+                      type: string
+                      description: "The entity ID of the process to suspend."
+                      example: "abc123"
+                      minLength: 1
+    SuspendProcessRouteResponse:
+        type: object
+        properties: { }
+        example:
+          data:
+            id: "233db9ea-6733-4849-9226-5a7039c7161d"
+            agents:
+              - "ed518850-681a-4d60-bb98-e22640cae2a8"
+            command: "suspend-process"
+            agentType: "endpoint"
+            isExpired: false
+            isCompleted: true
+            wasSuccessful: true
+            errors: [ ]
+            startedAt: "2022-07-29T19:08:49.126Z"
+            completedAt: "2022-07-29T19:09:44.961Z"
+            outputs:
+              ed518850-681a-4d60-bb98-e22640cae2a8:
+                type: "json"
+                content:
+                  key: "value"
+            createdBy: "myuser"
+            comment: "suspend the process"
+            parameters:
+              entity_id: "abc123"

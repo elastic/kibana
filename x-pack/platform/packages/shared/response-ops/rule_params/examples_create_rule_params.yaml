@@ -1,0 +1,29 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createEsQueryEsqlRuleRequest:
+          $ref: "./es_query/create_es_query_esql_rule_request.yaml"
+        createEsQueryRuleRequest:
+          $ref: "./es_query/create_es_query_rule_request.yaml"
+        createEsQueryKqlRuleRequest:
+          $ref: "./es_query/create_es_query_kql_rule_request.yaml"
+        createIndexThresholdRuleRequest:
+          $ref: "./index_threshold/create_index_threshold_rule_request.yaml"
+        createTrackingContainmentRuleRequest:
+          $ref: "./geo_containment/create_tracking_containment_rule_request.yaml"
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          createEsQueryEsqlRuleResponse:
+            $ref: "./es_query/create_es_query_esql_rule_response.yaml"
+          createEsQueryRuleResponse:
+            $ref: "./es_query/create_es_query_rule_response.yaml"
+          createEsQueryKqlRuleResponse:
+            $ref: "./es_query/create_es_query_kql_rule_response.yaml"
+          createIndexThresholdRuleResponse:
+            $ref: "./index_threshold/create_index_threshold_rule_response.yaml"
+          createTrackingContainmentRuleResponse:
+            $ref: "./geo_containment/create_tracking_containment_rule_response.yaml"

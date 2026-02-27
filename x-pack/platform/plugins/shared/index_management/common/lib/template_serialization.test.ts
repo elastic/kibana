@@ -1,0 +1,184 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { deserializeTemplate, serializeTemplate } from './template_serialization';
+import type { TemplateDeserialized, TemplateSerialized, IndexMode } from '../types';
+import { STANDARD_INDEX_MODE, LOGSDB_INDEX_MODE, TIME_SERIES_MODE } from '../constants';
+
+const defaultSerializedTemplate: TemplateSerialized = {
+  template: {},
+  index_patterns: ['test'],
+  data_stream: {},
+};
+
+const defaultDeserializedTemplate: TemplateDeserialized = {
+  name: 'my_template',
+  indexPatterns: ['test'],
+  indexMode: STANDARD_INDEX_MODE,
+  _kbnMeta: {
+    type: 'default',
+    hasDatastream: true,
+  },
+  allowAutoCreate: 'NO_OVERWRITE',
+};
+
+const allowAutoCreateRadioOptions = ['NO_OVERWRITE', 'TRUE', 'FALSE'];
+const allowAutoCreateSerializedValues = [undefined, true, false];
+const indexModeValues = [STANDARD_INDEX_MODE, LOGSDB_INDEX_MODE, TIME_SERIES_MODE, undefined];
+
+describe('Template serialization', () => {
+  describe('serialization of allow_auto_create parameter', () => {
+    describe('deserializeTemplate()', () => {
+      allowAutoCreateSerializedValues.forEach((value, index) => {
+        test(`correctly deserializes ${value} allow_auto_create value`, () => {
+          expect(
+            deserializeTemplate({
+              ...defaultSerializedTemplate,
+              name: 'my_template',
+              allow_auto_create: value,
+            })
+          ).toHaveProperty('allowAutoCreate', allowAutoCreateRadioOptions[index]);
+        });
+      });
+
+      indexModeValues.forEach((value) => {
+        test(`correctly deserializes ${value} index mode settings value`, () => {
+          expect(
+            deserializeTemplate({
+              ...defaultSerializedTemplate,
+              name: 'my_template',
+              template: {
+                settings: {
+                  index: {
+                    mode: value,
+                  },
+                },
+              },
+            })
+          ).toHaveProperty('indexMode', value);
+        });
+      });
+
+      describe('with logs-*-* index pattern', () => {
+        test('deserializes to logsdb index mode when logsdb is enabled', () => {
+          expect(
+            deserializeTemplate(
+              {
+                ...defaultSerializedTemplate,
+                index_patterns: ['logs-*-*'],
+                name: 'my_template',
+              },
+              undefined,
+              true
+            )
+          ).toHaveProperty('indexMode', LOGSDB_INDEX_MODE);
+        });
+
+        test('deserializes index mode to undefined when logsdb is disabled', () => {
+          expect(
+            deserializeTemplate(
+              {
+                ...defaultSerializedTemplate,
+                index_patterns: ['logs-*-*'],
+                name: 'my_template',
+              },
+              undefined,
+              false
+            )
+          ).toHaveProperty('indexMode', undefined);
+        });
+      });
+    });
+
+    describe('serializeTemplate()', () => {
+      allowAutoCreateRadioOptions.forEach((option, index) => {
+        test(`correctly serializes ${option} allowAutoCreate radio option`, () => {
+          expect(
+            serializeTemplate({
+              ...defaultDeserializedTemplate,
+              allowAutoCreate: option,
+            })
+          ).toHaveProperty('allow_auto_create', allowAutoCreateSerializedValues[index]);
+        });
+      });
+
+      // Only use the first three values (omit undefined)
+      indexModeValues.slice(0, 3).forEach((value) => {
+        test(`correctly serializes ${value} indexMode option`, () => {
+          expect(
+            serializeTemplate({
+              ...defaultDeserializedTemplate,
+              indexMode: value as IndexMode,
+            })
+          ).toHaveProperty('template.settings.index.mode', value);
+        });
+      });
+
+      test(`does not create empty index object when indexMode is undefined`, () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+        });
+        // Should not have settings.index at all when indexMode is undefined and no other index settings exist
+        expect(result.template?.settings?.index).toBeUndefined();
+      });
+
+      test(`does not create empty settings object when no settings are provided`, () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {},
+        });
+        // Should not have settings at all when there are no settings to include
+        expect(result.template?.settings).toBeUndefined();
+      });
+
+      test(`preserves existing index settings when indexMode is undefined`, () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {
+            settings: {
+              index: {
+                number_of_shards: 3,
+              },
+            },
+          },
+        });
+        // Should keep existing index settings
+        expect(result.template?.settings?.index).toEqual({
+          number_of_shards: 3,
+        });
+      });
+
+      test(`adds indexMode to existing index settings`, () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: LOGSDB_INDEX_MODE,
+          template: {
+            settings: {
+              index: {
+                number_of_shards: 3,
+              },
+            },
+          },
+        });
+        // Should merge indexMode with existing index settings
+        expect(result.template?.settings?.index).toEqual({
+          number_of_shards: 3,
+          mode: LOGSDB_INDEX_MODE,
+        });
+      });
+
+      test(`correctly serializes data_stream_options`, () => {
+        expect(
+          serializeTemplate(defaultDeserializedTemplate, { failure_store: { enabled: true } })
+        ).toHaveProperty('template.data_stream_options', { failure_store: { enabled: true } });
+      });
+    });
+  });
+});

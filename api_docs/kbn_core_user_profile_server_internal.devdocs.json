@@ -1,0 +1,315 @@
+{
+  "id": "@kbn/core-user-profile-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-server-internal",
+        "id": "def-server.CoreUserProfileRouteHandlerContext",
+        "type": "Class",
+        "tags": [],
+        "label": "CoreUserProfileRouteHandlerContext",
+        "description": [],
+        "signature": [
+          "CoreUserProfileRouteHandlerContext",
+          " implements ",
+          "UserProfileRequestHandlerContext"
+        ],
+        "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-internal",
+            "id": "def-server.CoreUserProfileRouteHandlerContext.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-server-internal",
+                "id": "def-server.CoreUserProfileRouteHandlerContext.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "userProfileStart",
+                "description": [],
+                "signature": [
+                  "InternalUserProfileServiceStart"
+                ],
+                "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+                "lineNumber": 21,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-user-profile-server-internal",
+                "id": "def-server.CoreUserProfileRouteHandlerContext.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+                "lineNumber": 22,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-internal",
+            "id": "def-server.CoreUserProfileRouteHandlerContext.getCurrent",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrent",
+            "description": [],
+            "signature": [
+              "<D extends ",
+              "UserProfileData",
+              ", L extends ",
+              "UserProfileLabels",
+              ">({ dataPath, }?: { dataPath?: string | undefined; }) => Promise<",
+              "UserProfileWithSecurity",
+              "<D, L> | null>"
+            ],
+            "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-server-internal",
+                "id": "def-server.CoreUserProfileRouteHandlerContext.getCurrent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    dataPath,\n  }",
+                "description": [],
+                "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+                "lineNumber": 27,
+                "columnNumber": 6,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-user-profile-server-internal",
+                    "id": "def-server.CoreUserProfileRouteHandlerContext.getCurrent.$1.dataPath",
+                    "type": "string",
+                    "tags": [],
+                    "label": "dataPath",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/core/packages/user-profile/server-internal/src/user_profile_route_handler_context.ts",
+                    "lineNumber": 28,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server-internal",
+        "id": "def-server.UserProfileService",
+        "type": "Class",
+        "tags": [],
+        "label": "UserProfileService",
+        "description": [],
+        "signature": [
+          "UserProfileService",
+          " implements ",
+          "CoreService",
+          "<",
+          "UserProfileServiceSetup",
+          ", ",
+          "InternalUserProfileServiceStart",
+          ">"
+        ],
+        "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-internal",
+            "id": "def-server.UserProfileService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-profile-server-internal",
+                "id": "def-server.UserProfileService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreContext",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-internal",
+            "id": "def-server.UserProfileService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => ",
+              "UserProfileServiceSetup"
+            ],
+            "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-internal",
+            "id": "def-server.UserProfileService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              "InternalUserProfileServiceStart"
+            ],
+            "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-server-internal",
+            "id": "def-server.UserProfileService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/user-profile/server-internal/src/user_profile_service.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-server-internal",
+        "id": "def-server.InternalUserProfileServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalUserProfileServiceSetup",
+        "description": [],
+        "signature": [
+          "UserProfileServiceSetup"
+        ],
+        "path": "src/core/packages/user-profile/server-internal/src/internal_contracts.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-profile-server-internal",
+        "id": "def-server.InternalUserProfileServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalUserProfileServiceStart",
+        "description": [],
+        "signature": [
+          "UserProfileService",
+          " & Pick<",
+          "CoreUserProfileDelegateContract",
+          ", \"update\">"
+        ],
+        "path": "src/core/packages/user-profile/server-internal/src/internal_contracts.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

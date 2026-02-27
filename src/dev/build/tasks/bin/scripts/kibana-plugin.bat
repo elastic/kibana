@@ -5,7 +5,7 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
-set NODE=%DIR%\node\node.exe
+set NODE=%DIR%\node\default\node.exe
 set NODE_ENV="production"
 
 If Not Exist "%NODE%" (
@@ -32,7 +32,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 set "NODE_OPTIONS=--no-warnings %NODE_OPTIONS%"
 
 TITLE Kibana Server
-"%NODE%" "%DIR%\src\cli_plugin\dist" %*
+"%NODE%" "%DIR%\src\cli\plugin\dist" %*
 
 :finally
 

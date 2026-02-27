@@ -1,5 +1,0 @@
-description: Indicates a successful call.
-content:
-  application/json:
-    schema:
-      $ref: '../schemas/action_response_properties.yaml'

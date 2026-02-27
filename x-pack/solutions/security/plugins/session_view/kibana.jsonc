@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/session-view-plugin",
+  "owner": [
+    "@elastic/contextual-security-apps"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "sessionView",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "timelines",
+      "ruleRegistry"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

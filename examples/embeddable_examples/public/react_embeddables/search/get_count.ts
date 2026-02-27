@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { lastValueFrom } from 'rxjs';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
 
 export async function getCount(
@@ -16,7 +17,9 @@ export async function getCount(
   dataService: DataPublicPluginStart,
   filters: Filter[],
   query: Query | AggregateQuery | undefined,
-  timeRange: TimeRange | undefined
+  timeRange: TimeRange | undefined,
+  abortSignal: AbortSignal,
+  sessionId?: string
 ) {
   const searchSource = await dataService.search.searchSource.create();
   searchSource.setField('index', dataView);
@@ -38,7 +41,9 @@ export async function getCount(
 
   const { rawResponse: resp } = await lastValueFrom(
     searchSource.fetch$({
+      abortSignal,
       legacyHitsTotal: false,
+      sessionId,
     })
   );
   // eslint-disable-next-line no-console

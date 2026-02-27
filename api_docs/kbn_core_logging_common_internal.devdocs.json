@@ -31,7 +31,9 @@
         "signature": [
           "(contextParts: string[]) => string"
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +49,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+            "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
+            "lineNumber": 31,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,7 +74,9 @@
         "signature": [
           "(context: string) => string"
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,7 +92,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+            "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
+            "lineNumber": 40,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -101,12 +109,59 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.BrowserLoggerConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "BrowserLoggerConfig",
+        "description": [],
+        "path": "src/core/packages/logging/common-internal/src/browser_config.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.BrowserLoggerConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/core/packages/logging/common-internal/src/browser_config.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.BrowserLoggerConfig.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\""
+            ],
+            "path": "src/core/packages/logging/common-internal/src/browser_config.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
         "id": "def-common.Conversion",
         "type": "Interface",
         "tags": [],
         "label": "Conversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -120,7 +175,9 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -136,7 +193,9 @@
               "LogRecord",
               ", highlight: boolean) => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -150,7 +209,9 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
+                "lineNumber": 14,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -165,7 +226,9 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
+                "lineNumber": 14,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -183,7 +246,9 @@
             "signature": [
               "((input: string) => void) | undefined"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -197,7 +262,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/types.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/types.ts",
+                "lineNumber": 15,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -223,7 +290,9 @@
         "signature": [
           "\".\""
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -240,7 +309,9 @@
         "signature": [
           "\"default\""
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -257,7 +328,9 @@
         "signature": [
           "\"root\""
         ],
-        "path": "packages/core/logging/core-logging-common-internal/src/logger_context.ts",
+        "path": "src/core/packages/logging/common-internal/src/logger_context.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -271,7 +344,9 @@
         "tags": [],
         "label": "DateConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -285,7 +360,9 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -301,7 +378,9 @@
               "LogRecord",
               ", highlight: boolean, ...matched: any[]) => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -315,7 +394,9 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
+                "lineNumber": 76,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -330,7 +411,9 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
+                "lineNumber": 76,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -345,7 +428,9 @@
                 "signature": [
                   "any[]"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
+                "lineNumber": 76,
+                "columnNumber": 50,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -363,7 +448,9 @@
             "signature": [
               "(rawString: string) => void"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -375,11 +462,83 @@
                 "tags": [],
                 "label": "rawString",
                 "description": [],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/date.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/date.ts",
+                "lineNumber": 61,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-common-internal",
+        "id": "def-common.ErrorConversion",
+        "type": "Object",
+        "tags": [],
+        "label": "ErrorConversion",
+        "description": [],
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.ErrorConversion.pattern",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "signature": [
+              "RegExp"
+            ],
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-common-internal",
+            "id": "def-common.ErrorConversion.convert",
+            "type": "Function",
+            "tags": [],
+            "label": "convert",
+            "description": [],
+            "signature": [
+              "(record: ",
+              "LogRecord",
+              ") => string"
+            ],
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-logging-common-internal",
+                "id": "def-common.ErrorConversion.convert.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "record",
+                "description": [],
+                "signature": [
+                  "LogRecord"
+                ],
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/error.ts",
+                "lineNumber": 19,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -391,7 +550,9 @@
         "tags": [],
         "label": "LevelConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/level.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -405,7 +566,9 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/level.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -421,7 +584,9 @@
               "LogRecord",
               ") => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/level.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -435,7 +600,9 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/level.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/level.ts",
+                "lineNumber": 15,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -453,7 +620,9 @@
         "tags": [],
         "label": "LoggerConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/logger.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +636,9 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/logger.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -483,7 +654,9 @@
               "LogRecord",
               ") => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/logger.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -497,7 +670,9 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/logger.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/logger.ts",
+                "lineNumber": 15,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -515,7 +690,9 @@
         "tags": [],
         "label": "MessageConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/message.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -529,7 +706,9 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/message.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -545,7 +724,9 @@
               "LogRecord",
               ") => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/message.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -559,7 +740,9 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/message.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/message.ts",
+                "lineNumber": 20,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -577,7 +760,9 @@
         "tags": [],
         "label": "MetaConversion",
         "description": [],
-        "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+        "path": "src/core/packages/logging/common-internal/src/layouts/conversions/meta.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -591,7 +776,9 @@
             "signature": [
               "RegExp"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/meta.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -607,7 +794,9 @@
               "LogRecord",
               ") => string"
             ],
-            "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+            "path": "src/core/packages/logging/common-internal/src/layouts/conversions/meta.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -621,7 +810,9 @@
                 "signature": [
                   "LogRecord"
                 ],
-                "path": "packages/core/logging/core-logging-common-internal/src/layouts/conversions/meta.ts",
+                "path": "src/core/packages/logging/common-internal/src/layouts/conversions/meta.ts",
+                "lineNumber": 15,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

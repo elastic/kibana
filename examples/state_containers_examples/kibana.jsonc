@@ -3,6 +3,8 @@
   "id": "@kbn/state-containers-examples-plugin",
   "owner": "@elastic/appex-sharedux",
   "description": "Example plugin of how to use kibanaUtils services",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "stateContainersExamples",
     "server": false,

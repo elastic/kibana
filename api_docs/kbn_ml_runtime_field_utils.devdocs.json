@@ -43,7 +43,9 @@
           "MappingRuntimeFields",
           " | undefined"
         ],
-        "path": "x-pack/packages/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+        "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -66,7 +68,9 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+            "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -84,7 +88,9 @@
               "MappingRuntimeFields",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+            "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -105,7 +111,9 @@
         "signature": [
           "(arg: unknown) => boolean"
         ],
-        "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_field.ts",
+        "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_field.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,7 +129,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_field.ts",
+            "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_field.ts",
+            "lineNumber": 20,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -142,7 +152,9 @@
         "signature": [
           "(arg: unknown) => boolean"
         ],
-        "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+        "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -158,7 +170,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+            "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+            "lineNumber": 18,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -185,7 +199,9 @@
           "MappingRuntimeField",
           "; }"
         ],
-        "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+        "path": "x-pack/platform/packages/shared/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

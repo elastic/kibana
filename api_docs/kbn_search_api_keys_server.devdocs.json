@@ -1,0 +1,103 @@
+{
+  "id": "@kbn/search-api-keys-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-api-keys-server",
+        "id": "def-server.registerSearchApiKeysRoutes",
+        "type": "Function",
+        "tags": [],
+        "label": "registerSearchApiKeysRoutes",
+        "description": [],
+        "signature": [
+          "(router: ",
+          "IRouter",
+          "<",
+          "RequestHandlerContext",
+          ">, logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ") => void"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-keys-server",
+            "id": "def-server.registerSearchApiKeysRoutes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "router",
+            "description": [],
+            "signature": [
+              "IRouter",
+              "<",
+              "RequestHandlerContext",
+              ">"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
+            "lineNumber": 19,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-api-keys-server",
+            "id": "def-server.registerSearchApiKeysRoutes.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts",
+            "lineNumber": 19,
+            "columnNumber": 62,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

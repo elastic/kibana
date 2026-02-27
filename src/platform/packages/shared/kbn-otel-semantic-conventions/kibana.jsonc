@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/otel-semantic-conventions",
+  "owner": [
+    "@elastic/obs-onboarding-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

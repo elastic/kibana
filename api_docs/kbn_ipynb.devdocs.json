@@ -35,9 +35,11 @@
             "section": "def-common.NotebookRendererProps",
             "text": "NotebookRendererProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-ipynb/components/index.tsx",
+        "path": "x-pack/solutions/search/packages/kbn-ipynb/components/index.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +59,9 @@
                 "text": "NotebookRendererProps"
               }
             ],
-            "path": "packages/kbn-ipynb/components/index.tsx",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/components/index.tsx",
+            "lineNumber": 20,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -75,7 +79,9 @@
         "tags": [],
         "label": "NotebookCellType",
         "description": [],
-        "path": "packages/kbn-ipynb/types.ts",
+        "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,7 +95,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,7 +111,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -117,7 +127,9 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -131,7 +143,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,7 +159,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -159,7 +175,9 @@
             "signature": [
               "{ id?: string | undefined; } | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -180,7 +198,9 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -194,7 +214,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -208,7 +230,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -222,7 +246,9 @@
         "tags": [],
         "label": "NotebookDefinition",
         "description": [],
-        "path": "packages/kbn-ipynb/types.ts",
+        "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,7 +269,9 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -264,7 +292,9 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,7 +308,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -292,7 +324,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -306,7 +340,9 @@
         "tags": [],
         "label": "NotebookMetadataType",
         "description": [],
-        "path": "packages/kbn-ipynb/types.ts",
+        "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -320,7 +356,9 @@
             "signature": [
               "{ display_name?: string | undefined; language?: string | undefined; name?: string | undefined; } | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -334,7 +372,9 @@
             "signature": [
               "{ mimetype?: string | undefined; name?: string | undefined; version?: string | undefined; } | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -348,7 +388,9 @@
         "tags": [],
         "label": "NotebookOutputData",
         "description": [],
-        "path": "packages/kbn-ipynb/types.ts",
+        "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -362,7 +404,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -376,7 +420,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -390,7 +436,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -404,7 +452,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -418,7 +468,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -432,7 +484,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -446,7 +500,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -460,7 +516,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -474,7 +532,9 @@
         "tags": [],
         "label": "NotebookOutputType",
         "description": [],
-        "path": "packages/kbn-ipynb/types.ts",
+        "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -488,7 +548,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -502,7 +564,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -516,7 +580,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -530,7 +596,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -551,7 +619,9 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,7 +635,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -579,7 +651,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -593,7 +667,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -607,7 +683,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -621,7 +699,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -635,7 +715,9 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -649,7 +731,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-ipynb/types.ts",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -663,7 +747,9 @@
         "tags": [],
         "label": "NotebookRendererProps",
         "description": [],
-        "path": "packages/kbn-ipynb/components/index.tsx",
+        "path": "x-pack/solutions/search/packages/kbn-ipynb/components/index.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -683,7 +769,9 @@
                 "text": "NotebookDefinition"
               }
             ],
-            "path": "packages/kbn-ipynb/components/index.tsx",
+            "path": "x-pack/solutions/search/packages/kbn-ipynb/components/index.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

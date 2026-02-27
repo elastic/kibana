@@ -18,13 +18,7 @@
             "text": "DiscoverEnhancedPlugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<void, void, ",
           {
             "pluginId": "discoverEnhanced",
@@ -43,7 +37,9 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+        "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,7 +59,9 @@
                 "text": "Config"
               }
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,7 +75,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -89,16 +89,12 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
-                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 38,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -115,13 +111,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               {
                 "pluginId": "discoverEnhanced",
@@ -140,7 +130,9 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -152,13 +144,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   {
                     "pluginId": "discoverEnhanced",
@@ -169,7 +155,9 @@
                   },
                   ", unknown>"
                 ],
-                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 43,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -190,7 +178,9 @@
                     "text": "DiscoverEnhancedSetupDependencies"
                   }
                 ],
-                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 44,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -207,13 +197,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: ",
               {
                 "pluginId": "discoverEnhanced",
@@ -224,7 +208,9 @@
               },
               ") => void"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -236,15 +222,11 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 70,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -265,7 +247,9 @@
                     "text": "DiscoverEnhancedStartDependencies"
                   }
                 ],
-                "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+                "lineNumber": 70,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -283,7 +267,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -321,9 +307,11 @@
           },
           "<",
           "ExploreDataChartActionContext",
-          ">"
+          ", object>"
         ],
-        "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+        "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -337,7 +325,9 @@
             "signature": [
               "\"ACTION_EXPLORE_DATA_CHART\""
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,7 +341,9 @@
             "signature": [
               "\"ACTION_EXPLORE_DATA_CHART\""
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -365,7 +357,9 @@
             "signature": [
               "200"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -381,7 +375,9 @@
               "ExploreDataChartActionContext",
               ") => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -395,7 +391,9 @@
                 "signature": [
                   "ExploreDataChartActionContext"
                 ],
-                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                "lineNumber": 37,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -417,7 +415,9 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -431,7 +431,9 @@
                 "signature": [
                   "ExploreDataChartActionContext"
                 ],
-                "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_chart_action.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -477,9 +479,11 @@
             "section": "def-common.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
-          ">"
+          ", object>"
         ],
-        "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+        "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -493,7 +497,9 @@
             "signature": [
               "\"ACTION_EXPLORE_DATA\""
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -507,7 +513,9 @@
             "signature": [
               "\"ACTION_EXPLORE_DATA\""
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,7 +529,9 @@
             "signature": [
               "200"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/actions/explore_data/explore_data_context_menu_action.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -538,7 +548,9 @@
         "tags": [],
         "label": "DiscoverEnhancedSetupDependencies",
         "description": [],
-        "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+        "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -558,7 +570,9 @@
                 "text": "DiscoverSetup"
               }
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -578,14 +592,16 @@
                 "text": "EmbeddableSetup"
               }
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "discoverEnhanced",
             "id": "def-public.DiscoverEnhancedSetupDependencies.share",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "share",
             "description": [],
@@ -599,7 +615,9 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -611,15 +629,7 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
-              {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
-                "text": "Trigger"
-              },
-              ") => void; readonly registerAction: <Context extends object>(definition: ",
+              "{ readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -627,7 +637,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -635,7 +645,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -643,9 +653,27 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; }"
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any, {}>>) => void; }"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -659,7 +687,9 @@
         "tags": [],
         "label": "DiscoverEnhancedStartDependencies",
         "description": [],
-        "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+        "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -679,7 +709,9 @@
                 "text": "DiscoverStart"
               }
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -699,7 +731,9 @@
                 "text": "EmbeddableStart"
               }
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -720,7 +754,9 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -732,17 +768,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -750,7 +784,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context>) => ",
+              "<Context, {}>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -758,7 +792,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -766,7 +800,23 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly getAction: (id: string) => ",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any, {}>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -774,7 +824,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object, object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -782,7 +832,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object, object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -790,7 +840,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              "<object, object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -798,17 +848,13 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "UiActionsService",
               "; }"
             ],
-            "path": "x-pack/plugins/discover_enhanced/public/plugin.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -839,7 +885,9 @@
         "tags": [],
         "label": "Config",
         "description": [],
-        "path": "x-pack/plugins/discover_enhanced/common/config.ts",
+        "path": "x-pack/platform/plugins/private/discover_enhanced/common/config.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -853,7 +901,9 @@
             "signature": [
               "{ exploreDataInChart: { enabled: boolean; }; exploreDataInContextMenu: { enabled: boolean; }; }"
             ],
-            "path": "x-pack/plugins/discover_enhanced/common/config.ts",
+            "path": "x-pack/platform/plugins/private/discover_enhanced/common/config.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

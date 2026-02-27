@@ -1,0 +1,44 @@
+get:
+  summary: Get single agent configuration
+  operationId: getSingleAgentConfiguration
+  tags:
+    - APM agent configuration
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - name: name
+      in: query
+      description: Service name
+      schema:
+        type: string
+      example: node
+    - name: environment
+      in: query
+      description: Service environment
+      schema:
+        type: string
+      example: prod
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/single_agent_configuration_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

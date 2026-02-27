@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -14,7 +15,7 @@ import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { findPluginDir } from './find_plugin_dir';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
 import * as Tasks from './tasks';
-import { TaskContext } from './task_context';
+import type { TaskContext } from './task_context';
 import { resolveKibanaVersion } from './resolve_kibana_version';
 import { loadConfig } from './config';
 
@@ -82,10 +83,11 @@ export function runCli() {
           sourceDir,
           buildDir,
           kibanaVersion,
+          quiet: true,
         };
 
         await Tasks.initTargets(context);
-        await Tasks.buildBazelPackages(context);
+        await Tasks.buildWebpackPackages(context);
         await Tasks.optimize(context);
         await Tasks.brotliCompressBundles(context);
         await Tasks.writePublicAssets(context);
@@ -159,10 +161,11 @@ export function runCli() {
           sourceDir,
           buildDir: '',
           kibanaVersion: 'kibana',
+          quiet: false,
         };
 
         await Tasks.initDev(context);
-        await Tasks.buildBazelPackages(context);
+        await Tasks.buildWebpackPackages(context);
         await Tasks.optimize(context);
       },
     })

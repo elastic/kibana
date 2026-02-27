@@ -1,7 +1,0 @@
-{
-  "id": "@kbn/bar",
-  "type": "shared-common",
-  "description": "test fixture",
-  "devOnly": false,
-  "owner": "@elastic/kibana-operations",
-}

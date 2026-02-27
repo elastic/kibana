@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -47,7 +48,7 @@ export class LocatorExplorerPlugin implements Plugin<void, void, SetupDeps, Star
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/blob/main/src/plugins/share/common/url_service/locators/README.md',
+          href: 'https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/share/common/url_service/locators/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

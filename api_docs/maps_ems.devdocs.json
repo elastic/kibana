@@ -11,7 +11,9 @@
         "tags": [],
         "label": "EMSConfig",
         "description": [],
-        "path": "src/plugins/maps_ems/common/ems_settings.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,7 +24,9 @@
             "tags": [],
             "label": "includeElasticMapsService",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -33,7 +37,9 @@
             "tags": [],
             "label": "emsUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,7 +50,9 @@
             "tags": [],
             "label": "emsFileApiUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -55,7 +63,9 @@
             "tags": [],
             "label": "emsTileApiUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -66,7 +76,9 @@
             "tags": [],
             "label": "emsLandingPageUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,7 +89,9 @@
             "tags": [],
             "label": "emsFontLibraryUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -97,7 +111,9 @@
         "signature": [
           "{ readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly includeElasticMapsService: boolean; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }"
         ],
-        "path": "src/plugins/maps_ems/config.ts",
+        "path": "src/platform/plugins/private/maps_ems/server/config.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -112,7 +128,9 @@
         "signature": [
           "{ readonly url?: string | undefined; readonly options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }"
         ],
-        "path": "src/plugins/maps_ems/config.ts",
+        "path": "src/platform/plugins/private/maps_ems/server/config.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -126,7 +144,9 @@
       "tags": [],
       "label": "MapsEmsPluginPublicSetup",
       "description": [],
-      "path": "src/plugins/maps_ems/public/index.ts",
+      "path": "src/platform/plugins/private/maps_ems/public/index.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -140,7 +160,9 @@
       "tags": [],
       "label": "MapsEmsPluginPublicStart",
       "description": [],
-      "path": "src/plugins/maps_ems/public/index.ts",
+      "path": "src/platform/plugins/private/maps_ems/public/index.ts",
+      "lineNumber": 26,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -154,7 +176,9 @@
           "signature": [
             "{ readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly includeElasticMapsService: boolean; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }"
           ],
-          "path": "src/plugins/maps_ems/public/index.ts",
+          "path": "src/platform/plugins/private/maps_ems/public/index.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -175,7 +199,9 @@
               "text": "EMSSettings"
             }
           ],
-          "path": "src/plugins/maps_ems/public/index.ts",
+          "path": "src/platform/plugins/private/maps_ems/public/index.ts",
+          "lineNumber": 28,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -193,7 +219,9 @@
             "EMSClient",
             ">"
           ],
-          "path": "src/plugins/maps_ems/public/index.ts",
+          "path": "src/platform/plugins/private/maps_ems/public/index.ts",
+          "lineNumber": 29,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -213,7 +241,9 @@
         "tags": [],
         "label": "EMSSettings",
         "description": [],
-        "path": "src/plugins/maps_ems/common/ems_settings.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -227,7 +257,9 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -247,7 +279,9 @@
                     "text": "EMSConfig"
                   }
                 ],
-                "path": "src/plugins/maps_ems/common/ems_settings.ts",
+                "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+                "lineNumber": 34,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -262,7 +296,9 @@
                 "signature": [
                   "() => boolean"
                 ],
-                "path": "src/plugins/maps_ems/common/ems_settings.ts",
+                "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+                "lineNumber": 34,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -280,7 +316,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -296,7 +334,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -312,7 +352,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -328,7 +370,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -344,7 +388,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -360,7 +406,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -376,7 +424,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -392,7 +442,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -408,7 +460,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -430,7 +484,9 @@
       "tags": [],
       "label": "MapsEmsPluginServerSetup",
       "description": [],
-      "path": "src/plugins/maps_ems/server/plugin.ts",
+      "path": "src/platform/plugins/private/maps_ems/server/plugin.ts",
+      "lineNumber": 17,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -444,7 +500,9 @@
           "signature": [
             "{ readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly includeElasticMapsService: boolean; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }"
           ],
-          "path": "src/plugins/maps_ems/server/plugin.ts",
+          "path": "src/platform/plugins/private/maps_ems/server/plugin.ts",
+          "lineNumber": 18,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -465,7 +523,9 @@
               "text": "EMSSettings"
             }
           ],
-          "path": "src/plugins/maps_ems/server/plugin.ts",
+          "path": "src/platform/plugins/private/maps_ems/server/plugin.ts",
+          "lineNumber": 19,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -485,7 +545,9 @@
         "tags": [],
         "label": "EMSSettings",
         "description": [],
-        "path": "src/plugins/maps_ems/common/ems_settings.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -499,7 +561,9 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -519,7 +583,9 @@
                     "text": "EMSConfig"
                   }
                 ],
-                "path": "src/plugins/maps_ems/common/ems_settings.ts",
+                "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+                "lineNumber": 34,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -534,7 +600,9 @@
                 "signature": [
                   "() => boolean"
                 ],
-                "path": "src/plugins/maps_ems/common/ems_settings.ts",
+                "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+                "lineNumber": 34,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -552,7 +620,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -568,7 +638,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -584,7 +656,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -600,7 +674,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -616,7 +692,9 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -632,7 +710,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -648,7 +728,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -664,7 +746,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -680,7 +764,9 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -699,7 +785,9 @@
         "tags": [],
         "label": "EMSConfig",
         "description": [],
-        "path": "src/plugins/maps_ems/common/ems_settings.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -710,7 +798,9 @@
             "tags": [],
             "label": "includeElasticMapsService",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -721,7 +811,9 @@
             "tags": [],
             "label": "emsUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -732,7 +824,9 @@
             "tags": [],
             "label": "emsFileApiUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -743,7 +837,9 @@
             "tags": [],
             "label": "emsTileApiUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -754,7 +850,9 @@
             "tags": [],
             "label": "emsLandingPageUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -765,7 +863,9 @@
             "tags": [],
             "label": "emsFontLibraryUrl",
             "description": [],
-            "path": "src/plugins/maps_ems/common/ems_settings.ts",
+            "path": "src/platform/plugins/private/maps_ems/common/ems_settings.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -783,9 +883,11 @@
         "label": "DEFAULT_EMS_DARKMAP_ID",
         "description": [],
         "signature": [
-          "\"dark_map\""
+          "\"dark_map_v9\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -800,7 +902,9 @@
         "signature": [
           "\"https://vector.maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -815,7 +919,9 @@
         "signature": [
           "\"https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -830,7 +936,9 @@
         "signature": [
           "\"https://maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -845,7 +953,9 @@
         "signature": [
           "\"2023-10-31\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -858,9 +968,11 @@
         "label": "DEFAULT_EMS_ROADMAP_DESATURATED_ID",
         "description": [],
         "signature": [
-          "\"road_map_desaturated\""
+          "\"road_map_desaturated_v9\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -875,7 +987,9 @@
         "signature": [
           "\"road_map\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -890,7 +1004,9 @@
         "signature": [
           "\"https://tiles.maps.elastic.co\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -905,7 +1021,43 @@
         "signature": [
           "\"kibana\""
         ],
-        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsEms",
+        "id": "def-common.EMS_DARKMAP_BOREALIS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EMS_DARKMAP_BOREALIS_ID",
+        "description": [],
+        "signature": [
+          "\"dark_map_v9\""
+        ],
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsEms",
+        "id": "def-common.EMS_ROADMAP_BOREALIS_DESATURATED_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EMS_ROADMAP_BOREALIS_DESATURATED_ID",
+        "description": [],
+        "signature": [
+          "\"road_map_desaturated_v9\""
+        ],
+        "path": "src/platform/plugins/private/maps_ems/common/ems_defaults.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -920,7 +1072,9 @@
         "signature": [
           "\"maps\""
         ],
-        "path": "src/plugins/maps_ems/common/index.ts",
+        "path": "src/platform/plugins/private/maps_ems/common/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

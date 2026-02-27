@@ -1,0 +1,73 @@
+{
+  "cat.thread_pool": {
+    "url_params": {
+      "format": [
+        "text"
+      ],
+      "help": "__flag__",
+      "v": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "h": [
+        "active",
+        "completed",
+        "core",
+        "ephemeral_id",
+        "host",
+        "ip",
+        "keep_alive",
+        "largest",
+        "max",
+        "name",
+        "node_id",
+        "node_name",
+        "pid",
+        "pool_size",
+        "port",
+        "queue",
+        "queue_size",
+        "rejected",
+        "size",
+        "type"
+      ],
+      "s": [],
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/thread_pool",
+      "_cat/thread_pool/{thread_pool_patterns}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-thread-pool",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

@@ -20,10 +20,10 @@
     "classes": [
       {
         "parentPluginId": "@kbn/ml-url-state",
-        "id": "def-common.PageUrlStateService",
+        "id": "def-common.UrlStateService",
         "type": "Class",
         "tags": [],
-        "label": "PageUrlStateService",
+        "label": "UrlStateService",
         "description": [
           "\nService for managing URL state of particular page."
         ],
@@ -32,21 +32,23 @@
             "pluginId": "@kbn/ml-url-state",
             "scope": "common",
             "docId": "kibKbnMlUrlStatePluginApi",
-            "section": "def-common.PageUrlStateService",
-            "text": "PageUrlStateService"
+            "section": "def-common.UrlStateService",
+            "text": "UrlStateService"
           },
           "<T>"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 212,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.getPageUrlState$",
+            "id": "def-common.UrlStateService.getUrlState$",
             "type": "Function",
             "tags": [],
-            "label": "getPageUrlState$",
+            "label": "getUrlState$",
             "description": [
               "\nProvides updates for the page URL state."
             ],
@@ -55,7 +57,9 @@
               "Observable",
               "<T>"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 219,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -63,15 +67,17 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.getPageUrlState",
+            "id": "def-common.UrlStateService.getUrlState",
             "type": "Function",
             "tags": [],
-            "label": "getPageUrlState",
+            "label": "getUrlState",
             "description": [],
             "signature": [
               "() => T | null"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 226,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -79,7 +85,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.updateUrlState",
+            "id": "def-common.UrlStateService.updateUrlState",
             "type": "Function",
             "tags": [],
             "label": "updateUrlState",
@@ -87,13 +93,15 @@
             "signature": [
               "(update: Partial<T>, replaceState?: boolean | undefined) => void"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 230,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.updateUrlState.$1",
+                "id": "def-common.UrlStateService.updateUrlState.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "update",
@@ -101,14 +109,16 @@
                 "signature": [
                   "Partial<T>"
                 ],
-                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+                "lineNumber": 230,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.updateUrlState.$2",
+                "id": "def-common.UrlStateService.updateUrlState.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "replaceState",
@@ -116,7 +126,9 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+                "lineNumber": 230,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -126,7 +138,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.setCurrentState",
+            "id": "def-common.UrlStateService.setCurrentState",
             "type": "Function",
             "tags": [],
             "label": "setCurrentState",
@@ -136,13 +148,15 @@
             "signature": [
               "(currentState: T) => void"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 237,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.setCurrentState.$1",
+                "id": "def-common.UrlStateService.setCurrentState.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "currentState",
@@ -150,7 +164,9 @@
                 "signature": [
                   "T"
                 ],
-                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+                "lineNumber": 241,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -160,7 +176,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-url-state",
-            "id": "def-common.PageUrlStateService.setUpdateCallback",
+            "id": "def-common.UrlStateService.setUpdateCallback",
             "type": "Function",
             "tags": [],
             "label": "setUpdateCallback",
@@ -170,13 +186,15 @@
             "signature": [
               "(callback: (update: Partial<T>, replaceState?: boolean | undefined) => void) => void"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 245,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-url-state",
-                "id": "def-common.PageUrlStateService.setUpdateCallback.$1",
+                "id": "def-common.UrlStateService.setUpdateCallback.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -184,7 +202,9 @@
                 "signature": [
                   "(update: Partial<T>, replaceState?: boolean | undefined) => void"
                 ],
-                "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+                "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+                "lineNumber": 249,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -209,7 +229,9 @@
         "signature": [
           "(queryParam: string) => boolean"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +245,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 66,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -250,7 +274,9 @@
           },
           "<any>"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -264,7 +290,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 70,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -285,7 +313,9 @@
           "UrlState",
           ">>"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 104,
+        "columnNumber": 16,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -300,7 +330,9 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -315,9 +347,11 @@
         "label": "UrlStateProvider",
         "description": [],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 106,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,7 +365,9 @@
             "signature": [
               "{ children?: React.ReactNode; }"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 106,
+            "columnNumber": 66,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -350,17 +386,27 @@
           "\nHook for managing the URL state of the page."
         ],
         "signature": [
-          "<T extends PageUrlState>(pageKey: T[\"pageKey\"], defaultState?: T[\"pageUrlState\"] | undefined) => [T[\"pageUrlState\"], (update: Partial<T[\"pageUrlState\"]>, replaceState?: boolean | undefined) => void, ",
+          "<T extends ",
           {
             "pluginId": "@kbn/ml-url-state",
             "scope": "common",
             "docId": "kibKbnMlUrlStatePluginApi",
-            "section": "def-common.PageUrlStateService",
-            "text": "PageUrlStateService"
+            "section": "def-common.PageUrlState",
+            "text": "PageUrlState"
+          },
+          ">(pageKey: T[\"pageKey\"], defaultState?: T[\"pageUrlState\"] | undefined) => [T[\"pageUrlState\"], (update: Partial<T[\"pageUrlState\"]>, replaceState?: boolean | undefined) => void, ",
+          {
+            "pluginId": "@kbn/ml-url-state",
+            "scope": "common",
+            "docId": "kibKbnMlUrlStatePluginApi",
+            "section": "def-common.UrlStateService",
+            "text": "UrlStateService"
           },
           "<T[\"pageUrlState\"]>]"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 366,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -374,7 +420,9 @@
             "signature": [
               "T[\"pageKey\"]"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 367,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -389,7 +437,9 @@
             "signature": [
               "T[\"pageUrlState\"] | undefined"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 368,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -424,7 +474,9 @@
           },
           "<unknown>, value?: unknown, replaceState?: boolean | undefined) => void]"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 187,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -444,7 +496,9 @@
                 "text": "Accessor"
               }
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 188,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -472,7 +526,9 @@
           },
           "<TValue>"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -486,7 +542,170 @@
             "signature": [
               "[id: string]:  TValue"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.ListingPageUrlState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ListingPageUrlState",
+        "description": [],
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.sortDirection",
+            "type": "string",
+            "tags": [],
+            "label": "sortDirection",
+            "description": [],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.queryText",
+            "type": "string",
+            "tags": [],
+            "label": "queryText",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.showPerPageOptions",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showPerPageOptions",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.ListingPageUrlState.showAll",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showAll",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-url-state",
+        "id": "def-common.PageUrlState",
+        "type": "Interface",
+        "tags": [],
+        "label": "PageUrlState",
+        "description": [],
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 254,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlState.pageKey",
+            "type": "string",
+            "tags": [],
+            "label": "pageKey",
+            "description": [],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 255,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-url-state",
+            "id": "def-common.PageUrlState.pageUrlState",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "pageUrlState",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 256,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -506,7 +725,9 @@
         "signature": [
           "\"_a\" | \"_g\""
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -537,7 +758,9 @@
           },
           "<any>, value?: any, replaceState?: boolean | undefined) => void"
         ],
-        "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+        "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -552,7 +775,9 @@
             "signature": [
               "\"_a\" | \"_g\""
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -574,7 +799,9 @@
               },
               "<any>"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -588,7 +815,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -602,7 +831,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
+            "path": "x-pack/platform/packages/private/ml/url_state/src/url_state.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

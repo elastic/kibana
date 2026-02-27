@@ -1,0 +1,11 @@
+type: string
+description: >
+  The feature that uses the connector.
+enum:
+  - alerting 
+  - cases
+  - generativeAIForSecurity
+  - generativeAIForObservability
+  - generativeAIForSearchPlayground
+  - siem
+  - uptime

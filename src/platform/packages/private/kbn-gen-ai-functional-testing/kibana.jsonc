@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/gen-ai-functional-testing",
+  "owner": [
+    "@elastic/appex-ai-infra"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

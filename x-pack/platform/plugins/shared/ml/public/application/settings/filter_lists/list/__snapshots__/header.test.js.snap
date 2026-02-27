@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Filter Lists Header renders header 1`] = `
+<div>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-baseline-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-baseline-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <span
+            class="emotion-euiTextColor-subdued"
+          >
+            <p>
+              3 in total
+            </p>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-m-flexStart-baseline-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+            data-test-subj="mlFilterListRefreshButton"
+            type="button"
+          >
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+            >
+              <span
+                color="inherit"
+                data-euiicon-type="refresh"
+              />
+              <span
+                class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
+              >
+                Refresh
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      <span
+        class="emotion-euiTextColor-subdued"
+      >
+        Filter lists contain values that you can use to include or exclude events from the machine learning analysis.
+You can use the same filter list in multiple jobs.
+        <br />
+        <a
+          class="euiLink emotion-euiLink-primary"
+          href="https://www.elastic.co/guide/en/machine-learning/current/ml-rules.html"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Learn more
+          <span
+            class="emotion-EuiExternalLinkIcon"
+            data-euiicon-type="popout"
+            role="presentation"
+          />
+          <span
+            class="emotion-euiScreenReaderOnly"
+          >
+            (external, opens in a new tab or window)
+          </span>
+        </a>
+      </span>
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+</div>
+`;

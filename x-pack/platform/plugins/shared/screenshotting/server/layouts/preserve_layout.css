@@ -1,0 +1,36 @@
+/**
+ *  Global utilities
+ */
+
+/* elements can hide themselves when shared */
+.hide-for-sharing {
+  display: none !important;
+}
+
+/* some elements needs to be stretched to be shared */
+.stretch-for-sharing {
+  margin: 0px;
+}
+
+/**
+* Global overrides
+*/
+
+/**
+ * The global banner (e.g. "Help us improve Elastic...") should not print.
+ */
+#globalBannerList {
+  display: none;
+}
+
+
+/**
+ * Specific for lens editor workspace screenshotting
+ */
+.lnsWorkspacePanelWrapper__contentFlexGroup {
+  display: block  !important;
+}
+.lnsVisualizationWorkspace_container {
+  padding: 0 !important;
+  border: 0 !important;
+}

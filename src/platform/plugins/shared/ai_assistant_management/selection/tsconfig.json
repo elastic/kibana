@@ -1,0 +1,32 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-chrome-browser",
+    "@kbn/typed-react-router-config",
+    "@kbn/serverless",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
+    "@kbn/features-plugin",
+    "@kbn/config",
+    "@kbn/doc-links",
+    "@kbn/core-ui-settings-common",
+    "@kbn/cloud-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/spaces-plugin",
+    "@kbn/ai-assistant-common",
+    "@kbn/ai-agent-confirmation-modal",
+    "@kbn/management-settings-ids"
+  ],
+  "exclude": ["target/**/*"]
+}

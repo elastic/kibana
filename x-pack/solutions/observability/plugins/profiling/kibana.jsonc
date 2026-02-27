@@ -1,0 +1,44 @@
+{
+  "type": "plugin",
+  "id": "@kbn/profiling-plugin",
+  "owner": [
+    "@elastic/obs-presentation-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "profiling",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "profiling"
+    ],
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "dataViews",
+      "features",
+      "licensing",
+      "observability",
+      "observabilityShared",
+      "unifiedSearch",
+      "kql",
+      "share",
+      "profilingDataAccess"
+    ],
+    "optionalPlugins": [
+      "spaces",
+      "usageCollection",
+      "security",
+      "cloud",
+      "fleet",
+      "observabilityAIAssistant",
+      "apmDataAccess"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

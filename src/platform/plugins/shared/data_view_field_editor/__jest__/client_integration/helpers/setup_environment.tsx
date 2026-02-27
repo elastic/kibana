@@ -1,0 +1,192 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+// eslint-disable-next-line max-classes-per-file
+import './jest.mocks';
+
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import { merge } from 'lodash';
+
+import { defer, BehaviorSubject } from 'rxjs';
+import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/data_views/data_view_lazy.stub';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { NULL_LABEL } from '@kbn/field-formats-common';
+import { PreviewController } from '../../../public/components/preview/preview_controller';
+import type { Context } from '../../../public/components/field_editor_context';
+import { FieldEditorProvider } from '../../../public/components/field_editor_context';
+import { FieldPreviewProvider } from '../../../public/components/preview';
+import type { ApiService } from '../../../public/lib';
+import { initApi } from '../../../public/lib';
+import { init as initHttpRequests } from './http_requests';
+import type { RuntimeFieldSubFields } from '../../../public/shared_imports';
+
+const dataStart = dataPluginMock.createStartContract();
+const { search } = dataStart;
+
+export const spySearchQuery = jest.fn();
+export const spySearchQueryResponse = jest.fn(() => Promise.resolve({}));
+export const spyIndexPatternGetByName = jest.fn().mockImplementation(() => {});
+export const spyGetFieldsForWildcard = jest.fn().mockResolvedValue({ fields: [] });
+
+let searchResponseDelay = 0;
+
+// Add latency to the search request
+export const setSearchResponseLatency = (ms: number) => {
+  searchResponseDelay = ms;
+};
+
+spySearchQuery.mockImplementation(() => {
+  return defer(() => {
+    if (searchResponseDelay === 0) {
+      // no delay, it is synchronous
+      return spySearchQueryResponse();
+    }
+
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(undefined);
+      }, searchResponseDelay);
+    }).then(() => {
+      return spySearchQueryResponse();
+    });
+  });
+});
+search.search = spySearchQuery;
+
+let apiService: ApiService;
+
+export const setupEnvironment = () => {
+  const { httpSetup, httpRequestsMockHelpers } = initHttpRequests();
+  apiService = initApi(httpSetup);
+
+  return {
+    server: httpSetup,
+    httpRequestsMockHelpers,
+  };
+};
+
+class MockDefaultFieldFormat extends FieldFormat {
+  static id = 'testDefaultFormat';
+  static title = 'TestDefaultFormat';
+}
+
+class MockCustomFieldFormat extends FieldFormat {
+  static id = 'upper';
+  static title = 'UpperCaseString';
+
+  // we need to catch possible null values and block them before running the transformation
+  // like in the real formatter.
+  htmlConvert = (value: unknown) =>
+    `<span>${value == null ? NULL_LABEL : String(value).toUpperCase()}</span>`;
+}
+
+// The format options available in the dropdown select for our tests.
+export const fieldFormatsOptions = [MockCustomFieldFormat];
+
+export const indexPatternNameForTest = 'testIndexPattern';
+
+export const WithFieldEditorDependencies =
+  <T extends object = { [key: string]: unknown }>(
+    Comp: FunctionComponent<T>,
+    overridingDependencies?: Partial<Context>,
+    getByNameOverride?: () => any
+  ) =>
+  (props: T) => {
+    // Setup mocks
+    (
+      fieldFormats.getByFieldType as jest.MockedFunction<(typeof fieldFormats)['getByFieldType']>
+    ).mockReturnValue(fieldFormatsOptions);
+
+    (
+      fieldFormats.getDefaultType as jest.MockedFunction<(typeof fieldFormats)['getDefaultType']>
+    ).mockReturnValue(MockDefaultFieldFormat);
+
+    (
+      fieldFormats.getInstance as jest.MockedFunction<(typeof fieldFormats)['getInstance']>
+    ).mockImplementation((id: string) => {
+      if (id === MockCustomFieldFormat.id) {
+        return new MockCustomFieldFormat();
+      } else {
+        return new MockDefaultFieldFormat();
+      }
+    });
+
+    (
+      fieldFormats.getDefaultInstance as jest.MockedFunction<(typeof fieldFormats)['getInstance']>
+    ).mockImplementation(() => {
+      return new MockDefaultFieldFormat();
+    });
+
+    const dataView = createStubDataViewLazy({
+      spec: {
+        title: indexPatternNameForTest,
+      },
+      deps: {
+        apiClient: {
+          getFieldsForWildcard: spyGetFieldsForWildcard,
+        },
+      },
+    });
+
+    jest
+      .spyOn(dataView, 'getFieldByName')
+      .mockImplementation(getByNameOverride || spyIndexPatternGetByName);
+
+    const dependencies: Context = {
+      dataView,
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      fieldTypeToProcess: 'runtime',
+      links: {
+        runtimePainless: 'https://elastic.co',
+      },
+      services: {
+        notifications: notificationServiceMock.createStartContract(),
+        search,
+        api: apiService,
+      },
+      fieldFormatEditors: {
+        getAll: () => [],
+        getById: () => undefined,
+      },
+      fieldFormats,
+      fieldName$: new BehaviorSubject(''),
+      subfields$: new BehaviorSubject<RuntimeFieldSubFields | undefined>(undefined),
+    };
+
+    const mergedDependencies = merge({}, dependencies, overridingDependencies);
+    const previewController = new PreviewController({
+      deps: {
+        dataViews: dataViewPluginMocks.createStartContract(),
+        search,
+        fieldFormats,
+        usageCollection: {
+          reportUiCounter: jest.fn(),
+        } as UsageCollectionStart,
+        notifications: notificationServiceMock.createStartContract(),
+      },
+      dataView,
+      dataViewToUpdate: dataView,
+      onSave: jest.fn(),
+      fieldTypeToProcess: 'runtime',
+    });
+
+    return (
+      <FieldEditorProvider {...mergedDependencies}>
+        <FieldPreviewProvider controller={previewController}>
+          <Comp {...props} />
+        </FieldPreviewProvider>
+      </FieldEditorProvider>
+    );
+  };

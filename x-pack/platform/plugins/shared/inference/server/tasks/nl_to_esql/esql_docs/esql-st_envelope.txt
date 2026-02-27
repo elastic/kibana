@@ -1,0 +1,32 @@
+# ST_ENVELOPE
+
+The ST_ENVELOPE function determines the minimum bounding box of the supplied geometry.
+
+## Syntax
+
+`ST_ENVELOPE(geometry, point, point, point, point)`
+
+### Parameters
+
+#### geometry
+
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
+
+## Examples
+
+Finds the minimum bounding box for the city boundary of Copenhagen airport and displays the abbreviation, airport name, and the bounding box.
+```esql
+FROM airport_city_boundaries
+| WHERE abbrev == "CPH"
+| EVAL envelope = ST_ENVELOPE(city_boundary)
+| KEEP abbrev, airport, envelope
+```
+
+Calculates the minimum and maximum x and y coordinates from the bounding box of Copenhagen airport's city boundary and displays them along with the abbreviation and airport name.
+```esql
+FROM airport_city_boundaries
+| WHERE abbrev == "CPH"
+| EVAL envelope = ST_ENVELOPE(city_boundary)
+| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
+| KEEP abbrev, airport, xmin, xmax, ymin, ymax
+```

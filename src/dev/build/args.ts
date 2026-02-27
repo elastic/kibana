@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import getopts from 'getopts';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
-import { BuildOptions } from './build_distributables';
+import type { BuildOptions } from './build_distributables';
 
 export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
@@ -21,7 +22,6 @@ export function readCliArgs(argv: string[]) {
       'skip-generic-folders',
       'skip-platform-folders',
       'skip-os-packages',
-      'skip-canvas-shareable-runtime',
       'rpm',
       'deb',
       'docker-context-use-local-artifact',
@@ -30,8 +30,9 @@ export function readCliArgs(argv: string[]) {
       'docker-push',
       'skip-docker-contexts',
       'skip-docker-ubi',
-      'skip-docker-ubuntu',
+      'skip-docker-wolfi',
       'skip-docker-cloud',
+      'skip-docker-cloud-fips',
       'skip-docker-serverless',
       'skip-docker-fips',
       'release',
@@ -47,6 +48,7 @@ export function readCliArgs(argv: string[]) {
       'help',
       'with-test-plugins',
       'with-example-plugins',
+      'serverless',
     ],
     string: ['docker-namespace', 'epr-registry'],
     alias: {
@@ -137,17 +139,19 @@ export function readCliArgs(argv: string[]) {
     createCdnAssets: !Boolean(flags['skip-cdn-assets']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
-    createDockerUbuntu:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
+    createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerCloudFIPS:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud-fips']),
     createDockerServerless:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless']),
+      (isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
+      Boolean(flags.serverless),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
     createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
+    targetServerlessPlatforms: Boolean(flags.serverless),
     eprRegistry: flags['epr-registry'],
-    buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
     withExamplePlugins: Boolean(flags['with-example-plugins']),
     withTestPlugins: Boolean(flags['with-test-plugins']),
   };

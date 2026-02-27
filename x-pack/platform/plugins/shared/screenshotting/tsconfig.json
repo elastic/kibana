@@ -1,0 +1,35 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/utility-types",
+    "@kbn/logging",
+    "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/utils",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server",
+    "@kbn/core-plugins-server",
+    "@kbn/task-manager-plugin",
+    "@kbn/screenshotting-server",
+    "@kbn/handlebars",
+    "@kbn/setup-node-env",
+  ],
+  "exclude": [
+    "target/**/*",
+    "chromium/**/*"
+  ]
+}

@@ -1,0 +1,336 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import _ from 'lodash';
+import React from 'react';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon } from '@elastic/eui';
+import type { Feature, FeatureCollection } from 'geojson';
+import type { FilterSpecification, Map as MbMap, GeoJSONSource } from '@kbn/mapbox-gl';
+import type { Writable } from '@kbn/utility-types';
+import {
+  EMPTY_FEATURE_COLLECTION,
+  FEATURE_VISIBLE_PROPERTY_NAME,
+  GEOJSON_FEATURE_ID_PROPERTY_NAME,
+  LAYER_TYPE,
+  SOURCE_BOUNDS_DATA_REQUEST_ID,
+} from '../../../../../common/constants';
+import type {
+  StyleMetaDescriptor,
+  Timeslice,
+  VectorLayerDescriptor,
+} from '../../../../../common/descriptor_types';
+import type { TimesliceMaskConfig } from '../../../util/mb_filter_expressions';
+import type { DataRequestContext } from '../../../../actions';
+import type { IVectorStyle } from '../../../styles/vector/vector_style';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+import type { ISource } from '../../../sources/source';
+import type { IVectorSource } from '../../../sources/vector_source';
+import type { LayerMessage, LayerIcon } from '../../layer';
+import { AbstractLayer } from '../../layer';
+import {
+  AbstractVectorLayer,
+  noResultsIcon,
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+} from '../vector_layer';
+import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
+import { syncGeojsonSourceData } from './geojson_source_data';
+import { performInnerJoins } from './perform_inner_joins';
+import { pluckStyleMetaFromFeatures } from './pluck_style_meta_from_features';
+
+export class GeoJsonVectorLayer extends AbstractVectorLayer {
+  static createDescriptor(
+    options: Partial<VectorLayerDescriptor>,
+    mapColors?: string[]
+  ): VectorLayerDescriptor {
+    const layerDescriptor = super.createDescriptor(options) as Writable<VectorLayerDescriptor>;
+    layerDescriptor.type = LAYER_TYPE.GEOJSON_VECTOR;
+
+    if (!options.style) {
+      const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
+      layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
+    }
+
+    if (!options.joins) {
+      layerDescriptor.joins = [];
+    }
+
+    return layerDescriptor;
+  }
+
+  isLayerLoading(zoom: number) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+
+    const isSourceLoading = super.isLayerLoading(zoom);
+    if (isSourceLoading) {
+      return true;
+    }
+
+    // Do not check join loading status when there are no source features. Why?
+    // syncMeta short circuits join loading when there are no source features
+    // because there is no reason to fetch join results when there is nothing to join with
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection || featureCollection?.features?.length === 0) {
+      return false;
+    }
+
+    return this._isLoadingJoins();
+  }
+
+  _isTiled(): boolean {
+    // Uses untiled maplibre source 'geojson'
+    return false;
+  }
+
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
+    const isStaticLayer = !this.getSource().isBoundsAware();
+    return isStaticLayer || this.hasJoins()
+      ? getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins())
+      : super.getBounds(getDataRequestContext);
+  }
+
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
+    const featureCollection = this._getSourceFeatureCollection();
+
+    if (!featureCollection || featureCollection.features.length === 0) {
+      return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
+    }
+
+    if (
+      this.getJoins().length &&
+      !featureCollection.features.some(
+        (feature) => feature.properties?.[FEATURE_VISIBLE_PROPERTY_NAME]
+      )
+    ) {
+      return {
+        icon: noResultsIcon,
+        tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundInJoinTooltip', {
+          defaultMessage: `No matching results found in term joins`,
+        }),
+      };
+    }
+
+    const sourceDataRequest = this.getSourceDataRequest();
+    const { tooltipContent, areResultsTrimmed, isDeprecated } =
+      this.getSource().getSourceStatus(sourceDataRequest);
+    return {
+      icon: isDeprecated ? (
+        <EuiIcon type="warning" color="danger" />
+      ) : (
+        this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed)
+      ),
+      tooltipContent,
+      areResultsTrimmed,
+    };
+  }
+
+  getFeatureId(feature: Feature): string | number | undefined {
+    return feature.properties?.[GEOJSON_FEATURE_ID_PROPERTY_NAME];
+  }
+
+  getFeatureById(id: string | number) {
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection) {
+      return null;
+    }
+
+    const targetFeature = featureCollection.features.find((feature) => {
+      return this.getFeatureId(feature) === id;
+    });
+    return targetFeature ? targetFeature : null;
+  }
+
+  async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
+    const sourceDataRequest = this.getSourceDataRequest();
+    const style = this.getCurrentStyle();
+    if (!style || !sourceDataRequest) {
+      return null;
+    }
+
+    return await pluckStyleMetaFromFeatures(
+      _.get(sourceDataRequest.getData(), 'features', []),
+      await this.getSource().getSupportedShapeTypes(),
+      this.getCurrentStyle().getDynamicPropertiesArray()
+    );
+  }
+
+  getErrors(inspectorAdapters: Adapters): LayerMessage[] {
+    const errors = super.getErrors(inspectorAdapters);
+
+    this.getValidJoins().forEach((join) => {
+      const joinDescriptor = join.toDescriptor();
+      if (joinDescriptor.error) {
+        errors.push({
+          title: i18n.translate('xpack.maps.geojsonVectorLayer.joinErrorTitle', {
+            defaultMessage: `An error occurred when adding join metrics to layer features`,
+          }),
+          body: joinDescriptor.error,
+        });
+      }
+    });
+
+    return errors;
+  }
+
+  _requiresPrevSourceCleanup(mbMap: MbMap) {
+    const mbSource = mbMap.getSource(this.getMbSourceId());
+    if (!mbSource) {
+      return false;
+    }
+
+    return mbSource.type !== 'geojson';
+  }
+
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
+    this._removeStaleMbSourcesAndLayers(mbMap);
+
+    const mbSourceId = this.getMbSourceId();
+    const mbSource = mbMap.getSource(mbSourceId);
+    if (!mbSource) {
+      mbMap.addSource(mbSourceId, {
+        type: 'geojson',
+        data: EMPTY_FEATURE_COLLECTION,
+      });
+    }
+
+    this._syncFeatureCollectionWithMb(mbMap);
+
+    const timesliceMaskConfig = this._getTimesliceMaskConfig(timeslice);
+    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
+    this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
+    this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
+  }
+
+  _getJoinFilterExpression(): FilterSpecification | undefined {
+    return this.hasJoins()
+      ? // Remove unjoined source features by filtering out features without GeoJSON feature.property[FEATURE_VISIBLE_PROPERTY_NAME] is true
+        ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]
+      : undefined;
+  }
+
+  _syncFeatureCollectionWithMb(mbMap: MbMap) {
+    const mbGeoJSONSource = mbMap.getSource(this.getId()) as GeoJSONSource;
+    const featureCollection = this._getSourceFeatureCollection();
+    const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
+
+    if (!featureCollection) {
+      if (featureCollectionOnMap) {
+        this.getCurrentStyle().clearFeatureState(featureCollectionOnMap, mbMap, this.getId());
+      }
+      mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
+      return;
+    }
+
+    // "feature-state" data expressions are not supported with layout properties.
+    // To work around this limitation,
+    // scaled layout properties (like icon-size) must fall back to geojson property values :(
+    const hasGeoJsonProperties = this.getCurrentStyle().setFeatureStateAndStyleProps(
+      featureCollection,
+      mbMap,
+      this.getId()
+    );
+    if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
+      mbGeoJSONSource.setData(featureCollection);
+    }
+  }
+
+  _getTimesliceMaskConfig(timeslice?: Timeslice): TimesliceMaskConfig | undefined {
+    if (!timeslice || this.hasJoins()) {
+      return;
+    }
+
+    const prevMeta = this.getSourceDataRequest()?.getMeta();
+    return prevMeta !== undefined && prevMeta.timesliceMaskField !== undefined
+      ? {
+          timesliceMaskField: prevMeta.timesliceMaskField,
+          timeslice,
+        }
+      : undefined;
+  }
+
+  async syncData(syncContext: DataRequestContext) {
+    await this._syncData(syncContext, this.getSource(), this.getCurrentStyle());
+  }
+
+  _isLoadingBounds() {
+    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
+    return !!boundsDataRequest && boundsDataRequest.isLoading();
+  }
+
+  // TLDR: Do not call getSource or getCurrentStyle in syncData flow. Use 'source' and 'style' arguments instead.
+  //
+  // 1) State is contained in the redux store. Layer instance state is readonly.
+  // 2) Even though data request descriptor updates trigger new instances for rendering,
+  // syncing data executes on a single object instance. Syncing data can not use updated redux store state.
+  //
+  // Blended layer data syncing branches on the source/style depending on whether clustering is used or not.
+  // Given 1 above, which source/style to use can not be stored in Layer instance state.
+  // Given 2 above, which source/style to use can not be pulled from data request state.
+  // Therefore, source and style are provided as arugments and must be used instead of calling getSource or getCurrentStyle.
+  async _syncData(syncContext: DataRequestContext, source: IVectorSource, style: IVectorStyle) {
+    if (this._isLoadingBounds()) {
+      return;
+    }
+
+    try {
+      await this._syncSourceStyleMeta(syncContext, source, style);
+      await this._syncSourceFormatters(syncContext, source, style);
+      const sourceResult = await syncGeojsonSourceData({
+        layerId: this.getId(),
+        layerName: await this.getDisplayName(source),
+        prevDataRequest: this.getSourceDataRequest(),
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          source,
+          style,
+          syncContext.isFeatureEditorOpenForLayer
+        ),
+        syncContext,
+        source,
+        getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+          return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
+        },
+      });
+      await this._syncSupportsFeatureEditing({ syncContext, source });
+      if (
+        !sourceResult.featureCollection ||
+        !sourceResult.featureCollection.features.length ||
+        !this.hasJoins()
+      ) {
+        return;
+      }
+
+      const joinStates = await this._syncJoins(syncContext, style, sourceResult.featureCollection);
+      await performInnerJoins(
+        sourceResult,
+        joinStates,
+        syncContext.updateSourceData,
+        syncContext.setJoinError
+      );
+    } catch (error) {
+      // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.
+    }
+  }
+
+  _getSourceFeatureCollection() {
+    const sourceDataRequest = this.getSourceDataRequest();
+    return sourceDataRequest ? (sourceDataRequest.getData() as FeatureCollection) : null;
+  }
+
+  _getUpdateDueToTimesliceFromSourceRequestMeta(source: ISource, timeslice?: Timeslice) {
+    const prevDataRequest = this.getSourceDataRequest();
+    const prevMeta = prevDataRequest?.getMeta();
+    if (!prevMeta) {
+      return true;
+    }
+    return source.getUpdateDueToTimeslice(prevMeta, timeslice);
+  }
+}

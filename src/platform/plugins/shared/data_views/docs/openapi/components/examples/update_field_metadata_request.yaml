@@ -1,0 +1,14 @@
+summary: Update metadata for multiple fields.
+value:
+  {
+    "fields": {
+        "field1": {
+            "count": 123,
+            "customLabel": "Field 1 label"
+        },
+        "field2": {
+            "customLabel": "Field 2 label",
+            "customDescription": "Field 2 description"
+        }
+    }
+}

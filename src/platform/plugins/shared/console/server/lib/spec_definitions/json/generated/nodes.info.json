@@ -1,0 +1,48 @@
+{
+  "nodes.info": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "flat_settings": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "url_components": {
+      "metric": [
+        "_all",
+        "_none",
+        "settings",
+        "os",
+        "process",
+        "jvm",
+        "thread_pool",
+        "transport",
+        "http",
+        "remote_cluster_server",
+        "plugins",
+        "ingest",
+        "aggregations",
+        "indices"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_nodes",
+      "_nodes/{node_id}",
+      "_nodes/{metric}",
+      "_nodes/{node_id}/{metric}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-info",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

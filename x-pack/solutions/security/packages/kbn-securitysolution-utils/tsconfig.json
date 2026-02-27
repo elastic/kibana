@@ -1,0 +1,15 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/esql-utils",
+    "@kbn/esql-language",
+    "@kbn/datemath"
+  ],
+  "exclude": ["target/**/*"]
+}

@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/securitysolution-grouping",
-  "owner": "@elastic/security-threat-hunting-explore"
-}

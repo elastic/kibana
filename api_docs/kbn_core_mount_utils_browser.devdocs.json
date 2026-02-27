@@ -3,39 +3,25 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-mount-utils-browser",
-        "id": "def-common.OverlayRef",
+        "id": "def-public.OverlayRef",
         "type": "Interface",
         "tags": [],
         "label": "OverlayRef",
         "description": [
           "\nReturned by {@link OverlayStart} methods for closing a mounted overlay."
         ],
-        "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+        "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
-            "id": "def-common.OverlayRef.onClose",
+            "id": "def-public.OverlayRef.onClose",
             "type": "Object",
             "tags": [],
             "label": "onClose",
@@ -45,13 +31,15 @@
             "signature": [
               "Promise<void>"
             ],
-            "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+            "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
-            "id": "def-common.OverlayRef.close",
+            "id": "def-public.OverlayRef.close",
             "type": "Function",
             "tags": [],
             "label": "close",
@@ -61,7 +49,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
+            "path": "src/core/packages/mount-utils/browser/src/overlay_ref.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -75,7 +65,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-mount-utils-browser",
-        "id": "def-common.MountPoint",
+        "id": "def-public.MountPoint",
         "type": "Type",
         "tags": [],
         "label": "MountPoint",
@@ -84,15 +74,11 @@
         ],
         "signature": [
           "(element: T) => ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-common.UnmountCallback",
-            "text": "UnmountCallback"
-          }
+          "UnmountCallback"
         ],
-        "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+        "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
@@ -101,7 +87,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
-            "id": "def-common.MountPoint.$1",
+            "id": "def-public.MountPoint.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "element",
@@ -111,7 +97,9 @@
             "signature": [
               "T"
             ],
-            "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+            "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+            "lineNumber": 19,
+            "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -120,7 +108,7 @@
       },
       {
         "parentPluginId": "@kbn/core-mount-utils-browser",
-        "id": "def-common.UnmountCallback",
+        "id": "def-public.UnmountCallback",
         "type": "Type",
         "tags": [],
         "label": "UnmountCallback",
@@ -130,7 +118,9 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
+        "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -138,6 +128,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

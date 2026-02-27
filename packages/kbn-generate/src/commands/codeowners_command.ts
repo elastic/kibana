@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 
 import type { GenerateCommand } from '../generate_command';
@@ -33,11 +34,22 @@ const GENERATED_END = `
 ####
 `;
 
-const ULTIMATE_PRIORITY_RULES = `
+const ULTIMATE_PRIORITY_RULES_COMMENT = `
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
 `;
+
+const ULTIMATE_PRIORITY_KIBANAMACHINE = `
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
+`;
+
+const ULTIMATE_PRIORITY_RULES =
+  kibanaPackageJson.branch === 'main'
+    ? ULTIMATE_PRIORITY_RULES_COMMENT
+    : ULTIMATE_PRIORITY_RULES_COMMENT + ULTIMATE_PRIORITY_KIBANAMACHINE;
 
 export const CodeownersCommand: GenerateCommand = {
   name: 'codeowners',
@@ -56,13 +68,22 @@ export const CodeownersCommand: GenerateCommand = {
     }
 
     // strip the old ultimate rules
-    const ultStart = content.indexOf(ULTIMATE_PRIORITY_RULES);
+    const ultStart = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
     if (ultStart !== -1) {
       content = content.slice(0, ultStart);
     }
 
+    // sort genarated entries by directory name
+    // this improves readability and makes sure that ownership for nested
+    // test plugins is not overriden by the parent package's entry
+    pkgs.sort((a, b) => a.directory.localeCompare(b.directory));
+
     const newCodeowners = `${GENERATED_START}${pkgs
-      .map((pkg) => `${pkg.normalizedRepoRelativeDir} ${pkg.manifest.owner.join(' ')}`)
+      .map(
+        (pkg) =>
+          pkg.normalizedRepoRelativeDir +
+          (pkg.manifest.owner.length ? ' ' + pkg.manifest.owner.join(' ') : '')
+      )
       .join('\n')}${GENERATED_END}${content}${ULTIMATE_PRIORITY_RULES}`;
 
     if (newCodeowners === oldCodeowners) {

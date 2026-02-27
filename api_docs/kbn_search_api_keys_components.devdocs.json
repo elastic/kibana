@@ -1,0 +1,136 @@
+{
+  "id": "@kbn/search-api-keys-components",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/search-api-keys-components",
+        "id": "def-public.ApiKeyFlyoutWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeyFlyoutWrapper",
+        "description": [],
+        "signature": [
+          "({ onCancel, onSuccess, }: ApiKeyFlyoutWrapperProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_flyout_wrapper.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-keys-components",
+            "id": "def-public.ApiKeyFlyoutWrapper.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  onCancel,\n  onSuccess,\n}",
+            "description": [],
+            "signature": [
+              "ApiKeyFlyoutWrapperProps"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_flyout_wrapper.tsx",
+            "lineNumber": 19,
+            "columnNumber": 73,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-keys-components",
+        "id": "def-public.ApiKeyForm",
+        "type": "Function",
+        "tags": [],
+        "label": "ApiKeyForm",
+        "description": [],
+        "signature": [
+          "({ hasTitle, minWidth }: ApiKeyFormProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_form.tsx",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-keys-components",
+            "id": "def-public.ApiKeyForm.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ hasTitle = true, minWidth }",
+            "description": [],
+            "signature": [
+              "ApiKeyFormProps"
+            ],
+            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/components/api_key_form.tsx",
+            "lineNumber": 31,
+            "columnNumber": 55,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-keys-components",
+        "id": "def-public.useSearchApiKey",
+        "type": "Function",
+        "tags": [],
+        "label": "useSearchApiKey",
+        "description": [],
+        "signature": [
+          "() => UseSearchApiKeyParams"
+        ],
+        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/hooks/use_search_api_key.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/search-api-keys-components",
+        "id": "def-public.Status",
+        "type": "Enum",
+        "tags": [],
+        "label": "Status",
+        "description": [],
+        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

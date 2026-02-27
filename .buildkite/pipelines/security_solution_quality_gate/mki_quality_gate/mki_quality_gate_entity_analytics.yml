@@ -1,0 +1,87 @@
+steps:
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:all
+    label: 'Cypress MKI - Entity Analytics'
+    key: test_entity_analytics
+    env:
+      BK_TEST_SUITE_KEY: "serverless-cypress-entity-analytics"
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+    timeout_in_minutes: 300
+    parallelism: 1
+
+  - group: "API MKI - Entity Analytics"
+    key: api_test_entity_analytics
+    steps:
+      - label: 'API MKI - entity_analytics:qa:serverless:release'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:qa:serverless:release
+        key: entity_analytics:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: 'API MKI - entity_analytics:essentials:qa:serverless:release'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless:release
+        key: entity_analytics:essentials:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: 'API MKI - explore:hosts:runner:qa:serverless:release'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:hosts:runner:qa:serverless:release
+        key: explore:hosts:runner:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: 'API MKI - explore:network:runner:qa:serverless:release'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless:release
+        key: explore:network:runner:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: 'API MKI - explore:users:runner:qa:serverless:release'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless:release
+        key: explore:users:runner:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2

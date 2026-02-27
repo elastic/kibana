@@ -27,7 +27,9 @@
         "tags": [],
         "label": "CustomBranding",
         "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+        "path": "src/core/packages/custom-branding/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +45,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,7 +63,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -75,7 +81,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -91,7 +99,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -107,7 +117,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "path": "src/core/packages/custom-branding/common/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

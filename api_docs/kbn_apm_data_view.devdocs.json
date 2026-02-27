@@ -29,7 +29,9 @@
         "signature": [
           "(spaceId: string) => string"
         ],
-        "path": "packages/kbn-apm-data-view/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-data-view/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +45,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-apm-data-view/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-data-view/index.ts",
+            "lineNumber": 12,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +66,9 @@
         "signature": [
           "(dataViewId: string) => boolean"
         ],
-        "path": "packages/kbn-apm-data-view/index.ts",
+        "path": "src/platform/packages/shared/kbn-apm-data-view/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +82,9 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-apm-data-view/index.ts",
+            "path": "src/platform/packages/shared/kbn-apm-data-view/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

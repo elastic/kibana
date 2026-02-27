@@ -1,0 +1,27 @@
+# CIDR_MATCH
+
+The CIDR_MATCH function checks if a given IP address is contained within one or more specified CIDR blocks. It returns true if the IP matches any of the provided blocks.
+
+## Syntax
+
+`CIDR_MATCH(ip, blockX)`
+
+### Parameters
+
+#### ip
+
+The IP address to check, of type `ip`. Both IPv4 and IPv6 addresses are supported.
+
+#### blockX
+
+The CIDR block(s) to test the IP address against.
+
+## Examples
+
+Filters the `hosts` data to include only rows where the `ip1` address matches either "127.0.0.2/32" or "127.0.0.3/32", and then keeps only the `card`, `host`, `ip0`, and `ip1` columns.
+
+```esql
+FROM hosts
+| WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
+| KEEP card, host, ip0, ip1
+```

@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsModelVersion, SavedObjectMigrationFn } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsModelVersion,
+  SavedObjectMigrationFn,
+} from '@kbn/core-saved-objects-server';
+import { type KibanaMigratorTestKitParams, currentVersion } from '@kbn/migrator-test-kit';
 import { createType } from '../test_utils';
-import { type KibanaMigratorTestKitParams, currentVersion } from '../kibana_migrator_test_kit';
 
 export const getBaseMigratorParams = ({
   migrationAlgorithm = 'zdt',
@@ -52,7 +56,6 @@ export const getFooType = () => {
         someField: { type: 'text' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
     modelVersions: {
       '1': dummyModelVersion,
       '2': dummyModelVersion,
@@ -68,7 +71,6 @@ export const getBarType = () => {
         aKeyword: { type: 'keyword' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
     modelVersions: {
       '1': dummyModelVersion,
     },
@@ -84,7 +86,6 @@ export const getSampleAType = () => {
         boolean: { type: 'boolean' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
     modelVersions: {
       '1': dummyModelVersion,
     },
@@ -100,7 +101,6 @@ export const getSampleBType = () => {
         text2: { type: 'text' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
     modelVersions: {
       '1': dummyModelVersion,
     },
@@ -116,7 +116,6 @@ export const getDeletedType = () => {
         text: { type: 'text' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
     modelVersions: {
       '1': dummyModelVersion,
     },
@@ -132,7 +131,6 @@ export const getExcludedType = () => {
         value: { type: 'integer' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
     modelVersions: {
       '1': dummyModelVersion,
     },

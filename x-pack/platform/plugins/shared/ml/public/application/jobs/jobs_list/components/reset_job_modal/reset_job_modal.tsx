@@ -1,0 +1,186 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiSpacer,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiText,
+  EuiSwitch,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
+import { resetJobs } from '../utils';
+import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
+import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
+import { isManagedJob } from '../../../jobs_utils';
+import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
+
+type ShowFunc = (jobs: MlSummaryJob[]) => void;
+
+interface Props {
+  setShowFunction(showFunc: ShowFunc): void;
+  unsetShowFunction(): void;
+  refreshJobs(): void;
+}
+
+export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useMlKibana();
+  const mlApi = useMlApi();
+  const [resetting, setResetting] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [jobIds, setJobIds] = useState<string[]>([]);
+  const [jobs, setJobs] = useState<MlSummaryJob[]>([]);
+  const [hasManagedJob, setHasManagedJob] = useState(false);
+  const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
+
+  useEffect(() => {
+    if (typeof setShowFunction === 'function') {
+      setShowFunction(showModal);
+    }
+    return () => {
+      if (typeof unsetShowFunction === 'function') {
+        unsetShowFunction();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const showModal = useCallback((tempJobs: MlSummaryJob[]) => {
+    setJobIds(tempJobs.map(({ id }) => id));
+    setJobs(tempJobs);
+    setHasManagedJob(tempJobs.some((j) => isManagedJob(j)));
+
+    setModalVisible(true);
+    setResetting(false);
+    setDeleteUserAnnotations(false);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModalVisible(false);
+    // This is a workaround to fix the issue where the focus is not returned to the action button when the modal is closed
+    if (jobIds.length === 1) {
+      createJobActionFocusRestoration(jobIds[0])();
+    }
+  }, [jobIds]);
+
+  const resetJob = useCallback(async () => {
+    setResetting(true);
+    await resetJobs(toasts, mlApi, jobIds, deleteUserAnnotations);
+    closeModal();
+    setTimeout(() => {
+      refreshJobs();
+    }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
+  }, [closeModal, deleteUserAnnotations, jobIds, mlApi, refreshJobs, toasts]);
+
+  if (modalVisible === false || jobIds.length === 0) {
+    return null;
+  }
+
+  return (
+    <EuiModal
+      data-test-subj="mlResetJobConfirmModal"
+      onClose={closeModal}
+      aria-labelledby={modalTitleId}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          <FormattedMessage
+            id="xpack.ml.jobsList.resetJobModal.resetJobsTitle"
+            defaultMessage="Reset {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+            values={{
+              jobsCount: jobIds.length,
+              jobId: jobIds[0],
+            }}
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <>
+          <OpenJobsWarningCallout jobs={jobs} />
+
+          {hasManagedJob === true ? (
+            <>
+              <ManagedJobsWarningCallout
+                jobsCount={jobIds.length}
+                action={i18n.translate(
+                  'xpack.ml.jobsList.startDatafeedsModal.resetManagedDatafeedsDescription',
+                  {
+                    defaultMessage: 'resetting',
+                  }
+                )}
+              />
+              <EuiSpacer />
+            </>
+          ) : null}
+
+          <EuiText>
+            <FormattedMessage
+              id="xpack.ml.jobsList.resetJobModal.resetMultipleJobsDescription"
+              defaultMessage="Resetting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
+                {jobsCount, plural, one {It} other {They}} will be reset in the background
+                and may not be updated in the jobs list instantly."
+              values={{
+                jobsCount: jobIds.length,
+              }}
+            />
+            <EuiSpacer />
+            <EuiSwitch
+              label={i18n.translate('xpack.ml.jobsList.resetJobModal.deleteUserAnnotations', {
+                defaultMessage: 'Delete annotations',
+              })}
+              checked={deleteUserAnnotations}
+              onChange={(e) => setDeleteUserAnnotations(e.target.checked)}
+            />
+          </EuiText>
+        </>
+      </EuiModalBody>
+      <>
+        <EuiSpacer />
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={closeModal} disabled={resetting}>
+            <FormattedMessage
+              id="xpack.ml.jobsList.resetJobModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+
+          <EuiButton
+            onClick={resetJob}
+            fill
+            disabled={resetting}
+            color="danger"
+            data-test-subj="mlResetJobConfirmModalButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.jobsList.resetJobModal.resetButtonLabel"
+              defaultMessage="Reset"
+            />
+          </EuiButton>
+        </EuiModalFooter>
+      </>
+    </EuiModal>
+  );
+};

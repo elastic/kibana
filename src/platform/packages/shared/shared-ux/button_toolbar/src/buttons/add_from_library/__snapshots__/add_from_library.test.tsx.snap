@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<AddFromLibraryButton /> is rendered 1`] = `
+<button
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text-ToolbarStandardButton"
+  id="addFromLibraryButton"
+  intl="[object Object]"
+  type="button"
+>
+  <span
+    class="emotion-euiButtonDisplayContent"
+  >
+    <span
+      color="inherit"
+      data-euiicon-type="folderOpen"
+    />
+    <span
+      class="eui-textTruncate css-13ifi6d-m"
+    >
+      Add from library
+    </span>
+  </span>
+</button>
+`;

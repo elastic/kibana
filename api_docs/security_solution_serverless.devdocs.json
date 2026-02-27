@@ -14,7 +14,9 @@
       "tags": [],
       "label": "SecuritySolutionServerlessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security_solution_serverless/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_serverless/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +30,9 @@
       "tags": [],
       "label": "SecuritySolutionServerlessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/security_solution_serverless/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_serverless/public/types.ts",
+      "lineNumber": 23,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -50,7 +54,9 @@
       "tags": [],
       "label": "SecuritySolutionServerlessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/security_solution_serverless/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/types.ts",
+      "lineNumber": 34,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +70,9 @@
       "tags": [],
       "label": "SecuritySolutionServerlessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/security_solution_serverless/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/security_solution_serverless/server/types.ts",
+      "lineNumber": 36,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -88,7 +96,9 @@
         "signature": [
           "\"securitySolutionServerless\""
         ],
-        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution_serverless/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +113,9 @@
         "signature": [
           "\"securitySolutionServerless\""
         ],
-        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution_serverless/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -118,7 +130,9 @@
         "signature": [
           "\"security\""
         ],
-        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/security_solution_serverless/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

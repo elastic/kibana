@@ -1,0 +1,36 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-view-management-plugin",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Data view management app",
+  "plugin": {
+    "id": "dataViewManagement",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "management",
+      "data",
+      "urlForwarding",
+      "dataViewFieldEditor",
+      "dataViewEditor",
+      "dataViews",
+      "fieldFormats",
+      "unifiedSearch",
+      "savedObjectsManagement"
+    ],
+    "optionalPlugins": [
+      "noDataPage",
+      "share",
+      "spaces",
+      "savedObjectsTagging"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

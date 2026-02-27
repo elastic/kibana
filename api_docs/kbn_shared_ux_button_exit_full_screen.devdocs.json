@@ -37,9 +37,11 @@
             "section": "def-common.ExitFullScreenButtonProps",
             "text": "ExitFullScreenButtonProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +61,9 @@
                 "text": "ExitFullScreenButtonProps"
               }
             ],
-            "path": "packages/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
+            "lineNumber": 25,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,9 +84,11 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "KibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/button/exit_full_screen/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/src/services.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,14 +97,16 @@
             "id": "def-common.ExitFullScreenButtonKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...services\n}",
+            "label": "{ children, ...services }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
               "KibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/button/exit_full_screen/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/src/services.tsx",
+            "lineNumber": 40,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,7 +126,9 @@
         "description": [
           "\nProps for the service-enabled `ExitFullScreenButton` component."
         ],
-        "path": "packages/shared-ux/button/exit_full_screen/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -134,7 +144,9 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/button/exit_full_screen/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -152,7 +164,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/button/exit_full_screen/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -174,7 +188,9 @@
         "signature": [
           "KibanaDependencies"
         ],
-        "path": "packages/shared-ux/button/exit_full_screen/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

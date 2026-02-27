@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -29,28 +30,32 @@ import {
 import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { TimeRange } from '@kbn/es-query';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+
+import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
 import {
   connectToQueryState,
-  DataPublicPluginStart,
-  IEsSearchRequest,
-  IEsSearchResponse,
   isRunningResponse,
-  QueryState,
   SearchSessionState,
 } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PLUGIN_ID } from '../../common';
 import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './app_locator';
 
 interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
+  analytics: CoreStart['analytics'];
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -58,7 +63,7 @@ interface SearchSessionsExampleAppDeps {
 
 /**
  * This example is an app with a step by step guide
- * walking through search session lifecycle
+ * walking through background searches lifecycle
  * These enum represents all important steps in this demo
  */
 enum DemoStep {
@@ -80,10 +85,10 @@ interface State extends QueryState {
 }
 
 export const SearchSessionsExampleApp = ({
-  notifications,
   navigation,
   data,
   unifiedSearch,
+  ...startServices
 }: SearchSessionsExampleAppDeps) => {
   const { IndexPatternSelect } = unifiedSearch.ui;
 
@@ -129,7 +134,7 @@ export const SearchSessionsExampleApp = ({
 
   const enableSessionStorage = useCallback(() => {
     data.search.session.enableStorage({
-      getName: async () => 'Search sessions example',
+      getName: async () => 'Background searches example',
       getLocatorData: async () => ({
         initialState: {
           time: data.query.timefilter.timefilter.getTime(),
@@ -196,7 +201,7 @@ export const SearchSessionsExampleApp = ({
       if (!numericFieldName) return;
       setIsSearching(true);
       const requestId = ++nextRequestIdRef.current;
-      doSearch({ dataView, numericFieldName, restoreSearchSessionId }, { data, notifications })
+      doSearch({ dataView, numericFieldName, restoreSearchSessionId }, { data, ...startServices })
         .then(({ response: res, request: req, tookMs: _tookMs }) => {
           if (requestId !== nextRequestIdRef.current) return; // no longer interested in this result
           if (restoreSearchSessionId) {
@@ -214,7 +219,7 @@ export const SearchSessionsExampleApp = ({
           setIsSearching(false);
         });
     },
-    [data, notifications, dataView, numericFieldName]
+    [data, dataView, numericFieldName, startServices]
   );
 
   useEffect(() => {
@@ -225,7 +230,7 @@ export const SearchSessionsExampleApp = ({
 
   return (
     <>
-      <EuiPageTemplate.Header pageTitle="Search session example" />
+      <EuiPageTemplate.Header pageTitle="Background search example" />
       <EuiPageTemplate.Section grow={false}>
         {!isShardDelayEnabled(data) && (
           <>
@@ -242,18 +247,18 @@ export const SearchSessionsExampleApp = ({
         <EuiText>
           <p>
             This example shows how you can use <EuiCode>data.search.session</EuiCode> service to
-            group your searches into a search session and allow user to save search results for
+            group your searches into a background search and allow user to save search results for
             later. <br />
             Start a long-running search, save the session and then restore it. See how fast search
             is completed when restoring the session comparing to when doing initial search. <br />
             <br />
             Follow this demo step-by-step:{' '}
             <b>configure the query, start the search and then save your session.</b> You can save
-            your session both when search is still in progress or when it is completed. After you
-            save the session and when initial search is completed you can <b>restore the session</b>
-            : the search will re-run reusing previous results. It will finish a lot faster then the
-            initial search. You can also <b>go to search sessions management</b> and{' '}
-            <b>get back to the stored results</b> from there.
+            your session both when search is still in progress. After you save the session and when
+            initial search is completed you can <b>restore the session</b>: the search will re-run
+            reusing previous results. It will finish a lot faster then the initial search. You can
+            also <b>go to background search management</b> and <b>get back to the stored results</b>{' '}
+            from there.
           </p>
         </EuiText>
       </EuiPageTemplate.Section>
@@ -270,6 +275,9 @@ export const SearchSessionsExampleApp = ({
                 useDefaultBehaviors={true}
                 indexPatterns={dataView ? [dataView] : undefined}
                 onQuerySubmit={reset}
+                onCancel={reset}
+                isLoading={isSearching}
+                useBackgroundSearchButton
               />
               <EuiFlexGroup justifyContent={'flexStart'}>
                 <EuiFlexItem grow={false}>
@@ -361,7 +369,7 @@ export const SearchSessionsExampleApp = ({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText>
-                  Use the search session indicator in the Kibana header to save the search session.
+                  Use the secondary button in the search button to save the background search.
                   <div>
                     <EuiButtonEmpty
                       flush="both"
@@ -378,7 +386,7 @@ export const SearchSessionsExampleApp = ({
                         demoStep === DemoStep.SaveSession
                       }
                     >
-                      Try saving the session using the search session indicator in the header.
+                      Try saving the session using the secondary button in the search button.
                     </EuiButtonEmpty>
                   </div>
                 </EuiText>
@@ -405,7 +413,7 @@ export const SearchSessionsExampleApp = ({
                         }}
                         data-test-subj={'restoreSearch'}
                       >
-                        Restore the search session
+                        Restore the background search
                       </EuiButtonEmpty>
                     )}
 
@@ -439,7 +447,7 @@ export const SearchSessionsExampleApp = ({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText>
-                  You can also get back to your session from the Search Session Management.
+                  You can also get back to your session from the Background Search Management.
                   <div>
                     <EuiButtonEmpty
                       flush="both"
@@ -452,7 +460,7 @@ export const SearchSessionsExampleApp = ({
                           ?.click();
                       }}
                     >
-                      Use Search Session indicator to navigate to management
+                      Use Background Search indicator to navigate to management
                     </EuiButtonEmpty>
                   </div>
                 </EuiText>
@@ -464,7 +472,7 @@ export const SearchSessionsExampleApp = ({
         {isRestoring && (
           <EuiPageTemplate.Section grow={false}>
             <EuiTitle size="s">
-              <h2>You restored the search session!</h2>
+              <h2>You restored the background search!</h2>
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiText>
@@ -662,7 +670,15 @@ function doSearch(
   {
     data,
     notifications,
-  }: { data: DataPublicPluginStart; notifications: CoreStart['notifications'] }
+    ...startServices
+  }: {
+    data: DataPublicPluginStart;
+    notifications: CoreStart['notifications'];
+    analytics: CoreStart['analytics'];
+    i18n: CoreStart['i18n'];
+    theme: CoreStart['theme'];
+    userProfile: CoreStart['userProfile'];
+  }
 ): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse; tookMs?: number }> {
   if (!dataView) return Promise.reject('Select a data view');
   if (!numericFieldName) return Promise.reject('Select a field to aggregate on');
@@ -693,10 +709,8 @@ function doSearch(
   const req = {
     params: {
       index: dataView.title,
-      body: {
-        aggs: aggsDsl,
-        query,
-      },
+      aggs: aggsDsl,
+      query,
     },
   };
 
@@ -712,16 +726,18 @@ function doSearch(
               res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
             : undefined;
           const message = (
-            <EuiText>
-              Searched {res.rawResponse.hits.total} documents. <br />
-              The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
-              .
-              <br />
-            </EuiText>
+            <KibanaRenderContextProvider {...startServices}>
+              <EuiText>
+                Searched {res.rawResponse.hits.total as number} documents. <br />
+                The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
+                .
+                <br />
+              </EuiText>
+            </KibanaRenderContextProvider>
           );
           notifications.toasts.addSuccess({
             title: 'Query result',
-            text: mountReactNode(message),
+            text: toMountPoint(message, startServices),
           });
         }
       }),
@@ -775,7 +791,7 @@ function NoShardDelayCallout() {
         </>
       }
       color="warning"
-      iconType="help"
+      iconType="question"
     >
       <p>
         This demo works best with <EuiCode>shardDelay</EuiCode> aggregation which simulates slow
@@ -791,7 +807,7 @@ function NoShardDelayCallout() {
 
 function NoDataViewsCallout() {
   return (
-    <EuiCallOut title={<>Missing data views!</>} color="warning" iconType="help">
+    <EuiCallOut title={<>Missing data views!</>} color="warning" iconType="question">
       <p>This demo requires at least one data view.</p>
     </EuiCallOut>
   );

@@ -1,0 +1,21 @@
+title: The getIncident subaction
+type: object
+description: The `getIncident` subaction for Jira, ServiceNow ITSM, and ServiceNow SecOps connectors.
+required:
+  - subAction
+  - subActionParams
+properties:
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - getIncident
+  subActionParams:
+    type: object
+    required:
+      - externalId
+    properties:
+      externalId:
+        type: string
+        description: The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier.
+        example: 71778

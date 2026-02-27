@@ -31,7 +31,9 @@
           },
           ">"
         ],
-        "path": "src/plugins/vis_types/pie/public/vis_type/index.ts",
+        "path": "src/platform/plugins/private/vis_types/pie/public/vis_type/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +47,9 @@
             "signature": [
               "PieTypeProps"
             ],
-            "path": "src/plugins/vis_types/pie/public/vis_type/index.ts",
+            "path": "src/platform/plugins/private/vis_types/pie/public/vis_type/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,7 +67,9 @@
         "tags": [],
         "label": "Dimension",
         "description": [],
-        "path": "src/plugins/vis_types/pie/public/types/types.ts",
+        "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -74,7 +80,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "path": "src/plugins/vis_types/pie/public/types/types.ts",
+            "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -104,7 +112,9 @@
               },
               "> | undefined; }"
             ],
-            "path": "src/plugins/vis_types/pie/public/types/types.ts",
+            "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -118,7 +128,9 @@
         "tags": [],
         "label": "Dimensions",
         "description": [],
-        "path": "src/plugins/vis_types/pie/public/types/types.ts",
+        "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -138,7 +150,9 @@
                 "text": "Dimension"
               }
             ],
-            "path": "src/plugins/vis_types/pie/public/types/types.ts",
+            "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -159,7 +173,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/vis_types/pie/public/types/types.ts",
+            "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -180,7 +196,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/vis_types/pie/public/types/types.ts",
+            "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -201,7 +219,9 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/vis_types/pie/public/types/types.ts",
+            "path": "src/platform/plugins/private/vis_types/pie/public/types/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -237,7 +257,9 @@
         "signature": [
           "2"
         ],
-        "path": "src/plugins/vis_types/pie/common/index.ts",
+        "path": "src/platform/plugins/private/vis_types/pie/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

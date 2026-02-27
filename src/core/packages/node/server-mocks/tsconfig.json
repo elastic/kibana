@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-node-server-internal",
+    "@kbn/utility-types",
+    "@kbn/lazy-object",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

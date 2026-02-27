@@ -3,46 +3,49 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-theme-browser",
-        "id": "def-common.CoreTheme",
+        "id": "def-public.CoreTheme",
         "type": "Interface",
         "tags": [],
         "label": "CoreTheme",
         "description": [
           "\nContains all the required information to apply Kibana's theme at the various levels it can be used.\n"
         ],
-        "path": "packages/core/theme/core-theme-browser/src/types.ts",
+        "path": "src/core/packages/theme/browser/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-theme-browser",
-            "id": "def-common.CoreTheme.darkMode",
+            "id": "def-public.CoreTheme.darkMode",
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
             "description": [
               "is dark mode enabled or not"
             ],
-            "path": "packages/core/theme/core-theme-browser/src/types.ts",
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser",
+            "id": "def-public.CoreTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the active theme"
+            ],
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -51,18 +54,20 @@
       },
       {
         "parentPluginId": "@kbn/core-theme-browser",
-        "id": "def-common.ThemeServiceSetup",
+        "id": "def-public.ThemeServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "ThemeServiceSetup",
         "description": [],
-        "path": "packages/core/theme/core-theme-browser/src/types.ts",
+        "path": "src/core/packages/theme/browser/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-theme-browser",
-            "id": "def-common.ThemeServiceSetup.theme$",
+            "id": "def-public.ThemeServiceSetup.theme$",
             "type": "Object",
             "tags": [],
             "label": "theme$",
@@ -72,22 +77,18 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
-            "path": "packages/core/theme/core-theme-browser/src/types.ts",
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-theme-browser",
-            "id": "def-common.ThemeServiceSetup.getTheme",
+            "id": "def-public.ThemeServiceSetup.getTheme",
             "type": "Function",
             "tags": [],
             "label": "getTheme",
@@ -96,15 +97,11 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
-              }
+              "CoreTheme"
             ],
-            "path": "packages/core/theme/core-theme-browser/src/types.ts",
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -118,26 +115,38 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-theme-browser",
-        "id": "def-common.ThemeServiceStart",
+        "id": "def-public.ThemeServiceStart",
         "type": "Type",
         "tags": [],
         "label": "ThemeServiceStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-common.ThemeServiceSetup",
-            "text": "ThemeServiceSetup"
-          }
+          "ThemeServiceSetup"
         ],
-        "path": "packages/core/theme/core-theme-browser/src/types.ts",
+        "path": "src/core/packages/theme/browser/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

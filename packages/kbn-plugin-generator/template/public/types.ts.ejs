@@ -1,4 +1,4 @@
-import { NavigationPublicPluginStart } from '<%= importFromRoot('src/plugins/navigation/public') %>';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 export interface <%= upperCamelCase(name) %>PluginSetup {
   getGreeting: () => string;

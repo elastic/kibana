@@ -27,9 +27,11 @@
         "label": "FilesContext",
         "description": [],
         "signature": [
-          "({ client, children }: React.PropsWithChildren<ContextProps>) => JSX.Element"
+          "({ client, children }: React.PropsWithChildren<ContextProps>) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +45,9 @@
             "signature": [
               "React.PropsWithChildren<ContextProps>"
             ],
-            "path": "packages/shared-ux/file/context/src/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+            "lineNumber": 37,
+            "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,7 +73,9 @@
             "text": "FilesContextValue"
           }
         ],
-        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -85,7 +91,9 @@
         "tags": [],
         "label": "FilesContextValue",
         "description": [],
-        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -108,7 +116,9 @@
               },
               "<any>"
             ],
-            "path": "packages/shared-ux/file/context/src/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/context/src/index.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ecs-data-quality-dashboard-plugin",
+  "owner": [
+    "@elastic/security-threat-hunting-investigations"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "APIs used to assess the quality of data in Elasticsearch indexes",
+  "plugin": {
+    "id": "ecsDataQualityDashboard",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": [
+      "data"
+    ],
+    "optionalPlugins": [
+      "spaces"
+    ]
+  }
+}

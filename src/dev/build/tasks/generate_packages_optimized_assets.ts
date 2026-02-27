@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -17,14 +18,15 @@ import gulpBrotli from 'gulp-brotli';
 import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
 import gulpTerser from 'gulp-terser';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import terser from 'terser';
 import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';
 import zlib from 'zlib';
 
-import { Task, write } from '../lib';
+import type { Task } from '../lib';
+import { write } from '../lib';
 
 const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
@@ -121,8 +123,8 @@ function categorizeAssets(assetDirs: string[]) {
 
   for (const { path, category } of assets) {
     if (category === 'euiTheme') {
-      // only track v8.light theme
-      if (path.includes('v8.light')) {
+      // only track borealis.light theme
+      if (path.includes('borealis.light')) {
         add('css', path);
       }
       continue;

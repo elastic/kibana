@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { groups } from './groups.json';
+import { TestSuiteType } from './constants';
+import type { BuildkiteStep } from '#pipeline-utils';
+import { expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -31,34 +35,6 @@ if (Number.isNaN(concurrency)) {
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
 
-// TODO: remove this after https://github.com/elastic/kibana-operations/issues/15 is finalized
-/** This function bridges the agent targeting between gobld and kibana-buildkite agent targeting */
-const getAgentRule = (queueName: string = 'n2-4-spot') => {
-  if (
-    process.env.BUILDKITE_AGENT_META_DATA_QUEUE === 'gobld' ||
-    process.env.BUILDKITE_AGENT_META_DATA_PROVIDER === 'k8s'
-  ) {
-    const [kind, cores, addition] = queueName.split('-');
-    const additionalProps =
-      {
-        spot: { preemptible: true },
-        virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
-      }[addition] || {};
-
-    return {
-      provider: 'gcp',
-      image: 'family/kibana-ubuntu-2004',
-      imageProject: 'elastic-images-qa',
-      machineType: `${kind}-standard-${cores}`,
-      ...additionalProps,
-    };
-  } else {
-    return {
-      queue: queueName,
-    };
-  }
-};
-
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
     console.error('+++ Invalid test config provided');
@@ -80,6 +56,7 @@ function getTestSuitesFromJson(json: string) {
   const testSuites: Array<
     | { type: 'group'; key: string; count: number }
     | { type: 'ftrConfig'; ftrConfig: string; count: number }
+    | { type: 'scoutConfig'; scoutConfig: string; count: number }
   > = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
@@ -92,8 +69,8 @@ function getTestSuitesFromJson(json: string) {
     }
 
     const type = item.type;
-    if (type !== 'ftrConfig' && type !== 'group') {
-      fail(`testSuite.type must be either "ftrConfig" or "group"`);
+    if (type !== 'ftrConfig' && type !== 'scoutConfig' && type !== 'group') {
+      fail(`testSuite.type must be either "ftrConfig" or "scoutConfig" or "group"`);
     }
 
     if (item.type === 'ftrConfig') {
@@ -105,6 +82,20 @@ function getTestSuitesFromJson(json: string) {
       testSuites.push({
         type: 'ftrConfig',
         ftrConfig,
+        count,
+      });
+      continue;
+    }
+
+    if (item.type === 'scoutConfig') {
+      const scoutConfig = item.scoutConfig;
+      if (typeof scoutConfig !== 'string') {
+        fail(`testSuite.scoutConfig must be a string`);
+      }
+
+      testSuites.push({
+        type: 'scoutConfig',
+        scoutConfig,
         count,
       });
       continue;
@@ -125,6 +116,7 @@ function getTestSuitesFromJson(json: string) {
 }
 
 const testSuites = getTestSuitesFromJson(configJson);
+const hasScoutSuites = testSuites.some((t) => t.type === 'scoutConfig' && t.count > 0);
 
 const totalJobs = testSuites.reduce((acc, t) => acc + t.count, BASE_JOBS);
 
@@ -138,22 +130,38 @@ if (totalJobs > MAX_JOBS) {
   process.exit(1);
 }
 
-const steps: any[] = [];
+const steps: BuildkiteStep[] = [];
+const envFromLabels = collectEnvFromLabels(process.env.GITHUB_PR_LABELS);
 const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
+    ...envFromLabels,
   },
   steps,
 };
 
 steps.push({
   command: '.buildkite/scripts/steps/build_kibana.sh',
-  label: 'Build Kibana Distribution and Plugins',
-  agents: getAgentRule('c2-8'),
+  label: 'Build Kibana Distribution',
+  agents: expandAgentQueue('c2-8'),
   key: 'build',
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
+if (hasScoutSuites) {
+  steps.push({
+    command: '.buildkite/scripts/steps/test/scout/discover_playwright_configs.sh',
+    label: 'Discover Scout Playwright configs',
+    agents: expandAgentQueue('n2-4-spot'),
+    key: 'scout_playwright_configs',
+    timeout_in_minutes: 30,
+    retry: {
+      automatic: [{ exit_status: '-1', limit: 3 }],
+    },
+  });
+}
+
+let suiteIndex = 0;
 for (const testSuite of testSuites) {
   if (testSuite.count <= 0) {
     continue;
@@ -165,14 +173,41 @@ for (const testSuite of testSuites) {
       env: {
         FTR_CONFIG: testSuite.ftrConfig,
       },
+      key: `${TestSuiteType.FTR}-${suiteIndex++}`,
       label: `${testSuite.ftrConfig}`,
       parallelism: testSuite.count,
       concurrency,
       concurrency_group: process.env.UUID,
       concurrency_method: 'eager',
-      agents: getAgentRule('n2-4-spot'),
+      agents: expandAgentQueue('n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
+      cancel_on_build_failing: true,
+      retry: {
+        automatic: [{ exit_status: '-1', limit: 3 }],
+      },
+    });
+    continue;
+  }
+
+  if (testSuite.type === 'scoutConfig') {
+    const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
+
+    steps.push({
+      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
+      env: {
+        SCOUT_CONFIG: testSuite.scoutConfig,
+        SCOUT_REPORTER_ENABLED: 'true',
+      },
+      key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
+      label: `${testSuite.scoutConfig}`,
+      parallelism: testSuite.count,
+      concurrency,
+      concurrency_group: process.env.UUID,
+      concurrency_method: 'eager',
+      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+      depends_on: hasScoutSuites ? ['build', 'scout_playwright_configs'] : 'build',
+      timeout_in_minutes: 60,
       cancel_on_build_failing: true,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
@@ -194,7 +229,8 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
-        agents: getAgentRule(agentQueue),
+        agents: expandAgentQueue(agentQueue),
+        key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 150,
         parallelism: testSuite.count,
@@ -216,9 +252,50 @@ for (const testSuite of testSuites) {
         },
       });
       break;
+    case 'elastic_synthetics':
+      const synthGroup = groups.find((g) => g.key === testSuite.key);
+      if (!synthGroup) {
+        throw new Error(
+          `Group configuration was not found in groups.json for the following synthetics suite: {${suiteName}}.`
+        );
+      }
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
+        label: synthGroup.name,
+        agents: expandAgentQueue('n2-4-spot'),
+        key: `${TestSuiteType.SYNTHETICS}-${suiteIndex++}`,
+        depends_on: 'build',
+        timeout_in_minutes: 30,
+        parallelism: testSuite.count,
+        concurrency,
+        concurrency_group: process.env.UUID,
+        concurrency_method: 'eager',
+        cancel_on_build_failing: true,
+        retry: {
+          automatic: [{ exit_status: '-1', limit: 3 }],
+        },
+      });
+      break;
+
     default:
       throw new Error(`unknown test suite: ${testSuite.key}`);
   }
 }
+
+pipeline.steps.push({
+  wait: '~',
+  continue_on_failure: true,
+});
+
+pipeline.steps.push({
+  command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
+  label: 'Post results on Github pull request',
+  agents: expandAgentQueue('n2-4-spot'),
+  timeout_in_minutes: 15,
+  retry: {
+    automatic: [{ exit_status: '-1', limit: 3 }],
+  },
+  soft_fail: true,
+});
 
 console.log(JSON.stringify(pipeline, null, 2));

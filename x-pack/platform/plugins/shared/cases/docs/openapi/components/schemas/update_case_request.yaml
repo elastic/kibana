@@ -1,0 +1,67 @@
+title: Update case request
+description: >-
+  The update case API request body varies depending on the type of connector.
+type: object
+required:
+  - cases
+properties:
+  cases:
+    type: array
+    description: An array containing one or more case objects.
+    maxItems: 100
+    minItems: 1
+    items:
+      type: object
+      required:
+        - id
+        - version
+      properties:
+        assignees:
+          $ref: 'assignees.yaml'
+        category:
+          $ref: 'case_category.yaml'
+        connector:
+          oneOf:
+            - $ref: 'connector_properties_none.yaml'
+            - $ref: 'connector_properties_cases_webhook.yaml'
+            - $ref: 'connector_properties_jira.yaml'
+            - $ref: 'connector_properties_resilient.yaml'
+            - $ref: 'connector_properties_servicenow.yaml'
+            - $ref: 'connector_properties_servicenow_sir.yaml'
+            - $ref: 'connector_properties_swimlane.yaml'
+        customFields:
+          type: array
+          description: >
+            Custom field values for a case.
+            Any optional custom fields that are not specified in the request are set to null.
+          minItems: 0
+          maxItems: 10
+          items:
+            type: object
+            required:
+              - key
+              - type
+              - value
+            properties:
+              $ref: 'case_customfields.yaml'
+        description:
+          $ref: 'case_description.yaml'
+        id:
+          description: The identifier for the case.
+          type: string
+          maxLength: 30000
+        settings:
+          $ref: 'settings.yaml'
+        severity:
+          $ref: 'case_severity.yaml'
+        status:
+          $ref: 'case_status.yaml'
+        tags:
+          $ref: 'case_tags.yaml'
+        title:
+          $ref: 'case_title.yaml'
+        version:
+          description: >
+            The current version of the case.
+            To determine this value, use the get case or search cases (`_find`) APIs.
+          type: string

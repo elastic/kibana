@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "timestamp": 1763111721884,
+    "date": "2025-11-14T09:15:21.884Z",
+    "kibanaCommitHash": "62a2a404a6280a1fbe8d6606ca5664687f65d932",
+    "buildUrl": null,
+    "pullRequestUrl": null
+  },
+  "typeDefinitions": {
+    "old-type-no-migrations": {
+      "name": "old-type-no-migrations",
+      "migrationVersions": [],
+      "hash": "4631898d09a686928fabbbe1ad0b7f2b22c44b565443408ab5d20b4dcae64e35",
+      "modelVersions": [],
+      "schemaVersions": [],
+      "mappings": {
+        "dynamic": false,
+        "properties.aTextAttribute.type": "text",
+        "properties.aBooleanAttribute.type": "boolean"
+      }
+    },
+    "old-type-with-migrations": {
+      "name": "old-type-with-migrations",
+      "migrationVersions": [
+        "8.7.0"
+      ],
+      "hash": "a7916755843d9ed712ccefb6888ebcbdd2f2f3628e058bfd174454aef644437a",
+      "modelVersions": [],
+      "schemaVersions": [
+        "8.7.0"
+      ],
+      "mappings": {
+        "dynamic": false,
+        "properties.aTextAttribute.type": "text",
+        "properties.aBooleanAttribute.type": "boolean"
+      }
+    },
+    "person-so-type": {
+      "name": "person-so-type",
+      "migrationVersions": [],
+      "hash": "b8a80c7a77c2d5f4d7964af4ef584a490a83d92012099e0d943ce566f9d52cfc",
+      "modelVersions": [
+        {
+          "version": "1",
+          "modelVersionHash": "e851da8aa62ba712eaa3e27bd787a982393fdde9a5627a779f48168edb0f86b0",
+          "changeTypes": [
+            "mappings_addition"
+          ],
+          "hasTransformation": false,
+          "newMappings": [
+            "firstName.type",
+            "lastName.type"
+          ],
+          "schemas": {
+            "forwardCompatibility": "2fc7b480e391f573cce65c0da1991d8925fa9d1aa998c89b50181a47f10e71e4",
+            "create": "79a184ebeb6bdecdae9b2314c5ded4c9f3379da264b3512ab561a12d917de3f6"
+          }
+        }
+      ],
+      "schemaVersions": [],
+      "mappings": {
+        "dynamic": false,
+        "properties.firstName.type": "text",
+        "properties.lastName.type": "text"
+      }
+    }
+  }
+}

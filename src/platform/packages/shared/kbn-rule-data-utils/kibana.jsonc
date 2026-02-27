@@ -1,0 +1,11 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/rule-data-utils",
+  "owner": [
+    "@elastic/security-detections-response",
+    "@elastic/response-ops",
+    "@elastic/actionable-obs-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

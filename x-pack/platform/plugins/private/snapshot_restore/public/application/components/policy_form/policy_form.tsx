@@ -1,0 +1,246 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiSpacer,
+} from '@elastic/eui';
+
+import type { SlmPolicyPayload } from '../../../../common/types';
+import { TIME_UNITS } from '../../../../common/constants';
+import type { PolicyValidation } from '../../services/validation';
+import { validatePolicy } from '../../services/validation';
+import {
+  PolicyStepLogistics,
+  PolicyStepSettings,
+  PolicyStepRetention,
+  PolicyStepReview,
+} from './steps';
+import { PolicyNavigation } from './navigation';
+
+interface Props {
+  policy: SlmPolicyPayload;
+  dataStreams: string[];
+  indices: string[];
+  currentUrl: string;
+  isEditing?: boolean;
+  isSaving: boolean;
+  saveError?: React.ReactNode;
+  clearSaveError: () => void;
+  onCancel: () => void;
+  onSave: (policy: SlmPolicyPayload) => void;
+}
+
+export const PolicyForm: React.FunctionComponent<Props> = ({
+  policy: originalPolicy,
+  dataStreams,
+  indices,
+  currentUrl,
+  isEditing,
+  isSaving,
+  saveError,
+  clearSaveError,
+  onCancel,
+  onSave,
+}) => {
+  // Step state
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [maxCompletedStep, setMaxCompletedStep] = useState<number>(0);
+  const stepMap: { [key: number]: any } = {
+    1: PolicyStepLogistics,
+    2: PolicyStepSettings,
+    3: PolicyStepRetention,
+    4: PolicyStepReview,
+  };
+  const CurrentStepForm = stepMap[currentStep];
+
+  // Policy state
+  const [policy, setPolicy] = useState<SlmPolicyPayload>({
+    ...originalPolicy,
+    config: {
+      // When creating a new policy includesGlobalState is enabled by default and the API will also
+      // include all featureStates into the snapshot when this happens. We need to take this case into account
+      // when creating the local state for the form and also set featureStates to be an empty array, which
+      // for the API it means that it will include all featureStates.
+      featureStates: [],
+      // IncludeGlobalState is set as default by the api, so we want to replicate that behaviour in our
+      // form state so that it gets explicitly represented in the request.
+      includeGlobalState: true,
+      ...(originalPolicy.config || {}),
+    },
+    retention: {
+      ...originalPolicy.retention,
+      expireAfterUnit: originalPolicy.retention?.expireAfterUnit ?? TIME_UNITS.DAY,
+    },
+  });
+
+  const isEditingManagedPolicy = Boolean(isEditing && policy.isManagedPolicy);
+
+  // Policy validation state
+  const [validation, setValidation] = useState<PolicyValidation>({
+    isValid: true,
+    errors: {},
+  });
+
+  const updatePolicy = (
+    updatedFields: Partial<SlmPolicyPayload>,
+    validationHelperData = {}
+  ): void => {
+    const newPolicy = { ...policy, ...updatedFields };
+    const newValidation = validatePolicy(newPolicy, validationHelperData);
+    setPolicy(newPolicy);
+    setValidation(newValidation);
+  };
+
+  const updateCurrentStep = (step: number) => {
+    if (maxCompletedStep < step - 1) {
+      return;
+    }
+    setCurrentStep(step);
+    setMaxCompletedStep(step - 1);
+    clearSaveError();
+  };
+
+  const onBack = () => {
+    const previousStep = currentStep - 1;
+    setCurrentStep(previousStep);
+    setMaxCompletedStep(previousStep - 1);
+    clearSaveError();
+  };
+
+  const onNext = () => {
+    if (!validation.isValid) {
+      return;
+    }
+    const nextStep = currentStep + 1;
+    setMaxCompletedStep(Math.max(currentStep, maxCompletedStep));
+    setCurrentStep(nextStep);
+  };
+
+  const savePolicy = () => {
+    if (validation.isValid) {
+      onSave(policy);
+    }
+  };
+
+  const lastStep = Object.keys(stepMap).length;
+
+  return (
+    <Fragment>
+      <PolicyNavigation
+        currentStep={currentStep}
+        maxCompletedStep={maxCompletedStep}
+        updateCurrentStep={updateCurrentStep}
+        isFormValid={validation.isValid}
+      />
+      <EuiSpacer size="l" />
+      <EuiForm>
+        <CurrentStepForm
+          policy={policy}
+          indices={indices}
+          dataStreams={dataStreams}
+          updatePolicy={updatePolicy}
+          isEditing={isEditing}
+          currentUrl={currentUrl}
+          errors={validation.errors}
+          updateCurrentStep={updateCurrentStep}
+        />
+        <EuiSpacer size="l" />
+
+        {saveError ? (
+          <Fragment>
+            {saveError}
+            <EuiSpacer size="m" />
+          </Fragment>
+        ) : null}
+
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              {currentStep > 1 ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="arrowLeft"
+                    onClick={() => onBack()}
+                    disabled={!validation.isValid}
+                  >
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyForm.backButtonLabel"
+                      defaultMessage="Back"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+              {currentStep < lastStep ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    iconType="arrowRight"
+                    onClick={() => onNext()}
+                    iconSide="right"
+                    disabled={!validation.isValid}
+                    data-test-subj="nextButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyForm.nextButtonLabel"
+                      defaultMessage="Next"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
+              {currentStep === lastStep ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill={!isEditingManagedPolicy}
+                    color={isEditingManagedPolicy ? 'warning' : 'success'}
+                    iconType="check"
+                    onClick={() => savePolicy()}
+                    isLoading={isSaving}
+                    data-test-subj="submitButton"
+                  >
+                    {isSaving ? (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.savingButtonLabel"
+                        defaultMessage="Saving…"
+                      />
+                    ) : isEditing ? (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.saveButtonLabel"
+                        defaultMessage="Save policy"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.policyForm.createButtonLabel"
+                        defaultMessage="Create policy"
+                      />
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onCancel()}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiForm>
+      <EuiSpacer size="m" />
+    </Fragment>
+  );
+};

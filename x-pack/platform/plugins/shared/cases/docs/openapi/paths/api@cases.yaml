@@ -1,0 +1,109 @@
+post:
+  summary: Create a case
+  operationId: createCaseDefaultSpace
+  description: >
+    You must have `all` privileges for the **Cases** feature in the
+    **Management**, **Observability**, or **Security** section of the Kibana 
+    feature privileges, depending on the owner of the case you're creating.
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/create_case_request.yaml'
+        examples:
+          createCaseRequest:
+            $ref: '../components/examples/create_case_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/case_response_properties.yaml'
+          examples:
+            createCaseResponse:
+              $ref: '../components/examples/create_case_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+
+delete:
+  summary: Delete cases
+  operationId: deleteCaseDefaultSpace
+  description: >
+    You must have `read` or `all` privileges and the `delete` sub-feature
+    privilege for the **Cases** feature in the **Management**,
+    **Observability**, or **Security** section of the Kibana feature privileges,
+    depending on the owner of the cases you're deleting.
+  tags:
+    - cases
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/ids.yaml'
+  responses:
+    '204':
+      description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+  x-code-samples:
+    - label: curl
+      lang: curl
+      source: |
+        curl \
+          --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \
+          --header "Authorization: $API_KEY" \
+          --header "Content-Type: application/json"
+          --header "kbn-xsrf: true"
+    - label: Console
+      lang: console
+      source: |
+        DELETE kbn:/api/cases?ids=["030e6e34-6470-4001-864f-b229511ad188","e662ff34-0493-4538-b9d1-6706ced02ff2"]
+patch:
+  summary: Update cases
+  operationId: updateCaseDefaultSpace
+  description: >
+    You must have `all` privileges for the **Cases** feature in the 
+    **Management**, **Observability**, or **Security** section of the Kibana 
+    feature privileges, depending on the owner of the case you're updating.
+  tags:
+    - cases
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/update_case_request.yaml'
+        examples:
+          updateCaseRequest:
+            $ref: '../components/examples/update_case_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/case_response_properties.yaml'
+          examples:
+            updateCaseResponse:
+              $ref: '../components/examples/update_case_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'

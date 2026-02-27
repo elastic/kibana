@@ -15,7 +15,12 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
-NODE="${DIR}/node/bin/node"
+{{#darwin}}
+NODE="${DIR}/node/default/bin/node"
+{{/darwin}}
+{{#linux}}
+NODE="${DIR}/node/glibc-217/bin/node"
+{{/linux}}
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."
@@ -26,4 +31,4 @@ if [ -f "${CONFIG_DIR}/node.options" ]; then
   KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
 
-NODE_OPTIONS="$KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production "${NODE}" "${DIR}/src/cli_encryption_keys/dist" "$@"
+NODE_OPTIONS="$KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production "${NODE}" "${DIR}/src/cli/encryption_keys/dist" "$@"

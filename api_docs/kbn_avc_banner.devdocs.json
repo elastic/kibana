@@ -1,0 +1,84 @@
+{
+  "id": "@kbn/avc-banner",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/avc-banner",
+        "id": "def-public.AVCResultsBanner",
+        "type": "Function",
+        "tags": [],
+        "label": "AVCResultsBanner",
+        "description": [],
+        "signature": [
+          "({ onDismiss }: { onDismiss: () => void; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/avc-banner",
+            "id": "def-public.AVCResultsBanner.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ onDismiss }",
+            "description": [],
+            "signature": [
+              "{ onDismiss: () => void; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
+            "lineNumber": 25,
+            "columnNumber": 71,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/avc-banner",
+        "id": "def-public.useIsStillYear2025",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsStillYear2025",
+        "description": [],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-avc-banner/src/index.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

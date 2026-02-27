@@ -1,0 +1,35 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cross-cluster-replication-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "crossClusterReplication",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "ccr"
+    ],
+    "requiredPlugins": [
+      "home",
+      "licensing",
+      "licenseApiGuard",
+      "management",
+      "remoteClusters",
+      "indexManagement",
+      "features",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

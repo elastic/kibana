@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/inspector-plugin",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "inspector",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "share"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "common",
+      "common/adapters/request"
+    ]
+  }
+}

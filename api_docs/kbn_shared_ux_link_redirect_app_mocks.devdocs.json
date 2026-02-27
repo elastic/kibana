@@ -45,7 +45,7 @@
           "RedirectAppLinksProps",
           ", {}, {}, {}>"
         ],
-        "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
+        "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/storybook.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,7 +56,7 @@
             "tags": [],
             "label": "propArguments",
             "description": [],
-            "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -68,7 +68,7 @@
             "tags": [],
             "label": "serviceArguments",
             "description": [],
-            "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -83,7 +83,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -99,7 +99,7 @@
               "HandlerFunction",
               "; currentAppId: string; }"
             ],
-            "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -117,7 +117,7 @@
               "HandlerFunction",
               "; currentAppId: string; }"
             ],
-            "path": "packages/shared-ux/link/redirect_app/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -139,7 +139,7 @@
           "(params?: Partial<Params> | undefined) => ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
+        "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,7 +153,7 @@
             "signature": [
               "Partial<Params> | undefined"
             ],
-            "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
+            "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -175,7 +175,7 @@
           "(params?: Partial<Params> | undefined) => ",
           "RedirectAppLinksServices"
         ],
-        "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
+        "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,7 +189,7 @@
             "signature": [
               "Partial<Params> | undefined"
             ],
-            "path": "packages/shared-ux/link/redirect_app/mocks/src/jest.ts",
+            "path": "src/platform/packages/shared/shared-ux/link/redirect_app/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

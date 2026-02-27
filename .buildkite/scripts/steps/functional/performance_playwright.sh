@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/common/setup_bazel.sh
 
 is_test_execution_step
 
@@ -32,6 +31,11 @@ fi
 rm -rf "$KIBANA_BUILD_LOCATION"
 .buildkite/scripts/download_build_artifacts.sh
 
+echo '--- Cleaning ports used by performance tests'
+# If a performance test shuts down uncleanly it might leave some ports bound
+# 6104 is the package registry running in docker
+force_clean_ports 6104
+
 if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
   # 'performance-data-set-extraction' uses 'n2-2-spot' agent, performance metrics don't matter
   # and we skip warmup phase for each test
@@ -39,8 +43,13 @@ if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; t
   node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --skip-warmup
 else
   # pipeline should use bare metal static worker
-  echo "--- Running performance tests"
-  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  if [[ -z "${JOURNEYS_GROUP+x}" ]]; then
+    echo "--- Running performance tests"
+    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  else
+    echo "--- Running performance tests: '$JOURNEYS_GROUP' group"
+    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --group "$JOURNEYS_GROUP"
+  fi
 fi
 
 echo "--- Upload journey step screenshots"

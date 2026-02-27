@@ -1,0 +1,975 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { setProjectAnnotations, composeStories } from '@storybook/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { action } from '@storybook/addon-actions';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
+import * as stories from './graph_investigation.stories';
+import { type GraphInvestigationProps } from './graph_investigation';
+import {
+  GRAPH_INVESTIGATION_TEST_ID,
+  GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
+  GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
+  GRAPH_NODE_EXPAND_BUTTON_ID,
+  GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
+  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
+} from '../test_ids';
+import * as previewAnnotations from '../../../.storybook/preview';
+import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
+import { USE_FETCH_GRAPH_DATA_REFRESH_ACTION } from '../mock/constants';
+import { mockDataView } from '../mock/data_view.mock';
+
+setProjectAnnotations(previewAnnotations);
+
+const { SingleActor, GroupedActor, GroupedTarget } = composeStories(stories);
+
+// Mock the useFetchGraphData hook, which is used by the GraphInvestigation component
+// Callbacks replaced with storybook actions, therefore we mock storybook's action function as well for testing
+jest.mock('../../hooks/use_fetch_graph_data', () => {
+  return require('../mock/use_fetch_graph_data.mock');
+});
+
+const actionMocks: Record<string, jest.Mock> = {};
+
+jest.mock('@storybook/addon-actions', () => ({
+  action: jest.fn((name) => {
+    if (!actionMocks[name]) {
+      actionMocks[name] = jest.fn(); // Create a new mock if not already present
+    }
+    return actionMocks[name]; // Return the mock for the given action name
+  }),
+}));
+
+const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <SingleActor {...args} />
+    </IntlProvider>,
+    {
+      // TODO: Fails in concurrent mode
+      legacyRoot: true,
+    }
+  );
+};
+
+const renderGroupedActorStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <GroupedActor {...args} />
+    </IntlProvider>,
+    {
+      legacyRoot: true,
+    }
+  );
+};
+
+const renderGroupedTargetStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <GroupedTarget {...args} />
+    </IntlProvider>,
+    {
+      legacyRoot: true,
+    }
+  );
+};
+
+// Turn off the optimization that hides elements that are not visible in the viewport
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  ONLY_RENDER_VISIBLE_ELEMENTS: false,
+}));
+
+// By default we toggle the search bar visibility
+jest.mock('react-use/lib/useSessionStorage', () => jest.fn().mockReturnValue([true, jest.fn()]));
+
+const QUERY_PARAM_IDX = 0;
+const FILTERS_PARAM_IDX = 1;
+
+const expandNode = async (container: HTMLElement, nodeId: string) => {
+  await waitFor(() => {
+    const nodeElement = container.querySelector(
+      `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
+    );
+    expect(nodeElement).not.toBeNull();
+  });
+
+  const nodeElement = container.querySelector(
+    `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
+  );
+  userEvent.hover(nodeElement!);
+  (
+    nodeElement?.querySelector(
+      `[data-test-subj="${GRAPH_NODE_EXPAND_BUTTON_ID}"]`
+    ) as HTMLButtonElement
+  )?.click();
+};
+
+const showActionsByNode = async (container: HTMLElement, nodeId: string) => {
+  await expandNode(container, nodeId);
+
+  const btn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+  expect(btn).toHaveTextContent("Show this entity's actions");
+  btn.click();
+};
+
+const hideActionsByNode = async (container: HTMLElement, nodeId: string) => {
+  await expandNode(container, nodeId);
+
+  const hideBtn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+  expect(hideBtn).toHaveTextContent("Hide this entity's actions");
+  hideBtn.click();
+};
+
+const disableFilter = (container: HTMLElement, filterIndex: number) => {
+  const filterBtn = container.querySelector(
+    `[data-test-subj*="filter-id-${filterIndex}"]`
+  ) as HTMLButtonElement;
+  expect(filterBtn).not.toBeNull();
+  filterBtn.click();
+
+  const disableFilterBtn = screen.getByTestId('disableFilter');
+  expect(disableFilterBtn).not.toBeNull();
+  disableFilterBtn.click();
+};
+
+const isSearchBarVisible = (container: HTMLElement) => {
+  const searchBarContainer = container.querySelector('.toggled-off');
+  return searchBarContainer === null;
+};
+
+const waitAndExecute = async (callback: () => void, timeout: number = 3000) => {
+  const startTime = Date.now();
+  const pollInterval = 100;
+
+  while (Date.now() - startTime < timeout) {
+    try {
+      callback();
+      // If callback executes without throwing, we're done
+      return;
+    } catch (error) {
+      // If callback throws, wait and try again
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    }
+  }
+
+  // If we've reached the timeout, try one final time and let any error bubble up
+  callback();
+};
+
+describe('GraphInvestigation Component', () => {
+  beforeEach(() => {
+    for (const key in actionMocks) {
+      if (Object.prototype.hasOwnProperty.call(actionMocks, key)) {
+        actionMocks[key].mockClear();
+      }
+    }
+  });
+
+  it('renders without crashing', () => {
+    const { getByTestId } = renderStory();
+
+    expect(getByTestId(GRAPH_INVESTIGATION_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders with initial state', async () => {
+    const { container, getAllByText } = renderStory();
+
+    await waitFor(() => {
+      const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+      expect(nodes).toHaveLength(6);
+    });
+    expect(getAllByText('~ an hour ago')).toHaveLength(2);
+  });
+
+  it('shows error on bad kql syntax', async () => {
+    const mockDangerToast = action(NOTIFICATIONS_ADD_ERROR_ACTION);
+    const { getByTestId } = renderStory();
+
+    // Act
+    const queryInput = getByTestId('queryInput');
+    await userEvent.type(queryInput, '< > sdg $@#T');
+    const querySubmitBtn = getByTestId('querySubmitButton');
+    querySubmitBtn.click();
+
+    // Assert
+    expect(mockDangerToast).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls refresh on submit button click', () => {
+    const mockRefresh = action(USE_FETCH_GRAPH_DATA_REFRESH_ACTION);
+    const { getByTestId } = renderStory();
+
+    // Act
+    getByTestId('querySubmitButton').click();
+
+    // Assert
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  describe('popover', () => {
+    it('shows `Show event details` list item when label node has documentsData of event', async () => {
+      const { container, getByTestId } = renderStory();
+
+      await expandNode(
+        container,
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.UpdateRole)'
+      );
+
+      const showDetailsItem = getByTestId(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toHaveTextContent('Show event details');
+    });
+
+    it('shows `Show alert details` list item when label node has documentsData of alert', async () => {
+      const { container, getByTestId } = renderStory();
+
+      await expandNode(
+        container,
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
+      );
+
+      const showDetailsItem = getByTestId(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toHaveTextContent('Show alert details');
+    });
+
+    it('should not show `Show event details` list item when label node misses documentsData', async () => {
+      const { container, queryByTestId } = renderStory();
+
+      await expandNode(
+        container,
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.DeleteRole)'
+      );
+
+      const showDetailsItem = queryByTestId(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
+      expect(showDetailsItem).not.toBeInTheDocument();
+    });
+
+    it('shows the option `Show entity details` as enabled when entity node has documentsData with entity data', async () => {
+      const { container, getByTestId } = renderStory();
+
+      await expandNode(container, 'projects/your-project-id/roles/customRole');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toHaveTextContent('Show entity details');
+      expect(showDetailsItem).not.toHaveAttribute('disabled');
+    });
+
+    it('show the option `Show entity details` as disabled when entity node has no documentsData', async () => {
+      const { container, getByTestId, queryByTestId } = renderStory();
+
+      await expandNode(container, 'admin@example.com');
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toHaveTextContent('Show entity details');
+      expect(showDetailsItem).toHaveAttribute('disabled');
+
+      // can't use userEvent.hover since we get the following error:
+      // 'Unable to perform pointer interaction as the element has pointer-events: none:'
+      fireEvent.mouseOver(showDetailsItem);
+
+      // Wait for tooltip and execute validation
+      await waitAndExecute(() => {
+        const tooltip = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID);
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent('Details not available');
+      });
+    });
+
+    it('shows the option `Show entity relationships` as enabled when entity node is enriched', async () => {
+      const { container, getByTestId } = renderStory();
+
+      await expandNode(container, 'projects/your-project-id/roles/customRole');
+
+      const showRelationshipsItem = getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).not.toHaveAttribute('disabled');
+    });
+
+    it('shows the option `Show entity relationships` as disabled when entity node is not enriched', async () => {
+      const { container, getByTestId, queryByTestId } = renderStory();
+
+      await expandNode(container, 'admin@example.com');
+      const showRelationshipsItem = getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).toHaveAttribute('disabled');
+
+      // can't use userEvent.hover since we get the following error:
+      // 'Unable to perform pointer interaction as the element has pointer-events: none:'
+      fireEvent.mouseOver(showRelationshipsItem);
+
+      // Wait for tooltip and execute validation
+      await waitAndExecute(() => {
+        const tooltip = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID);
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent('Entity relationships not available');
+      });
+    });
+
+    it('does not show `Show entity relationships` option for grouped entities', async () => {
+      const { container, queryByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      const showRelationshipsItem = queryByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).not.toBeInTheDocument();
+    });
+  });
+
+  describe('searchBar', () => {
+    it('shows searchBar when search button toggle is hidden', () => {
+      const { getByTestId, queryByTestId, container } = renderStory();
+
+      expect(queryByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).not.toBeInTheDocument();
+      expect(getByTestId('globalQueryBar')).toBeInTheDocument();
+      expect(isSearchBarVisible(container)).toBeTruthy();
+    });
+
+    it('toggles searchBar on click', async () => {
+      let searchBarToggled = false;
+      const setSearchBarToggled = jest.fn((value: boolean) => {
+        searchBarToggled = value;
+      });
+      (useSessionStorage as jest.Mock).mockImplementation(() => [
+        searchBarToggled,
+        setSearchBarToggled,
+      ]);
+      const { getByTestId, container } = renderStory({
+        showToggleSearch: true,
+      });
+
+      expect(isSearchBarVisible(container)).toBeFalsy();
+
+      // Act
+      getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).click();
+
+      // Assert
+      expect(setSearchBarToggled).lastCalledWith(true);
+    });
+
+    it('toggles searchBar off on click', async () => {
+      let searchBarToggled = true;
+      const setSearchBarToggled = jest.fn((value: boolean) => {
+        searchBarToggled = value;
+      });
+      (useSessionStorage as jest.Mock).mockImplementation(() => [
+        searchBarToggled,
+        setSearchBarToggled,
+      ]);
+      const { getByTestId, container } = renderStory({
+        showToggleSearch: true,
+      });
+
+      expect(isSearchBarVisible(container)).toBeTruthy();
+
+      // Act
+      getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID).click();
+
+      // Assert
+      expect(setSearchBarToggled).lastCalledWith(false);
+    });
+
+    it('shows filters counter when KQL filter is applied', async () => {
+      const { getByTestId } = renderStory({
+        showToggleSearch: true,
+      });
+
+      const queryInput = getByTestId('queryInput');
+      await userEvent.type(queryInput, 'host1');
+      const querySubmitBtn = getByTestId('querySubmitButton');
+      querySubmitBtn.click();
+
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+    });
+
+    it('shows filters counter when node filter is applied', async () => {
+      const { getByTestId, container } = renderStory({
+        showToggleSearch: true,
+      });
+      await expandNode(container, 'admin@example.com');
+      getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID).click();
+
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+    });
+
+    it('hide filters counter when node filter is toggled off', async () => {
+      const { getByTestId, container } = renderStory({
+        showToggleSearch: true,
+      });
+      await showActionsByNode(container, 'admin@example.com');
+
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+
+      await hideActionsByNode(container, 'admin@example.com');
+
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('');
+
+      await expandNode(container, 'admin@example.com');
+      expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
+        "Show this entity's actions"
+      );
+    });
+
+    it('hide filters counter when filter is disabled', async () => {
+      const { getByTestId, container } = renderStory({
+        showToggleSearch: true,
+      });
+      await showActionsByNode(container, 'admin@example.com');
+
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+
+      disableFilter(container, 0);
+
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('');
+
+      await expandNode(container, 'admin@example.com');
+      expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
+        "Show this entity's actions"
+      );
+    });
+  });
+
+  describe('investigateInTimeline', () => {
+    it('has originEventIds, empty query and no filters - calls onInvestigateInTimeline action with event.id filter only', () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '',
+        language: 'kuery',
+      });
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: ['1', '2'].map((eventId) => ({
+              meta: {
+                controlledBy: 'graph-investigation',
+                field: 'event.id',
+                index: '1235',
+                key: 'event.id',
+                negate: false,
+                params: {
+                  query: eventId,
+                },
+                type: 'phrase',
+              },
+              query: {
+                match_phrase: {
+                  'event.id': eventId,
+                },
+              },
+            })),
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('has originEventIds, has a query and no filters - calls onInvestigateInTimeline action with event.id in the query but not in the filters', async () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+      const queryInput = getByTestId('queryInput');
+      await userEvent.type(queryInput, 'host1');
+      const querySubmitBtn = getByTestId('querySubmitButton');
+      querySubmitBtn.click();
+
+      // Act
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '(host1) OR event.id: "1" OR event.id: "2"',
+        language: 'kuery',
+      });
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
+    });
+
+    it('has originEventIds, empty query and there are filters - calls onInvestigateInTimeline action with event.id filter only', async () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId, container } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+      const entityIdFilter = 'admin@example.com';
+
+      // Act
+      await showActionsByNode(container, entityIdFilter);
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '',
+        language: 'kuery',
+      });
+
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: [
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.entity.id',
+                  index: '1235',
+                  key: 'user.entity.id',
+                  negate: false,
+                  params: {
+                    query: entityIdFilter,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.entity.id': entityIdFilter,
+                  },
+                },
+              },
+              ...['1', '2'].map((eventId) => ({
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'event.id',
+                  index: eventId === '1' ? '1235' : undefined,
+                  ...(eventId === '2' ? { disabled: false } : {}),
+                  key: 'event.id',
+                  negate: false,
+                  params: {
+                    query: eventId,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'event.id': eventId,
+                  },
+                },
+              })),
+            ],
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('has originEventIds, has query and there are filters - calls onInvestigateInTimeline action with event.id filter and query', async () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId, container } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+      const entityIdFilter = 'admin@example.com';
+
+      // Act
+      await showActionsByNode(container, entityIdFilter);
+      const queryInput = getByTestId('queryInput');
+      await userEvent.type(queryInput, 'host1');
+      const querySubmitBtn = getByTestId('querySubmitButton');
+      querySubmitBtn.click();
+
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '(host1) OR event.id: "1" OR event.id: "2"',
+        language: 'kuery',
+      });
+
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: [
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.entity.id',
+                  index: '1235',
+                  key: 'user.entity.id',
+                  negate: false,
+                  params: {
+                    query: entityIdFilter,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.entity.id': entityIdFilter,
+                  },
+                },
+              },
+              ...['1', '2'].map((eventId) => ({
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'event.id',
+                  index: eventId === '1' ? '1235' : undefined,
+                  ...(eventId === '2' ? { disabled: false } : {}),
+                  key: 'event.id',
+                  negate: false,
+                  params: {
+                    query: eventId,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'event.id': eventId,
+                  },
+                },
+              })),
+            ],
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('empty originEventIds, empty query and no filters - calls onInvestigateInTimeline with empty query and no filters', () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+        initialState: {
+          dataView: mockDataView,
+          originEventIds: [],
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        },
+      });
+
+      // Act
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '',
+        language: 'kuery',
+      });
+      // Should have empty filters since there are no originEventIds
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
+    });
+
+    it('empty originEventIds, has query and no filters - calls onInvestigateInTimeline with query only', async () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+        initialState: {
+          dataView: mockDataView,
+          originEventIds: [],
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        },
+      });
+
+      // Act
+      const queryInput = getByTestId('queryInput');
+      await userEvent.type(queryInput, 'host1');
+      const querySubmitBtn = getByTestId('querySubmitButton');
+      querySubmitBtn.click();
+
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      // Query should remain unchanged since there are no originEventIds to add
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: 'host1',
+        language: 'kuery',
+      });
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
+    });
+
+    it('empty originEventIds, empty query and has filters - calls onInvestigateInTimeline with empty query and filters', async () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId, container } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+        initialState: {
+          dataView: mockDataView,
+          originEventIds: [],
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        },
+      });
+      const entityIdFilter = 'admin@example.com';
+
+      // Act
+      await showActionsByNode(container, entityIdFilter);
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      // Query should remain unchanged since there are no originEventIds to add
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '',
+        language: 'kuery',
+      });
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            field: 'user.entity.id',
+            key: 'user.entity.id',
+            params: {
+              query: entityIdFilter,
+            },
+            type: 'phrase',
+          }),
+          query: {
+            match_phrase: {
+              'user.entity.id': entityIdFilter,
+            },
+          },
+        },
+      ]);
+    });
+
+    it('empty originEventIds, has query and has filters - calls onInvestigateInTimeline with query and filters', async () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId, container } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+        initialState: {
+          dataView: mockDataView,
+          originEventIds: [],
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        },
+      });
+      const entityIdFilter = 'admin@example.com';
+
+      // Act
+      await showActionsByNode(container, entityIdFilter);
+      const queryInput = getByTestId('queryInput');
+      await userEvent.type(queryInput, 'host1');
+      const querySubmitBtn = getByTestId('querySubmitButton');
+      querySubmitBtn.click();
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      // Query should remain unchanged since there are no originEventIds to add
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: 'host1',
+        language: 'kuery',
+      });
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            field: 'user.entity.id',
+            key: 'user.entity.id',
+            params: {
+              query: entityIdFilter,
+            },
+            type: 'phrase',
+          }),
+          query: {
+            match_phrase: {
+              'user.entity.id': entityIdFilter,
+            },
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('grouped-actor scenario - mixed namespaces as actor', () => {
+    it('renders graph with grouped actor node', async () => {
+      const { container } = renderGroupedActorStory();
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(4); // group, grouped-actor, target, label
+      });
+    });
+
+    it('grouped actor node with mixed namespaces falls back to generic entity.id filter', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { container } = renderGroupedActorStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      // Since the node has no entity details (all availableInEntityStore = false),
+      // we cannot add filters via "Show actions by entity"
+      // This scenario tests the fallback behavior
+      await waitFor(() => {
+        const nodeElement = container.querySelector(
+          `.react-flow__nodes .react-flow__node[data-id="mixed-entities"]`
+        );
+        expect(nodeElement).not.toBeNull();
+      });
+    });
+
+    it('grouped actor node does not show filter actions in popover', async () => {
+      const { container, queryByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      // Grouped entities should not have "Show actions by entity" option
+      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).not.toBeInTheDocument();
+    });
+
+    it('grouped actor node shows entity details option', async () => {
+      const { container, getByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toBeInTheDocument();
+    });
+  });
+
+  describe('grouped-target scenario - mixed namespaces as target', () => {
+    it('renders graph with grouped target node', async () => {
+      const { container } = renderGroupedTargetStory();
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(4); // group, actor, grouped-target, label
+      });
+    });
+
+    it('single actor node with user namespace uses user.entity.id filter', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { container, getByTestId } = renderGroupedTargetStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      // Act - Click "Show actions by entity" on single-actor node
+      await showActionsByNode(container, 'single-actor');
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert - Should use user.entity.id since actor has user namespace
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: expect.arrayContaining([
+              expect.objectContaining({
+                meta: expect.objectContaining({
+                  field: 'user.entity.id',
+                  key: 'user.entity.id',
+                }),
+                query: {
+                  match_phrase: {
+                    'user.entity.id': 'single-actor',
+                  },
+                },
+              }),
+            ]),
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('grouped target node with mixed namespaces does not show filter actions in popover', async () => {
+      const { container, queryByTestId } = renderGroupedTargetStory();
+
+      await expandNode(container, 'mixed-targets');
+
+      // Grouped entities should not have "Show actions by entity" or "Show actions on entity" options
+      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).not.toBeInTheDocument();
+    });
+
+    it('grouped target node shows entity details option', async () => {
+      const { container, getByTestId } = renderGroupedTargetStory();
+
+      await expandNode(container, 'mixed-targets');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toBeInTheDocument();
+    });
+  });
+});

@@ -1,0 +1,21 @@
+{
+  "security.activate_user_profile": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/profile/_activate"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-activate-user-profile",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

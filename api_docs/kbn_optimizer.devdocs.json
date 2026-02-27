@@ -9,29 +9,23 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.OptimizerConfig",
+        "id": "def-server.OptimizerConfig",
         "type": "Class",
         "tags": [],
         "label": "OptimizerConfig",
         "description": [],
         "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+        "lineNumber": 171,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.parseOptions",
+            "id": "def-server.OptimizerConfig.parseOptions",
             "type": "Function",
             "tags": [],
             "label": "parseOptions",
@@ -41,12 +35,14 @@
               "ParsedOptions"
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.parseOptions.$1",
+                "id": "def-server.OptimizerConfig.parseOptions.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -55,6 +51,8 @@
                   "Options"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 172,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -64,7 +62,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.create",
+            "id": "def-server.OptimizerConfig.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -73,19 +71,21 @@
               "(inputOptions: Options) => ",
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+            "lineNumber": 242,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.create.$1",
+                "id": "def-server.OptimizerConfig.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "inputOptions",
@@ -94,6 +94,8 @@
                   "Options"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 242,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -103,7 +105,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.Unnamed",
+            "id": "def-server.OptimizerConfig.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -112,12 +114,14 @@
               "any"
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+            "lineNumber": 288,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$1",
+                "id": "def-server.OptimizerConfig.Unnamed.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "bundles",
@@ -127,13 +131,15 @@
                   "[]"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 289,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$2",
+                "id": "def-server.OptimizerConfig.Unnamed.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "filteredBundles",
@@ -143,13 +149,15 @@
                   "[]"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 290,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$3",
+                "id": "def-server.OptimizerConfig.Unnamed.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "cache",
@@ -158,13 +166,15 @@
                   "boolean"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 291,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$4",
+                "id": "def-server.OptimizerConfig.Unnamed.$4",
                 "type": "boolean",
                 "tags": [],
                 "label": "watch",
@@ -173,13 +183,15 @@
                   "boolean"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 292,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$5",
+                "id": "def-server.OptimizerConfig.Unnamed.$5",
                 "type": "boolean",
                 "tags": [],
                 "label": "inspectWorkers",
@@ -188,13 +200,15 @@
                   "boolean"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 293,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$6",
+                "id": "def-server.OptimizerConfig.Unnamed.$6",
                 "type": "Array",
                 "tags": [],
                 "label": "plugins",
@@ -204,13 +218,15 @@
                   "[]"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 294,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$7",
+                "id": "def-server.OptimizerConfig.Unnamed.$7",
                 "type": "string",
                 "tags": [],
                 "label": "repoRoot",
@@ -219,13 +235,15 @@
                   "string"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 295,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$8",
+                "id": "def-server.OptimizerConfig.Unnamed.$8",
                 "type": "number",
                 "tags": [],
                 "label": "maxWorkerCount",
@@ -234,13 +252,15 @@
                   "number"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 296,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$9",
+                "id": "def-server.OptimizerConfig.Unnamed.$9",
                 "type": "boolean",
                 "tags": [],
                 "label": "dist",
@@ -249,13 +269,15 @@
                   "boolean"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 297,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$10",
+                "id": "def-server.OptimizerConfig.Unnamed.$10",
                 "type": "boolean",
                 "tags": [],
                 "label": "profileWebpack",
@@ -264,13 +286,15 @@
                   "boolean"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 298,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$11",
+                "id": "def-server.OptimizerConfig.Unnamed.$11",
                 "type": "Object",
                 "tags": [],
                 "label": "themeTags",
@@ -279,6 +303,8 @@
                   "ThemeTags"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 299,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -288,7 +314,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.getWorkerConfig",
+            "id": "def-server.OptimizerConfig.getWorkerConfig",
             "type": "Function",
             "tags": [],
             "label": "getWorkerConfig",
@@ -298,12 +324,14 @@
               "WorkerConfig"
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+            "lineNumber": 302,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.getWorkerConfig.$1",
+                "id": "def-server.OptimizerConfig.getWorkerConfig.$1",
                 "type": "Unknown",
                 "tags": [],
                 "label": "optimizerCacheKey",
@@ -312,6 +340,8 @@
                   "unknown"
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+                "lineNumber": 302,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -321,7 +351,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.getCacheableWorkerConfig",
+            "id": "def-server.OptimizerConfig.getCacheableWorkerConfig",
             "type": "Function",
             "tags": [],
             "label": "getCacheableWorkerConfig",
@@ -331,6 +361,8 @@
               "CacheableWorkerConfig"
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
+            "lineNumber": 315,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -343,7 +375,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.logOptimizerProgress",
+        "id": "def-server.logOptimizerProgress",
         "type": "Function",
         "tags": [],
         "label": "logOptimizerProgress",
@@ -362,20 +394,22 @@
           "<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
         ],
         "path": "packages/kbn-optimizer/src/log_optimizer_progress.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.logOptimizerProgress.$1",
+            "id": "def-server.logOptimizerProgress.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -390,6 +424,8 @@
               }
             ],
             "path": "packages/kbn-optimizer/src/log_optimizer_progress.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -400,7 +436,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.logOptimizerState",
+        "id": "def-server.logOptimizerState",
         "type": "Function",
         "tags": [],
         "label": "logOptimizerState",
@@ -417,36 +453,38 @@
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerConfig",
+            "section": "def-server.OptimizerConfig",
             "text": "OptimizerConfig"
           },
           ") => Operator<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ", ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
         ],
         "path": "packages/kbn-optimizer/src/log_optimizer_state.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.logOptimizerState.$1",
+            "id": "def-server.logOptimizerState.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -461,13 +499,15 @@
               }
             ],
             "path": "packages/kbn-optimizer/src/log_optimizer_state.ts",
+            "lineNumber": 21,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.logOptimizerState.$2",
+            "id": "def-server.logOptimizerState.$2",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -475,13 +515,15 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
             "path": "packages/kbn-optimizer/src/log_optimizer_state.ts",
+            "lineNumber": 21,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -492,7 +534,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.readLimits",
+        "id": "def-server.readLimits",
         "type": "Function",
         "tags": [],
         "label": "readLimits",
@@ -502,12 +544,14 @@
           "Limits"
         ],
         "path": "packages/kbn-optimizer/src/limits.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.readLimits.$1",
+            "id": "def-server.readLimits.$1",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -516,6 +560,8 @@
               "string"
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
+            "lineNumber": 25,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -526,7 +572,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.reportOptimizerTimings",
+        "id": "def-server.reportOptimizerTimings",
         "type": "Function",
         "tags": [],
         "label": "reportOptimizerTimings",
@@ -543,36 +589,38 @@
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerConfig",
+            "section": "def-server.OptimizerConfig",
             "text": "OptimizerConfig"
           },
           ") => Operator<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ", ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
         ],
         "path": "packages/kbn-optimizer/src/report_optimizer_timings.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.reportOptimizerTimings.$1",
+            "id": "def-server.reportOptimizerTimings.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -587,13 +635,15 @@
               }
             ],
             "path": "packages/kbn-optimizer/src/report_optimizer_timings.ts",
+            "lineNumber": 18,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.reportOptimizerTimings.$2",
+            "id": "def-server.reportOptimizerTimings.$2",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -601,13 +651,15 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
             "path": "packages/kbn-optimizer/src/report_optimizer_timings.ts",
+            "lineNumber": 18,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -618,7 +670,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.runFindBabelHelpersInEntryBundlesCli",
+        "id": "def-server.runFindBabelHelpersInEntryBundlesCli",
         "type": "Function",
         "tags": [],
         "label": "runFindBabelHelpersInEntryBundlesCli",
@@ -627,6 +679,8 @@
           "() => Promise<void>"
         ],
         "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_babel_runtime_helpers_in_entry_bundles.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -635,7 +689,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
+        "id": "def-server.runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
         "type": "Function",
         "tags": [],
         "label": "runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
@@ -644,6 +698,8 @@
           "() => Promise<void>"
         ],
         "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_node_libs_browser_polyfills_in_entry_bundles.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -652,7 +708,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.runKbnOptimizerCli",
+        "id": "def-server.runKbnOptimizerCli",
         "type": "Function",
         "tags": [],
         "label": "runKbnOptimizerCli",
@@ -661,28 +717,34 @@
           "(options: { defaultLimitsPath: string; }) => void"
         ],
         "path": "packages/kbn-optimizer/src/cli.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.runKbnOptimizerCli.$1",
+            "id": "def-server.runKbnOptimizerCli.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
             "description": [],
             "path": "packages/kbn-optimizer/src/cli.ts",
+            "lineNumber": 41,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.runKbnOptimizerCli.$1.defaultLimitsPath",
+                "id": "def-server.runKbnOptimizerCli.$1.defaultLimitsPath",
                 "type": "string",
                 "tags": [],
                 "label": "defaultLimitsPath",
                 "description": [],
                 "path": "packages/kbn-optimizer/src/cli.ts",
+                "lineNumber": 41,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -694,7 +756,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.runOptimizer",
+        "id": "def-server.runOptimizer",
         "type": "Function",
         "tags": [],
         "label": "runOptimizer",
@@ -703,9 +765,9 @@
           "(config: ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerConfig",
+            "section": "def-server.OptimizerConfig",
             "text": "OptimizerConfig"
           },
           ") => ",
@@ -713,20 +775,22 @@
           "<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
         ],
         "path": "packages/kbn-optimizer/src/run_optimizer.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.runOptimizer.$1",
+            "id": "def-server.runOptimizer.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -734,13 +798,15 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
             "path": "packages/kbn-optimizer/src/run_optimizer.ts",
+            "lineNumber": 34,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -751,7 +817,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.updateBundleLimits",
+        "id": "def-server.updateBundleLimits",
         "type": "Function",
         "tags": [],
         "label": "updateBundleLimits",
@@ -760,12 +826,14 @@
           "({\n  log,\n  config,\n  dropMissing,\n  limitsPath,\n}: UpdateBundleLimitsOptions) => void"
         ],
         "path": "packages/kbn-optimizer/src/limits.ts",
+        "lineNumber": 107,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.updateBundleLimits.$1",
+            "id": "def-server.updateBundleLimits.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  log,\n  config,\n  dropMissing,\n  limitsPath,\n}",
@@ -774,6 +842,8 @@
               "UpdateBundleLimitsOptions"
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
+            "lineNumber": 107,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -784,7 +854,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.validateLimitsForAllBundles",
+        "id": "def-server.validateLimitsForAllBundles",
         "type": "Function",
         "tags": [],
         "label": "validateLimitsForAllBundles",
@@ -801,20 +871,22 @@
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerConfig",
+            "section": "def-server.OptimizerConfig",
             "text": "OptimizerConfig"
           },
           ", limitsPath: string) => void"
         ],
         "path": "packages/kbn-optimizer/src/limits.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.validateLimitsForAllBundles.$1",
+            "id": "def-server.validateLimitsForAllBundles.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -829,13 +901,15 @@
               }
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.validateLimitsForAllBundles.$2",
+            "id": "def-server.validateLimitsForAllBundles.$2",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -843,20 +917,22 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.validateLimitsForAllBundles.$3",
+            "id": "def-server.validateLimitsForAllBundles.$3",
             "type": "string",
             "tags": [],
             "label": "limitsPath",
@@ -865,6 +941,8 @@
               "string"
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -879,7 +957,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.OptimizerUpdate",
+        "id": "def-server.OptimizerUpdate",
         "type": "Type",
         "tags": [],
         "label": "OptimizerUpdate",
@@ -893,13 +971,15 @@
           ">"
         ],
         "path": "packages/kbn-optimizer/src/run_optimizer.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.OptimizerUpdate$",
+        "id": "def-server.OptimizerUpdate$",
         "type": "Type",
         "tags": [],
         "label": "OptimizerUpdate$",
@@ -909,19 +989,29 @@
           "<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
         ],
         "path": "packages/kbn-optimizer/src/run_optimizer.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

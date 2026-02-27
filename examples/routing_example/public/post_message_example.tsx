@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback } from 'react';
@@ -18,7 +19,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
-import { Services } from './services';
+import type { Services } from './services';
 
 interface Props {
   postMessage: Services['postMessage'];
@@ -82,7 +83,7 @@ export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props)
         </EuiFormRow>
 
         {error !== undefined ? (
-          <EuiCallOut color="danger" iconType="warning">
+          <EuiCallOut announceOnMount color="danger" iconType="warning">
             {error.message}
           </EuiCallOut>
         ) : null}

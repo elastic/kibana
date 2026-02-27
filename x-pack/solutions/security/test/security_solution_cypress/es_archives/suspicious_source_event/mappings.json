@@ -1,0 +1,29 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      "thread-data": {
+        "is_write_index": false
+      },
+      "beats": {
+      },
+      "siem-read-alias": {
+      }
+    },
+    "index": "auditbeat-suspicious-source-event-001",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "myhash": {
+          "properties": {
+            "mysha256": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

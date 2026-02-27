@@ -11,59 +11,57 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreConfigUsageData",
+        "id": "def-server.CoreConfigUsageData",
         "type": "Interface",
         "tags": [],
         "label": "CoreConfigUsageData",
         "description": [
           "\nUsage data on this cluster's configuration of Core features"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+        "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreConfigUsageData.elasticsearch",
+            "id": "def-server.CoreConfigUsageData.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ sniffOnStart: boolean; sniffIntervalMs?: number | undefined; sniffOnConnectionFault: boolean; numberOfHostsConfigured: number; requestHeadersWhitelistConfigured: boolean; customHeadersConfigured: boolean; shardTimeoutMs: number; requestTimeoutMs: number; pingTimeoutMs: number; logQueries: boolean; ssl: { verificationMode: \"none\" | \"full\" | \"certificate\"; certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; alwaysPresentCertificate: boolean; }; apiVersion: string; healthCheckDelayMs: number; principal: \"unknown\" | \"elastic_user\" | \"kibana_user\" | \"kibana_system_user\" | \"other_user\" | \"kibana_service_account\"; }"
+              "{ sniffOnStart: boolean; sniffIntervalMs?: number | undefined; sniffOnConnectionFault: boolean; numberOfHostsConfigured: number; requestHeadersWhitelistConfigured: boolean; customHeadersConfigured: boolean; shardTimeoutMs: number; requestTimeoutMs: number; logQueries: boolean; ssl: { verificationMode: \"none\" | \"full\" | \"certificate\"; certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; alwaysPresentCertificate: boolean; }; apiVersion: string; healthCheckDelayMs: number; principal: \"unknown\" | \"elastic_user\" | \"kibana_user\" | \"kibana_system_user\" | \"other_user\" | \"kibana_service_account\"; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreConfigUsageData.http",
+            "id": "def-server.CoreConfigUsageData.http",
             "type": "Object",
             "tags": [],
             "label": "http",
             "description": [],
             "signature": [
-              "{ basePathConfigured: boolean; maxPayloadInBytes: number; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; compression: { enabled: boolean; referrerWhitelistConfigured: boolean; }; xsrf: { disableProtection: boolean; allowlistConfigured: boolean; }; requestId: { allowFromAnyIp: boolean; ipAllowlistConfigured: boolean; }; ssl: { certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; cipherSuites: string[]; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; redirectHttpFromPortConfigured: boolean; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }; securityResponseHeaders: { strictTransportSecurity: string; xContentTypeOptions: string; referrerPolicy: string; permissionsPolicyConfigured: boolean; disableEmbedding: boolean; crossOriginOpenerPolicy: string; }; }"
+              "{ basePathConfigured: boolean; maxPayloadInBytes: number; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; protocol: \"http1\" | \"http2\"; compression: { enabled: boolean; referrerWhitelistConfigured: boolean; }; xsrf: { disableProtection: boolean; allowlistConfigured: boolean; }; requestId: { allowFromAnyIp: boolean; ipAllowlistConfigured: boolean; }; ssl: { certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; cipherSuites: string[]; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; redirectHttpFromPortConfigured: boolean; supportedProtocols: string[]; clientAuthentication: \"none\" | \"required\" | \"optional\"; }; securityResponseHeaders: { strictTransportSecurity: string; xContentTypeOptions: string; referrerPolicy: string; permissionsPolicyConfigured: boolean; disableEmbedding: boolean; crossOriginOpenerPolicy: string; }; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreConfigUsageData.logging",
+            "id": "def-server.CoreConfigUsageData.logging",
             "type": "Object",
             "tags": [],
             "label": "logging",
@@ -71,13 +69,15 @@
             "signature": [
               "{ appendersTypesUsed: string[]; loggersConfiguredCount: number; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreConfigUsageData.savedObjects",
+            "id": "def-server.CoreConfigUsageData.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -85,13 +85,15 @@
             "signature": [
               "{ customIndex: boolean; maxImportPayloadBytes: number; maxImportExportSize: number; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreConfigUsageData.deprecatedKeys",
+            "id": "def-server.CoreConfigUsageData.deprecatedKeys",
             "type": "Object",
             "tags": [],
             "label": "deprecatedKeys",
@@ -99,7 +101,9 @@
             "signature": [
               "{ set: string[]; unset: string[]; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -108,28 +112,113 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreEnvironmentUsageData",
+        "id": "def-server.CoreDeprecatedApiUsageStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreDeprecatedApiUsageStats",
+        "description": [],
+        "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+        "lineNumber": 153,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiId",
+            "type": "string",
+            "tags": [],
+            "label": "apiId",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.totalMarkedAsResolved",
+            "type": "number",
+            "tags": [],
+            "label": "totalMarkedAsResolved",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.markedAsResolvedLastCalledAt",
+            "type": "string",
+            "tags": [],
+            "label": "markedAsResolvedLastCalledAt",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiTotalCalls",
+            "type": "number",
+            "tags": [],
+            "label": "apiTotalCalls",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiLastCalledAt",
+            "type": "string",
+            "tags": [],
+            "label": "apiLastCalledAt",
+            "description": [],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 163,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-usage-data-server",
+        "id": "def-server.CoreEnvironmentUsageData",
         "type": "Interface",
         "tags": [],
         "label": "CoreEnvironmentUsageData",
         "description": [
           "\nUsage data on this Kibana node's runtime environment."
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+        "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreEnvironmentUsageData.memory",
+            "id": "def-server.CoreEnvironmentUsageData.memory",
             "type": "Object",
             "tags": [],
             "label": "memory",
             "description": [],
             "signature": [
-              "{ heapTotalBytes: number; heapUsedBytes: number; heapSizeLimit: number; }"
+              "{ arrayBuffersBytes: number; residentSetSizeBytes: number; externalBytes: number; heapTotalBytes: number; heapUsedBytes: number; heapSizeLimit: number; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -138,31 +227,35 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreIncrementCounterParams",
+        "id": "def-server.CoreIncrementCounterParams",
         "type": "Interface",
         "tags": [],
         "label": "CoreIncrementCounterParams",
         "description": [],
-        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreIncrementCounterParams.counterName",
+            "id": "def-server.CoreIncrementCounterParams.counterName",
             "type": "string",
             "tags": [],
             "label": "counterName",
             "description": [
               "The name of the counter"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreIncrementCounterParams.counterType",
+            "id": "def-server.CoreIncrementCounterParams.counterType",
             "type": "string",
             "tags": [],
             "label": "counterType",
@@ -172,13 +265,15 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreIncrementCounterParams.incrementBy",
+            "id": "def-server.CoreIncrementCounterParams.incrementBy",
             "type": "number",
             "tags": [],
             "label": "incrementBy",
@@ -188,7 +283,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -197,20 +294,22 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreServicesUsageData",
+        "id": "def-server.CoreServicesUsageData",
         "type": "Interface",
         "tags": [],
         "label": "CoreServicesUsageData",
         "description": [
           "\nUsage data from Core services"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+        "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreServicesUsageData.savedObjects",
+            "id": "def-server.CoreServicesUsageData.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
@@ -218,7 +317,9 @@
             "signature": [
               "{ indices: { alias: string; docsCount: number; docsDeleted: number; storeSizeBytes: number; primaryStoreSizeBytes: number; savedObjectsDocsCount: number; }[]; legacyUrlAliases: { activeCount: number; inactiveCount: number; disabledCount: number; totalCount: number; }; }"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_data.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -227,12 +328,14 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreUsageCounter",
+        "id": "def-server.CoreUsageCounter",
         "type": "Interface",
         "tags": [],
         "label": "CoreUsageCounter",
         "description": [],
-        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -240,7 +343,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreUsageData",
+        "id": "def-server.CoreUsageData",
         "type": "Interface",
         "tags": [],
         "label": "CoreUsageData",
@@ -248,83 +351,61 @@
           "\nType describing Core's usage data payload"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-usage-data-server",
-            "scope": "common",
-            "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-common.CoreUsageData",
-            "text": "CoreUsageData"
-          },
+          "CoreUsageData",
           " extends ",
-          {
-            "pluginId": "@kbn/core-usage-data-server",
-            "scope": "common",
-            "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-common.CoreUsageStats",
-            "text": "CoreUsageStats"
-          }
+          "CoreUsageStats"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/start_contract.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageData.config",
+            "id": "def-server.CoreUsageData.config",
             "type": "Object",
             "tags": [],
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-common.CoreConfigUsageData",
-                "text": "CoreConfigUsageData"
-              }
+              "CoreConfigUsageData"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/start_contract.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageData.services",
+            "id": "def-server.CoreUsageData.services",
             "type": "Object",
             "tags": [],
             "label": "services",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-common.CoreServicesUsageData",
-                "text": "CoreServicesUsageData"
-              }
+              "CoreServicesUsageData"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/start_contract.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageData.environment",
+            "id": "def-server.CoreUsageData.environment",
             "type": "Object",
             "tags": [],
             "label": "environment",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-common.CoreEnvironmentUsageData",
-                "text": "CoreEnvironmentUsageData"
-              }
+              "CoreEnvironmentUsageData"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/start_contract.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -333,22 +414,22 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreUsageDataSetup",
+        "id": "def-server.CoreUsageDataSetup",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": [],
         "label": "CoreUsageDataSetup",
         "description": [
           "\nInternal API for registering the Usage Tracker used for Core's usage data payload.\n"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageDataSetup.registerUsageCounter",
+            "id": "def-server.CoreUsageDataSetup.registerUsageCounter",
             "type": "Function",
             "tags": [],
             "label": "registerUsageCounter",
@@ -357,36 +438,66 @@
             ],
             "signature": [
               "(usageCounter: ",
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-common.CoreUsageCounter",
-                "text": "CoreUsageCounter"
-              },
+              "CoreUsageCounter",
               ") => void"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-usage-data-server",
-                "id": "def-common.CoreUsageDataSetup.registerUsageCounter.$1",
+                "id": "def-server.CoreUsageDataSetup.registerUsageCounter.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "usageCounter",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-usage-data-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreUsageDataServerPluginApi",
-                    "section": "def-common.CoreUsageCounter",
-                    "text": "CoreUsageCounter"
-                  }
+                  "CoreUsageCounter"
                 ],
-                "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+                "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+                "lineNumber": 23,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageDataSetup.registerDeprecatedUsageFetch",
+            "type": "Function",
+            "tags": [],
+            "label": "registerDeprecatedUsageFetch",
+            "description": [],
+            "signature": [
+              "(fetchFn: ",
+              "DeprecatedApiUsageFetcher",
+              ") => void"
+            ],
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server",
+                "id": "def-server.CoreUsageDataSetup.registerDeprecatedUsageFetch.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "fetchFn",
+                "description": [],
+                "signature": [
+                  "DeprecatedApiUsageFetcher"
+                ],
+                "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+                "lineNumber": 24,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -399,7 +510,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreUsageDataStart",
+        "id": "def-server.CoreUsageDataStart",
         "type": "Interface",
         "tags": [
           "note"
@@ -408,29 +519,27 @@
         "description": [
           "\nInternal API for getting Core's usage data payload.\n"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/start_contract.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageDataStart.getConfigsUsageData",
+            "id": "def-server.CoreUsageDataStart.getConfigsUsageData",
             "type": "Function",
             "tags": [],
             "label": "getConfigsUsageData",
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-common.ConfigUsageData",
-                "text": "ConfigUsageData"
-              },
+              "ConfigUsageData",
               ">"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/start_contract.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -441,18 +550,20 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreUsageStats",
+        "id": "def-server.CoreUsageStats",
         "type": "Interface",
         "tags": [],
         "label": "CoreUsageStats",
         "description": [],
-        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+        "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.total'",
@@ -460,13 +571,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.total'",
@@ -474,13 +587,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes'",
@@ -488,13 +603,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no'",
@@ -502,13 +619,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.total'",
@@ -516,13 +635,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'",
@@ -530,13 +651,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'",
@@ -544,13 +667,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.total'",
@@ -558,13 +683,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.total'",
@@ -572,13 +699,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes'",
@@ -586,13 +715,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no'",
@@ -600,13 +731,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.total'",
@@ -614,13 +747,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes'",
@@ -628,13 +763,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no'",
@@ -642,13 +779,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.total'",
@@ -656,13 +795,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.total'",
@@ -670,13 +811,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes'",
@@ -684,13 +827,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no'",
@@ -698,13 +843,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.total'",
@@ -712,13 +859,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes'",
@@ -726,13 +875,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no'",
@@ -740,13 +891,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.total'",
@@ -754,13 +907,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.total'",
@@ -768,13 +923,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes'",
@@ -782,13 +939,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no'",
@@ -796,13 +955,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.total'",
@@ -810,13 +971,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes'",
@@ -824,13 +987,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'",
@@ -838,13 +1003,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.total'",
@@ -852,13 +1019,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.total'",
@@ -866,13 +1035,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes'",
@@ -880,13 +1051,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no'",
@@ -894,13 +1067,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.total'",
@@ -908,13 +1083,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes'",
@@ -922,13 +1099,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no'",
@@ -936,13 +1115,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.total'",
@@ -950,13 +1131,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.total'",
@@ -964,13 +1147,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes'",
@@ -978,13 +1163,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no'",
@@ -992,13 +1179,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.total'",
@@ -1006,13 +1195,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes'",
@@ -1020,13 +1211,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no'",
@@ -1034,13 +1227,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.total'",
@@ -1048,13 +1243,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.total'",
@@ -1062,13 +1259,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes'",
@@ -1076,13 +1275,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no'",
@@ -1090,13 +1291,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.total'",
@@ -1104,13 +1307,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes'",
@@ -1118,13 +1323,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no'",
@@ -1132,13 +1339,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.total'",
@@ -1146,13 +1355,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.total'",
@@ -1160,13 +1371,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes'",
@@ -1174,13 +1387,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no'",
@@ -1188,13 +1403,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.total'",
@@ -1202,13 +1419,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes'",
@@ -1216,13 +1435,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no'",
@@ -1230,13 +1451,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.total'",
@@ -1244,13 +1467,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.total'",
@@ -1258,13 +1483,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes'",
@@ -1272,13 +1499,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no'",
@@ -1286,13 +1515,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.total'",
@@ -1300,13 +1531,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'",
@@ -1314,13 +1547,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'",
@@ -1328,13 +1563,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.total'",
@@ -1342,13 +1579,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.total'",
@@ -1356,13 +1595,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes'",
@@ -1370,13 +1611,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no'",
@@ -1384,13 +1627,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.total'",
@@ -1398,13 +1643,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes'",
@@ -1412,13 +1659,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no'",
@@ -1426,13 +1675,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.total'",
@@ -1440,13 +1691,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.total'",
@@ -1454,13 +1707,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'",
@@ -1468,13 +1723,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no'",
@@ -1482,13 +1739,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.total'",
@@ -1496,13 +1755,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes'",
@@ -1510,13 +1771,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no'",
@@ -1524,13 +1787,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.total'",
@@ -1538,13 +1803,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.total'",
@@ -1552,13 +1819,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes'",
@@ -1566,13 +1835,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no'",
@@ -1580,13 +1851,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.total'",
@@ -1594,13 +1867,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes'",
@@ -1608,13 +1883,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no'",
@@ -1622,13 +1899,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'",
@@ -1636,13 +1915,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.createNewCopiesEnabled.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'",
@@ -1650,13 +1931,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.compatibilityModeEnabled.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.compatibilityModeEnabled.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.compatibilityModeEnabled.yes'",
@@ -1664,13 +1947,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.compatibilityModeEnabled.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.compatibilityModeEnabled.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.compatibilityModeEnabled.no'",
@@ -1678,13 +1963,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.overwriteEnabled.yes'",
@@ -1692,13 +1979,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsImport.overwriteEnabled.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsImport.overwriteEnabled.no'",
@@ -1706,13 +1995,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.total'",
@@ -1720,13 +2011,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.total'",
@@ -1734,13 +2027,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes'",
@@ -1748,13 +2043,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no'",
@@ -1762,13 +2059,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.total'",
@@ -1776,13 +2075,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes'",
@@ -1790,13 +2091,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no'",
@@ -1804,13 +2107,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'",
@@ -1818,13 +2123,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'",
@@ -1832,13 +2139,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.total'",
@@ -1846,13 +2155,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.total'",
@@ -1860,13 +2171,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes'",
@@ -1874,13 +2187,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no'",
@@ -1888,13 +2203,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.total'",
@@ -1902,13 +2219,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes'",
@@ -1916,13 +2235,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'",
@@ -1930,13 +2251,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.allTypesSelected.yes'",
@@ -1944,13 +2267,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.no",
+            "id": "def-server.CoreUsageStats.apiCalls.savedObjectsExport.allTypesSelected.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.savedObjectsExport.allTypesSelected.no'",
@@ -1958,13 +2283,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.total",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.total'",
@@ -1972,13 +2299,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.total'",
@@ -1986,13 +2315,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes'",
@@ -2000,13 +2331,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no'",
@@ -2014,13 +2347,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.total'",
@@ -2028,13 +2363,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes'",
@@ -2042,13 +2379,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no'",
@@ -2056,13 +2395,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.total",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.total'",
@@ -2070,13 +2411,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.total",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.total'",
@@ -2084,13 +2427,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes'",
@@ -2098,13 +2443,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no'",
@@ -2112,13 +2459,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.total",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.total",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.total'",
@@ -2126,13 +2475,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes'",
@@ -2140,13 +2491,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no",
+            "id": "def-server.CoreUsageStats.apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no",
             "type": "number",
             "tags": [],
             "label": "'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no'",
@@ -2154,13 +2507,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.exactMatch",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.exactMatch",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.exactMatch'",
@@ -2168,13 +2523,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.aliasMatch",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.aliasMatch",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.aliasMatch'",
@@ -2182,13 +2539,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.conflict",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.conflict",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.conflict'",
@@ -2196,13 +2555,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.notFound",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.notFound",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.notFound'",
@@ -2210,13 +2571,15 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreUsageStats.savedObjectsRepository.resolvedOutcome.total",
+            "id": "def-server.CoreUsageStats.savedObjectsRepository.resolvedOutcome.total",
             "type": "number",
             "tags": [],
             "label": "'savedObjectsRepository.resolvedOutcome.total'",
@@ -2224,7 +2587,41 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.deprecated_api_calls_resolved.total",
+            "type": "number",
+            "tags": [],
+            "label": "'deprecated_api_calls_resolved.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.deprecated_api_calls.total",
+            "type": "number",
+            "tags": [],
+            "label": "'deprecated_api_calls.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/usage-data/server/src/core_usage_stats.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2236,7 +2633,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.ConfigUsageData",
+        "id": "def-server.ConfigUsageData",
         "type": "Type",
         "tags": [],
         "label": "ConfigUsageData",
@@ -2246,51 +2643,87 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/start_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/start_contract.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
-        "id": "def-common.CoreIncrementUsageCounter",
+        "id": "def-server.CoreIncrementUsageCounter",
         "type": "Type",
         "tags": [],
         "label": "CoreIncrementUsageCounter",
         "description": [],
         "signature": [
           "(params: ",
-          {
-            "pluginId": "@kbn/core-usage-data-server",
-            "scope": "common",
-            "docId": "kibKbnCoreUsageDataServerPluginApi",
-            "section": "def-common.CoreIncrementCounterParams",
-            "text": "CoreIncrementCounterParams"
-          },
+          "CoreIncrementCounterParams",
           ") => void"
         ],
-        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server",
-            "id": "def-common.CoreIncrementUsageCounter.$1",
+            "id": "def-server.CoreIncrementUsageCounter.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-usage-data-server",
-                "scope": "common",
-                "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-common.CoreIncrementCounterParams",
-                "text": "CoreIncrementCounterParams"
-              }
+              "CoreIncrementCounterParams"
             ],
-            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "lineNumber": 52,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-usage-data-server",
+        "id": "def-server.DeprecatedApiUsageFetcher",
+        "type": "Type",
+        "tags": [],
+        "label": "DeprecatedApiUsageFetcher",
+        "description": [],
+        "signature": [
+          "(params: { soClient: ",
+          "ISavedObjectsRepository",
+          "; }) => Promise<",
+          "CoreDeprecatedApiUsageStats",
+          "[]>"
+        ],
+        "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.DeprecatedApiUsageFetcher.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ soClient: ",
+              "ISavedObjectsRepository",
+              "; }"
+            ],
+            "path": "src/core/packages/usage-data/server/src/setup_contract.ts",
+            "lineNumber": 58,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2298,6 +2731,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

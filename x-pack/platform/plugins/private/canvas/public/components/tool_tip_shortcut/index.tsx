@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { compose, mapProps } from 'react-recompose';
+import { getPlatform } from '@kbn/shared-ux-utility';
+import type { Props as ComponentProps } from './tool_tip_shortcut';
+import { ToolTipShortcut as Component } from './tool_tip_shortcut';
+import { keymap } from '../../lib/keymap';
+import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
+
+const platform = getPlatform();
+
+interface Props {
+  /**
+   * namespace defined in the keymap to look for shortcut in
+   */
+  namespace: keyof typeof keymap;
+  /**
+   * key of the shortcut defined in the keymap
+   */
+  action: string;
+}
+
+export const ToolTipShortcut = compose<ComponentProps, Props>(
+  mapProps(({ namespace, action }: Props): ComponentProps => {
+    const shortcutMap = keymap[namespace][action];
+    if (typeof shortcutMap === 'string') {
+      return { shortcut: '' };
+    }
+
+    const shortcuts = shortcutMap[platform] || [];
+    return { shortcut: getPrettyShortcut(shortcuts[0]) };
+  })
+)(Component);

@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/unsaved-changes-prompt",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/unsaved-changes-prompt",
+        "id": "def-public.useUnsavedChangesPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "useUnsavedChangesPrompt",
+        "description": [],
+        "signature": [
+          "(props: Props) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-unsaved-changes-prompt/src/unsaved_changes_prompt/unsaved_changes_prompt.tsx",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unsaved-changes-prompt",
+            "id": "def-public.useUnsavedChangesPrompt.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "src/platform/packages/shared/kbn-unsaved-changes-prompt/src/unsaved_changes_prompt/unsaved_changes_prompt.tsx",
+            "lineNumber": 58,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

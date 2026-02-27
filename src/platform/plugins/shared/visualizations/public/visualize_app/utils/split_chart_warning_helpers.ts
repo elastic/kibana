@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { $Values } from '@kbn/utility-types';
+import type { AggConfigs } from '@kbn/data-plugin/common';
+import { NEW_GAUGE_CHARTS_LIBRARY } from '../constants';
+
+export const CHARTS_WITHOUT_SMALL_MULTIPLES = {
+  gauge: 'gauge',
+} as const;
+
+export const CHARTS_TO_BE_DEPRECATED = {
+  pie: 'pie',
+  controls: 'input_control_vis',
+} as const;
+
+export type CHARTS_WITHOUT_SMALL_MULTIPLES = $Values<typeof CHARTS_WITHOUT_SMALL_MULTIPLES>;
+export type CHARTS_TO_BE_DEPRECATED = $Values<typeof CHARTS_TO_BE_DEPRECATED>;
+
+export const CHARTS_CONFIG_TOKENS = {
+  [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: NEW_GAUGE_CHARTS_LIBRARY,
+} as const;
+
+export const isSplitChart = (chartType: string | undefined, aggs?: AggConfigs) => {
+  const defaultIsSplitChart = () => aggs?.aggs.some((agg) => agg.schema === 'split');
+
+  const knownCheckers = {
+    [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: () => aggs?.aggs.some((agg) => agg.schema === 'group'),
+  };
+
+  return (knownCheckers[chartType as CHARTS_WITHOUT_SMALL_MULTIPLES] ?? defaultIsSplitChart)();
+};

@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import ReactDOM from 'react-dom';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StartDeps } from './plugin';
 
 export const renderApp = (
@@ -21,7 +24,14 @@ export const renderApp = (
   { data }: StartDeps,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(<UnifiedDocViewerExamplesApp data={data} />, element);
+  ReactDOM.render(
+    <EuiThemeProvider>
+      <IntlProvider locale="en">
+        <UnifiedDocViewerExamplesApp data={data} />
+      </IntlProvider>
+    </EuiThemeProvider>,
+    element
+  );
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
@@ -43,10 +53,8 @@ function UnifiedDocViewerExamplesApp({ data }: { data: DataPublicPluginStart }) 
         .search({
           params: {
             index: dataView?.getIndexPattern(),
-            body: {
-              fields: ['*'],
-              _source: false,
-            },
+            fields: ['*'],
+            _source: false,
           },
         })
         .toPromise();

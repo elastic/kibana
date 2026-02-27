@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { captureErrorMock } from './versioned_router.test.mocks';
@@ -13,12 +14,15 @@ import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpServer, createConfigService } from '@kbn/core-http-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
 import { ELASTIC_HTTP_VERSION_QUERY_PARAM } from '@kbn/core-http-common';
+import { createInternalHttpService } from '../utilities';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -29,7 +33,7 @@ interface AdditionalOptions {
 
 describe('Routing versioned requests', () => {
   let router: IRouter;
-  let supertest: Supertest.SuperTest<Supertest.Test>;
+  let supertest: Supertest.Agent;
 
   async function setupServer(cliArgs: Partial<CliArgs> = {}, options: AdditionalOptions = {}) {
     logger = loggingSystemMock.create();
@@ -42,14 +46,17 @@ describe('Routing versioned requests', () => {
           options.useVersionResolutionStrategyForInternalPaths ?? [],
       },
     };
-    server = createHttpServer({
+    server = createInternalHttpService({
       logger,
       env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
       configService: createConfigService({
         server: serverConfig,
       }),
     });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     router = createRouter('/');
     supertest = Supertest(innerServer.listener);
@@ -58,6 +65,7 @@ describe('Routing versioned requests', () => {
   const setupDeps = {
     context: contextServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
+    userActivity: userActivityServiceMock.createInternalSetupContract(),
   };
 
   beforeEach(async () => {
@@ -71,7 +79,11 @@ describe('Routing versioned requests', () => {
 
   it('routes requests to the expected handlers', async () => {
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
         return res.ok({ body: { v: '1' } });
       })
@@ -101,7 +113,11 @@ describe('Routing versioned requests', () => {
   it('handles missing version header (defaults to oldest)', async () => {
     await setupServer({ dev: false });
     router.versioned
-      .get({ path: '/my-path', access: 'public' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'public',
+      })
       .addVersion({ validate: false, version: '2020-02-02' }, async (ctx, req, res) => {
         return res.ok({ body: { v: '1' } });
       })
@@ -111,19 +127,21 @@ describe('Routing versioned requests', () => {
 
     await server.start();
 
-    await expect(supertest.get('/my-path').expect(200)).resolves.toEqual(
-      expect.objectContaining({
-        body: { v: '1' },
-        header: expect.objectContaining({
-          'elastic-api-version': '2020-02-02',
-        }),
-      })
-    );
+    await expect(supertest.get('/my-path').expect(200)).resolves.toMatchObject({
+      body: { v: '1' },
+      header: expect.objectContaining({
+        'elastic-api-version': '2020-02-02',
+      }),
+    });
   });
 
   it('returns the expected output for badly formatted versions', async () => {
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
         return res.ok({ body: { v: '1' } });
       });
@@ -136,16 +154,18 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', 'abc')
         .expect(400)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Invalid version/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Invalid version/),
+    });
   });
 
   it('returns the expected responses for failed validation', async () => {
     router.versioned
-      .post({ path: '/my-path', access: 'internal' })
+      .post({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       // Bad request validation
       .addVersion(
         {
@@ -162,24 +182,24 @@ describe('Routing versioned requests', () => {
     await server.start();
 
     await expect(
-      supertest
-        .post('/my-path')
-        .send({})
-        .set('Elastic-Api-Version', '1')
-        .expect(400)
-        .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
+      supertest.post('/my-path').send({}).set('Elastic-Api-Version', '1').expect(400)
+    ).resolves.toMatchObject({
+      body: {
         error: 'Bad Request',
         message: expect.stringMatching(/expected value of type/),
-      })
-    );
+      },
+      headers: { 'elastic-api-version': '1' }, // includes version if validation failed
+    });
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
   it('returns the version in response headers', async () => {
     router.versioned
-      .get({ path: '/my-path', access: 'public' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'public',
+      })
       .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
         return res.ok({ body: { foo: 'bar' } });
       });
@@ -192,21 +212,50 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2023-10-31')
         .expect(200)
         .then(({ header }) => header)
-    ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2023-10-31' }));
+    ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+  });
+
+  it('returns the version in response headers, even for HTTP resources', async () => {
+    router.versioned
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'public',
+        options: { httpResource: true },
+      })
+      .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
+        return res.ok({ body: { foo: 'bar' } });
+      });
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '2023-10-31')
+        .expect(200)
+        .then(({ header }) => header)
+    ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
   });
 
   it('runs response validation when in dev', async () => {
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       .addVersion(
-        { validate: { response: { 200: { body: schema.number() } } }, version: '1' },
+        { validate: { response: { 200: { body: () => schema.number() } } }, version: '1' },
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
       )
       .addVersion(
         {
-          validate: { response: { 200: { body: schema.object({}, { unknowns: 'forbid' }) } } },
+          validate: {
+            response: { 200: { body: () => schema.object({}, { unknowns: 'forbid' }) } },
+          },
           version: '2',
         },
         async (ctx, req, res) => {
@@ -215,7 +264,9 @@ describe('Routing versioned requests', () => {
       )
       .addVersion(
         {
-          validate: { response: { 200: { body: schema.object({}, { unknowns: 'allow' }) } } },
+          validate: {
+            response: { 200: { body: () => schema.object({}, { unknowns: 'allow' }) } },
+          },
           version: '3',
         },
         async (ctx, req, res) => {
@@ -231,11 +282,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '1')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Failed output validation/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Failed output validation/),
+    });
 
     await expect(
       supertest
@@ -243,11 +292,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Failed output validation/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Failed output validation/),
+    });
 
     // This should pass response validation
     await expect(
@@ -256,11 +303,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '3')
         .expect(200)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        v: '3',
-      })
-    );
+    ).resolves.toMatchObject({
+      v: '3',
+    });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
@@ -269,9 +314,13 @@ describe('Routing versioned requests', () => {
     await setupServer({ dev: false });
 
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       .addVersion(
-        { validate: { response: { 200: { body: schema.number() } } }, version: '1' },
+        { validate: { response: { 200: { body: () => schema.number() } } }, version: '1' },
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
@@ -288,38 +337,52 @@ describe('Routing versioned requests', () => {
     ).resolves.toEqual('1');
   });
 
-  it('requires version headers to be set for internal HTTP APIs', async () => {
+  it('defaults to v1 for internal HTTP APIs to allow gracefully onboarding internal routes to versioned router', async () => {
     await setupServer({ dev: false });
 
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
+      .get({
+        path: '/my-internal-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       .addVersion(
-        { version: '1', validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
+        { version: '1', validate: { response: { 200: { body: () => schema.number() } } } },
+        async (ctx, req, res) => res.ok({ body: 'v1' })
       )
       .addVersion(
-        { version: '2', validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
+        { version: '2', validate: { response: { 200: { body: () => schema.number() } } } },
+        async (ctx, req, res) => res.ok({ body: 'v2' })
       );
     await server.start();
 
     await expect(
       supertest
-        .get('/my-path')
+        .get('/my-internal-path')
         .unset('Elastic-Api-Version')
-        .expect(400)
-        .then(({ body }) => body.message)
-    ).resolves.toMatch(/Please specify.+version/);
+        .expect(200)
+        .then(({ text }) => text)
+    ).resolves.toMatch('v1');
   });
 
-  it('requires version headers to be set for public endpoints when in dev', async () => {
+  it('requires version headers to be set for internal and public endpoints when in dev', async () => {
     await setupServer({ dev: true });
     router.versioned
       .get({
         path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
         access: 'public',
       })
       .addVersion({ version: '2023-10-31', validate: false }, async (ctx, req, res) => res.ok());
+
+    router.versioned
+      .get({
+        path: '/my-internal-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
+      .addVersion({ version: '1', validate: false }, async (ctx, req, res) => res.ok());
+
     await server.start();
 
     await expect(
@@ -329,10 +392,26 @@ describe('Routing versioned requests', () => {
         .expect(400)
         .then(({ body }) => body.message)
     ).resolves.toMatch(/Please specify.+version/);
+
+    await supertest.get('/my-path').set('Elastic-Api-Version', '2023-10-31').expect(200);
+
+    await expect(
+      supertest
+        .get('/my-internal-path')
+        .unset('Elastic-Api-Version')
+        .expect(400)
+        .then(({ body }) => body.message)
+    ).resolves.toMatch(/Please specify.+version/);
+
+    await supertest.get('/my-internal-path').set('Elastic-Api-Version', '1').expect(200);
   });
 
   it('errors when no handler could be found', async () => {
-    router.versioned.get({ path: '/my-path', access: 'public' });
+    router.versioned.get({
+      path: '/my-path',
+      security: { authz: { enabled: false, reason: '' } },
+      access: 'public',
+    });
 
     await server.start();
 
@@ -342,9 +421,7 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2020-02-02')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({ message: expect.stringMatching(/No handlers registered/) })
-    );
+    ).resolves.toMatchObject({ message: expect.stringMatching(/No handlers registered/) });
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
@@ -352,7 +429,11 @@ describe('Routing versioned requests', () => {
     await setupServer({ serverless: true, dev: false });
 
     router.versioned
-      .get({ path: '/my-path', access: 'public' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'public',
+      })
       .addVersion({ validate: false, version: '2023-04-04' }, async (ctx, req, res) => {
         return res.ok({ body: { v: 'oldest' } });
       })
@@ -374,7 +455,11 @@ describe('Routing versioned requests', () => {
     await setupServer({ serverless: false, dev: false });
 
     router.versioned
-      .get({ path: '/my-path', access: 'public' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'public',
+      })
       .addVersion({ validate: false, version: '2023-04-04' }, async (ctx, req, res) => {
         return res.ok({ body: { v: 'oldest' } });
       })
@@ -396,7 +481,11 @@ describe('Routing versioned requests', () => {
     const error = new Error(`some error`);
 
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
         throw error;
       });
@@ -411,19 +500,25 @@ describe('Routing versioned requests', () => {
 
   it('reserves the query parameter "apiVersion" for version negotiation', async () => {
     await setupServer({ serverless: false, dev: false });
-    router.versioned.get({ path: '/my-path', access: 'public' }).addVersion(
-      {
-        validate: {
-          request: {
-            query: schema.object({ [ELASTIC_HTTP_VERSION_QUERY_PARAM]: schema.string() }),
+    router.versioned
+      .get({
+        path: '/my-path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'public',
+      })
+      .addVersion(
+        {
+          validate: {
+            request: {
+              query: schema.object({ [ELASTIC_HTTP_VERSION_QUERY_PARAM]: schema.string() }),
+            },
           },
+          version: '2023-04-04',
         },
-        version: '2023-04-04',
-      },
-      async (ctx, req, res) => {
-        return res.ok({ body: 'ok' });
-      }
-    );
+        async (ctx, req, res) => {
+          return res.ok({ body: 'ok' });
+        }
+      );
 
     await server.start();
 
@@ -449,7 +544,12 @@ describe('Routing versioned requests', () => {
         return res.ok({ body: 'ok' });
       });
       router.versioned
-        .get({ path: '/my-public', access: 'public', enableQueryVersion: true })
+        .get({
+          path: '/my-public',
+          security: { authz: { enabled: false, reason: '' } },
+          access: 'public',
+          enableQueryVersion: true,
+        })
         .addVersion(
           {
             validate: { request: { query: schema.object({ a: schema.number() }) } },
@@ -459,7 +559,12 @@ describe('Routing versioned requests', () => {
         );
 
       router.versioned
-        .get({ path: '/my-internal', access: 'internal', enableQueryVersion: true })
+        .get({
+          path: '/my-internal',
+          security: { authz: { enabled: false, reason: '' } },
+          access: 'internal',
+          enableQueryVersion: true,
+        })
         .addVersion(
           {
             validate: { request: { query: schema.object({ a: schema.number() }) } },
@@ -513,12 +618,20 @@ describe('Routing versioned requests', () => {
     );
 
     router.versioned
-      .get({ path: '/my_path_to_bypass/{id?}', access: 'internal' })
+      .get({
+        path: '/my_path_to_bypass/{id?}',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
         return res.ok({ body: { ok: true } });
       });
     router.versioned
-      .get({ path: '/my_other_path', access: 'internal' })
+      .get({
+        path: '/my_other_path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
       .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
         return res.ok({ body: { ok: true } });
       });

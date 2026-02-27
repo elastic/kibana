@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
+<div>
+  <div
+    class="kbnDocViewer"
+    data-test-subj="kbnDocViewer"
+  >
+    <div>
+      <div
+        class="euiTabs emotion-euiTabs-s-bottomBorder"
+        role="tablist"
+      >
+        <button
+          aria-controls="generated-id"
+          aria-selected="true"
+          class="euiTab euiTab-isSelected emotion-euiTab-selected"
+          data-test-subj="docViewerTab-view1"
+          id="kbn_doc_viewer_tab_view1"
+          role="tab"
+          tabindex="0"
+          type="button"
+        >
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            Render 1
+          </span>
+        </button>
+        <button
+          aria-controls="generated-id"
+          aria-selected="false"
+          class="euiTab emotion-euiTab"
+          data-test-subj="docViewerTab-view2"
+          id="kbn_doc_viewer_tab_view2"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            Render 2
+          </span>
+        </button>
+        <button
+          aria-controls="generated-id"
+          aria-selected="false"
+          class="euiTab emotion-euiTab"
+          data-test-subj="docViewerTab-invalid"
+          id="kbn_doc_viewer_tab_invalid"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            class="euiTab__content eui-textTruncate emotion-euiTab__content-s"
+          >
+            Invalid doc view
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="kbn_doc_viewer_tab_view1"
+        id="generated-id"
+        role="tabpanel"
+      />
+    </div>
+  </div>
+</div>
+`;

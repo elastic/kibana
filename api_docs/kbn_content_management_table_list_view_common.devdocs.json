@@ -27,7 +27,9 @@
         "tags": [],
         "label": "UserContentCommonSchema",
         "description": [],
-        "path": "packages/content-management/table_list_view_common/index.ts",
+        "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +53,57 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.updatedBy",
+            "type": "string",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,7 +117,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,14 +133,16 @@
             "signature": [
               {
                 "pluginId": "@kbn/content-management-content-editor",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementContentEditorPluginApi",
-                "section": "def-common.SavedObjectsReference",
+                "section": "def-public.SavedObjectsReference",
                 "text": "SavedObjectsReference"
               },
               "[]"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,7 +153,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,7 +169,9 @@
             "signature": [
               "{ title: string; description?: string | undefined; }"
             ],
-            "path": "packages/content-management/table_list_view_common/index.ts",
+            "path": "src/platform/packages/shared/content-management/table_list_view_common/index.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

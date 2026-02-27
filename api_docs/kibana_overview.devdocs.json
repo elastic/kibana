@@ -14,7 +14,9 @@
       "tags": [],
       "label": "KibanaOverviewPluginSetup",
       "description": [],
-      "path": "src/plugins/kibana_overview/public/types.ts",
+      "path": "src/platform/plugins/private/kibana_overview/public/types.ts",
+      "lineNumber": 19,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +30,9 @@
       "tags": [],
       "label": "KibanaOverviewPluginStart",
       "description": [],
-      "path": "src/plugins/kibana_overview/public/types.ts",
+      "path": "src/platform/plugins/private/kibana_overview/public/types.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -60,7 +64,9 @@
         "signature": [
           "\"logoKibana\""
         ],
-        "path": "src/plugins/kibana_overview/common/index.ts",
+        "path": "src/platform/plugins/private/kibana_overview/common/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -75,7 +81,9 @@
         "signature": [
           "\"kibanaOverview\""
         ],
-        "path": "src/plugins/kibana_overview/common/index.ts",
+        "path": "src/platform/plugins/private/kibana_overview/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -90,7 +98,9 @@
         "signature": [
           "\"Overview\""
         ],
-        "path": "src/plugins/kibana_overview/common/index.ts",
+        "path": "src/platform/plugins/private/kibana_overview/common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -105,7 +115,9 @@
         "signature": [
           "\"/app/kibana_overview\""
         ],
-        "path": "src/plugins/kibana_overview/common/index.ts",
+        "path": "src/platform/plugins/private/kibana_overview/common/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

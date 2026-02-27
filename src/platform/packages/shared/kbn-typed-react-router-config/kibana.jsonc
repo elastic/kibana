@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/typed-react-router-config",
+  "owner": [
+    "@elastic/obs-presentation-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

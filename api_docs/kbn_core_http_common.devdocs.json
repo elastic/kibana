@@ -29,7 +29,9 @@
         "description": [
           "\nA policy describing whether access to an external destination is allowed."
         ],
-        "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+        "path": "src/core/packages/http/common/src/external_url_policy.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +44,9 @@
             "description": [
               "\nIndicates if this policy allows or denies access to the described destination."
             ],
-            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,7 +62,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -74,7 +80,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -100,7 +108,9 @@
         "signature": [
           "string"
         ],
-        "path": "packages/core/http/core-http-common/src/versioning.ts",
+        "path": "src/core/packages/http/common/src/versioning.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -115,7 +125,9 @@
         "signature": [
           "\"elastic-api-version\""
         ],
-        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -130,7 +142,9 @@
         "signature": [
           "\"apiVersion\""
         ],
-        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -145,7 +159,9 @@
         "signature": [
           "\"elasticInternalOrigin\""
         ],
-        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -160,7 +176,9 @@
         "signature": [
           "\"x-elastic-internal-origin\""
         ],
-        "path": "packages/core/http/core-http-common/src/constants.ts",
+        "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,40 +1,36 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests'
     agents:
-      queue: n2-4-virt
+      enableNestedVirtualization: true
+      machineType: n2-standard-4
+      diskSizeGb: 105
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
-    parallelism: 20
+    parallelism: 24
     retry:
       automatic:
         - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
-      queue: n2-4-virt
+      enableNestedVirtualization: true
+      machineType: n2-standard-4
+      diskSizeGb: 105
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
     timeout_in_minutes: 60
-    parallelism: 14
+    parallelism: 16
     retry:
       automatic:
         - exit_status: '-1'
           limit: 1
-
-  # status_exception: Native role management is not enabled in this Elasticsearch instance
-  # - command: .buildkite/scripts/steps/functional/security_serverless_defend_workflows.sh
-  #   label: 'Serverless Security Defend Workflows Cypress Tests'
-  #   agents:
-  #     queue: n2-4-spot
-  #   depends_on: build
-  #   timeout_in_minutes: 60
-  #   retry:
-  #     automatic:
-  #       - exit_status: '-1'
-  #         limit: 1

@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 export const FinderApp = (props: {
@@ -22,6 +23,7 @@ export const FinderApp = (props: {
     <ContentClientProvider contentClient={props.contentClient}>
       <I18nProvider>
         <SavedObjectFinder
+          id="cmFinderApp"
           showFilter={true}
           services={{
             savedObjectsTagging: props.savedObjectsTagging.getTaggingApi(),
@@ -35,7 +37,7 @@ export const FinderApp = (props: {
             {
               type: `search`,
               getIconForSavedObject: () => 'discoverApp',
-              name: 'Saved search',
+              name: 'Discover session',
             },
             {
               type: 'index-pattern',

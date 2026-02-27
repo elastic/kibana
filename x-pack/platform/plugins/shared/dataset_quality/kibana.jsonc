@@ -1,0 +1,47 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dataset-quality-plugin",
+  "owner": [
+    "@elastic/obs-onboarding-team"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "This plugin introduces the concept of data set quality, where users can easily get an overview on the data sets they have.",
+  "plugin": {
+    "id": "datasetQuality",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "datasetQuality"
+    ],
+    "requiredPlugins": [
+      "controls",
+      "data",
+      "dataViews",
+      "dataViewEditor",
+      "embeddable",
+      "fieldFormats",
+      "fieldsMetadata",
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "lens",
+      "share",
+      "triggersActionsUi",
+      "unifiedSearch",
+    ],
+    "optionalPlugins": [
+      "alerting",
+    ],
+    "requiredBundles": [
+      "charts",
+      "discover",
+      "esUiShared",
+      "stackAlerts",
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

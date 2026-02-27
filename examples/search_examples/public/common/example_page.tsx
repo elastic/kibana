@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
-import { IBasePath } from '@kbn/core/public';
+import type { IBasePath } from '@kbn/core/public';
 import { PLUGIN_ID } from '../../common';
 
 export interface ExampleLink {
@@ -49,11 +51,11 @@ interface Props {
   basePath: IBasePath;
 }
 
-export const SearchExamplePage: React.FC<Props> = ({
+export const SearchExamplePage: React.FC<PropsWithChildren<Props>> = ({
   children,
   exampleLinks,
   basePath,
-}: PropsWithChildren<Props>) => {
+}) => {
   return (
     <EuiPageTemplate offset={0}>
       <EuiPageTemplate.Sidebar>

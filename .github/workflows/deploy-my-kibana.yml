@@ -20,12 +20,13 @@ permissions:
 
 jobs:
   deploy-my-kibana:
-    if: ${{ github.event.issue.pull_request && (github.event.comment.body == '/oblt-deploy' || github.event.comment.body == '/oblt-deploy-serverless') }}
+    if: ${{ github.event.issue.pull_request && github.event.comment.body == '/oblt-deploy' }}
     runs-on: ubuntu-latest
+    permissions:
+      # if you listen for PRs, use this to use some comment reactions
+      pull-requests: write
     steps:
-      - uses: elastic/apm-pipeline-library/.github/actions/deploy-my-kibana@current
+      - uses: elastic/oblt-actions/oblt-cli/deploy-my-kibana@v1
         with:
-          vaultUrl: ${{ secrets.OBLT_VAULT_ADDR }}
-          vaultRoleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
-          vaultSecretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
-          serverless: ${{ github.event.comment.body == '/oblt-deploy-serverless' }}
+          github-app-id: ${{ secrets.OBS_AUTOMATION_APP_ID }}
+          github-app-private-key: ${{ secrets.OBS_AUTOMATION_APP_PEM }}

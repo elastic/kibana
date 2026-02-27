@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import type { LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
-import { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import { Subject } from 'rxjs';
 import { unsafeConsole } from '@kbn/security-hardening';
 
@@ -38,6 +40,7 @@ function createRoot() {
         },
       ],
     },
+    server: { restrictInternalApis: false },
   });
 }
 
@@ -136,8 +139,6 @@ describe('logging service', () => {
       ],
     };
 
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
     let root: ReturnType<typeof createRoot>;
     let setup: InternalCoreSetup;
     let mockConsoleLog: jest.SpyInstance;
@@ -145,7 +146,7 @@ describe('logging service', () => {
     const setContextConfig = async (enable: boolean) => {
       loggingConfig$.next(enable ? CUSTOM_LOGGING_CONFIG : {});
       // need to wait for config to reload. nextTick is enough, using delay just to be sure
-      await delay(10);
+      await timer(10);
     };
 
     beforeAll(async () => {

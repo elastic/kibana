@@ -1,0 +1,21 @@
+{
+  "security.get_token": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/oauth2/token"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-get-token",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

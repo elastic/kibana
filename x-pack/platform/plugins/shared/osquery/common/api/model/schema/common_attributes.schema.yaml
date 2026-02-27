@@ -1,0 +1,264 @@
+openapi: 3.0.0
+info:
+  title: Common Osquery Attributes
+  version: '2023-10-31'
+paths: { }
+components:
+  schemas:
+    QueryId:
+      description: 'The ID of the query.'
+      example: '3c42c847-eb30-4452-80e0-728584042334'
+      type: string
+
+    PackDescription:
+      description: 'The pack description.'
+      example: 'Pack description'
+      type: string
+
+    PackDescriptionOrUndefined:
+      $ref: '#/components/schemas/PackDescription'
+      nullable: true
+
+
+    Platform:
+      description: 'Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, `linux,darwin`.'
+      example: 'linux,darwin'
+      type: string
+
+    PlatformOrUndefined:
+      $ref: '#/components/schemas/Platform'
+      nullable: true
+
+
+    Query:
+      description: 'The SQL query you want to run.'
+      example: 'select * from uptime;'
+      type: string
+
+    QueryOrUndefined:
+      $ref: '#/components/schemas/Query'
+      nullable: true
+
+    Version:
+      description: 'Uses the Osquery versions greater than or equal to the specified version string.'
+      example: '1.0.0'
+      type: string
+
+    VersionOrUndefined:
+      $ref: '#/components/schemas/Version'
+      nullable: true
+
+    Interval:
+      description: 'An interval, in seconds, on which to run the query.'
+      example: '60'
+      type: string
+
+    IntervalOrUndefined:
+      $ref: '#/components/schemas/Interval'
+      nullable: true
+
+    Snapshot:
+      description: 'Indicates whether the query is a snapshot.'
+      example: true
+      type: boolean
+
+    SnapshotOrUndefined:
+      $ref: '#/components/schemas/Snapshot'
+      nullable: true
+
+    Removed:
+      description: 'Indicates whether the query is removed.'
+      example: false
+      type: boolean
+
+    RemovedOrUndefined:
+      $ref: '#/components/schemas/Removed'
+      nullable: true
+
+    PackName:
+      description: 'The pack name.'
+      type: string
+
+    SavedQueryId:
+      description: 'The ID of a saved query.'
+      example: '3c42c847-eb30-4452-80e0-728584042334'
+      type: string
+
+    SavedQueryIdOrUndefined:
+      $ref: '#/components/schemas/SavedQueryId'
+      nullable: true
+
+    SavedQueryDescription:
+      description: 'The saved query description.'
+      example: 'Saved query description'
+      type: string
+
+    SavedQueryDescriptionOrUndefined:
+      $ref: '#/components/schemas/SavedQueryDescription'
+      nullable: true
+
+
+    PackId:
+      description: 'The ID of the pack you want to run, retrieve, update, or delete.'
+      example: '3c42c847-eb30-4452-80e0-728584042334'
+      type: string
+
+    PackIdOrUndefined:
+      $ref: '#/components/schemas/PackId'
+      nullable: true
+
+    Enabled:
+      description: 'Enables the pack.'
+      example: true
+      type: boolean
+
+    EnabledOrUndefined:
+      $ref: '#/components/schemas/Enabled'
+      nullable: true
+
+    PolicyIds:
+      description: 'A list of agents policy IDs.'
+      example:
+        - "policyId1"
+        - "policyId2"
+      type: array
+      items:
+        type: string
+
+    PolicyIdsOrUndefined:
+      $ref: '#/components/schemas/PolicyIds'
+      nullable: true
+
+    ECSMappingItem:
+      type: object
+      properties:
+        field:
+          description: 'The ECS field to map to.'
+          example: 'host.uptime'
+          type: string
+        value:
+          description: 'The value to map to the ECS field.'
+          example: 'total_seconds'
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+
+    ECSMapping:
+      description: 'Map osquery results columns or static values to Elastic Common Schema (ECS) fields'
+      example:
+        host.uptime:
+          field: 'total_seconds'
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/ECSMappingItem'
+
+    ECSMappingOrUndefined:
+      $ref: '#/components/schemas/ECSMapping'
+      nullable: true
+
+    ArrayQueriesItem:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/QueryId'
+        query:
+          $ref: '#/components/schemas/Query'
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        version:
+          $ref: '#/components/schemas/VersionOrUndefined'
+        platform:
+          $ref: '#/components/schemas/PlatformOrUndefined'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+
+    ArrayQueries:
+      type: array
+      description: 'An array of queries to run.'
+      items:
+        $ref: '#/components/schemas/ArrayQueriesItem'
+
+    ObjectQueriesItem:
+      type: object
+      properties:
+        query:
+          $ref: '#/components/schemas/Query'
+        id:
+          $ref: '#/components/schemas/QueryId'
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        version:
+          $ref: '#/components/schemas/VersionOrUndefined'
+        platform:
+          $ref: '#/components/schemas/PlatformOrUndefined'
+        saved_query_id:
+          $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+
+    ObjectQueries:
+      type: object
+      description: 'An object of queries.'
+      additionalProperties:
+        $ref: '#/components/schemas/ObjectQueriesItem'
+
+    Queries:
+      oneOf:
+        - $ref: '#/components/schemas/ArrayQueries'
+        - $ref: '#/components/schemas/ObjectQueries'
+
+
+    QueriesOrUndefined:
+      $ref: '#/components/schemas/Queries'
+      nullable: true
+
+    KueryOrUndefined:
+      description: 'The kuery to filter the results by.'
+      example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
+      type: string
+      nullable: true
+
+    PageOrUndefined:
+      description: 'The page number to return. The default is 1.'
+      example: 1
+      type: integer
+      nullable: true
+
+    PageSizeOrUndefined:
+      description: 'The number of results to return per page. The default is 20.'
+      example: 20
+      type: integer
+      nullable: true
+
+    SortOrUndefined:
+      description: 'The field that is used to sort the results.'
+      example: 'createdAt'
+      default: createdAt
+      type: string
+      nullable: true
+
+    SortOrderOrUndefined:
+      description: 'Specifies the sort order.'
+      example: 'desc'
+      enum:
+        - asc
+        - desc
+      type: string
+
+    Shards:
+      description: 'An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.'
+      example:
+        policy_id: 50
+      type: object
+      additionalProperties:
+        type: number
+
+    DefaultSuccessResponse:
+      type: object
+      properties: { }

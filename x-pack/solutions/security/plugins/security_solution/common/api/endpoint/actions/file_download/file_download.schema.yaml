@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  title: File Download Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/{action_id}/file/{file_id}/download:
+    get:
+      summary: Download a file
+      operationId: EndpointFileDownload
+      description: |
+        Download a file associated with a response action.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      parameters:
+        - name: action_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: file_id
+          in: path
+          required: true
+          description: |
+            The file identifier is constructed in one of two ways:
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
+            `{file_id}` = `{action_id}.{agent_id}`
+            - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary

@@ -14,7 +14,9 @@
       "tags": [],
       "label": "ServerlessSearchPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless_search/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/serverless_search/public/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +30,9 @@
       "tags": [],
       "label": "ServerlessSearchPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless_search/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/serverless_search/public/types.ts",
+      "lineNumber": 30,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -50,7 +54,9 @@
       "tags": [],
       "label": "ServerlessSearchPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless_search/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/serverless_search/server/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +70,9 @@
       "tags": [],
       "label": "ServerlessSearchPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless_search/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/serverless_search/server/types.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -80,6 +88,23 @@
     "misc": [
       {
         "parentPluginId": "serverlessSearch",
+        "id": "def-common.DEFAULT_INGESTION_PIPELINE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_INGESTION_PIPELINE",
+        "description": [],
+        "signature": [
+          "\"search-default-ingestion\""
+        ],
+        "path": "x-pack/solutions/search/plugins/serverless_search/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "serverlessSearch",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -88,7 +113,9 @@
         "signature": [
           "\"serverlessSearch\""
         ],
-        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/serverless_search/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +130,9 @@
         "signature": [
           "\"serverlessSearch\""
         ],
-        "path": "x-pack/plugins/serverless_search/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/serverless_search/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

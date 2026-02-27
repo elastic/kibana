@@ -1,0 +1,136 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ComponentType } from 'react';
+import React, { Component, Fragment } from 'react';
+
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import type { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
+import { FieldSelect } from './field_select';
+import type { ControlParams, ControlParamsOptions } from '../../editor_utils';
+import type { InputControlVisDependencies } from '../../plugin';
+
+interface RangeControlEditorProps {
+  controlIndex: number;
+  controlParams: ControlParams;
+  getIndexPattern: (indexPatternId: string) => Promise<DataView>;
+  handleFieldNameChange: (fieldName: string) => void;
+  handleIndexPatternChange: (indexPatternId: string) => void;
+  handleOptionsChange: <T extends keyof ControlParamsOptions>(
+    controlIndex: number,
+    optionName: T,
+    value: ControlParamsOptions[T]
+  ) => void;
+  deps: InputControlVisDependencies;
+}
+
+interface RangeControlEditorState {
+  IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
+}
+
+function filterField(field: DataViewField) {
+  return field.type === 'number';
+}
+
+export class RangeControlEditor extends Component<
+  RangeControlEditorProps,
+  RangeControlEditorState
+> {
+  state: RangeControlEditorState = {
+    IndexPatternSelect: null,
+  };
+
+  componentDidMount() {
+    this.getIndexPatternSelect();
+  }
+
+  async getIndexPatternSelect() {
+    const [, { unifiedSearch }] = await this.props.deps.core.getStartServices();
+    this.setState({
+      IndexPatternSelect: unifiedSearch.ui.IndexPatternSelect,
+    });
+  }
+
+  render() {
+    const stepSizeId = `stepSize-${this.props.controlIndex}`;
+    const decimalPlacesId = `decimalPlaces-${this.props.controlIndex}`;
+    if (this.state.IndexPatternSelect === null) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <IndexPatternSelectFormRow
+          indexPatternId={this.props.controlParams.indexPattern}
+          onChange={this.props.handleIndexPatternChange}
+          controlIndex={this.props.controlIndex}
+          IndexPatternSelect={this.state.IndexPatternSelect}
+        />
+
+        <FieldSelect
+          fieldName={this.props.controlParams.fieldName}
+          indexPatternId={this.props.controlParams.indexPattern}
+          filterField={filterField}
+          onChange={this.props.handleFieldNameChange}
+          getIndexPattern={this.props.getIndexPattern}
+          controlIndex={this.props.controlIndex}
+        />
+
+        <EuiFormRow
+          id={stepSizeId}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.rangeControl.stepSizeLabel"
+              defaultMessage="Step Size"
+            />
+          }
+        >
+          <EuiFieldNumber
+            value={this.props.controlParams.options.step}
+            onChange={(event) => {
+              this.props.handleOptionsChange(
+                this.props.controlIndex,
+                'step',
+                event.target.valueAsNumber
+              );
+            }}
+            data-test-subj={`rangeControlSizeInput${this.props.controlIndex}`}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          id={decimalPlacesId}
+          label={
+            <FormattedMessage
+              id="inputControl.editor.rangeControl.decimalPlacesLabel"
+              defaultMessage="Decimal Places"
+            />
+          }
+        >
+          <EuiFieldNumber
+            min={0}
+            value={this.props.controlParams.options.decimalPlaces}
+            onChange={(event) => {
+              this.props.handleOptionsChange(
+                this.props.controlIndex,
+                'decimalPlaces',
+                event.target.valueAsNumber
+              );
+            }}
+            data-test-subj={`rangeControlDecimalPlacesInput${this.props.controlIndex}`}
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  }
+}

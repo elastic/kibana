@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -12,10 +13,12 @@ import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
-import { HttpService } from '@kbn/core-http-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
+import type { HttpService } from '@kbn/core-http-server-internal';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
+import { createInternalHttpService } from '../utilities';
 
 const buildHash = 'buildHash';
 const fooPluginFixture = resolve(__dirname, './__fixtures__/plugin/foo');
@@ -31,8 +34,11 @@ describe('bundle routes', () => {
     logger = loggingSystemMock.create();
     fileHashCache = new FileHashCache();
 
-    server = createHttpServer({ logger });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService({ logger });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
   });
 
   afterEach(async () => {
@@ -56,6 +62,7 @@ describe('bundle routes', () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -74,6 +81,7 @@ describe('bundle routes', () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -92,6 +100,7 @@ describe('bundle routes', () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -106,6 +115,7 @@ describe('bundle routes', () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -120,6 +130,7 @@ describe('bundle routes', () => {
     const { server: innerServer, createRouter } = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     registerFooPluginRoute(createRouter(''));
@@ -145,6 +156,7 @@ describe('bundle routes', () => {
       const { server: innerServer, createRouter } = await server.setup({
         context: contextSetup,
         executionContext: executionContextServiceMock.createInternalSetupContract(),
+        userActivity: userActivityServiceMock.createInternalSetupContract(),
       });
 
       registerFooPluginRoute(createRouter(''), { isDist: true });
@@ -164,6 +176,7 @@ describe('bundle routes', () => {
       const { server: innerServer, createRouter } = await server.setup({
         context: contextSetup,
         executionContext: executionContextServiceMock.createInternalSetupContract(),
+        userActivity: userActivityServiceMock.createInternalSetupContract(),
       });
 
       registerFooPluginRoute(createRouter(''), { isDist: false });

@@ -1,0 +1,239 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Server } from '@hapi/hapi';
+import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import type { Logger } from '@kbn/logging';
+import type { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
+import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
+import {
+  AssetDetailsLocatorDefinition,
+  InventoryLocatorDefinition,
+  MetricsExplorerLocatorDefinition,
+} from '@kbn/observability-shared-plugin/common';
+import { mapValues } from 'lodash';
+import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import { getMetricsFeature } from './features';
+import { registerRoutes } from './infra_server';
+import type {
+  InfraServerPluginSetupDeps,
+  InfraServerPluginStartDeps,
+} from './lib/adapters/framework';
+import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
+import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
+import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
+import { registerRuleTypes } from './lib/alerting';
+import {
+  LOGS_RULES_ALERT_CONTEXT,
+  METRICS_RULES_ALERT_CONTEXT,
+} from './lib/alerting/register_rule_types';
+import { InfraMetricsDomain } from './lib/domains/metrics_domain';
+import type { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
+import { InfraSourceStatus } from './lib/source_status';
+import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
+import {
+  infraCustomDashboardsSavedObjectType,
+  inventoryViewSavedObjectType,
+  metricsExplorerViewSavedObjectType,
+} from './saved_objects';
+import { InventoryViewsService } from './services/inventory_views';
+import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
+import { RulesService } from './services/rules';
+import type {
+  InfraConfig,
+  InfraPluginCoreSetup,
+  InfraPluginRequestHandlerContext,
+  InfraPluginSetup,
+  InfraPluginStart,
+} from './types';
+import { UsageCollector } from './usage/usage_collector';
+import { mapSourceToLogView } from './utils/map_source_to_log_view';
+import { registerDataProviders } from './agent_builder/register_data_providers';
+import { getInfraRequestHandlerContext } from './utils/get_infra_request_handler_context';
+
+export interface KbnServer extends Server {
+  usage: any;
+}
+
+export class InfraServerPlugin
+  implements
+    Plugin<
+      InfraPluginSetup,
+      InfraPluginStart,
+      InfraServerPluginSetupDeps,
+      InfraServerPluginStartDeps
+    >
+{
+  public config: InfraConfig;
+  public libs!: InfraBackendLibs;
+  public logger: Logger;
+
+  private logsRules: RulesService;
+  private metricsRules: RulesService;
+  private inventoryViews: InventoryViewsService;
+  private metricsExplorerViews?: MetricsExplorerViewsService;
+
+  constructor(context: PluginInitializerContext<InfraConfig>) {
+    this.config = context.config.get();
+    this.logger = context.logger.get();
+    this.logsRules = new RulesService(
+      LOGS_FEATURE_ID,
+      LOGS_RULES_ALERT_CONTEXT,
+      this.logger.get('logsRules')
+    );
+    this.metricsRules = new RulesService(
+      METRICS_FEATURE_ID,
+      METRICS_RULES_ALERT_CONTEXT,
+      this.logger.get('metricsRules')
+    );
+
+    this.inventoryViews = new InventoryViewsService(this.logger.get('inventoryViews'));
+    this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
+      ? new MetricsExplorerViewsService(this.logger.get('metricsExplorerViews'))
+      : undefined;
+  }
+
+  setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
+    const framework = new KibanaFramework(core, this.config, plugins);
+    const metricsClient = plugins.metricsDataAccess.client;
+    metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
+      const sourceConfiguration = await sources.getInfraSourceConfiguration(
+        options.savedObjectsClient,
+        'default'
+      );
+      return sourceConfiguration.configuration.metricAlias;
+    });
+    const sources = new InfraSources({
+      metricsClient,
+    });
+
+    const sourceStatus = new InfraSourceStatus(
+      new InfraElasticsearchSourceStatusAdapter(framework),
+      { sources }
+    );
+
+    const alertsLocator = plugins.share.url.locators.get<AlertsLocatorParams>(alertsLocatorID);
+    const assetDetailsLocator = plugins.share.url.locators.create(
+      new AssetDetailsLocatorDefinition()
+    );
+    const metricsExplorerLocator = plugins.share.url.locators.create(
+      new MetricsExplorerLocatorDefinition()
+    );
+    const inventoryLocator = plugins.share.url.locators.create(new InventoryLocatorDefinition());
+
+    // Setup infra services
+    const inventoryViews = this.inventoryViews.setup();
+    const metricsExplorerViews = this.metricsExplorerViews?.setup();
+
+    // Register saved object types
+    core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
+    core.savedObjects.registerType(inventoryViewSavedObjectType);
+    core.savedObjects.registerType(infraCustomDashboardsSavedObjectType);
+    if (this.config.featureFlags.metricsExplorerEnabled) {
+      core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
+    }
+
+    // TODO: separate these out individually and do away with "domains" as a temporary group
+    // and make them available via the request context so we can do away with
+    // the wrapper classes
+    const domainLibs: InfraDomainLibs = {
+      logEntries: plugins.logsShared.logEntries,
+      metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
+    };
+
+    // Instead of passing plugins individually to `libs` on a necessity basis,
+    // this provides an object with all plugins infra depends on
+    const libsPlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[key as keyof InfraServerPluginStartDeps];
+          }),
+      };
+    }) as InfraBackendLibs['plugins'];
+
+    this.libs = {
+      configuration: this.config,
+      framework,
+      sources,
+      sourceStatus,
+      ...domainLibs,
+      handleEsError,
+      logsRules: this.logsRules.setup(core, plugins),
+      metricsRules: this.metricsRules.setup(core, plugins),
+      getStartServices: () => core.getStartServices(),
+      getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
+      logger: this.logger,
+      basePath: core.http.basePath,
+      plugins: libsPlugins,
+    };
+
+    plugins.features.registerKibanaFeature(getMetricsFeature());
+
+    // Register an handler to retrieve the fallback logView starting from a source configuration
+    plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
+      const sourceConfiguration = await sources.getInfraSourceConfiguration(soClient, sourceId);
+      return mapSourceToLogView(sourceConfiguration);
+    });
+    plugins.logsShared.logViews.setLogViewsStaticConfig({
+      messageFields: this.config.sources?.default?.fields?.message,
+    });
+
+    plugins.logsShared.registerUsageCollectorActions({
+      countLogs: () => UsageCollector.countLogs(),
+    });
+
+    registerRuleTypes(plugins.alerting, this.libs, this.config, {
+      alertsLocator,
+      assetDetailsLocator,
+      metricsExplorerLocator,
+      inventoryLocator,
+    });
+
+    core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
+      'infra',
+      async (context, request) => {
+        const coreContext = await context.core;
+        return getInfraRequestHandlerContext({ coreContext, request, plugins });
+      }
+    );
+
+    // Telemetry
+    UsageCollector.registerUsageCollector(plugins.usageCollection);
+
+    registerDataProviders({ core, plugins, libs: this.libs, logger: this.logger });
+
+    return {
+      inventoryViews,
+      metricsExplorerViews,
+    } as InfraPluginSetup;
+  }
+
+  start(core: CoreStart) {
+    const inventoryViews = this.inventoryViews.start({
+      infraSources: this.libs.sources,
+      savedObjects: core.savedObjects,
+    });
+
+    const metricsExplorerViews = this.metricsExplorerViews?.start({
+      infraSources: this.libs.sources,
+      savedObjects: core.savedObjects,
+    });
+
+    registerRoutes(this.libs);
+
+    return {
+      inventoryViews,
+      metricsExplorerViews,
+    };
+  }
+
+  stop() {}
+}

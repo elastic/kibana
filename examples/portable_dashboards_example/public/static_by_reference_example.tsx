@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { buildPhraseFilter, Filter } from '@kbn/es-query';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DashboardRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 export const StaticByReferenceExample = ({
   dashboardId,
@@ -48,13 +49,21 @@ export const StaticByReferenceExample = ({
           savedObjectId={dashboardId}
           getCreationOptions={async () => {
             const field = dataView.getFieldByName('machine.os.keyword');
-            let filter: Filter;
+            let filter: AsCodeFilter;
             let creationOptions: DashboardCreationOptions = {
-              getInitialInput: () => ({ viewMode: ViewMode.VIEW }),
+              getInitialInput: () => ({ viewMode: 'view' }),
             };
             if (field) {
-              filter = buildPhraseFilter(field, 'win xp', dataView);
-              filter.meta.negate = true;
+              filter = {
+                negate: true,
+                type: 'condition',
+                data_view_id: dataView.id,
+                condition: {
+                  field: 'machine.os.keyword',
+                  operator: 'is',
+                  value: 'win xp',
+                },
+              };
               creationOptions = {
                 ...creationOptions,
                 getInitialInput: () => ({ filters: [filter] }),

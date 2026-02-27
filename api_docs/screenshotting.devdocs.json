@@ -38,7 +38,9 @@
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } : never"
         ],
-        "path": "x-pack/plugins/screenshotting/common/layout.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/common/layout.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -70,7 +72,9 @@
           " extends ",
           "CaptureOptions"
         ],
-        "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,7 +90,9 @@
             "signature": [
               "\"pdf\""
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -102,7 +108,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -118,7 +126,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -144,7 +154,9 @@
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -160,7 +172,9 @@
         "description": [
           "\nFinal, formatted PDF result"
         ],
-        "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -174,9 +188,11 @@
               "\nCollected performance metrics during the screenshotting session along with the PDF generation ones."
             ],
             "signature": [
-              "PdfScreenshotMetrics"
+              "{ cpu?: number | undefined; cpuInPercentage?: number | undefined; memory?: number | undefined; memoryInMegabytes?: number | undefined; }"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -192,7 +208,9 @@
             "signature": [
               "Buffer"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -208,7 +226,9 @@
             "signature": [
               "Error[]"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -224,7 +244,9 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -251,7 +273,9 @@
           " extends ",
           "CaptureOptions"
         ],
-        "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/png.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -269,7 +293,9 @@
             "signature": [
               "\"png\" | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/png.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -285,7 +311,9 @@
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/png.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -307,7 +335,9 @@
         "signature": [
           "CaptureResult"
         ],
-        "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/png.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -336,7 +366,9 @@
             "text": "PngScreenshotOptions"
           }
         ],
-        "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/server/screenshots/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -359,7 +391,9 @@
           " | ",
           "CaptureResult"
         ],
-        "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/server/screenshots/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -375,7 +409,9 @@
       "description": [
         "\nStart public contract."
       ],
-      "path": "x-pack/plugins/screenshotting/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/screenshotting/server/plugin.ts",
+      "lineNumber": 29,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -393,7 +429,9 @@
             "Observable",
             "<string>"
           ],
-          "path": "x-pack/plugins/screenshotting/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/screenshotting/server/plugin.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [
@@ -410,7 +448,9 @@
               "signature": [
                 "string[]"
               ],
-              "path": "x-pack/plugins/screenshotting/server/browsers/chromium/driver_factory/index.ts",
+              "path": "x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/driver_factory/index.ts",
+              "lineNumber": 395,
+              "columnNumber": 12,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -476,9 +516,40 @@
             },
             ">; }"
           ],
-          "path": "x-pack/plugins/screenshotting/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/screenshotting/server/plugin.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "returnComment": [
+            "Observable with screenshotting results."
+          ],
+          "children": [
+            {
+              "parentPluginId": "screenshotting",
+              "id": "def-server.ScreenshottingStart.getScreenshots.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [
+                "Screenshots session options."
+              ],
+              "signature": [
+                {
+                  "pluginId": "screenshotting",
+                  "scope": "server",
+                  "docId": "kibScreenshottingPluginApi",
+                  "section": "def-server.PngScreenshotOptions",
+                  "text": "PngScreenshotOptions"
+                }
+              ],
+              "path": "x-pack/platform/plugins/shared/screenshotting/server/screenshots/screenshots.ts",
+              "lineNumber": 180,
+              "columnNumber": 18,
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
         }
       ],
       "lifecycle": "start",
@@ -498,7 +569,9 @@
         "description": [
           "\nCollected performance metrics during a screenshotting session."
         ],
-        "path": "x-pack/plugins/screenshotting/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -514,7 +587,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -530,7 +605,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -546,7 +623,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -562,7 +641,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/screenshotting/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -604,7 +685,9 @@
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } : never"
         ],
-        "path": "x-pack/plugins/screenshotting/common/layout.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/common/layout.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -621,7 +704,9 @@
         "signature": [
           "\"canvas\" | \"print\" | \"preserve_layout\""
         ],
-        "path": "x-pack/plugins/screenshotting/common/layout.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/common/layout.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -636,7 +721,9 @@
         "signature": [
           "\"screenshotting\""
         ],
-        "path": "x-pack/plugins/screenshotting/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/common/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -651,7 +738,9 @@
         "signature": [
           "\"screenshotting\""
         ],
-        "path": "x-pack/plugins/screenshotting/common/expression.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/common/expression.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -666,7 +755,9 @@
         "signature": [
           "\"expression\""
         ],
-        "path": "x-pack/plugins/screenshotting/common/expression.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/common/expression.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -681,7 +772,9 @@
         "signature": [
           "\"input\""
         ],
-        "path": "x-pack/plugins/screenshotting/common/expression.ts",
+        "path": "x-pack/platform/plugins/shared/screenshotting/common/expression.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

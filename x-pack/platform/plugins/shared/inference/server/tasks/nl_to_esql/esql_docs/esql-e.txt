@@ -1,0 +1,19 @@
+# E
+
+The E function returns Euler’s number, which is approximately 2.718281828459045.
+
+## Syntax
+
+`E()`
+
+### Parameters
+
+This function does not require any parameters.
+
+## Examples
+
+Returns a single row containing Euler’s number.
+
+```esql
+ROW E()
+```

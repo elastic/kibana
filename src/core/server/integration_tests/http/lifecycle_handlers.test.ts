@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createConfigService, createHttpServer } from '@kbn/core-http-server-mocks';
-import { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
+import type { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { schema } from '@kbn/config-schema';
-import { IConfigServiceMock } from '@kbn/config-mocks';
-import { Logger } from '@kbn/logging';
+import type { IConfigServiceMock } from '@kbn/config-mocks';
+import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
+import { createInternalHttpService } from '../utilities';
 
 const actualVersion = kibanaPackageJson.version;
 const versionHeader = 'kbn-version';
@@ -26,11 +30,12 @@ const nameHeader = 'kbn-name';
 const allowlistedTestPath = '/xsrf/test/route/whitelisted';
 const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
-const internalProductHeader = 'x-elastic-internal-origin';
+const internalOriginHeader = 'x-elastic-internal-origin';
 const internalProductQueryParam = 'elasticInternalOrigin';
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 const testConfig: Parameters<typeof createConfigService>[0] = {
@@ -49,6 +54,7 @@ const testConfig: Parameters<typeof createConfigService>[0] = {
       'referrer-policy': 'strict-origin', // overrides a header that is defined by securityResponseHeaders
     },
     xsrf: { disableProtection: false, allowlist: [allowlistedTestPath] },
+    restrictInternalApis: false,
   },
 };
 
@@ -61,8 +67,11 @@ describe('core lifecycle handlers', () => {
   beforeEach(async () => {
     const configService = createConfigService(testConfig);
     logger = loggerMock.create();
-    server = createHttpServer({ configService, logger });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService({ configService, logger });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     innerServer = serverSetup.server;
@@ -76,9 +85,12 @@ describe('core lifecycle handlers', () => {
     const testRoute = '/version_check/test/route';
 
     beforeEach(async () => {
-      router.get({ path: testRoute, validate: false }, (context, req, res) => {
-        return res.ok({ body: 'ok' });
-      });
+      router.get(
+        { path: testRoute, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: 'ok' });
+        }
+      );
       await server.start();
     });
 
@@ -121,12 +133,22 @@ describe('core lifecycle handlers', () => {
     };
 
     beforeEach(async () => {
-      router.get({ path: testRoute, validate: false }, (context, req, res) => {
-        return res.ok({ body: 'ok' });
-      });
-      router.get({ path: testErrorRoute, validate: false }, (context, req, res) => {
-        return res.badRequest({ body: 'bad request' });
-      });
+      router.get(
+        { path: testRoute, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: 'ok' });
+        }
+      );
+      router.get(
+        {
+          path: testErrorRoute,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+        },
+        (context, req, res) => {
+          return res.badRequest({ body: 'bad request' });
+        }
+      );
       await server.start();
     });
 
@@ -153,25 +175,37 @@ describe('core lifecycle handlers', () => {
     };
 
     beforeEach(async () => {
-      router.get({ path: testPath, validate: false }, (context, req, res) => {
-        return res.ok({ body: 'ok' });
-      });
+      router.get(
+        { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: 'ok' });
+        }
+      );
 
       destructiveMethods.forEach((method) => {
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
-          { path: testPath, validate: false },
+          { path: testPath, validate: false, security: { authz: { enabled: false, reason: '' } } },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
-          { path: allowlistedTestPath, validate: false },
+          {
+            path: allowlistedTestPath,
+            validate: false,
+            security: { authz: { enabled: false, reason: '' } },
+          },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
         ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
-          { path: xsrfDisabledTestPath, validate: false, options: { xsrfRequired: false } },
+          {
+            path: xsrfDisabledTestPath,
+            validate: false,
+            security: { authz: { enabled: false, reason: '' } },
+            options: { xsrfRequired: false },
+          },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
@@ -243,14 +277,18 @@ describe('core lifecycle handlers', () => {
           restrictInternalApis: true,
         },
       });
-      server = createHttpServer({ configService });
-      await server.preboot({ context: contextServiceMock.createPrebootContract() });
+      server = createInternalHttpService({ configService });
+      await server.preboot({
+        context: contextServiceMock.createPrebootContract(),
+        docLinks: docLinksServiceMock.createSetupContract(),
+      });
       const serverSetup = await server.setup(setupDeps);
       router = serverSetup.createRouter('/');
       innerServer = serverSetup.server;
       router.get(
         {
           path: testInternalRoute,
+          security: { authz: { enabled: false, reason: '' } },
           validate: { query: schema.object({ myValue: schema.string() }) },
           options: { access: 'internal' },
         },
@@ -261,6 +299,7 @@ describe('core lifecycle handlers', () => {
       router.get(
         {
           path: testPublicRoute,
+          security: { authz: { enabled: false, reason: '' } },
           validate: { query: schema.object({ myValue: schema.string() }) },
           options: { access: 'public' },
         },
@@ -278,30 +317,30 @@ describe('core lifecycle handlers', () => {
         .expect(400);
     });
 
-    it('accepts requests with the internal product header to internal routes', async () => {
+    it('accepts requests with the internal origin header to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .query({ myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product header to public routes', async () => {
+    it('accepts requests with the internal origin header to public routes', async () => {
       await supertest(innerServer.listener)
         .get(testPublicRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .query({ myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product query param to internal routes', async () => {
+    it('accepts requests with the internal origin query param to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
         .query({ [internalProductQueryParam]: 'anything', myValue: 'test' })
         .expect(200, 'ok()');
     });
 
-    it('accepts requests with the internal product query param to public routes', async () => {
+    it('accepts requests with the internal origin query param to public routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
         .query({ [internalProductQueryParam]: 'anything', myValue: 'test' })
@@ -314,12 +353,17 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
   let server: HttpService;
   let innerServer: HttpServerSetup['server'];
   let router: IRouter;
+  let logger: jest.Mocked<Logger>;
 
   beforeEach(async () => {
+    logger = loggerMock.create();
     const configService = createConfigService({ server: { restrictInternalApis: true } });
-    server = createHttpServer({ configService });
+    server = createInternalHttpService({ configService, logger });
 
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
     innerServer = serverSetup.server;
@@ -334,13 +378,23 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
     const testPublicRoute = '/restrict_internal_routes/test/route_public';
     beforeEach(async () => {
       router.get(
-        { path: testInternalRoute, validate: false, options: { access: 'internal' } },
+        {
+          path: testInternalRoute,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+          options: { access: 'internal' },
+        },
         (context, req, res) => {
           return res.ok({ body: 'ok()' });
         }
       );
       router.get(
-        { path: testPublicRoute, validate: false, options: { access: 'public' } },
+        {
+          path: testPublicRoute,
+          validate: false,
+          security: { authz: { enabled: false, reason: '' } },
+          options: { access: 'public' },
+        },
         (context, req, res) => {
           return res.ok({ body: 'ok()' });
         }
@@ -348,16 +402,20 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
       await server.start();
     });
 
-    it('request requests without the internal product header to internal routes', async () => {
+    it('rejects requests without the internal product header to internal routes', async () => {
       const result = await supertest(innerServer.listener).get(testInternalRoute).expect(400);
       expect(result.body.error).toBe('Bad Request');
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
 
     it('accepts requests with the internal product header to internal routes', async () => {
       await supertest(innerServer.listener)
         .get(testInternalRoute)
-        .set(internalProductHeader, 'anything')
+        .set(internalOriginHeader, 'anything')
         .expect(200, 'ok()');
+      expect(logger.warn).toHaveBeenCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(0);
     });
   });
 });
@@ -382,16 +440,25 @@ describe('core lifecycle handlers with no strict client version check', () => {
         },
       },
     });
-    server = createHttpServer({ configService, logger, buildNum: 1234 });
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService({ configService, logger, buildNum: 1234 });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     const serverSetup = await server.setup(setupDeps);
     router = serverSetup.createRouter('/');
-    router.get({ path: testRouteGood, validate: false }, (context, req, res) => {
-      return res.ok({ body: 'ok' });
-    });
-    router.get({ path: testRouteBad, validate: false }, (context, req, res) => {
-      return res.custom({ body: 'nok', statusCode: 500 });
-    });
+    router.get(
+      { path: testRouteGood, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => {
+        return res.ok({ body: 'ok' });
+      }
+    );
+    router.get(
+      { path: testRouteBad, validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => {
+        return res.custom({ body: 'nok', statusCode: 500 });
+      }
+    );
     innerServer = serverSetup.server;
     await server.start();
   });
@@ -417,8 +484,8 @@ describe('core lifecycle handlers with no strict client version check', () => {
       .set(KIBANA_BUILD_NR_HEADER, '12345')
       .expect(500, /nok/);
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    const [[message]] = logger.warn.mock.calls;
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    const message = logger.warn.mock.calls[1][0];
     expect(message).toMatch(
       /^Client build \(12345\) is newer than this Kibana server build \(1234\)/
     );
@@ -429,8 +496,8 @@ describe('core lifecycle handlers with no strict client version check', () => {
       .set(KIBANA_BUILD_NR_HEADER, '123')
       .expect(500, /nok/);
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    const [[message]] = logger.warn.mock.calls;
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    const message = logger.warn.mock.calls[1][0];
     expect(message).toMatch(
       /^Client build \(123\) is older than this Kibana server build \(1234\)/
     );

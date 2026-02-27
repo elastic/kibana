@@ -1,0 +1,2679 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
+import type {
+  InternalArtifactCompleteSchema,
+  InternalArtifactSchema,
+  InternalManifestSchema,
+  InternalUnifiedManifestSchema,
+} from '../../../schemas/artifacts';
+import {
+  createPackagePolicyWithConfigMock,
+  getMockArtifacts,
+  toArtifactRecords,
+} from '../../../lib/artifacts/mocks';
+import {
+  getArtifactId,
+  Manifest,
+  ManifestConstants,
+  translateToEndpointExceptions,
+} from '../../../lib/artifacts';
+
+import {
+  buildManifestManagerContextMock,
+  mockFindExceptionListItemResponses,
+} from './manifest_manager.mock';
+
+import type { ManifestManagerContext } from './manifest_manager';
+import { ManifestManager } from './manifest_manager';
+import type { EndpointArtifactClientInterface } from '../artifact_client';
+import { EndpointError } from '../../../../../common/endpoint/errors';
+import type { Artifact } from '@kbn/fleet-plugin/server';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types/src/response/exception_list_item_schema';
+import {
+  createFetchAllArtifactsIterableMock,
+  generateArtifactMock,
+} from '@kbn/fleet-plugin/server/services/artifacts/mocks';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { allowedExperimentalValues } from '../../../../../common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
+
+const getArtifactObject = (artifact: InternalArtifactSchema) =>
+  JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
+
+describe('ManifestManager', () => {
+  const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+  const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
+  const ARTIFACT_ID_EXCEPTIONS_LINUX =
+    'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+  const ARTIFACT_ID_EXCEPTIONS_MACOS =
+    'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+  const ARTIFACT_ID_EXCEPTIONS_WINDOWS =
+    'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+  const ARTIFACT_ID_TRUSTED_APPS_MACOS =
+    'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+  const ARTIFACT_ID_TRUSTED_APPS_WINDOWS =
+    'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+  const ARTIFACT_ID_TRUSTED_DEVICES_MACOS =
+    'endpoint-trusteddevicelist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+  const ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS =
+    'endpoint-trusteddevicelist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
+
+  const ARTIFACT_NAME_EXCEPTIONS_LINUX = 'endpoint-exceptionlist-linux-v1';
+  const ARTIFACT_NAME_EXCEPTIONS_MACOS = 'endpoint-exceptionlist-macos-v1';
+  const ARTIFACT_NAME_EXCEPTIONS_WINDOWS = 'endpoint-exceptionlist-windows-v1';
+  const ARTIFACT_NAME_TRUSTED_APPS_MACOS = 'endpoint-trustlist-macos-v1';
+  const ARTIFACT_NAME_TRUSTED_APPS_WINDOWS = 'endpoint-trustlist-windows-v1';
+  const ARTIFACT_NAME_TRUSTED_APPS_LINUX = 'endpoint-trustlist-linux-v1';
+  const ARTIFACT_NAME_EVENT_FILTERS_MACOS = 'endpoint-eventfilterlist-macos-v1';
+  const ARTIFACT_NAME_EVENT_FILTERS_WINDOWS = 'endpoint-eventfilterlist-windows-v1';
+  const ARTIFACT_NAME_EVENT_FILTERS_LINUX = 'endpoint-eventfilterlist-linux-v1';
+  const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS =
+    'endpoint-hostisolationexceptionlist-macos-v1';
+  const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS =
+    'endpoint-hostisolationexceptionlist-windows-v1';
+  const ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX =
+    'endpoint-hostisolationexceptionlist-linux-v1';
+  const ARTIFACT_NAME_BLOCKLISTS_MACOS = 'endpoint-blocklist-macos-v1';
+  const ARTIFACT_NAME_BLOCKLISTS_WINDOWS = 'endpoint-blocklist-windows-v1';
+  const ARTIFACT_NAME_BLOCKLISTS_LINUX = 'endpoint-blocklist-linux-v1';
+  const ARTIFACT_NAME_TRUSTED_DEVICES_MACOS = 'endpoint-trusteddevicelist-macos-v1';
+  const ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS = 'endpoint-trusteddevicelist-windows-v1';
+
+  const getMockPolicyFetchAllItemIds = (items: string[]) =>
+    jest.fn(async () =>
+      jest.fn(async function* () {
+        yield items;
+      })()
+    );
+
+  let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
+  let ARTIFACTS_BY_ID: { [K: string]: InternalArtifactCompleteSchema } = {};
+  let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_DEVICES_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_DEVICES_WINDOWS: InternalArtifactCompleteSchema;
+
+  let defaultFeatures: ExperimentalFeatures;
+
+  beforeAll(async () => {
+    ARTIFACTS = await getMockArtifacts();
+    ARTIFACTS_BY_ID = {
+      [ARTIFACT_ID_EXCEPTIONS_MACOS]: ARTIFACTS[0],
+      [ARTIFACT_ID_EXCEPTIONS_WINDOWS]: ARTIFACTS[1],
+      [ARTIFACT_ID_EXCEPTIONS_LINUX]: ARTIFACTS[2],
+      [ARTIFACT_ID_TRUSTED_APPS_MACOS]: ARTIFACTS[3],
+      [ARTIFACT_ID_TRUSTED_APPS_WINDOWS]: ARTIFACTS[4],
+      [ARTIFACT_ID_TRUSTED_DEVICES_MACOS]: ARTIFACTS[6],
+      [ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS]: ARTIFACTS[7],
+    };
+    ARTIFACT_EXCEPTIONS_MACOS = ARTIFACTS[0];
+    ARTIFACT_EXCEPTIONS_WINDOWS = ARTIFACTS[1];
+    ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[3];
+    ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[4];
+    ARTIFACT_TRUSTED_DEVICES_MACOS = ARTIFACTS[6];
+    ARTIFACT_TRUSTED_DEVICES_WINDOWS = ARTIFACTS[7];
+    defaultFeatures = allowedExperimentalValues;
+  });
+
+  describe('getLastComputedManifest from Unified Manifest SO', () => {
+    const mockGetAllUnifiedManifestsSOFromCache = jest.fn().mockImplementation(() => [
+      {
+        policyId: '.global',
+        semanticVersion: '1.0.0',
+        artifactIds: [
+          ARTIFACT_ID_EXCEPTIONS_MACOS,
+          ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+          ARTIFACT_ID_EXCEPTIONS_LINUX,
+        ],
+        created: '20-01-2020 10:00:00.000Z',
+        id: '3',
+      },
+      {
+        policyId: TEST_POLICY_ID_1,
+        semanticVersion: '1.0.0',
+        artifactIds: [
+          ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+          ARTIFACT_ID_TRUSTED_APPS_MACOS,
+          ARTIFACT_ID_TRUSTED_APPS_WINDOWS,
+        ],
+        created: '20-01-2020 10:00:00.000Z',
+        id: '1',
+      },
+      {
+        policyId: TEST_POLICY_ID_2,
+        semanticVersion: '1.0.0',
+        artifactIds: [ARTIFACT_ID_TRUSTED_APPS_WINDOWS],
+        created: '20-01-2020 10:00:00.000Z',
+        id: '2',
+      },
+    ]);
+
+    test('Retrieves empty unified manifest successfully', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const manifestManager = new ManifestManager(
+        buildManifestManagerContextMock({
+          savedObjectsClient,
+        })
+      );
+
+      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => []);
+
+      const manifest = await manifestManager.getLastComputedManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toStrictEqual('WzQ3NzAsMV0=');
+      expect(manifest?.getAllArtifacts()).toStrictEqual([]);
+    });
+
+    test('Retrieves empty unified manifest successfully but uses semanticVersion from existing legacy SO manifest', async () => {
+      const semanticVersion = '1.14.0';
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const manifestManager = new ManifestManager(
+        buildManifestManagerContextMock({
+          savedObjectsClient,
+        })
+      );
+
+      savedObjectsClient.get = jest.fn().mockImplementation(async (objectType: string) => {
+        if (objectType === ManifestConstants.SAVED_OBJECT_TYPE) {
+          return {
+            attributes: {
+              artifacts: [
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+                { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+              ],
+              semanticVersion,
+            },
+          };
+        } else {
+          return null;
+        }
+      });
+
+      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => []);
+
+      const manifest = await manifestManager.getLastComputedManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual(semanticVersion);
+      expect(manifest?.getSavedObjectVersion()).toStrictEqual('WzQ3NzAsMV0=');
+      expect(manifest?.getAllArtifacts()).toStrictEqual([]);
+    });
+
+    test('Retrieves non empty manifest succesfully from Unified Saved Object', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const manifestManagerContext = buildManifestManagerContextMock({
+        savedObjectsClient,
+      });
+      const manifestManager = new ManifestManager(manifestManagerContext);
+
+      (
+        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+      ).fetchAll.mockReturnValue(createFetchAllArtifactsIterableMock([ARTIFACTS as Artifact[]]));
+
+      manifestManager.getAllUnifiedManifestsSO = mockGetAllUnifiedManifestsSOFromCache;
+
+      const manifest = await manifestManager.getLastComputedManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toStrictEqual('WzQ3NzAsMV0=');
+      expect(manifest?.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 5));
+      expect(manifest?.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
+      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
+        new Set()
+      );
+      expect(manifest?.isDefaultArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(true);
+      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_WINDOWS)).toStrictEqual(
+        new Set([TEST_POLICY_ID_1])
+      );
+      expect(manifest?.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_MACOS)).toBe(false);
+      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_MACOS)).toStrictEqual(
+        new Set([TEST_POLICY_ID_1])
+      );
+      expect(manifest?.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_WINDOWS)).toBe(false);
+      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_WINDOWS)).toStrictEqual(
+        new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+      );
+    });
+
+    test("Retrieve non empty unified manifest and skips over artifacts that can't be found", async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const manifestManagerContext = buildManifestManagerContextMock({
+        savedObjectsClient,
+      });
+      const manifestManager = new ManifestManager(manifestManagerContext);
+
+      manifestManager.getAllUnifiedManifestsSO = mockGetAllUnifiedManifestsSOFromCache;
+
+      (
+        manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
+      ).fetchAll.mockReturnValue(
+        createFetchAllArtifactsIterableMock([
+          // report the MACOS Exceptions artifact as not found
+          [
+            ARTIFACT_TRUSTED_APPS_MACOS,
+            ARTIFACT_EXCEPTIONS_WINDOWS,
+            ARTIFACT_TRUSTED_APPS_WINDOWS,
+            ARTIFACTS_BY_ID[ARTIFACT_ID_EXCEPTIONS_LINUX],
+          ] as Artifact[],
+        ])
+      );
+
+      const manifest = await manifestManager.getLastComputedManifest();
+
+      expect(manifest?.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(1, 5));
+
+      expect(manifestManagerContext.logger.warn).toHaveBeenCalledWith(
+        "Missing artifacts detected! Internal artifact manifest (SavedObject version [WzQ3NzAsMV0=]) references [1] artifact IDs that don't exist.\n" +
+          "First 10 below (run with logging set to 'debug' to see all):\n" +
+          'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
+      );
+    });
+  });
+
+  describe('commit unified manifest', () => {
+    test('Correctly updates, creates and deletes unified manifest so', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const manifest = ManifestManager.createDefaultManifest();
+
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+
+      manifestManager.getAllUnifiedManifestsSO = jest.fn().mockImplementation(() => [
+        {
+          policyId: '.global',
+          semanticVersion: '1.0.0',
+          artifactIds: [ARTIFACT_ID_EXCEPTIONS_MACOS],
+          created: '20-01-2020 10:00:00.000Z',
+          id: '2',
+        },
+        {
+          policyId: TEST_POLICY_ID_1,
+          semanticVersion: '1.0.0',
+          artifactIds: [ARTIFACT_ID_EXCEPTIONS_MACOS, ARTIFACT_ID_TRUSTED_APPS_MACOS],
+          created: '20-01-2020 10:00:00.000Z',
+          id: '3',
+        },
+        {
+          policyId: 'non-existent-policy',
+          semanticVersion: '1.0.0',
+          artifactIds: [ARTIFACT_ID_EXCEPTIONS_WINDOWS],
+          created: '20-01-2020 10:00:00.000Z',
+          id: '4',
+        },
+      ]);
+
+      context.savedObjectsClient.bulkCreate = jest.fn();
+      context.savedObjectsClient.bulkUpdate = jest.fn();
+      context.savedObjectsClient.bulkDelete = jest.fn();
+      manifestManager.bumpGlobalUnifiedManifestVersion = jest.fn();
+
+      await expect(manifestManager.commit(manifest)).resolves.toBeUndefined();
+      expect(context.savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      // TEST_POLICY_ID_1 and .global exists, shouldn't be created
+      expect(context.savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            attributes: {
+              artifactIds: [ARTIFACT_ID_EXCEPTIONS_WINDOWS, ARTIFACT_ID_TRUSTED_APPS_MACOS],
+              id: undefined,
+              policyId: TEST_POLICY_ID_2,
+              semanticVersion: '1.0.0',
+            },
+            type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
+          },
+        ],
+        { initialNamespaces: ['*'] }
+      );
+
+      expect(context.savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      // TEST_POLICY_ID_1 is updated, global is not due to no changes
+      expect(context.savedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          attributes: {
+            artifactIds: [
+              ARTIFACT_ID_EXCEPTIONS_MACOS,
+              ARTIFACT_ID_TRUSTED_APPS_WINDOWS,
+              ARTIFACT_ID_TRUSTED_APPS_MACOS,
+            ],
+            policyId: TEST_POLICY_ID_1,
+            semanticVersion: '1.0.1',
+          },
+          id: '3',
+          type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
+        },
+      ]);
+
+      // non-existent-policy should be deleted for not being in the manifest
+      expect(context.savedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(context.savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { id: '4', type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE },
+      ]);
+      // Global manifest wasn't updated, manual bump is required
+      expect(manifestManager.bumpGlobalUnifiedManifestVersion).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('buildNewManifest', () => {
+    const SUPPORTED_ARTIFACT_NAMES = [
+      ARTIFACT_NAME_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_TRUSTED_APPS_MACOS,
+      ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
+      ARTIFACT_NAME_TRUSTED_APPS_LINUX,
+      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
+      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
+      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_BLOCKLISTS_MACOS,
+      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
+      ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
+    ];
+
+    const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
+      ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
+    ];
+
+    test(`Fails when exception list client fails`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = jest.fn().mockRejectedValue(new Error());
+
+      await expect(manifestManager.buildNewManifest()).rejects.toThrow();
+    });
+
+    test(`Builds fully new manifest if no baseline parameter passed and no exception list items`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(17);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      for (const artifact of artifacts) {
+        expect(getArtifactObject(artifact)).toStrictEqual({ entries: [] });
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test(`Builds fully new manifest if no baseline parameter passed and present exception list items`, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
+      });
+
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(17);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [hostIsolationExceptionsItem],
+          'v1',
+          defaultFeatures
+        ),
+      });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
+      });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test(`Reuses artifacts when baseline parameter passed and present exception list items`, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const oldManifest = await manifestManager.buildNewManifest();
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
+      });
+
+      const manifest = await manifestManager.buildNewManifest(oldManifest);
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(17);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      expect(artifacts[0]).toStrictEqual(oldManifest.getAllArtifacts()[0]);
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [hostIsolationExceptionsItem],
+          'v1',
+          defaultFeatures
+        ),
+      });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
+      });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test(`Builds fully new manifest with single entries when they are duplicated`, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_1)],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      const duplicatedEventFilterInDifferentPolicy = {
+        ...eventFiltersListItem,
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
+      };
+      const duplicatedEndpointExceptionInDifferentOS: ExceptionListItemSchema = {
+        ...exceptionListItem,
+        os_types: ['windows'],
+      };
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: {
+          macos: [exceptionListItem, exceptionListItem],
+          windows: [duplicatedEndpointExceptionInDifferentOS],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: {
+          linux: [trustedAppListItem, trustedAppListItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: {
+          windows: [eventFiltersListItem, duplicatedEventFilterInDifferentPolicy],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [
+            hostIsolationExceptionsItem,
+            { ...hostIsolationExceptionsItem, tags: [buildPerPolicyTag(TEST_POLICY_ID_2)] },
+          ],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: {
+          macos: [blocklistsListItem, blocklistsListItem],
+        },
+      });
+
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(18);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [duplicatedEndpointExceptionInDifferentOS],
+          'v1',
+          defaultFeatures
+        ),
+      });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [eventFiltersListItem, duplicatedEventFilterInDifferentPolicy],
+          'v1',
+          defaultFeatures
+        ),
+      });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [hostIsolationExceptionsItem],
+          'v1',
+          defaultFeatures
+        ),
+      });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[15])).toStrictEqual({ entries: [] });
+
+      // Default artifacts used by both policies
+      for (const artifact of artifacts.slice(0, 7)) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+        );
+      }
+
+      // Default event filters artifact for windows not used by test policies
+      expect(manifest.isDefaultArtifact(artifacts[7])).toBe(true);
+      expect(manifest.getArtifactTargetPolicies(artifacts[7])).toStrictEqual(new Set([]));
+
+      // Default event filters artifact for linux used by both policies
+      expect(manifest.isDefaultArtifact(artifacts[8])).toBe(true);
+      expect(manifest.getArtifactTargetPolicies(artifacts[8])).toStrictEqual(
+        new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+      );
+
+      // Policy specific event filters artifact for windows used by both policies
+      expect(manifest.isDefaultArtifact(artifacts[9])).toBe(false);
+      expect(manifest.getArtifactTargetPolicies(artifacts[9])).toStrictEqual(
+        new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+      );
+
+      // Default artifacts used by both policies
+      for (const artifact of artifacts.slice(10)) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+        );
+      }
+    });
+
+    test(`Builds manifest with policy specific exception list items for trusted apps`, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const trustedAppListItemPolicy2 = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        entries: [
+          { field: 'other.field', operator: 'included', type: 'match', value: 'other value' },
+        ],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
+      });
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: {
+          linux: [trustedAppListItem, trustedAppListItemPolicy2],
+        },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(18);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [trustedAppListItem, trustedAppListItemPolicy2],
+          'v1',
+          defaultFeatures
+        ),
+      });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
+
+      for (const artifact of artifacts.slice(0, 5)) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+        );
+      }
+
+      expect(manifest.isDefaultArtifact(artifacts[6])).toBe(false);
+      expect(manifest.getArtifactTargetPolicies(artifacts[6])).toStrictEqual(
+        new Set([TEST_POLICY_ID_2])
+      );
+    });
+  });
+
+  describe('buildNewManifest when using app features', () => {
+    const SUPPORTED_ARTIFACT_NAMES = [
+      ARTIFACT_NAME_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_TRUSTED_APPS_MACOS,
+      ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
+      ARTIFACT_NAME_TRUSTED_APPS_LINUX,
+      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
+      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
+      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_BLOCKLISTS_MACOS,
+      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
+      ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
+    ];
+
+    const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
+      ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
+    ];
+
+    test(`when it has endpoint artifact management app feature it should not generate host isolation exceptions`, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const context = buildManifestManagerContextMock({}, [
+        ProductFeatureKey.endpointArtifactManagement,
+      ]);
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
+      });
+
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(17);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
+      });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test(`when it has endpoint artifact management and endpoint host isolation exceptions app features it should generate all exceptions`, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const context = buildManifestManagerContextMock({}, [
+        ProductFeatureKey.endpointArtifactManagement,
+        ProductFeatureKey.endpointHostIsolationExceptions,
+      ]);
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
+      });
+
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(17);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1', defaultFeatures),
+      });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [hostIsolationExceptionsItem],
+          'v1',
+          defaultFeatures
+        ),
+      });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
+      });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test(`when does not have right app features, should not generate any exception`, async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      const context = buildManifestManagerContextMock({}, []);
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
+          linux: [hostIsolationExceptionsItem],
+        },
+        [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: { linux: [blocklistsListItem] },
+      });
+
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(17);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+
+      expect(getArtifactObject(artifacts[0])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[5])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[8])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[11])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(artifacts[14])).toStrictEqual({ entries: [] });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+  });
+
+  describe('buildNewManifest with trustedDevices', () => {
+    const SUPPORTED_ARTIFACT_NAMES_WITH_TRUSTED_DEVICES = [
+      ARTIFACT_NAME_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_TRUSTED_APPS_MACOS,
+      ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
+      ARTIFACT_NAME_TRUSTED_APPS_LINUX,
+      ARTIFACT_NAME_EVENT_FILTERS_MACOS,
+      ARTIFACT_NAME_EVENT_FILTERS_WINDOWS,
+      ARTIFACT_NAME_EVENT_FILTERS_LINUX,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_HOST_ISOLATION_EXCEPTIONS_LINUX,
+      ARTIFACT_NAME_BLOCKLISTS_MACOS,
+      ARTIFACT_NAME_BLOCKLISTS_WINDOWS,
+      ARTIFACT_NAME_BLOCKLISTS_LINUX,
+      ARTIFACT_NAME_TRUSTED_DEVICES_MACOS,
+      ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS,
+    ];
+
+    const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
+      ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
+    ];
+
+    test('builds manifest with trusted devices', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(17); // 15 standard + 2 trusted devices (macos, windows)
+      expect(getArtifactIds(artifacts)).toStrictEqual(
+        SUPPORTED_ARTIFACT_NAMES_WITH_TRUSTED_DEVICES
+      );
+
+      // Verify trusted devices artifacts are present
+      const trustedDevicesMacosArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_MACOS
+      );
+      const trustedDevicesWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS
+      );
+
+      expect(trustedDevicesMacosArtifact).toBeDefined();
+      expect(trustedDevicesWindowsArtifact).toBeDefined();
+
+      // Verify trusted devices artifacts have empty entries (no test data)
+      expect(getArtifactObject(trustedDevicesMacosArtifact!)).toStrictEqual({ entries: [] });
+      expect(getArtifactObject(trustedDevicesWindowsArtifact!)).toStrictEqual({ entries: [] });
+
+      for (const artifact of artifacts) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
+      }
+    });
+
+    test('builds manifest with trusted devices entries when trusted devices data present', async () => {
+      const trustedDeviceListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.trustedDevices.id]: { windows: [trustedDeviceListItem] },
+      });
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      const artifacts = manifest.getAllArtifacts();
+      expect(artifacts.length).toBe(17);
+
+      // Find trusted devices artifacts
+      const trustedDevicesMacosArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_MACOS
+      );
+      const trustedDevicesWindowsArtifact = artifacts.find(
+        (a) => a.identifier === ARTIFACT_NAME_TRUSTED_DEVICES_WINDOWS
+      );
+
+      expect(trustedDevicesMacosArtifact).toBeDefined();
+      expect(trustedDevicesWindowsArtifact).toBeDefined();
+
+      // Verify trusted devices artifacts content
+      expect(getArtifactObject(trustedDevicesMacosArtifact!)).toStrictEqual({ entries: [] }); // No macOS data
+      expect(getArtifactObject(trustedDevicesWindowsArtifact!)).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedDeviceListItem], 'v1', {
+          ...defaultFeatures,
+          trustedDevices: true,
+        }),
+      });
+    });
+  });
+
+  describe('buildNewManifest with Endpoint Exceptions', () => {
+    let manifestManager: ManifestManager;
+    let context: ManifestManagerContext;
+
+    let globalEndpointException: ExceptionListItemSchema;
+    let endpointExceptionAssignedToNowhere: ExceptionListItemSchema;
+    let endpointExceptionAssignedToPolicy1: ExceptionListItemSchema;
+    let endpointExceptionAssignedToPolicy2: ExceptionListItemSchema;
+
+    beforeEach(() => {
+      context = buildManifestManagerContextMock({});
+
+      globalEndpointException = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        entries: [{ type: 'match', operator: 'included', field: 'path', value: 'global' }],
+        tags: [GLOBAL_ARTIFACT_TAG],
+      });
+      endpointExceptionAssignedToNowhere = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'assigned_to_nowhere' },
+        ],
+        tags: [],
+      });
+      endpointExceptionAssignedToPolicy1 = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'assigned_to_policy_1' },
+        ],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_1)],
+      });
+      endpointExceptionAssignedToPolicy2 = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        entries: [
+          { type: 'match', operator: 'included', field: 'path', value: 'assigned_to_policy_2' },
+        ],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
+      });
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: {
+          windows: [
+            globalEndpointException,
+            endpointExceptionAssignedToNowhere,
+            endpointExceptionAssignedToPolicy1,
+            endpointExceptionAssignedToPolicy2,
+          ],
+        },
+      });
+
+      context.licenseService = createLicenseServiceMock();
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+    });
+
+    describe('when Endpoint Exceptions can only be global - feature flag is disabled', () => {
+      beforeEach(() => {
+        context.experimentalFeatures = {
+          ...context.experimentalFeatures,
+          endpointExceptionsMovedUnderManagement: false,
+        };
+
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('applies all endpoint exception artifacts to all policies', async () => {
+        const manifest = await manifestManager.buildNewManifest();
+        const artifacts = manifest.getAllArtifacts();
+
+        expect(artifacts.length).toBe(17);
+
+        const windowsEndpointExceptionsArtifact = artifacts.find(
+          (a) => a.identifier === ARTIFACT_NAME_EXCEPTIONS_WINDOWS
+        );
+        expect(windowsEndpointExceptionsArtifact).toBeDefined();
+        expect(getArtifactObject(windowsEndpointExceptionsArtifact!)).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [
+              globalEndpointException,
+              endpointExceptionAssignedToNowhere,
+              endpointExceptionAssignedToPolicy1,
+              endpointExceptionAssignedToPolicy2,
+            ],
+            'v1',
+            defaultFeatures
+          ),
+        });
+      });
+    });
+
+    describe('when Endpoint Exceptions can be per-policy - feature flag is enabled', () => {
+      beforeEach(() => {
+        context.experimentalFeatures = {
+          ...context.experimentalFeatures,
+          endpointExceptionsMovedUnderManagement: true,
+        };
+
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('skips unassigned per-policy endpoint exceptions', async () => {
+        const manifest = await manifestManager.buildNewManifest();
+        const artifacts = manifest.getAllArtifacts();
+
+        expect(artifacts.length).toBe(17 + 2); // +2 for the per-policy artifacts
+
+        const windowsEndpointExceptionsArtifacts = artifacts.filter(
+          (a) => a.identifier === ARTIFACT_NAME_EXCEPTIONS_WINDOWS
+        );
+        expect(windowsEndpointExceptionsArtifacts.length).toBe(3); // 1 global + 2 per-policy
+
+        // global artifact: only global endpoint exception
+        expect(getArtifactObject(windowsEndpointExceptionsArtifacts[0])).toStrictEqual({
+          entries: translateToEndpointExceptions([globalEndpointException], 'v1', defaultFeatures),
+        });
+
+        // policy 1 artifact: global + policy 1 endpoint exceptions
+        expect(getArtifactObject(windowsEndpointExceptionsArtifacts[1])).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [globalEndpointException, endpointExceptionAssignedToPolicy1],
+            'v1',
+            defaultFeatures
+          ),
+        });
+
+        // policy 2 artifact: global + policy 2 endpoint exceptions
+        expect(getArtifactObject(windowsEndpointExceptionsArtifacts[2])).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [globalEndpointException, endpointExceptionAssignedToPolicy2],
+            'v1',
+            defaultFeatures
+          ),
+        });
+      });
+    });
+
+    describe('when Endpoint Exceptions contain `matches`', () => {
+      beforeEach(() => {
+        manifestManager = new ManifestManager(context);
+      });
+
+      test(`when contains only \`wildcard\`, \`event.module=endpoint\` is added `, async () => {
+        const exceptionListItem = getExceptionListItemSchemaMock({
+          os_types: ['macos'],
+          entries: [
+            { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
+            { type: 'wildcard', operator: 'excluded', field: 'not_path', value: '*dont_match_me*' },
+          ],
+        });
+        const expectedExceptionListItem = getExceptionListItemSchemaMock({
+          os_types: ['macos'],
+          entries: [
+            ...exceptionListItem.entries,
+            { type: 'match', operator: 'included', field: 'event.module', value: 'endpoint' },
+          ],
+        });
+
+        context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+          [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        });
+
+        context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+          TEST_POLICY_ID_1,
+        ]);
+
+        const manifest = await manifestManager.buildNewManifest();
+
+        expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+        expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+        expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+        const artifacts = manifest.getAllArtifacts();
+
+        expect(artifacts.length).toBe(17);
+
+        expect(getArtifactObject(artifacts[0])).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [expectedExceptionListItem],
+            'v1',
+            defaultFeatures
+          ),
+        });
+      });
+
+      test(`when contains anything next to \`wildcard\`, nothing is added `, async () => {
+        const exceptionListItem = getExceptionListItemSchemaMock({
+          os_types: ['macos'],
+          entries: [
+            { type: 'wildcard', operator: 'included', field: 'path', value: '*match_me*' },
+            { type: 'wildcard', operator: 'excluded', field: 'path', value: '*dont_match_me*' },
+            { type: 'match', operator: 'included', field: 'path', value: 'something' },
+          ],
+        });
+        const expectedExceptionListItem = getExceptionListItemSchemaMock({
+          os_types: ['macos'],
+          entries: [...exceptionListItem.entries],
+        });
+
+        context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+          [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
+        });
+
+        context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+          TEST_POLICY_ID_1,
+        ]);
+
+        const manifest = await manifestManager.buildNewManifest();
+
+        expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+        expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+        expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+        const artifacts = manifest.getAllArtifacts();
+
+        expect(artifacts.length).toBe(17);
+
+        expect(getArtifactObject(artifacts[0])).toStrictEqual({
+          entries: translateToEndpointExceptions(
+            [expectedExceptionListItem],
+            'v1',
+            defaultFeatures
+          ),
+        });
+      });
+    });
+  });
+
+  describe('deleteArtifacts', () => {
+    test(`Successfully invokes saved objects client`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      await expect(
+        manifestManager.deleteArtifacts([
+          ARTIFACT_ID_EXCEPTIONS_MACOS,
+          ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+        ])
+      ).resolves.toStrictEqual([]);
+
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_EXCEPTIONS_MACOS,
+        ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+      ]);
+    });
+
+    test(`Successfully deletes trusted devices artifacts`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      await expect(
+        manifestManager.deleteArtifacts([
+          ARTIFACT_ID_TRUSTED_DEVICES_MACOS,
+          ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS,
+        ])
+      ).resolves.toStrictEqual([]);
+
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_TRUSTED_DEVICES_MACOS,
+        ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS,
+      ]);
+    });
+
+    test(`Returns errors for partial failures`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const error = new Error();
+
+      artifactClient.bulkDeleteArtifacts.mockImplementation(async (ids): Promise<Error[]> => {
+        if (ids[1] === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
+          return [error];
+        }
+        return [];
+      });
+
+      await expect(
+        manifestManager.deleteArtifacts([
+          ARTIFACT_ID_EXCEPTIONS_MACOS,
+          ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+        ])
+      ).resolves.toStrictEqual([error]);
+
+      expect(artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(1);
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_EXCEPTIONS_MACOS,
+        ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+      ]);
+    });
+
+    test(`Returns errors for trusted devices deletion failures`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const error = new Error();
+
+      artifactClient.bulkDeleteArtifacts.mockImplementation(async (ids): Promise<Error[]> => {
+        if (ids[0] === ARTIFACT_ID_TRUSTED_DEVICES_MACOS) {
+          return [error];
+        }
+        return [];
+      });
+
+      await expect(
+        manifestManager.deleteArtifacts([
+          ARTIFACT_ID_TRUSTED_DEVICES_MACOS,
+          ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS,
+        ])
+      ).resolves.toStrictEqual([error]);
+
+      expect(artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(1);
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_TRUSTED_DEVICES_MACOS,
+        ARTIFACT_ID_TRUSTED_DEVICES_WINDOWS,
+      ]);
+    });
+  });
+
+  describe('pushArtifacts', () => {
+    test(`Successfully invokes artifactClient `, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
+
+      await expect(
+        manifestManager.pushArtifacts(
+          [ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_EXCEPTIONS_WINDOWS],
+          newManifest
+        )
+      ).resolves.toStrictEqual([]);
+
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_EXCEPTIONS_MACOS,
+        },
+        {
+          ...ARTIFACT_EXCEPTIONS_WINDOWS,
+        },
+      ]);
+    });
+
+    test(`Successfully pushes trusted devices artifacts`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
+
+      await expect(
+        manifestManager.pushArtifacts(
+          [ARTIFACT_TRUSTED_DEVICES_MACOS, ARTIFACT_TRUSTED_DEVICES_WINDOWS],
+          newManifest
+        )
+      ).resolves.toStrictEqual([]);
+
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_TRUSTED_DEVICES_MACOS,
+        },
+        {
+          ...ARTIFACT_TRUSTED_DEVICES_WINDOWS,
+        },
+      ]);
+    });
+
+    test(`Returns errors for partial failures`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
+      const error = new Error();
+      const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_APPS_MACOS;
+
+      artifactClient.bulkCreateArtifacts.mockImplementation(
+        async (artifacts: InternalArtifactCompleteSchema[]) => {
+          return { artifacts: [artifacts[0]], errors: [error] };
+        }
+      );
+
+      await expect(
+        manifestManager.pushArtifacts(
+          [
+            ARTIFACT_EXCEPTIONS_MACOS,
+            ARTIFACT_EXCEPTIONS_WINDOWS,
+            incompleteArtifact as InternalArtifactCompleteSchema,
+          ],
+          newManifest
+        )
+      ).resolves.toStrictEqual([
+        new EndpointError(
+          `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`,
+          ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_APPS_MACOS]
+        ),
+        error,
+      ]);
+
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_EXCEPTIONS_MACOS,
+        },
+        {
+          ...ARTIFACT_EXCEPTIONS_WINDOWS,
+        },
+      ]);
+    });
+
+    test(`Returns errors for trusted devices artifact failures`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
+      const manifestManager = new ManifestManager(context);
+      const newManifest = ManifestManager.createDefaultManifest();
+      const error = new Error();
+      const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_DEVICES_MACOS;
+
+      artifactClient.bulkCreateArtifacts.mockImplementation(
+        async (artifacts: InternalArtifactCompleteSchema[]) => {
+          return { artifacts: [artifacts[0]], errors: [error] };
+        }
+      );
+
+      await expect(
+        manifestManager.pushArtifacts(
+          [
+            ARTIFACT_TRUSTED_DEVICES_MACOS,
+            ARTIFACT_TRUSTED_DEVICES_WINDOWS,
+            incompleteArtifact as InternalArtifactCompleteSchema,
+          ],
+          newManifest
+        )
+      ).resolves.toStrictEqual([
+        new EndpointError(
+          `Incomplete artifact: ${ARTIFACT_ID_TRUSTED_DEVICES_MACOS}`,
+          ARTIFACTS_BY_ID[ARTIFACT_ID_TRUSTED_DEVICES_MACOS]
+        ),
+        error,
+      ]);
+
+      expect(artifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          ...ARTIFACT_TRUSTED_DEVICES_MACOS,
+        },
+        {
+          ...ARTIFACT_TRUSTED_DEVICES_WINDOWS,
+        },
+      ]);
+    });
+  });
+
+  describe('tryDispatch', () => {
+    const getMockPolicyFetchAllItems = (items: PackagePolicy[]) =>
+      jest.fn(async () =>
+        jest.fn(async function* () {
+          yield items;
+        })()
+      );
+
+    test(`Should not dispatch if no policies`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const manifest = new Manifest({ soVersion: '1.0.0' });
+
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([]);
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
+    });
+
+    test(`Should not dispatch trusted devices if no policies`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const manifest = new Manifest({ soVersion: '1.0.0' });
+
+      manifest.addEntry(ARTIFACT_TRUSTED_DEVICES_MACOS);
+      manifest.addEntry(ARTIFACT_TRUSTED_DEVICES_WINDOWS);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([]);
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
+    });
+
+    test(`Should return errors if invalid config for package policy`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      const manifest = new Manifest({ soVersion: '1.0.0' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        createPackagePolicyWithConfigMock({ id: TEST_POLICY_ID_1 }),
+      ]);
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([
+        new EndpointError(`Package Policy ${TEST_POLICY_ID_1} has no 'inputs[0].config'`),
+      ]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
+    });
+
+    test(`Should not dispatch if semantic version has not changed`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      const manifest = new Manifest({ soVersion: '1.0.0' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_1,
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: toArtifactRecords({
+                  [ARTIFACT_NAME_EXCEPTIONS_WINDOWS]: ARTIFACT_EXCEPTIONS_MACOS,
+                }),
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+      ]);
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
+    });
+
+    test(`Should dispatch to only policies where list of artifacts changed`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_1,
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: toArtifactRecords({
+                  [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
+                }),
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_2,
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: toArtifactRecords({
+                  [ARTIFACT_NAME_EXCEPTIONS_WINDOWS]: ARTIFACT_EXCEPTIONS_WINDOWS,
+                  [ARTIFACT_NAME_TRUSTED_APPS_MACOS]: ARTIFACT_TRUSTED_APPS_MACOS,
+                }),
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+      ]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        context.esClient,
+        [
+          createPackagePolicyWithConfigMock({
+            id: TEST_POLICY_ID_1,
+            config: {
+              artifact_manifest: {
+                value: {
+                  artifacts: toArtifactRecords({
+                    [ARTIFACT_NAME_EXCEPTIONS_WINDOWS]: ARTIFACT_EXCEPTIONS_WINDOWS,
+                  }),
+                  manifest_version: '1.0.1',
+                  schema_version: 'v1',
+                },
+              },
+            },
+          }),
+        ]
+      );
+    });
+
+    test(`Should dispatch to only policies where artifact content changed`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_1,
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: toArtifactRecords({
+                  [ARTIFACT_NAME_EXCEPTIONS_MACOS]: await getEmptyInternalArtifactMock(
+                    'macos',
+                    'v1'
+                  ),
+                }),
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_2,
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: toArtifactRecords({
+                  [ARTIFACT_NAME_EXCEPTIONS_WINDOWS]: ARTIFACT_EXCEPTIONS_WINDOWS,
+                  [ARTIFACT_NAME_TRUSTED_APPS_MACOS]: ARTIFACT_TRUSTED_APPS_MACOS,
+                }),
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+      ]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        context.esClient,
+        [
+          createPackagePolicyWithConfigMock({
+            id: TEST_POLICY_ID_1,
+            config: {
+              artifact_manifest: {
+                value: {
+                  artifacts: toArtifactRecords({
+                    [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
+                  }),
+                  manifest_version: '1.0.1',
+                  schema_version: 'v1',
+                },
+              },
+            },
+          }),
+        ]
+      );
+    });
+
+    test(`should dispatch bulkUpdate per-space when space awareness is enabled`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_1,
+          spaceIds: ['bar'],
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: {},
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_2,
+          spaceIds: ['foo'],
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: {},
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+      ]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [],
+      });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        context.esClient,
+        [
+          expect.objectContaining({
+            spaceIds: ['bar'],
+          }),
+        ]
+      );
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
+        2,
+        expect.anything(),
+        context.esClient,
+        [
+          expect.objectContaining({
+            spaceIds: ['foo'],
+          }),
+        ]
+      );
+    });
+
+    test(`Should return partial errors`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const error = new Error();
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      const policy1 = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
+        policy1,
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_2,
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: {},
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+      ]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [{}],
+        failedPolicies: [{ packagePolicy: policy1, error }],
+      });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+    });
+
+    test('Should retry policy update if a Conflict error is encountered', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const error = SavedObjectsErrorHelpers.createConflictError('update failed', TEST_POLICY_ID_1);
+      const policy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+      const latestPolicy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        description: 'updated policy',
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      context.packagePolicyService.get = jest.fn().mockResolvedValue(latestPolicy);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
+      context.packagePolicyService.bulkUpdate = jest
+        .fn()
+        .mockResolvedValueOnce({
+          updatedPolicies: [],
+          failedPolicies: [{ error, packagePolicy: policy }],
+        })
+        .mockResolvedValueOnce({ updatedPolicies: [policy], failedPolicies: [] });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(context.packagePolicyService.get).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            ...latestPolicy,
+            inputs: [
+              {
+                config: {
+                  artifact_manifest: {
+                    value: {
+                      artifacts: {
+                        'endpoint-exceptionlist-macos-v1': {
+                          compression_algorithm: 'none',
+                          decoded_sha256:
+                            '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                          decoded_size: 432,
+                          encoded_sha256:
+                            '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                          encoded_size: 432,
+                          encryption_algorithm: 'none',
+                          relative_url:
+                            '/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+                        },
+                      },
+                      manifest_version: '1.0.1',
+                      schema_version: 'v1',
+                    },
+                  },
+                },
+                enabled: true,
+                streams: [],
+                type: 'endpoint',
+              },
+            ],
+          },
+        ]
+      );
+    });
+
+    test('Should only attempt a retry of conflict error once', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+      const error = SavedObjectsErrorHelpers.createConflictError('update failed', TEST_POLICY_ID_1);
+      const policy = createPackagePolicyWithConfigMock({
+        id: TEST_POLICY_ID_1,
+        config: {
+          artifact_manifest: {
+            value: {
+              artifacts: {},
+              manifest_version: '1.0.0',
+              schema_version: 'v1',
+            },
+          },
+        },
+      });
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+
+      context.packagePolicyService.get = jest.fn().mockResolvedValue(policy);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([policy]);
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({
+        updatedPolicies: [],
+        failedPolicies: [{ error, packagePolicy: policy }],
+      });
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
+
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('cleanup artifacts', () => {
+    test(`Successfully removes orphan artifacts`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      (context.artifactClient.fetchAll as jest.Mock).mockReturnValue(
+        createFetchAllArtifactsIterableMock([[generateArtifactMock()]])
+      );
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+      const manifest = await manifestManager.buildNewManifest();
+
+      await manifestManager.cleanup(manifest);
+      const artifactToBeRemoved = await context.artifactClient.getArtifact('');
+      expect(artifactToBeRemoved).not.toBeUndefined();
+
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        getArtifactId(artifactToBeRemoved!),
+      ]);
+    });
+
+    test(`When there is no artifact to be removed`, async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
+
+      context.savedObjectsClient.create = jest
+        .fn()
+        .mockImplementation((_type: string, object: InternalManifestSchema) => ({
+          attributes: object,
+        }));
+
+      context.artifactClient.listArtifacts = jest.fn().mockResolvedValue([
+        {
+          id: '123',
+          type: 'trustlist',
+          identifier: 'endpoint-trustlist-windows-v1',
+          packageName: 'endpoint',
+          encryptionAlgorithm: 'none',
+          relative_url: '/api/fleet/artifacts/trustlist-v1/d801aa1fb',
+          compressionAlgorithm: 'zlib',
+          decodedSha256: 'd801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658',
+          decodedSize: 14,
+          encodedSha256: 'd29238d40',
+          encodedSize: 22,
+          body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
+          created: '2021-03-08T14:47:13.714Z',
+        },
+      ]);
+      const manifest = await manifestManager.buildNewManifest();
+
+      await manifestManager.cleanup(manifest);
+
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('Unified Manifest Methods', () => {
+    let manifestManager: ManifestManager;
+    let context: ManifestManagerContext;
+
+    beforeEach(() => {
+      context = buildManifestManagerContextMock({});
+      manifestManager = new ManifestManager(context);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe('transforms', () => {
+      const createLegacyManifestSO = (
+        opts: {
+          semanticVersion?: string;
+        } = {}
+      ) => ({
+        attributes: {
+          schemaVersion: 'v1' as const,
+          semanticVersion: opts.semanticVersion ?? '1.0.0',
+          artifacts: [
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_LINUX, policyId: undefined },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+            { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+            { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
+          ],
+        },
+        version: 'WzQ3NzAsMV0=',
+      });
+
+      const createUnifiedManifestSO = (globalSemanticVersion?: string) => [
+        {
+          policyId: '.global',
+          semanticVersion: globalSemanticVersion ?? '1.0.0',
+          artifactIds: [
+            ARTIFACT_ID_EXCEPTIONS_MACOS,
+            ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+            ARTIFACT_ID_EXCEPTIONS_LINUX,
+          ],
+          ...(globalSemanticVersion ? { created: '20-01-2020 10:00:00.000Z' } : {}),
+          id: '3',
+        },
+        {
+          policyId: TEST_POLICY_ID_1,
+          semanticVersion: '1.0.0',
+          artifactIds: [
+            ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+            ARTIFACT_ID_TRUSTED_APPS_MACOS,
+            ARTIFACT_ID_TRUSTED_APPS_WINDOWS,
+          ],
+          ...(globalSemanticVersion ? { created: '20-01-2020 10:00:00.000Z' } : {}),
+          id: '1',
+        },
+        {
+          policyId: TEST_POLICY_ID_2,
+          semanticVersion: '1.0.0',
+          artifactIds: [ARTIFACT_ID_TRUSTED_APPS_WINDOWS],
+          ...(globalSemanticVersion ? { created: '20-01-2020 10:00:00.000Z' } : {}),
+          id: '2',
+        },
+      ];
+
+      describe('transformUnifiedManifestSOtoLegacyManifestSO', () => {
+        const unifiedManifestSO = createUnifiedManifestSO('1.0.5');
+        test('should transform unified manifest saved object to legacy manifest saved object', async () => {
+          const expectedLegacyManifestSO = createLegacyManifestSO({ semanticVersion: '1.0.5' });
+
+          expect(
+            manifestManager.transformUnifiedManifestSOtoLegacyManifestSO(
+              unifiedManifestSO as InternalUnifiedManifestSchema[]
+            )
+          ).toEqual(expectedLegacyManifestSO);
+        });
+
+        test('should return empty artifacts array when unified manifest saved object is empty', async () => {
+          const emptyUnifiedManifestSO: InternalUnifiedManifestSchema[] = [];
+          const expectedEmptyLegacyManifestSO = createLegacyManifestSO();
+          expect(
+            manifestManager.transformUnifiedManifestSOtoLegacyManifestSO(emptyUnifiedManifestSO)
+          ).toEqual({
+            ...expectedEmptyLegacyManifestSO,
+            attributes: { ...expectedEmptyLegacyManifestSO.attributes, artifacts: [] },
+          });
+        });
+
+        test('should return empty artifacts array when unified manifest saved object is empty but semanticVersion was provided', async () => {
+          const semanticVersion = '1.14.0';
+          const emptyUnifiedManifestSO: InternalUnifiedManifestSchema[] = [];
+          const expectedEmptyLegacyManifestSO = createLegacyManifestSO();
+          expect(
+            manifestManager.transformUnifiedManifestSOtoLegacyManifestSO(
+              emptyUnifiedManifestSO,
+              semanticVersion
+            )
+          ).toEqual({
+            ...expectedEmptyLegacyManifestSO,
+            attributes: {
+              ...expectedEmptyLegacyManifestSO.attributes,
+              artifacts: [],
+              semanticVersion,
+            },
+          });
+        });
+      });
+      describe('transformLegacyManifestSOtoUnifiedManifestSO', () => {
+        const unifiedManifestSO = createUnifiedManifestSO();
+        const expectedLegacyManifestSO = createLegacyManifestSO().attributes;
+        test('should properly transform legacy manifest to unified manifest saved object with empty exising unified manifest so', async () => {
+          expect(
+            manifestManager.transformLegacyManifestSOtoUnifiedManifestSO(
+              expectedLegacyManifestSO,
+              []
+            )
+          ).toEqual(unifiedManifestSO.map((item) => ({ ...item, id: undefined })));
+        });
+
+        test('should properly transform legacy manifest to unified manifest saved object with empty exising unified manifest so and propagate semanticVersion from the manifest', async () => {
+          const semanticVersion = '1.14.0';
+          const expectedLegacyManifestSOWithSemanticVersion = createLegacyManifestSO({
+            semanticVersion,
+          }).attributes;
+          const unifiedManifestSOWithSemanticVersion = createUnifiedManifestSO(semanticVersion);
+
+          expect(
+            manifestManager.transformLegacyManifestSOtoUnifiedManifestSO(
+              expectedLegacyManifestSOWithSemanticVersion,
+              []
+            )
+          ).toEqual(
+            unifiedManifestSOWithSemanticVersion.map((item) => ({
+              ...item,
+              id: undefined,
+              created: undefined,
+            }))
+          );
+        });
+
+        test('should properly transform legacy manifest to unified manifest saved object with existing unified manifest so', async () => {
+          const createUnifiedManifests = (empty = false) => [
+            {
+              policyId: '.global',
+              semanticVersion: '1.0.2',
+              artifactIds: !empty
+                ? [
+                    ARTIFACT_ID_EXCEPTIONS_MACOS,
+                    ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+                    ARTIFACT_ID_EXCEPTIONS_LINUX,
+                  ]
+                : [],
+              id: '3',
+              ...(empty ? { created: '2000' } : {}),
+            },
+            {
+              policyId: TEST_POLICY_ID_1,
+              semanticVersion: '1.0.5',
+              artifactIds: !empty
+                ? [
+                    ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+                    ARTIFACT_ID_TRUSTED_APPS_MACOS,
+                    ARTIFACT_ID_TRUSTED_APPS_WINDOWS,
+                  ]
+                : [],
+              id: '1',
+              ...(empty ? { created: '2000' } : {}),
+            },
+            {
+              policyId: TEST_POLICY_ID_2,
+              semanticVersion: '1.0.1',
+              artifactIds: !empty ? [ARTIFACT_ID_TRUSTED_APPS_WINDOWS] : [],
+              id: '2',
+              ...(empty ? { created: '2000' } : {}),
+            },
+          ];
+
+          const existingUnifiedManifest = createUnifiedManifests(true);
+          const output = createUnifiedManifests();
+
+          const legacyManifest = createLegacyManifestSO().attributes;
+
+          expect(
+            manifestManager.transformLegacyManifestSOtoUnifiedManifestSO(
+              legacyManifest,
+              existingUnifiedManifest as InternalUnifiedManifestSchema[]
+            )
+          ).toEqual(output);
+        });
+      });
+    });
+
+    describe('prepareUnifiedManifestsSOUpdates', () => {
+      const existingUnifiedManifests = ['.global', TEST_POLICY_ID_1, TEST_POLICY_ID_2].map(
+        (policyId, idx) => ({
+          policyId,
+          semanticVersion: '1.0.0',
+          artifactIds: [ARTIFACT_ID_EXCEPTIONS_WINDOWS],
+          id: `${idx}`,
+          created: '1',
+          version: 'abc',
+        })
+      );
+
+      const bumpSemanticVersion = (
+        manifests: Array<Record<string, unknown>>,
+        semanticVersion = '1.0.1'
+      ) =>
+        manifests.map((manifest) => ({
+          ...manifest,
+          semanticVersion,
+        }));
+
+      test('correctly selects manifests to create', () => {
+        const unifiedManifest = existingUnifiedManifests.map(
+          ({ id, created, ...manifest }) => manifest
+        );
+
+        const { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete } =
+          manifestManager.prepareUnifiedManifestsSOUpdates(unifiedManifest, []);
+
+        expect(unifiedManifestsToUpdate).toEqual([]);
+        expect(unifiedManifestsToCreate).toEqual(unifiedManifest);
+        expect(unifiedManifestsToDelete).toEqual([]);
+      });
+      test('correctly selects manifests to delete', () => {
+        const newUnifiedManifests = existingUnifiedManifests.slice(0, 2);
+
+        const { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete } =
+          manifestManager.prepareUnifiedManifestsSOUpdates(
+            newUnifiedManifests,
+            existingUnifiedManifests
+          );
+
+        expect(unifiedManifestsToUpdate).toEqual([]);
+        expect(unifiedManifestsToCreate).toEqual([]);
+        expect(unifiedManifestsToDelete).toEqual([existingUnifiedManifests[2].id]);
+      });
+      test('correctly selects manifests to update when artifactIds changed', () => {
+        const newUnifiedManifests = existingUnifiedManifests.map((manifest) => ({
+          ...manifest,
+          artifactIds: [ARTIFACT_ID_EXCEPTIONS_WINDOWS, ARTIFACT_ID_EXCEPTIONS_WINDOWS],
+        }));
+
+        const expectedUnifiedManifestsToUpdate = bumpSemanticVersion(newUnifiedManifests);
+
+        const { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete } =
+          manifestManager.prepareUnifiedManifestsSOUpdates(
+            newUnifiedManifests,
+            existingUnifiedManifests
+          );
+
+        expect(unifiedManifestsToUpdate).toEqual(expectedUnifiedManifestsToUpdate);
+        expect(unifiedManifestsToCreate).toEqual([]);
+        expect(unifiedManifestsToDelete).toEqual([]);
+      });
+
+      test('correctly combines all cases', () => {
+        const newUnifiedManifests = existingUnifiedManifests.slice(0, 2).map((manifest) => ({
+          ...manifest,
+          artifactIds: [ARTIFACT_ID_EXCEPTIONS_WINDOWS, ARTIFACT_ID_EXCEPTIONS_WINDOWS],
+        }));
+
+        const newUnifiedManifestsAddition = {
+          policyId: 'test',
+          semanticVersion: '1.0.0',
+          artifactIds: [],
+        };
+
+        const expectedUnifiedManifestsToUpdate = bumpSemanticVersion(newUnifiedManifests);
+
+        const expectedUnifiedManifestsToCreate = [newUnifiedManifestsAddition];
+
+        const expectedUnifiedManifestsToDelete = [existingUnifiedManifests[2].id];
+
+        const { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete } =
+          manifestManager.prepareUnifiedManifestsSOUpdates(
+            [...newUnifiedManifests, newUnifiedManifestsAddition],
+            existingUnifiedManifests
+          );
+
+        expect(unifiedManifestsToUpdate).toEqual(expectedUnifiedManifestsToUpdate);
+        expect(unifiedManifestsToCreate).toEqual(expectedUnifiedManifestsToCreate);
+        expect(unifiedManifestsToDelete).toEqual(expectedUnifiedManifestsToDelete);
+      });
+    });
+    describe('bumpGlobalUnifiedManifestVersion', () => {
+      const createSoFindMock = (savedObjects: Array<Record<string, unknown>>) =>
+        jest.fn().mockImplementation(async (objectType: { type: string }) => {
+          if (objectType.type === ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE) {
+            return {
+              saved_objects: savedObjects,
+            };
+          } else {
+            return null;
+          }
+        });
+
+      test('should bump the semantic version of the global manifest', async () => {
+        context.savedObjectsClient.find = createSoFindMock([
+          {
+            id: '1',
+            attributes: {
+              policyId: '.global',
+              semanticVersion: '1.0.1',
+            },
+          },
+        ]);
+        context.savedObjectsClient.bulkUpdate = jest.fn();
+        await manifestManager.bumpGlobalUnifiedManifestVersion();
+        expect(context.savedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+          {
+            id: '1',
+            type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
+            attributes: {
+              policyId: '.global',
+              semanticVersion: '1.0.2',
+            },
+          },
+        ]);
+      });
+      test('should make a clean return when no global manifest is found', async () => {
+        context.savedObjectsClient.find = createSoFindMock([]);
+        context.savedObjectsClient.bulkUpdate = jest.fn();
+        await manifestManager.bumpGlobalUnifiedManifestVersion();
+        expect(context.savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(0);
+      });
+    });
+  });
+
+  describe('shouldRetrieveExceptions for trusted devices licensing logic', () => {
+    let manifestManager: ManifestManager;
+    let context: ManifestManagerContext;
+
+    beforeEach(() => {
+      context = buildManifestManagerContextMock({});
+    });
+
+    interface ManifestManagerWithPrivateMethods {
+      shouldRetrieveExceptions: (listId: string) => boolean;
+    }
+
+    describe('when trustedDevices feature flag is disabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: [], // No trustedDevices feature
+        });
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      test('should return true for other artifact types regardless of feature flag', () => {
+        const shouldRetrieveExceptions = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id);
+        const shouldRetrieveTrustedApps = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedApps.id);
+
+        expect(shouldRetrieveExceptions).toBe(true);
+        expect(shouldRetrieveTrustedApps).toBe(true);
+      });
+    });
+
+    describe('when trustedDevices feature flag is enabled', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({
+          experimentalFeatures: ['trustedDevices'],
+        });
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return false when only PLI is enabled (enterprise required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointTrustedDevices;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+      });
+
+      test('should return false when only enterprise license is present (PLI required)', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+      });
+
+      test('should return true when both PLI and enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointTrustedDevices;
+        });
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(true);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+        expect(context.licenseService.isEnterprise).toHaveBeenCalled();
+      });
+
+      test('should return false when neither PLI nor enterprise license are enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        context.licenseService.isEnterprise = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.trustedDevices.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointTrustedDevices
+        );
+      });
+    });
+
+    describe('host isolation exceptions licensing logic', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        context.licenseService = createLicenseServiceMock();
+      });
+
+      test('should return true for host isolation exceptions when product feature is enabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockImplementation((key) => {
+          return key === ProductFeatureKey.endpointHostIsolationExceptions;
+        });
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id);
+
+        expect(shouldRetrieve).toBe(true);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointHostIsolationExceptions
+        );
+      });
+
+      test('should return false for host isolation exceptions when product feature is disabled', () => {
+        context.productFeaturesService.isEnabled = jest.fn().mockReturnValue(false);
+        manifestManager = new ManifestManager(context);
+
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id);
+
+        expect(shouldRetrieve).toBe(false);
+        expect(context.productFeaturesService.isEnabled).toHaveBeenCalledWith(
+          ProductFeatureKey.endpointHostIsolationExceptions
+        );
+      });
+    });
+
+    describe('default behavior for non-licensed artifacts', () => {
+      beforeEach(() => {
+        context = buildManifestManagerContextMock({});
+        context.licenseService = createLicenseServiceMock();
+        manifestManager = new ManifestManager(context);
+      });
+
+      const nonLicensedArtifacts = [
+        { name: 'exceptions', id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id },
+        { name: 'trusted apps', id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id },
+        { name: 'event filters', id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id },
+        { name: 'blocklists', id: ENDPOINT_ARTIFACT_LISTS.blocklists.id },
+      ];
+
+      test.each(nonLicensedArtifacts)('should return true for $name artifacts', ({ id }) => {
+        const shouldRetrieve = (
+          manifestManager as unknown as ManifestManagerWithPrivateMethods
+        ).shouldRetrieveExceptions(id);
+        expect(shouldRetrieve).toBe(true);
+      });
+    });
+  });
+});

@@ -1,0 +1,179 @@
+---
+id: kibDataPlugin
+slug: /kibana-dev-docs/key-concepts/data-plugin
+title: Data services
+image: https://source.unsplash.com/400x175/?Search
+description: The data plugin contains services for searching, querying and filtering.
+date: 2020-12-02
+tags: ['kibana', 'dev', 'contributor', 'api docs']
+---
+
+# data
+
+The data plugin provides common data access services, such as `search` and `query`, for solutions and application developers.
+
+## Autocomplete
+
+The autocomplete service provides suggestions for field names and values.
+
+It is wired into the `TopNavMenu` component, but can be used independently.
+
+### Fetch Query Suggestions
+
+The `getQuerySuggestions` function helps to construct a query.
+
+```.ts
+
+    // `inputValue` is the user input
+    const querySuggestions = await autocomplete.getQuerySuggestions({
+        language: 'kuery',
+        indexPatterns: [indexPattern],
+        query: inputValue,
+    });
+
+```
+
+### Fetch Value Suggestions
+
+The `getValueSuggestions` function returns suggestions for field values.
+This is helpful when you want to provide a user with options, for example when constructing a filter.
+
+```.ts
+
+    // `inputValue` is the user input
+    const valueSuggestions = await autocomplete.getValueSuggestions({
+      indexPattern,
+      field,
+      query: inputValue,
+    });
+
+```
+
+## Query
+
+The query service is responsible for managing the configuration of a search query (`QueryState`): filters, time range, query string, and settings such as the auto refresh behavior and saved queries.
+
+It contains sub-services for each of those configurations:
+
+- `data.query.filterManager` - Manages the `filters` component of a `QueryState`. The global filter state (filters that are persisted between applications) are owned by this service.
+- `data.query.timefilter` - Responsible for the time range filter and the auto refresh behavior settings.
+- `data.query.queryString` - Responsible for the query string and query language settings.
+- `data.query.savedQueries` - Responsible for persisting a `QueryState` into a `SavedObject`, so it can be restored and used by other applications.
+
+Any changes to the `QueryState` are published on the `data.query.state$`, which is useful when wanting to persist global state or run a search upon data changes.
+
+A simple use case is:
+
+```.ts
+function searchOnChange(indexPattern: IndexPattern, aggConfigs: AggConfigs) {
+   data.query.state$.subscribe(() => {
+
+       // Constuct the query portion of the search request
+       const query = data.query.getEsQuery(indexPattern);
+
+       // Construct a request
+       const request = {
+           params: {
+               index: indexPattern.title,
+               body: {
+                   aggs: aggConfigs.toDsl(),
+                   query,
+               },
+           },
+       };
+
+       // Search with the `data.query` config
+       const search$ = data.search.search(request);
+
+       ...
+   });
+}
+
+```
+
+You can also retrieve a snapshot of the whole `QueryState` by using `data.query.getState()`
+
+### Timefilter
+
+`data.query.timefilter` is responsible for the time range filter and the auto refresh behavior settings.
+
+#### Autorefresh
+
+Timefilter provides an API for setting and getting current auto refresh state:
+
+```ts
+const { pause, value } = data.query.timefilter.timefilter.getRefreshInterval();
+
+data.query.timefilter.timefilter.setRefreshInterval({ pause: false, value: 5000 }); // start auto refresh with 5 seconds interval
+```
+
+Timefilter API also provides an `autoRefreshFetch$` observables that apps should use to get notified
+when it is time to refresh data because of auto refresh.
+This API expects apps to confirm when they are done with reloading the data.
+The confirmation mechanism is needed to prevent excessive queue of fetches.
+
+```
+import { refetchData } from '../my-app'
+
+const autoRefreshFetch$ = data.query.timefilter.timefilter.getAutoRefreshFetch$()
+autoRefreshFetch$.subscribe((done) => {
+  try {
+    await refetchData();
+  } finally {
+    // confirm that data fetching was finished
+    done();
+  }
+})
+
+function unmount() {
+  // don't forget to unsubscribe when leaving the app
+  autoRefreshFetch$.unsubscribe()
+}
+
+```
+
+## Search
+
+Provides access to Elasticsearch using the high-level `SearchSource` API or low-level `Search Strategies`.
+
+### SearchSource
+
+The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query.
+
+```.tsx
+
+    const searchSource = await data.search.searchSource.create();
+    const searchResponse = await searchSource
+      .setParent(undefined)
+      .setField('index', indexPattern)
+      .setField('filter', filters)
+      .fetch();
+
+```
+
+### Low-level search
+
+#### Default Search Strategy
+
+One benefit of using the low-level search API, is partial response support, allowing for a better and more responsive user experience.
+
+```.ts
+    import { isRunningResponse } from '@kbn/data-plugin/public';
+
+    const search$ = data.search.search(request)
+        .subscribe({
+        next: (response) => {
+            if (!isRunningResponse(response)) {
+                // Final result
+                search$.unsubscribe();
+            } else {
+                // Partial result - you can update the UI, but data is still loading
+            }
+        },
+        error: (e: Error) => {
+            // Show customized toast notifications.
+            // You may choose to handle errors differently if you prefer.
+            data.search.showError(e);
+        },
+    });
+```

@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildkite, buildkiteBuildStateToEmoji, CommitWithStatuses } from '../shared';
-import { GitCommitExtract } from './commit_info';
-import { Build } from '#pipeline-utils/buildkite';
+import type { CommitWithStatuses } from '../shared';
+import { buildkite, buildkiteBuildStateToEmoji } from '../shared';
+import type { GitCommitExtract } from './commit_info';
+import type { Build } from '#pipeline-utils/buildkite';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
 const KIBANA_ARTIFACT_BUILD_SLUG = 'kibana-artifacts-container-image';
@@ -79,8 +81,8 @@ export async function getQAFBuildContainingCommit(
 
   // Find the first build that contains this commit
   const build = qafBuilds
-    // Only search across scheduled builds, triggered builds might run with different commits
-    .filter((e) => e.source === 'schedule')
+    // Scheduled and manually tagged builds will have this variable, other builds might have non-relevant commits
+    .filter((e) => e.env.PRE_RELEASE_CHECK?.match(/(1|true)/i))
     .find((kbBuild) => {
       const commitShaIndex = recentGitCommits.findIndex((c) => c.sha === commitSha);
 

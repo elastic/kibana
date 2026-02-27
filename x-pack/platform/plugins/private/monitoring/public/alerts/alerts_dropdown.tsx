@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { MonitoringStartServices } from '../types';
+import { useAlertsModal } from '../application/hooks/use_alerts_modal';
+import { WatcherMigrationStep } from './enable_alerts_modal';
+export const AlertsDropdown: React.FC<{}> = () => {
+  const [shouldShowModal, setShouldShowModal] = useState(false);
+  const alertsEnableModalProvider = useAlertsModal();
+  const { navigateToApp, isAppRegistered } =
+    useKibana<MonitoringStartServices>().services.application;
+
+  const unifiedRulesPageEnabled = isAppRegistered('rules');
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const togglePopoverVisibility = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const createDefaultRules = () => {
+    setShouldShowModal(true);
+  };
+
+  const createButtonClick = () => {
+    alertsEnableModalProvider.enableAlerts();
+    closeModal();
+  };
+
+  const closeModal = () => {
+    setShouldShowModal(false);
+    closePopover();
+  };
+
+  const button = (
+    <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={togglePopoverVisibility}>
+      <FormattedMessage
+        id="xpack.monitoring.alerts.dropdown.button"
+        defaultMessage="Alerts and rules"
+      />
+    </EuiButtonEmpty>
+  );
+
+  const items: EuiContextMenuPanelDescriptor['items'] = [
+    {
+      name: i18n.translate('xpack.monitoring.alerts.dropdown.createAlerts', {
+        defaultMessage: 'Create default rules',
+      }),
+      onClick: createDefaultRules,
+    },
+    {
+      name: i18n.translate('xpack.monitoring.alerts.dropdown.manageRules', {
+        defaultMessage: 'Manage rules',
+      }),
+      icon: 'tableOfContents',
+      onClick: () =>
+        unifiedRulesPageEnabled
+          ? navigateToApp('rules')
+          : navigateToApp('management', { path: '/insightsAndAlerting/triggersActions/rules' }),
+    },
+  ];
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      title: i18n.translate('xpack.monitoring.alerts.dropdown.title', {
+        defaultMessage: 'Alerts and rules',
+      }),
+      items,
+    },
+  ];
+
+  return (
+    <>
+      <EuiPopover
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+      {shouldShowModal ? (
+        <WatcherMigrationStep closeModal={closeModal} createButtonClick={createButtonClick} />
+      ) : null}
+    </>
+  );
+};

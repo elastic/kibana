@@ -1,0 +1,124 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import _ from 'lodash';
+import type { VECTOR_STYLES } from '../constants';
+import {
+  AGG_DELIMITER,
+  AGG_TYPE,
+  FIELD_ORIGIN,
+  JOIN_FIELD_NAME_PREFIX,
+  LAYER_TYPE,
+} from '../constants';
+import { getJoinAggKey } from '../get_agg_key';
+import type { AggDescriptor, JoinDescriptor, VectorLayerDescriptor } from '../descriptor_types';
+import type { StoredMapAttributes } from '../../server';
+
+const GROUP_BY_DELIMITER = '_groupby_';
+
+function getLegacyAggKey({
+  aggType,
+  aggFieldName,
+  indexPatternTitle,
+  termFieldName,
+}: {
+  aggType: AGG_TYPE;
+  aggFieldName?: string;
+  indexPatternTitle: string;
+  termFieldName: string;
+}): string {
+  const metricKey =
+    aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : aggType;
+  return `${JOIN_FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${indexPatternTitle}.${termFieldName}`;
+}
+
+function parseLegacyAggKey(legacyAggKey: string): { aggType: AGG_TYPE; aggFieldName?: string } {
+  const groupBySplit = legacyAggKey
+    .substring(JOIN_FIELD_NAME_PREFIX.length)
+    .split(GROUP_BY_DELIMITER);
+  const metricKey = groupBySplit[0];
+  const metricKeySplit = metricKey.split(AGG_DELIMITER);
+  return {
+    aggType: metricKeySplit[0] as AGG_TYPE,
+    aggFieldName: metricKeySplit.length === 2 ? metricKeySplit[1] : undefined,
+  };
+}
+
+export function migrateJoinAggKey({
+  attributes,
+}: {
+  attributes: StoredMapAttributes;
+}): StoredMapAttributes {
+  if (!attributes || !attributes.layerListJSON) {
+    return attributes;
+  }
+
+  let layerList = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
+  layerList.forEach((layerDescriptor: { type: string }) => {
+    if (
+      // can not use LAYER_TYPE because LAYER_TYPE.VECTOR does not exist >8.1
+      layerDescriptor.type === 'VECTOR' ||
+      layerDescriptor.type === LAYER_TYPE.BLENDED_VECTOR
+    ) {
+      const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
+
+      if (
+        !vectorLayerDescriptor.style ||
+        !vectorLayerDescriptor.joins ||
+        vectorLayerDescriptor.joins.length === 0
+      ) {
+        return;
+      }
+
+      const legacyJoinFields = new Map<string, Partial<JoinDescriptor>>();
+      vectorLayerDescriptor.joins.forEach((joinDescriptor: Partial<JoinDescriptor>) => {
+        _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
+          const legacyAggKey = getLegacyAggKey({
+            aggType: aggDescriptor.type,
+            aggFieldName: 'field' in aggDescriptor ? aggDescriptor.field : undefined,
+            indexPatternTitle: _.get(joinDescriptor, 'right.indexPatternTitle', ''),
+            termFieldName: _.get(joinDescriptor, 'right.term', ''),
+          });
+          // The legacy getAggKey implemenation has a naming collision bug where
+          // aggType, aggFieldName, indexPatternTitle, and termFieldName would result in the identical aggKey.
+          // The VectorStyle implemenation used the first matching join descriptor
+          // so, in the event of a name collision, the first join descriptor will be used here as well.
+          if (!legacyJoinFields.has(legacyAggKey)) {
+            legacyJoinFields.set(legacyAggKey, joinDescriptor);
+          }
+        });
+      });
+
+      Object.keys(vectorLayerDescriptor.style.properties).forEach((key) => {
+        const style: any = vectorLayerDescriptor.style!.properties[key as VECTOR_STYLES];
+        if (_.get(style, 'options.field.origin') === FIELD_ORIGIN.JOIN) {
+          const joinDescriptor = legacyJoinFields.get(style.options.field.name);
+          if (joinDescriptor?.right?.id) {
+            const { aggType, aggFieldName } = parseLegacyAggKey(style.options.field.name);
+            // Update legacy join agg key to new join agg key
+            style.options.field.name = getJoinAggKey({
+              aggType,
+              aggFieldName,
+              rightSourceId: joinDescriptor.right.id,
+            });
+          }
+        }
+      });
+    }
+  });
+
+  return {
+    ...attributes,
+    layerListJSON: JSON.stringify(layerList),
+  };
+}

@@ -1,0 +1,46 @@
+{
+  "tasks": [
+    {
+      "node": "ONkVoIlIRa-gtI1Lr6Zj7Q",
+      "id": 16582586,
+      "type": "model_import",
+      "action": "xpack/ml/model_import[n]",
+      "status": {
+        "total_parts": 418,
+        "downloaded_parts": 0
+      },
+      "description": "model_id-.elser_model_2",
+      "start_time_in_millis": 1717594443997,
+      "running_time_in_nanos": 533070792,
+      "cancellable": true,
+      "cancelled": false,
+      "parent_task_id": "ONkVoIlIRa-gtI1Lr6Zj7Q:16582585",
+      "headers": {
+        "X-elastic-product-origin": "kibana",
+        "trace.id": "fc0078d94fb25500d1e1e24a3315e453",
+        "X-Opaque-Id": "fb9651ab-ee33-4c52-8629-508bab1d4fc8;kibana:application:ml:%2Ftrained_models;application:ml:%2Finternal%2Fml%2Ftrained_models%2Finstall_elastic_trained_model%2F.elser_model_2"
+      }
+    },
+    {
+      "node": "ONkVoIlIRa-gtI1Lr6Zj7Q",
+      "id": 16581272,
+      "type": "model_import",
+      "action": "xpack/ml/model_import[n]",
+      "status": {
+        "total_parts": 263,
+        "downloaded_parts": 96
+      },
+      "description": "model_id-.elser_model_2_linux-x86_64",
+      "start_time_in_millis": 1717594437574,
+      "running_time_in_nanos": 6956247000,
+      "cancellable": true,
+      "cancelled": false,
+      "parent_task_id": "ONkVoIlIRa-gtI1Lr6Zj7Q:16581271",
+      "headers": {
+        "X-elastic-product-origin": "kibana",
+        "trace.id": "3a63a7395996bdc50515b7821b5df4c7",
+        "X-Opaque-Id": "6027219b-92a4-447e-9962-ffa3859fe7cd;kibana:application:ml:%2Ftrained_models;application:ml:%2Finternal%2Fml%2Ftrained_models%2Finstall_elastic_trained_model%2F.elser_model_2_linux-x86_64"
+      }
+    }
+  ]
+}

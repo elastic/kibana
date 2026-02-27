@@ -1,0 +1,36 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../../../typings/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/security-solution-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/security-solution-features",
+    "@kbn/security-solution-navigation",
+    "@kbn/licensing-plugin",
+    "@kbn/security-solution-upselling",
+    "@kbn/i18n",
+    "@kbn/navigation-plugin",
+    "@kbn/management-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/cloud-plugin",
+    "@kbn/licensing-types",
+    "@kbn/deeplinks-management",
+    "@kbn/management-settings-ids",
+    "@kbn/ai-assistant-common",
+    "@kbn/ai-assistant-icon",
+    "@kbn/shared-ux-page-kibana-template",
+  ]
+}

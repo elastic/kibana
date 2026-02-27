@@ -27,7 +27,9 @@
         "tags": [],
         "label": "TableVisParams",
         "description": [],
-        "path": "src/plugins/vis_types/table/common/types.ts",
+        "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +43,9 @@
             "signature": [
               "number | \"\""
             ],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -52,7 +56,9 @@
             "tags": [],
             "label": "showPartialRows",
             "description": [],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,7 +69,9 @@
             "tags": [],
             "label": "showMetricsAtAllLevels",
             "description": [],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -74,7 +82,9 @@
             "tags": [],
             "label": "showToolbar",
             "description": [],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -85,7 +95,9 @@
             "tags": [],
             "label": "showTotal",
             "description": [],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,7 +117,9 @@
                 "text": "AggTypes"
               }
             ],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -116,7 +130,9 @@
             "tags": [],
             "label": "percentageCol",
             "description": [],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -130,7 +146,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -144,7 +162,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/vis_types/table/common/types.ts",
+            "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -160,7 +180,9 @@
         "tags": [],
         "label": "AggTypes",
         "description": [],
-        "path": "src/plugins/vis_types/table/common/types.ts",
+        "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -177,7 +199,9 @@
         "signature": [
           "\"table\""
         ],
-        "path": "src/plugins/vis_types/table/common/types.ts",
+        "path": "src/platform/plugins/private/vis_types/table/common/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

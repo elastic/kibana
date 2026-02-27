@@ -1,0 +1,45 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "../../../../../typings/**/*",
+    "./jest_setup.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/data-plugin",
+    "@kbn/es-query",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/datemath",
+    "@kbn/config-schema",
+    "@kbn/ui-actions-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/content-management-utils",
+    "@kbn/field-formats-plugin",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/std",
+    "@kbn/esql-types",
+    "@kbn/css-utils",
+    "@kbn/esql-utils",
+    "@kbn/search-types",
+    "@kbn/controls-constants",
+    "@kbn/controls-schemas",
+    "@kbn/presentation-util",
+    "@kbn/kql",
+    "@kbn/control-group-renderer",
+    "@kbn/utility-types"
+  ],
+  "exclude": ["target/**/*"]
+}

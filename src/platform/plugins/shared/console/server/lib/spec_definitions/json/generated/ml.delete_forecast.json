@@ -1,0 +1,28 @@
+{
+  "ml.delete_forecast": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_forecasts": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/_forecast",
+      "_ml/anomaly_detectors/{job_id}/_forecast/{forecast_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-forecast",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

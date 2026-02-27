@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/serverless-common-settings",
+  "owner": [
+    "@elastic/appex-sharedux",
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

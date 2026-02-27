@@ -1,30 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createCoreContext } from '@kbn/core-http-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { contextServiceMock, coreMock } from '../../../../mocks';
 import {
   registerGetRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from '../routes_test_utils';
+import { contextServiceMock, coreMock } from '../../../../mocks';
+import { createInternalHttpService } from '../../../utilities';
+import { deprecationMock, setupConfig } from '../routes_test_utils';
 
 const coreId = Symbol('core');
 const testTypes = [
@@ -42,13 +46,17 @@ describe('GET /api/saved_objects/{type}/{id} with allowApiAccess true', () => {
 
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
-    server = createHttpServer(coreContext);
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    server = createInternalHttpService(coreContext);
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
 
     const contextService = new ContextService(coreContext);
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     handlerContext = coreMock.createRequestHandlerContext();
@@ -78,7 +86,15 @@ describe('GET /api/saved_objects/{type}/{id} with allowApiAccess true', () => {
     const logger = loggerMock.create();
 
     const config = setupConfig(true);
-    registerGetRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerGetRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

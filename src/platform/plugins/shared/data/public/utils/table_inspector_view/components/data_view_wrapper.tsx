@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { lazy } from 'react';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
+
+const DataViewComponent = lazy(() => import('./data_view'));
+
+export const getDataViewComponentWrapper = (
+  getStartServices: () => {
+    uiActions: UiActionsStart;
+    fieldFormats: FieldFormatsStart;
+    uiSettings: IUiSettingsClient;
+    isFilterable: (column: DatatableColumn) => boolean;
+  }
+) => {
+  return (props: any) => {
+    return (
+      <DataViewComponent
+        adapters={props.adapters}
+        title={props.title}
+        uiSettings={getStartServices().uiSettings}
+        fieldFormats={getStartServices().fieldFormats}
+        uiActions={getStartServices().uiActions}
+        isFilterable={getStartServices().isFilterable}
+        options={props.options}
+      />
+    );
+  };
+};

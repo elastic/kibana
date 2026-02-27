@@ -30,15 +30,11 @@
         ],
         "signature": [
           "() => ",
-          {
-            "pluginId": "@kbn/core-test-helpers-model-versions",
-            "scope": "common",
-            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
-            "section": "def-common.ModelVersionTestBed",
-            "text": "ModelVersionTestBed"
-          }
+          "ModelVersionTestBed"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/test_bed.ts",
+        "path": "src/core/test-helpers/model-versions/src/test_bed/test_bed.ts",
+        "lineNumber": 65,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -56,23 +52,13 @@
         ],
         "signature": [
           "({ type, }: { type: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>; }) => ",
-          {
-            "pluginId": "@kbn/core-test-helpers-model-versions",
-            "scope": "common",
-            "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
-            "section": "def-common.ModelVersionTestMigrator",
-            "text": "ModelVersionTestMigrator"
-          }
+          "ModelVersionTestMigrator"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+        "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+        "lineNumber": 77,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -83,7 +69,9 @@
             "tags": [],
             "label": "{\n  type,\n}",
             "description": [],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+            "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+            "lineNumber": 79,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -95,16 +83,12 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-common.SavedObjectsType",
-                    "text": "SavedObjectsType"
-                  },
+                  "SavedObjectsType",
                   "<any>"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+                "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+                "lineNumber": 80,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -125,7 +109,9 @@
         "description": [
           "\nA testbed that can be used for model version integration tests.\n"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+        "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -141,7 +127,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -159,7 +147,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -179,24 +169,14 @@
             ],
             "signature": [
               "(options: ",
-              {
-                "pluginId": "@kbn/core-test-helpers-model-versions",
-                "scope": "common",
-                "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
-                "section": "def-common.ModelVersionTestkitOptions",
-                "text": "ModelVersionTestkitOptions"
-              },
+              "ModelVersionTestkitOptions",
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-test-helpers-model-versions",
-                "scope": "common",
-                "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
-                "section": "def-common.ModelVersionTestKit",
-                "text": "ModelVersionTestKit"
-              },
+              "ModelVersionTestKit",
               ">"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -208,15 +188,11 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-test-helpers-model-versions",
-                    "scope": "common",
-                    "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
-                    "section": "def-common.ModelVersionTestkitOptions",
-                    "text": "ModelVersionTestkitOptions"
-                  }
+                  "ModelVersionTestkitOptions"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+                "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+                "lineNumber": 39,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -236,7 +212,9 @@
         "description": [
           "\nTestkit composed of various services that can be used to run the\nmodel version integration tests.\n\nMostly composed of the two `repositoryBefore` and `repositoryAfter` repositories\nthat can be used to interact with different versions of the SO types.\n"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+        "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -252,7 +230,9 @@
             "signature": [
               "default"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -266,15 +246,11 @@
               "\nThe SO repository using the SO type definitions at the `before` versions."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.ISavedObjectsRepository",
-                "text": "ISavedObjectsRepository"
-              }
+              "ISavedObjectsRepository"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -288,15 +264,11 @@
               "\nThe SO repository using the SO type definitions at the `after` versions."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.ISavedObjectsRepository",
-                "text": "ISavedObjectsRepository"
-              }
+              "ISavedObjectsRepository"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -312,7 +284,9 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -330,7 +304,9 @@
         "description": [
           "\nOptions used to create a {@link ModelVersionTestKit} via {@link ModelVersionTestBed#prepareTestKit}\n"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+        "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -344,16 +320,12 @@
               "\nThe {@link SavedObjectTestkitDefinition | definitions} for the SO type(s) to test"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-test-helpers-model-versions",
-                "scope": "common",
-                "docId": "kibKbnCoreTestHelpersModelVersionsPluginApi",
-                "section": "def-common.SavedObjectTestkitDefinition",
-                "text": "SavedObjectTestkitDefinition"
-              },
+              "SavedObjectTestkitDefinition",
               "[]"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -366,7 +338,9 @@
             "description": [
               "\nThe path of the file to write logs to.\nNecessary because the testkit doesn't know the test's location\n"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -380,16 +354,12 @@
               "\n(optional) if specified, the provided list of objects will be created (using `SOR.bulkCreate`)\nbetween the first (before) the second (after) migrator runs. Objects are therefor expected to be of\nthe `versionBefore` version."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsBulkCreateObject",
-                "text": "SavedObjectsBulkCreateObject"
-              },
+              "SavedObjectsBulkCreateObject",
               "<unknown>[] | undefined"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -405,7 +375,9 @@
             "signature": [
               "Record<string, any> | undefined"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -421,7 +393,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -437,7 +411,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -453,7 +429,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -469,7 +447,9 @@
         "description": [
           "\nTest utility allowing to test model version changes between versions."
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+        "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -486,16 +466,12 @@
             ],
             "signature": [
               "<In = unknown, Out = unknown>(options: ModelVersionTestMigrateOptions<In>) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<Out>"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+            "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -509,7 +485,9 @@
                 "signature": [
                   "ModelVersionTestMigrateOptions<In>"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
+                "path": "src/core/test-helpers/model-versions/src/model_version_tester.ts",
+                "lineNumber": 53,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -529,7 +507,9 @@
         "description": [
           "\nRepresents the info necessary to prepare a given type for the sandbox.\nContains both the actual SO type definition, and the versions\nthat should be used at 'before' and 'after' model versions.\n"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+        "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -543,16 +523,12 @@
               "\nThe SO type definition"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,7 +541,9 @@
             "description": [
               "\nThe model version to be used for the 'before' repository."
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -578,7 +556,9 @@
             "description": [
               "\nThe model version to be used for the 'after' repository."
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
+            "path": "src/core/test-helpers/model-versions/src/test_bed/types.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

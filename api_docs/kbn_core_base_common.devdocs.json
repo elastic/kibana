@@ -29,7 +29,9 @@
         "description": [
           "\nSmall container object used to expose information about discovered plugins that may\nor may not have been started."
         ],
-        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "path": "src/core/packages/base/common/src/plugins.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +44,9 @@
             "description": [
               "\nIdentifier of the plugin."
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,7 +62,9 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,15 +78,11 @@
               "\nType of the plugin, defaults to `standard`."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-base-common",
-                "scope": "common",
-                "docId": "kibKbnCoreBaseCommonPluginApi",
-                "section": "def-common.PluginType",
-                "text": "PluginType"
-              }
+              "PluginType"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -96,7 +98,9 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,7 +116,9 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -128,7 +134,9 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -144,7 +152,9 @@
             "signature": [
               "readonly string[]"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -160,7 +170,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "path": "src/core/packages/base/common/src/plugins.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -176,7 +188,9 @@
         "tags": [],
         "label": "PluginType",
         "description": [],
-        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "path": "src/core/packages/base/common/src/plugins.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -193,7 +207,9 @@
         "signature": [
           "\"eui-global\""
         ],
-        "path": "packages/core/base/core-base-common/src/eui.ts",
+        "path": "src/core/packages/base/common/src/eui.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -208,7 +224,9 @@
         "signature": [
           "\"eui-utilities\""
         ],
-        "path": "packages/core/base/core-base-common/src/eui.ts",
+        "path": "src/core/packages/base/common/src/eui.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -225,7 +243,9 @@
         "signature": [
           "string"
         ],
-        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "path": "src/core/packages/base/common/src/plugins.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -240,7 +260,9 @@
         "signature": [
           "symbol"
         ],
-        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "path": "src/core/packages/base/common/src/plugins.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

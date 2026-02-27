@@ -1,0 +1,26 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/event-annotation-common",
+    "@kbn/es-query",
+    "@kbn/expressions-plugin",
+    "@kbn/core-saved-objects-common",
+    "@kbn/esql-utils",
+    "@kbn/config-schema",
+    "@kbn/coloring",
+    "@kbn/content-management-utils",
+    "@kbn/lens-common",
+    "@kbn/chart-expressions-common",
+    "@kbn/expression-xy-plugin",
+    "@kbn/utility-types",
+    "@kbn/transpose-utils",
+  ]
+}

@@ -1,0 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Assign } from '@kbn/utility-types';
+import type { CreateManagementItemArgs, ManagementSectionId } from '../types';
+import { ManagementItem } from './management_item';
+import type { RegisterManagementAppArgs } from './management_app';
+import { ManagementApp } from './management_app';
+
+export type RegisterManagementSectionArgs = Assign<
+  CreateManagementItemArgs,
+  { id: ManagementSectionId | string }
+>;
+
+export class ManagementSection extends ManagementItem {
+  public readonly apps: ManagementApp[] = [];
+
+  constructor(args: RegisterManagementSectionArgs) {
+    super(args);
+  }
+
+  registerApp(args: Omit<RegisterManagementAppArgs, 'basePath'>) {
+    if (this.getApp(args.id)) {
+      throw new Error(`Management app already registered - id: ${args.id}, title: ${args.title}`);
+    }
+
+    const app = new ManagementApp({
+      ...args,
+      basePath: `/${this.id}/${args.id}`,
+    });
+
+    this.apps.push(app);
+
+    return app;
+  }
+
+  getApp(id: ManagementApp['id']) {
+    return this.apps.find((app) => app.id === id);
+  }
+
+  getAppsEnabled() {
+    return this.apps.filter((app) => app.enabled);
+  }
+}

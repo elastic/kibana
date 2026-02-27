@@ -1,29 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import os from 'os';
 
-import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
+import { REPO_ROOT, kibanaPackageJson, type KibanaPackageJson } from '@kbn/repo-info';
 import {
-  Package,
+  type Package,
   getPackages,
-  PluginSelector,
-  PluginPackage,
+  type PluginSelector,
+  type PluginPackage,
   getPluginPackagesFilter,
 } from '@kbn/repo-packages';
-
-import { getVersionInfo, VersionInfo } from './version_info';
-import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { VersionInfo } from './version_info';
+import { getVersionInfo } from './version_info';
+import type { PlatformName, PlatformArchitecture } from './platform';
+import { ALL_PLATFORMS, SERVERLESS_PLATFORMS } from './platform';
+import type { BuildOptions } from '../build_distributables';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
+  targetServerlessPlatforms: boolean;
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
@@ -45,6 +50,7 @@ export class Config {
 
     return new Config(
       opts.targetAllPlatforms,
+      opts.targetServerlessPlatforms,
       kibanaPackageJson,
       nodeVersion,
       REPO_ROOT,
@@ -64,7 +70,8 @@ export class Config {
       {
         examples: opts.withExamplePlugins,
         testPlugins: opts.withTestPlugins,
-      }
+      },
+      opts
     );
   }
 
@@ -72,6 +79,7 @@ export class Config {
 
   constructor(
     private readonly targetAllPlatforms: boolean,
+    private readonly targetServerlessPlatforms: boolean,
     private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
@@ -84,7 +92,8 @@ export class Config {
     private readonly dockerPush: boolean,
     public readonly isRelease: boolean,
     public readonly downloadFreshNode: boolean,
-    public readonly pluginSelector: PluginSelector
+    public readonly pluginSelector: PluginSelector,
+    public readonly buildOptions: Partial<BuildOptions>
   ) {
     this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);
   }
@@ -164,6 +173,9 @@ export class Config {
    * specified only the platform for this OS will be returned
    */
   getTargetPlatforms() {
+    if (this.targetServerlessPlatforms) {
+      return SERVERLESS_PLATFORMS;
+    }
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
     }
@@ -177,6 +189,9 @@ export class Config {
    * reliably get the LICENSE file, which isn't included in the windows version
    */
   getNodePlatforms() {
+    if (this.targetServerlessPlatforms) {
+      return SERVERLESS_PLATFORMS;
+    }
     if (this.targetAllPlatforms) {
       return ALL_PLATFORMS;
     }
@@ -259,5 +274,11 @@ export class Config {
 
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
+  }
+
+  getPrivateSolutionPackagesFromRepo(project: KibanaSolution) {
+    return getPackages(this.repoRoot).filter(
+      (p) => p.group === project && p.visibility === 'private'
+    );
   }
 }

@@ -5,23 +5,13 @@
 
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
-// The current implementation excluded all the variables matching the regexp.
-// We should remove it as soon as multiple underscores are supported by the linter.
-// https://github.com/typescript-eslint/typescript-eslint/issues/1712
-// Due to the same reason we have to duplicate the "filter" option for "default" and other "selectors".
-const allowedNameRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 module.exports = {
   overrides: [
     {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
-      plugins: [
-        '@typescript-eslint',
-        'ban',
-        'import',
-        'eslint-comments'
-      ],
+      plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
 
       env: {
         es6: true,
@@ -34,7 +24,7 @@ module.exports = {
         sourceType: 'module',
         ecmaVersion: 2018,
         ecmaFeatures: {
-          jsx: true
+          jsx: true,
         },
         // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
         // typescript eslint. As we are not using rules that need types information, we can safely
@@ -43,7 +33,7 @@ module.exports = {
         // https://github.com/typescript-eslint/typescript-eslint/issues/389
         // https://github.com/typescript-eslint/typescript-eslint/issues/243
         // https://github.com/typescript-eslint/typescript-eslint/pull/361
-        project: undefined
+        project: undefined,
       },
 
       // NOTE: we can't override the extends option here to apply
@@ -60,88 +50,86 @@ module.exports = {
           //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': ['error', { default: 'array-simple', readonly: 'array-simple' }],
-          '@typescript-eslint/ban-types': ['error', {
-            types: {
-              SFC: {
-                message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'FC'
+          '@typescript-eslint/array-type': 'off',
+          // ##
+          // Replacing old @typescript-eslint/ban-types
+          '@typescript-eslint/no-restricted-types': [
+            'error',
+            {
+              types: {
+                SFC: 'Use FC or FunctionComponent instead.',
+                'React.SFC': 'Use React.FC instead.',
+                StatelessComponent: 'Use FunctionComponent instead.',
+                'React.StatelessComponent': 'Use React.FunctionComponent instead.',
               },
-              'React.SFC': {
-                message: 'Use FC or FunctionComponent instead.',
-                fixWith: 'React.FC'
-              },
-              StatelessComponent: {
-                message: 'Use FunctionComponent instead.',
-                fixWith: 'FunctionComponent'
-              },
-              'React.StatelessComponent': {
-                message: 'Use FunctionComponent instead.',
-                fixWith: 'React.FunctionComponent'
-              },
-              // used in the codebase in the wild
-              '{}': false,
-              'object': false,
-              'Function': false,
+            },
+          ],
+          '@typescript-eslint/no-unsafe-function-type': 'off',
+          '@typescript-eslint/no-wrapper-object-types': 'off',
+          '@typescript-eslint/no-empty-object-type': 'off',
+          // ##
+          camelcase: 'off',
+          "@typescript-eslint/consistent-type-imports": [
+            "error",
+            {
+              "prefer": "type-imports",
+              "disallowTypeAnnotations": false,
+              "fixStyle": "separate-type-imports"
             }
-          }],
-          'camelcase': 'off',
+          ],
           '@typescript-eslint/naming-convention': [
             'error',
             {
               selector: 'default',
-              format: ['camelCase'],
+              format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
+            },
+            {
+              selector: 'classMethod',
               filter: {
-                regex: allowedNameRegexp,
-                match: false
-              }
+                regex: '^UNSAFE_',
+                match: true,
+              },
+              prefix: ['UNSAFE_'],
+              format: ['camelCase'],
             },
             {
               selector: 'variable',
               format: [
                 'camelCase',
-                'UPPER_CASE', // const SOMETHING = ...
-                'PascalCase', // React.FunctionComponent =
+                'UPPER_CASE', // e.g. const SOMETHING = ...
+                'PascalCase', // e.g. React.FunctionComponent =
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false
-              }
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
+            },
+            {
+              selector: 'variable',
+              modifiers: ['destructured'],
+              format: [
+                'camelCase',
+                'snake_case', // e.g. properties from ES response objects
+                'UPPER_CASE', // e.g. const SOMETHING = ...
+                'PascalCase', // e.g. React.FunctionComponent =
+              ],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'parameter',
-              format: [
-                'camelCase',
-                'PascalCase',
-              ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false
-              }
-            },
-            {
-              selector: 'memberLike',
-              format: [
-                'camelCase',
-                'PascalCase',
-                'snake_case', // keys in elasticsearch requests / responses
-                'UPPER_CASE'
-              ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false
-              }
+              format: ['camelCase', 'PascalCase', 'snake_case'],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'function',
               format: [
                 'camelCase',
-                'PascalCase' // React.FunctionComponent =
+                'PascalCase', // React.FunctionComponent =
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false
-              }
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'typeLike',
@@ -164,27 +152,31 @@ module.exports = {
                 'objectLiteralMethod',
                 'typeMethod',
                 'accessor',
-                'enumMember'
+                'enumMember',
               ],
               format: null,
-              modifiers: ['requiresQuotes']
-            }
+              modifiers: ['requiresQuotes'],
+            },
           ],
-          '@typescript-eslint/explicit-member-accessibility': ['error',
+          '@typescript-eslint/explicit-member-accessibility': [
+            'error',
             {
               accessibility: 'off',
               overrides: {
                 accessors: 'explicit',
                 constructors: 'no-public',
-                parameterProperties: 'explicit'
-              }
-            }
+                parameterProperties: 'explicit',
+              },
+            },
           ],
           '@typescript-eslint/prefer-function-type': 'error',
           '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-          '@typescript-eslint/member-ordering': ['error', {
-            'default': ['public-static-field', 'static-field', 'instance-field']
-          }],
+          '@typescript-eslint/member-ordering': [
+            'error',
+            {
+              default: ['public-static-field', 'static-field', 'instance-field'],
+            },
+          ],
           '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
           '@typescript-eslint/no-extra-non-null-assertion': 'error',
@@ -195,24 +187,26 @@ module.exports = {
           '@typescript-eslint/no-undef': 'off',
           'no-undef': 'off',
 
-          '@typescript-eslint/triple-slash-reference': ['error', {
-            path: 'never',
-            types: 'never',
-            lib: 'never'
-          }],
+          '@typescript-eslint/triple-slash-reference': [
+            'error',
+            {
+              path: 'never',
+              types: 'never',
+              lib: 'never',
+            },
+          ],
           '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/unified-signatures': 'error',
           'constructor-super': 'error',
           'dot-notation': 'error',
-          'eqeqeq': ['error', 'always', {'null': 'ignore'}],
+          eqeqeq: ['error', 'always', { null: 'ignore' }],
           'guard-for-in': 'error',
-          'import/order': ['error', {
-            'groups': [
-              ['external', 'builtin'],
-              'internal',
-              ['parent', 'sibling', 'index'],
-            ],
-          }],
+          'import/order': [
+            'error',
+            {
+              groups: [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']],
+            },
+          ],
           'max-classes-per-file': ['error', 1],
           'no-bitwise': 'error',
           'no-caller': 'error',
@@ -229,26 +223,31 @@ module.exports = {
           'no-unsafe-finally': 'error',
           'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
-          '@typescript-eslint/no-unused-expressions': 'error',
+          '@typescript-eslint/no-unused-expressions': ["error", { "allowTaggedTemplates": true }],
           'no-unused-labels': 'error',
           'no-var': 'error',
           'object-shorthand': 'error',
-          'one-var': [ 'error', 'never' ],
+          'one-var': ['error', 'never'],
           'prefer-const': 'error',
           'prefer-rest-params': 'error',
-          'radix': 'error',
-          'spaced-comment': ["error", "always", {
-            "exceptions": ["/"]
-          }],
+          radix: 'error',
+          'spaced-comment': [
+            'error',
+            'always',
+            {
+              exceptions: ['/'],
+            },
+          ],
           'use-isnan': 'error',
 
           // Old tslint yml override or defined rules
           'ban/ban': [
             2,
-            {'name': ['describe', 'only'], 'message': 'No exclusive suites.'},
-            {'name': ['it', 'only'], 'message': 'No exclusive tests.'},
-            {'name': ['test', 'only'], 'message': 'No exclusive tests.'},
-
+            { name: ['describe', 'only'], message: 'No exclusive suites.' },
+            { name: ['it', 'only'], message: 'No exclusive tests.' },
+            { name: ['test', 'only'], message: 'No exclusive tests.' },
+            { name: ['testSuggestions', 'only'], message: 'No exclusive tests.' },
+            { name: ['testErrorsAndWarnings', 'only'], message: 'No exclusive tests.' },
           ],
           'import/no-default-export': 'error',
 
@@ -257,13 +256,13 @@ module.exports = {
           'no-restricted-syntax': [
             'error',
             {
-              "selector": "TSEnumDeclaration[const=true]",
-              "message": "Do not use `const` with enum declarations"
-            }
-          ]
+              selector: 'TSEnumDeclaration[const=true]',
+              message: 'Do not use `const` with enum declarations',
+            },
+          ],
         },
         eslintConfigPrettierRules
-      )
+      ),
     },
-  ]
+  ],
 };

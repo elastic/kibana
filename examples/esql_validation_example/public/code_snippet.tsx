@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiCodeBlock } from '@elastic/eui';
@@ -28,16 +29,11 @@ function getCallbacksCode(callbacks: CodeSnippetProps['callbacks']) {
             ? `
         // the getFieldsFor callback gets an esql query to get the required fields
         // note that the query is not optimized yet, so things like "| limit 0"
-        // might be appended to speed up the retrieval. 
+        // might be appended to speed up the retrieval.
         getFieldsFor: async (esqlFieldsQuery: string) => [
             { name: 'numberField', type: 'number' },
             { name: 'stringField', type: 'string' },
         ],`
-            : ''
-        }
-        ${
-          callbacks.metaFields
-            ? `getMetaFields: async () => ['_version', '_id', '_index', '_source'],`
             : ''
         }
         ${
@@ -59,8 +55,8 @@ export function CodeSnippet({ currentQuery, callbacks, ignoreErrors }: CodeSnipp
   return (
     <EuiCodeBlock language="typescript" isCopyable>
       {`
-import { ESQLCallbacks, validateQuery } from '@kbn/esql-validation-autocomplete';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import { validateQuery, parse } from '@kbn/esql-language';
 
 const currentQuery = "${currentQuery}";
 
@@ -68,8 +64,6 @@ const callbacks: ESQLCallbacks = () => ${getCallbacksCode(callbacks)};
 
 const {errors, warnings} = validateQuery(
     currentQuery,
-    getAstAndSyntaxErrors,
-    { ignoreOnMissingCallbacks: ${Boolean(ignoreErrors)} },
     callbacks
 );
 `}

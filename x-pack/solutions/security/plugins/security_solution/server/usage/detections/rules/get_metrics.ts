@@ -1,0 +1,195 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { createPrebuiltRuleAssetsClient } from '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { RuleAdoption } from './types';
+
+import { updateRuleUsage } from './update_usage';
+import { getDetectionRules } from '../../queries/get_detection_rules';
+import { getAlerts } from '../../queries/get_alerts';
+import { MAX_PER_PAGE, MAX_RESULTS_WINDOW } from '../../constants';
+import {
+  getInitialEventLogUsage,
+  getInitialRuleCustomizationStatus,
+  getInitialRuleUpgradeStatus,
+  getInitialRulesUsage,
+  getInitialSpacesUsage,
+} from './get_initial_usage';
+import { getCaseComments } from '../../queries/get_case_comments';
+import { getRuleIdToCasesMap } from './transform_utils/get_rule_id_to_cases_map';
+import { getAlertIdToCountMap } from './transform_utils/get_alert_id_to_count_map';
+import { getRuleIdToEnabledMap } from './transform_utils/get_rule_id_to_enabled_map';
+import { getSpacesUsage } from './transform_utils/get_spaces_usage';
+import { getRuleObjectCorrelations } from './transform_utils/get_rule_object_correlations';
+import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_and_status';
+
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
+import { calculateRuleUpgradeStatus } from './calculate_rules_upgrade_status';
+import type { ExternalRuleSourceInfo } from './get_rule_customization_status';
+import { getRuleCustomizationStatus } from './get_rule_customization_status';
+
+export interface GetRuleMetricsOptions {
+  signalsIndex: string;
+  esClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  eventLogIndex: string;
+}
+
+export const getRuleMetrics = async ({
+  signalsIndex,
+  esClient,
+  savedObjectsClient,
+  logger,
+  eventLogIndex,
+}: GetRuleMetricsOptions): Promise<RuleAdoption> => {
+  try {
+    // gets rule saved objects
+    const ruleResults = await getDetectionRules({
+      savedObjectsClient,
+      maxPerPage: MAX_PER_PAGE,
+      maxSize: MAX_RESULTS_WINDOW,
+      logger,
+    });
+
+    // early return if we don't have any detection rules then there is no need to query anything else
+    if (ruleResults.length === 0) {
+      return {
+        detection_rule_detail: [],
+        detection_rule_usage: getInitialRulesUsage(),
+        detection_rule_status: getInitialEventLogUsage(),
+        elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+        elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+        spaces_usage: getInitialSpacesUsage(),
+      };
+    }
+
+    // gets the alerts data objects
+    const detectionAlertsRespPromise = getAlerts({
+      esClient,
+      signalsIndex: `${signalsIndex}*`,
+      maxPerPage: MAX_PER_PAGE,
+      maxSize: MAX_RESULTS_WINDOW,
+      logger,
+    });
+
+    // gets cases saved objects
+    const caseCommentsPromise = getCaseComments({
+      savedObjectsClient,
+      maxSize: MAX_PER_PAGE,
+      maxPerPage: MAX_RESULTS_WINDOW,
+      logger,
+    });
+
+    // gets the legacy rule actions to track legacy notifications.
+    const legacyRuleActionsPromise = legacyGetRuleActions({
+      savedObjectsClient,
+      maxSize: MAX_PER_PAGE,
+      maxPerPage: MAX_RESULTS_WINDOW,
+      logger,
+    });
+
+    // gets the event log information by type and status
+    const eventLogMetricsTypeStatusPromise = getEventLogByTypeAndStatus({
+      esClient,
+      logger,
+      eventLogIndex,
+      ruleResults,
+    });
+
+    const [detectionAlertsResp, caseComments, legacyRuleActions, eventLogMetricsTypeStatus] =
+      await Promise.all([
+        detectionAlertsRespPromise,
+        caseCommentsPromise,
+        legacyRuleActionsPromise,
+        eventLogMetricsTypeStatusPromise,
+      ]);
+
+    // create in-memory maps for correlation
+    const legacyNotificationRuleIds = getRuleIdToEnabledMap(legacyRuleActions);
+    const casesRuleIds = getRuleIdToCasesMap(caseComments);
+    const alertsCounts = getAlertIdToCountMap(detectionAlertsResp);
+
+    // correlate the rule objects to the results
+    const rulesCorrelated = getRuleObjectCorrelations({
+      ruleResults,
+      legacyNotificationRuleIds,
+      casesRuleIds,
+      alertsCounts,
+    });
+
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+    const latestRuleVersions = await ruleAssetsClient.fetchLatestVersions();
+    const latestRuleVersionsMap = new Map(latestRuleVersions.map((rule) => [rule.rule_id, rule]));
+
+    const upgradeableRules = rulesCorrelated.filter((rule) => {
+      const latestVersion = latestRuleVersionsMap.get(rule.rule_id);
+      return (
+        latestVersion != null && rule.elastic_rule && rule.rule_version < latestVersion.version
+      );
+    });
+
+    // Only bring back rule detail on elastic prepackaged detection rules
+    const elasticRuleObjects = rulesCorrelated.filter((hit) => hit.elastic_rule === true);
+
+    // calculate the rule usage
+    const rulesUsage = rulesCorrelated.reduce(
+      (usage, rule) => updateRuleUsage(rule, usage),
+      getInitialRulesUsage()
+    );
+
+    return {
+      detection_rule_detail: elasticRuleObjects,
+      detection_rule_usage: rulesUsage,
+      detection_rule_status: eventLogMetricsTypeStatus,
+      elastic_detection_rule_upgrade_status: calculateRuleUpgradeStatus(upgradeableRules),
+      elastic_detection_rule_customization_status: prepareRuleCustomizationStatus(ruleResults),
+      spaces_usage: getSpacesUsage(ruleResults),
+    };
+  } catch (e) {
+    // ignore failure, usage will be zeroed. We use debug mode to not unnecessarily worry users as this will not effect them.
+    logger.debug(
+      `Encountered unexpected condition in telemetry of message: ${e.message}, object: ${e}. Telemetry for "detection rules" being skipped.`
+    );
+    return {
+      detection_rule_detail: [],
+      detection_rule_usage: getInitialRulesUsage(),
+      detection_rule_status: getInitialEventLogUsage(),
+      elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+      elastic_detection_rule_customization_status: getInitialRuleCustomizationStatus(),
+      spaces_usage: getInitialSpacesUsage(),
+    };
+  }
+};
+
+function prepareRuleCustomizationStatus(
+  ruleResults: Awaited<ReturnType<typeof getDetectionRules>>
+) {
+  const ruleSources = ruleResults.flatMap((ruleResult): ExternalRuleSourceInfo[] => {
+    const ruleSource = ruleResult.attributes?.params?.ruleSource;
+    if (
+      !ruleSource ||
+      ruleSource?.type !== 'external' ||
+      typeof ruleSource.isCustomized !== 'boolean'
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        is_customized: ruleSource.isCustomized,
+        customized_fields: ruleSource.customizedFields ?? [],
+      },
+    ];
+  });
+
+  return ruleSources.length === 0
+    ? getInitialRuleCustomizationStatus()
+    : getRuleCustomizationStatus(ruleSources);
+}

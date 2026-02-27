@@ -18,8 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
 
 export interface StreamingResponseProps {
@@ -148,15 +147,10 @@ export const StreamingResponse = ({
     <EuiPanel color="primary">
       <EuiAccordion
         id={`streamingResponse`}
-        css={css`
-          .euiButtonIcon {
-            color: ${euiTheme.colors.primaryText};
-          }
-        `}
         buttonContent={
           <EuiFlexGroup direction="row" alignItems="center">
             <EuiFlexItem grow>
-              <EuiText size="m" color={euiTheme.colors.primaryText}>
+              <EuiText size="m" color={euiTheme.colors.textPrimary}>
                 <strong>
                   {i18n.translate(
                     'genAiStreamingResponseExample.app.component.streamingResponseTitle',

@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+interface TraverseObjectOptions {
+  skipKeys?: string[];
+}
+
+/**
+ * A generic function to traverse an object or array of objects recursively
+ *
+ * @param obj The object to traverse
+ * @param onVisit A function that will be called for each traversed node in the object
+ */
+export function traverseObject(
+  obj: unknown,
+  onVisit: (element: object) => void,
+  options: TraverseObjectOptions = {}
+) {
+  function search(element: unknown) {
+    if (typeof element === 'object' && element !== null) {
+      onVisit(element);
+
+      Object.entries(element).forEach(([key, value]) => {
+        if (options.skipKeys?.includes(key)) {
+          return;
+        }
+
+        if (Array.isArray(value)) {
+          value.forEach(search);
+        } else {
+          search(value);
+        }
+      });
+    }
+  }
+
+  search(obj);
+}

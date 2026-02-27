@@ -3,771 +3,9 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.ILicense",
-        "type": "Interface",
-        "tags": [],
-        "label": "ILicense",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.uid",
-            "type": "string",
-            "tags": [],
-            "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.status",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "signature": [
-              "LicenseStatus",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.isActive",
-            "type": "boolean",
-            "tags": [],
-            "label": "isActive",
-            "description": [
-              "\nDetermine if the status of the license is active."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.expiryDateInMillis",
-            "type": "number",
-            "tags": [],
-            "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.mode",
-            "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "mode",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.signature",
-            "type": "string",
-            "tags": [],
-            "label": "signature",
-            "description": [
-              "\nSignature of the license content."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.isAvailable",
-            "type": "boolean",
-            "tags": [],
-            "label": "isAvailable",
-            "description": [
-              "\nDetermine if the license container has information."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.toJSON",
-            "type": "Function",
-            "tags": [],
-            "label": "toJSON",
-            "description": [
-              "\nReturns"
-            ],
-            "signature": [
-              "() => ",
-              "PublicLicenseJSON"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.error",
-            "type": "string",
-            "tags": [],
-            "label": "error",
-            "description": [
-              "\nA potential error denoting the failure of the license from being retrieved."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.getUnavailableReason",
-            "type": "Function",
-            "tags": [],
-            "label": "getUnavailableReason",
-            "description": [
-              "\nIf the license is not available, provides a string or Error containing the reason."
-            ],
-            "signature": [
-              "() => string | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.hasAtLeast",
-            "type": "Function",
-            "tags": [],
-            "label": "hasAtLeast",
-            "description": [
-              "\nDetermine if license type >= minimal required license type."
-            ],
-            "signature": [
-              "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "licensing",
-                "id": "def-public.ILicense.hasAtLeast.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "minimumLicenseRequired",
-                "description": [
-                  "the minimum valid license required for the given feature"
-                ],
-                "signature": [
-                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-                ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.check",
-            "type": "Function",
-            "tags": [],
-            "label": "check",
-            "description": [
-              "\nFor a given plugin and license type, receive information about the status of the license."
-            ],
-            "signature": [
-              "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
-              "LicenseCheck"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "licensing",
-                "id": "def-public.ILicense.check.$1",
-                "type": "string",
-                "tags": [],
-                "label": "pluginName",
-                "description": [
-                  "the name of the plugin"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "licensing",
-                "id": "def-public.ILicense.check.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "minimumLicenseRequired",
-                "description": [
-                  "the minimum valid license for operating the given plugin"
-                ],
-                "signature": [
-                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-                ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.ILicense.getFeature",
-            "type": "Function",
-            "tags": [],
-            "label": "getFeature",
-            "description": [
-              "\nA specific API for interacting with the specific features of the license."
-            ],
-            "signature": [
-              "(name: string) => ",
-              "LicenseFeature"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "licensing",
-                "id": "def-public.ILicense.getFeature.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [
-                  "the name of the feature to interact with"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.LicenseCheck",
-        "type": "Interface",
-        "tags": [],
-        "label": "LicenseCheck",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.LicenseCheck.state",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "state",
-            "description": [
-              "\nThe state of checking the results of a license type meeting the license minimum."
-            ],
-            "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.LicenseCheck.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [
-              "\nA message containing the reason for a license type not being valid."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.LicenseFeature",
-        "type": "Interface",
-        "tags": [],
-        "label": "LicenseFeature",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.LicenseFeature.isAvailable",
-            "type": "boolean",
-            "tags": [],
-            "label": "isAvailable",
-            "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.LicenseFeature.isEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isEnabled",
-            "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.PublicLicense",
-        "type": "Interface",
-        "tags": [],
-        "label": "PublicLicense",
-        "description": [
-          "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.PublicLicense.uid",
-            "type": "string",
-            "tags": [],
-            "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.PublicLicense.status",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "signature": [
-              "\"active\" | \"invalid\" | \"expired\""
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.PublicLicense.expiryDateInMillis",
-            "type": "number",
-            "tags": [],
-            "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.PublicLicense.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.PublicLicense.mode",
-            "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "mode",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.PublicLicenseJSON",
-        "type": "Interface",
-        "tags": [],
-        "label": "PublicLicenseJSON",
-        "description": [
-          "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.PublicLicenseJSON.license",
-            "type": "Object",
-            "tags": [],
-            "label": "license",
-            "description": [],
-            "signature": [
-              "PublicLicense",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.PublicLicenseJSON.features",
-            "type": "Object",
-            "tags": [],
-            "label": "features",
-            "description": [],
-            "signature": [
-              "PublicFeatures",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-public.PublicLicenseJSON.signature",
-            "type": "string",
-            "tags": [],
-            "label": "signature",
-            "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.LicenseCheckState",
-        "type": "Type",
-        "tags": [],
-        "label": "LicenseCheckState",
-        "description": [],
-        "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.LicenseStatus",
-        "type": "Type",
-        "tags": [],
-        "label": "LicenseStatus",
-        "description": [],
-        "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.LicenseType",
-        "type": "Type",
-        "tags": [],
-        "label": "LicenseType",
-        "description": [],
-        "signature": [
-          "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-public.PublicFeatures",
-        "type": "Type",
-        "tags": [],
-        "label": "PublicFeatures",
-        "description": [
-          "\nProvides information about feature availability for the current license."
-        ],
-        "signature": [
-          "{ [x: string]: ",
-          "LicenseFeature",
-          "; }"
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "licensing",
@@ -776,7 +14,9 @@
       "tags": [],
       "label": "LicensingPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/licensing/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -794,73 +34,77 @@
           "signature": [
             "Observable",
             "<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 15,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
           "references": [
             {
               "plugin": "security",
-              "path": "x-pack/plugins/security/public/plugin.tsx"
-            },
-            {
-              "plugin": "aiops",
-              "path": "x-pack/plugins/aiops/public/plugin.tsx"
+              "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
             },
             {
               "plugin": "licenseManagement",
-              "path": "x-pack/plugins/license_management/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/license_management/public/plugin.ts"
             },
             {
               "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts"
             },
             {
               "plugin": "crossClusterReplication",
-              "path": "x-pack/plugins/cross_cluster_replication/public/plugin.ts"
+              "path": "x-pack/platform/plugins/private/cross_cluster_replication/public/plugin.ts"
             },
             {
               "plugin": "logstash",
-              "path": "x-pack/plugins/logstash/public/plugin.ts"
+              "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
+            },
+            {
+              "plugin": "monitoring",
+              "path": "x-pack/platform/plugins/private/monitoring/public/plugin.ts"
             },
             {
               "plugin": "painlessLab",
-              "path": "x-pack/plugins/painless_lab/public/plugin.tsx"
+              "path": "x-pack/platform/plugins/private/painless_lab/public/plugin.tsx"
             },
             {
               "plugin": "painlessLab",
-              "path": "x-pack/plugins/painless_lab/public/plugin.tsx"
-            },
-            {
-              "plugin": "searchprofiler",
-              "path": "x-pack/plugins/searchprofiler/public/plugin.ts"
-            },
-            {
-              "plugin": "searchprofiler",
-              "path": "x-pack/plugins/searchprofiler/public/plugin.ts"
+              "path": "x-pack/platform/plugins/private/painless_lab/public/plugin.tsx"
             },
             {
               "plugin": "watcher",
-              "path": "x-pack/plugins/watcher/public/plugin.ts"
+              "path": "x-pack/platform/plugins/private/watcher/public/plugin.ts"
             },
             {
               "plugin": "watcher",
-              "path": "x-pack/plugins/watcher/public/plugin.ts"
+              "path": "x-pack/platform/plugins/private/watcher/public/plugin.ts"
             },
             {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx"
+              "plugin": "searchprofiler",
+              "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
             },
             {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/public/context/license/license_context.tsx"
+              "plugin": "searchprofiler",
+              "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
             },
             {
               "plugin": "slo",
-              "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
+              "path": "x-pack/solutions/observability/plugins/slo/public/plugin.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx"
             }
           ]
         },
@@ -877,10 +121,18 @@
           ],
           "signature": [
             "() => Promise<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 21,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -900,7 +152,9 @@
           "signature": [
             "FeatureUsageServiceSetup"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 27,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -915,7 +169,9 @@
       "tags": [],
       "label": "LicensingPluginStart",
       "description": [],
-      "path": "x-pack/plugins/licensing/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+      "lineNumber": 33,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -931,12 +187,48 @@
           "signature": [
             "Observable",
             "<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 35,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "licensing",
+          "id": "def-public.LicensingPluginStart.getLicense",
+          "type": "Function",
+          "tags": [],
+          "label": "getLicense",
+          "description": [
+            "\nRetrieves the {@link ILicense | licensing information}"
+          ],
+          "signature": [
+            "() => Promise<",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "licensing",
@@ -949,10 +241,18 @@
           ],
           "signature": [
             "() => Promise<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 43,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -970,7 +270,9 @@
           "signature": [
             "FeatureUsageServiceStart"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
+          "lineNumber": 47,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1001,26 +303,16 @@
           ", handler: ",
           "RequestHandler",
           "<P, Q, B, Context, any, ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaResponseFactory",
-            "text": "KibanaResponseFactory"
-          },
+          "KibanaResponseFactory",
           ">) => ",
           "RequestHandler",
           "<P, Q, B, Context, any, ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaResponseFactory",
-            "text": "KibanaResponseFactory"
-          },
+          "KibanaResponseFactory",
           ">"
         ],
-        "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1040,7 +332,9 @@
                 "text": "CheckLicense"
               }
             ],
-            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1055,16 +349,12 @@
             "signature": [
               "RequestHandler",
               "<P, Q, B, Context, any, ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaResponseFactory",
-                "text": "KibanaResponseFactory"
-              },
+              "KibanaResponseFactory",
               ">"
             ],
-            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1092,7 +382,9 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/licensing/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1106,7 +398,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/licensing/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1120,7 +414,9 @@
         "tags": [],
         "label": "FeatureUsageServiceSetup",
         "description": [],
-        "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1134,9 +430,11 @@
               "\nRegister a feature to be able to notify of it's usages using the {@link FeatureUsageServiceStart | service start contract}."
             ],
             "signature": [
-              "(featureName: string, licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => void"
+              "(featureId: string, licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => void"
             ],
-            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1145,12 +443,14 @@
                 "id": "def-server.FeatureUsageServiceSetup.register.$1",
                 "type": "string",
                 "tags": [],
-                "label": "featureName",
+                "label": "featureId",
                 "description": [],
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+                "lineNumber": 16,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1165,7 +465,9 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+                "lineNumber": 16,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1183,7 +485,9 @@
         "tags": [],
         "label": "FeatureUsageServiceStart",
         "description": [],
-        "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1197,9 +501,11 @@
               "\nNotify of a registered feature usage at given time.\n"
             ],
             "signature": [
-              "(featureName: string, usedAt?: number | Date | undefined) => void"
+              "(featureId: string, usedAt?: number | Date | undefined) => void"
             ],
-            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1208,14 +514,16 @@
                 "id": "def-server.FeatureUsageServiceStart.notifyUsage.$1",
                 "type": "string",
                 "tags": [],
-                "label": "featureName",
+                "label": "featureId",
                 "description": [
-                  "- the name of the feature to notify usage of"
+                  "- the identifer of the feature to notify usage of"
                 ],
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+                "lineNumber": 33,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1232,7 +540,9 @@
                 "signature": [
                   "number | Date | undefined"
                 ],
-                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+                "lineNumber": 33,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1254,411 +564,13 @@
               "LastFeatureUsage",
               "[]"
             ],
-            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.ILicense",
-        "type": "Interface",
-        "tags": [],
-        "label": "ILicense",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.uid",
-            "type": "string",
-            "tags": [],
-            "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.status",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "signature": [
-              "LicenseStatus",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.isActive",
-            "type": "boolean",
-            "tags": [],
-            "label": "isActive",
-            "description": [
-              "\nDetermine if the status of the license is active."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.expiryDateInMillis",
-            "type": "number",
-            "tags": [],
-            "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.mode",
-            "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "mode",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.signature",
-            "type": "string",
-            "tags": [],
-            "label": "signature",
-            "description": [
-              "\nSignature of the license content."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.isAvailable",
-            "type": "boolean",
-            "tags": [],
-            "label": "isAvailable",
-            "description": [
-              "\nDetermine if the license container has information."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.toJSON",
-            "type": "Function",
-            "tags": [],
-            "label": "toJSON",
-            "description": [
-              "\nReturns"
-            ],
-            "signature": [
-              "() => ",
-              "PublicLicenseJSON"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.error",
-            "type": "string",
-            "tags": [],
-            "label": "error",
-            "description": [
-              "\nA potential error denoting the failure of the license from being retrieved."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.getUnavailableReason",
-            "type": "Function",
-            "tags": [],
-            "label": "getUnavailableReason",
-            "description": [
-              "\nIf the license is not available, provides a string or Error containing the reason."
-            ],
-            "signature": [
-              "() => string | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.hasAtLeast",
-            "type": "Function",
-            "tags": [],
-            "label": "hasAtLeast",
-            "description": [
-              "\nDetermine if license type >= minimal required license type."
-            ],
-            "signature": [
-              "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "licensing",
-                "id": "def-server.ILicense.hasAtLeast.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "minimumLicenseRequired",
-                "description": [
-                  "the minimum valid license required for the given feature"
-                ],
-                "signature": [
-                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-                ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.check",
-            "type": "Function",
-            "tags": [],
-            "label": "check",
-            "description": [
-              "\nFor a given plugin and license type, receive information about the status of the license."
-            ],
-            "signature": [
-              "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
-              "LicenseCheck"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "licensing",
-                "id": "def-server.ILicense.check.$1",
-                "type": "string",
-                "tags": [],
-                "label": "pluginName",
-                "description": [
-                  "the name of the plugin"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "licensing",
-                "id": "def-server.ILicense.check.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "minimumLicenseRequired",
-                "description": [
-                  "the minimum valid license for operating the given plugin"
-                ],
-                "signature": [
-                  "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-                ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.ILicense.getFeature",
-            "type": "Function",
-            "tags": [],
-            "label": "getFeature",
-            "description": [
-              "\nA specific API for interacting with the specific features of the license."
-            ],
-            "signature": [
-              "(name: string) => ",
-              "LicenseFeature"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "licensing",
-                "id": "def-server.ILicense.getFeature.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [
-                  "the name of the feature to interact with"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.LicenseCheck",
-        "type": "Interface",
-        "tags": [],
-        "label": "LicenseCheck",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.LicenseCheck.state",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "state",
-            "description": [
-              "\nThe state of checking the results of a license type meeting the license minimum."
-            ],
-            "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.LicenseCheck.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [
-              "\nA message containing the reason for a license type not being valid."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.LicenseFeature",
-        "type": "Interface",
-        "tags": [],
-        "label": "LicenseFeature",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.LicenseFeature.isAvailable",
-            "type": "boolean",
-            "tags": [],
-            "label": "isAvailable",
-            "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.LicenseFeature.isEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isEnabled",
-            "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1672,7 +584,9 @@
         "description": [
           "\nThe APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing."
         ],
-        "path": "x-pack/plugins/licensing/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1692,7 +606,9 @@
                 "text": "FeatureUsageServiceStart"
               }
             ],
-            "path": "x-pack/plugins/licensing/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1704,305 +620,17 @@
             "label": "license",
             "description": [],
             "signature": [
-              "ILicense"
-            ],
-            "path": "x-pack/plugins/licensing/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.PublicLicense",
-        "type": "Interface",
-        "tags": [],
-        "label": "PublicLicense",
-        "description": [
-          "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.PublicLicense.uid",
-            "type": "string",
-            "tags": [],
-            "label": "uid",
-            "description": [
-              "\nUID for license."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.PublicLicense.status",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "status",
-            "description": [
-              "\nThe validity status of the license."
-            ],
-            "signature": [
-              "\"active\" | \"invalid\" | \"expired\""
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.PublicLicense.expiryDateInMillis",
-            "type": "number",
-            "tags": [],
-            "label": "expiryDateInMillis",
-            "description": [
-              "\nUnix epoch of the expiration date of the license."
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.PublicLicense.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.PublicLicense.mode",
-            "type": "CompoundType",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "mode",
-            "description": [
-              "\nThe license type, being usually one of basic, standard, gold, platinum, or trial."
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "trackAdoption": false,
-            "references": [
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/common/license_check.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/common/license/policy_config.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/fleet_integration.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/management/pages/policy/store/policy_details/index.test.ts"
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.ILicense",
+                "text": "ILicense"
               }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.PublicLicenseJSON",
-        "type": "Interface",
-        "tags": [],
-        "label": "PublicLicenseJSON",
-        "description": [
-          "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.PublicLicenseJSON.license",
-            "type": "Object",
-            "tags": [],
-            "label": "license",
-            "description": [],
-            "signature": [
-              "PublicLicense",
-              " | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.PublicLicenseJSON.features",
-            "type": "Object",
-            "tags": [],
-            "label": "features",
-            "description": [],
-            "signature": [
-              "PublicFeatures",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "licensing",
-            "id": "def-server.PublicLicenseJSON.signature",
-            "type": "string",
-            "tags": [],
-            "label": "signature",
-            "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2010,20 +638,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.LICENSE_TYPE",
-        "type": "Enum",
-        "tags": [],
-        "label": "LICENSE_TYPE",
-        "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "licensing",
@@ -2034,10 +649,18 @@
         "description": [],
         "signature": [
           "(license: ",
-          "ILicense",
+          {
+            "pluginId": "@kbn/licensing-types",
+            "scope": "common",
+            "docId": "kibKbnLicensingTypesPluginApi",
+            "section": "def-common.ILicense",
+            "text": "ILicense"
+          },
           ") => { valid: false; message: string; } | { valid: true; message: null; }"
         ],
-        "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2050,77 +673,21 @@
             "label": "license",
             "description": [],
             "signature": [
-              "ILicense"
+              {
+                "pluginId": "@kbn/licensing-types",
+                "scope": "common",
+                "docId": "kibKbnLicensingTypesPluginApi",
+                "section": "def-common.ILicense",
+                "text": "ILicense"
+              }
             ],
-            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.LicenseCheckState",
-        "type": "Type",
-        "tags": [],
-        "label": "LicenseCheckState",
-        "description": [],
-        "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.LicenseStatus",
-        "type": "Type",
-        "tags": [],
-        "label": "LicenseStatus",
-        "description": [],
-        "signature": [
-          "\"active\" | \"invalid\" | \"expired\""
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.LicenseType",
-        "type": "Type",
-        "tags": [],
-        "label": "LicenseType",
-        "description": [],
-        "signature": [
-          "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "licensing",
-        "id": "def-server.PublicFeatures",
-        "type": "Type",
-        "tags": [],
-        "label": "PublicFeatures",
-        "description": [
-          "\nProvides information about feature availability for the current license."
-        ],
-        "signature": [
-          "{ [x: string]: ",
-          "LicenseFeature",
-          "; }"
-        ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2132,7 +699,9 @@
       "tags": [],
       "label": "LicensingPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/licensing/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+      "lineNumber": 49,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2150,145 +719,157 @@
           "signature": [
             "Observable",
             "<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 51,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
           "references": [
             {
               "plugin": "spaces",
-              "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts"
+              "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.ts"
             },
             {
               "plugin": "spaces",
-              "path": "x-pack/plugins/spaces/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts"
             },
             {
               "plugin": "spaces",
-              "path": "x-pack/plugins/spaces/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts"
             },
             {
               "plugin": "security",
-              "path": "x-pack/plugins/security/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
             },
             {
               "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
+            },
+            {
+              "plugin": "maintenanceWindows",
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/plugin.ts"
             },
             {
               "plugin": "alerting",
-              "path": "x-pack/plugins/alerting/server/plugin.ts"
-            },
-            {
-              "plugin": "aiops",
-              "path": "x-pack/plugins/aiops/server/plugin.ts"
-            },
-            {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
             },
             {
               "plugin": "remoteClusters",
-              "path": "x-pack/plugins/remote_clusters/server/plugin.ts"
+              "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts"
             },
             {
               "plugin": "graph",
-              "path": "x-pack/plugins/graph/server/plugin.ts"
+              "path": "x-pack/platform/plugins/private/graph/server/plugin.ts"
             },
             {
               "plugin": "indexLifecycleManagement",
-              "path": "x-pack/plugins/index_lifecycle_management/server/services/license.ts"
-            },
-            {
-              "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/plugin.ts"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/server/handlers/action/create_action_service.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/indicator_match/threat_mapping/create_threat_signals.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/query/query.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
+              "path": "x-pack/platform/plugins/private/index_lifecycle_management/server/services/license.ts"
             },
             {
               "plugin": "painlessLab",
-              "path": "x-pack/plugins/painless_lab/server/services/license.ts"
+              "path": "x-pack/platform/plugins/private/painless_lab/server/services/license.ts"
             },
             {
               "plugin": "rollup",
-              "path": "x-pack/plugins/rollup/server/services/license.ts"
-            },
-            {
-              "plugin": "searchprofiler",
-              "path": "x-pack/plugins/searchprofiler/server/plugin.ts"
+              "path": "x-pack/platform/plugins/private/rollup/server/services/license.ts"
             },
             {
               "plugin": "snapshotRestore",
-              "path": "x-pack/plugins/snapshot_restore/server/services/license.ts"
+              "path": "x-pack/platform/plugins/private/snapshot_restore/server/services/license.ts"
             },
             {
               "plugin": "transform",
-              "path": "x-pack/plugins/transform/server/services/license.ts"
+              "path": "x-pack/platform/plugins/private/transform/server/services/license.ts"
             },
             {
               "plugin": "upgradeAssistant",
-              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
+              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/data_streams/data_stream_migration_service.ts"
+            },
+            {
+              "plugin": "aiops",
+              "path": "x-pack/platform/plugins/shared/aiops/server/plugin.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/platform/plugins/shared/osquery/server/handlers/action/create_action_service.ts"
+            },
+            {
+              "plugin": "searchprofiler",
+              "path": "x-pack/platform/plugins/shared/searchprofiler/server/plugin.ts"
             },
             {
               "plugin": "spaces",
-              "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.test.ts"
+              "path": "x-pack/platform/plugins/shared/spaces/server/usage_collection/spaces_usage_collector.test.ts"
             },
             {
-              "plugin": "upgradeAssistant",
-              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
-            },
-            {
-              "plugin": "upgradeAssistant",
-              "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
+              "plugin": "apm",
+              "path": "x-pack/solutions/observability/plugins/apm/server/routes/fleet/api_keys/add_api_keys_to_policies_if_missing.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/indicator_match/threat_mapping/create_threat_signals.ts"
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/query/query.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
             },
             {
               "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/lib/license_state.test.ts"
+              "path": "x-pack/platform/plugins/shared/actions/server/lib/license_state.test.ts"
             },
             {
               "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/lib/license_state.test.ts"
+              "path": "x-pack/platform/plugins/shared/actions/server/lib/license_state.test.ts"
             },
             {
               "plugin": "alerting",
-              "path": "x-pack/plugins/alerting/server/lib/license_state.test.ts"
+              "path": "x-pack/platform/plugins/shared/alerting/server/lib/license_state.test.ts"
             },
             {
               "plugin": "alerting",
-              "path": "x-pack/plugins/alerting/server/lib/license_state.test.ts"
+              "path": "x-pack/platform/plugins/shared/alerting/server/lib/license_state.test.ts"
+            },
+            {
+              "plugin": "maintenanceWindows",
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/lib/license_state.test.ts"
+            },
+            {
+              "plugin": "maintenanceWindows",
+              "path": "x-pack/platform/plugins/shared/maintenance_windows/server/lib/license_state.test.ts"
             }
           ]
         },
@@ -2305,19 +886,22 @@
           ],
           "signature": [
             "() => Promise<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 58,
+          "columnNumber": 3,
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/plugin.ts"
-            }
-          ],
+          "references": [],
           "children": [],
           "returnComment": []
         },
@@ -2339,7 +923,9 @@
               "text": "FeatureUsageServiceSetup"
             }
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 65,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2354,7 +940,9 @@
       "tags": [],
       "label": "LicensingPluginStart",
       "description": [],
-      "path": "x-pack/plugins/licensing/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+      "lineNumber": 71,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2370,12 +958,48 @@
           "signature": [
             "Observable",
             "<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 73,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "licensing",
+          "id": "def-server.LicensingPluginStart.getLicense",
+          "type": "Function",
+          "tags": [],
+          "label": "getLicense",
+          "description": [
+            "\nRetrieves the {@link ILicense | licensing information}"
+          ],
+          "signature": [
+            "() => Promise<",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 78,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "licensing",
@@ -2388,10 +1012,18 @@
           ],
           "signature": [
             "() => Promise<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 83,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2408,22 +1040,30 @@
           ],
           "signature": [
             "(clusterClient: ",
-            {
-              "pluginId": "@kbn/core-elasticsearch-server",
-              "scope": "common",
-              "docId": "kibKbnCoreElasticsearchServerPluginApi",
-              "section": "def-common.IClusterClient",
-              "text": "IClusterClient"
-            },
+            "IClusterClient",
             ", pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">; refresh(): Promise<",
-            "ILicense",
+            {
+              "pluginId": "@kbn/licensing-types",
+              "scope": "common",
+              "docId": "kibKbnLicensingTypesPluginApi",
+              "section": "def-common.ILicense",
+              "text": "ILicense"
+            },
             ">; }"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 88,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2435,15 +1075,11 @@
               "label": "clusterClient",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-elasticsearch-server",
-                  "scope": "common",
-                  "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                  "section": "def-common.IClusterClient",
-                  "text": "IClusterClient"
-                }
+                "IClusterClient"
               ],
-              "path": "x-pack/plugins/licensing/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+              "lineNumber": 94,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2458,7 +1094,9 @@
               "signature": [
                 "number"
               ],
-              "path": "x-pack/plugins/licensing/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+              "lineNumber": 95,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2484,7 +1122,9 @@
               "text": "FeatureUsageServiceStart"
             }
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
+          "lineNumber": 97,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }

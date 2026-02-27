@@ -1,0 +1,76 @@
+{{#unless log_group_name}}
+{{#unless log_group_name_prefix}}
+{{#if log_group_arn }}
+log_group_arn: {{ log_group_arn }}
+{{/if}}
+{{/unless}}
+{{/unless}}
+{{#unless log_group_arn}}
+{{#unless log_group_name}}
+{{#if log_group_name_prefix }}
+log_group_name_prefix: {{ log_group_name_prefix }}
+{{/if}}
+{{/unless}}
+{{/unless}}
+{{#unless log_group_arn}}
+{{#unless log_group_name_prefix}}
+{{#if log_group_name }}
+log_group_name: {{ log_group_name }}
+{{/if}}
+{{/unless}}
+{{/unless}}
+{{#unless log_group_arn}}
+region_name: {{ region_name }}
+{{/unless}}
+{{#unless log_stream_prefix}}
+{{#if log_streams }}
+log_streams: {{ log_streams }}
+{{/if}}
+{{/unless}}
+{{#unless log_streams}}
+{{#if log_stream_prefix }}
+log_stream_prefix: {{ log_stream_prefix }}
+{{/if}}
+{{/unless}}
+{{#if start_position }}
+start_position: {{ start_position }}
+{{/if}}
+{{#if scan_frequency }}
+scan_frequency: {{ scan_frequency }}
+{{/if}}
+{{#if api_sleep }}
+api_sleep: {{ api_sleep }}
+{{/if}}
+{{#if api_timeout}}
+api_timeout: {{api_timeout}}
+{{/if}}
+{{#if latency }}
+latency: {{ latency }}
+{{/if}}
+{{#if number_of_workers }}
+number_of_workers: {{ number_of_workers }}
+{{/if}}
+{{#if credential_profile_name}}
+credential_profile_name: {{credential_profile_name}}
+{{/if}}
+{{#if shared_credential_file}}
+shared_credential_file: {{shared_credential_file}}
+{{/if}}
+{{#if default_region}}
+default_region: {{default_region}}
+{{/if}}
+{{#if access_key_id}}
+access_key_id: {{access_key_id}}
+{{/if}}
+{{#if secret_access_key}}
+secret_access_key: {{secret_access_key}}
+{{/if}}
+{{#if session_token}}
+session_token: {{session_token}}
+{{/if}}
+{{#if role_arn}}
+role_arn: {{role_arn}}
+{{/if}}
+{{#if proxy_url }}
+proxy_url: {{proxy_url}}
+{{/if}}

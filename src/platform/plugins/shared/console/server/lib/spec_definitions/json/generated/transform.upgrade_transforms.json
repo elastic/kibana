@@ -1,0 +1,27 @@
+{
+  "transform.upgrade_transforms": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "dry_run": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_transform/_upgrade"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-transform-upgrade-transforms",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

@@ -2,61 +2,38 @@
   "id": "dataVisualizer",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [
+    "functions": [
       {
         "parentPluginId": "dataVisualizer",
-        "id": "def-public.GetAdditionalLinksParams",
-        "type": "Interface",
+        "id": "def-public.getFieldsStatsGrid",
+        "type": "Function",
         "tags": [],
-        "label": "GetAdditionalLinksParams",
+        "label": "getFieldsStatsGrid",
         "description": [],
-        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+        "signature": [
+          "() => React.ForwardRefExoticComponent<",
+          "Props",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/common/components/fields_stats_grid/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.GetAdditionalLinksParams.dataViewId",
-            "type": "string",
-            "tags": [],
-            "label": "dataViewId",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.GetAdditionalLinksParams.dataViewTitle",
-            "type": "string",
-            "tags": [],
-            "label": "dataViewTitle",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.GetAdditionalLinksParams.globalState",
-            "type": "Any",
-            "tags": [],
-            "label": "globalState",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
-      },
+      }
+    ],
+    "interfaces": [
       {
         "parentPluginId": "dataVisualizer",
         "id": "def-public.IndexDataVisualizerViewProps",
@@ -64,7 +41,9 @@
         "tags": [],
         "label": "IndexDataVisualizerViewProps",
         "description": [],
-        "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+        "lineNumber": 101,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,7 +63,9 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,7 +86,9 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -119,7 +102,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -131,166 +116,12 @@
             "label": "getAdditionalLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "dataVisualizer",
-                "scope": "public",
-                "docId": "kibDataVisualizerPluginApi",
-                "section": "def-public.GetAdditionalLinks",
-                "text": "GetAdditionalLinks"
-              },
+              "GetAdditionalLinks",
               " | undefined"
             ],
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataVisualizer",
-        "id": "def-public.ResultLink",
-        "type": "Interface",
-        "tags": [],
-        "label": "ResultLink",
-        "description": [],
-        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"index\" | \"file\""
-            ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.icon",
-            "type": "string",
-            "tags": [],
-            "label": "icon",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.getUrl",
-            "type": "Function",
-            "tags": [],
-            "label": "getUrl",
-            "description": [],
-            "signature": [
-              "(params?: any) => Promise<string>"
-            ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-public.ResultLink.getUrl.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.canDisplay",
-            "type": "Function",
-            "tags": [],
-            "label": "canDisplay",
-            "description": [],
-            "signature": [
-              "(params?: any) => Promise<boolean>"
-            ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "dataVisualizer",
-                "id": "def-public.ResultLink.canDisplay.$1",
-                "type": "Any",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.datatestsubj",
-            "type": "string",
-            "tags": [],
-            "label": "'data-test-subj'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -312,7 +143,9 @@
           "DataDriftDetectionAppStateProps",
           ">"
         ],
-        "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/data_drift/data_drift_app_state.tsx",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -320,14 +153,16 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-public.DataDriftSpec.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -341,90 +176,13 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataVisualizer",
-        "id": "def-public.FileDataVisualizerSpec",
-        "type": "Type",
-        "tags": [],
-        "label": "FileDataVisualizerSpec",
-        "description": [],
-        "signature": [
-          "React.FunctionComponent<",
-          "Props",
-          ">"
-        ],
-        "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.FileDataVisualizerSpec.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P & { children?: React.ReactNode; }"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dataVisualizer",
-            "id": "def-public.FileDataVisualizerSpec.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataVisualizer",
-        "id": "def-public.GetAdditionalLinks",
-        "type": "Type",
-        "tags": [],
-        "label": "GetAdditionalLinks",
-        "description": [],
-        "signature": [
-          "((params: ",
-          {
-            "pluginId": "dataVisualizer",
-            "scope": "public",
-            "docId": "kibDataVisualizerPluginApi",
-            "section": "def-public.GetAdditionalLinksParams",
-            "text": "GetAdditionalLinksParams"
-          },
-          ") => Promise<",
-          {
-            "pluginId": "dataVisualizer",
-            "scope": "public",
-            "docId": "kibDataVisualizerPluginApi",
-            "section": "def-public.ResultLink",
-            "text": "ResultLink"
-          },
-          "[] | undefined>)[]"
-        ],
-        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -439,7 +197,9 @@
           "Props",
           ">"
         ],
-        "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
+        "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
+        "lineNumber": 56,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -447,14 +207,16 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-public.IndexDataVisualizerSpec.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,7 +230,9 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -485,17 +249,17 @@
       "label": "DataVisualizerPluginStart",
       "description": [],
       "signature": [
-        "{ getFileDataVisualizerComponent: () => Promise<() => ",
-        "SpecWithLinks",
-        "<React.FC<",
-        "Props",
-        ">>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<",
+        "{ getIndexDataVisualizerComponent: () => Promise<() => React.FC<",
         "Props",
         ">>; getDataDriftComponent: () => Promise<() => React.FC<",
         "DataDriftDetectionAppStateProps",
-        ">>; getMaxBytesFormatted: () => string; }"
+        ">>; getMaxBytesFormatted: () => string; FieldStatsUnavailableMessage: React.ForwardRefExoticComponent<{ id?: string | undefined; title?: string | undefined; } & React.RefAttributes<{}>>; FieldStatisticsTable: React.ForwardRefExoticComponent<",
+        "FieldStatisticTableEmbeddableProps",
+        " & React.RefAttributes<{}>>; }"
       ],
-      "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
+      "path": "x-pack/platform/plugins/private/data_visualizer/public/plugin.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

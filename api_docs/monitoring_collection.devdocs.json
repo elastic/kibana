@@ -29,7 +29,9 @@
           },
           "<T>"
         ],
-        "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+        "path": "x-pack/platform/plugins/private/monitoring_collection/server/plugin.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,7 +42,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+            "path": "x-pack/platform/plugins/private/monitoring_collection/server/plugin.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,7 +62,9 @@
               "RecursiveMakeSchemaFrom",
               "<Required<T>[Key], false>; }"
             ],
-            "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+            "path": "x-pack/platform/plugins/private/monitoring_collection/server/plugin.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -88,7 +94,9 @@
               },
               "<T>[]>"
             ],
-            "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+            "path": "x-pack/platform/plugins/private/monitoring_collection/server/plugin.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -117,7 +125,9 @@
             "text": "JsonObject"
           }
         ],
-        "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+        "path": "x-pack/platform/plugins/private/monitoring_collection/server/plugin.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -128,11 +138,15 @@
         "type": "Type",
         "tags": [],
         "label": "MonitoringCollectionConfig",
-        "description": [],
+        "description": [
+          "\nConfiguration of the plugin `monitoring_collection`"
+        ],
         "signature": [
           "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
         ],
-        "path": "x-pack/plugins/monitoring_collection/server/config.ts",
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/monitoring_collection_schema.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -146,7 +160,9 @@
       "tags": [],
       "label": "MonitoringCollectionSetup",
       "description": [],
-      "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+      "path": "x-pack/platform/plugins/private/monitoring_collection/server/plugin.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -168,7 +184,9 @@
             },
             "<T>) => void"
           ],
-          "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+          "path": "x-pack/platform/plugins/private/monitoring_collection/server/plugin.ts",
+          "lineNumber": 23,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -189,7 +207,9 @@
                 },
                 "<T>"
               ],
-              "path": "x-pack/plugins/monitoring_collection/server/plugin.ts",
+              "path": "x-pack/platform/plugins/private/monitoring_collection/server/plugin.ts",
+              "lineNumber": 23,
+              "columnNumber": 23,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true

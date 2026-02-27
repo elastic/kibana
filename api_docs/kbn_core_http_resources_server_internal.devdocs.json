@@ -9,43 +9,31 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-http-resources-server-internal",
-        "id": "def-common.HttpResourcesService",
+        "id": "def-server.HttpResourcesService",
         "type": "Class",
         "tags": [],
         "label": "HttpResourcesService",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-resources-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpResourcesServerInternalPluginApi",
-            "section": "def-common.HttpResourcesService",
-            "text": "HttpResourcesService"
-          },
+          "HttpResourcesService",
           " implements ",
           "CoreService",
           "<",
           "InternalHttpResourcesPreboot",
           ", void>"
         ],
-        "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+        "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.Unnamed",
+            "id": "def-server.HttpResourcesService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -53,13 +41,15 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server-internal",
-                "id": "def-common.HttpResourcesService.Unnamed.$1",
+                "id": "def-server.HttpResourcesService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -67,7 +57,9 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+                "lineNumber": 56,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -77,7 +69,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.preboot",
+            "id": "def-server.HttpResourcesService.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
@@ -86,38 +78,22 @@
               "(deps: ",
               "PrebootDeps",
               ") => { createRegistrar: (router: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IRouter",
-                "text": "IRouter"
-              },
+              "IRouter",
               "<",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               "; }"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server-internal",
-                "id": "def-common.HttpResourcesService.preboot.$1",
+                "id": "def-server.HttpResourcesService.preboot.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -125,7 +101,9 @@
                 "signature": [
                   "PrebootDeps"
                 ],
-                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+                "lineNumber": 60,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -135,7 +113,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.setup",
+            "id": "def-server.HttpResourcesService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -144,38 +122,22 @@
               "(deps: ",
               "SetupDeps",
               ") => { createRegistrar: (router: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IRouter",
-                "text": "IRouter"
-              },
+              "IRouter",
               "<",
-              {
-                "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
-                "text": "RequestHandlerContext"
-              },
+              "RequestHandlerContext",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               "; }"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-resources-server-internal",
-                "id": "def-common.HttpResourcesService.setup.$1",
+                "id": "def-server.HttpResourcesService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "deps",
@@ -183,7 +145,9 @@
                 "signature": [
                   "SetupDeps"
                 ],
-                "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+                "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+                "lineNumber": 67,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -193,7 +157,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.start",
+            "id": "def-server.HttpResourcesService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -201,7 +165,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -209,7 +175,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-internal",
-            "id": "def-common.HttpResourcesService.stop",
+            "id": "def-server.HttpResourcesService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -217,7 +183,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.ts",
+            "path": "src/core/packages/http/resources-server-internal/src/http_resources_service.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -227,6 +195,14 @@
         "initialIsOpen": false
       }
     ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

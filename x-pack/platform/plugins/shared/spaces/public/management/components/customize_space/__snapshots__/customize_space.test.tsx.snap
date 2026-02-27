@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders correctly 1`] = `
+<SectionPanel
+  dataTestSubj="generalPanel"
+>
+  <EuiDescribedFormGroup
+    description="Give your space a meaningful name and description."
+    fullWidth={true}
+    title={
+      <EuiTitle
+        size="xs"
+      >
+        <h3>
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Describe this space"
+            id="xpack.spaces.management.manageSpacePage.describeSpaceTitle"
+          />
+        </h3>
+      </EuiTitle>
+    }
+  >
+    <EuiFormRow
+      error="Enter a name."
+      fullWidth={true}
+      isInvalid={true}
+      label="Name"
+    >
+      <EuiFieldText
+        data-test-subj="addSpaceName"
+        fullWidth={true}
+        isInvalid={true}
+        name="name"
+        onChange={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      data-test-subj="optionalDescription"
+      fullWidth={true}
+      helpText="Appears on the space selection screen and spaces list."
+      isInvalid={false}
+      label="Description"
+      labelAppend={
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Optional"
+            id="xpack.spaces.management.manageSpacePage.optionalLabel"
+          />
+        </EuiText>
+      }
+    >
+      <EuiTextArea
+        data-test-subj="descriptionSpaceText"
+        fullWidth={true}
+        isInvalid={false}
+        name="description"
+        onChange={[Function]}
+        rows={2}
+        value=""
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      error="Enter a URL identifier."
+      fullWidth={true}
+      helpText={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="You can't change the URL identifier once created."
+          id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
+        />
+      }
+      isInvalid={true}
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="URL identifier"
+          id="xpack.spaces.management.spaceIdentifier.urlIdentifierTitle"
+        />
+      }
+    >
+      <EuiFieldText
+        data-test-subj="spaceURLDisplay"
+        disabled={false}
+        fullWidth={true}
+        isInvalid={true}
+        onChange={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+</SectionPanel>
+`;

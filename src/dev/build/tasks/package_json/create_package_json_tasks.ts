@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginPackage } from '@kbn/repo-packages';
+import type { PluginPackage } from '@kbn/repo-packages';
 import { findUsedDependencies } from './find_used_dependencies';
-import { read, write, Task } from '../../lib';
+import type { Task } from '../../lib';
+import { read, write } from '../../lib';
 
 export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
@@ -27,9 +29,6 @@ export const CreatePackageJson: Task = {
      * will then _copy_ the `file:` dependencies into `node_modules` instead of
      * symlinking like we do in development.
      *
-     * Additionally it also taken care of replacing `link:bazel-bin/` with
-     * `file:` so we can also support the copy of the Bazel packages dist already into
-     * build/packages to be copied into the node_modules
      */
     const transformedDeps = Object.fromEntries(
       Object.entries({ ...pkg.dependencies, ...pkg.devDependencies })

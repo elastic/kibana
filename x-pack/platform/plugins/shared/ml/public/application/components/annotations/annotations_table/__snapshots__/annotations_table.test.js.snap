@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
+<div
+  data-test-subj="mockEuiInMemoryTable"
+>
+  Mocked table with 1 items
+</div>
+`;
+
+exports[`AnnotationsTable Initialization with job config prop. 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceAround-stretch-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <span
+      aria-label="Loading"
+      class="euiLoadingSpinner emotion-euiLoadingSpinner-l"
+      role="progressbar"
+    />
+  </div>
+</div>
+`;
+
+exports[`AnnotationsTable Minimal initialization without props. 1`] = `
+<div
+  class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+  role="alert"
+>
+  <p
+    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-primary"
+  >
+    <span
+      aria-hidden="true"
+      class="emotion-euiCallOut__icon"
+      color="inherit"
+      data-euiicon-type="info"
+    />
+    No annotations created for this job
+  </p>
+</div>
+`;

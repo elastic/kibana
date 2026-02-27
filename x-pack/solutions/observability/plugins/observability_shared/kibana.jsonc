@@ -1,0 +1,33 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-shared-plugin",
+  "owner": [
+    "@elastic/observability-ui"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "observabilityShared",
+    "browser": true,
+    "server": false,
+    "configPath": [
+      "xpack",
+      "observability_shared"
+    ],
+    "requiredPlugins": [
+      "uiActions",
+      "embeddable",
+      "share"
+    ],
+    "requiredBundles": [
+      "cases",
+      "data",
+      "inspector",
+      "kibanaReact",
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/server-route-repository",
+  "owner": [
+    "@elastic/observability-ui"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

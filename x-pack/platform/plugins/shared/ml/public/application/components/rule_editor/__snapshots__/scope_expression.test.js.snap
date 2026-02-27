@@ -1,0 +1,262 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
+    >
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+        />
+        <input
+          checked=""
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="scope_cb_domain"
+          type="checkbox"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+      >
+        when
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value"
+      >
+        domain
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`ScopeExpression renders when enabled set to false 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
+    >
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="empty"
+        />
+        <input
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="scope_cb_domain"
+          type="checkbox"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+      >
+        when
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value"
+      >
+        domain
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+      id="operatorValuePopover"
+    >
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+        data-test-subj="mlScopeExpressionFilterSelector"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        >
+          is in
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          safe_domains
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
+    >
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+        />
+        <input
+          checked=""
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="scope_cb_domain"
+          type="checkbox"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+      >
+        when
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value"
+      >
+        domain
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+      id="operatorValuePopover"
+    >
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+        data-test-subj="mlScopeExpressionFilterSelector"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        >
+          is in
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          safe_domains
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiCheckbox emotion-euiCheckbox"
+    >
+      <div
+        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+      >
+        <span
+          class="emotion-euiCheckbox__icon-check"
+          data-euiicon-type="check"
+        />
+        <input
+          checked=""
+          class="euiCheckbox__input emotion-euiCheckbox__input"
+          id="scope_cb_domain"
+          type="checkbox"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+      >
+        when
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value"
+      >
+        domain
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+      id="operatorValuePopover"
+    >
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+        data-test-subj="mlScopeExpressionFilterSelector"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
+        >
+          is 
+        </span>
+         
+      </button>
+    </div>
+  </div>
+</div>
+`;

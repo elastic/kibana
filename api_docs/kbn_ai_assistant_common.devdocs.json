@@ -1,0 +1,113 @@
+{
+  "id": "@kbn/ai-assistant-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.filterScopes",
+        "type": "Function",
+        "tags": [],
+        "label": "filterScopes",
+        "description": [],
+        "signature": [
+          "(scopeFilters: ",
+          {
+            "pluginId": "@kbn/ai-assistant-common",
+            "scope": "common",
+            "docId": "kibKbnAiAssistantCommonPluginApi",
+            "section": "def-common.AssistantScope",
+            "text": "AssistantScope"
+          },
+          "[] | undefined) => (value: T) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-common",
+            "id": "def-common.filterScopes.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "scopeFilters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/common/src/utils/filter_scopes.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.AIChatExperience",
+        "type": "Enum",
+        "tags": [],
+        "label": "AIChatExperience",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/constants/ai_chat_experience.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.AssistantScope",
+        "type": "Type",
+        "tags": [],
+        "label": "AssistantScope",
+        "description": [],
+        "signature": [
+          "\"search\" | \"observability\" | \"all\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/common/src/types/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

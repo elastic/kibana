@@ -1,0 +1,21 @@
+{
+  "license.get_trial_status": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_license/trial_status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-license-get-trial-status",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

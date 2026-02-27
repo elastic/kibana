@@ -8,20 +8,38 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
-
-# If cached snapshots are baked into the agent, copy them into our workspace first
-# We are doing this rather than simply changing the ES base path because many workers
-#   run with the workspace mounted in memory or on a local ssd
-cacheDir="$ES_CACHE_DIR/cache"
-if [[ -d "$cacheDir" ]]; then
-  mkdir -p .es/cache
-  echo "--- Copying ES snapshot cache"
-  echo "Copying cached snapshots from $cacheDir to .es/cache"
-  cp -R "$cacheDir"/* .es/cache/
-fi
+.buildkite/scripts/setup_es_snapshot_cache.sh
 
 is_test_execution_step
 
-# logins into docker as a common step for functional tests
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
+# Upload Scout reporter events after Cypress test execution
+upload_scout_cypress_events() {
+  local test_name="${1:-Cypress tests}"
+
+  if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
+    # Save current directory and navigate to Kibana root
+    local current_dir=$(pwd)
+    cd "${KIBANA_DIR:-$(git rev-parse --show-toplevel)}"
+
+    # Check if reports exist before uploading
+    if compgen -G '.scout/reports/*' > /dev/null; then
+      echo "--- Upload Scout reporter events to AppEx QA's team cluster for $test_name"
+      node scripts/scout upload-events --dontFailOnError
+
+      # Clean up only Cypress event reports to avoid double ingestion
+      # Only remove scout-cypress-* directories, preserving other test reports and failure reports
+      if compgen -G '.scout/reports/scout-cypress-*' > /dev/null; then
+       echo "🧹 Cleaning up Scout Cypress event reports"
+       rm -rf .scout/reports/scout-cypress-*
+      fi
+    else
+      echo "❌ No Scout reports found for $test_name"
+    fi
+
+    # Return to original directory
+    cd "$current_dir"
+  else
+    echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
+  fi
+}
+

@@ -1,8 +1,0 @@
-TAU
-
-Syntax
-DescriptionReturns the ratio of a circle’s circumference
-to its radius.Example
-```esql
-ROW TAU()
-```

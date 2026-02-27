@@ -1,0 +1,16 @@
+steps:
+  - command: .buildkite/scripts/steps/entity_store_performance/trigger_performance_tests.sh
+    cancel_on_build_failing: true
+    label: 'Entity Store Performance Tests'
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 10
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+

@@ -1,0 +1,22 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/analytics",
+    "@kbn/core-http-server",
+    "@kbn/core-chrome-browser"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

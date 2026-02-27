@@ -1,0 +1,21 @@
+{
+  "security.enroll_kibana": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/enroll/kibana"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-enroll-kibana",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

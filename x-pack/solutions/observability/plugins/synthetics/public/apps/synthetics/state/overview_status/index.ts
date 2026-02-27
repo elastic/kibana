@@ -1,0 +1,75 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createReducer } from '@reduxjs/toolkit';
+
+import type {
+  OverviewStatusMetaData,
+  OverviewStatusState,
+} from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '..';
+import {
+  clearOverviewStatusErrorAction,
+  fetchOverviewStatusAction,
+  quietFetchOverviewStatusAction,
+  initialLoadReported,
+} from './actions';
+
+export interface OverviewStatusStateReducer {
+  loading: boolean;
+  loaded: boolean;
+  status: OverviewStatusState | null;
+  allConfigs?: OverviewStatusMetaData[];
+  disabledConfigs?: OverviewStatusMetaData[];
+  error: IHttpSerializedFetchError | null;
+  isInitialLoad: boolean;
+}
+
+const initialState: OverviewStatusStateReducer = {
+  loading: false,
+  loaded: false,
+  status: null,
+  error: null,
+  isInitialLoad: true,
+};
+
+export const overviewStatusReducer = createReducer(initialState, (builder) => {
+  builder
+    .addCase(fetchOverviewStatusAction.get, (state) => {
+      state.status = null;
+      state.loading = true;
+    })
+    .addCase(quietFetchOverviewStatusAction.get, (state) => {
+      state.loading = true;
+    })
+    .addCase(fetchOverviewStatusAction.success, (state, action) => {
+      state.status = action.payload;
+      state.allConfigs = Object.values({
+        ...action.payload.upConfigs,
+        ...action.payload.downConfigs,
+        ...action.payload.pendingConfigs,
+        ...action.payload.disabledConfigs,
+      });
+      state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
+      state.loaded = true;
+      state.loading = false;
+    })
+    .addCase(fetchOverviewStatusAction.fail, (state, action) => {
+      state.error = action.payload;
+      state.loading = false;
+    })
+    .addCase(clearOverviewStatusErrorAction, (state) => {
+      state.error = null;
+    })
+    .addCase(initialLoadReported, (state) => {
+      state.isInitialLoad = false;
+    });
+});
+
+export * from './actions';
+export * from './effects';
+export * from './selectors';

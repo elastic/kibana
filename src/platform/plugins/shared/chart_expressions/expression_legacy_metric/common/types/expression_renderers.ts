@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { $Values } from '@kbn/utility-types';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type {
+  ColorMode,
+  Labels,
+  CustomPaletteState,
+  Style as ChartStyle,
+} from '@kbn/charts-plugin/common';
+import type { Style } from '@kbn/expressions-plugin/common';
+import type { LabelPosition } from '../constants';
+
+export const visType = 'metric';
+
+export interface DimensionsVisParam {
+  metrics: Array<ExpressionValueVisDimension | string>;
+  bucket?: ExpressionValueVisDimension | string;
+}
+
+export type LabelPositionType = $Values<typeof LabelPosition>;
+
+export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
+
+export type LabelsConfig = Labels & { style: Style; position: LabelPositionType };
+
+export type MetricAlignment = 'left' | 'center' | 'right';
+export interface MetricVisParam {
+  autoScaleMetricAlignment?: MetricAlignment;
+  percentageMode: boolean;
+  percentageFormatPattern?: string;
+  metricColorMode: ColorMode;
+  palette?: CustomPaletteState;
+  labels: LabelsConfig;
+  style: MetricStyle;
+  colorFullBackground: boolean;
+  autoScale?: boolean;
+}
+
+export interface VisParams {
+  addTooltip: boolean;
+  addLegend: boolean;
+  dimensions: DimensionsVisParam;
+  metric: MetricVisParam;
+  type: typeof visType;
+}
+
+export interface MetricOptions {
+  value: string;
+  label: string;
+  color?: string;
+  bgColor?: string;
+  lightText: boolean;
+  colIndex: number;
+  rowIndex: number;
+}

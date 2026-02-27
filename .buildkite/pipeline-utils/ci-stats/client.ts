@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios, { Method, AxiosRequestConfig } from 'axios';
+import type { Method, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 export interface CiStatsClientConfig {
   baseUrl?: string;
@@ -162,6 +164,7 @@ export class CiStatsClient {
           jobName: string;
         }
     >;
+    durationPercentile?: number;
     groups: Array<{
       type: string;
       queue?: string;
@@ -169,6 +172,8 @@ export class CiStatsClient {
       maxMin: number;
       minimumIsolationMin?: number;
       overheadMin?: number;
+      warmupMin?: number;
+      concurrency?: number;
       names: string[];
     }>;
   }) => {

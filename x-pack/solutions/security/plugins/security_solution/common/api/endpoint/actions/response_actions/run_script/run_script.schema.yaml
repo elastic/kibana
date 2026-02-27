@@ -1,0 +1,156 @@
+openapi: 3.0.0
+info:
+  title: RunScript Action Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/runscript:
+    post:
+      summary: Run a script
+      operationId: RunScriptAction
+      description: Run a script on a host. Currently supported only for some agent types.
+      x-codegen-enabled: true
+      x-labels: [ ess, serverless ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunScriptRouteRequestBody'
+            examples:
+              SentinelOne:
+                summary: "Run a script against a SentinelOne agent"
+                description: "SentinelOne runscript"
+                value:
+                  endpoint_ids: [ "ed518850-681a-4d60-bb98-e22640cae2a8" ]
+                  agent_type: "sentinel_one"
+                  parameters:
+                    scriptId: "1111-2222-3333-4444-5555-6666-7777-8888"
+                    scriptInput: "--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt"
+              MDE:
+                summary: "Run a script against a Microsoft Defender Endpoint agent"
+                description: "Microsoft Defender Endpoint runscript"
+                value:
+                  endpoint_ids: [ "ed518850-681a-4d60-bb98-e22640cae2a8" ]
+                  agent_type: "microsoft_defender_endpoint"
+                  parameters:
+                    scriptName: "my-script.ps1"
+                    args: "-param1 value1 -param2 value2"
+      responses:
+        '200':
+          description: Action request was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/ResponseActionCreateSuccessResponse'
+components:
+  schemas:
+    RunScriptRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              oneOf:
+                - $ref: '#/components/schemas/RawScriptParameters'
+                - $ref: '#/components/schemas/HostPathScriptParameters'
+                - $ref: '#/components/schemas/CloudFileScriptParameters'
+                - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
+                - $ref: '#/components/schemas/MDERunScriptParameters'
+              description: >
+                One of the following set of parameters must be provided
+    RawScriptParameters:
+      type: object
+      required:
+        - raw
+      properties:
+        raw:
+          type: string
+          minLength: 1
+          description: Raw script content.
+        commandLine:
+          type: string
+          minLength: 1
+          description: Command line arguments.
+        timeout:
+          type: integer
+          minimum: 1
+          description: Timeout in seconds.
+    HostPathScriptParameters:
+      type: object
+      required:
+        - hostPath
+      properties:
+        hostPath:
+          type: string
+          minLength: 1
+          description: Absolute or relative path of script on host machine.
+        commandLine:
+          type: string
+          minLength: 1
+          description: Command line arguments.
+        timeout:
+          type: integer
+          minimum: 1
+          description: Timeout in seconds.
+    CloudFileScriptParameters:
+      type: object
+      required:
+        - cloudFile
+      properties:
+        cloudFile:
+          type: string
+          minLength: 1
+          description: Script name in cloud storage.
+        commandLine:
+          type: string
+          minLength: 1
+          description: Command line arguments.
+        timeout:
+          type: integer
+          minimum: 1
+          description: Timeout in seconds.
+    SentinelOneRunScriptParameters:
+      type: object
+      title: SentinelOne Run Script Parameters
+      required:
+        - scriptId
+      description: Parameters for Run Script response action against SentinelOne agent type.
+      example:
+        endpoint_ids: [ "endpoint-id-1" ]
+        agent_type: "sentinel_one"
+        parameters:
+          scriptId: "1111-2222-3333-4444-5555-6666-7777-8888"
+          scriptInput: "--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt"
+      properties:
+        scriptId:
+          type: string
+          minLength: 1
+          description: The script ID from SentinelOne scripts library that will be executed.
+        scriptInput:
+          type: string
+          minLength: 1
+          description: The input parameter arguments for the script that was selected.
+    MDERunScriptParameters:
+      type: object
+      title: Microsoft Defender Endpoint Run Script Parameters
+      required:
+        - scriptName
+      description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
+      example:
+        endpoint_ids: [ "endpoint-id-1" ]
+        agent_type: "microsoft_defender_endpoint"
+        parameters:
+          scriptName: "my-script.ps1"
+          args: "-param1 value1 -param2 value2"
+      properties:
+        scriptName:
+          type: string
+          minLength: 1
+          description: The name of the script to execute from the cloud storage.
+        args:
+          type: string
+          minLength: 1
+          description: Optional command line arguments for the script.
+

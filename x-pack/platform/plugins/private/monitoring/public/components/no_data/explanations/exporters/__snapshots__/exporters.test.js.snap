@@ -1,0 +1,152 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplainExporters should explain about xpack.monitoring.exporters setting 1`] = `
+Array [
+  <h2
+    class="euiTitle emotion-euiTitle-l"
+  >
+    You need to make some adjustments
+  </h2>,
+  <span
+    class="emotion-euiTextColor-subdued"
+  >
+    <div
+      class="euiText emotion-euiText-m"
+    >
+      <p>
+        To run monitoring please perform the following steps
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
+  />,
+  <div
+    class="euiText eui-textLeft emotion-euiText-m"
+  >
+    <p>
+      We checked the 
+      <code>
+        esProd001
+      </code>
+       settings for 
+      <code>
+        xpack.monitoring.exporters
+      </code>
+      , and found the reason: 
+      <code>
+        myMonitoringClusterExporter1
+      </code>
+      .
+    </p>
+    <p>
+      Using monitoring exporters to ship the monitoring data to a remote monitoring cluster is highly recommended as it keeps the integrity of the monitoring data safe no matter what the state of the production cluster. However, as this instance of Kibana could not find any monitoring data, there seems to be a problem with the 
+      <code>
+        xpack.monitoring.exporters
+      </code>
+       configuration, or the 
+      <code>
+        xpack.monitoring.elasticsearch
+      </code>
+       settings in 
+      <code>
+        kibana.yml
+      </code>
+      .
+    </p>
+    <p>
+      Check that the intended exporters are enabled for sending statistics to the monitoring cluster, and that the monitoring cluster host matches the 
+      <code>
+        xpack.monitoring.elasticsearch
+      </code>
+       setting in 
+      <code>
+        kibana.yml
+      </code>
+       to see monitoring data in this instance of Kibana.
+    </p>
+  </div>,
+]
+`;
+
+exports[`ExplainExportersCloud should explain about xpack.monitoring.exporters setting in a cloud environment 1`] = `
+Array [
+  <span
+    class="emotion-euiTextColor-subdued"
+  >
+    <div
+      class="euiText emotion-euiText-m"
+    >
+      <p>
+        Configure monitoring through 
+        <a
+          class="euiLink emotion-euiLink-primary"
+          href="https://cloud.elastic.co/deployments"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Elasticsearch Service Console
+          <span
+            class="emotion-EuiExternalLinkIcon"
+            data-euiicon-type="popout"
+            role="presentation"
+          />
+          <span
+            class="emotion-euiScreenReaderOnly"
+          >
+            (external, opens in a new tab or window)
+          </span>
+        </a>
+         Go to 
+        <a
+          class="euiLink emotion-euiLink-primary"
+          href="https://cloud.elastic.co/deployments"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Logs and metrics
+          <span
+            class="emotion-EuiExternalLinkIcon"
+            data-euiicon-type="popout"
+            role="presentation"
+          />
+          <span
+            class="emotion-euiScreenReaderOnly"
+          >
+            (external, opens in a new tab or window)
+          </span>
+        </a>
+         section for a deployment to configure monitoring. For more information visit 
+        <a
+          class="euiLink emotion-euiLink-primary"
+          href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          the documentation page.
+          <span
+            class="emotion-EuiExternalLinkIcon"
+            data-euiicon-type="popout"
+            role="presentation"
+          />
+          <span
+            class="emotion-euiScreenReaderOnly"
+          >
+            (external, opens in a new tab or window)
+          </span>
+        </a>
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
+  />,
+  <div
+    class="euiText eui-textLeft emotion-euiText-m"
+  >
+    <p>
+      In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.
+    </p>
+  </div>,
+]
+`;

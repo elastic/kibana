@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
+import { write, copyAll, mkdirp, exec } from '../../../lib';
+import type { Config, Build, Solution } from '../../../lib';
 import * as dockerTemplates from './templates';
-import { TemplateContext } from './template_context';
+import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);
@@ -29,7 +31,7 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
-    baseImage: 'none' | 'ubi' | 'ubuntu';
+    baseImage: 'none' | 'wolfi' | 'ubi';
     context: boolean;
     image: boolean;
     ironbank?: boolean;
@@ -37,18 +39,32 @@ export async function runDockerGenerator(
     serverless?: boolean;
     dockerBuildDate?: string;
     fips?: boolean;
+    solution?: Solution;
   }
 ) {
   let baseImageName = '';
-  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
-  if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
+  if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi9-minimal:latest';
+  /**
+   * Renovate config contains a regex manager to automatically update both Chainguard references
+   *
+   * If this logic moves to another file or under another name, then the Renovate regex manager
+   * for automatic Chainguard updates will break.
+   */
+  if (flags.baseImage === 'wolfi')
+    baseImageName =
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:b5a03b6a754fa2f9a29e44e316a6c4df1f606cd8a3cd8810ce3d6a3a3134428b';
 
   let imageFlavor = '';
-  if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
+  if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
-  if (flags.fips) imageFlavor += '-fips';
+  if (flags.solution) imageFlavor += `-${flags.solution.artifact}`;
+  if (flags.fips) {
+    imageFlavor += '-fips';
+    baseImageName =
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:11d66ae7ec7ca1d5a7289750bdd96eb3d8eb592e5b7377f1fc8e4fb556fa7383';
+  }
 
   // General docker var config
   const license = 'Elastic License';
@@ -61,16 +77,24 @@ export async function runDockerGenerator(
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactPrefix = `kibana-${version}-linux`;
+  let artifactVariant = '';
+  let artifactSolution = '';
+  if (flags.serverless) artifactVariant = '-serverless';
+  if (flags.solution) artifactSolution = `-${flags.solution.artifact}`;
+  const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
-  const metricbeatTarball = `metricbeat-${version}-linux-${beatsArchitecture}.tar.gz`;
-  const filebeatTarball = `filebeat-${version}-linux-${beatsArchitecture}.tar.gz`;
+  const metricbeatTarball = `metricbeat${
+    flags.fips ? '-fips' : ''
+  }-${version}-linux-${beatsArchitecture}.tar.gz`;
+  const filebeatTarball = `filebeat${
+    flags.fips ? '-fips' : ''
+  }-${version}-linux-${beatsArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
-  const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
+  const imageArchitecture = flags.architecture === 'aarch64' ? '-arm64' : '-amd64';
   const dockerTargetFilename = config.resolveFromTarget(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
@@ -132,7 +156,14 @@ export async function runDockerGenerator(
   // Write all the needed docker config files
   // into kibana-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
-    await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
+    let filename: string;
+    if (!dockerTemplate.name.includes('kibana.yml')) {
+      filename = `${dockerTemplate.name}.${artifactArchitecture}`;
+    } else {
+      filename = dockerTemplate.name;
+    }
+
+    await write(resolve(dockerBuildDir, filename), dockerTemplate.generator(scope));
   }
 
   // Copy serverless-only configuration files
@@ -163,7 +194,8 @@ export async function runDockerGenerator(
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
-  await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
+  const dockerBuildScript = `build_docker.sh.${artifactArchitecture}`;
+  await chmodAsync(`${resolve(dockerBuildDir, dockerBuildScript)}`, '755');
 
   // Only build images on native targets
   if (flags.image) {
@@ -182,9 +214,10 @@ export async function runDockerGenerator(
       await linkAsync(src, dest);
     }
 
-    await exec(log, `./build_docker.sh`, [], {
+    await exec(log, `./${dockerBuildScript}`, [], {
       cwd: dockerBuildDir,
       level: 'info',
+      build,
     });
   }
 

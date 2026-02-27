@@ -29,7 +29,9 @@
         "signature": [
           "(options: Cypress.ConfigOptions<any> | undefined) => Cypress.ConfigOptions<any>"
         ],
-        "path": "packages/kbn-cypress-config/index.ts",
+        "path": "src/platform/packages/shared/kbn-cypress-config/index.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +45,9 @@
             "signature": [
               "Cypress.ConfigOptions<any> | undefined"
             ],
-            "path": "packages/kbn-cypress-config/index.ts",
+            "path": "src/platform/packages/shared/kbn-cypress-config/index.ts",
+            "lineNumber": 109,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -55,7 +59,22 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/cypress-config",
+        "id": "def-common.SCOUT_CYPRESS_REPORTER_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_CYPRESS_REPORTER_PATH",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-cypress-config/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

@@ -1,0 +1,222 @@
+{
+  "id": "@kbn/language-documentation",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/language-documentation",
+        "id": "def-common.LanguageDocumentationFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "LanguageDocumentationFlyout",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<DocumentationFlyoutProps> & { readonly type: ({ searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationFlyoutProps) => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_flyout/index.tsx",
+        "lineNumber": 133,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/language-documentation",
+            "id": "def-common.LanguageDocumentationFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/language-documentation",
+        "id": "def-common.LanguageDocumentationInline",
+        "type": "Function",
+        "tags": [],
+        "label": "LanguageDocumentationInline",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<DocumentationInlineProps> & { readonly type: ({ searchInDescription, height }: DocumentationInlineProps) => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_inline/index.tsx",
+        "lineNumber": 95,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/language-documentation",
+            "id": "def-common.LanguageDocumentationInline.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/language-documentation",
+        "id": "def-common.LanguageDocumentationPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "LanguageDocumentationPopover",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationPopoverProps) => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_popover/index.tsx",
+        "lineNumber": 84,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/language-documentation",
+            "id": "def-common.LanguageDocumentationPopover.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/language-documentation",
+        "id": "def-common.LanguageDocumentationPopoverContent",
+        "type": "Function",
+        "tags": [],
+        "label": "LanguageDocumentationPopoverContent",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<DocumentationProps> & { readonly type: ({ language, sections, searchInDescription, linkToDocumentation, }: DocumentationProps) => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_popover/popover_content.tsx",
+        "lineNumber": 296,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/language-documentation",
+            "id": "def-common.LanguageDocumentationPopoverContent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/language-documentation",
+        "id": "def-common.LanguageDocumentationSections",
+        "type": "Interface",
+        "tags": [],
+        "label": "LanguageDocumentationSections",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/language-documentation",
+            "id": "def-common.LanguageDocumentationSections.groups",
+            "type": "Array",
+            "tags": [],
+            "label": "groups",
+            "description": [],
+            "signature": [
+              "DocumentationGroup",
+              "[]"
+            ],
+            "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/language-documentation",
+            "id": "def-common.LanguageDocumentationSections.initialSection",
+            "type": "Object",
+            "tags": [],
+            "label": "initialSection",
+            "description": [],
+            "signature": [
+              "JSX.Element"
+            ],
+            "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

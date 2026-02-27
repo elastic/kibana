@@ -24,7 +24,9 @@
         "signature": [
           "{ readonly enabled: boolean; }"
         ],
-        "path": "x-pack/plugins/painless_lab/server/index.ts",
+        "path": "x-pack/platform/plugins/private/painless_lab/server/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -56,7 +58,9 @@
           },
           "<true, boolean, boolean>; }>"
         ],
-        "path": "x-pack/plugins/painless_lab/server/index.ts",
+        "path": "x-pack/platform/plugins/private/painless_lab/server/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

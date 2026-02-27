@@ -14,29 +14,23 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-metrics-server-mocks",
-        "id": "def-common.metricsServiceMock",
+        "id": "def-server.metricsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "metricsServiceMock",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+        "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.create",
+            "id": "def-server.metricsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +38,9 @@
             "signature": [
               "() => jest.Mocked<MetricsServiceContract>"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -52,23 +48,19 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createSetupContract",
+            "id": "def-server.metricsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              },
+              "MetricsServiceSetup",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -76,23 +68,19 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createStartContract",
+            "id": "def-server.metricsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              },
+              "MetricsServiceSetup",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -100,23 +88,19 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createInternalSetupContract",
+            "id": "def-server.metricsServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              },
+              "MetricsServiceSetup",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -124,23 +108,19 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createInternalStartContract",
+            "id": "def-server.metricsServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.MetricsServiceSetup",
-                "text": "MetricsServiceSetup"
-              },
+              "MetricsServiceSetup",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -148,22 +128,18 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.metricsServiceMock.createEventLoopDelaysMonitor",
+            "id": "def-server.metricsServiceMock.createEventLoopDelaysMonitor",
             "type": "Function",
             "tags": [],
             "label": "createEventLoopDelaysMonitor",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-metrics-collectors-server-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-                "section": "def-common.EventLoopDelaysMonitor",
-                "text": "EventLoopDelaysMonitor"
-              }
+              "EventLoopDelaysMonitor"
             ],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -174,45 +150,53 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-server-mocks",
-        "id": "def-common.sampleEsClientMetrics",
+        "id": "def-server.sampleEsClientMetrics",
         "type": "Object",
         "tags": [],
         "label": "sampleEsClientMetrics",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+        "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.sampleEsClientMetrics.totalActiveSockets",
+            "id": "def-server.sampleEsClientMetrics.totalActiveSockets",
             "type": "number",
             "tags": [],
             "label": "totalActiveSockets",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.sampleEsClientMetrics.totalIdleSockets",
+            "id": "def-server.sampleEsClientMetrics.totalIdleSockets",
             "type": "number",
             "tags": [],
             "label": "totalIdleSockets",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-server-mocks",
-            "id": "def-common.sampleEsClientMetrics.totalQueuedRequests",
+            "id": "def-server.sampleEsClientMetrics.totalQueuedRequests",
             "type": "number",
             "tags": [],
             "label": "totalQueuedRequests",
             "description": [],
-            "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
+            "path": "src/core/packages/metrics/server-mocks/src/metrics_service.mock.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -220,5 +204,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

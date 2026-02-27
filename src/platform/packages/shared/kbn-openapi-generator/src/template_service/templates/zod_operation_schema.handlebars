@@ -1,0 +1,102 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+ {{> disclaimer}}
+
+import type { ZodTypeDef } from '@kbn/zod';
+{{#if config.experimentallyImportZodV4}}
+import { z } from '@kbn/zod/v4';
+{{else}}
+import { z } from '@kbn/zod';
+{{/if}}
+import { requiredOptional, isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
+
+{{#each imports}}
+import {
+  {{#each this}}{{.}},{{/each}}
+} from "{{@key}}"
+{{/each}}
+
+{{#each components.schemas}}
+{{#if description}}
+/**
+  * {{{description}}}
+  {{#if deprecated}}
+  * @deprecated
+  {{/if}}
+  */
+{{/if}}
+{{#if (isCircularSchema @key)}}
+export type {{transformSchemaName @key}} = {{> ts_type}};
+export type {{transformSchemaName @key}}Input = {{> ts_input_type }};
+export const {{transformSchemaName @key}}: z.ZodType<{{transformSchemaName @key}}, ZodTypeDef, {{transformSchemaName @key}}Input> = {{> zod_schema_item }};
+{{else}}
+{{#if (shouldCastExplicitly this)}}
+{{!-- We need this temporary type to infer from it below, but in the end we want to export as a casted {{transformSchemaName @key}} type --}}
+{{!-- error TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed. --}}
+export const {{transformSchemaName @key}}Internal = {{> zod_schema_item}};
+
+export type {{transformSchemaName @key}} = z.infer<typeof {{transformSchemaName @key}}Internal>;
+export const {{transformSchemaName @key}} = {{transformSchemaName @key}}Internal as z.ZodType<{{transformSchemaName @key}}>;
+{{else}}
+export type {{transformSchemaName @key}} = z.infer<typeof {{transformSchemaName @key}}>;
+export const {{transformSchemaName @key}} = {{> zod_schema_item}};
+{{/if }}
+{{/if}}
+{{#if enum}}
+{{#unless (isSingle enum)}}
+export type {{transformSchemaName @key}}Enum = typeof {{transformSchemaName @key}}.enum;
+export const {{transformSchemaName @key}}Enum = {{transformSchemaName @key}}.enum;
+{{/unless}}
+{{/if}}
+
+{{/each}}
+
+{{#each operations}}
+{{#if requestQuery}}
+{{#if requestQuery.description}}
+/**
+* {{{requestQuery.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestQuery = z.infer<typeof {{operationId}}RequestQuery>;
+export const {{operationId}}RequestQuery = {{> zod_query_item requestQuery }};
+export type {{operationId}}RequestQueryInput = z.input<typeof {{operationId}}RequestQuery>;
+{{/if}}
+
+{{#if requestParams}}
+{{#if requestParams.description}}
+/**
+* {{{requestParams.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestParams = z.infer<typeof {{operationId}}RequestParams>;
+export const {{operationId}}RequestParams = {{> zod_schema_item requestParams }};
+export type {{operationId}}RequestParamsInput = z.input<typeof {{operationId}}RequestParams>;
+{{/if}}
+
+{{#if requestBody}}
+{{#if requestBody.description}}
+/**
+* {{{requestBody.description}}}
+*/
+{{/if}}
+export type {{operationId}}RequestBody = z.infer<typeof {{operationId}}RequestBody>;
+export const {{operationId}}RequestBody = {{> zod_schema_item requestBody }};
+export type {{operationId}}RequestBodyInput = z.input<typeof {{operationId}}RequestBody>;
+{{/if}}
+
+{{#if response}}
+{{#if response.description}}
+/**
+* {{{response.description}}}
+*/
+{{/if}}
+export type {{operationId}}Response = z.infer<typeof {{operationId}}Response>;
+export const {{operationId}}Response = {{> zod_schema_item response }};
+{{/if}}
+{{/each}}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -16,7 +17,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'wait_for_migration_completion.log');
 
@@ -34,14 +35,8 @@ describe('migration with waitForCompletion=true', () => {
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await root?.shutdown();
+    await esServer?.stop();
   });
 
   it('waits for another instance to complete the migration', async () => {
@@ -60,7 +55,7 @@ describe('migration with waitForCompletion=true', () => {
     await root.preboot();
     await root.setup();
 
-    root.start();
+    void root.start();
     const esClient = esServer.es.getClient();
 
     await retryAsync(
@@ -128,6 +123,7 @@ function createRoot() {
     {
       migrations: {
         skip: false,
+        useCumulativeLogger: false,
       },
       node: {
         roles: ['background_tasks'],

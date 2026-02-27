@@ -1,0 +1,124 @@
+openapi: 3.0.3
+info:
+  title: User session management APIs
+  description: Kibana APIs for user session management
+  version: "1.0.1"
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: user session
+    x-displayName: User session management
+servers:
+  - url: /
+paths:
+  /api/security/session/_invalidate:
+    post:
+      summary: Invalidate user sessions
+      tags:
+        - user session
+      description: >
+        Invalidate user sessions that match a query.
+        To use this API, you must be a superuser.
+      operationId: post-security-session-invalidate
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - match
+              properties:
+                match:
+                  enum:
+                    - all
+                    - query
+                  type: string
+                  description: >
+                    The method Kibana uses to determine which sessions to invalidate.
+                    If it is `all`, all existing sessions will be invalidated.
+                    If it is `query`, only the sessions that match the query will be invalidated.
+                query:
+                  type: object
+                  description: >
+                    The query that Kibana uses to match the sessions to invalidate when the `match` parameter is set to `query`.
+                  required:
+                    - provider
+                  properties:
+                    provider:
+                      type: object
+                      description: The authentication providers that will have their user sessions invalidated.
+                      properties:
+                        name:
+                          type: string
+                          description: The authentication provider name.
+                        type:
+                          type: string
+                          description: >
+                            The authentication provide type.
+                            For example: `basic`, `token`, `saml`, `oidc`, `kerberos`, or `pki`.
+                      required:
+                        - type
+                    username:
+                      type: string
+                      description: The username that will have its sessions invalidated.
+            examples:
+              invalidateRequestExample1:
+                summary:  Invalidate all sessions
+                description: Run `POST api/security/session/_invalidate` to invalidate all existing sessions.
+                value: |-
+                  {
+                    "match" : "all"
+                  }
+              invalidateRequestExample2:
+                summary: Invalidate all SAML sessions
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any SAML authentication provider.
+                value: |-
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "saml" }
+                    }
+                  }
+              invalidateRequestExample3:
+                summary: Invalidate sessions for a provider
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by the SAML authentication provider named `saml1`.
+                value: |-
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "saml", "name": "saml1" }
+                    }
+                  }
+              invalidateRequestExample4:
+                summary: Invalidate sessions for a user
+                description: Run `POST api/security/session/_invalidate` to invalidate sessions that were created by any OpenID Connect authentication provider for the user with the username `user@my-oidc-sso.com`.
+                value: |-
+                  {
+                    "match" : "query",
+                    "query": {
+                      "provider" : { "type": "oidc" },
+                      "username": "user@my-oidc-sso.com"
+                    }
+                  }
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: The number of sessions that were successfully invalidated.
+        '403':
+          description: Indicates that the user may not be authorized to invalidate sessions for other users.

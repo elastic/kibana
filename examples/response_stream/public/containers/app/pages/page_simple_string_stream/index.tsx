@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,
@@ -66,7 +68,13 @@ export const PageSimpleStringStream: FC = () => {
       <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+          <EuiButton
+            data-test-subj="responseStreamStartButton"
+            color="primary"
+            size="s"
+            onClick={onClickHandler}
+            aria-label={buttonLabel}
+          >
             {buttonLabel}
           </EuiButton>
         </EuiFlexItem>
@@ -77,14 +85,18 @@ export const PageSimpleStringStream: FC = () => {
         label="Toggle compression setting for response stream."
         checked={compressResponse}
         onChange={(e) => setCompressResponse(!compressResponse)}
-        compressed
       />
       <EuiSpacer />
       <EuiText>
-        <p>{data}</p>
+        <p data-test-subj="responseStreamString">{data}</p>
       </EuiText>
       {errors.length > 0 && (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
+        <EuiCallOut
+          announceOnMount
+          title="Sorry, there was an error"
+          color="danger"
+          iconType="warning"
+        >
           {errors.length === 1 ? (
             <p>{errors[0]}</p>
           ) : (

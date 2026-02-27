@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/spaces-test-plugin",
+  "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "spacesTestPlugin",
+    "server": true,
+    "browser": false
+  }
+}

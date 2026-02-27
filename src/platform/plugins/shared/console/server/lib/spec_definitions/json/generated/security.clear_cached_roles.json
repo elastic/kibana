@@ -1,0 +1,21 @@
+{
+  "security.clear_cached_roles": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/role/{name}/_clear_cache"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-roles",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

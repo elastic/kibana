@@ -10,40 +10,36 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-rendering-server-internal",
-        "id": "def-common.Fonts",
+        "id": "def-server.Fonts",
         "type": "Function",
         "tags": [],
         "label": "Fonts",
         "description": [],
         "signature": [
-          "({ url }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ url }: Props) => React.JSX.Element"
         ],
-        "path": "packages/core/rendering/core-rendering-server-internal/src/views/fonts.tsx",
+        "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
+        "lineNumber": 222,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-rendering-server-internal",
-            "id": "def-common.Fonts.$1",
-            "type": "CompoundType",
+            "id": "def-server.Fonts.$1",
+            "type": "Object",
             "tags": [],
             "label": "{ url }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
-            "path": "packages/core/rendering/core-rendering-server-internal/src/views/fonts.tsx",
+            "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
+            "lineNumber": 222,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -53,6 +49,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

@@ -1,0 +1,5073 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-endpoint.metrics-01",
+    "source": {
+      "agent": {
+        "build": {
+          "original": "version: 8.6.0, compiled: Mon Jan 2 23:00:00 2023, branch: 8.6, commit: e2d09ff1b8e49bfb5f8940d317eb4ac96672d956"
+        },
+        "id": "456",
+        "type": "endpoint",
+        "version": "8.6.0"
+      },
+      "@timestamp": "2024-01-26T14:38:30.628421712Z",
+      "Endpoint": {
+        "metrics": {
+          "system_impact": [
+            {
+              "process": {
+                "executable": "/usr/bin/amazon-ssm-agent"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 36
+              },
+              "process_events": {
+                "week_idle_ms": 5,
+                "week_ms": 12487
+              },
+              "overall": {
+                "week_idle_ms": 5,
+                "week_ms": 12523
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/ps"
+              },
+              "process_events": {
+                "week_idle_ms": 8692,
+                "week_ms": 10288
+              },
+              "overall": {
+                "week_idle_ms": 8692,
+                "week_ms": 10288
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/sshd"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 116
+              },
+              "process_events": {
+                "week_idle_ms": 3621,
+                "week_ms": 7204
+              },
+              "network_events": {
+                "week_idle_ms": 97,
+                "week_ms": 0
+              },
+              "overall": {
+                "week_idle_ms": 3718,
+                "week_ms": 7320
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/dhclient-script"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 430
+              },
+              "process_events": {
+                "week_idle_ms": 152054,
+                "week_ms": 6229
+              },
+              "overall": {
+                "week_idle_ms": 152054,
+                "week_ms": 6659
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/crond"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 73
+              },
+              "process_events": {
+                "week_idle_ms": 9491,
+                "week_ms": 2060
+              },
+              "overall": {
+                "week_idle_ms": 9491,
+                "week_ms": 2133
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 80958,
+                "week_ms": 1963
+              },
+              "process": {
+                "executable": "/usr/lib/systemd/systemd"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 23
+              },
+              "process_events": {
+                "week_idle_ms": 6,
+                "week_ms": 7
+              },
+              "overall": {
+                "week_idle_ms": 80964,
+                "week_ms": 1993
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/logger"
+              },
+              "process_events": {
+                "week_idle_ms": 25156,
+                "week_ms": 1097
+              },
+              "overall": {
+                "week_idle_ms": 25156,
+                "week_ms": 1097
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 12,
+                "week_ms": 0
+              },
+              "process": {
+                "executable": "/usr/lib64/sa/sadc"
+              },
+              "process_events": {
+                "week_idle_ms": 4182,
+                "week_ms": 1005
+              },
+              "overall": {
+                "week_idle_ms": 4194,
+                "week_ms": 1005
+              }
+            },
+            {
+              "process": {
+                "executable": "unknown"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 981
+              },
+              "overall": {
+                "week_idle_ms": 0,
+                "week_ms": 981
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/date"
+              },
+              "process_events": {
+                "week_idle_ms": 8682,
+                "week_ms": 856
+              },
+              "overall": {
+                "week_idle_ms": 8682,
+                "week_ms": 856
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 89949,
+                "week_ms": 835
+              },
+              "process": {
+                "executable": "/usr/lib/systemd/systemd-logind (deleted)"
+              },
+              "overall": {
+                "week_idle_ms": 89949,
+                "week_ms": 835
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/cat"
+              },
+              "process_events": {
+                "week_idle_ms": 28801,
+                "week_ms": 754
+              },
+              "overall": {
+                "week_idle_ms": 28801,
+                "week_ms": 754
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/lib64/sa/sa1"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 69
+              },
+              "process_events": {
+                "week_idle_ms": 7188,
+                "week_ms": 637
+              },
+              "overall": {
+                "week_idle_ms": 7188,
+                "week_ms": 706
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/cut"
+              },
+              "process_events": {
+                "week_idle_ms": 7258,
+                "week_ms": 660
+              },
+              "overall": {
+                "week_idle_ms": 7258,
+                "week_ms": 660
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/ipcalc"
+              },
+              "process_events": {
+                "week_idle_ms": 6603,
+                "week_ms": 477
+              },
+              "overall": {
+                "week_idle_ms": 6603,
+                "week_ms": 477
+              }
+            },
+            {
+              "process": {
+                "executable": "/sbin/ip"
+              },
+              "process_events": {
+                "week_idle_ms": 14654,
+                "week_ms": 470
+              },
+              "overall": {
+                "week_idle_ms": 14654,
+                "week_ms": 470
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/curl"
+              },
+              "process_events": {
+                "week_idle_ms": 4696,
+                "week_ms": 432
+              },
+              "network_events": {
+                "week_idle_ms": 3120,
+                "week_ms": 20
+              },
+              "overall": {
+                "week_idle_ms": 7816,
+                "week_ms": 452
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/run-parts"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 66
+              },
+              "process_events": {
+                "week_idle_ms": 4219,
+                "week_ms": 354
+              },
+              "overall": {
+                "week_idle_ms": 4219,
+                "week_ms": 420
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/dhclient"
+              },
+              "process_events": {
+                "week_idle_ms": 3,
+                "week_ms": 326
+              },
+              "overall": {
+                "week_idle_ms": 3,
+                "week_ms": 326
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/sh"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 51
+              },
+              "process_events": {
+                "week_idle_ms": 2569,
+                "week_ms": 239
+              },
+              "overall": {
+                "week_idle_ms": 2569,
+                "week_ms": 290
+              }
+            }
+          ],
+          "memory": {
+            "endpoint": {
+              "private": {
+                "mean": 119318921,
+                "latest": 136073216
+              }
+            }
+          },
+          "disks": [
+            {
+              "total": 0,
+              "free": 0,
+              "device": "sysfs",
+              "mount": "/sys",
+              "fstype": "sysfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "proc",
+              "mount": "/proc",
+              "fstype": "proc"
+            },
+            {
+              "total": 4157120512,
+              "free": 4157120512,
+              "device": "devtmpfs",
+              "mount": "/dev",
+              "fstype": "devtmpfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "securityfs",
+              "mount": "/sys/kernel/security",
+              "fstype": "securityfs"
+            },
+            {
+              "total": 4166328320,
+              "free": 4166328320,
+              "device": "tmpfs",
+              "mount": "/dev/shm",
+              "fstype": "tmpfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "devpts",
+              "mount": "/dev/pts",
+              "fstype": "devpts"
+            },
+            {
+              "total": 4166328320,
+              "free": 4165955584,
+              "device": "tmpfs",
+              "mount": "/run",
+              "fstype": "tmpfs"
+            },
+            {
+              "total": 4166328320,
+              "free": 4166328320,
+              "device": "tmpfs",
+              "mount": "/sys/fs/cgroup",
+              "fstype": "tmpfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/systemd",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "pstore",
+              "mount": "/sys/fs/pstore",
+              "fstype": "pstore"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/devices",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/cpu,cpuacct",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/perf_event",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/pids",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/blkio",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/net_cls,net_prio",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/freezer",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/memory",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/cpuset",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/hugetlb",
+              "fstype": "cgroup"
+            },
+            {
+              "endpoint_drive": true,
+              "total": 8577331200,
+              "free": 1841799168,
+              "device": "/dev/xvda1",
+              "mount": "/",
+              "fstype": "xfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "mqueue",
+              "mount": "/dev/mqueue",
+              "fstype": "mqueue"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "hugetlbfs",
+              "mount": "/dev/hugepages",
+              "fstype": "hugetlbfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "debugfs",
+              "mount": "/sys/kernel/debug",
+              "fstype": "debugfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "sunrpc",
+              "mount": "/var/lib/nfs/rpc_pipefs",
+              "fstype": "rpc_pipefs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "systemd-1",
+              "mount": "/proc/sys/fs/binfmt_misc",
+              "fstype": "autofs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "binfmt_misc",
+              "mount": "/proc/sys/fs/binfmt_misc",
+              "fstype": "binfmt_misc"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "tracefs",
+              "mount": "/sys/kernel/debug/tracing",
+              "fstype": "tracefs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "none",
+              "mount": "/sys/fs/bpf",
+              "fstype": "bpf"
+            }
+          ],
+          "documents_volume": {
+            "file_events": {
+              "suppressed_count": 3928398,
+              "suppressed_bytes": 0,
+              "sent_count": 0,
+              "sent_bytes": 0
+            },
+            "process_events": {
+              "suppressed_count": 0,
+              "suppressed_bytes": 0,
+              "sent_count": 5689500,
+              "sent_bytes": 12905842838
+            },
+            "network_events": {
+              "suppressed_count": 23529207,
+              "suppressed_bytes": 0,
+              "sent_count": 0,
+              "sent_bytes": 0
+            },
+            "overall": {
+              "suppressed_count": 27457605,
+              "suppressed_bytes": 0,
+              "sent_count": 5689500,
+              "sent_bytes": 12905842838
+            }
+          },
+          "malicious_behavior_rules": [
+            {
+              "id": "123",
+              "endpoint_uptime_percent": 0
+            }
+          ],
+          "cpu": {
+            "endpoint": {
+              "histogram": {
+                "counts": [
+                  3439059,
+                  129,
+                  15,
+                  0,
+                  5,
+                  6,
+                  4,
+                  0,
+                  3,
+                  4,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "values": [
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35,
+                  40,
+                  45,
+                  50,
+                  55,
+                  60,
+                  65,
+                  70,
+                  75,
+                  80,
+                  85,
+                  90,
+                  95,
+                  100
+                ]
+              },
+              "mean": 0.2374646952923115,
+              "latest": 0.1
+            }
+          },
+          "threads": [
+            {
+              "name": "Cron",
+              "cpu": {
+                "mean": 0.00252963994365742
+              }
+            },
+            {
+              "name": "FileLogThread",
+              "cpu": {
+                "mean": 0.0006221101490102125
+              }
+            },
+            {
+              "name": "LoggingLimitThread",
+              "cpu": {
+                "mean": 0.0003625542590258192
+              }
+            },
+            {
+              "name": "DocumentLoggingThread",
+              "cpu": {
+                "mean": 0.001359578471346822
+              }
+            },
+            {
+              "name": "DocumentLoggingMaintenance",
+              "cpu": {
+                "mean": 0.0001029983690414259
+              }
+            },
+            {
+              "name": "BulkConsumerThread",
+              "cpu": {
+                "mean": 0.009533529038474382
+              }
+            },
+            {
+              "name": "DocumentLoggingConsumerThread",
+              "cpu": {
+                "mean": 0.1315907162873257
+              }
+            },
+            {
+              "name": "DocumentLoggingLimitThread",
+              "cpu": {
+                "mean": 0.0002471960856994222
+              }
+            },
+            {
+              "name": "ArtifactManifestDownload",
+              "cpu": {
+                "mean": 0.001561455274668017
+              }
+            },
+            {
+              "name": "PolicyReloadThread",
+              "cpu": {
+                "mean": 0.00001235980428497111
+              }
+            },
+            {
+              "name": "PerformanceMonitorWorkerThread",
+              "cpu": {
+                "mean": 0.004639046541625823
+              }
+            },
+            {
+              "name": "MetadataThread",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "EventsQueueThread",
+              "cpu": {
+                "mean": 0.05644722616946305
+              }
+            },
+            {
+              "name": "DelayedAlertEnrichment",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "MaintainProcessMap",
+              "cpu": {
+                "mean": 0.002167085684631601
+              }
+            },
+            {
+              "name": "FileScoreThread",
+              "cpu": {
+                "mean": 0.002241244510341427
+              }
+            },
+            {
+              "name": "DiagnosticMalwareThread",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "QuarantineManagerWorkerThread",
+              "cpu": {
+                "mean": 0.002014648098450291
+              }
+            },
+            {
+              "name": "EventProcessingThread",
+              "cpu": {
+                "mean": 0.00583794755726802
+              }
+            },
+            {
+              "name": "HostIsolationMonitorThread",
+              "cpu": {
+                "mean": 0.0008281068870930642
+              }
+            },
+            {
+              "name": "MountMonitor",
+              "cpu": {
+                "mean": 0.003407186047890369
+              }
+            },
+            {
+              "name": "responseActionsUploadThread",
+              "cpu": {
+                "mean": 0.00208468698939846
+              }
+            },
+            {
+              "name": "responseActionsProcessThread",
+              "cpu": {
+                "mean": 0.002105286663206745
+              }
+            },
+            {
+              "name": "serviceCommsThread",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "grpcConnectionManagerThread",
+              "cpu": {
+                "mean": 0.002344242879382854
+              }
+            },
+            {
+              "name": "checkinAPIThread",
+              "cpu": {
+                "mean": 0.0002513162482505196
+              }
+            },
+            {
+              "name": "actionsAPIThread",
+              "cpu": {
+                "mean": 0.0004985125580051291
+              }
+            },
+            {
+              "name": "stateReportThread",
+              "cpu": {
+                "mean": 0.004400094313632049
+              }
+            },
+            {
+              "name": "EventsLoopThread",
+              "cpu": {
+                "mean": 0.008866112391817567
+              }
+            },
+            {
+              "name": "FanotifyWatchdog",
+              "cpu": {
+                "mean": 0.0002142369165309078
+              }
+            },
+            {
+              "name": "FanotifySyncConsumer",
+              "cpu": {
+                "mean": 0.001042344997736917
+              }
+            },
+            {
+              "name": "FanotifyAsyncConsumer",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "FanotifyConsumer",
+              "cpu": {
+                "mean": 0.03632551717409642
+              }
+            },
+            {
+              "name": "RulesEngineThread",
+              "cpu": {
+                "mean": 0.03752853985923151
+              }
+            }
+          ],
+          "event_filter": {
+            "active_global_count": 0,
+            "active_user_count": 0
+          },
+          "uptime": {
+            "endpoint": 24272228,
+            "system": 29719735
+          }
+        }
+      },
+      "ecs": {
+        "version": "1.11.0"
+      },
+      "data_stream": {
+        "namespace": "default",
+        "type": "metrics",
+        "dataset": "endpoint.metrics"
+      },
+      "elastic": {
+        "agent": {
+          "id": "123"
+        }
+      },
+      "host": {
+        "hostname": "123",
+        "os": {
+          "Ext": {
+            "variant": "Amazon Linux"
+          },
+          "kernel": "5.10.102-99.473.amzn2.x86_64 #1 SMP Wed Mar 2 19:14:12 UTC 2022",
+          "name": "Linux",
+          "family": "amazon linux",
+          "type": "linux",
+          "version": "2",
+          "platform": "amazon linux",
+          "full": "Amazon Linux 2"
+        },
+        "ip": [
+          "127.0.0.1",
+          "::1"
+        ],
+        "name": "123",
+        "id": "123",
+        "mac": [
+          "aa:aa:aa:aa:aa:aa"
+        ],
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "sequence": 33235745,
+        "ingested": "2024-01-26T14:38:32Z",
+        "created": "2024-01-26T14:38:30.628421712Z",
+        "kind": "metric",
+        "module": "endpoint",
+        "action": "endpoint_metrics",
+        "id": "123",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "dataset": "endpoint.metrics"
+      },
+      "message": "Endpoint metrics"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-endpoint.metrics-01",
+    "source": {
+      "agent": {
+        "build": {
+          "original": "version: 8.6.0, compiled: Mon Jan 2 23:00:00 2023, branch: 8.6, commit: e2d09ff1b8e49bfb5f8940d317eb4ac96672d956"
+        },
+        "id": "123",
+        "type": "endpoint",
+        "version": "8.6.0"
+      },
+      "@timestamp": "2024-01-26T14:35:43.564911752Z",
+      "Endpoint": {
+        "metrics": {
+          "system_impact": [
+            {
+              "process": {
+                "executable": "/usr/bin/amazon-ssm-agent"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 51
+              },
+              "process_events": {
+                "week_idle_ms": 2,
+                "week_ms": 8914
+              },
+              "overall": {
+                "week_idle_ms": 2,
+                "week_ms": 8965
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/ps"
+              },
+              "process_events": {
+                "week_idle_ms": 7543,
+                "week_ms": 6667
+              },
+              "overall": {
+                "week_idle_ms": 7543,
+                "week_ms": 6667
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/sshd"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 51
+              },
+              "process_events": {
+                "week_idle_ms": 3596,
+                "week_ms": 4596
+              },
+              "network_events": {
+                "week_idle_ms": 85,
+                "week_ms": 5
+              },
+              "overall": {
+                "week_idle_ms": 3681,
+                "week_ms": 4652
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/dhclient-script"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 380
+              },
+              "process_events": {
+                "week_idle_ms": 105790,
+                "week_ms": 3877
+              },
+              "overall": {
+                "week_idle_ms": 105790,
+                "week_ms": 4257
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/crond"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 129
+              },
+              "process_events": {
+                "week_idle_ms": 8062,
+                "week_ms": 1903
+              },
+              "overall": {
+                "week_idle_ms": 8062,
+                "week_ms": 2032
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 69051,
+                "week_ms": 1544
+              },
+              "process": {
+                "executable": "/usr/lib/systemd/systemd"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 15
+              },
+              "process_events": {
+                "week_idle_ms": 31,
+                "week_ms": 9
+              },
+              "overall": {
+                "week_idle_ms": 69082,
+                "week_ms": 1568
+              }
+            },
+            {
+              "process": {
+                "executable": "unknown"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 979
+              },
+              "overall": {
+                "week_idle_ms": 0,
+                "week_ms": 979
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 29,
+                "week_ms": 0
+              },
+              "process": {
+                "executable": "/usr/lib64/sa/sadc"
+              },
+              "process_events": {
+                "week_idle_ms": 5107,
+                "week_ms": 917
+              },
+              "overall": {
+                "week_idle_ms": 5136,
+                "week_ms": 917
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/logger"
+              },
+              "process_events": {
+                "week_idle_ms": 20585,
+                "week_ms": 880
+              },
+              "overall": {
+                "week_idle_ms": 20585,
+                "week_ms": 880
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 72520,
+                "week_ms": 852
+              },
+              "process": {
+                "executable": "/usr/lib/systemd/systemd-logind (deleted)"
+              },
+              "overall": {
+                "week_idle_ms": 72520,
+                "week_ms": 852
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/date"
+              },
+              "process_events": {
+                "week_idle_ms": 9862,
+                "week_ms": 808
+              },
+              "overall": {
+                "week_idle_ms": 9862,
+                "week_ms": 808
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/cat"
+              },
+              "process_events": {
+                "week_idle_ms": 17468,
+                "week_ms": 701
+              },
+              "overall": {
+                "week_idle_ms": 17468,
+                "week_ms": 701
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/lib64/sa/sa1"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 67
+              },
+              "process_events": {
+                "week_idle_ms": 7451,
+                "week_ms": 618
+              },
+              "overall": {
+                "week_idle_ms": 7451,
+                "week_ms": 685
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/curl"
+              },
+              "process_events": {
+                "week_idle_ms": 5615,
+                "week_ms": 403
+              },
+              "network_events": {
+                "week_idle_ms": 4128,
+                "week_ms": 6
+              },
+              "overall": {
+                "week_idle_ms": 9743,
+                "week_ms": 409
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/run-parts"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 116
+              },
+              "process_events": {
+                "week_idle_ms": 3770,
+                "week_ms": 260
+              },
+              "overall": {
+                "week_idle_ms": 3770,
+                "week_ms": 376
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/dhclient"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 36
+              },
+              "process_events": {
+                "week_idle_ms": 1,
+                "week_ms": 278
+              },
+              "overall": {
+                "week_idle_ms": 1,
+                "week_ms": 314
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/cut"
+              },
+              "process_events": {
+                "week_idle_ms": 5067,
+                "week_ms": 313
+              },
+              "overall": {
+                "week_idle_ms": 5067,
+                "week_ms": 313
+              }
+            },
+            {
+              "process": {
+                "executable": "/sbin/ip"
+              },
+              "process_events": {
+                "week_idle_ms": 10369,
+                "week_ms": 286
+              },
+              "overall": {
+                "week_idle_ms": 10369,
+                "week_ms": 286
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/sh"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 20
+              },
+              "process_events": {
+                "week_idle_ms": 2397,
+                "week_ms": 208
+              },
+              "overall": {
+                "week_idle_ms": 2397,
+                "week_ms": 228
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/ipcalc"
+              },
+              "process_events": {
+                "week_idle_ms": 4827,
+                "week_ms": 201
+              },
+              "overall": {
+                "week_idle_ms": 4827,
+                "week_ms": 201
+              }
+            }
+          ],
+          "memory": {
+            "endpoint": {
+              "private": {
+                "mean": 118266395,
+                "latest": 135163904
+              }
+            }
+          },
+          "disks": [
+            {
+              "total": 0,
+              "free": 0,
+              "device": "sysfs",
+              "mount": "/sys",
+              "fstype": "sysfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "proc",
+              "mount": "/proc",
+              "fstype": "proc"
+            },
+            {
+              "total": 4157120512,
+              "free": 4157120512,
+              "device": "devtmpfs",
+              "mount": "/dev",
+              "fstype": "devtmpfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "securityfs",
+              "mount": "/sys/kernel/security",
+              "fstype": "securityfs"
+            },
+            {
+              "total": 4166328320,
+              "free": 4166328320,
+              "device": "tmpfs",
+              "mount": "/dev/shm",
+              "fstype": "tmpfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "devpts",
+              "mount": "/dev/pts",
+              "fstype": "devpts"
+            },
+            {
+              "total": 4166328320,
+              "free": 4165955584,
+              "device": "tmpfs",
+              "mount": "/run",
+              "fstype": "tmpfs"
+            },
+            {
+              "total": 4166328320,
+              "free": 4166328320,
+              "device": "tmpfs",
+              "mount": "/sys/fs/cgroup",
+              "fstype": "tmpfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/systemd",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "pstore",
+              "mount": "/sys/fs/pstore",
+              "fstype": "pstore"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/blkio",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/cpu,cpuacct",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/net_cls,net_prio",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/devices",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/cpuset",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/hugetlb",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/pids",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/freezer",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/memory",
+              "fstype": "cgroup"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup",
+              "mount": "/sys/fs/cgroup/perf_event",
+              "fstype": "cgroup"
+            },
+            {
+              "endpoint_drive": true,
+              "total": 8577331200,
+              "free": 1908756480,
+              "device": "/dev/xvda1",
+              "mount": "/",
+              "fstype": "xfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "hugetlbfs",
+              "mount": "/dev/hugepages",
+              "fstype": "hugetlbfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "mqueue",
+              "mount": "/dev/mqueue",
+              "fstype": "mqueue"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "debugfs",
+              "mount": "/sys/kernel/debug",
+              "fstype": "debugfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "sunrpc",
+              "mount": "/var/lib/nfs/rpc_pipefs",
+              "fstype": "rpc_pipefs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "systemd-1",
+              "mount": "/proc/sys/fs/binfmt_misc",
+              "fstype": "autofs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "binfmt_misc",
+              "mount": "/proc/sys/fs/binfmt_misc",
+              "fstype": "binfmt_misc"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "tracefs",
+              "mount": "/sys/kernel/debug/tracing",
+              "fstype": "tracefs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "none",
+              "mount": "/sys/fs/bpf",
+              "fstype": "bpf"
+            }
+          ],
+          "documents_volume": {
+            "file_events": {
+              "suppressed_count": 3926292,
+              "suppressed_bytes": 0,
+              "sent_count": 0,
+              "sent_bytes": 0
+            },
+            "process_events": {
+              "suppressed_count": 0,
+              "suppressed_bytes": 0,
+              "sent_count": 5737776,
+              "sent_bytes": 12992145486
+            },
+            "network_events": {
+              "suppressed_count": 24813200,
+              "suppressed_bytes": 0,
+              "sent_count": 0,
+              "sent_bytes": 0
+            },
+            "overall": {
+              "suppressed_count": 28739492,
+              "suppressed_bytes": 0,
+              "sent_count": 5737776,
+              "sent_bytes": 12992145486
+            }
+          },
+          "malicious_behavior_rules": [
+            {
+              "id": "123",
+              "endpoint_uptime_percent": 0
+            }
+          ],
+          "cpu": {
+            "endpoint": {
+              "histogram": {
+                "counts": [
+                  3147842,
+                  87,
+                  11,
+                  10,
+                  9,
+                  5,
+                  10,
+                  6,
+                  1,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "values": [
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35,
+                  40,
+                  45,
+                  50,
+                  55,
+                  60,
+                  65,
+                  70,
+                  75,
+                  80,
+                  85,
+                  90,
+                  95,
+                  100
+                ]
+              },
+              "mean": 0.2338436071605115,
+              "latest": 0.9000000000000001
+            }
+          },
+          "threads": [
+            {
+              "name": "Cron",
+              "cpu": {
+                "mean": 0.002129690752013577
+              }
+            },
+            {
+              "name": "FileLogThread",
+              "cpu": {
+                "mean": 0.0004778416387496615
+              }
+            },
+            {
+              "name": "LoggingLimitThread",
+              "cpu": {
+                "mean": 0.0002965913619825484
+              }
+            },
+            {
+              "name": "DocumentLoggingThread",
+              "cpu": {
+                "mean": 0.001116336931906537
+              }
+            },
+            {
+              "name": "DocumentLoggingMaintenance",
+              "cpu": {
+                "mean": 0.00009062513838355648
+              }
+            },
+            {
+              "name": "BulkConsumerThread",
+              "cpu": {
+                "mean": 0.008971888699972091
+              }
+            },
+            {
+              "name": "DocumentLoggingConsumerThread",
+              "cpu": {
+                "mean": 0.1281974968924846
+              }
+            },
+            {
+              "name": "DocumentLoggingLimitThread",
+              "cpu": {
+                "mean": 0.000205966223598992
+              }
+            },
+            {
+              "name": "ArtifactManifestDownload",
+              "cpu": {
+                "mean": 0.001515911405688581
+              }
+            },
+            {
+              "name": "PolicyReloadThread",
+              "cpu": {
+                "mean": 0.00000823864894395968
+              }
+            },
+            {
+              "name": "PerformanceMonitorWorkerThread",
+              "cpu": {
+                "mean": 0.003917477572852828
+              }
+            },
+            {
+              "name": "MetadataThread",
+              "cpu": {
+                "mean": 0.00000411932447197984
+              }
+            },
+            {
+              "name": "EventsQueueThread",
+              "cpu": {
+                "mean": 0.04977791691940438
+              }
+            },
+            {
+              "name": "DelayedAlertEnrichment",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "MaintainProcessMap",
+              "cpu": {
+                "mean": 0.001837218714503009
+              }
+            },
+            {
+              "name": "FileScoreThread",
+              "cpu": {
+                "mean": 0.001923724528414585
+              }
+            },
+            {
+              "name": "DiagnosticMalwareThread",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "QuarantineManagerWorkerThread",
+              "cpu": {
+                "mean": 0.001557104650408379
+              }
+            },
+            {
+              "name": "EventProcessingThread",
+              "cpu": {
+                "mean": 0.00591534994176305
+              }
+            },
+            {
+              "name": "HostIsolationMonitorThread",
+              "cpu": {
+                "mean": 0.0006508532665728148
+              }
+            },
+            {
+              "name": "MountMonitor",
+              "cpu": {
+                "mean": 0.002533384550267602
+              }
+            },
+            {
+              "name": "responseActionsUploadThread",
+              "cpu": {
+                "mean": 0.001771309522951331
+              }
+            },
+            {
+              "name": "responseActionsProcessThread",
+              "cpu": {
+                "mean": 0.001783667496367271
+              }
+            },
+            {
+              "name": "serviceCommsThread",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "grpcConnectionManagerThread",
+              "cpu": {
+                "mean": 0.001956679124190424
+              }
+            },
+            {
+              "name": "checkinAPIThread",
+              "cpu": {
+                "mean": 0.0002389210358973501
+              }
+            },
+            {
+              "name": "actionsAPIThread",
+              "cpu": {
+                "mean": 0.0003913361794870389
+              }
+            },
+            {
+              "name": "stateReportThread",
+              "cpu": {
+                "mean": 0.003550860912819238
+              }
+            },
+            {
+              "name": "EventsLoopThread",
+              "cpu": {
+                "mean": 0.0077690568352644
+              }
+            },
+            {
+              "name": "FanotifyWatchdog",
+              "cpu": {
+                "mean": 0.0001647732096556607
+              }
+            },
+            {
+              "name": "FanotifySyncConsumer",
+              "cpu": {
+                "mean": 0.001103980504692926
+              }
+            },
+            {
+              "name": "FanotifyAsyncConsumer",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "FanotifyConsumer",
+              "cpu": {
+                "mean": 0.02717934093270123
+              }
+            },
+            {
+              "name": "RulesEngineThread",
+              "cpu": {
+                "mean": 0.03744471189424889
+              }
+            }
+          ],
+          "event_filter": {
+            "active_global_count": 0,
+            "active_user_count": 0
+          },
+          "uptime": {
+            "endpoint": 24275825,
+            "system": 29714870
+          }
+        }
+      },
+      "ecs": {
+        "version": "1.11.0"
+      },
+      "data_stream": {
+        "namespace": "default",
+        "type": "metrics",
+        "dataset": "endpoint.metrics"
+      },
+      "elastic": {
+        "agent": {
+          "id": "123"
+        }
+      },
+      "host": {
+        "hostname": "123",
+        "os": {
+          "Ext": {
+            "variant": "Amazon Linux"
+          },
+          "kernel": "5.10.102-99.473.amzn2.x86_64 #1 SMP Wed Mar 2 19:14:12 UTC 2022",
+          "name": "Linux",
+          "family": "amazon linux",
+          "type": "linux",
+          "version": "2",
+          "platform": "amazon linux",
+          "full": "Amazon Linux 2"
+        },
+        "ip": [
+          "127.0.0.1",
+          "::1"
+        ],
+        "name": "123",
+        "id": "123",
+        "mac": [
+          "aa:aa:aa:aa:aa:aa"
+        ],
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "sequence": 34569822,
+        "ingested": "2024-01-26T14:35:45Z",
+        "created": "2024-01-26T14:35:43.564911752Z",
+        "kind": "metric",
+        "module": "endpoint",
+        "action": "endpoint_metrics",
+        "id": "123",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "dataset": "endpoint.metrics"
+      },
+      "message": "Endpoint metrics"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-endpoint.metrics-01",
+    "source": {
+      "agent": {
+        "build": {
+          "original": "version: 8.6.2, compiled: Fri Feb 10 14:00:00 2023, branch: 8.6, commit: eaee25e73cc58a52387e50d5bce542ec8965f638"
+        },
+        "id": "123",
+        "type": "endpoint",
+        "version": "8.6.2"
+      },
+      "@timestamp": "2024-01-26T15:06:50.254822749Z",
+      "Endpoint": {
+        "metrics": {
+          "system_impact": [
+            {
+              "process": {
+                "executable": "/usr/sbin/sshd"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 304
+              },
+              "process_events": {
+                "week_idle_ms": 31791,
+                "week_ms": 110821
+              },
+              "network_events": {
+                "week_idle_ms": 2030,
+                "week_ms": 53
+              },
+              "overall": {
+                "week_idle_ms": 33821,
+                "week_ms": 111178
+              }
+            },
+            {
+              "process": {
+                "executable": "unknown"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 4552
+              },
+              "overall": {
+                "week_idle_ms": 0,
+                "week_ms": 4552
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 130,
+                "week_ms": 7
+              },
+              "process": {
+                "executable": "/lib/systemd/systemd"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 1920
+              },
+              "process_events": {
+                "week_idle_ms": 1273,
+                "week_ms": 1750
+              },
+              "overall": {
+                "week_idle_ms": 1403,
+                "week_ms": 3677
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 7,
+                "week_ms": 0
+              },
+              "process": {
+                "executable": "/bin/systemctl"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 3055
+              },
+              "process_events": {
+                "week_idle_ms": 0,
+                "week_ms": 9
+              },
+              "overall": {
+                "week_idle_ms": 7,
+                "week_ms": 3064
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 3104,
+                "week_ms": 1
+              },
+              "process": {
+                "executable": "/usr/bin/apt-key"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 61
+              },
+              "process_events": {
+                "week_idle_ms": 178857,
+                "week_ms": 2062
+              },
+              "overall": {
+                "week_idle_ms": 181961,
+                "week_ms": 2124
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/gce_workload_cert_refresh"
+              },
+              "process_events": {
+                "week_idle_ms": 230,
+                "week_ms": 1405
+              },
+              "network_events": {
+                "week_idle_ms": 135,
+                "week_ms": 21
+              },
+              "overall": {
+                "week_idle_ms": 365,
+                "week_ms": 1426
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/apt-config"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 65
+              },
+              "process_events": {
+                "week_idle_ms": 18708,
+                "week_ms": 840
+              },
+              "overall": {
+                "week_idle_ms": 18708,
+                "week_ms": 905
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/lib/apt/apt.systemd.daily"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 273
+              },
+              "process_events": {
+                "week_idle_ms": 1064,
+                "week_ms": 352
+              },
+              "overall": {
+                "week_idle_ms": 1064,
+                "week_ms": 625
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/dpkg"
+              },
+              "process_events": {
+                "week_idle_ms": 11479,
+                "week_ms": 558
+              },
+              "overall": {
+                "week_idle_ms": 11479,
+                "week_ms": 558
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/sbin/cron"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 80
+              },
+              "process_events": {
+                "week_idle_ms": 270,
+                "week_ms": 451
+              },
+              "overall": {
+                "week_idle_ms": 270,
+                "week_ms": 531
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/cmp"
+              },
+              "process_events": {
+                "week_idle_ms": 39452,
+                "week_ms": 513
+              },
+              "overall": {
+                "week_idle_ms": 39452,
+                "week_ms": 513
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 144,
+                "week_ms": 0
+              },
+              "process": {
+                "executable": "/sbin/dhclient-script"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 251
+              },
+              "process_events": {
+                "week_idle_ms": 2412,
+                "week_ms": 186
+              },
+              "overall": {
+                "week_idle_ms": 2556,
+                "week_ms": 437
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/env"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 413
+              },
+              "process_events": {
+                "week_idle_ms": 45,
+                "week_ms": 4
+              },
+              "overall": {
+                "week_idle_ms": 45,
+                "week_ms": 417
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/cat"
+              },
+              "process_events": {
+                "week_idle_ms": 39679,
+                "week_ms": 359
+              },
+              "overall": {
+                "week_idle_ms": 39679,
+                "week_ms": 359
+              }
+            },
+            {
+              "process": {
+                "executable": "/bin/sh"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 35
+              },
+              "process_events": {
+                "week_idle_ms": 444,
+                "week_ms": 197
+              },
+              "overall": {
+                "week_idle_ms": 444,
+                "week_ms": 232
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/lib/apt/apt-helper"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 100
+              },
+              "process_events": {
+                "week_idle_ms": 8,
+                "week_ms": 62
+              },
+              "overall": {
+                "week_idle_ms": 8,
+                "week_ms": 162
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/date"
+              },
+              "process_events": {
+                "week_idle_ms": 1024,
+                "week_ms": 143
+              },
+              "overall": {
+                "week_idle_ms": 1024,
+                "week_ms": 143
+              }
+            },
+            {
+              "file_events": {
+                "week_idle_ms": 5315,
+                "week_ms": 2
+              },
+              "process": {
+                "executable": "/usr/bin/apt-get"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 53
+              },
+              "process_events": {
+                "week_idle_ms": 576,
+                "week_ms": 76
+              },
+              "overall": {
+                "week_idle_ms": 5891,
+                "week_ms": 131
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/unattended-upgrade"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 27
+              },
+              "process_events": {
+                "week_idle_ms": 139,
+                "week_ms": 95
+              },
+              "overall": {
+                "week_idle_ms": 139,
+                "week_ms": 122
+              }
+            },
+            {
+              "process": {
+                "executable": "/usr/bin/gpgconf"
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 26
+              },
+              "process_events": {
+                "week_idle_ms": 12075,
+                "week_ms": 93
+              },
+              "overall": {
+                "week_idle_ms": 12075,
+                "week_ms": 119
+              }
+            }
+          ],
+          "memory": {
+            "endpoint": {
+              "private": {
+                "mean": 373780821,
+                "latest": 411860992
+              }
+            }
+          },
+          "disks": [
+            {
+              "total": 0,
+              "free": 0,
+              "device": "sysfs",
+              "mount": "/sys",
+              "fstype": "sysfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "proc",
+              "mount": "/proc",
+              "fstype": "proc"
+            },
+            {
+              "total": 2049777664,
+              "free": 2049777664,
+              "device": "udev",
+              "mount": "/dev",
+              "fstype": "devtmpfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "devpts",
+              "mount": "/dev/pts",
+              "fstype": "devpts"
+            },
+            {
+              "total": 412172288,
+              "free": 411795456,
+              "device": "tmpfs",
+              "mount": "/run",
+              "fstype": "tmpfs"
+            },
+            {
+              "endpoint_drive": true,
+              "total": 10331889664,
+              "free": 4091109376,
+              "device": "/dev/sda1",
+              "mount": "/",
+              "fstype": "ext4"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "securityfs",
+              "mount": "/sys/kernel/security",
+              "fstype": "securityfs"
+            },
+            {
+              "total": 2060849152,
+              "free": 2060849152,
+              "device": "tmpfs",
+              "mount": "/dev/shm",
+              "fstype": "tmpfs"
+            },
+            {
+              "total": 5242880,
+              "free": 5242880,
+              "device": "tmpfs",
+              "mount": "/run/lock",
+              "fstype": "tmpfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "cgroup2",
+              "mount": "/sys/fs/cgroup",
+              "fstype": "cgroup2"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "pstore",
+              "mount": "/sys/fs/pstore",
+              "fstype": "pstore"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "efivarfs",
+              "mount": "/sys/firmware/efi/efivars",
+              "fstype": "efivarfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "none",
+              "mount": "/sys/fs/bpf",
+              "fstype": "bpf"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "systemd-1",
+              "mount": "/proc/sys/fs/binfmt_misc",
+              "fstype": "autofs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "hugetlbfs",
+              "mount": "/dev/hugepages",
+              "fstype": "hugetlbfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "mqueue",
+              "mount": "/dev/mqueue",
+              "fstype": "mqueue"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "debugfs",
+              "mount": "/sys/kernel/debug",
+              "fstype": "debugfs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "tracefs",
+              "mount": "/sys/kernel/tracing",
+              "fstype": "tracefs"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "fusectl",
+              "mount": "/sys/fs/fuse/connections",
+              "fstype": "fusectl"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "configfs",
+              "mount": "/sys/kernel/config",
+              "fstype": "configfs"
+            },
+            {
+              "total": 129751040,
+              "free": 118589440,
+              "device": "/dev/sda15",
+              "mount": "/boot/efi",
+              "fstype": "vfat"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "binfmt_misc",
+              "mount": "/proc/sys/fs/binfmt_misc",
+              "fstype": "binfmt_misc"
+            },
+            {
+              "total": 0,
+              "free": 0,
+              "device": "tracefs",
+              "mount": "/sys/kernel/debug/tracing",
+              "fstype": "tracefs"
+            }
+          ],
+          "documents_volume": {
+            "file_events": {
+              "suppressed_count": 1651293,
+              "suppressed_bytes": 0,
+              "sent_count": 0,
+              "sent_bytes": 0
+            },
+            "process_events": {
+              "suppressed_count": 0,
+              "suppressed_bytes": 0,
+              "sent_count": 11026887,
+              "sent_bytes": 23412176619
+            },
+            "network_events": {
+              "suppressed_count": 3270009,
+              "suppressed_bytes": 0,
+              "sent_count": 0,
+              "sent_bytes": 0
+            },
+            "overall": {
+              "suppressed_count": 4921302,
+              "suppressed_bytes": 0,
+              "sent_count": 11026887,
+              "sent_bytes": 23412176619
+            }
+          },
+          "malicious_behavior_rules": [
+            {
+              "id": "123",
+              "endpoint_uptime_percent": 0
+            }
+          ],
+          "cpu": {
+            "endpoint": {
+              "histogram": {
+                "counts": [
+                  3934326,
+                  520,
+                  140,
+                  110,
+                  212,
+                  78,
+                  41,
+                  18,
+                  12,
+                  25,
+                  9,
+                  5,
+                  5,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "values": [
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35,
+                  40,
+                  45,
+                  50,
+                  55,
+                  60,
+                  65,
+                  70,
+                  75,
+                  80,
+                  85,
+                  90,
+                  95,
+                  100
+                ]
+              },
+              "mean": 0.2697424700222798,
+              "latest": 0.1
+            }
+          },
+          "threads": [
+            {
+              "name": "Cron",
+              "cpu": {
+                "mean": 0.005330585583239717
+              }
+            },
+            {
+              "name": "FileLogThread",
+              "cpu": {
+                "mean": 0.01387886588350829
+              }
+            },
+            {
+              "name": "LoggingLimitThread",
+              "cpu": {
+                "mean": 0.0003385089239880071
+              }
+            },
+            {
+              "name": "DocumentLoggingThread",
+              "cpu": {
+                "mean": 0.002019893909071295
+              }
+            },
+            {
+              "name": "DocumentLoggingMaintenance",
+              "cpu": {
+                "mean": 0.0001711144011367948
+              }
+            },
+            {
+              "name": "BulkConsumerThread",
+              "cpu": {
+                "mean": 0.01437360969549076
+              }
+            },
+            {
+              "name": "DocumentLoggingConsumerThread",
+              "cpu": {
+                "mean": 0.1566068758230231
+              }
+            },
+            {
+              "name": "DocumentLoggingLimitThread",
+              "cpu": {
+                "mean": 0.000383147463414997
+              }
+            },
+            {
+              "name": "ArtifactManifestDownload",
+              "cpu": {
+                "mean": 0.00202733366564246
+              }
+            },
+            {
+              "name": "PolicyReloadThread",
+              "cpu": {
+                "mean": 0.00001487951314232998
+              }
+            },
+            {
+              "name": "PerformanceMonitorWorkerThread",
+              "cpu": {
+                "mean": 0.005423582540379278
+              }
+            },
+            {
+              "name": "MetadataThread",
+              "cpu": {
+                "mean": 0.00001115963485674749
+              }
+            },
+            {
+              "name": "EventsQueueThread",
+              "cpu": {
+                "mean": 0.05409447002894065
+              }
+            },
+            {
+              "name": "DelayedAlertEnrichment",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "MaintainProcessMap",
+              "cpu": {
+                "mean": 0.002905224941039929
+              }
+            },
+            {
+              "name": "FileScoreThread",
+              "cpu": {
+                "mean": 0.003567363275873613
+              }
+            },
+            {
+              "name": "DiagnosticMalwareThread",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "QuarantineManagerWorkerThread",
+              "cpu": {
+                "mean": 0.002083131839926198
+              }
+            },
+            {
+              "name": "EventProcessingThread",
+              "cpu": {
+                "mean": 0.01754294664738331
+              }
+            },
+            {
+              "name": "HostIsolationMonitorThread",
+              "cpu": {
+                "mean": 0.0008481322806622976
+              }
+            },
+            {
+              "name": "MountMonitor",
+              "cpu": {
+                "mean": 0.003463206812704382
+              }
+            },
+            {
+              "name": "responseActionsUploadThread",
+              "cpu": {
+                "mean": 0.00270807149264102
+              }
+            },
+            {
+              "name": "responseActionsProcessThread",
+              "cpu": {
+                "mean": 0.002689472100521233
+              }
+            },
+            {
+              "name": "serviceCommsThread",
+              "cpu": {
+                "mean": 0.1
+              }
+            },
+            {
+              "name": "grpcConnectionManagerThread",
+              "cpu": {
+                "mean": 0.0110926774602411
+              }
+            },
+            {
+              "name": "checkinAPIThread",
+              "cpu": {
+                "mean": 0.0003124700433295513
+              }
+            },
+            {
+              "name": "actionsAPIThread",
+              "cpu": {
+                "mean": 0.0004910243538035807
+              }
+            },
+            {
+              "name": "stateReportThread",
+              "cpu": {
+                "mean": 0.00539010824743476
+              }
+            },
+            {
+              "name": "EventsLoopThread",
+              "cpu": {
+                "mean": 0.003266057265515501
+              }
+            },
+            {
+              "name": "FanotifyWatchdog",
+              "cpu": {
+                "mean": 0.0002231929794201937
+              }
+            },
+            {
+              "name": "FanotifySyncConsumer",
+              "cpu": {
+                "mean": 0.001885980676100637
+              }
+            },
+            {
+              "name": "FanotifyAsyncConsumer",
+              "cpu": {
+                "mean": 0.0002492321603525497
+              }
+            },
+            {
+              "name": "FanotifyConsumer",
+              "cpu": {
+                "mean": 0.03793164685246193
+              }
+            },
+            {
+              "name": "RulesEngineThread",
+              "cpu": {
+                "mean": 0.02721466395730229
+              }
+            }
+          ],
+          "event_filter": {
+            "active_global_count": 0,
+            "active_user_count": 0
+          },
+          "uptime": {
+            "endpoint": 26882599,
+            "system": 26883343
+          }
+        }
+      },
+      "ecs": {
+        "version": "1.11.0"
+      },
+      "data_stream": {
+        "namespace": "default",
+        "type": "metrics",
+        "dataset": "endpoint.metrics"
+      },
+      "elastic": {
+        "agent": {
+          "id": "123"
+        }
+      },
+      "host": {
+        "hostname": "123",
+        "os": {
+          "Ext": {
+            "variant": "Debian"
+          },
+          "kernel": "5.10.0-21-cloud-amd64 #1 SMP Debian 5.10.162-1 (2023-01-21)",
+          "name": "Linux",
+          "family": "debian",
+          "type": "linux",
+          "version": "11.8",
+          "platform": "debian",
+          "full": "Debian 11.8"
+        },
+        "ip": [
+          "127.0.0.1",
+          "::1"
+        ],
+        "name": "123",
+        "id": "123",
+        "mac": [
+          "aa:aa:aa:aa:aa:aa"
+        ],
+        "architecture": "x86_64"
+      },
+      "event": {
+        "agent_id_status": "verified",
+        "sequence": 16194584,
+        "ingested": "2024-01-26T15:06:52Z",
+        "created": "2024-01-26T15:06:50.254822749Z",
+        "kind": "metric",
+        "module": "endpoint",
+        "action": "endpoint_metrics",
+        "id": "123",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "dataset": "endpoint.metrics"
+      },
+      "message": "Endpoint metrics"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "metrics-endpoint.metrics-01",
+    "source": {
+      "@timestamp": "2025-01-28T16:45:28.82746649Z",
+      "Endpoint": {
+        "metrics": {
+          "cloud_services": {
+            "reputation_lookups": {}
+          },
+          "cpu": {
+            "endpoint": {
+              "histogram": {
+                "counts": [
+                  6,
+                  3,
+                  2,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "values": [
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35,
+                  40,
+                  45,
+                  50,
+                  55,
+                  60,
+                  65,
+                  70,
+                  75,
+                  80,
+                  85,
+                  90,
+                  95,
+                  100
+                ]
+              },
+              "latest": 0.9750000000000001,
+              "mean": 4.843181818181818
+            }
+          },
+          "disks": [
+            {
+              "device": "sysfs",
+              "free": 0,
+              "fstype": "sysfs",
+              "mount": "/sys",
+              "total": 0
+            },
+            {
+              "device": "proc",
+              "free": 0,
+              "fstype": "proc",
+              "mount": "/proc",
+              "total": 0
+            },
+            {
+              "device": "udev",
+              "free": 8307535872,
+              "fstype": "devtmpfs",
+              "mount": "/dev",
+              "total": 8307535872
+            },
+            {
+              "device": "devpts",
+              "free": 0,
+              "fstype": "devpts",
+              "mount": "/dev/pts",
+              "total": 0
+            },
+            {
+              "device": "tmpfs",
+              "free": 1670688768,
+              "fstype": "tmpfs",
+              "mount": "/run",
+              "total": 1672884224
+            },
+            {
+              "device": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+              "endpoint_drive": true,
+              "free": 108122083328,
+              "fstype": "ext4",
+              "mount": "/",
+              "total": 208661176320
+            },
+            {
+              "device": "securityfs",
+              "free": 0,
+              "fstype": "securityfs",
+              "mount": "/sys/kernel/security",
+              "total": 0
+            },
+            {
+              "device": "tmpfs",
+              "free": 8364396544,
+              "fstype": "tmpfs",
+              "mount": "/dev/shm",
+              "total": 8364417024
+            },
+            {
+              "device": "tmpfs",
+              "free": 5242880,
+              "fstype": "tmpfs",
+              "mount": "/run/lock",
+              "total": 5242880
+            },
+            {
+              "device": "cgroup2",
+              "free": 0,
+              "fstype": "cgroup2",
+              "mount": "/sys/fs/cgroup",
+              "total": 0
+            },
+            {
+              "device": "pstore",
+              "free": 0,
+              "fstype": "pstore",
+              "mount": "/sys/fs/pstore",
+              "total": 0
+            },
+            {
+              "device": "bpf",
+              "free": 0,
+              "fstype": "bpf",
+              "mount": "/sys/fs/bpf",
+              "total": 0
+            },
+            {
+              "device": "systemd-1",
+              "free": 0,
+              "fstype": "autofs",
+              "mount": "/proc/sys/fs/binfmt_misc",
+              "total": 0
+            },
+            {
+              "device": "hugetlbfs",
+              "free": 0,
+              "fstype": "hugetlbfs",
+              "mount": "/dev/hugepages",
+              "total": 0
+            },
+            {
+              "device": "mqueue",
+              "free": 0,
+              "fstype": "mqueue",
+              "mount": "/dev/mqueue",
+              "total": 0
+            },
+            {
+              "device": "debugfs",
+              "free": 0,
+              "fstype": "debugfs",
+              "mount": "/sys/kernel/debug",
+              "total": 0
+            },
+            {
+              "device": "tracefs",
+              "free": 0,
+              "fstype": "tracefs",
+              "mount": "/sys/kernel/tracing",
+              "total": 0
+            },
+            {
+              "device": "fusectl",
+              "free": 0,
+              "fstype": "fusectl",
+              "mount": "/sys/fs/fuse/connections",
+              "total": 0
+            },
+            {
+              "device": "configfs",
+              "free": 0,
+              "fstype": "configfs",
+              "mount": "/sys/kernel/config",
+              "total": 0
+            },
+            {
+              "device": "none",
+              "free": 0,
+              "fstype": "ramfs",
+              "mount": "/run/credentials/systemd-sysusers.service",
+              "total": 0
+            },
+            {
+              "device": "/dev/loop1",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/core20/2434",
+              "total": 66846720
+            },
+            {
+              "device": "/dev/loop0",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/core20/2379",
+              "total": 67108864
+            },
+            {
+              "device": "/dev/loop3",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/core22/1722",
+              "total": 77463552
+            },
+            {
+              "device": "/dev/loop4",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/go/10748",
+              "total": 68812800
+            },
+            {
+              "device": "/dev/loop5",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/go/10818",
+              "total": 68812800
+            },
+            {
+              "device": "/dev/loop6",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/lxd/29351",
+              "total": 91357184
+            },
+            {
+              "device": "/dev/loop7",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/lxd/31333",
+              "total": 93847552
+            },
+            {
+              "device": "/dev/loop9",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/snapd/23545",
+              "total": 46661632
+            },
+            {
+              "device": "/dev/loop8",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/snapd/23258",
+              "total": 46530560
+            },
+            {
+              "device": "/dev/sda2",
+              "free": 1786802176,
+              "fstype": "ext4",
+              "mount": "/boot",
+              "total": 2040373248
+            },
+            {
+              "device": "binfmt_misc",
+              "free": 0,
+              "fstype": "binfmt_misc",
+              "mount": "/proc/sys/fs/binfmt_misc",
+              "total": 0
+            },
+            {
+              "device": "//192.168.1.186/Data",
+              "free": 7032009764864,
+              "fstype": "cifs",
+              "mount": "/mnt/nas",
+              "total": 23018619527168
+            },
+            {
+              "device": "tmpfs",
+              "free": 1670688768,
+              "fstype": "tmpfs",
+              "mount": "/run/snapd/ns",
+              "total": 1672884224
+            },
+            {
+              "device": "nsfs",
+              "free": 0,
+              "fstype": "nsfs",
+              "mount": "/run/snapd/ns/lxd.mnt",
+              "total": 0
+            },
+            {
+              "device": "overlay",
+              "free": 108122083328,
+              "fstype": "overlay",
+              "mount": "/var/lib/docker/overlay2/2efcbcf71b2b8e2af40ac3edfe79949164f83ce1c2ffaf54fb2ba6c8e7832982/merged",
+              "total": 208661176320
+            },
+            {
+              "device": "nsfs",
+              "free": 0,
+              "fstype": "nsfs",
+              "mount": "/run/docker/netns/c0f146abc951",
+              "total": 0
+            },
+            {
+              "device": "tracefs",
+              "free": 0,
+              "fstype": "tracefs",
+              "mount": "/sys/kernel/debug/tracing",
+              "total": 0
+            },
+            {
+              "device": "tmpfs",
+              "free": 1672876032,
+              "fstype": "tmpfs",
+              "mount": "/run/user/1000",
+              "total": 1672880128
+            },
+            {
+              "device": "/dev/loop10",
+              "free": 0,
+              "fstype": "squashfs",
+              "mount": "/snap/core22/1748",
+              "total": 77594624
+            }
+          ],
+          "documents_volume": {
+            "file_events": {
+              "sent_bytes": 119257,
+              "sent_count": 94,
+              "suppressed_bytes": 0,
+              "suppressed_count": 0
+            },
+            "network_events": {
+              "sent_bytes": 4907,
+              "sent_count": 3,
+              "suppressed_bytes": 0,
+              "suppressed_count": 0
+            },
+            "overall": {
+              "sent_bytes": 2074039,
+              "sent_count": 1200,
+              "suppressed_bytes": 0,
+              "suppressed_count": 0
+            },
+            "process_events": {
+              "sent_bytes": 1949875,
+              "sent_count": 1103,
+              "suppressed_bytes": 0,
+              "suppressed_count": 0
+            }
+          },
+          "event_filter": {
+            "active_global_count": 2,
+            "active_user_count": 0
+          },
+          "exception_list": {},
+          "malicious_behavior_rules": [
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c4539c79-9f55-4b36-b06f-8aff82563bca"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "92bb2a27-745b-4291-90a1-b7b654df1379"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b9935dcc-e885-4954-9999-3c016b990737"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "31da6564-b3d3-4fc8-9a96-75ad0b364363"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "539488cc-baf9-465f-9700-f978b93b3f62"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "feed7842-34a6-4764-b858-6e5ac01a5ab7"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "aec74eb4-9618-42ff-96eb-2d13e6959d47"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "95718a3c-edc7-46ef-978b-77891ca6198f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "13fd98ce-f1c3-423f-9441-45c50eb462c0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b3bcbab6-e216-4d70-bdee-2b69affbb386"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "5d7328aa-973b-41e7-a6b3-6f40ea3094f1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "1ab34b34-4cfd-450d-befc-c3503095eaed"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "15019d7c-42e6-4cf7-88b0-0c3a6963e6f5"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "d0e45f6c-1f83-4d97-a8d9-c8f9eb61c15c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "33309858-3154-47a6-b601-eda2de62557b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b7974ff6-82ff-4743-9e07-1c6901b1f0ea"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "133102a7-f906-4725-b382-09257a0209c2"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3f3e9299-1a05-4922-aef2-6d855a07f8ef"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "52001df2-a3bf-411d-a09c-5f36a9f976b8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3cce374b-c877-4419-8230-08f1a6b04da2"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "25ae94f5-0214-4bf1-b534-33d4ffc3d41c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b9b3922a-59ee-407c-8773-31b98bf9b18d"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "995c8bdb-5ebb-4c5b-9a03-4d39b52c0ff3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "36a8d397-7fef-4bdf-9152-71c750168580"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "d4867fb6-183c-49f2-afbb-fd06144f9b11"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cd0844ea-6112-453f-a836-cc021a2b6afb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "879c083c-e2d9-4f75-84f2-0f1471d915a8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "8012a863-8c0c-4461-bb88-b0193dfb9f38"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "52deef30-e633-49e1-9dd2-da1ad6cb5e43"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "18cdd8c1-4dc8-4ac1-8f7c-830be4c493cc"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "22145fc0-dc4c-4187-8397-4d20162fc391"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "6929ab87-7b2f-4ef8-858a-1f8f1c239cac"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "7032dd32-8a51-4545-94d0-5997051f4610"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "8fff17c6-f0ba-4996-bcc3-342a9ebd0ef3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "94f548c8-cad2-4bc5-bf61-c0e42558ef65"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "4c8b9c6f-4d85-4fa9-9104-16f7a99aded6"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c0ca8114-254d-46ba-88c6-db57de6efe2d"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "52206861-4570-4b8b-a73e-4ef0ea379a4c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "947b70bb-8e01-4f1b-994d-5af9488556bb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "0fd5b434-606b-42fc-bed0-87071293533e"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "46b142a6-3d54-45e7-ad8a-7a4bc9bfe01c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cb351778-7329-4de9-82b5-6705f772a3af"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b15d8277-ccd5-481b-82f8-c1681c5aada8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a67ef648-f04e-475c-8f53-a2db038ee834"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3bc8af69-707a-482c-b3c1-06bdb1530b94"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "d20cd4ba-ff65-4e1c-8012-4241d449b16b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "dc1cee03-4923-4c6b-b00b-8a5c323bb753"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fa71e336-0177-4732-b58b-53eb4a87a286"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b25ec4e7-34f1-40c2-b683-bbf1dcdd84e5"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "268ffea4-fc13-4ab5-a473-07d10255ea8d"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e6669bc3-cb75-4fb3-91e0-ddaa06dd59b2"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "42c2e98b-b757-423f-ac25-8183d8c76b97"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "ad89ce4d-96df-4cc8-bfc5-979a73469b54"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "bb330560-0042-48a5-8232-7f2012d6e440"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3e79f8fc-26a4-4646-9a58-9f11b9c11e28"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "30f3021b-032e-4aa0-bc6f-341d0c82fdf5"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e8d8eb78-d6aa-456f-a24e-c073026f7809"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "0b206183-7f90-461d-80b3-8a147147ae78"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fdb6fde5-3af3-4759-a4cc-2c6847b09565"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e8b2afe5-37a9-468c-a6fb-f178d46cb698"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "f2d206e0-97c9-484b-8b6a-5eecd82fbfdc"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fcc42a61-4507-4918-867b-d673e5b065dc"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "dd914805-e99b-4ff6-b445-775c53d44e10"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "112ed0c3-9685-4786-ad79-8307a2d426bf"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "272cf3e7-fd3f-442b-a781-f9e864fb1d4c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "0c63849b-2e23-4720-9608-0a402d093d3c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e0db3577-879e-4ac2-bd58-691e1343afca"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fbf9342e-3d1e-4fba-a828-92fa0fb4d21b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "bfff8d1b-c4d7-4005-9f49-f494261e5a25"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a18e57c9-5627-4535-b994-64febc67c1e8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "18d82674-08d0-408e-801b-468e1b06298f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e8f9661a-a418-45ea-91cc-e2fa705e2ade"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b86c5998-3068-43e8-bfb5-ecb593e34ca9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "37f6659f-dff4-42bc-91ae-7ed7a9264529"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "10cb6563-35a9-45b7-a394-e7bca6fd5bed"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3337a10c-e950-4827-a44e-96a688fba221"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "0fb019ab-98a0-487e-aa37-fabe5b69ec8a"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "4342c282-ee21-4140-8e27-4e0f551489ef"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "dbbd7fb0-8b29-4c96-901d-166dff728a3b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "34c0ed64-4456-437e-9bd2-92e6fed9bfb2"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "aa02591f-c9e6-4317-841e-0b075b9515ff"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "508226f9-4030-4e86-86cd-63321b7164bc"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e40b5e63-b737-49a3-9e38-1d8aef72c9e7"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "47e5595e-1920-4fdd-9a1c-cf712e1112d1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "7d39db57-5c5e-4542-a9eb-8f5de524b09c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "1471cf36-7e5c-47cc-bf39-2234df0e676a"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "eb928496-a992-4cee-9cd7-fc3fbae7e8da"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "50f67a77-d499-4f1f-8dfc-c47616b47a71"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "00a97e57-4834-47ec-880d-48ce3783e0b4"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "9015e5ec-a68d-4539-923d-a96d2c6227d3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3ee903d9-6839-48d6-9437-3823b77bbeaa"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fbc224a0-5469-4c0c-953d-fc57e0293197"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "2f4275f8-b305-455d-9f1f-c67574cc6b38"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cc8a82b6-eb6e-4e35-8c9e-e6ec3339e12d"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b8bb0b6a-eb7e-4819-9c7e-4e3845b82b91"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "21692d53-d4a5-462c-9ee6-2d8788411996"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b1d81dfe-93d7-4d7d-827d-5def574e8cda"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "895ed985-a6ae-4ebe-b688-7ca8cd6e2e23"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e9731cea-c3fc-4183-a76c-9a798ae0a2b0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "f6f74bd6-414a-4f22-89ec-c045d634a805"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b6585a25-db0e-4911-b860-3f117b1db60f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "831513aa-8320-484f-9275-5b46c57760f0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "2588a595-c6c7-4d8d-b287-57b9d1e3d7e6"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "18439a4c-cd67-43f5-ac42-5c4210edeacb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a13c8f01-36a5-4ad7-a282-8d297cf62860"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "742037b3-3ef6-4a33-84ed-b26fc6ae322c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fb2c3240-4cbe-413e-be78-5427807b618b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "05f95917-6942-4aab-a904-37c6db906503"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c71b9783-ca42-4532-8eb3-e8f2fe32ff39"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "30e19006-e1b4-4328-9553-b0284c5cec00"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "54873ebe-b8c8-4053-92b2-8ee8f57aabc1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e659b4b9-5bbf-4839-96b9-b489334b4ca1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "ea97874d-a232-44b4-a99f-be7850977cd7"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "69b41dec-033a-4629-9b1d-dd2c54b507b9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cc29bf55-8d7f-45df-b8fe-212968c8951c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e5149069-189b-4b1a-ad24-9fed16f5a15b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "14f332f1-b20b-4628-b6de-14a4626fba79"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "6644d936-36a2-4d21-95f3-4826e6b61b9b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "8c2977dd-07ce-4a8e-8ccd-5e4183138675"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "da02d81a-d432-4cfe-8aa4-fc1a31c29c98"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "436e12a8-7a03-4f6f-a3b2-3fe8b8f4c474"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "0259c937-877f-4140-a67b-dc51298f3f86"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e3d9bd45-315f-47a6-8675-475e2d3f29ff"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "03d344f8-3a0c-4c2c-988f-cdba2aeadf0f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "08ad673a-7f99-417e-8b93-a79d4faeeed3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "08697d36-4c07-4f54-b177-a39e473705c0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "276a5df0-7e20-4218-ade1-3f3ed711d4cb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b38eb534-230c-45f4-93ba-fc516ac51630"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "8ccebdc1-9929-4584-ac8f-a96ee8e8c616"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a0fce633-b6ee-4e4c-b6c7-ba46b8561e9e"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "87bee79f-cf0b-43a0-884a-a7a4ddbd4599"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "5b544dbb-2c66-42cd-a4ee-8d1e5afe9903"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b382c343-892d-46e1-8fad-22576a086598"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "74afd5bc-7d44-4a11-9383-a5e30c3ec8ae"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3144cab7-cc28-46c3-a3ac-8fefe8db22d6"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "47903010-d527-4200-b43d-971955a80924"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "38108046-32a6-407f-b5fd-6943ffdcdab0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "9aff7450-c93c-4b97-8c53-48392d798deb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "03195b53-de40-4a18-b727-6fb7ac3f94b7"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "789f8a41-00cb-40cb-b41f-c2e1611b1245"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a12904d1-c9d5-4fa5-8727-38e64c81553e"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3002b96e-adaa-4660-b906-e021c0a1c086"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c932c9f0-76ed-4d78-a242-cfaade43080c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "40bec6eb-e93b-4d09-8265-66bba186e332"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "04ec0ec4-86c4-47e3-8c7b-8dad5f97532c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "55275da8-4d24-4844-b62e-5eadb7ff01b1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "2d0e4305-c7b8-46af-8473-775a49c18ec3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "30c89cc9-d93c-4134-a976-58f8413f2f32"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "f0bc87ef-4acd-4dda-aff2-c13d80939e66"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cd6e64ec-2890-4bd8-9d07-bef06465b06f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "79165167-8419-4755-80c7-b151e08eee37"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "1a2596ff-a5e7-4562-af17-97dbaf9284d5"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "ca9de348-a09d-4c67-af21-5645b70003d0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "57ed0e43-643a-47f3-936e-138dc6f480da"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "656f671c-6b21-4aed-8a13-4d492f97273b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "1e5af062-4973-42d1-94bb-0c1ecbd8daa4"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "613da93c-226e-4150-9125-3b476103c0b9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "78ae5dbd-477b-4ce7-a7f7-8c4b5e228df2"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "7c4d6361-3e7f-481a-9313-d1d1c0e5a3a9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "4c61fca2-6f77-474d-a537-2d7fd9ec75e0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "f2a52d42-2410-468b-9910-26823c6ef822"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "93d7b72d-3914-44fb-92bf-63675769ef12"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "332a8018-6615-4d2d-aeff-61e85e5ae77b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c14705f7-ebd3-4cf7-88b3-6bff2d832f1b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fa59e598-8adc-4798-af82-9f878934d975"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "21984abc-9efa-4de1-b1ad-bf797a7acec9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "ba70be59-bf50-48a9-8b36-0f0808a50fb8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c8d440b8-fb37-4903-814b-84a05d65f201"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "eb66a097-a2e0-4fc9-b1e8-c59d26fd9f93"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c52891b5-8f83-4571-8e68-ea2601f46285"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "eb575588-dce7-4934-966c-c0e9ebc456c5"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "94943f02-5580-4d1d-a763-09e958bd0f57"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "8704a5cf-f1e1-4de8-b102-634f237f2514"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "49ab63a4-ed52-49ac-855b-c298b38b0cb9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "d50a66ea-2065-45cc-a66f-0f7222e4c52d"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a67ef648-f04e-475c-8f53-a2db038ee834"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "10cb6563-35a9-45b7-a394-e7bca6fd5bed"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cb351778-7329-4de9-82b5-6705f772a3af"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "30f3021b-032e-4aa0-bc6f-341d0c82fdf5"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "ca9de348-a09d-4c67-af21-5645b70003d0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b86c5998-3068-43e8-bfb5-ecb593e34ca9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "8fff17c6-f0ba-4996-bcc3-342a9ebd0ef3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e659b4b9-5bbf-4839-96b9-b489334b4ca1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "22145fc0-dc4c-4187-8397-4d20162fc391"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "6644d936-36a2-4d21-95f3-4826e6b61b9b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "276a5df0-7e20-4218-ade1-3f3ed711d4cb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fdb6fde5-3af3-4759-a4cc-2c6847b09565"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "21692d53-d4a5-462c-9ee6-2d8788411996"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "52206861-4570-4b8b-a73e-4ef0ea379a4c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "d20cd4ba-ff65-4e1c-8012-4241d449b16b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cc29bf55-8d7f-45df-b8fe-212968c8951c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "94943f02-5580-4d1d-a763-09e958bd0f57"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "eb928496-a992-4cee-9cd7-fc3fbae7e8da"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "52deef30-e633-49e1-9dd2-da1ad6cb5e43"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "04ec0ec4-86c4-47e3-8c7b-8dad5f97532c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "1e5af062-4973-42d1-94bb-0c1ecbd8daa4"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "8c2977dd-07ce-4a8e-8ccd-5e4183138675"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a12904d1-c9d5-4fa5-8727-38e64c81553e"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "ba70be59-bf50-48a9-8b36-0f0808a50fb8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "f0bc87ef-4acd-4dda-aff2-c13d80939e66"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "79165167-8419-4755-80c7-b151e08eee37"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "57ed0e43-643a-47f3-936e-138dc6f480da"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "742037b3-3ef6-4a33-84ed-b26fc6ae322c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "18439a4c-cd67-43f5-ac42-5c4210edeacb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "42c2e98b-b757-423f-ac25-8183d8c76b97"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "47903010-d527-4200-b43d-971955a80924"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3144cab7-cc28-46c3-a3ac-8fefe8db22d6"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "52001df2-a3bf-411d-a09c-5f36a9f976b8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "332a8018-6615-4d2d-aeff-61e85e5ae77b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c0ca8114-254d-46ba-88c6-db57de6efe2d"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "dbbd7fb0-8b29-4c96-901d-166dff728a3b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "1471cf36-7e5c-47cc-bf39-2234df0e676a"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c14705f7-ebd3-4cf7-88b3-6bff2d832f1b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "9aff7450-c93c-4b97-8c53-48392d798deb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b38eb534-230c-45f4-93ba-fc516ac51630"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "dd914805-e99b-4ff6-b445-775c53d44e10"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "78ae5dbd-477b-4ce7-a7f7-8c4b5e228df2"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "14f332f1-b20b-4628-b6de-14a4626fba79"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a13c8f01-36a5-4ad7-a282-8d297cf62860"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "37f6659f-dff4-42bc-91ae-7ed7a9264529"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "4c8b9c6f-4d85-4fa9-9104-16f7a99aded6"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "30e19006-e1b4-4328-9553-b0284c5cec00"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cd6e64ec-2890-4bd8-9d07-bef06465b06f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "2d0e4305-c7b8-46af-8473-775a49c18ec3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "272cf3e7-fd3f-442b-a781-f9e864fb1d4c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b15d8277-ccd5-481b-82f8-c1681c5aada8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "bb330560-0042-48a5-8232-7f2012d6e440"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "1a2596ff-a5e7-4562-af17-97dbaf9284d5"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "0fb019ab-98a0-487e-aa37-fabe5b69ec8a"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "cd0844ea-6112-453f-a836-cc021a2b6afb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a18e57c9-5627-4535-b994-64febc67c1e8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "aa02591f-c9e6-4317-841e-0b075b9515ff"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "613da93c-226e-4150-9125-3b476103c0b9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fbf9342e-3d1e-4fba-a828-92fa0fb4d21b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b9b3922a-59ee-407c-8773-31b98bf9b18d"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "da02d81a-d432-4cfe-8aa4-fc1a31c29c98"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "38108046-32a6-407f-b5fd-6943ffdcdab0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "30c89cc9-d93c-4134-a976-58f8413f2f32"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fbc224a0-5469-4c0c-953d-fc57e0293197"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "21984abc-9efa-4de1-b1ad-bf797a7acec9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "995c8bdb-5ebb-4c5b-9a03-4d39b52c0ff3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c932c9f0-76ed-4d78-a242-cfaade43080c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "9015e5ec-a68d-4539-923d-a96d2c6227d3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "08ad673a-7f99-417e-8b93-a79d4faeeed3"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fb2c3240-4cbe-413e-be78-5427807b618b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "18d82674-08d0-408e-801b-468e1b06298f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "656f671c-6b21-4aed-8a13-4d492f97273b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "f2d206e0-97c9-484b-8b6a-5eecd82fbfdc"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "831513aa-8320-484f-9275-5b46c57760f0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3ee903d9-6839-48d6-9437-3823b77bbeaa"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "2588a595-c6c7-4d8d-b287-57b9d1e3d7e6"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fa71e336-0177-4732-b58b-53eb4a87a286"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "947b70bb-8e01-4f1b-994d-5af9488556bb"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c71b9783-ca42-4532-8eb3-e8f2fe32ff39"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e8f9661a-a418-45ea-91cc-e2fa705e2ade"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "46b142a6-3d54-45e7-ad8a-7a4bc9bfe01c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3337a10c-e950-4827-a44e-96a688fba221"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "7c4d6361-3e7f-481a-9313-d1d1c0e5a3a9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "895ed985-a6ae-4ebe-b688-7ca8cd6e2e23"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "5b544dbb-2c66-42cd-a4ee-8d1e5afe9903"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "08697d36-4c07-4f54-b177-a39e473705c0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "93d7b72d-3914-44fb-92bf-63675769ef12"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b382c343-892d-46e1-8fad-22576a086598"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "dc1cee03-4923-4c6b-b00b-8a5c323bb753"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "03195b53-de40-4a18-b727-6fb7ac3f94b7"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "508226f9-4030-4e86-86cd-63321b7164bc"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "0c63849b-2e23-4720-9608-0a402d093d3c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e40b5e63-b737-49a3-9e38-1d8aef72c9e7"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "112ed0c3-9685-4786-ad79-8307a2d426bf"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "0b206183-7f90-461d-80b3-8a147147ae78"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b1d81dfe-93d7-4d7d-827d-5def574e8cda"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3e79f8fc-26a4-4646-9a58-9f11b9c11e28"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "74afd5bc-7d44-4a11-9383-a5e30c3ec8ae"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "f6f74bd6-414a-4f22-89ec-c045d634a805"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3bc8af69-707a-482c-b3c1-06bdb1530b94"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "c52891b5-8f83-4571-8e68-ea2601f46285"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "268ffea4-fc13-4ab5-a473-07d10255ea8d"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "bfff8d1b-c4d7-4005-9f49-f494261e5a25"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "05f95917-6942-4aab-a904-37c6db906503"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e8b2afe5-37a9-468c-a6fb-f178d46cb698"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "4342c282-ee21-4140-8e27-4e0f551489ef"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3cce374b-c877-4419-8230-08f1a6b04da2"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "436e12a8-7a03-4f6f-a3b2-3fe8b8f4c474"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "a0fce633-b6ee-4e4c-b6c7-ba46b8561e9e"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "8ccebdc1-9929-4584-ac8f-a96ee8e8c616"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "7032dd32-8a51-4545-94d0-5997051f4610"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "47e5595e-1920-4fdd-9a1c-cf712e1112d1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "2f4275f8-b305-455d-9f1f-c67574cc6b38"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "87bee79f-cf0b-43a0-884a-a7a4ddbd4599"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e3d9bd45-315f-47a6-8675-475e2d3f29ff"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e6669bc3-cb75-4fb3-91e0-ddaa06dd59b2"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "54873ebe-b8c8-4053-92b2-8ee8f57aabc1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fa59e598-8adc-4798-af82-9f878934d975"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "789f8a41-00cb-40cb-b41f-c2e1611b1245"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "00a97e57-4834-47ec-880d-48ce3783e0b4"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "3f3e9299-1a05-4922-aef2-6d855a07f8ef"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "4c61fca2-6f77-474d-a537-2d7fd9ec75e0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b25ec4e7-34f1-40c2-b683-bbf1dcdd84e5"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "fcc42a61-4507-4918-867b-d673e5b065dc"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "e9731cea-c3fc-4183-a76c-9a798ae0a2b0"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "94f548c8-cad2-4bc5-bf61-c0e42558ef65"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "f2a52d42-2410-468b-9910-26823c6ef822"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "879c083c-e2d9-4f75-84f2-0f1471d915a8"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "69b41dec-033a-4629-9b1d-dd2c54b507b9"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "03d344f8-3a0c-4c2c-988f-cdba2aeadf0f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "55275da8-4d24-4844-b62e-5eadb7ff01b1"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "1ab34b34-4cfd-450d-befc-c3503095eaed"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "31da6564-b3d3-4fc8-9a96-75ad0b364363"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b3bcbab6-e216-4d70-bdee-2b69affbb386"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "feed7842-34a6-4764-b858-6e5ac01a5ab7"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "95718a3c-edc7-46ef-978b-77891ca6198f"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b7974ff6-82ff-4743-9e07-1c6901b1f0ea"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "b9935dcc-e885-4954-9999-3c016b990737"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "d0e45f6c-1f83-4d97-a8d9-c8f9eb61c15c"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "92bb2a27-745b-4291-90a1-b7b654df1379"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "33309858-3154-47a6-b601-eda2de62557b"
+            },
+            {
+              "endpoint_uptime_percent": 0.0,
+              "id": "15019d7c-42e6-4cf7-88b0-0c3a6963e6f5"
+            }
+          ],
+          "memory": {
+            "endpoint": {
+              "private": {
+                "latest": 184266752,
+                "mean": 144539989
+              }
+            }
+          },
+          "system_impact": [
+            {
+              "behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 4016
+              },
+              "diagnostic_behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 4370
+              },
+              "memory_scan": {
+                "week_idle_ms": 0,
+                "week_ms": 3
+              },
+              "overall": {
+                "week_idle_ms": 717064,
+                "week_ms": 12742
+              },
+              "process": {
+                "executable": "/opt/miniconda3/envs/Endpoint/bin/python"
+              },
+              "process_events": {
+                "week_idle_ms": 717064,
+                "week_ms": 4353
+              }
+            },
+            {
+              "behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 349
+              },
+              "diagnostic_behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 397
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 1185
+              },
+              "overall": {
+                "week_idle_ms": 11882,
+                "week_ms": 2696
+              },
+              "process": {
+                "executable": "/usr/bin/sudo"
+              },
+              "process_events": {
+                "week_idle_ms": 11882,
+                "week_ms": 765
+              }
+            },
+            {
+              "behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 210
+              },
+              "diagnostic_behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 203
+              },
+              "file_events": {
+                "week_idle_ms": 1321,
+                "week_ms": 32
+              },
+              "malware": {
+                "week_idle_ms": 0,
+                "week_ms": 1927
+              },
+              "network_events": {
+                "week_idle_ms": 117,
+                "week_ms": 8
+              },
+              "overall": {
+                "week_idle_ms": 10201,
+                "week_ms": 2464
+              },
+              "process": {
+                "executable": "/opt/miniconda3/envs/Endpoint/bin/python3.10"
+              },
+              "process_events": {
+                "week_idle_ms": 8763,
+                "week_ms": 84
+              }
+            },
+            {
+              "network_events": {
+                "week_idle_ms": 1381,
+                "week_ms": 8
+              },
+              "overall": {
+                "week_idle_ms": 31481,
+                "week_ms": 577
+              },
+              "process": {
+                "executable": "/home/brian/.vscode-server/cli/servers/Stable-384ff7382de624fb94dbaf6da11977bba1ecd427/server/node"
+              },
+              "process_events": {
+                "week_idle_ms": 30100,
+                "week_ms": 569
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 4957,
+                "week_ms": 313
+              },
+              "process": {
+                "executable": "/snap/snapd/23545/usr/lib/snapd/snapd"
+              },
+              "process_events": {
+                "week_idle_ms": 4957,
+                "week_ms": 313
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 4510,
+                "week_ms": 240
+              },
+              "process": {
+                "executable": "/var/lib/docker/overlay2/2efcbcf71b2b8e2af40ac3edfe79949164f83ce1c2ffaf54fb2ba6c8e7832982/merged/usr/local/bin/influxd"
+              },
+              "process_events": {
+                "week_idle_ms": 4510,
+                "week_ms": 240
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 183217,
+                "week_ms": 219
+              },
+              "process": {
+                "executable": "/usr/bin/bash"
+              },
+              "process_events": {
+                "week_idle_ms": 183217,
+                "week_ms": 219
+              }
+            },
+            {
+              "diagnostic_behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 1
+              },
+              "file_events": {
+                "week_idle_ms": 66834,
+                "week_ms": 190
+              },
+              "overall": {
+                "week_idle_ms": 75131,
+                "week_ms": 210
+              },
+              "process": {
+                "executable": "/tmp/eaf_elasticsearch-8.15.2-linux-x86_64/elasticsearch-8.15.2/jdk/bin/java"
+              },
+              "process_events": {
+                "week_idle_ms": 8297,
+                "week_ms": 19
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 4745,
+                "week_ms": 192
+              },
+              "process": {
+                "executable": "/usr/bin/dockerd"
+              },
+              "process_events": {
+                "week_idle_ms": 4745,
+                "week_ms": 192
+              }
+            },
+            {
+              "behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 41
+              },
+              "diagnostic_behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 44
+              },
+              "overall": {
+                "week_idle_ms": 4423,
+                "week_ms": 185
+              },
+              "process": {
+                "executable": "/opt/Elastic/Endpoint/elastic-endpoint"
+              },
+              "process_events": {
+                "week_idle_ms": 4423,
+                "week_ms": 100
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 4211,
+                "week_ms": 126
+              },
+              "process": {
+                "executable": "/home/brian/.vscode-server/extensions/ms-vscode.cpptools-1.22.11-linux-x64/bin/cpptools"
+              },
+              "process_events": {
+                "week_idle_ms": 4211,
+                "week_ms": 126
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 4865,
+                "week_ms": 102
+              },
+              "process": {
+                "executable": "/usr/bin/containerd"
+              },
+              "process_events": {
+                "week_idle_ms": 4865,
+                "week_ms": 102
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 4081,
+                "week_ms": 85
+              },
+              "process": {
+                "executable": "/home/brian/.vscode-server/extensions/ms-vscode.cpptools-1.22.11-linux-x64/bin/cpptools-srv"
+              },
+              "process_events": {
+                "week_idle_ms": 4081,
+                "week_ms": 85
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 4044,
+                "week_ms": 80
+              },
+              "process": {
+                "executable": "/home/brian/.vscode-server/code-384ff7382de624fb94dbaf6da11977bba1ecd427"
+              },
+              "process_events": {
+                "week_idle_ms": 4044,
+                "week_ms": 80
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 10115,
+                "week_ms": 30
+              },
+              "process": {
+                "executable": "/usr/bin/python3.10"
+              },
+              "process_events": {
+                "week_idle_ms": 10115,
+                "week_ms": 30
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 21189,
+                "week_ms": 30
+              },
+              "process": {
+                "executable": "/usr/sbin/sshd"
+              },
+              "process_events": {
+                "week_idle_ms": 21189,
+                "week_ms": 30
+              }
+            },
+            {
+              "behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 9
+              },
+              "diagnostic_behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 9
+              },
+              "overall": {
+                "week_idle_ms": 48,
+                "week_ms": 29
+              },
+              "process": {
+                "executable": "/usr/bin/stat"
+              },
+              "process_events": {
+                "week_idle_ms": 48,
+                "week_ms": 11
+              }
+            },
+            {
+              "behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 9
+              },
+              "diagnostic_behavior_protection": {
+                "week_idle_ms": 0,
+                "week_ms": 9
+              },
+              "overall": {
+                "week_idle_ms": 56,
+                "week_ms": 28
+              },
+              "process": {
+                "executable": "/usr/bin/chmod"
+              },
+              "process_events": {
+                "week_idle_ms": 56,
+                "week_ms": 10
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 12626,
+                "week_ms": 27
+              },
+              "process": {
+                "executable": "/usr/lib/systemd/systemd"
+              },
+              "process_events": {
+                "week_idle_ms": 12626,
+                "week_ms": 27
+              }
+            },
+            {
+              "overall": {
+                "week_idle_ms": 4740,
+                "week_ms": 24
+              },
+              "process": {
+                "executable": "/usr/bin/containerd-shim-runc-v2"
+              },
+              "process_events": {
+                "week_idle_ms": 4740,
+                "week_ms": 24
+              }
+            }
+          ],
+          "threads": [
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "Cron"
+            },
+            {
+              "cpu": {
+                "mean": 1.612903225806452
+              },
+              "name": "FileLogThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "LoggingLimitThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "DocumentLoggingThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "DocumentLoggingMaintenance"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "BulkConsumerThread"
+            },
+            {
+              "cpu": {
+                "mean": 1.612903225806452
+              },
+              "name": "DocumentLoggingConsumerThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "DocumentLoggingLimitThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "ArtifactManifestDownload"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "PolicyReloadThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "PerformanceMonitorWorkerThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "MetadataThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "MountMonitor"
+            },
+            {
+              "cpu": {
+                "mean": 14.75409836065574
+              },
+              "name": "EventsQueueThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "DelayedAlertEnrichment"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "MaintainProcessMap"
+            },
+            {
+              "cpu": {
+                "mean": 1.639344262295082
+              },
+              "name": "FileScoreThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "DiagnosticMalwareThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "QuarantineManagerWorkerThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "EventProcessingThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "HostIsolationMonitorThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "AsyncReputationLookupsThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "ReputationSamplesUploadThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "ImpactMonitorThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "serviceCommsThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "grpcConnectionManagerThread"
+            },
+            {
+              "cpu": {
+                "mean": 18.0327868852459
+              },
+              "name": "checkinAPIThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "actionsAPIThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "stateReportThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "EventsLoopThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "FanotifyWatchdog"
+            },
+            {
+              "cpu": {
+                "mean": 2.564102564102564
+              },
+              "name": "FanotifySyncConsumer"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "FanotifyAsyncConsumer"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "FanotifyConsumer"
+            },
+            {
+              "cpu": {
+                "mean": 35.29411764705883
+              },
+              "name": "RulesEngineThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "responseActionsGetFileUploadThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "responseActionsGetFileProcessThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "responseActionsExecuteUploadThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "responseActionsExecuteProcessThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "responseActionsPutFileProcessThread"
+            },
+            {
+              "cpu": {
+                "mean": 0.0
+              },
+              "name": "responseActionsScanThread"
+            },
+            {
+              "name": "ServiceCommsDispatchInstance"
+            }
+          ],
+          "top_process_trees": {
+            "values": [
+              {
+                "event_count": 1726,
+                "last_seen": "2025-01-28T16:43:49.0Z",
+                "sample": {
+                  "command_line": "/opt/miniconda3/envs/Endpoint/bin/python /opt/miniconda3/envs/Endpoint/bin/pytest -s -v --show-capture=no -k test_noisy_processes_validate_metadata",
+                  "entity_id": "CaOqGgCnYo6Wxqe5CYLRBQ",
+                  "executable": "python3.10",
+                  "parent_command_line": "-bash"
+                }
+              },
+              {
+                "event_count": 1502,
+                "last_seen": "2025-01-28T16:45:02.93Z",
+                "sample": {
+                  "command_line": "/opt/miniconda3/envs/Endpoint/bin/python /git/endpoint-dev/Python/endpoint/tools/noisy_process_tree_test.py --child --marker e24383f3cc6c804d9be34aa9982f7ca4",
+                  "entity_id": "2xZDJ2oZ/6qK8UALFbKUAw",
+                  "executable": "python",
+                  "parent_command_line": "/opt/miniconda3/envs/Endpoint/bin/python /git/endpoint-dev/Python/endpoint/tools/noisy_process_tree_test.py --marker e24383f3cc6c804d9be34aa9982f7ca4 --count 2000"
+                }
+              },
+              {
+                "event_count": 100,
+                "last_seen": "2025-01-28T16:45:01.37Z",
+                "sample": {
+                  "command_line": "sudo /opt/Elastic/Endpoint/elastic-endpoint inspect",
+                  "entity_id": "Ni/hCgF773ZtGv1li87hrw",
+                  "executable": "sudo",
+                  "parent_command_line": "/opt/miniconda3/envs/Endpoint/bin/python /opt/miniconda3/envs/Endpoint/bin/pytest -s -v --show-capture=no -k test_noisy_processes_validate_metadata"
+                }
+              }
+            ],
+            "window_end": "2025-01-28T16:45:28.8381494Z",
+            "window_start": "2025-01-28T04:45:28.8381494Z"
+          },
+          "uptime": {
+            "endpoint": 62,
+            "system": 235881
+          }
+        }
+      },
+      "agent": {
+        "build": {
+          "original": "version: 9.0.0-SNAPSHOT, compiled: Tue Jan 28 16:00:00 2025, branch: 14632_noisy_process_tests, commit: fbadbb40da3484daf848142ed7cc3f18cffb750e"
+        },
+        "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        "type": "endpoint",
+        "version": "9.0.0-SNAPSHOT"
+      },
+      "data_stream": {
+        "dataset": "endpoint.metrics",
+        "namespace": "default",
+        "type": "metrics"
+      },
+      "ecs": {
+        "version": "8.10.0"
+      },
+      "elastic": {
+        "agent": {
+          "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        }
+      },
+      "event": {
+        "action": "endpoint_metrics",
+        "category": [
+          "host"
+        ],
+        "created": "2025-01-28T16:45:28.82746649Z",
+        "dataset": "endpoint.metrics",
+        "id": "NtY7TLHCjYuLSjUP+++++/O/",
+        "kind": "metric",
+        "module": "endpoint",
+        "sequence": 3742,
+        "type": [
+          "info"
+        ]
+      },
+      "host": {
+        "architecture": "x86_64",
+        "hostname": "ubuntu-server",
+        "id": "dabadaba-0000-0000-0000-000000000000",
+        "ip": [
+          "172.20.0.1",
+          "172.24.0.1",
+          "172.22.0.1",
+          "172.19.0.1",
+          "172.18.0.1",
+          "127.0.0.1",
+          "::1",
+          "192.168.224.128",
+          "fe80::20c:29ff:fe27:b344",
+          "192.168.177.100",
+          "fe80::20c:29ff:fe27:b34e",
+          "172.21.0.1",
+          "fe80::42:18ff:fe3f:e64",
+          "172.17.0.1",
+          "fe80::42:35ff:fe21:4364",
+          "fe80::9890:baff:fe17:1cf"
+        ],
+        "mac": [
+          "02-42-f1-c9-0b-12",
+          "02-42-25-77-34-be",
+          "02-42-91-e1-74-ae",
+          "02-42-92-43-9e-26",
+          "02-42-a0-45-dd-ea",
+          "00-0c-29-27-b3-44",
+          "00-0c-29-27-b3-4e",
+          "02-42-18-3f-0e-64",
+          "02-42-35-21-43-64",
+          "9a-90-ba-17-01-cf"
+        ],
+        "name": "ubuntu-server",
+        "os": {
+          "Ext": {
+            "variant": "Ubuntu"
+          },
+          "family": "ubuntu",
+          "full": "Ubuntu 22.04.5",
+          "kernel": "5.15.0-130-generic #140-Ubuntu SMP Wed Dec 18 17:59:53 UTC 2024",
+          "name": "Linux",
+          "platform": "ubuntu",
+          "type": "linux",
+          "version": "22.04.5"
+        }
+      },
+      "message": "Endpoint metrics"
+    },
+    "type": "_doc"
+  }
+}

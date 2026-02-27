@@ -39,7 +39,9 @@
           },
           ") => React.ForwardRefExoticComponent<React.PropsWithoutRef<React.ComponentPropsWithRef<TElement>> & React.RefAttributes<TRef>>"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -53,7 +55,9 @@
             "signature": [
               "Loader<TElement>"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,7 +78,9 @@
                 "text": "DynamicOptions"
               }
             ],
-            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,9 +99,11 @@
           "\nA simple implementation of `React.Suspense.fallback` that renders a loading spinner."
         ],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/fallback.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/fallback.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -114,7 +122,9 @@
         "signature": [
           "(element: HTMLElement | null | undefined, container?: HTMLElement | undefined) => HTMLAnchorElement | undefined"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,7 +138,9 @@
             "signature": [
               "HTMLElement | null | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -143,12 +155,42 @@
             "signature": [
               "HTMLElement | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.getPlatform",
+        "type": "Function",
+        "tags": [],
+        "label": "getPlatform",
+        "description": [
+          "\nGets the current platform as a standardized string."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.Platform",
+            "text": "Platform"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -164,7 +206,9 @@
         "signature": [
           "(event: React.MouseEvent<Element, MouseEvent>) => boolean"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,7 +222,9 @@
             "signature": [
               "React.MouseEvent<Element, MouseEvent>"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/utils.ts",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/utils.ts",
+            "lineNumber": 15,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -197,7 +243,7 @@
           "\nA HOC which supplies React.Suspense with a fallback component, and a `KibanaErrorBoundary` to contain errors."
         ],
         "signature": [
-          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P & ",
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -207,7 +253,9 @@
           },
           "> & React.RefAttributes<R>>"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +271,9 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -240,7 +290,9 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -260,7 +312,9 @@
         "description": [
           "\nOptions for the lazy loaded component"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -272,9 +326,11 @@
             "label": "fallback",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -290,7 +346,9 @@
         "description": [
           "\nOptional services that the Suspense wrapper can use"
         ],
-        "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -304,16 +362,12 @@
               "\nThe `AnalyticsServiceStart` object from `CoreStart`"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               " | undefined"
             ],
-            "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/with_suspense.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -322,7 +376,73 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.isLinux",
+        "type": "boolean",
+        "tags": [],
+        "label": "isLinux",
+        "description": [
+          "\nChecks if the current platform is Linux."
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.isMac",
+        "type": "boolean",
+        "tags": [],
+        "label": "isMac",
+        "description": [
+          "\nChecks if the current platform is macOS."
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.isWindows",
+        "type": "boolean",
+        "tags": [],
+        "label": "isWindows",
+        "description": [
+          "\nChecks if the current platform is Windows."
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-utility",
+        "id": "def-common.Platform",
+        "type": "Type",
+        "tags": [],
+        "label": "Platform",
+        "description": [],
+        "signature": [
+          "\"other\" | \"windows\" | \"linux\" | \"mac\""
+        ],
+        "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/browser/platform.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

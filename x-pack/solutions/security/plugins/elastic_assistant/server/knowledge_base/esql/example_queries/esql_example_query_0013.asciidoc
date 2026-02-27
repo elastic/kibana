@@ -1,0 +1,64 @@
+//13. Persistence via Systemd (timers)
+//Helpful when answering questions on using the CASE command (conditional statements), searching lists using the IN command, wildcard searches with the LIKE command and aggregations
+FROM logs-*
+| WHERE host.os.type == "linux" and event.type in ("creation", "change") and (
+
+    // System-wide/user-specific services/timers (root permissions required)
+    file.path like "/run/systemd/system/*" or
+    file.path like "/etc/systemd/system/*" or
+    file.path like "/etc/systemd/user/*" or
+    file.path like "/usr/local/lib/systemd/system/*" or
+    file.path like "/lib/systemd/system/*" or
+    file.path like "/usr/lib/systemd/system/*" or
+    file.path like "/usr/lib/systemd/user/*" or
+
+    // user-specific services/timers (user permissions required)
+    file.path like "/home/*/.config/systemd/user/*" or
+    file.path like "/home/*/.local/share/systemd/user/*" or
+
+    // System-wide generators (root permissions required)
+    file.path like "/etc/systemd/system-generators/*" or
+    file.path like "/usr/local/lib/systemd/system-generators/*" or
+    file.path like "/lib/systemd/system-generators/*" or
+    file.path like "/etc/systemd/user-generators/*" or
+    file.path like "/usr/local/lib/systemd/user-generators/*" or
+    file.path like "/usr/lib/systemd/user-generators/*"
+
+) and not (
+process.name in (
+"dpkg", "dockerd", "yum", "dnf", "snapd", "pacman", "pamac-daemon",
+"netplan", "systemd", "generate"
+) or
+process.executable == "/proc/self/exe" or
+process.executable like "/dev/fd/*" or
+file.extension in ("dpkg-remove", "swx", "swp")
+)
+| EVAL persistence = CASE(
+
+    // System-wide/user-specific services/timers (root permissions required)
+    file.path like "/run/systemd/system/*" or
+    file.path like "/etc/systemd/system/*" or
+    file.path like "/etc/systemd/user/*" or
+    file.path like "/usr/local/lib/systemd/system/*" or
+    file.path like "/lib/systemd/system/*" or
+    file.path like "/usr/lib/systemd/system/*" or
+    file.path like "/usr/lib/systemd/user/*" or
+
+    // user-specific services/timers (user permissions required)
+    file.path like "/home/*/.config/systemd/user/*" or
+    file.path like "/home/*/.local/share/systemd/user/*" or
+
+    // System-wide generators (root permissions required)
+    file.path like "/etc/systemd/system-generators/*" or
+    file.path like "/usr/local/lib/systemd/system-generators/*" or
+    file.path like "/lib/systemd/system-generators/*" or
+    file.path like "/etc/systemd/user-generators/*" or
+    file.path like "/usr/local/lib/systemd/user-generators/*" or
+    file.path like "/usr/lib/systemd/user-generators/*",
+    process.name,
+    null
+)
+| STATS cc = COUNT(*), pers_count = COUNT(persistence), agent_count = COUNT(agent.id) by process.executable, file.path, host.name, user.name
+| WHERE pers_count > 0 and pers_count <= 20 and agent_count <= 3
+| SORT cc asc
+| LIMIT 100

@@ -1,0 +1,163 @@
+{
+  "id": "@kbn/security-solution-distribution-bar",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-solution-distribution-bar",
+        "id": "def-public.DistributionBar",
+        "type": "Function",
+        "tags": [],
+        "label": "DistributionBar",
+        "description": [
+          "\nSecurity Solution DistributionBar component.\nShows visual representation of distribution of stats, such as alerts by criticality or misconfiguration findings by evaluation result."
+        ],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "@kbn/security-solution-distribution-bar",
+            "scope": "public",
+            "docId": "kibKbnSecuritySolutionDistributionBarPluginApi",
+            "section": "def-public.DistributionBarProps",
+            "text": "DistributionBarProps"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+        "lineNumber": 162,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-distribution-bar",
+            "id": "def-public.DistributionBar.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-distribution-bar",
+            "id": "def-public.DistributionBar.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/security-solution-distribution-bar",
+        "id": "def-public.DistributionBarProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DistributionBarProps",
+        "description": [
+          "DistributionBar component props"
+        ],
+        "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-distribution-bar",
+            "id": "def-public.DistributionBarProps.stats",
+            "type": "Array",
+            "tags": [],
+            "label": "stats",
+            "description": [
+              "distribution data points"
+            ],
+            "signature": [
+              "{ key: string; count: number; color: string; label?: React.ReactNode; isCurrentFilter?: boolean | undefined; filter?: (() => void) | undefined; reset?: ((event: React.MouseEvent<SVGElement, MouseEvent>) => void) | undefined; }[]"
+            ],
+            "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-distribution-bar",
+            "id": "def-public.DistributionBarProps.hideLastTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideLastTooltip",
+            "description": [
+              "hide the label above the bar at first render"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-distribution-bar",
+            "id": "def-public.DistributionBarProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "['data-test-subj']",
+            "description": [
+              "data-test-subj used for querying the component in tests"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/distribution-bar/src/distribution_bar.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

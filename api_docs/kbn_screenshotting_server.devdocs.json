@@ -1,0 +1,855 @@
+{
+  "id": "@kbn/screenshotting-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/screenshotting-server",
+        "id": "def-server.ChromiumArchivePaths",
+        "type": "Class",
+        "tags": [],
+        "label": "ChromiumArchivePaths",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.ChromiumArchivePaths.packages",
+            "type": "Array",
+            "tags": [],
+            "label": "packages",
+            "description": [],
+            "signature": [
+              "(CustomPackageInfo | ChromeForTestingPackageInfo)[]"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.ChromiumArchivePaths.archivesPath",
+            "type": "string",
+            "tags": [],
+            "label": "archivesPath",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.ChromiumArchivePaths.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [],
+            "signature": [
+              "(platform: string, architecture: string, packages?: ",
+              {
+                "pluginId": "@kbn/screenshotting-server",
+                "scope": "server",
+                "docId": "kibKbnScreenshottingServerPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              },
+              "[]) => ",
+              {
+                "pluginId": "@kbn/screenshotting-server",
+                "scope": "server",
+                "docId": "kibKbnScreenshottingServerPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/screenshotting-server",
+                "id": "def-server.ChromiumArchivePaths.find.$1",
+                "type": "string",
+                "tags": [],
+                "label": "platform",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 108,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/screenshotting-server",
+                "id": "def-server.ChromiumArchivePaths.find.$2",
+                "type": "string",
+                "tags": [],
+                "label": "architecture",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 108,
+                "columnNumber": 33,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/screenshotting-server",
+                "id": "def-server.ChromiumArchivePaths.find.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "packages",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/screenshotting-server",
+                    "scope": "server",
+                    "docId": "kibKbnScreenshottingServerPluginApi",
+                    "section": "def-server.PackageInfo",
+                    "text": "PackageInfo"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 108,
+                "columnNumber": 55,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.ChromiumArchivePaths.resolvePath",
+            "type": "Function",
+            "tags": [],
+            "label": "resolvePath",
+            "description": [],
+            "signature": [
+              "(p: ",
+              {
+                "pluginId": "@kbn/screenshotting-server",
+                "scope": "server",
+                "docId": "kibKbnScreenshottingServerPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              },
+              ") => string"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/screenshotting-server",
+                "id": "def-server.ChromiumArchivePaths.resolvePath.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "p",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/screenshotting-server",
+                    "scope": "server",
+                    "docId": "kibKbnScreenshottingServerPluginApi",
+                    "section": "def-server.PackageInfo",
+                    "text": "PackageInfo"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 112,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.ChromiumArchivePaths.getAllArchiveFilenames",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllArchiveFilenames",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.ChromiumArchivePaths.getDownloadUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getDownloadUrl",
+            "description": [],
+            "signature": [
+              "(p: ",
+              {
+                "pluginId": "@kbn/screenshotting-server",
+                "scope": "server",
+                "docId": "kibKbnScreenshottingServerPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              },
+              ") => string"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/screenshotting-server",
+                "id": "def-server.ChromiumArchivePaths.getDownloadUrl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "p",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/screenshotting-server",
+                    "scope": "server",
+                    "docId": "kibKbnScreenshottingServerPluginApi",
+                    "section": "def-server.PackageInfo",
+                    "text": "PackageInfo"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 121,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.ChromiumArchivePaths.getBinaryPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getBinaryPath",
+            "description": [],
+            "signature": [
+              "(p: ",
+              {
+                "pluginId": "@kbn/screenshotting-server",
+                "scope": "server",
+                "docId": "kibKbnScreenshottingServerPluginApi",
+                "section": "def-server.PackageInfo",
+                "text": "PackageInfo"
+              },
+              ", chromiumPath: string) => string"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/screenshotting-server",
+                "id": "def-server.ChromiumArchivePaths.getBinaryPath.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "p",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/screenshotting-server",
+                    "scope": "server",
+                    "docId": "kibKbnScreenshottingServerPluginApi",
+                    "section": "def-server.PackageInfo",
+                    "text": "PackageInfo"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 133,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/screenshotting-server",
+                "id": "def-server.ChromiumArchivePaths.getBinaryPath.$2",
+                "type": "string",
+                "tags": [],
+                "label": "chromiumPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+                "lineNumber": 133,
+                "columnNumber": 40,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/screenshotting-server",
+        "id": "def-server.args",
+        "type": "Function",
+        "tags": [],
+        "label": "args",
+        "description": [],
+        "signature": [
+          "({ userDataDir, disableSandbox, windowSize, proxy: proxyConfig, }: LaunchArgs) => string[]"
+        ],
+        "path": "src/platform/packages/private/kbn-screenshotting-server/src/args.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.args.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  userDataDir,\n  disableSandbox,\n  windowSize,\n  proxy: proxyConfig,\n}",
+            "description": [],
+            "signature": [
+              "LaunchArgs"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/args.ts",
+            "lineNumber": 27,
+            "columnNumber": 22,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/screenshotting-server",
+        "id": "def-server.createConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "createConfig",
+        "description": [],
+        "signature": [
+          "(parentLogger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", config: Readonly<{} & { enabled: boolean; capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; poolSize: number; }>) => Promise<Readonly<{} & { enabled: boolean; capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; poolSize: number; }>>"
+        ],
+        "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/create_config.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.createConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "parentLogger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/create_config.ts",
+            "lineNumber": 20,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.createConfig.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Readonly<{} & { enabled: boolean; capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; poolSize: number; }>"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/create_config.ts",
+            "lineNumber": 20,
+            "columnNumber": 58,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/screenshotting-server",
+        "id": "def-server.durationToNumber",
+        "type": "Function",
+        "tags": [],
+        "label": "durationToNumber",
+        "description": [
+          "\nHelper function"
+        ],
+        "signature": [
+          "(value: number | moment.Duration) => number"
+        ],
+        "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.durationToNumber.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | moment.Duration"
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/screenshotting-server",
+        "id": "def-server.getChromiumPackage",
+        "type": "Function",
+        "tags": [],
+        "label": "getChromiumPackage",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/screenshotting-server",
+            "scope": "server",
+            "docId": "kibKbnScreenshottingServerPluginApi",
+            "section": "def-server.PackageInfo",
+            "text": "PackageInfo"
+          }
+        ],
+        "path": "src/platform/packages/private/kbn-screenshotting-server/src/get_chromium_package.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/screenshotting-server",
+        "id": "def-server.PackageInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "PackageInfo",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.PackageInfo.platform",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "platform",
+            "description": [],
+            "signature": [
+              "\"linux\" | \"darwin\" | \"win32\""
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.PackageInfo.architecture",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "architecture",
+            "description": [],
+            "signature": [
+              "\"arm64\" | \"x64\""
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.PackageInfo.archiveFilename",
+            "type": "string",
+            "tags": [],
+            "label": "archiveFilename",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.PackageInfo.archiveChecksum",
+            "type": "string",
+            "tags": [],
+            "label": "archiveChecksum",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.PackageInfo.binaryChecksum",
+            "type": "string",
+            "tags": [],
+            "label": "binaryChecksum",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.PackageInfo.binaryRelativePath",
+            "type": "string",
+            "tags": [],
+            "label": "binaryRelativePath",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.PackageInfo.isPreInstalled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPreInstalled",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/screenshotting-server",
+            "id": "def-server.PackageInfo.location",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "signature": [
+              "\"custom\" | \"chromeForTesting\""
+            ],
+            "path": "src/platform/packages/private/kbn-screenshotting-server/src/paths.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/screenshotting-server",
+        "id": "def-server.ConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; readonly browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; readonly networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; readonly poolSize: number; }"
+        ],
+        "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/schema.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/screenshotting-server",
+        "id": "def-server.ConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ConfigSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, boolean, boolean>; networkPolicy: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; rules: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]>; }>; browser: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ autoDownload: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, boolean, boolean>; chromium: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ disableSandbox: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; proxy: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; server: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, string, undefined>; bypass: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<true, string[], undefined>; }>; }>; }>; capture: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ timeouts: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ openUrl: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number | moment.Duration>; waitForElements: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number | moment.Duration>; renderComplete: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number | moment.Duration>; }>; zoom: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; loadDelay: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number | moment.Duration | undefined>; }>; poolSize: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; }>"
+        ],
+        "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/schema.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

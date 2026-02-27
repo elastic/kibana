@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { SavedObject } from '@kbn/core/server';
+import type { ISavedObjectsManagement } from '../services';
+import type { SavedObjectWithMetadata } from '../types';
+
+export function injectMetaAttributes<T = unknown>(
+  savedObject: SavedObject<T> | SavedObjectWithMetadata<T>,
+  savedObjectsManagement: ISavedObjectsManagement
+): SavedObjectWithMetadata<T> {
+  const result = {
+    ...savedObject,
+    meta: (savedObject as SavedObjectWithMetadata).meta || {},
+  };
+
+  // Add extra meta information
+  result.meta.icon = savedObjectsManagement.getIcon(savedObject.type);
+  result.meta.title = savedObjectsManagement.getTitle(savedObject);
+  result.meta.editUrl = savedObjectsManagement.getEditUrl(savedObject);
+  result.meta.inAppUrl = savedObjectsManagement.getInAppUrl(savedObject);
+  result.meta.namespaceType = savedObjectsManagement.getNamespaceType(savedObject);
+  result.meta.hiddenType = savedObjectsManagement.isHidden(savedObject);
+
+  return result;
+}

@@ -1,0 +1,205 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiAccordion,
+  EuiErrorBoundary,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/css';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
+import { useHtmlId } from '../../../components/use_html_id';
+
+export interface ApiKeysEmptyPromptProps {
+  error?: Error;
+  readOnly?: boolean;
+}
+
+export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> = ({
+  error,
+  readOnly,
+  children,
+}) => {
+  const { services } = useKibana();
+  const { euiTheme } = useEuiTheme();
+  const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
+
+  if (error) {
+    if (doesErrorIndicateAPIKeysAreDisabled(error)) {
+      return (
+        <KibanaPageTemplate.EmptyPrompt
+          iconType="warning"
+          body={
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.apiKeysEmptyPrompt.disabledErrorMessage"
+                  defaultMessage="API keys are disabled."
+                />
+              </p>
+              <p>
+                <EuiLink
+                  href={services.docLinks!.links.security.apiKeyServiceSettings}
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="xpack.security.management.apiKeysEmptyPrompt.docsLinkText"
+                    defaultMessage="Learn how to enable API keys."
+                  />
+                </EuiLink>
+              </p>
+            </>
+          }
+        />
+      );
+    }
+
+    if (doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error)) {
+      return (
+        <KibanaPageTemplate.EmptyPrompt
+          iconType="lock"
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.security.management.apiKeysEmptyPrompt.forbiddenErrorMessage"
+                defaultMessage="You do not have permission to manage API keys."
+              />
+            </p>
+          }
+        />
+      );
+    }
+
+    const ThrowError = () => {
+      throw error;
+    };
+
+    const promptHeading = doesErrorIndicateBadQuery(error) ? (
+      <FormattedMessage
+        id="xpack.security.management.apiKeysEmptyPrompt.badQueryErrorMessage"
+        defaultMessage="Could not load API keys as the query is incorrect."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.management.apiKeysEmptyPrompt.errorMessage"
+        defaultMessage="Could not load API keys."
+      />
+    );
+
+    return (
+      <KibanaPageTemplate.EmptyPrompt
+        iconType="warning"
+        body={<p>{promptHeading}</p>}
+        actions={
+          <>
+            {children}
+
+            <EuiSpacer size="xl" />
+            <EuiAccordion
+              id={accordionId}
+              buttonClassName={css({
+                display: 'flex',
+                justifyContent: 'center',
+              })}
+              buttonContent={
+                <EuiText size="xs" className={css({ fontWeight: euiTheme.font.weight.medium })}>
+                  <FormattedMessage
+                    id="xpack.security.management.apiKeysEmptyPrompt.technicalDetailsButton"
+                    defaultMessage="Technical details"
+                  />
+                </EuiText>
+              }
+              arrowDisplay="right"
+              paddingSize="m"
+            >
+              <EuiText textAlign="left">
+                <EuiErrorBoundary>
+                  <ThrowError />
+                </EuiErrorBoundary>
+              </EuiText>
+            </EuiAccordion>
+          </>
+        }
+      />
+    );
+  }
+
+  if (readOnly) {
+    return (
+      <KibanaPageTemplate.EmptyPrompt
+        iconType="error"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyTitle"
+              defaultMessage="You do not have permission to create API keys"
+            />
+          </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyMessage"
+              defaultMessage="Please contact your administrator for more information"
+            />
+          </p>
+        }
+      />
+    );
+  }
+
+  return (
+    <KibanaPageTemplate.EmptyPrompt
+      iconType="managementApp"
+      title={
+        <h1>
+          <FormattedMessage
+            id="xpack.security.management.apiKeysEmptyPrompt.emptyTitle"
+            defaultMessage="Create your first API key"
+          />
+        </h1>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.security.management.apiKeysEmptyPrompt.emptyMessage"
+            defaultMessage="Allow external services to access the Elastic Stack on your behalf."
+          />
+        </p>
+      }
+      actions={children}
+    />
+  );
+};
+
+function doesErrorIndicateAPIKeysAreDisabled(error: Record<string, any>) {
+  const message = error.body?.message || '';
+  return message.indexOf('disabled.feature="api_keys"') !== -1;
+}
+
+function doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error: Record<string, any>) {
+  return error.body?.statusCode === 403;
+}
+
+export function doesErrorIndicateBadQuery(error: Record<string, any>) {
+  const message = error?.message || '';
+  const errorString = error?.name || '';
+
+  return (
+    errorString.indexOf('ResponseError') > -1 || message.indexOf('illegal_argument_exception') > -1
+  );
+}

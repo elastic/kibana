@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Select Flow Direction rendering it renders the basic group button for uni-direction and bi-direction 1`] = `
+<div
+  class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+>
+  <div
+    class="euiFilterButton__wrapper css-1anz60t-wrapper-withNext-hasToggle"
+  >
+    <button
+      aria-pressed="true"
+      class="euiButtonGroupButton euiButtonGroupButton-isSelected euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-fill-text-euiFilterButton-hasActiveFilters-toggle"
+      data-test-subj="uniDirectional"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
+      >
+        <span
+          class="euiFilterButton__text emotion-euiFilterButton__text"
+          data-text="Unidirectional"
+          title="Unidirectional"
+        >
+          Unidirectional
+        </span>
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFilterButton__wrapper css-1nn8k4u-wrapper-hasToggle"
+  >
+    <button
+      aria-pressed="false"
+      class="euiButtonGroupButton euiFilterButton euiFilterButton-isToggle emotion-euiButtonDisplay-s-defaultMinWidth-euiButtonGroupButton-compressed-empty-text-euiFilterButton-toggle"
+      data-test-subj="biDirectional"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent-euiButtonGroupButton__content-compressed-euiFilterButton__content"
+      >
+        <span
+          class="euiFilterButton__text emotion-euiFilterButton__text"
+          data-text="Bidirectional"
+          title="Bidirectional"
+        >
+          Bidirectional
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

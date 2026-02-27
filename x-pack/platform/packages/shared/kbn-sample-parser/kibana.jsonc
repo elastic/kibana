@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/sample-log-parser",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

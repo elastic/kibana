@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/security-solution-side-nav",
+  "owner": [
+    "@elastic/security-threat-hunting-investigations"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC } from 'react';
+import React from 'react';
+
+import { EuiIcon, EuiIconTip } from '@elastic/eui';
+import type { AuditMessageBase } from '../../../../common/types/audit_message';
+
+interface Props {
+  message: AuditMessageBase;
+  showTooltip?: boolean;
+}
+
+const [INFO, WARNING, ERROR] = ['info', 'warning', 'error'];
+
+export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
+  if (message === undefined) {
+    return <span />;
+  }
+
+  let color = 'primary';
+  let icon = 'warning';
+
+  if (message.level === INFO) {
+    icon = 'info';
+  } else if (message.level === WARNING) {
+    color = 'warning';
+  } else if (message.level === ERROR) {
+    color = 'danger';
+  }
+
+  if (showTooltip) {
+    return <EuiIconTip content={message.text} position="bottom" type={icon} color={color} />;
+  } else {
+    return <EuiIcon type={icon} color={color} />;
+  }
+};

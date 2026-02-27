@@ -1,61 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
+import pLimit from 'p-limit';
+import { storybookAliases } from '../../../../src/dev/storybook/aliases';
 import { getKibanaDir } from '#pipeline-utils';
-
-// TODO - how to generate this dynamically?
-const STORYBOOKS = [
-  'apm',
-  'canvas',
-  'cases',
-  'cell_actions',
-  'cloud_chat',
-  'coloring',
-  'chart_icons',
-  'content_management_examples',
-  'controls',
-  'custom_integrations',
-  'dashboard_enhanced',
-  'dashboard',
-  'data',
-  'logs_explorer',
-  'embeddable',
-  'expression_error',
-  'expression_image',
-  'expression_metric',
-  'expression_repeat_image',
-  'expression_reveal_image',
-  'expression_shape',
-  'expression_tagcloud',
-  'management',
-  'fleet',
-  'grouping',
-  'home',
-  'infra',
-  'kibana_react',
-  'lists',
-  'observability',
-  'observability_ai_assistant',
-  'presentation',
-  'security_solution',
-  'security_solution_packages',
-  'serverless',
-  'shared_ux',
-  'triggers_actions_ui',
-  'ui_actions_enhanced',
-  'language_documentation_popover',
-  'unified_search',
-  'random_sampling',
-  'text_based_editor',
-];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
 
@@ -65,9 +23,45 @@ const STORYBOOK_DIRECTORY =
     : (process.env.BUILDKITE_BRANCH ?? '').replace('/', '__');
 const STORYBOOK_BUCKET = 'ci-artifacts.kibana.dev/storybooks';
 const STORYBOOK_BUCKET_URL = `https://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}`;
-const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}/${process.env.BUILDKITE_COMMIT}`;
+const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}`;
 
 const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
+
+const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
+  return new Promise((resolve, reject) => {
+    const logsBuffer: string[] = [];
+    const handleBufferChunk = (chunk: Buffer) => {
+      logsBuffer.push(chunk.toString());
+    };
+
+    const child = spawn('yarn', ['storybook', '--site', storybook], {
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        STORYBOOK_BASE_URL,
+        NODE_OPTIONS: '--max-old-space-size=6144',
+      },
+    });
+
+    child.stdout?.on('data', handleBufferChunk);
+    child.stderr?.on('data', handleBufferChunk);
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        logsBuffer.unshift(`--- ✅ ${storybook} storybook\n`);
+        resolve({ logs: logsBuffer.join('') });
+      } else {
+        logsBuffer.unshift(`--- ❌ ${storybook} storybook\n`);
+        reject(new Error(logsBuffer.join('')));
+      }
+    });
+
+    child.on('error', () => {
+      logsBuffer.unshift(`--- ❌ ${storybook} storybook\n`);
+      reject(new Error(logsBuffer.join('')));
+    });
+  });
+};
 
 const ghStatus = (state: string, description: string) =>
   exec(
@@ -79,11 +73,23 @@ const ghStatus = (state: string, description: string) =>
     `--silent`
   );
 
-const build = () => {
+const build = async () => {
   console.log('--- Building Storybooks');
 
-  for (const storybook of STORYBOOKS) {
-    exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`);
+  const limit = pLimit(os.availableParallelism());
+  const storybooks = Object.keys(storybookAliases);
+
+  try {
+    const results = await Promise.all(
+      storybooks.map((storybook) => limit(() => buildStorybook(storybook)))
+    );
+
+    results.forEach(({ logs }) => {
+      console.log(logs);
+    });
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 };
 
@@ -124,8 +130,8 @@ const upload = () => {
     );
     exec(`
       ${activateScript} gs://ci-artifacts.kibana.dev
-      gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --no-user-output-enabled '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/'
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=html --no-user-output-enabled 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
 
     if (process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false') {
@@ -138,12 +144,14 @@ const upload = () => {
   }
 };
 
-try {
-  ghStatus('pending', 'Building Storybooks');
-  build();
-  upload();
-  ghStatus('success', 'Storybooks built');
-} catch (error) {
-  ghStatus('error', 'Building Storybooks failed');
-  throw error;
-}
+(async () => {
+  try {
+    ghStatus('pending', 'Building Storybooks');
+    await build();
+    upload();
+    ghStatus('success', 'Storybooks built');
+  } catch (error) {
+    ghStatus('error', 'Building Storybooks failed');
+    throw error;
+  }
+})();

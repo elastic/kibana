@@ -1,0 +1,11 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": ["server/**/*", "translations/ja-JP.json", "translations/fr-FR.json", "translations/de-DE.json", "translations/zh-CN.json"],
+  "kbn_references": [],
+  "exclude": [
+    "target/**/*",
+  ]
+}

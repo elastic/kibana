@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useContext, useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { ExpressionsContext } from './expressions_context';
 
 const expression = `getEvents
@@ -41,7 +43,7 @@ export function App() {
   }, [expressions]);
 
   return (
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <EuiPageTemplate offset={0}>
         <EuiPageTemplate.Header pageTitle="Partial Results Demo" />
         <EuiPageTemplate.Section>
@@ -56,6 +58,9 @@ export function App() {
           <EuiSpacer size={'m'} />
           {datatable ? (
             <EuiBasicTable
+              tableCaption={i18n.translate('partialResultsDemo.tableCaption', {
+                defaultMessage: 'Partial expression results',
+              })}
               data-test-subj={'example-table'}
               columns={datatable.columns?.map(({ id: field, name }) => ({
                 field,
@@ -65,7 +70,7 @@ export function App() {
               items={datatable.rows ?? []}
             />
           ) : (
-            <EuiCallOut color="success">
+            <EuiCallOut announceOnMount={false} color="success">
               <p>Click or press any key.</p>
             </EuiCallOut>
           )}

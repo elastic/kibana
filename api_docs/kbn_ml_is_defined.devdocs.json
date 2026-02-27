@@ -31,7 +31,9 @@
         "signature": [
           "(argument: T | null | undefined) => boolean"
         ],
-        "path": "x-pack/packages/ml/is_defined/src/is_defined.ts",
+        "path": "x-pack/platform/packages/private/ml/is_defined/src/is_defined.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +49,9 @@
             "signature": [
               "T | null | undefined"
             ],
-            "path": "x-pack/packages/ml/is_defined/src/is_defined.ts",
+            "path": "x-pack/platform/packages/private/ml/is_defined/src/is_defined.ts",
+            "lineNumber": 14,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

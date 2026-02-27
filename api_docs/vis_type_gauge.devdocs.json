@@ -25,7 +25,9 @@
           "GaugeVisParams",
           ">"
         ],
-        "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
+        "path": "src/platform/plugins/private/vis_types/gauge/public/vis_type/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +41,9 @@
             "signature": [
               "GaugeTypeProps"
             ],
-            "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
+            "path": "src/platform/plugins/private/vis_types/gauge/public/vis_type/index.ts",
+            "lineNumber": 14,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,7 +74,9 @@
           "GaugeVisParams",
           ">"
         ],
-        "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
+        "path": "src/platform/plugins/private/vis_types/gauge/public/vis_type/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,7 +90,9 @@
             "signature": [
               "GaugeTypeProps"
             ],
-            "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
+            "path": "src/platform/plugins/private/vis_types/gauge/public/vis_type/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,7 +110,9 @@
         "tags": [],
         "label": "VisTypeGaugePluginSetup",
         "description": [],
-        "path": "src/plugins/vis_types/gauge/public/types.ts",
+        "path": "src/platform/plugins/private/vis_types/gauge/public/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -115,7 +125,9 @@
         "tags": [],
         "label": "VisTypeGaugePluginStart",
         "description": [],
-        "path": "src/plugins/vis_types/gauge/public/types.ts",
+        "path": "src/platform/plugins/private/vis_types/gauge/public/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -150,7 +162,9 @@
         "signature": [
           "\"visualization:visualize:legacyGaugeChartsLibrary\""
         ],
-        "path": "src/plugins/vis_types/gauge/common/index.ts",
+        "path": "src/platform/plugins/private/vis_types/gauge/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { PluginInitializer } from '@kbn/core/public';
+import type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart } from './plugin';
+import { LogsDataAccessPlugin } from './plugin';
+
+export type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart };
+
+import type { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } from './types';
+export { LogSourcesProvider, useLogSourcesContext } from './hooks/use_log_sources';
+export { LogSourcesSettingSynchronisationInfo } from './components/logs_sources_setting';
+
+export const plugin: PluginInitializer<
+  LogsDataAccessPluginSetup,
+  LogsDataAccessPluginStart,
+  LogsDataAccessPluginSetupDeps,
+  LogsDataAccessPluginStartDeps
+> = () => {
+  return new LogsDataAccessPlugin();
+};

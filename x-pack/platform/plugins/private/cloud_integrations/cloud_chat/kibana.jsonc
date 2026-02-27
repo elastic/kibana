@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-chat-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Chat available on Elastic Cloud deployments for quicker assistance.",
+  "plugin": {
+    "id": "cloudChat",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "cloud_integrations",
+      "chat"
+    ],
+    "requiredPlugins": [
+      "cloud"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

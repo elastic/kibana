@@ -6,7 +6,42 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-apps-browser-mocks",
+        "id": "def-public.coreAppsMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreAppsMock",
+        "description": [],
+        "path": "src/core/packages/apps/browser-mocks/src/core_app.mock.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-apps-browser-mocks",
+            "id": "def-public.coreAppsMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<CoreAppContract>"
+            ],
+            "path": "src/core/packages/apps/browser-mocks/src/core_app.mock.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   },
   "server": {
     "classes": [],
@@ -22,37 +57,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-apps-browser-mocks",
-        "id": "def-common.coreAppsMock",
-        "type": "Object",
-        "tags": [],
-        "label": "coreAppsMock",
-        "description": [],
-        "path": "packages/core/apps/core-apps-browser-mocks/src/core_app.mock.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-apps-browser-mocks",
-            "id": "def-common.coreAppsMock.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "() => jest.Mocked<CoreAppContract>"
-            ],
-            "path": "packages/core/apps/core-apps-browser-mocks/src/core_app.mock.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

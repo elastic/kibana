@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/core-metrics-server-mocks",
-  "devOnly": true,
-  "owner": "@elastic/kibana-core"
-}

@@ -1,0 +1,130 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render default props 1`] = `
+<EuiPopover
+  anchorPosition="leftCenter"
+  button={
+    <EuiExpression
+      description="and use metric"
+      onClick={[Function]}
+      uppercase={false}
+      value="count"
+    />
+  }
+  closePopover={[Function]}
+  display="inline-block"
+  hasArrow={false}
+  id="metricsPopover"
+  initialFocus="body"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  repositionOnScroll={true}
+  repositionToCrossAxis={true}
+>
+  <div
+    style={
+      Object {
+        "width": 400,
+      }
+    }
+  >
+    <EuiPopoverTitle>
+      <MemoizedFormattedMessage
+        defaultMessage="Configure join metrics"
+        id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
+      />
+    </EuiPopoverTitle>
+    <EuiFormHelpText
+      className="mapJoinExpressionHelpText"
+    >
+      <MemoizedFormattedMessage
+        defaultMessage="Metrics are added to layer features and used for data driven styling and tooltip content."
+        id="xpack.maps.layerPanel.metricsExpression.helpText"
+      />
+    </EuiFormHelpText>
+    <MetricsEditor
+      allowMultipleMetrics={true}
+      fields={Array []}
+      isJoin={true}
+      metrics={
+        Array [
+          Object {
+            "type": "count",
+          },
+        ]
+      }
+      onChange={[Function]}
+    />
+  </div>
+</EuiPopover>
+`;
+
+exports[`Should render metrics expression for metrics 1`] = `
+<EuiPopover
+  anchorPosition="leftCenter"
+  button={
+    <EuiExpression
+      description="and use metrics"
+      onClick={[Function]}
+      uppercase={false}
+      value="count, max prop1"
+    />
+  }
+  closePopover={[Function]}
+  display="inline-block"
+  hasArrow={false}
+  id="metricsPopover"
+  initialFocus="body"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  repositionOnScroll={true}
+  repositionToCrossAxis={true}
+>
+  <div
+    style={
+      Object {
+        "width": 400,
+      }
+    }
+  >
+    <EuiPopoverTitle>
+      <MemoizedFormattedMessage
+        defaultMessage="Configure join metrics"
+        id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
+      />
+    </EuiPopoverTitle>
+    <EuiFormHelpText
+      className="mapJoinExpressionHelpText"
+    >
+      <MemoizedFormattedMessage
+        defaultMessage="Metrics are added to layer features and used for data driven styling and tooltip content."
+        id="xpack.maps.layerPanel.metricsExpression.helpText"
+      />
+    </EuiFormHelpText>
+    <MetricsEditor
+      allowMultipleMetrics={true}
+      fields={Array []}
+      isJoin={true}
+      metrics={
+        Array [
+          Object {
+            "label": "my count",
+            "type": "count",
+          },
+          Object {
+            "type": "max",
+          },
+          Object {
+            "field": "prop1",
+            "label": "mostest",
+            "type": "max",
+          },
+        ]
+      }
+      onChange={[Function]}
+    />
+  </div>
+</EuiPopover>
+`;

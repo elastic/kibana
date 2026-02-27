@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
+import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
+import { BUCKET_TYPES } from '../../../../common/enums';
+import type { TimeseriesVisParams } from '../../../types';
+import type { TSVBTables } from './types';
+import { SERIES_SEPARATOR } from '../../../../common/constants';
+
+export const getClickFilterData = (
+  points: Array<[GeometryValue, XYChartSeriesIdentifier]>,
+  tables: TSVBTables,
+  model: TimeseriesVisParams
+) => {
+  const data: ValueClickContext['data']['data'] = [];
+  points.forEach((point) => {
+    const [geometry] = point;
+    const { specId } = point[1];
+    // specId for a split series has the format
+    // 61ca57f1-469d-11e7-af02-69e470af7417:Men's Accessories, <layer_id>:<split_label>
+    const [layerId, splitLabel] = specId.split(SERIES_SEPARATOR);
+    const table = tables[layerId];
+
+    const layer = model.series.filter(({ id }) => id === layerId);
+    let label = splitLabel;
+    // compute label for filters split mode
+    if (splitLabel && layer.length && layer[0].split_mode === BUCKET_TYPES.FILTERS) {
+      const filter = layer[0]?.split_filters?.filter(({ id }) => id === splitLabel);
+      label = filter?.[0].label || (filter?.[0].filter?.query as string);
+    }
+    const index = table.rows.findIndex((row) => {
+      const condition =
+        geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
+      if (splitLabel) {
+        const value =
+          row[X_ACCESSOR_INDEX + 2].keys?.join() ?? row[X_ACCESSOR_INDEX + 2].toString();
+        return condition && value === label;
+      }
+      return condition;
+    });
+    if (index < 0) return;
+
+    // Filter out the metric column
+    const bucketCols = table.columns.filter((col) => col.meta.sourceParams?.schema === 'group');
+
+    const newData = bucketCols.map(({ id }) => ({
+      table,
+      column: parseInt(id, 10),
+      row: index,
+      value: table.rows[index][id] ?? null,
+    }));
+    if (newData.length) {
+      data.push(...newData);
+    }
+  });
+  return data;
+};

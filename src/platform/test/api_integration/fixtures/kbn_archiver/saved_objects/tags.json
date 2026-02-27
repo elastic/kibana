@@ -1,0 +1,91 @@
+{
+  "attributes": {
+    "color": "#123456",
+    "description": "Another awesome tag",
+    "name": "bar"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-19T18:17:49.747Z",
+  "id": "tag-2",
+  "managed": false,
+  "references": [],
+  "type": "tag",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2025-03-19T18:17:49.747Z",
+  "version": "WzYxMywxXQ=="
+}
+
+{
+  "attributes": {
+    "color": "#000000",
+    "description": "Last but not least",
+    "name": "buzz"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-19T18:17:49.747Z",
+  "id": "tag-3",
+  "managed": false,
+  "references": [],
+  "type": "tag",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2025-03-19T18:17:49.747Z",
+  "version": "WzYxNCwxXQ=="
+}
+
+{
+  "attributes": {
+    "controlGroupInput": {
+      "chainingSystem": "HIERARCHICAL",
+      "controlStyle": "oneLine",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
+      "panelsJSON": "{}",
+      "showApplySelections": false
+    },
+    "description": "I have some tags!",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"type\":\"visualization\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"savedVis\":{\"id\":\"\",\"title\":\"\",\"description\":\"\",\"type\":\"markdown\",\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"# Hello world\"},\"uiState\":{},\"data\":{\"aggs\":[],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}}}},\"panelIndex\":\"b9e32168-d39e-4289-ab07-30cfda9e00d4\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"b9e32168-d39e-4289-ab07-30cfda9e00d4\"}}]",
+    "timeRestore": false,
+    "title": "tagged dashboard",
+    "version": 3
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-19T18:18:29.671Z",
+  "id": "8d66658a-f5b7-4482-84dc-f41d317473b8",
+  "managed": false,
+  "references": [
+    {
+      "id": "tag-2",
+      "name": "tag-ref-tag-2",
+      "type": "tag"
+    },
+    {
+      "id": "tag-3",
+      "name": "tag-ref-tag-3",
+      "type": "tag"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.2.0",
+  "updated_at": "2025-03-19T18:18:58.406Z",
+  "version": "WzQ1MTQxLDFd"
+}
+
+{
+  "attributes": {
+    "color": "#FF00FF",
+    "description": "My first tag!",
+    "name": "foo"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2025-03-19T18:17:49.747Z",
+  "id": "tag-1",
+  "managed": false,
+  "references": [],
+  "type": "tag",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2025-03-19T18:17:49.747Z",
+  "version": "WzYxMiwxXQ=="
+}

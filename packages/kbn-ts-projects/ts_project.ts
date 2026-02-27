@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -13,8 +14,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { makeMatcher } from '@kbn/picomatcher';
 import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { readPackageJson } from '@kbn/repo-packages';
 
-import { readTsConfig, parseTsConfig, TsConfig } from './ts_configfile';
+import type { TsConfig } from './ts_configfile';
+import { readTsConfig, parseTsConfig } from './ts_configfile';
 
 export type RefableTsProject = TsProject & { rootImportReq: string; pkg: Package };
 
@@ -68,6 +71,10 @@ export class TsProject {
     }
 
     const tsConfigRepoRels: string[] = JSON.parse(Fs.readFileSync(mapPath, 'utf8'));
+
+    if (!tsConfigRepoRels || !tsConfigRepoRels.length) {
+      throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
+    }
 
     const ignores = expand('ignore', options.ignore, tsConfigRepoRels);
     const disableTypeCheck = expand('disableTypeCheck', options.disableTypeCheck, tsConfigRepoRels);
@@ -150,6 +157,8 @@ export class TsProject {
   public readonly directory: string;
   /** the package this tsconfig file is within, if any */
   public readonly pkg?: Package;
+  /** the package is esm or not */
+  public readonly isEsm?: boolean;
   /**
    * if this project is within a package then this will
    * be set to the import request that maps to the root of this project
@@ -186,6 +195,7 @@ export class TsProject {
       : undefined;
 
     this._disableTypeCheck = !!opts?.disableTypeCheck;
+    this.isEsm = readPackageJson(`${this.dir}/package.json`)?.type === 'module';
   }
 
   private _name: string | undefined;
@@ -247,12 +257,19 @@ export class TsProject {
       return undefined;
     }
 
-    return TsProject.createFromCache(
+    const absolutePath =
+      this.config.extends === '@kbn/tsconfig-base/tsconfig.json'
+        ? Path.join(REPO_ROOT, 'tsconfig.base.json')
+        : Path.resolve(this.directory, this.config.extends);
+
+    const tsProject = TsProject.createFromCache(
       this.cache,
-      Path.resolve(this.directory, this.config.extends),
+      absolutePath,
       {},
       `extends: ${JSON.stringify(this.config.extends)}`
     );
+
+    return tsProject;
   }
 
   isRefable(): this is RefableTsProject {

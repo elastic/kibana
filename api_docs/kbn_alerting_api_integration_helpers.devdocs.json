@@ -25,7 +25,9 @@
         "tags": [],
         "label": "ESTestIndexTool",
         "description": [],
-        "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+        "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +41,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,7 +57,9 @@
                 "signature": [
                   "default"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 15,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -68,7 +74,9 @@
                 "signature": [
                   "any"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 16,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -83,7 +91,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 17,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -105,7 +115,9 @@
               "IndicesCreateResponse",
               ", unknown>>"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -123,7 +135,9 @@
               "WriteResponseBase",
               ">"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -137,7 +151,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 97,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -152,7 +168,9 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 97,
+                "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -174,7 +192,9 @@
               "IndicesResponseBase",
               ", unknown> | undefined>"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -196,7 +216,9 @@
               "AggregationsAggregate",
               ">>, unknown>>"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -210,7 +232,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 115,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -225,7 +249,9 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 115,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -241,7 +267,7 @@
             "label": "getAll",
             "description": [],
             "signature": [
-              "(size?: number) => Promise<",
+              "(size?: number, sort?: string | undefined) => Promise<",
               "TransportResult",
               "<",
               "SearchResponse",
@@ -249,7 +275,9 @@
               "AggregationsAggregate",
               ">>, unknown>>"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -263,10 +291,29 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 161,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.getAll.$2",
+                "type": "string",
+                "tags": [],
+                "label": "sort",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 161,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -283,7 +330,9 @@
               "DeleteByQueryResponse",
               ">"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -299,7 +348,9 @@
             "signature": [
               "(source: string, reference: string, numDocs?: number) => Promise<any>"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -313,7 +364,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 185,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -328,7 +381,9 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 185,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -343,7 +398,9 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "lineNumber": 185,
+                "columnNumber": 56,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -368,7 +425,9 @@
           "node_modules/@types/http-proxy/index",
           ">"
         ],
-        "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+        "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -382,7 +441,9 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -397,7 +458,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -412,7 +475,9 @@
             "signature": [
               "(proxyRes?: unknown, req?: unknown, res?: unknown) => void"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -431,7 +496,9 @@
         "signature": [
           "(kbnTestServerConfig: any) => number"
         ],
-        "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+        "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -445,7 +512,9 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "lineNumber": 31,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -466,9 +535,11 @@
         "label": "ES_TEST_INDEX_NAME",
         "description": [],
         "signature": [
-          "\".kibana-alerting-test-data\""
+          "\"kibana-alerting-test-data\""
         ],
-        "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+        "path": "x-pack/platform/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

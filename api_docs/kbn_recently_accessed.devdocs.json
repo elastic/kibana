@@ -1,0 +1,297 @@
+{
+  "id": "@kbn/recently-accessed",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/recently-accessed",
+        "id": "def-common.RecentlyAccessedService",
+        "type": "Class",
+        "tags": [],
+        "label": "RecentlyAccessedService",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-recently-accessed/src/recently_accessed_service.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/recently-accessed",
+            "id": "def-common.RecentlyAccessedService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ http, key }: StartDeps) => ",
+              {
+                "pluginId": "@kbn/recently-accessed",
+                "scope": "common",
+                "docId": "kibKbnRecentlyAccessedPluginApi",
+                "section": "def-common.RecentlyAccessed",
+                "text": "RecentlyAccessed"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-recently-accessed/src/recently_accessed_service.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/recently-accessed",
+                "id": "def-common.RecentlyAccessedService.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ http, key }",
+                "description": [],
+                "signature": [
+                  "StartDeps"
+                ],
+                "path": "src/platform/packages/shared/kbn-recently-accessed/src/recently_accessed_service.ts",
+                "lineNumber": 21,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/recently-accessed",
+        "id": "def-common.RecentlyAccessed",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecentlyAccessed",
+        "description": [
+          "\n{@link RecentlyAccessed | APIs} for recently accessed history."
+        ],
+        "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/recently-accessed",
+            "id": "def-common.RecentlyAccessed.add",
+            "type": "Function",
+            "tags": [],
+            "label": "add",
+            "description": [
+              "\nAdds a new item to the recently accessed history.\n"
+            ],
+            "signature": [
+              "(link: string, label: string, id: string) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/recently-accessed",
+                "id": "def-common.RecentlyAccessed.add.$1",
+                "type": "string",
+                "tags": [],
+                "label": "link",
+                "description": [
+                  "a relative URL to the resource (not including the {@link HttpStart.basePath | `http.basePath`})"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/recently-accessed",
+                "id": "def-common.RecentlyAccessed.add.$2",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [
+                  "the label to display in the UI"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/recently-accessed",
+                "id": "def-common.RecentlyAccessed.add.$3",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "a unique string used to de-duplicate the recently accessed list."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/recently-accessed",
+            "id": "def-common.RecentlyAccessed.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nGets an Array of the current recently accessed history.\n"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/recently-accessed",
+                "scope": "common",
+                "docId": "kibKbnRecentlyAccessedPluginApi",
+                "section": "def-common.RecentlyAccessedHistoryItem",
+                "text": "RecentlyAccessedHistoryItem"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/recently-accessed",
+            "id": "def-common.RecentlyAccessed.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [
+              "\nGets an Observable of the array of recently accessed history.\n"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/recently-accessed",
+                "scope": "common",
+                "docId": "kibKbnRecentlyAccessedPluginApi",
+                "section": "def-common.RecentlyAccessedHistoryItem",
+                "text": "RecentlyAccessedHistoryItem"
+              },
+              "[]>"
+            ],
+            "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/recently-accessed",
+        "id": "def-common.RecentlyAccessedHistoryItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecentlyAccessedHistoryItem",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/recently-accessed",
+            "id": "def-common.RecentlyAccessedHistoryItem.link",
+            "type": "string",
+            "tags": [],
+            "label": "link",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/recently-accessed",
+            "id": "def-common.RecentlyAccessedHistoryItem.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/recently-accessed",
+            "id": "def-common.RecentlyAccessedHistoryItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-recently-accessed/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

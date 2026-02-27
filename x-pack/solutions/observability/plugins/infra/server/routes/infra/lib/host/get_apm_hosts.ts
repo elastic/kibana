@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { estypes } from '@elastic/elasticsearch';
+import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
+import type { GetHostParameters } from '../types';
+
+export const getApmHostNames = async ({
+  apmDataAccessServices,
+  apmDocumentSources,
+  from: start,
+  to: end,
+  query,
+  limit,
+  schema,
+}: Required<Pick<GetHostParameters, 'apmDataAccessServices' | 'from' | 'to' | 'schema'>> & {
+  query?: estypes.QueryDslQueryContainer;
+  limit?: number;
+  apmDocumentSources: TimeRangeMetadata['sources'];
+}) => {
+  return apmDataAccessServices.getHostNames({
+    documentSources: apmDocumentSources,
+    query,
+    start,
+    end,
+    size: limit,
+    schema,
+  });
+};

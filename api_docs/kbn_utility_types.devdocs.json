@@ -18,7 +18,84 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.maybe",
+        "type": "Function",
+        "tags": [],
+        "label": "maybe",
+        "description": [
+          "\nMark a value as possibly undefined. Useful for array and object access\nwhich won't account for the possibility where the item at the specified\nindex is undefined. E.g.:\n\nconst val = maybe(obj[key]);"
+        ],
+        "signature": [
+          "(value: T) => T | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/maybe.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utility-types",
+            "id": "def-common.maybe.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-utility-types/src/maybe.ts",
+            "lineNumber": 17,
+            "columnNumber": 26,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.maybe",
+        "type": "Function",
+        "tags": [],
+        "label": "maybe",
+        "description": [],
+        "signature": [
+          "(val: unknown) => unknown"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/maybe.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utility-types",
+            "id": "def-common.maybe.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-utility-types/src/maybe.ts",
+            "lineNumber": 19,
+            "columnNumber": 23,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/utility-types",
@@ -45,7 +122,9 @@
           },
           "<T>[]"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 143,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -76,7 +155,9 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -89,7 +170,9 @@
         "tags": [],
         "label": "JsonObject",
         "description": [],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -110,7 +193,9 @@
                 "text": "JsonValue"
               }
             ],
-            "path": "packages/kbn-utility-types/src/serializable/index.ts",
+            "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -136,7 +221,9 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -150,7 +237,9 @@
             "signature": [
               "(observer: (value: T) => void) => void"
             ],
-            "path": "packages/kbn-utility-types/index.ts",
+            "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -164,7 +253,9 @@
                 "signature": [
                   "(value: T) => void"
                 ],
-                "path": "packages/kbn-utility-types/index.ts",
+                "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+                "lineNumber": 41,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -200,7 +291,9 @@
           },
           "<T>[]"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -231,7 +324,9 @@
           },
           ">"
         ],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -256,6 +351,8 @@
           "T[keyof T]"
         ],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -270,7 +367,9 @@
         "signature": [
           "A extends readonly (infer T)[] ? T : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 149,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -290,6 +389,8 @@
           "{ [P in keyof I]: I[P]; }"
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
+        "lineNumber": 259,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -310,6 +411,8 @@
           "<T, K> & Required<Pick<T, K>>"
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
+        "lineNumber": 481,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -326,7 +429,9 @@
         "signature": [
           "{ [K in keyof T]: Awaited<T[K]>; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -347,6 +452,8 @@
           "new (...args: any[]) => T"
         ],
         "path": "node_modules/utility-types/dist/utility-types.d.ts",
+        "lineNumber": 130,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -361,15 +468,17 @@
         "signature": [
           "(Exclude<",
           "ValuesType",
-          "<{ [TKey in keyof TObject]: {} extends Pick<TObject, TKey> ? ",
+          "<{ [TKey in keyof TObject as string]: string extends TKey ? Record<TKey, TObject[TKey]> : {} extends Pick<TObject, TKey> ? ",
           "DeepPartial",
           "<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>> : DedotKey<TObject, TKey, TObject[TKey]>; }>, undefined> extends any ? (k: Exclude<",
           "ValuesType",
-          "<{ [TKey in keyof TObject]: {} extends Pick<TObject, TKey> ? ",
+          "<{ [TKey in keyof TObject as string]: string extends TKey ? Record<TKey, TObject[TKey]> : {} extends Pick<TObject, TKey> ? ",
           "DeepPartial",
           "<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>> : DedotKey<TObject, TKey, TObject[TKey]>; }>, undefined>) => void : never) extends (k: infer I) => void ? I : never"
         ],
-        "path": "packages/kbn-utility-types/src/dot.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/dot.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -402,7 +511,9 @@
           },
           "<T> : T"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 133,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -425,7 +536,36 @@
           },
           "<T[P]> | undefined; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.DotKeysOf",
+        "type": "Type",
+        "tags": [],
+        "label": "DotKeysOf",
+        "description": [],
+        "signature": [
+          "keyof ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/dot.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -444,7 +584,9 @@
           "ValuesType",
           "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, TPrefix>> : DotKey<TObject, TKey, TPrefix>; }>) => void : never) extends (k: infer I) => void ? I : never"
         ],
-        "path": "packages/kbn-utility-types/src/dot.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/dot.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -461,7 +603,9 @@
         "signature": [
           "T extends X ? T : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -492,7 +636,9 @@
           },
           " | null"
         ],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -509,7 +655,9 @@
         "signature": [
           "T | Promise<T>"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -526,7 +674,9 @@
         "signature": [
           "{ [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never; }[keyof T]"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -543,7 +693,9 @@
         "signature": [
           "Omit<T, K> & { [k in K]: Pick<Required<T>, k> & { [k1 in Exclude<K, k>]?: undefined; }; }[K]"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 121,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -564,6 +716,208 @@
           "<T, K> & Partial<Pick<T, K>>"
         ],
         "path": "node_modules/utility-types/dist/mapped-types.d.ts",
+        "lineNumber": 435,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.OrStringRecursive",
+        "type": "Type",
+        "tags": [],
+        "label": "OrStringRecursive",
+        "description": [
+          "\nRecursively transform a type so that each value can be either its original type or a string.\nThis is useful for types that may contain template strings (like Liquid templates) that will\nbe rendered at runtime.\n"
+        ],
+        "signature": [
+          "T extends (infer U)[] ? string | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.OrStringRecursive",
+            "text": "OrStringRecursive"
+          },
+          "<U>[] : T extends object ? { [K in keyof T]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.OrStringRecursive",
+            "text": "OrStringRecursive"
+          },
+          "<T[K]>; } : string | T"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/or_string_recursive.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.PickDotted",
+        "type": "Type",
+        "tags": [],
+        "label": "PickDotted",
+        "description": [],
+        "signature": [
+          "(Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey> as string]: string extends TKey ? Record<TKey, Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey]> : {} extends Pick<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey, Exclude<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey], undefined>>> : DedotKey<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey, Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey]>; }>, undefined> extends any ? (k: Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey> as string]: string extends TKey ? Record<TKey, Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey]> : {} extends Pick<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey, Exclude<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey], undefined>>> : DedotKey<Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>, TKey, Pick<",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, \"\">> : DotKey<TObject, TKey, \"\">; }>>, TPickKey>[TKey]>; }>, undefined>) => void : never) extends (k: infer I) => void ? I : never"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/src/dot.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -580,7 +934,9 @@
         "signature": [
           "{ [P in keyof T]: T[P]; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -597,7 +953,9 @@
         "signature": [
           "keyof T"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -622,7 +980,9 @@
           },
           "<T>]: T[P]; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -677,7 +1037,9 @@
           },
           "<T[P]>) | undefined; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 163,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -708,7 +1070,36 @@
           },
           "<T[K]>; }> : T"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.RecursiveWritable",
+        "type": "Type",
+        "tags": [],
+        "label": "RecursiveWritable",
+        "description": [
+          "\n Makes an object with readonly properties mutable."
+        ],
+        "signature": [
+          "{ -readonly [K in keyof T]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursiveWritable",
+            "text": "RecursiveWritable"
+          },
+          "<T[K]>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 114,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -733,7 +1124,9 @@
           "SerializableArray",
           " | null | undefined"
         ],
-        "path": "packages/kbn-utility-types/src/serializable/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/src/serializable/index.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -750,7 +1143,9 @@
         "signature": [
           "T extends Promise<infer U> ? Promise<U> : Promise<T>"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -767,7 +1162,9 @@
         "signature": [
           "(U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -792,7 +1189,9 @@
           },
           "<infer U> ? U : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -809,7 +1208,9 @@
         "signature": [
           "T extends any[] ? T[number] : T extends object ? T[keyof T] : never"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -826,7 +1227,9 @@
         "signature": [
           "Omit<Type, Key> & { [Property in Key]-?: Type[Property]; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 151,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -843,7 +1246,9 @@
         "signature": [
           "{ -readonly [K in keyof T]: T[K]; }"
         ],
-        "path": "packages/kbn-utility-types/index.ts",
+        "path": "src/platform/packages/shared/kbn-utility-types/index.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

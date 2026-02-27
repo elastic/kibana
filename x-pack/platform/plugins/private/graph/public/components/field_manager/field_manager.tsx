@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { FieldPicker } from './field_picker';
+import { FieldEditor } from './field_editor';
+import type { GraphState, GraphStore } from '../../state_management';
+import {
+  selectedFieldsSelector,
+  fieldsSelector,
+  fieldMapSelector,
+  updateFieldProperties,
+  selectField,
+  deselectField,
+} from '../../state_management';
+import type { WorkspaceField } from '../../types';
+
+export type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
+
+export function FieldManagerComponent(props: {
+  allFields: WorkspaceField[];
+  fieldMap: Record<string, WorkspaceField>;
+  selectedFields: WorkspaceField[];
+  updateFieldProperties: (props: {
+    fieldName: string;
+    fieldProperties: Partial<Pick<WorkspaceField, UpdateableFieldProperties>>;
+  }) => void;
+  selectField: (fieldName: string) => void;
+  deselectField: (fieldName: string) => void;
+  pickerOpen: boolean;
+  setPickerOpen: (open: boolean) => void;
+  store?: GraphStore; // only for testing purpose
+}) {
+  return (
+    <EuiFlexGroup
+      className="gphFieldManager"
+      gutterSize="s"
+      alignItems="center"
+      wrap={true}
+      responsive={false}
+    >
+      {props.selectedFields.map((field) => (
+        <EuiFlexItem key={field.name} grow={false}>
+          <FieldEditor {...props} field={field} />
+        </EuiFlexItem>
+      ))}
+      <EuiFlexItem grow={false}>
+        <FieldPicker {...props} open={props.pickerOpen} setOpen={props.setPickerOpen} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+export const FieldManager = connect(
+  (state: GraphState) => ({
+    fieldMap: fieldMapSelector(state),
+    allFields: fieldsSelector(state),
+    selectedFields: selectedFieldsSelector(state),
+  }),
+  (dispatch) =>
+    bindActionCreators(
+      {
+        updateFieldProperties,
+        selectField,
+        deselectField,
+      },
+      dispatch
+    )
+)(FieldManagerComponent);

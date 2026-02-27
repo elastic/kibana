@@ -1,0 +1,8 @@
+in: query
+name: tags
+description: Filters the returned cases by tags.
+schema:
+  oneOf:
+    - $ref: '../schemas/string.yaml'
+    - $ref: '../schemas/string_array.yaml'
+example: tag-1

@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
 
-import { Config } from './config';
-import { Platform } from './platform';
+import type { Config } from './config';
+import type { Platform } from './platform';
+import { dashSuffix } from './util';
 
 export class Build {
+  private buildDesc: string = '';
   private name = 'kibana';
   private logTag = chalk`{cyan [  kibana  ]}`;
 
-  constructor(private config: Config) {}
+  constructor(private config: Config, private bufferLogs = false) {}
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);
@@ -25,7 +28,9 @@ export class Build {
     return this.config.resolveFromRepo(
       'build',
       'default',
-      `kibana-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
+      `kibana${dashSuffix(platform.getVariant())}${dashSuffix(
+        platform.getSolutionArtifact()
+      )}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }
@@ -34,12 +39,16 @@ export class Build {
     const ext = platform.isWindows() ? 'zip' : 'tar.gz';
     return this.config.resolveFromRepo(
       'target',
-      `${this.name}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
+      `${this.name}${dashSuffix(platform.getVariant())}${dashSuffix(
+        platform.getSolutionArtifact()
+      )}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
     );
   }
 
-  getRootDirectory() {
-    return `${this.name}-${this.config.getBuildVersion()}`;
+  getRootDirectory(platform: Platform) {
+    return `${this.name}${dashSuffix(platform.getVariant())}${dashSuffix(
+      platform.getSolutionArtifact()
+    )}-${this.config.getBuildVersion()}`;
   }
 
   getName() {
@@ -48,5 +57,17 @@ export class Build {
 
   getLogTag() {
     return this.logTag;
+  }
+
+  getBufferLogs() {
+    return this.bufferLogs;
+  }
+
+  setBuildDesc(desc: string) {
+    this.buildDesc = desc;
+  }
+
+  getBuildDesc() {
+    return this.buildDesc;
   }
 }

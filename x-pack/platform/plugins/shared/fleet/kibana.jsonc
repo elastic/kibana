@@ -1,0 +1,57 @@
+{
+  "type": "plugin",
+  "id": "@kbn/fleet-plugin",
+  "owner": ["@elastic/fleet"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "fleet",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "fleet"],
+    "requiredPlugins": [
+      "licensing",
+      "data",
+      "encryptedSavedObjects",
+      "navigation",
+      "customIntegrations",
+      "share",
+      "security",
+      "unifiedSearch",
+      "kql",
+      "savedObjectsTagging",
+      "taskManager",
+      "files",
+      "uiActions",
+      "dashboard",
+      "fieldsMetadata",
+      "logsDataAccess",
+      "embeddable",
+      "savedSearch",
+      "spaces"
+    ],
+    "optionalPlugins": [
+      "features",
+      "cloud",
+      "usageCollection",
+      "home",
+      "globalSearch",
+      "telemetry",
+      "discover",
+      "ingestPipelines",
+      "automaticImport",
+      "automaticImportVTwo",
+      "alerting",
+      "sloShared",
+      "reporting"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared",
+      "logsShared",
+      "kibanaUtils",
+      "usageCollection"
+    ],
+    "extraPublicDirs": ["common"]
+  }
+}

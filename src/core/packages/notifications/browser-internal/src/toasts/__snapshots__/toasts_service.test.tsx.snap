@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
+Array [
+  Array [
+    <I18nProvider>
+      <EuiProvider>
+        <GlobalToastList
+          dismissToast={[Function]}
+          reportEvent={
+            Object {
+              "onDismissToast": [Function],
+            }
+          }
+          toasts$={
+            Observable {
+              "operator": [Function],
+              "source": Observable {
+                "operator": [Function],
+                "source": Observable {
+                  "operator": [Function],
+                  "source": Observable {
+                    "operator": [Function],
+                    "source": Observable {
+                      "_subscribe": [Function],
+                    },
+                  },
+                },
+              },
+            }
+          }
+        />
+      </EuiProvider>
+    </I18nProvider>,
+    <div
+      test="target-dom-element"
+    />,
+  ],
+]
+`;
+
+exports[`#stop() unmounts the GlobalToastList from the targetDomElement 1`] = `
+Array [
+  Array [
+    <div
+      test="target-dom-element"
+    />,
+  ],
+]
+`;

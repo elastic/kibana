@@ -3,39 +3,25 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-execution-context-browser",
-        "id": "def-common.ExecutionContextSetup",
+        "id": "def-public.ExecutionContextSetup",
         "type": "Interface",
         "tags": [],
         "label": "ExecutionContextSetup",
         "description": [
           "\nKibana execution context.\nUsed to provide execution context to Elasticsearch, reporting, performance monitoring, etc."
         ],
-        "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+        "path": "src/core/packages/execution-context/browser/src/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.context$",
+            "id": "def-public.ExecutionContextSetup.context$",
             "type": "Object",
             "tags": [],
             "label": "context$",
@@ -45,22 +31,18 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               ">"
             ],
-            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "path": "src/core/packages/execution-context/browser/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.set",
+            "id": "def-public.ExecutionContextSetup.set",
             "type": "Function",
             "tags": [],
             "label": "set",
@@ -69,36 +51,28 @@
             ],
             "signature": [
               "(c$: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               ") => void"
             ],
-            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "path": "src/core/packages/execution-context/browser/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-browser",
-                "id": "def-common.ExecutionContextSetup.set.$1",
+                "id": "def-public.ExecutionContextSetup.set.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "c$",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-execution-context-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                    "section": "def-common.KibanaExecutionContext",
-                    "text": "KibanaExecutionContext"
-                  }
+                  "KibanaExecutionContext"
                 ],
-                "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+                "path": "src/core/packages/execution-context/browser/src/types.ts",
+                "lineNumber": 33,
+                "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -108,7 +82,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.get",
+            "id": "def-public.ExecutionContextSetup.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -117,15 +91,11 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              }
+              "KibanaExecutionContext"
             ],
-            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "path": "src/core/packages/execution-context/browser/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -133,7 +103,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.clear",
+            "id": "def-public.ExecutionContextSetup.clear",
             "type": "Function",
             "tags": [],
             "label": "clear",
@@ -143,7 +113,9 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "path": "src/core/packages/execution-context/browser/src/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -151,7 +123,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.getAsLabels",
+            "id": "def-public.ExecutionContextSetup.getAsLabels",
             "type": "Function",
             "tags": [],
             "label": "getAsLabels",
@@ -162,7 +134,9 @@
               "() => ",
               "Labels"
             ],
-            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "path": "src/core/packages/execution-context/browser/src/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -170,7 +144,7 @@
           },
           {
             "parentPluginId": "@kbn/core-execution-context-browser",
-            "id": "def-common.ExecutionContextSetup.withGlobalContext",
+            "id": "def-public.ExecutionContextSetup.withGlobalContext",
             "type": "Function",
             "tags": [],
             "label": "withGlobalContext",
@@ -179,44 +153,30 @@
             ],
             "signature": [
               "(context?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              }
+              "KibanaExecutionContext"
             ],
-            "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+            "path": "src/core/packages/execution-context/browser/src/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-browser",
-                "id": "def-common.ExecutionContextSetup.withGlobalContext.$1",
+                "id": "def-public.ExecutionContextSetup.withGlobalContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-execution-context-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                    "section": "def-common.KibanaExecutionContext",
-                    "text": "KibanaExecutionContext"
-                  },
+                  "KibanaExecutionContext",
                   " | undefined"
                 ],
-                "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+                "path": "src/core/packages/execution-context/browser/src/types.ts",
+                "lineNumber": 49,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -232,7 +192,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-execution-context-browser",
-        "id": "def-common.ExecutionContextStart",
+        "id": "def-public.ExecutionContextStart",
         "type": "Type",
         "tags": [],
         "label": "ExecutionContextStart",
@@ -240,20 +200,32 @@
           "\nSee {@link ExecutionContextSetup}."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-common.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          }
+          "ExecutionContextSetup"
         ],
-        "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
+        "path": "src/core/packages/execution-context/browser/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

@@ -1,0 +1,36 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { DataViewsService } from '../common';
+
+export function createIndexPatternsStartMock() {
+  const dataViewsServiceFactory = jest.fn().mockResolvedValue({ get: jest.fn() });
+  return {
+    dataViewsServiceFactory,
+    getScriptedFieldsEnabled: jest.fn().mockReturnValue(true),
+  };
+}
+
+export const dataViewsService = {
+  find: jest.fn((search) => [{ id: search, title: search }]),
+  ensureDefaultIndexPattern: jest.fn(),
+  ensureDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
+  get: jest.fn().mockReturnValue(Promise.resolve({})),
+  getDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
+  clearCache: jest.fn(),
+  createAndSave: jest.fn(),
+  createAndSaveDataViewLazy: jest.fn(),
+  setDefault: jest.fn(),
+  delete: jest.fn(),
+  hasUserDataView: jest.fn(),
+  getDefaultId: jest.fn(),
+  updateSavedObject: jest.fn(),
+  refreshFields: jest.fn(),
+  getIdsWithTitle: jest.fn(),
+} as unknown as jest.Mocked<DataViewsService>;

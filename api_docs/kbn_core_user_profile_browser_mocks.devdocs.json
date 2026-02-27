@@ -1,0 +1,142 @@
+{
+  "id": "@kbn/core-user-profile-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-user-profile-browser-mocks",
+        "id": "def-public.userProfileServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "userProfileServiceMock",
+        "description": [],
+        "path": "src/core/packages/user-profile/browser-mocks/src/user_profile_service.mock.ts",
+        "lineNumber": 75,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser-mocks",
+            "id": "def-public.userProfileServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => { setup: jest.Mock<any, any, any>; start: jest.Mock<any, any, any>; stop: jest.Mock<any, any, any>; }"
+            ],
+            "path": "src/core/packages/user-profile/browser-mocks/src/user_profile_service.mock.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser-mocks",
+            "id": "def-public.userProfileServiceMock.createSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetup",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "UserProfileServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/user-profile/browser-mocks/src/user_profile_service.mock.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser-mocks",
+            "id": "def-public.userProfileServiceMock.createStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createStart",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "UserProfileService",
+              ">"
+            ],
+            "path": "src/core/packages/user-profile/browser-mocks/src/user_profile_service.mock.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser-mocks",
+            "id": "def-public.userProfileServiceMock.createInternalSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetup",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "UserProfileServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/user-profile/browser-mocks/src/user_profile_service.mock.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-profile-browser-mocks",
+            "id": "def-public.userProfileServiceMock.createInternalStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStart",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "UserProfileService",
+              ">"
+            ],
+            "path": "src/core/packages/user-profile/browser-mocks/src/user_profile_service.mock.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

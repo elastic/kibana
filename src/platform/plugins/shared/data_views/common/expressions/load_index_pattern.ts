@@ -1,0 +1,106 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { DataViewsContract } from '../data_views';
+import type { DataViewSpec } from '..';
+
+const name = 'indexPatternLoad';
+const type = 'index_pattern';
+
+/**
+ * Index pattern expression interface
+ * @public
+ */
+export interface IndexPatternExpressionType {
+  /**
+   * Expression type
+   */
+  type: typeof type;
+  /**
+   * Value - DataViewSpec
+   */
+  value: DataViewSpec;
+}
+
+type Input = null;
+type Output = Promise<IndexPatternExpressionType>;
+
+interface Arguments {
+  id: string;
+  includeFields?: boolean;
+}
+
+/** @internal */
+export interface IndexPatternLoadStartDependencies {
+  indexPatterns: DataViewsContract;
+}
+
+export type IndexPatternLoadExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof name,
+  Input,
+  Arguments,
+  Output
+>;
+
+export const getIndexPatternLoadMeta = (): Omit<
+  IndexPatternLoadExpressionFunctionDefinition,
+  'fn'
+> => ({
+  name,
+  type,
+  inputTypes: ['null'],
+  help: i18n.translate('dataViews.functions.dataViewLoad.help', {
+    defaultMessage: 'Loads a data view',
+  }),
+  args: {
+    id: {
+      types: ['string'],
+      required: true,
+      help: i18n.translate('dataViews.functions.dataViewLoad.id.help', {
+        defaultMessage: 'data view id to load',
+      }),
+    },
+    includeFields: {
+      types: ['boolean'],
+      required: false,
+      default: true,
+      help: i18n.translate('dataViews.functions.dataViewLoad.includeFields.help', {
+        defaultMessage: 'Whether to include the field list in the serialized data view',
+      }),
+    },
+  },
+  extract(state) {
+    const refName = 'indexPatternLoad.id';
+    const references: SavedObjectReference[] = [
+      {
+        name: refName,
+        type: 'search',
+        id: state.id[0] as string,
+      },
+    ];
+    return {
+      state: {
+        ...state,
+        id: [refName],
+      },
+      references,
+    };
+  },
+
+  inject(state, references) {
+    const reference = references.find((ref) => ref.name === 'indexPatternLoad.id');
+    if (reference) {
+      state.id[0] = reference.id;
+    }
+    return state;
+  },
+});

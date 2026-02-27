@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`source editor geo_grid_source should not allow editing multiple metrics for heatmap 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h6>
+        <MemoizedFormattedMessage
+          defaultMessage="Metrics"
+          id="xpack.maps.source.esGrid.metricsLabel"
+        />
+      </h6>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <MetricsEditor
+      allowMultipleMetrics={false}
+      bucketsName="clusters"
+      fields={Array []}
+      isJoin={false}
+      key="12345"
+      metrics={Array []}
+      metricsFilter={[Function]}
+      onChange={[Function]}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h6>
+        Heat map
+      </h6>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <ResolutionEditor
+      metrics={Array []}
+      onChange={[Function]}
+      renderAs="point"
+      resolution="COARSE"
+    />
+    <RenderAsSelect
+      isColumnCompressed={true}
+      onChange={[Function]}
+      renderAs="point"
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;
+
+exports[`source editor geo_grid_source should render editor 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h6>
+        <MemoizedFormattedMessage
+          defaultMessage="Metrics"
+          id="xpack.maps.source.esGrid.metricsLabel"
+        />
+      </h6>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <MetricsEditor
+      allowMultipleMetrics={true}
+      bucketsName="clusters"
+      fields={Array []}
+      isJoin={false}
+      key="12345"
+      metrics={Array []}
+      metricsFilter={[Function]}
+      onChange={[Function]}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h6>
+        Clusters
+      </h6>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <ResolutionEditor
+      metrics={Array []}
+      onChange={[Function]}
+      renderAs="point"
+      resolution="COARSE"
+    />
+    <RenderAsSelect
+      isColumnCompressed={true}
+      onChange={[Function]}
+      renderAs="point"
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

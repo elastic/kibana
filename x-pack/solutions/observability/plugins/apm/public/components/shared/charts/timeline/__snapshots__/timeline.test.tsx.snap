@@ -1,0 +1,217 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
+<div
+  data-test-subj="timeline-axis-container"
+  style="width: 100%; height: 100%;"
+>
+  <div
+    style="height: 100px; width: 100%;"
+  >
+    <svg
+      height="100"
+      style="position: absolute; top: 0px; left: 0px;"
+      width="0"
+    >
+      <g
+        transform="translate(0 80)"
+      >
+        <text
+          fill="#5A6D8C"
+          font-size="11"
+          text-anchor="middle"
+          x="50"
+          y="0"
+        >
+          0 μs
+        </text>
+        <text
+          fill="#5A6D8C"
+          font-size="11"
+          text-anchor="middle"
+          x="30"
+          y="0"
+        >
+          200 μs
+        </text>
+        <text
+          fill="#5A6D8C"
+          font-size="11"
+          text-anchor="middle"
+          x="10"
+          y="0"
+        >
+          400 μs
+        </text>
+        <text
+          fill="#5A6D8C"
+          font-size="11"
+          text-anchor="middle"
+          x="-10"
+          y="0"
+        >
+          600 μs
+        </text>
+        <text
+          fill="#5A6D8C"
+          font-size="11"
+          text-anchor="middle"
+          x="-30"
+          y="0"
+        >
+          800 μs
+        </text>
+        <text
+          fill="#1D2A3E"
+          text-anchor="middle"
+          x="-50"
+          y="0"
+        >
+          1,000 μs
+        </text>
+      </g>
+    </svg>
+    <div
+      class="css-1oyht0a-MarkerContainer eoof5b20"
+      style="left: -9955.5px;"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="timeToFirstByte-wrapper"
+      >
+        <div
+          class="css-1ejn3a9-Container en0jakt1"
+        >
+          <span
+            class="css-xbgcmn-Indicator en0jakt0"
+            color="#8E9FBC"
+            shape="circle"
+          />
+        </div>
+      </span>
+    </div>
+    <div
+      class="css-1oyht0a-MarkerContainer eoof5b20"
+      style="left: -10955.5px;"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="domInteractive-wrapper"
+      >
+        <div
+          class="css-1ejn3a9-Container en0jakt1"
+        >
+          <span
+            class="css-xbgcmn-Indicator en0jakt0"
+            color="#8E9FBC"
+            shape="circle"
+          />
+        </div>
+      </span>
+    </div>
+    <div
+      class="css-1oyht0a-MarkerContainer eoof5b20"
+      style="left: -18955.5px;"
+    >
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="domComplete-wrapper"
+      >
+        <div
+          class="css-1ejn3a9-Container en0jakt1"
+        >
+          <span
+            class="css-xbgcmn-Indicator en0jakt0"
+            color="#8E9FBC"
+            shape="circle"
+          />
+        </div>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Timeline Components renders VerticalLinesContainer with data 1`] = `
+<svg
+  data-test-subj="vertical-lines"
+  height="100%"
+  style="position: absolute; top: 0px; left: 0px;"
+  width="0"
+>
+  <g
+    transform="translate(0 100)"
+  >
+    <line
+      stroke="#ECF1F9"
+      x1="50"
+      x2="50"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="30"
+      x2="30"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="10"
+      x2="10"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="-10"
+      x2="-10"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="-30"
+      x2="-30"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="-50"
+      x2="-50"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#8E9FBC"
+      x1="-9950"
+      x2="-9950"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#8E9FBC"
+      x1="-10950"
+      x2="-10950"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#8E9FBC"
+      x1="-18950"
+      x2="-18950"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#8E9FBC"
+      x1="-50"
+      x2="-50"
+      y1="0"
+      y2="100%"
+    />
+  </g>
+</svg>
+`;
