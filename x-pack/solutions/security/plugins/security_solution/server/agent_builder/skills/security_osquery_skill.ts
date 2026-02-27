@@ -31,8 +31,7 @@ let osquerySchemaCache: OsquerySchemaTable[] | null = null;
 
 const getOsquerySchema = (): OsquerySchemaTable[] => {
   if (!osquerySchemaCache) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    osquerySchemaCache = require('../../../../../../../platform/plugins/shared/osquery/public/common/schemas/osquery/v5.20.0.json');
+    osquerySchemaCache = require('@kbn/osquery-plugin/public/common/schemas/osquery/v5.20.0.json');
   }
   return osquerySchemaCache!;
 };
@@ -442,9 +441,7 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
         if (search) {
           const term = search.toLowerCase();
           tables = tables.filter(
-            (t) =>
-              t.name.toLowerCase().includes(term) ||
-              t.description.toLowerCase().includes(term)
+            (t) => t.name.toLowerCase().includes(term) || t.description.toLowerCase().includes(term)
           );
         }
 
@@ -463,9 +460,16 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
                 message: JSON.stringify({
                   total: result.length,
                   tables: result,
-                  message: result.length > 0
-                    ? `Found ${result.length} table(s).${search ? ` Filtered by "${search}".` : ''}${platform ? ` Platform: ${platform}.` : ''} Call again with tableName and agentId to get full column details for a specific table.`
-                    : `No tables found${search ? ` matching "${search}"` : ''}${platform ? ` for platform ${platform}` : ''}.`,
+                  message:
+                    result.length > 0
+                      ? `Found ${result.length} table(s).${
+                          search ? ` Filtered by "${search}".` : ''
+                        }${
+                          platform ? ` Platform: ${platform}.` : ''
+                        } Call again with tableName and agentId to get full column details for a specific table.`
+                      : `No tables found${search ? ` matching "${search}"` : ''}${
+                          platform ? ` for platform ${platform}` : ''
+                        }.`,
                 }),
               },
             },
@@ -658,8 +662,7 @@ const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillB
             {
               type: ToolResultType.error,
               data: {
-                message:
-                  'You must specify agentIds, agentAll, or agentPolicyIds to target agents.',
+                message: 'You must specify agentIds, agentAll, or agentPolicyIds to target agents.',
               },
             },
           ],
@@ -673,14 +676,12 @@ const createRunLiveQueryTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkillB
 
       const agentCount = osqueryAction.agents?.length ?? 0;
       const queryActionIds =
-        osqueryAction.queries?.map(
-          (q: Record<string, unknown>) => ({
-            action_id: q.action_id as string,
-            query_id: q.id as string | undefined,
-            query: q.query as string | undefined,
-            agent_count: (q.agents as string[] | undefined)?.length ?? agentCount,
-          })
-        ) ?? [];
+        osqueryAction.queries?.map((q: Record<string, unknown>) => ({
+          action_id: q.action_id as string,
+          query_id: q.id as string | undefined,
+          query: q.query as string | undefined,
+          agent_count: (q.agents as string[] | undefined)?.length ?? agentCount,
+        })) ?? [];
 
       const primaryQueryActionId = queryActionIds.length === 1 ? queryActionIds[0].action_id : null;
 
@@ -853,8 +854,8 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
                 warning:
                   status === 'timeout'
                     ? `Query timed out after ${Math.round(
-                      (Date.now() - startTime) / 1000
-                    )}s. Some agents may not have responded.`
+                        (Date.now() - startTime) / 1000
+                      )}s. Some agents may not have responded.`
                     : undefined,
               }),
             },
