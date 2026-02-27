@@ -158,6 +158,13 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(readRulesConflictRes.body.outcome).to.eql('conflict');
+
+        // We should try cleaning up manually
+        // // extra teardown to avoid errors on cleanup
+        // await es.delete({
+        //   index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        //   id: 'alert:90e3ca0e-71f7-513a-b60a-ac678efd8887',
+        // });
       });
     });
   });
