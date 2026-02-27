@@ -116,6 +116,7 @@ const SEARCH_ALL_METRICS_ESQL_RECOMMENDED_QUERY = {
   description: i18n.translate('xpack.observability.esqlQueries.searchAllMetrics.description', {
     defaultMessage: 'Searches all available metrics',
   }),
+  isStandalone: true,
 };
 
 export function setEsqlRecommendedQueries(esqlPlugin: ESQLSetup) {
