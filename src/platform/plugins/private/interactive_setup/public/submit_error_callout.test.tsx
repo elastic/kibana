@@ -8,10 +8,10 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
 
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { SubmitErrorCallout } from './submit_error_callout';
 import {
@@ -25,11 +25,9 @@ import {
 } from '../common';
 import { interactiveSetupMock } from '../server/mocks';
 
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
-
 describe('SubmitErrorCallout', () => {
   it('renders unknown errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout error={new Error('Unknown error')} defaultTitle="Something went wrong" />
     );
 
@@ -57,7 +55,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders 403 errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -96,7 +94,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders 404 errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -150,7 +148,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders ERROR_CONFIGURE_FAILURE errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -195,7 +193,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -250,7 +248,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders ERROR_ENROLL_FAILURE errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -292,7 +290,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders ERROR_KIBANA_CONFIG_FAILURE errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -336,7 +334,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders ERROR_KIBANA_CONFIG_NOT_WRITABLE errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -380,7 +378,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders ERROR_OUTSIDE_PREBOOT_STAGE errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
@@ -435,7 +433,7 @@ describe('SubmitErrorCallout', () => {
   });
 
   it('renders ERROR_PING_FAILURE errors correctly', async () => {
-    const { container } = renderWithIntl(
+    const { container } = renderWithI18n(
       <SubmitErrorCallout
         error={
           new errors.ResponseError(
