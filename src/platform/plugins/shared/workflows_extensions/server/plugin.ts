@@ -15,12 +15,12 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { emitEvent } from './emit_event';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
-import { emitEvent } from './emit_event';
 import type {
   EmitEventParams,
   TriggerEventHandler,
@@ -66,23 +66,23 @@ export class WorkflowsExtensionsServerPlugin
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
     registerInternalStepDefinitions(core, this.stepRegistry);
 
-    core.http.registerRouteHandlerContext<
-      WorkflowsExtensionsRequestHandlerContext,
-      'workflows'
-    >('workflows', async (_context, request) => {
-      const [coreStart] = await core.getStartServices();
-      const { spaceId } = getSpaceIdFromPath(
-        request.url.pathname,
-        coreStart.http.basePath.serverBasePath
-      );
-      const emitEventFn = this.emitEventFn!;
-      return {
-        getWorkflowsClient: () => ({
-          emitEvent: (triggerId: string, payload: Record<string, unknown>) =>
-            emitEventFn({ triggerId, spaceId, payload, request }),
-        }),
-      };
-    });
+    core.http.registerRouteHandlerContext<WorkflowsExtensionsRequestHandlerContext, 'workflows'>(
+      'workflows',
+      async (_context, request) => {
+        const [coreStart] = await core.getStartServices();
+        const { spaceId } = getSpaceIdFromPath(
+          request.url.pathname,
+          coreStart.http.basePath.serverBasePath
+        );
+        const emitEventFn = this.emitEventFn!;
+        return {
+          getWorkflowsClient: () => ({
+            emitEvent: (triggerId: string, payload: Record<string, unknown>) =>
+              emitEventFn({ triggerId, spaceId, payload, request }),
+          }),
+        };
+      }
+    );
 
     return {
       registerStepDefinition: (definition) => {

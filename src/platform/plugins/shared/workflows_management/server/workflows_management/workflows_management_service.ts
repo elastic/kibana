@@ -8,6 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { v4 as generateUuid } from 'uuid';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
@@ -39,6 +40,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { ConnectorInstanceConfig } from '@kbn/workflows/types/v1';
 import type {
   IWorkflowEventLoggerService,
   LogSearchResult,
@@ -48,26 +50,21 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type { ConnectorInstanceConfig } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod/v4';
-import { v4 as generateUuid } from 'uuid';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
-import {
-  WorkflowConflictError,
-  WorkflowValidationError
-} from '../../common/lib/errors';
 import type {
   DeleteWorkflowsResponse,
   GetAvailableConnectorsResponse,
   GetStepExecutionParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
+import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
 
 import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
@@ -84,7 +81,9 @@ import type { WorkflowsServerPluginStartDeps } from '../types';
 function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefined): string[] {
   const triggers = definition?.triggers ?? [];
   return triggers
-    .map((t) => (t && typeof (t as { type?: string }).type === 'string' ? (t as { type: string }).type : null))
+    .map((t) =>
+      t && typeof (t as { type?: string }).type === 'string' ? (t as { type: string }).type : null
+    )
     .filter((t): t is string => t != null);
 }
 

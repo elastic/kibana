@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './step_registry/types';
@@ -112,19 +112,20 @@ export interface WorkflowsExtensionsServerPluginSetup {
  * Server-side plugin start contract.
  * Exposes step definitions (from common contract), trigger definitions, and emitEvent.
  */
-export type WorkflowsExtensionsServerPluginStart = WorkflowsExtensionsStartContract<ServerStepDefinition> & {
-  /**
-   * Get all registered trigger definitions.
-   * @returns Array of all registered trigger definitions
-   */
-  getAllTriggerDefinitions(): ServerTriggerDefinition[];
+export type WorkflowsExtensionsServerPluginStart =
+  WorkflowsExtensionsStartContract<ServerStepDefinition> & {
+    /**
+     * Get all registered trigger definitions.
+     * @returns Array of all registered trigger definitions
+     */
+    getAllTriggerDefinitions(): ServerTriggerDefinition[];
 
-  /**
-   * Emit a trigger event.
-   * @throws Error if triggerId is not registered
-   */
-  emitEvent: EmitEventFn;
-};
+    /**
+     * Emit a trigger event.
+     * @throws Error if triggerId is not registered
+     */
+    emitEvent: EmitEventFn;
+  };
 
 /**
  * Dependencies for the server plugin setup phase.

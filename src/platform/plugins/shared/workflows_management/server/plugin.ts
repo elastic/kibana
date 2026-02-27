@@ -25,12 +25,12 @@ import {
 import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
 import { createTriggerEventHandler } from './event_driven/trigger_event_handler';
 import { WorkflowsManagementFeatureConfig } from './features';
+import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import {
-  initializeTriggerEventsDataStream,
   initializeTriggerEventsClient,
+  initializeTriggerEventsDataStream,
   type TriggerEventsDataStreamClient,
 } from './trigger_events_log';
-import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -216,7 +216,9 @@ export class WorkflowsPlugin
       this.triggerEventsClient = await initializeTriggerEventsClient(core.dataStreams);
     } catch (error) {
       this.logger.warn(
-        `Failed to initialize trigger events data stream client: ${error instanceof Error ? error.message : String(error)}. Event audit logging will be skipped.`
+        `Failed to initialize trigger events data stream client: ${
+          error instanceof Error ? error.message : String(error)
+        }. Event audit logging will be skipped.`
       );
     }
   }
