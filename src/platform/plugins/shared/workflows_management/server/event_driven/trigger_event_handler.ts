@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { Logger } from '@kbn/core/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { TriggerEventHandlerParams } from '@kbn/workflows-extensions/server';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
+import { workflowMatchesTriggerCondition } from './filter_workflows_by_trigger_condition';
 import { validateWorkflowForExecution } from '../connectors/workflows/validate_workflow_for_execution';
-import {
-  writeTriggerEvent,
-  type TriggerEventsDataStreamClient,
-} from '../trigger_events_log';
+import { type TriggerEventsDataStreamClient, writeTriggerEvent } from '../trigger_events_log';
+import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
 export interface CreateTriggerEventHandlerParams {
   api: WorkflowsManagementApi;
@@ -37,7 +35,11 @@ export function createTriggerEventHandler({
   return async (params: TriggerEventHandlerParams): Promise<void> => {
     const { timestamp, triggerId, spaceId, payload, request } = params;
 
-    const workflows = await api.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+    const allWorkflows = await api.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+    const eventContext = { ...payload, timestamp, spaceId };
+    const workflows = allWorkflows.filter((w) =>
+      workflowMatchesTriggerCondition(w, triggerId, eventContext, logger)
+    );
     const subscriptions = workflows.map((w) => w.id);
 
     const client = getTriggerEventsClient();
@@ -52,7 +54,9 @@ export function createTriggerEventHandler({
         });
       } catch (error) {
         logger.warn(
-          `Failed to write trigger event to data stream (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
+          `Failed to write trigger event to data stream (trigger: ${triggerId}): ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
       }
     }
@@ -75,13 +79,15 @@ export function createTriggerEventHandler({
           await api.runWorkflow(
             workflowToRun,
             spaceId,
-            { event: payload },
+            { event: eventContext },
             request,
             triggerId
           );
         } catch (error) {
           logger.warn(
-            `Event-driven workflow execution failed for workflow ${workflow.id} (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
+            `Event-driven workflow execution failed for workflow ${
+              workflow.id
+            } (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
           );
         }
       })

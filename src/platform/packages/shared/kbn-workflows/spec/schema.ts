@@ -669,10 +669,19 @@ export const AlertEventPropsSchema = z.object({
 });
 
 /**
- * Base event properties that are always present regardless of trigger type.
+ * Base fields present on every trigger event (injected by the platform).
+ * Custom trigger event schemas are merged on top of this for workflow context and autocomplete.
+ * Timestamp is only present for event-driven (custom) triggers; see EventTimestampSchema.
  */
 export const BaseEventSchema = z.object({
-  spaceId: z.string(),
+  spaceId: z.string().describe('The space where the event was emitted.'),
+});
+
+/**
+ * Timestamp injected by the platform for event-driven (custom) trigger events only.
+ */
+export const EventTimestampSchema = z.object({
+  timestamp: z.string().describe('Time when the event was received (ISO 8601).'),
 });
 
 /**

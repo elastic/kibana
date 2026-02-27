@@ -14,6 +14,7 @@ import {
   AlertEventPropsSchema,
   BaseEventSchema,
   DynamicWorkflowContextSchema,
+  EventTimestampSchema,
   isTriggerType,
 } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
@@ -56,6 +57,7 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
         eventSchema = z.object({
           ...eventSchema.shape,
           ...def.eventSchema.shape,
+          ...(EventTimestampSchema as z.ZodObject<z.ZodRawShape>).shape,
         });
       }
     }
