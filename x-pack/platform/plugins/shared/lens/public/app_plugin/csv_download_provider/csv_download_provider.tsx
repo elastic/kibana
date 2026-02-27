@@ -13,7 +13,7 @@ import { exporters } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public';
+import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public/types';
 import type { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
