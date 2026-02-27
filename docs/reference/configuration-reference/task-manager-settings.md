@@ -13,7 +13,6 @@ Task Manager runs background tasks by polling for work on an interval. You can c
 
 ## Task Manager settings [task-manager-settings]
 
-`xpack.task_manager.api_key_type` {applies_to}`serverless: ga` {applies_to}`stack: unavailable` 
 : The API key type to use for task execution. The default value, corresponding to the existing behavior, is `es`, which uses an Elasticsearch API key. Set this to `uiam` to use Elastic Cloud API keys instead.
 
 `xpack.task_manager.max_attempts`
