@@ -114,9 +114,6 @@ describe('createStackConnector', () => {
           },
           secrets: {
             apiKey: 'api-key-123',
-            secretHeaders: {
-              'X-API-Key': 'api-key-123',
-            },
           },
         },
       });
@@ -167,19 +164,21 @@ describe('createStackConnector', () => {
       });
     });
 
-    it('should create MCP connector with token_header auth type (e.g. PagerDuty)', async () => {
+    it('should create MCP connector with apiKey auth and valueTemplate (e.g. PagerDuty)', async () => {
       const mockStackConnector = {
-        id: 'mcp-connector-token-header',
+        id: 'mcp-connector-pagerduty',
         name: '.mcp',
         actionTypeId: '.mcp',
       };
 
-      const connectorConfigTokenHeader: StackConnectorConfig = {
+      const connectorConfigPagerDuty: StackConnectorConfig = {
         type: '.mcp',
         config: {
           serverUrl: 'https://mcp.pagerduty.com/mcp',
           hasAuth: true,
-          authType: 'token_header' as const,
+          authType: 'apiKey' as const,
+          apiKeyHeaderName: 'Authorization',
+          apiKeyHeaderValue: 'Token token={{apiKey}}',
         },
         importedTools: undefined,
       };
@@ -190,7 +189,7 @@ describe('createStackConnector', () => {
         mockActions as any,
         mockRequest,
         MOCK_DATA_SOURCE_NAME,
-        connectorConfigTokenHeader,
+        connectorConfigPagerDuty,
         'pagerduty-token-abc'
       );
 
@@ -202,7 +201,9 @@ describe('createStackConnector', () => {
           config: {
             serverUrl: 'https://mcp.pagerduty.com/mcp',
             hasAuth: true,
-            authType: 'token_header',
+            authType: 'apiKey',
+            apiKeyHeaderName: 'Authorization',
+            apiKeyHeaderValue: 'Token token={{apiKey}}',
           },
           secrets: {
             apiKey: 'pagerduty-token-abc',

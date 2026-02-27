@@ -25,7 +25,9 @@ export const pagerdutyDataSource: DataSource = {
       config: {
         serverUrl: 'https://mcp.pagerduty.com/mcp',
         hasAuth: true,
-        authType: MCPAuthType.TokenHeader,
+        authType: MCPAuthType.ApiKey,
+        apiKeyHeaderName: 'Authorization',
+        apiKeyHeaderValue: 'Token token={{apiKey}}',
       },
       importedTools: [
         { name: 'list_schedules' },

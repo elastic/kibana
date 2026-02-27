@@ -17,8 +17,10 @@ export const MCPAuthType = {
   Bearer: 'bearer',
   ApiKey: 'apiKey',
   Basic: 'basic',
-  TokenHeader: 'token_header',
 } as const;
+
+/** Placeholder in apiKeyHeaderValue template replaced by secrets.apiKey */
+export const API_KEY_PLACEHOLDER = '{{apiKey}}';
 
 /**
  * Schema for MCP connector configuration.
@@ -38,13 +40,7 @@ export const MCPConnectorConfigSchema = z.object({
    * Authentication type to use when hasAuth is true.
    */
   authType: z
-    .enum([
-      MCPAuthType.None,
-      MCPAuthType.Bearer,
-      MCPAuthType.ApiKey,
-      MCPAuthType.Basic,
-      MCPAuthType.TokenHeader,
-    ])
+    .enum([MCPAuthType.None, MCPAuthType.Bearer, MCPAuthType.ApiKey, MCPAuthType.Basic])
     .optional(),
   /**
    * Custom header name for API key authentication.
@@ -52,6 +48,11 @@ export const MCPConnectorConfigSchema = z.object({
    * Only used when authType is 'apiKey'.
    */
   apiKeyHeaderName: z.string().min(1).optional(),
+  /**
+   * When authType is 'apiKey': optional value template. {{apiKey}} is replaced by secrets.apiKey.
+   * When omitted, the header value is the raw apiKey.
+   */
+  apiKeyHeaderValue: z.string().optional(),
   /**
    * Non-sensitive HTTP headers to include in requests.
    */
