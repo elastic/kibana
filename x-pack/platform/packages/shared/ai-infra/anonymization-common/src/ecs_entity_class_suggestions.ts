@@ -36,6 +36,10 @@ export const ECS_ENTITY_CLASS_MAP: Readonly<Record<string, AnonymizationEntityCl
   'user.effective.name': 'USER_NAME',
   'user.display_name': 'USER_NAME',
 
+  // URLs
+  'url.full': 'URL',
+  'url.original': 'URL',
+
   // Email addresses
   'user.email': 'EMAIL',
 

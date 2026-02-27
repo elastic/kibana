@@ -289,7 +289,7 @@ describe('anonymizeRecords', () => {
     const urlRule: AnonymizationRule = {
       type: 'RegExp',
       enabled: true,
-      entityClass: 'IP',
+      entityClass: 'URL',
       pattern: 'https?://\\S+',
     };
 
@@ -312,14 +312,14 @@ describe('anonymizeRecords', () => {
     // Original URL must be removed
     expect(anonymizedContent).not.toContain(testUrl);
 
-    // Later rule must not produce a nested MISC mask inside IP mask
+    // Later rule must not produce a nested MISC mask inside URL mask
     expect(anonymizedContent).not.toContain('MISC_');
 
-    // Only the IP entity should be recorded
+    // Only the URL entity should be recorded
     const miscCount = result.anonymizations.filter((a) => a.entity.class_name === 'MISC').length;
-    const ipCount = result.anonymizations.filter((a) => a.entity.class_name === 'IP').length;
+    const urlCount = result.anonymizations.filter((a) => a.entity.class_name === 'URL').length;
     expect(miscCount).toBe(0);
-    expect(ipCount).toBe(1);
+    expect(urlCount).toBe(1);
   });
 
   it('applies field policy anonymize before regex/NER rules', async () => {

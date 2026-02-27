@@ -27,6 +27,7 @@ export const ANONYMIZATION_ENTITY_CLASSES = [
   'HOST_NAME',
   'USER_NAME',
   'IP',
+  'URL',
   'EMAIL',
   'CLOUD_ACCOUNT',
   'ENTITY_NAME',

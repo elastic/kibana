@@ -12,6 +12,7 @@ export type AnonymizationEntityClass =
   | 'HOST_NAME'
   | 'USER_NAME'
   | 'IP'
+  | 'URL'
   | 'EMAIL'
   | 'CLOUD_ACCOUNT'
   | 'ENTITY_NAME'
