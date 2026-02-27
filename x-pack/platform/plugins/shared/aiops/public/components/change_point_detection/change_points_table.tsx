@@ -202,6 +202,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             name: i18n.translate('xpack.aiops.changePointDetection.fieldNameColumn', {
               defaultMessage: 'Field name',
             }),
+            width: '10%',
             truncateText: false,
           },
           {
@@ -213,6 +214,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             }),
             truncateText: false,
             sortable: true,
+            width: '15%',
           },
           ...(hasActions
             ? [
