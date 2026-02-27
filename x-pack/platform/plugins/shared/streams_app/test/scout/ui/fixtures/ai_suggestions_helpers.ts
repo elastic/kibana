@@ -33,7 +33,6 @@ export const SUGGESTION_BUTTON_TEST_IDS = {
   reject: (streamName: string) => `suggestionRejectButton-${streamName}`,
   preview: (streamName: string) => `suggestionPreviewButton-${streamName}`,
   edit: (streamName: string) => `suggestionEditButton-${streamName}`,
-  checkbox: (suggestionName: string) => `suggestionCheckbox-${suggestionName}`,
 } as const;
 
 export const MODAL_TEST_IDS = {
@@ -42,20 +41,6 @@ export const MODAL_TEST_IDS = {
   cancelButton: 'streamsAppCreateStreamConfirmationModalCancelButton',
   createButton: 'streamsAppCreateStreamConfirmationModalCreateButton',
 } as const;
-
-export const BULK_MODAL_TEST_IDS = {
-  modal: 'streamsAppBulkCreateStreamsConfirmationModal',
-  createButton: 'streamsAppBulkCreateStreamsConfirmationModalCreateButton',
-  cancelButton: 'streamsAppBulkCreateStreamsConfirmationModalCancelButton',
-  closeButton: 'streamsAppBulkCreateStreamsConfirmationModalCloseButton',
-  doneButton: 'streamsAppBulkCreateStreamsConfirmationModalDoneButton',
-  streamItem: (suggestionName: string) => `streamsAppBulkCreateStreamItem-${suggestionName}`,
-  progress: 'streamsAppBulkCreateProgress',
-  partialSuccessCallout: 'streamsAppBulkCreatePartialSuccessCallout',
-} as const;
-
-export const BULK_ACCEPT_BUTTON_TEST_ID = 'streamsAppAcceptSelectedSuggestionsButton';
-export const MASTER_CHECKBOX_TEST_ID = 'streamsAppMasterSuggestionCheckbox';
 
 // Mock suggestion data constants
 export const MOCK_SUGGESTION_INFO: PartitionSuggestion = {
@@ -315,103 +300,4 @@ export async function setupAiSuggestionsTest(
  */
 export function getStreamName(suggestionName: string, parentStream = 'logs.otel'): string {
   return `${parentStream}.${suggestionName}`;
-}
-
-/**
- * Toggles the checkbox selection for a suggestion
- */
-export async function toggleSuggestionCheckbox(
-  page: ScoutPage,
-  suggestionName: string
-): Promise<void> {
-  const checkbox = page.getByTestId(SUGGESTION_BUTTON_TEST_IDS.checkbox(suggestionName));
-  await expect(checkbox).toBeVisible();
-  await checkbox.click();
-}
-
-/**
- * Checks if a suggestion checkbox is checked
- */
-export async function isSuggestionCheckboxChecked(
-  page: ScoutPage,
-  suggestionName: string
-): Promise<boolean> {
-  const checkbox = page.getByTestId(SUGGESTION_BUTTON_TEST_IDS.checkbox(suggestionName));
-  return checkbox.isChecked();
-}
-
-/**
- * Clicks the "Accept Selected" button for bulk accepting suggestions
- */
-export async function clickAcceptSelectedButton(page: ScoutPage): Promise<void> {
-  const button = page.getByTestId(BULK_ACCEPT_BUTTON_TEST_ID);
-  await expect(button).toBeVisible();
-  await button.click();
-}
-
-/**
- * Opens the bulk create streams confirmation modal by selecting suggestions and clicking Accept Selected
- */
-export async function openBulkAcceptModal(
-  page: ScoutPage,
-  suggestionNames: string[]
-): Promise<ReturnType<ScoutPage['getByTestId']>> {
-  // Select all the suggestions
-  for (const name of suggestionNames) {
-    await toggleSuggestionCheckbox(page, name);
-  }
-
-  // Click Accept Selected
-  await clickAcceptSelectedButton(page);
-
-  // Wait for and return the modal
-  const modal = page.getByTestId(BULK_MODAL_TEST_IDS.modal);
-  await expect(modal).toBeVisible();
-  return modal;
-}
-
-/**
- * Clicks the Create all streams button in the bulk modal
- */
-export async function clickBulkModalCreateButton(
-  modal: ReturnType<ScoutPage['getByTestId']>
-): Promise<void> {
-  const createButton = modal.getByTestId(BULK_MODAL_TEST_IDS.createButton);
-  await createButton.click();
-}
-
-/**
- * Clicks the Cancel button in the bulk modal
- */
-export async function clickBulkModalCancelButton(
-  modal: ReturnType<ScoutPage['getByTestId']>
-): Promise<void> {
-  const cancelButton = modal.getByTestId(BULK_MODAL_TEST_IDS.cancelButton);
-  await cancelButton.click();
-}
-
-/**
- * Clicks the master checkbox to toggle selection of all suggestions
- */
-export async function clickMasterCheckbox(page: ScoutPage): Promise<void> {
-  const checkbox = page.getByTestId(MASTER_CHECKBOX_TEST_ID);
-  await expect(checkbox).toBeVisible();
-  await checkbox.click();
-}
-
-/**
- * Returns the checked state of the master checkbox
- */
-export async function isMasterCheckboxChecked(page: ScoutPage): Promise<boolean> {
-  const checkbox = page.getByTestId(MASTER_CHECKBOX_TEST_ID);
-  return checkbox.isChecked();
-}
-
-/**
- * Returns whether the master checkbox is in indeterminate state
- */
-export async function isMasterCheckboxIndeterminate(page: ScoutPage): Promise<boolean> {
-  const checkbox = page.getByTestId(MASTER_CHECKBOX_TEST_ID);
-  const ariaChecked = await checkbox.getAttribute('aria-checked');
-  return ariaChecked === 'mixed';
 }
