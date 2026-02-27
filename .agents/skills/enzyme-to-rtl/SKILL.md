@@ -168,6 +168,7 @@ await screen.findByTestId('results')
 
 - Replace `wrapper.update()` + `nextTick()` patterns with `await waitFor(...)`.
 - For promises that resolve in tests, prefer `findByTestId` (auto-waits) over `getByTestId` + `waitFor`.
+- For elements that should disappear, prefer `waitForElementToBeRemoved(...)` (example: `await waitForElementToBeRemoved(screen.getByTestId('loading'))`).
 
 ## Snapshot strategy
 
