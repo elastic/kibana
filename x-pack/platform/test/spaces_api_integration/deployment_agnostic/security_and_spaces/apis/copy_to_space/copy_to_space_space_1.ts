@@ -16,9 +16,7 @@ interface User {
   role: string;
 }
 
-export default function copyToSpaceSpace1Suite(
-  context: DeploymentAgnosticFtrProviderContext
-) {
+export default function copyToSpaceSpace1Suite(context: DeploymentAgnosticFtrProviderContext) {
   const {
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,
