@@ -7,11 +7,13 @@
 
 import React from 'react';
 import moment from 'moment';
+import rison from '@kbn/rison';
 import type { Direction } from '@elastic/eui';
-import { EuiBasicTable, EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../hooks/use_date_format';
+import { useSyntheticsSettingsContext } from '../../contexts';
 import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
@@ -49,10 +51,22 @@ interface Props {
   alertsByCert?: Map<string, number>;
 }
 
+const useCertAlertsUrl = (sha256: string) => {
+  const { basePath } = useSyntheticsSettingsContext();
+  const kuery = `kibana.alert.rule.rule_type_id : "xpack.synthetics.alerts.tls" AND tls.server.hash.sha256 : "${sha256}"`;
+  return `${basePath}/app/observability/alerts?_a=${rison.encode({
+    kuery,
+    status: 'active',
+    rangeFrom: 'now-30d',
+    rangeTo: 'now',
+  })}`;
+};
+
 const CertAlertsBadge: React.FC<{
   sha256: string;
   alertsByCert?: Map<string, number>;
 }> = ({ sha256, alertsByCert }) => {
+  const alertsUrl = useCertAlertsUrl(sha256);
   const count = alertsByCert?.get(sha256) ?? 0;
   if (count > 0) {
     return (
@@ -63,7 +77,9 @@ const CertAlertsBadge: React.FC<{
           values: { count },
         })}
       >
-        <EuiBadge color="danger">{count}</EuiBadge>
+        <EuiLink href={alertsUrl}>
+          <EuiBadge color="danger">{count}</EuiBadge>
+        </EuiLink>
       </EuiToolTip>
     );
   }
