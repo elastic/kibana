@@ -18,6 +18,7 @@ export const MockAgentManager: jest.MockedClass<typeof AgentManager> = jest.fn()
 jest.mock('@kbn/core-elasticsearch-client-server-internal', () => ({
   ClusterClient: MockClusterClient,
   AgentManager: MockAgentManager,
+  getRequestHandlerFactory: jest.fn().mockReturnValue(jest.fn()),
 }));
 
 export const isScriptingEnabledMock = jest.fn();
