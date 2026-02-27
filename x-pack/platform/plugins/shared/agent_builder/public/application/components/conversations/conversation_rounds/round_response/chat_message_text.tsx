@@ -93,7 +93,7 @@ export function ChatMessageText({
 
   const handleLinkClick = useCallback(
     (href: string, e: React.MouseEvent) => {
-      const internal = http.externalUrl.isInternalUrl(href);
+      const internal = http?.externalUrl?.isInternalUrl(href);
       if (!internal) {
         // External links always show the confirmation modal
         e.preventDefault();
@@ -105,7 +105,7 @@ export function ChatMessageText({
       }
       // Internal link in full page: target="_blank" handles navigation
     },
-    [isSidebar, http.externalUrl, application]
+    [isSidebar, http?.externalUrl, application]
   );
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
