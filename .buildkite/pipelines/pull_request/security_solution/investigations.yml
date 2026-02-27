@@ -1,5 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
+    cancel_on_build_failing: true
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -7,19 +8,15 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 9
     retry:
       automatic:
         - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
+    cancel_on_build_failing: true
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -27,13 +24,8 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
-    parallelism: 10
+    parallelism: 11
     retry:
       automatic:
         - exit_status: '-1'
