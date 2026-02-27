@@ -52,12 +52,18 @@ const mockServices = {
       timeFieldName: '@timestamp',
     }),
   } as any,
+  application: {
+    currentAppId$: {
+      subscribe: () => ({ unsubscribe: () => {} }),
+    },
+  } as any,
 };
 
 const mockFormServices: RuleFormServices = {
   http: mockServices.http,
   data: mockServices.data,
   dataViews: mockServices.dataViews,
+  application: mockServices.application,
 };
 
 // =============================================================================

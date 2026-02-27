@@ -62,8 +62,8 @@ describe('useEsqlCallbacks', () => {
 
   it('getColumnsFor calls getEsqlColumns with correct parameters', async () => {
     const mockColumns = [
-      { name: '@timestamp', type: 'date' },
-      { name: 'message', type: 'text' },
+      { name: '@timestamp', type: 'date', userDefined: false as const },
+      { name: 'message', type: 'text', userDefined: false as const },
     ];
     mockGetEsqlColumns.mockResolvedValue(mockColumns);
 
@@ -86,7 +86,7 @@ describe('useEsqlCallbacks', () => {
   });
 
   it('getColumnsFor handles undefined query parameter', async () => {
-    const mockColumns: Array<{ name: string; type: string }> = [];
+    const mockColumns: Array<{ name: string; type: string; userDefined: false }> = [];
     mockGetEsqlColumns.mockResolvedValue(mockColumns);
 
     const { result } = renderHook(() =>
