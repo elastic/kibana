@@ -22,12 +22,12 @@ node scripts/scout start-server --arch serverless --domain observability_complet
 
 ```bash
 npx playwright test \
-  --config src/platform/plugins/shared/discover/test/scout/ui/metrics_experience_parallel.playwright.config.ts \
+  --config src/platform/plugins/shared/discover/test/scout/ui/metrics_experience.playwright.config.ts \
   --project local --trace on
 ```
 
 To check stability before merging, trigger the flaky test runner from a PR comment:
 
 ```
-/flaky scoutConfig:src/platform/plugins/shared/discover/test/scout/ui/metrics_experience_parallel.playwright.config.ts:30
+/flaky scoutConfig:src/platform/plugins/shared/discover/test/scout/ui/metrics_experience.playwright.config.ts:30
 ```

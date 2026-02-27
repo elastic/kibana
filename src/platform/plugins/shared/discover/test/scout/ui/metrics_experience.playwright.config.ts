@@ -10,7 +10,6 @@
 import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
-  testDir: './parallel_tests/metrics_experience',
-  workers: 2,
+  testDir: './tests/metrics_experience',
   runGlobalSetup: true,
 });

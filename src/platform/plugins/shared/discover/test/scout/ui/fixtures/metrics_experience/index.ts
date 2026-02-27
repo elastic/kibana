@@ -7,24 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PageObjects,
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '@kbn/scout';
-import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { test as baseTest, createLazyPageObject } from '@kbn/scout';
 import { MetricsExperiencePage } from './page_objects';
 
-export interface MetricsExperienceTestFixtures extends ScoutParallelTestFixtures {
+export interface MetricsExperienceTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     metricsExperience: MetricsExperiencePage;
   };
 }
 
-export const spaceTest = spaceBaseTest.extend<
-  MetricsExperienceTestFixtures,
-  ScoutParallelWorkerFixtures
->({
+export const test = baseTest.extend<MetricsExperienceTestFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,

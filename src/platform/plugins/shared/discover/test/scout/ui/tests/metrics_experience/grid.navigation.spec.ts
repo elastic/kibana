@@ -17,7 +17,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import {
-  spaceTest,
+  test,
   testData,
   PAGINATION,
   DEFAULT_TIME_RANGE,
@@ -33,39 +33,41 @@ const FIRST_CARD_PAGE_1 = `${SORTED_METRICS[0].name}-0`;
 const FIRST_CARD_PAGE_2 = `${SORTED_METRICS[PAGE_SIZE].name}-0`;
 const FIRST_CARD_LAST_PAGE = `${SORTED_METRICS[PAGE_SIZE * (TOTAL_PAGES - 1)].name}-0`;
 
-spaceTest.describe(
+test.describe(
   'Metrics in Discover - Grid Navigation',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,
   },
   () => {
-    spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME);
-      await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
+    test.beforeAll(async ({ kbnClient, uiSettings }) => {
+      await kbnClient.importExport.load(testData.KBN_ARCHIVE);
+      await uiSettings.set({
+        defaultIndex: testData.DATA_VIEW_NAME,
+        'timepicker:timeDefaults': `{ "from": "${DEFAULT_TIME_RANGE.from}", "to": "${DEFAULT_TIME_RANGE.to}"}`,
+      });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.gotoWithExtendedTimeout();
+      await pageObjects.discover.goto();
     });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
+    test.afterAll(async ({ kbnClient, uiSettings }) => {
+      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await kbnClient.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should paginate through metrics', async ({ pageObjects }) => {
+    test('should paginate through metrics', async ({ pageObjects }) => {
       await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
 
-      await spaceTest.step('pagination is visible', async () => {
+      await test.step('pagination is visible', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.pagination.container).toBeVisible();
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
 
-      await spaceTest.step('navigate to last page and grid updates', async () => {
+      await test.step('navigate to last page and grid updates', async () => {
         await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.cards).toHaveCount(LAST_PAGE_CARDS);
@@ -75,7 +77,7 @@ spaceTest.describe(
         );
       });
 
-      await spaceTest.step('navigate using next and prev arrows', async () => {
+      await test.step('navigate using next and prev arrows', async () => {
         await metricsExperience.pagination.getPageButton(0).click();
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
@@ -93,23 +95,23 @@ spaceTest.describe(
       });
     });
 
-    spaceTest('should filter metrics using search', async ({ pageObjects }) => {
+    test('should filter metrics using search', async ({ pageObjects }) => {
       await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 
-      await spaceTest.step('search filters results across all pages', async () => {
+      await test.step('search filters results across all pages', async () => {
         await metricsExperience.searchMetric(SEARCH_METRIC_NAME);
         await expect(metricsExperience.cards).toHaveCount(1);
       });
 
-      await spaceTest.step('search for non-existent metric shows empty state', async () => {
+      await test.step('search for non-existent metric shows empty state', async () => {
         await metricsExperience.clearSearch();
         await metricsExperience.searchMetric('nonexistent_metric_xyz_123');
         await expect(metricsExperience.emptyState).toBeVisible();
       });
 
-      await spaceTest.step('clearing search restores full grid', async () => {
+      await test.step('clearing search restores full grid', async () => {
         await metricsExperience.clearSearch();
         await expect(metricsExperience.emptyState).toBeHidden();
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
