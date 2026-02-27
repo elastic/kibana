@@ -113,13 +113,11 @@ export function SloOverviewDetailsContent({
 export interface SloOverviewDetailsFlyoutFooterProps {
   slo: SLOWithSummaryResponse;
   onClose: () => void;
-  onOpenInApp?: () => void;
 }
 
 export function SloOverviewDetailsFlyoutFooter({
   slo,
   onClose,
-  onOpenInApp,
 }: SloOverviewDetailsFlyoutFooterProps) {
   const {
     application: { navigateToUrl },
@@ -140,7 +138,6 @@ export function SloOverviewDetailsFlyoutFooter({
         <EuiButton
           fill
           onClick={() => {
-            onOpenInApp?.();
             const { sloDetailsUrl } = getSloFormattedSummary(slo, uiSettings, basePath);
             navigateToUrl(sloDetailsUrl);
           }}
