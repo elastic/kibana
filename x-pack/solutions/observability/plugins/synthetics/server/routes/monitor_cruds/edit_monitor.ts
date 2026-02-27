@@ -279,13 +279,16 @@ export const syncEditedMonitor = async ({
           allPrivateLocations,
           spaceId
         ),
-        packagePolicyIds.length > 0
-          ? monitorConfigRepository.bulkUpdatePackagePolicyReferences([
-              { monitorId, packagePolicyIds, savedObjectType },
-            ])
-          : Promise.resolve(),
       ]
     );
+
+    // Reference update must run after monitorConfigRepository.update completes,
+    // because update may delete and recreate the saved object when spaces change.
+    if (packagePolicyIds.length > 0) {
+      await monitorConfigRepository.bulkUpdatePackagePolicyReferences([
+        { monitorId, packagePolicyIds, savedObjectType },
+      ]);
+    }
 
     sendTelemetryEvents(
       server.logger,
