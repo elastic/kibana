@@ -40,7 +40,6 @@ import type {
   IEventLogService,
 } from '@kbn/event-log-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -91,10 +90,7 @@ import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import type { ConnectorWithOptionalDeprecation } from './application/connector/lib';
-import {
-  isConnectorDeprecated,
-  updateDynamicInMemoryConnectors,
-} from './application/connector/lib';
+import { isConnectorDeprecated } from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import type {
   ICaseServiceAbstract,
@@ -190,13 +186,17 @@ export interface PluginStartContract {
   isSystemActionConnector: (connectorId: string) => boolean;
 
   /**
-   * Takes a list of the current pre-configured EIS inference endpoints and updates the inMemoryConnectors for usage in Kibana.
-   * @param preconfiguredInferenceEndpoints List of pre-configured EIS inference endpoints that should have inMemoryConnectors
-   * @returns boolean indicating if any connectors were added to the inMemoryConnectors list.
+   * Add a new dynamic InMemoryConnector to the inMemoryConnectors list if a connector with the id doesn't already exist.
+   * @param connector to add to the inMemoryConnectors list
+   * @returns void
    */
-  updateDynamicInMemoryConnectors: (
-    preconfiguredInferenceEndpoints: InferenceInferenceEndpointInfo[]
-  ) => boolean;
+  registerDynamicConnector: (connector: InMemoryConnector) => void;
+  /**
+   * Remove connector with the given id from the inMemoryConnectors list if it exists.
+   * @param connectorId to remove from inMemoryConnectors list
+   * @returns
+   */
+  unregisterDynamicConnector: (connectorId: string) => void;
 }
 
 export interface ActionsPluginsSetup {
@@ -715,15 +715,10 @@ export class ActionsPlugin
             inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
         );
       },
-      updateDynamicInMemoryConnectors: (
-        preconfiguredInferenceEndpoints: InferenceInferenceEndpointInfo[]
-      ): boolean => {
-        return updateDynamicInMemoryConnectors(
-          this.inMemoryConnectors,
-          preconfiguredInferenceEndpoints,
-          this.logger
-        );
-      },
+      registerDynamicConnector: (connector: InMemoryConnector) =>
+        this.registerDynamicConnector(connector),
+      unregisterDynamicConnector: (connectorId: string) =>
+        this.unregisterDynamicConnector(connectorId),
     };
   }
 
@@ -919,6 +914,27 @@ export class ActionsPlugin
     return async (getAxiosParams: GetAxiosInstanceWithAuthFnOpts) => {
       return await getAxiosInstanceFn(getAxiosParams);
     };
+  };
+
+  private registerDynamicConnector = (connector: InMemoryConnector): void => {
+    if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      this.inMemoryConnectors.push({
+        ...connector,
+        isDynamic: true,
+        isPreconfigured: true,
+      });
+      this.logger.info(`Registered dynamic connector with id ${connector.id}`);
+    }
+  };
+
+  private unregisterDynamicConnector = (connectorId: string): void => {
+    const index = this.inMemoryConnectors.findIndex(
+      (c) => c.id === connectorId && c.isDynamic === true
+    );
+    if (index !== -1) {
+      this.inMemoryConnectors.splice(index, 1);
+      this.logger.info(`Unregistered dynamic connector with id ${connectorId}`);
+    }
   };
 
   public stop() {

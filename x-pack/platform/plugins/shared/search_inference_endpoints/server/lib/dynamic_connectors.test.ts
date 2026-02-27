@@ -6,14 +6,16 @@
  */
 
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
 import { DynamicConnectorsPoller, initialDelayMs } from './dynamic_connectors';
-import { mockEISPreconfiguredEndpoints } from './__mocks__/inference_endpoints';
+import { mockEISPreconfiguredEndpoints } from '../__mocks__/inference_endpoints';
+
+import { filterPreconfiguredEndpoints, connectorFromEndpoint } from '../utils/in_memory_connectors';
 
 describe('DynamicConnectorsPoller', () => {
   jest.useFakeTimers({ legacyFakeTimers: true });
@@ -29,9 +31,7 @@ describe('DynamicConnectorsPoller', () => {
     },
   };
   const client = mockClient as unknown as ElasticsearchClient;
-  const mockActions = {
-    updateDynamicInMemoryConnectors: jest.fn(),
-  };
+  const mockActions = actionsMock.createStart();
   const actions = mockActions as unknown as ActionsPluginStartContract;
   let poller: DynamicConnectorsPoller;
   const pollingIntervalMins = 1;
@@ -44,8 +44,7 @@ describe('DynamicConnectorsPoller', () => {
     mockInferenceGet.mockResolvedValue({
       endpoints: mockEISPreconfiguredEndpoints,
     });
-    mockActions.updateDynamicInMemoryConnectors.mockReturnValue(true);
-
+    mockActions.inMemoryConnectors = [];
     poller = new DynamicConnectorsPoller(logger, actions, client, pollingIntervalMins);
   });
 
@@ -65,29 +64,47 @@ describe('DynamicConnectorsPoller', () => {
       advance(testInitialAdvance); // advance past initial delay
       await wait();
       expect(mockClient.inference.get).toHaveBeenCalledWith({ inference_id: '_all' });
-      expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(1);
-      const preconfiguredEndpoints = mockActions.updateDynamicInMemoryConnectors.mock.calls[0][0];
-      expect(preconfiguredEndpoints).not.toHaveLength(mockEISPreconfiguredEndpoints.length);
-      for (const endpoint of preconfiguredEndpoints) {
-        expect(mockEISPreconfiguredEndpoints).toContain(endpoint);
-      }
     })
   );
 
   it(
-    'only sends EIS chat_completion endpoints to actions',
+    'creates connectors for EIS endpoints',
     fakeSchedulers(async (advance) => {
       poller.start();
 
       advance(testInitialAdvance); // advance past initial delay
       await wait();
-      expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(1);
-      const preconfiguredEndpoints = mockActions.updateDynamicInMemoryConnectors.mock
-        .calls[0][0] as unknown as InferenceInferenceEndpointInfo[];
-      for (const endpoint of preconfiguredEndpoints) {
-        expect(endpoint.task_type).toEqual('chat_completion');
-        expect(endpoint.service).toEqual('elastic');
-      }
+      const filteredEndpoints = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
+      const expectedConnectors = filteredEndpoints.map(connectorFromEndpoint);
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalledTimes(expectedConnectors.length);
+      expectedConnectors.forEach((connector) =>
+        expect(mockActions.registerDynamicConnector).toHaveBeenCalledWith(connector)
+      );
+    })
+  );
+  it(
+    'only sends new EIS endpoints that do not have connectors already',
+    fakeSchedulers(async (advance) => {
+      mockInferenceGet.mockResolvedValue({
+        endpoints: mockEISPreconfiguredEndpoints,
+      });
+      const filteredEndpoints = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
+      const expectedConnectors = filteredEndpoints.map(connectorFromEndpoint);
+      const existingConnector = expectedConnectors.slice(0, -2);
+      const newConnectors = expectedConnectors.slice(-2);
+      mockActions.inMemoryConnectors = existingConnector;
+
+      poller.start();
+
+      advance(testInitialAdvance); // advance past initial delay
+      await wait();
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalledTimes(2);
+      newConnectors.forEach((connector) =>
+        expect(mockActions.registerDynamicConnector).toHaveBeenCalledWith(connector)
+      );
+      existingConnector.forEach((connector) =>
+        expect(mockActions.registerDynamicConnector).not.toHaveBeenCalledWith(connector)
+      );
     })
   );
 
@@ -101,8 +118,8 @@ describe('DynamicConnectorsPoller', () => {
       advance(testInitialAdvance);
       await wait();
       expect(mockClient.inference.get).toHaveBeenCalledTimes(1);
-      expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(0);
-      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalledTimes(0);
+      expect(mockLogger.error).toHaveBeenCalledTimes(2);
 
       mockClient.inference.get.mockResolvedValue({
         endpoints: mockEISPreconfiguredEndpoints,
@@ -112,7 +129,7 @@ describe('DynamicConnectorsPoller', () => {
       advance(pollingIntervalMs); // advance past initial delay
       await wait();
       expect(mockClient.inference.get).toHaveBeenCalledTimes(2);
-      expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(1);
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledTimes(0);
     })
   );
@@ -133,8 +150,8 @@ describe('DynamicConnectorsPoller', () => {
       advance(testInitialAdvance); // advance past initial delay
       await wait();
       expect(mockClient.inference.get).toHaveBeenCalledTimes(1);
-      expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(0);
-      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalledTimes(0);
+      expect(mockLogger.error).toHaveBeenCalledTimes(2);
 
       mockLogger.error.mockReset();
       mockClient.inference.get.mockResolvedValue({
@@ -144,7 +161,7 @@ describe('DynamicConnectorsPoller', () => {
       advance(pollingIntervalMs); // advance past initial delay
       await wait();
       expect(mockClient.inference.get).toHaveBeenCalledTimes(2);
-      expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(1);
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledTimes(0);
     })
   );
@@ -152,7 +169,7 @@ describe('DynamicConnectorsPoller', () => {
   it(
     'handles errors from actions api',
     fakeSchedulers(async (advance) => {
-      mockActions.updateDynamicInMemoryConnectors.mockImplementationOnce(() => {
+      mockActions.registerDynamicConnector.mockImplementationOnce(() => {
         throw new Error('Actions error');
       });
 
@@ -161,17 +178,15 @@ describe('DynamicConnectorsPoller', () => {
       advance(testInitialAdvance); // advance past initial delay
       await wait();
       expect(mockClient.inference.get).toHaveBeenCalledTimes(1);
-      expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(1);
-      expect(mockLogger.error).toHaveBeenCalledTimes(1);
-
-      mockLogger.error.mockReset();
-      mockActions.updateDynamicInMemoryConnectors.mockReturnValue(true);
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledTimes(2);
 
       advance(pollingIntervalMs); // advance past initial delay
       await wait();
+
       expect(mockClient.inference.get).toHaveBeenCalledTimes(2);
-      expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(2);
-      expect(mockLogger.error).toHaveBeenCalledTimes(0);
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalledTimes(13);
+      expect(mockLogger.error).toHaveBeenCalledTimes(2);
     })
   );
 
@@ -204,14 +219,12 @@ describe('DynamicConnectorsPoller', () => {
         advance(pollingIntervalMs); // advance past initial delay
         await wait();
         expect(mockClient.inference.get).toHaveBeenCalledTimes(0);
-        expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(0);
 
         poller.start();
 
         advance(testInitialAdvance); // advance past initial delay
         await wait();
         expect(mockClient.inference.get).toHaveBeenCalledTimes(1);
-        expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(1);
       })
     );
     it(
@@ -222,29 +235,25 @@ describe('DynamicConnectorsPoller', () => {
         advance(testInitialAdvance); // advance past initial delay
         await wait();
         expect(mockClient.inference.get).toHaveBeenCalledTimes(1);
-        expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(1);
 
         advance(pollingIntervalMs); // advance past initial delay
         await wait();
         expect(mockClient.inference.get).toHaveBeenCalledTimes(2);
-        expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(2);
 
         poller.stop();
 
         advance(pollingIntervalMs); // advance past initial delay
         await wait();
         expect(mockClient.inference.get).toHaveBeenCalledTimes(2);
-        expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(2);
         advance(pollingIntervalMs); // advance past initial delay
         await wait();
         expect(mockClient.inference.get).toHaveBeenCalledTimes(2);
-        expect(mockActions.updateDynamicInMemoryConnectors).toHaveBeenCalledTimes(2);
       })
     );
     it(
       'does not start multiple polling processes if start is called multiple times',
       fakeSchedulers(async (advance) => {
-        // @ts-ignore - accessing private property for testing purposes
+        // @ts-expect-error - accessing private property for testing purposes
         const subscribeSpy = jest.spyOn(poller.polling$, 'subscribe');
 
         poller.start();

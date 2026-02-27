@@ -8,15 +8,21 @@
 import { type Observable, type Subscription, of } from 'rxjs';
 import * as Rx from 'rxjs';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginStartContract,
+  InMemoryConnector,
+} from '@kbn/actions-plugin/server';
 import type {
   InferenceGetResponse,
   InferenceInferenceEndpointInfo,
 } from '@elastic/elasticsearch/lib/api/types';
 import { PLUGIN_ID } from '../../common/constants';
+import {
+  connectorFromEndpoint,
+  filterPreconfiguredEndpoints,
+  findEndpointsWithoutConnectors,
+} from '../utils/in_memory_connectors';
 
-const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
-const EIS_SERVICE_PROVIDER = 'elastic';
 export const initialDelayMs = 5000; // 5 seconds
 
 export class DynamicConnectorsPoller {
@@ -65,7 +71,8 @@ export class DynamicConnectorsPoller {
       Rx.tap(this.pollBegin.bind(this)),
       Rx.mergeMap(this.fetchInferenceEndpoints.bind(this)),
       Rx.map(this.handleInferenceEndpointsResponse.bind(this)),
-      Rx.map(this.parseInferenceEndpoints.bind(this)),
+      Rx.map(filterPreconfiguredEndpoints),
+      Rx.map(this.generateConnectorsForEndpoints.bind(this)),
       Rx.tap(this.updateDynamicConnectors.bind(this)),
       Rx.delay(this.pollingIntervalMs - initialDelayMs),
       Rx.repeat(),
@@ -93,27 +100,36 @@ export class DynamicConnectorsPoller {
     throw response;
   }
 
-  private parseInferenceEndpoints(endpoints: InferenceInferenceEndpointInfo[]) {
-    return endpoints.filter(
-      (endpoint) =>
-        endpoint.service === EIS_SERVICE_PROVIDER &&
-        // TODO: update this when endpoints have metadata to identify if they are preconfigured
-        endpoint.inference_id.startsWith('.') &&
-        endpoint.task_type === CHAT_COMPLETION_TASK_TYPE
+  private generateConnectorsForEndpoints(
+    preconfiguredEISEndpoints: InferenceInferenceEndpointInfo[]
+  ): InMemoryConnector[] {
+    const inMemoryConnectors = [...this.actions.inMemoryConnectors];
+    const inferenceEndpointsWithoutConnectors = findEndpointsWithoutConnectors(
+      preconfiguredEISEndpoints,
+      inMemoryConnectors
     );
+
+    return inferenceEndpointsWithoutConnectors.map(connectorFromEndpoint);
   }
 
-  private updateDynamicConnectors(preconfiguredEISEndpoints: InferenceInferenceEndpointInfo[]) {
-    if (preconfiguredEISEndpoints.length > 0) {
+  private updateDynamicConnectors(connectorsToAdd: InMemoryConnector[]) {
+    if (connectorsToAdd.length > 0) {
       this.logger.debug(
-        `Found ${preconfiguredEISEndpoints.length} preconfigured EIS endpoints. Syncing dynamic connectors.`
+        `Found ${connectorsToAdd.length} preconfigured EIS endpoints to register as inMemoryConnectors`
       );
-      this.actions.updateDynamicInMemoryConnectors(preconfiguredEISEndpoints);
+      for (const connector of connectorsToAdd) {
+        this.actions.registerDynamicConnector(connector);
+      }
     }
   }
 
   private handleError(error: unknown, _caught$: Observable<unknown>): Observable<never> {
-    this.logger.error(`Error polling inference endpoints for dynamic connectors.`, { error });
+    this.logger.error(`Error polling inference endpoints for dynamic connectors.`);
+    if (Error.isError(error)) {
+      this.logger.error(error);
+    } else if (typeof error === 'object') {
+      this.logger.error(JSON.stringify(error));
+    }
     return Rx.throwError(() => error);
   }
 }
