@@ -8,30 +8,7 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Model } from '@kbn/inference-common';
-import { hostname } from 'os';
 import { buildRunFilterQuery, buildStatsAggregation, SCORES_SORT_ORDER } from '@kbn/evals-common';
-import { calculateEvaluatorStats } from './evaluation_stats';
-import type { DatasetScoreWithStats } from './evaluation_stats';
-
-/**
- * Represents a single evaluation result with explanation for display purposes.
- */
-export interface EvaluationExplanation {
-  /** Index of the example in the dataset */
-  exampleIndex: number;
-  /** Repetition number */
-  repetition: number;
-  /** The score (0-1 scale) */
-  score: number | null;
-  /** Label from the evaluator */
-  label?: string | null;
-  /** Explanation from the evaluator for the score */
-  explanation?: string;
-  /** Reasoning from the evaluator */
-  reasoning?: string;
-  /** Input question/prompt that was evaluated */
-  inputQuestion?: string;
-}
 
 interface BulkDroppedDocument<TDocument> {
   status?: number;
@@ -69,8 +46,7 @@ export interface EvaluationScoreDocument {
     };
   };
 
-  /** Per-example format: one document per evaluated example */
-  example?: {
+  example: {
     id: string;
     index: number;
     dataset: {
@@ -79,44 +55,20 @@ export interface EvaluationScoreDocument {
     };
   };
 
-  task?: {
+  task: {
     trace_id: string | null;
     repetition_index: number;
     model: Model;
   };
 
-  /** Aggregated format: one document per dataset per evaluator */
-  dataset?: {
-    id: string;
-    name: string;
-    examples_count: number;
-  };
-  model?: Model;
-  evaluator_model?: Model;
-  repetitions?: number;
-
   evaluator: {
     name: string;
-    /** Per-example format: single score and metadata */
-    score?: number | null;
-    label?: string | null;
-    explanation?: string | null;
-    metadata?: Record<string, unknown> | null;
-    trace_id?: string | null;
-    model?: Model;
-    /** Aggregated format: stats and scores array */
-    stats?: {
-      mean: number;
-      median: number;
-      std_dev: number;
-      min: number;
-      max: number;
-      count: number;
-      percentage: number;
-    };
-    scores?: number[];
-    /** Explanations for non-perfect scores (score < 1) */
-    low_score_explanations?: EvaluationExplanation[];
+    score: number | null;
+    label: string | null;
+    explanation: string | null;
+    metadata: Record<string, unknown> | null;
+    trace_id: string | null;
+    model: Model;
   };
 
   run_metadata: {
@@ -226,107 +178,6 @@ interface RunStatsAggregations {
   };
 }
 
-/**
- * Transforms evaluation score documents from ES into DatasetScoreWithStats.
- * Handles both (1) per-example documents with example/task/evaluator.score and
- * (2) aggregated documents with dataset/evaluator.stats/evaluator.scores.
- */
-export function parseScoreDocuments(
-  documents: EvaluationScoreDocument[]
-): import('./evaluation_stats').DatasetScoreWithStats[] {
-  const datasetMap = new Map<string, import('./evaluation_stats').DatasetScoreWithStats>();
-
-  for (const doc of documents) {
-    const evaluator = doc.evaluator;
-    if (!evaluator) continue;
-
-    // Path 1: Aggregated format (dataset + evaluator.stats + evaluator.scores)
-    const dataset = doc.dataset;
-    if (dataset && evaluator.stats && evaluator.scores) {
-      if (!datasetMap.has(dataset.id)) {
-        datasetMap.set(dataset.id, {
-          id: dataset.id,
-          name: dataset.name,
-          numExamples: dataset.examples_count,
-          evaluatorScores: new Map(),
-          evaluatorExplanations: new Map(),
-          evaluatorStats: new Map(),
-          experimentId: doc.experiment_id,
-        });
-      }
-      const datasetEntry = datasetMap.get(dataset.id)!;
-      datasetEntry.evaluatorScores.set(evaluator.name, evaluator.scores);
-      datasetEntry.evaluatorStats.set(evaluator.name, {
-        mean: evaluator.stats.mean,
-        median: evaluator.stats.median,
-        stdDev: evaluator.stats.std_dev,
-        min: evaluator.stats.min,
-        max: evaluator.stats.max,
-        count: evaluator.stats.count,
-        percentage: evaluator.stats.percentage,
-      });
-      if (evaluator.low_score_explanations?.length) {
-        datasetEntry.evaluatorExplanations.set(evaluator.name, evaluator.low_score_explanations);
-      }
-      continue;
-    }
-
-    // Path 2: Per-example format (example + task + evaluator.score)
-    const example = doc.example;
-    if (example && evaluator.score != null) {
-      const datasetId = example.dataset.id;
-      const datasetName = example.dataset.name;
-      if (!datasetMap.has(datasetId)) {
-        datasetMap.set(datasetId, {
-          id: datasetId,
-          name: datasetName,
-          numExamples: 0,
-          evaluatorScores: new Map(),
-          evaluatorExplanations: new Map(),
-          evaluatorStats: new Map(),
-          experimentId: doc.experiment_id,
-        });
-      }
-      const datasetEntry = datasetMap.get(datasetId)!;
-      const scores = datasetEntry.evaluatorScores.get(evaluator.name) ?? [];
-      scores.push(evaluator.score);
-      datasetEntry.evaluatorScores.set(evaluator.name, scores);
-      if (evaluator.score < 1 && evaluator.explanation) {
-        const explanations = datasetEntry.evaluatorExplanations.get(evaluator.name) ?? [];
-        explanations.push({
-          exampleIndex: example.index,
-          repetition: doc.task?.repetition_index ?? 0,
-          score: evaluator.score,
-          label: evaluator.label ?? undefined,
-          explanation: evaluator.explanation,
-        });
-        datasetEntry.evaluatorExplanations.set(evaluator.name, explanations);
-      }
-    }
-  }
-
-  // Compute stats for per-example aggregated data (aggregated path already has stats)
-  for (const datasetEntry of datasetMap.values()) {
-    datasetEntry.evaluatorScores.forEach((scores, evaluatorName) => {
-      if (!datasetEntry.evaluatorStats.has(evaluatorName)) {
-        const totalExamples = datasetEntry.numExamples || scores.length;
-        const stats = calculateEvaluatorStats(scores, totalExamples);
-        datasetEntry.evaluatorStats.set(evaluatorName, stats);
-      }
-    });
-    const maxCount = Math.max(
-      datasetEntry.numExamples,
-      ...Array.from(datasetEntry.evaluatorScores.values()).map((s) => s.length),
-      0
-    );
-    if (datasetEntry.numExamples === 0) {
-      datasetEntry.numExamples = maxCount;
-    }
-  }
-
-  return Array.from(datasetMap.values());
-}
-
 const EVALUATIONS_DATA_STREAM_ALIAS = 'kibana-evaluations';
 const EVALUATIONS_DATA_STREAM_WILDCARD = 'kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
@@ -413,22 +264,6 @@ export class EvaluationScoreRepository {
                     id: { type: 'keyword' },
                     family: { type: 'keyword' },
                     provider: { type: 'keyword' },
-                  },
-                },
-                scores: {
-                  type: 'float',
-                  index: false,
-                },
-                low_score_explanations: {
-                  type: 'nested',
-                  properties: {
-                    exampleIndex: { type: 'integer' },
-                    repetition: { type: 'integer' },
-                    score: { type: 'float' },
-                    label: { type: 'keyword' },
-                    explanation: { type: 'text', index: false },
-                    reasoning: { type: 'text', index: false },
-                    inputQuestion: { type: 'text', index: false },
                   },
                 },
               },
@@ -519,25 +354,23 @@ export class EvaluationScoreRepository {
       // Bulk index documents
       if (enrichedDocuments.length > 0) {
         const dropped: Array<BulkDroppedDocument<EvaluationScoreDocument>> = [];
-        const timestamp = new Date().toISOString();
 
         const stats = await this.esClient.helpers.bulk({
           datasource: enrichedDocuments,
           onDocument: (doc) => {
+            // Documents are exported from multiple suites *and* multiple task models/connectors.
+            // Keep IDs unique across that matrix while maintaining deterministic IDs for re-runs.
             const suiteIdPart = doc.suite?.id ?? 'unknown-suite';
-            const taskModelIdPart = doc.task?.model.id ?? 'unknown';
-            const docId =
-              doc.example && doc.task
-                ? [
-                    doc.run_id,
-                    suiteIdPart,
-                    taskModelIdPart,
-                    doc.example.dataset.id,
-                    doc.example.id,
-                    doc.evaluator.name,
-                    doc.task.repetition_index,
-                  ].join('-')
-                : '';
+            const taskModelIdPart = doc.task.model.id;
+            const docId = [
+              doc.run_id,
+              suiteIdPart,
+              taskModelIdPart,
+              doc.example.dataset.id,
+              doc.example.id,
+              doc.evaluator.name,
+              doc.task.repetition_index,
+            ].join('-');
 
             return {
               // Data streams only allow create operations. Use deterministic document IDs so:
@@ -545,12 +378,7 @@ export class EvaluationScoreRepository {
               // - We can treat 409s as a no-op for idempotency
               create: {
                 _index: EVALUATIONS_DATA_STREAM_ALIAS,
-                _id:
-                  doc.example && doc.task
-                    ? docId
-                    : `${doc.environment.hostname}-${doc.model?.id ?? 'unknown'}-${
-                        doc.experiment_id
-                      }-${doc.dataset?.id}-${doc.evaluator.name}-${timestamp}`,
+                _id: docId,
               },
             };
           },
@@ -620,80 +448,6 @@ export class EvaluationScoreRepository {
     }
   }
 
-  /**
-   * Exports aggregated evaluation scores from DatasetScoreWithStats.
-   * Creates one document per dataset per evaluator with stats and scores array.
-   */
-  async exportAggregatedScores({
-    datasetScoresWithStats,
-    runId,
-    model,
-    evaluatorModel,
-  }: {
-    datasetScoresWithStats: DatasetScoreWithStats[];
-    runId: string;
-    model: Model;
-    evaluatorModel: Model;
-  }): Promise<void> {
-    const documents: EvaluationScoreDocument[] = [];
-    const timestamp = new Date().toISOString();
-
-    for (const dataset of datasetScoresWithStats) {
-      for (const [evaluatorName, stats] of dataset.evaluatorStats.entries()) {
-        const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-        if (stats.count === 0) {
-          continue;
-        }
-
-        const lowScoreExplanations = dataset.evaluatorExplanations?.get(evaluatorName) || [];
-
-        documents.push({
-          '@timestamp': timestamp,
-          run_id: runId,
-          experiment_id: dataset.experimentId,
-          dataset: {
-            id: dataset.id,
-            name: dataset.name,
-            examples_count: dataset.numExamples,
-          },
-          model: {
-            id: model.id || 'unknown',
-            family: model.family,
-            provider: model.provider,
-          },
-          evaluator_model: evaluatorModel,
-          evaluator: {
-            name: evaluatorName,
-            stats: {
-              mean: stats.mean,
-              median: stats.median,
-              std_dev: stats.stdDev,
-              min: stats.min,
-              max: stats.max,
-              count: stats.count,
-              percentage: stats.percentage,
-            },
-            scores,
-            low_score_explanations:
-              lowScoreExplanations.length > 0 ? lowScoreExplanations.slice(0, 10) : undefined,
-          },
-          run_metadata: {
-            git_branch: null,
-            git_commit_sha: null,
-            total_repetitions: stats.count,
-          },
-          environment: {
-            hostname: hostname(),
-          },
-        });
-      }
-    }
-
-    if (documents.length > 0) {
-      await this.exportScores(documents);
-    }
-  }
-
   async getStatsByRunId(
     runId: string,
     options?: { taskModelId?: string; suiteId?: string }
@@ -753,10 +507,8 @@ export class EvaluationScoreRepository {
 
       return {
         stats,
-        taskModel: firstDoc.task?.model ??
-          firstDoc.model ?? { id: 'unknown', family: '', provider: '' },
-        evaluatorModel: firstDoc.evaluator?.model ??
-          firstDoc.evaluator_model ?? { id: 'unknown', family: '', provider: '' },
+        taskModel: firstDoc.task.model,
+        evaluatorModel: firstDoc.evaluator.model,
         totalRepetitions: firstDoc.run_metadata?.total_repetitions ?? 1,
       };
     } catch (error) {
