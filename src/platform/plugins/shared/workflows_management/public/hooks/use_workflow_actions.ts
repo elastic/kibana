@@ -7,20 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQueryClient } from '@kbn/react-query';
-import type { WorkflowDetailDto, WorkflowListDto } from '@kbn/workflows';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type {
+  RunStepCommand,
+  RunWorkflowResponseDto,
+  WorkflowDetailDto,
+  WorkflowListDto,
+} from '@kbn/workflows';
 import { useRunWorkflow } from '@kbn/workflows-ui';
-import { useCloneWorkflow } from './use_clone_workflow';
-import { useDeleteWorkflows } from './use_delete_workflows';
-import { useRunWorkflowStep } from './use_run_workflow_step';
+import { useKibana } from './use_kibana';
 import { useTelemetry } from './use_telemetry';
-import { useUpdateWorkflow } from './use_update_workflow';
+
+type HttpError = IHttpFetchError<ResponseErrorBody>;
+
+export interface UpdateWorkflowParams {
+  id: string;
+  workflow: Partial<WorkflowDetailDto>;
+  isBulkAction?: boolean;
+  bulkActionCount?: number;
+  /**
+   * When true, the mutation will not refetch queries after a successful update.
+   * Useful for bulk operations where the caller handles a single refetch at the end.
+   */
+  skipRefetch?: boolean;
+}
+
+interface OptimisticContext {
+  previousData: Map<string, WorkflowListDto>;
+  previousWorkflowDetail?: WorkflowDetailDto;
+}
 
 export const useWorkflowActions = () => {
-  const telemetry = useTelemetry();
   const queryClient = useQueryClient();
+  const { http } = useKibana().services;
+  const telemetry = useTelemetry();
 
-  const updateWorkflow = useUpdateWorkflow({
+  const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
+    mutationKey: ['PUT', 'workflows', 'id'],
+    mutationFn: ({ id, workflow }: UpdateWorkflowParams) => {
+      return http.put<void>(`/api/workflows/${id}`, {
+        body: JSON.stringify(workflow),
+      });
+    },
     onMutate: async ({ id, workflow }) => {
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
 
@@ -65,7 +94,7 @@ export const useWorkflowActions = () => {
       }
 
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      telemetry?.reportWorkflowUpdated({
+      telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
         hasValidationErrors: false,
@@ -79,7 +108,7 @@ export const useWorkflowActions = () => {
       });
     },
     onSuccess: (_, variables) => {
-      telemetry?.reportWorkflowUpdated({
+      telemetry.reportWorkflowUpdated({
         workflowId: variables.id,
         workflowUpdate: variables.workflow,
         hasValidationErrors: false,
@@ -99,7 +128,13 @@ export const useWorkflowActions = () => {
     },
   });
 
-  const deleteWorkflows = useDeleteWorkflows({
+  const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
+    mutationKey: ['DELETE', 'workflows'],
+    mutationFn: ({ ids }: { ids: string[] }) => {
+      return http.delete(`/api/workflows`, {
+        body: JSON.stringify({ ids }),
+      });
+    },
     onMutate: async ({ ids }) => {
       await queryClient.cancelQueries({ queryKey: ['workflows'] });
 
@@ -134,7 +169,7 @@ export const useWorkflowActions = () => {
 
       const errorObj = err instanceof Error ? err : new Error(String(err));
       variables.ids.forEach((workflowId) => {
-        telemetry?.reportWorkflowDeleted({
+        telemetry.reportWorkflowDeleted({
           workflowIds: [workflowId],
           isBulkDelete: variables.ids.length > 1,
           origin: 'workflow_list',
@@ -144,7 +179,7 @@ export const useWorkflowActions = () => {
     },
     onSuccess: (_, variables) => {
       variables.ids.forEach((workflowId) => {
-        telemetry?.reportWorkflowDeleted({
+        telemetry.reportWorkflowDeleted({
           workflowIds: [workflowId],
           isBulkDelete: variables.ids.length > 1,
           origin: 'workflow_list',
@@ -160,7 +195,7 @@ export const useWorkflowActions = () => {
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
-      telemetry?.reportWorkflowRunInitiated({
+      telemetry.reportWorkflowRunInitiated({
         workflowId: variables.id,
         hasInputs: inputCount > 0,
         inputCount,
@@ -177,7 +212,7 @@ export const useWorkflowActions = () => {
       const inputCount = Object.keys(variables.inputs || {}).length;
       const errorObj = err instanceof Error ? err : new Error(String(err));
 
-      telemetry?.reportWorkflowRunInitiated({
+      telemetry.reportWorkflowRunInitiated({
         workflowId: variables.id,
         hasInputs: inputCount > 0,
         inputCount,
@@ -188,9 +223,15 @@ export const useWorkflowActions = () => {
     },
   });
 
-  const runIndividualStep = useRunWorkflowStep({
+  const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
+    mutationKey: ['POST', 'workflows', 'stepId', 'run'],
+    mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
+      return http.post(`/api/workflows/testStep`, {
+        body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
+      });
+    },
     onSuccess: ({ workflowExecutionId }, variables) => {
-      telemetry?.reportWorkflowStepTestRunInitiated({
+      telemetry.reportWorkflowStepTestRunInitiated({
         workflowYaml: variables.workflowYaml,
         stepId: variables.stepId,
         origin: 'workflow_detail',
@@ -201,7 +242,7 @@ export const useWorkflowActions = () => {
     },
     onError: (err, variables) => {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      telemetry?.reportWorkflowStepTestRunInitiated({
+      telemetry.reportWorkflowStepTestRunInitiated({
         workflowYaml: variables.workflowYaml,
         stepId: variables.stepId,
         origin: 'workflow_detail',
@@ -210,9 +251,13 @@ export const useWorkflowActions = () => {
     },
   });
 
-  const cloneWorkflow = useCloneWorkflow({
+  const cloneWorkflow = useMutation<WorkflowDetailDto, HttpError, { id: string }>({
+    mutationKey: ['POST', 'workflows', 'id', 'clone'],
+    mutationFn: ({ id }: { id: string }) => {
+      return http.post<WorkflowDetailDto>(`/api/workflows/${id}/clone`);
+    },
     onSuccess: (clonedWorkflow, variables) => {
-      telemetry?.reportWorkflowCloned({
+      telemetry.reportWorkflowCloned({
         sourceWorkflowId: variables.id,
         newWorkflowId: clonedWorkflow.id,
         origin: 'workflow_list',
@@ -223,7 +268,7 @@ export const useWorkflowActions = () => {
     },
     onError: (err, variables) => {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      telemetry?.reportWorkflowCloned({
+      telemetry.reportWorkflowCloned({
         sourceWorkflowId: variables.id,
         origin: 'workflow_list',
         error: errorObj,
