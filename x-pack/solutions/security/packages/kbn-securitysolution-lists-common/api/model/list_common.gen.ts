@@ -59,6 +59,25 @@ export const ListDescription = NonEmptyString;
 export type ListMetadata = z.infer<typeof ListMetadata>;
 export const ListMetadata = z.object({}).catchall(z.unknown());
 
+<<<<<<< HEAD
+=======
+/**
+ * The document version number.
+ */
+export type ListVersion = z.infer<typeof ListVersion>;
+export const ListVersion = z.number().int().min(1);
+
+/**
+  * The version id, normally returned by the API when the document is retrieved. Use it ensure updates are done against the latest version.
+
+  */
+export type ListVersionId = z.infer<typeof ListVersionId>;
+export const ListVersionId = z.string();
+
+/**
+ * Value list item's identifier.
+ */
+>>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
 export type ListItemId = z.infer<typeof ListItemId>;
 export const ListItemId = NonEmptyString;
 

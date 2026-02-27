@@ -6,14 +6,18 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+<<<<<<< HEAD
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   DeserializerOrUndefined,
+=======
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
+>>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
   IdOrUndefined,
   ListItemSchema,
   MetaOrUndefined,
   RefreshWithWaitFor,
-  SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
@@ -22,9 +26,7 @@ import { transformListItemToElasticQuery } from '../utils';
 import { IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemOptions {
-  deserializer: DeserializerOrUndefined;
   id: IdOrUndefined;
-  serializer: SerializerOrUndefined;
   listId: string;
   type: Type;
   value: string;
@@ -38,9 +40,7 @@ export interface CreateListItemOptions {
 }
 
 export const createListItem = async ({
-  deserializer,
   id,
-  serializer,
   listId,
   type,
   value,
@@ -58,15 +58,13 @@ export const createListItem = async ({
     '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user,
-    deserializer,
     list_id: listId,
     meta,
-    serializer,
     tie_breaker_id: tieBreakerId,
     updated_at: createdAt,
     updated_by: user,
   };
-  const elasticQuery = transformListItemToElasticQuery({ serializer, type, value });
+  const elasticQuery = transformListItemToElasticQuery({ type, value });
   if (elasticQuery != null) {
     const body: IndexEsListItemSchema = {
       ...baseBody,

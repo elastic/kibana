@@ -39,8 +39,6 @@ describe('create_list', () => {
   test('it returns a list as expected with the id changed out for the elastic id and seralizer and deseralizer set', async () => {
     const options: CreateListOptions = {
       ...getCreateListOptionsMock(),
-      deserializer: '{{value}}',
-      serializer: '(?<value>)',
     };
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.create.mockResponse(
@@ -50,9 +48,7 @@ describe('create_list', () => {
     const list = await createList({ ...options, esClient });
     const expected: ListSchema = {
       ...getListResponseMock(),
-      deserializer: '{{value}}',
       id: 'elastic-id-123',
-      serializer: '(?<value>)',
     };
     expect(list).toEqual(expected);
   });

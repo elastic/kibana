@@ -35,10 +35,15 @@ Required when importing a new list that is `list_id` is not specified.
 
       */
   type: ListType.optional(),
+<<<<<<< HEAD
   serializer: z.string().optional(),
   deserializer: z.string().optional(),
   /**
    * Determines when changes made by the request are made visible to search
+=======
+  /**
+   * Determines when changes made by the request are made visible to search.
+>>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
    */
   refresh: z.enum(['true', 'false', 'wait_for']).optional(),
 });

@@ -6,7 +6,11 @@
  */
 
 import Mustache from 'mustache';
+<<<<<<< HEAD
 import { DeserializerOrUndefined, type } from '@kbn/securitysolution-io-ts-list-types';
+=======
+import { type } from '@kbn/securitysolution-io-ts-list-types';
+>>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
 
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { esDataTypeGeoPointRange, esDataTypeRange } from '../../schemas/common/schemas';
@@ -32,7 +36,6 @@ export const findSourceValue = (
         return deserializeValue({
           defaultDeserializer: DEFAULT_GEO_POINT,
           defaultValueDeserializer: DEFAULT_VALUE,
-          deserializer: listItem.deserializer,
           value,
         });
       }
@@ -44,7 +47,6 @@ export const findSourceValue = (
         return deserializeValue({
           defaultDeserializer: DEFAULT_LTE_GTE,
           defaultValueDeserializer: DEFAULT_VALUE,
-          deserializer: listItem.deserializer,
           value,
         });
       }
@@ -52,7 +54,6 @@ export const findSourceValue = (
         return deserializeValue({
           defaultDeserializer: DEFAULT_DATE_RANGE,
           defaultValueDeserializer: DEFAULT_VALUE,
-          deserializer: listItem.deserializer,
           value,
         });
       }
@@ -60,7 +61,6 @@ export const findSourceValue = (
         return deserializeValue({
           defaultDeserializer: DEFAULT_VALUE,
           defaultValueDeserializer: DEFAULT_VALUE,
-          deserializer: listItem.deserializer,
           value,
         });
       }
@@ -71,32 +71,24 @@ export const findSourceValue = (
 };
 
 export const deserializeValue = ({
-  deserializer,
   defaultValueDeserializer,
   defaultDeserializer,
   value,
 }: {
-  deserializer: DeserializerOrUndefined;
   defaultValueDeserializer: string;
   defaultDeserializer: string;
   value: string | object | number | undefined;
 }): string | null => {
   if (esDataTypeRange.is(value)) {
-    const template =
-      deserializer?.includes('gte') && deserializer?.includes('lte')
-        ? deserializer
-        : defaultDeserializer;
+    const template = defaultDeserializer;
     const variables = { gte: value.gte, lte: value.lte };
     return Mustache.render(template, variables);
   } else if (esDataTypeGeoPointRange.is(value)) {
-    const template =
-      deserializer?.includes('lat') && deserializer?.includes('lon')
-        ? deserializer
-        : defaultDeserializer;
+    const template = defaultDeserializer;
     const variables = { lat: value.lat, lon: value.lon };
     return Mustache.render(template, variables);
   } else if (typeof value === 'string') {
-    const template = deserializer?.includes('value') ? deserializer : defaultValueDeserializer;
+    const template = defaultValueDeserializer;
     const variables = { value };
     return Mustache.render(template, variables);
   } else {

@@ -31,8 +31,11 @@ export const CreateListRequestBody = z.object({
   name: ListName,
   description: ListDescription,
   type: ListType,
+<<<<<<< HEAD
   serializer: z.string().optional(),
   deserializer: z.string().optional(),
+=======
+>>>>>>> 18aae8e0dec ([Security Solution] [Detections] remove references to serializer / deserializer parameter (#250111))
   meta: ListMetadata.optional(),
   version: z.number().int().min(1).optional().default(1),
 });
