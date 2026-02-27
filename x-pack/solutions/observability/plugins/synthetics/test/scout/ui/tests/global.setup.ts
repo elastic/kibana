@@ -6,6 +6,7 @@
  */
 
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
+import { testData } from '../fixtures';
 
 globalSetupHook(
   'Ingest Synthetics test data',

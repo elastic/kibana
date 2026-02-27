@@ -11,17 +11,20 @@ import { test } from '../fixtures';
 
 test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => {
   const NEW_LOCATION_LABEL = 'Updated Test Location';
+  const FLEET_POLICY_NAME = 'Test fleet policy';
   let locationId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.deletePrivateLocations();
     await syntheticsServices.deleteMonitors();
     await syntheticsServices.deleteSyntheticsIntegrations();
+    await syntheticsServices.createFleetAgentPolicy(FLEET_POLICY_NAME);
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.deletePrivateLocations();
     await syntheticsServices.deleteMonitors();
+    await syntheticsServices.deleteSyntheticsIntegrations();
+    await syntheticsServices.deletePrivateLocations();
   });
 
   test('manages private locations lifecycle', async ({
@@ -35,23 +38,12 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await pageObjects.syntheticsApp.navigateToSettings();
     });
 
-    await test.step('create agent policy', async () => {
-      await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
-      await page.click('text=No agent policies found');
-      await page.click('text=Create agent policy');
-      await page.fill('[placeholder="Choose a name"]', 'Test fleet policy');
-      await page.click('text=Collect system logs and metrics');
-      await page.click('div[role="dialog"] button:has-text("Create agent policy")');
-      await pageObjects.syntheticsApp.waitForLoadingToFinish();
-    });
-
     await test.step('create private location', async () => {
-      await pageObjects.syntheticsApp.navigateToSettings();
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
       await page.click('button:has-text("Create location")');
       await page.testSubj.fill('syntheticsLocationFormFieldText', 'Test private');
       await page.click('[aria-label="Select agent policy"]');
-      await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
+      await page.click(`button[role="option"]:has-text("${FLEET_POLICY_NAME}Agents: 0")`);
       await page.click('.euiComboBox__inputWrap');
       await page.fill('[aria-label="Tags"]', 'Basement');
       await page.press('[aria-label="Tags"]', 'Enter');
@@ -84,14 +76,14 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
     await test.step('verify Fleet integration', async () => {
       await pageObjects.syntheticsApp.navigateToFleetIntegrationPolicies();
       await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}-default"`);
-      await expect(
-        page.getByText('This package policy is managed by the Synthetics app.')
-      ).toBeVisible();
+      // there is "ghost" element with the same locator, so we need to specify the first one
+      // eslint-disable-next-line playwright/no-nth-methods
+      await expect(page.testSubj.locator('syntheticsManagedPolicyCallout').first()).toBeVisible();
     });
 
     await test.step('edit button leads to Synthetics edit page', async () => {
       await page.click('text="Edit in Synthetics"');
-      await expect(page.getByText('Edit Monitor')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Edit Monitor' })).toBeVisible();
       await expect(page.testSubj.locator('syntheticsMonitorConfigName')).toHaveValue(
         'test-monitor'
       );

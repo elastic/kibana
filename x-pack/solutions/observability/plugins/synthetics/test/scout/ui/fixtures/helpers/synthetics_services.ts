@@ -60,6 +60,7 @@ export interface SyntheticsServicesFixture {
   deleteSyntheticsIntegrations: () => Promise<void>;
   deleteSyntheticsPackagePolicyByName: (name: string) => Promise<void>;
   deleteSettingsAndConnectors: () => Promise<void>;
+  createFleetAgentPolicy: (name: string) => Promise<void>;
   enable: () => Promise<void>;
   ensurePrivateLocationExists: () => Promise<PrivateLocation>;
   getDefaultLocation: () => Promise<PrivateLocation>;
@@ -127,7 +128,7 @@ const defaultBrowserMonitorData = {
 
 const projectMonitorBrowser = (
   name: string,
-  privateLocationId: string,
+  privateLocationLabel: string,
   config?: Record<string, unknown>
 ) => ({
   monitors: [
@@ -136,7 +137,7 @@ const projectMonitorBrowser = (
       throttling: { download: 5, upload: 3, latency: 20 },
       schedule: 10,
       locations: [],
-      privateLocations: [privateLocationId],
+      privateLocations: [privateLocationLabel],
       params: {},
       playwrightOptions: { headless: true, chromiumSandbox: false },
       custom_heartbeat_id: 'check-if-title-is-present',
@@ -197,15 +198,27 @@ function createSyntheticsServices(
     config?: Record<string, unknown>
   ) => {
     const location = await getDefaultLocation();
-    await kbnClient.request({
+    const response = await kbnClient.request({
       path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
         '{projectName}',
         projectName
       ),
       method: 'PUT',
-      body: projectMonitorBrowser(name, location.id, config),
+      body: projectMonitorBrowser(name, location.label, config),
       headers: PUBLIC_API_HEADERS,
     });
+    const { failedMonitors } = response.data as {
+      createdMonitors: string[];
+      updatedMonitors: string[];
+      failedMonitors: Array<{ id: string; reason: string }>;
+    };
+    if (failedMonitors.length > 0) {
+      throw new Error(
+        `addMonitorProject failed for: ${failedMonitors
+          .map((m) => `${m.id} — ${m.reason}`)
+          .join(', ')}`
+      );
+    }
   };
 
   const addMonitorSimple = async (
@@ -430,6 +443,25 @@ function createSyntheticsServices(
     });
   };
 
+  const createFleetAgentPolicy = async (name: string): Promise<void> => {
+    const { data } = await kbnClient.request({
+      path: '/api/fleet/agent_policies',
+      method: 'GET',
+      query: { kuery: `ingest-agent-policies.name:"${name}"`, perPage: 1 },
+      headers: PUBLIC_API_HEADERS,
+    });
+    const exists = ((data as any)?.items ?? []).length > 0;
+    if (exists) {
+      return;
+    }
+    await kbnClient.request({
+      path: '/api/fleet/agent_policies',
+      method: 'POST',
+      body: { name, namespace: 'default', monitoring_enabled: ['logs', 'metrics'] },
+      headers: PUBLIC_API_HEADERS,
+    });
+  };
+
   const ensurePrivateLocationExists = async (): Promise<PrivateLocation> => {
     const existing = await getPrivateLocations();
     if (existing.length > 0) {
@@ -524,6 +556,7 @@ function createSyntheticsServices(
     deletePrivateLocations,
     deleteSyntheticsIntegrations,
     deleteSyntheticsPackagePolicyByName,
+    createFleetAgentPolicy,
     deleteSettingsAndConnectors,
     enable,
     ensurePrivateLocationExists,

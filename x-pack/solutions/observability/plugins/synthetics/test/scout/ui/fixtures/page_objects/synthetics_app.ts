@@ -56,7 +56,7 @@ export class SyntheticsAppPage {
 
   async navigateToFleetIntegrationPolicies() {
     await this.page.goto(this.kbnUrl.get('/app/integrations/detail/synthetics/policies'));
-    await expect(this.page.getByText('Elastic Synthetics')).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Elastic Synthetics' })).toBeVisible();
   }
 
   async selectMonitorFromSelector(monitorName: string) {
@@ -288,8 +288,9 @@ export class SyntheticsAppPage {
 
   async navigateToEditMonitor(monitorName: string) {
     const monitorRow = await this.getMonitorRowLocator(monitorName);
-    await monitorRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
-    await this.page.testSubj.click('syntheticsMonitorEditAction');
+    await monitorRow.hover();
+    await monitorRow.locator('[data-test-subj="syntheticsMonitorEditAction"]').click();
+    await this.ensureIsOnMonitorConfigPage();
   }
 
   async adjustRows() {

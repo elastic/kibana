@@ -16,6 +16,7 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.enable();
     await syntheticsServices.deleteMonitors();
+    await syntheticsServices.ensurePrivateLocationExists();
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
