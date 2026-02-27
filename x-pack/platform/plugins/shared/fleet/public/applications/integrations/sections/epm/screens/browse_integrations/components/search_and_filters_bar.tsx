@@ -25,7 +25,8 @@ import {
   mathWithUnits,
   useEuiTheme,
 } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme, EuiSelectableOption } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';
@@ -35,9 +36,8 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import type { CategoryFacet } from '../../home/category_facets';
 
-import type { EuiSelectableOption } from '@elastic/eui';
-
 import { useUrlFilters, useAddUrlFilters } from '../hooks/url_filters';
+import { useUrlCategories, useSetUrlCategory } from '../hooks/url_categories';
 import type {
   BrowseIntegrationSortType,
   IntegrationStatusFilterType,
@@ -343,22 +343,15 @@ const SignalFilter: React.FC<{
 };
 
 interface SearchBarProps {
-  selectedCategory?: string;
   categories?: CategoryFacet[];
   availableSubCategories?: CategoryFacet[];
-  selectedSubCategory?: string;
-  onCategoryBadgeDismiss?: () => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
-  selectedCategory,
-  categories,
-  availableSubCategories,
-  selectedSubCategory,
-  onCategoryBadgeDismiss,
-}) => {
+const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategories }) => {
   const urlFilters = useUrlFilters();
   const addUrlFilters = useAddUrlFilters();
+  const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
+  const setUrlCategory = useSetUrlCategory();
   const styles = useMemoCss(searchBarStyles);
 
   const [searchTerms, setSearchTerms] = useState(urlFilters.q);
@@ -391,6 +384,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
     return selectedCategoryTitle ?? '';
   }, [availableSubCategories, selectedCategoryTitle, selectedSubCategory]);
+
+  const handleCategoryBadgeDismiss = useCallback(() => {
+    if (selectedSubCategory) {
+      setUrlCategory({ category: selectedCategory });
+    } else {
+      setUrlCategory({ category: '' });
+    }
+  }, [selectedCategory, selectedSubCategory, setUrlCategory]);
 
   return (
     <EuiFieldSearch
@@ -425,7 +426,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           >
             <button
               css={styles.clearButton}
-              onClick={onCategoryBadgeDismiss}
+              onClick={handleCategoryBadgeDismiss}
               aria-label={i18n.translate(
                 'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.removeCategoryFilter',
                 { defaultMessage: 'Remove filter' }
@@ -458,25 +459,19 @@ const searchBarStyles = {
 const MAX_VISIBLE_SUBCATEGORIES = 6;
 
 interface SearchAndFiltersBarProps {
-  selectedCategory?: string;
   categories?: CategoryFacet[];
   availableSubCategories?: CategoryFacet[];
-  selectedSubCategory?: string;
-  onSubCategoryClick: (subCategoryId: string) => void;
-  onCategoryBadgeDismiss: () => void;
 }
 
 export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
-  selectedCategory,
   categories,
   availableSubCategories,
-  selectedSubCategory,
-  onSubCategoryClick,
-  onCategoryBadgeDismiss,
 }) => {
   const { euiTheme } = useEuiTheme();
   const urlFilters = useUrlFilters();
   const addUrlFilters = useAddUrlFilters();
+  const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
+  const setUrlCategory = useSetUrlCategory();
 
   const [isSubCategoryPopoverOpen, setIsSubCategoryPopoverOpen] = useState(false);
 
@@ -501,6 +496,13 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
     [addUrlFilters]
   );
 
+  const handleSubCategoryClick = useCallback(
+    (subCategoryId: string) => {
+      setUrlCategory({ category: selectedCategory, subCategory: subCategoryId });
+    },
+    [selectedCategory, setUrlCategory]
+  );
+
   const visibleSubCategories = useMemo(
     () => availableSubCategories?.slice(0, MAX_VISIBLE_SUBCATEGORIES),
     [availableSubCategories]
@@ -511,7 +513,7 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
       <EuiContextMenuItem
         key={subCategory.id}
         onClick={() => {
-          onSubCategoryClick(subCategory.id);
+          handleSubCategoryClick(subCategory.id);
           setIsSubCategoryPopoverOpen(false);
         }}
         icon={selectedSubCategory === subCategory.id ? 'check' : 'empty'}
@@ -519,19 +521,13 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
         {subCategory.title}
       </EuiContextMenuItem>
     ));
-  }, [availableSubCategories, onSubCategoryClick, selectedSubCategory]);
+  }, [availableSubCategories, handleSubCategoryClick, selectedSubCategory]);
 
   return (
     <StickyFlexItem>
       <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
         <EuiFlexItem grow={true}>
-          <SearchBar
-            selectedCategory={selectedCategory}
-            categories={categories}
-            availableSubCategories={availableSubCategories}
-            selectedSubCategory={selectedSubCategory}
-            onCategoryBadgeDismiss={onCategoryBadgeDismiss}
-          />
+          <SearchBar categories={categories} availableSubCategories={availableSubCategories} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup compressed>
@@ -580,7 +576,7 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
                     color={isSelected ? 'accent' : 'text'}
                     fill={isSelected}
                     aria-label={subCategory.title}
-                    onClick={() => onSubCategoryClick(subCategory.id)}
+                    onClick={() => handleSubCategoryClick(subCategory.id)}
                     size="s"
                   >
                     {subCategory.title}
