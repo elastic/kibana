@@ -349,40 +349,6 @@ describe('setupUpgradeManagedPackagePolicies', () => {
     expect(hasNewDeprecations).not.toHaveBeenCalled();
   });
 
-  it('should skip deprecation gate when keep_policies_up_to_date is false', async () => {
-    const soClient = savedObjectsClientMock.create();
-
-    (getInstallations as jest.Mock).mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: 'custom-pkg',
-          attributes: {
-            name: 'custom_package',
-            version: '2.0.0',
-            install_status: 'installed',
-            keep_policies_up_to_date: false,
-          },
-        },
-      ],
-    });
-
-    (packagePolicyService.fetchAllItems as jest.Mock).mockResolvedValueOnce(
-      (async function* () {
-        yield [
-          {
-            id: 'policy-1',
-            package: { name: 'custom_package', version: '1.0.0' },
-          },
-        ];
-      })()
-    );
-
-    await setupUpgradeManagedPackagePolicies(soClient);
-
-    expect(hasNewDeprecations).not.toHaveBeenCalled();
-    expect(soClient.update).not.toHaveBeenCalled();
-  });
-
   it('should not gate autoUpgradePoliciesPackages even with deprecations', async () => {
     const soClient = savedObjectsClientMock.create();
 

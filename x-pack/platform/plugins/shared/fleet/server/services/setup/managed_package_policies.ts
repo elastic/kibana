@@ -14,7 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import type { UpgradePackagePolicyDryRunResponseItem } from '../../../common/types';
-import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../common/constants';
+import { AUTO_UPDATE_PACKAGES } from '../../../common/constants';
 
 import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
@@ -112,19 +112,19 @@ export const setupUpgradeManagedPackagePolicies = async (soClient: SavedObjectsC
       }
     }
     if (shouldRegisterTask) {
-      const isAutoUpgrade = AUTO_UPGRADE_POLICIES_PACKAGES.some(
+      // AUTO_UPDATE_PACKAGES are stack-aligned and they shouldn't require user review
+      const stackAlignedPackages = AUTO_UPDATE_PACKAGES.some(
         (pkg) => pkg.name === installedPackage.name
       );
-      // If the package is not an auto-upgrade package and the keep_policies_up_to_date flag is set to true, check the deprecation gate
-      //  when there are new deprecations, the user should explicitly accept or decline the upgrade.
-      if (!isAutoUpgrade && installedPackage.keep_policies_up_to_date) {
-        const gateResult = await checkDeprecationGate(
+      // If the package is not an auto-update package, check the deprecation gate
+      if (!stackAlignedPackages) {
+        const isUpgradeAccepted = await checkUserReview(
           soClient,
           soId,
           installedPackage,
           oldPolicyVersion
         );
-        if (gateResult === 'blocked') {
+        if (!isUpgradeAccepted) {
           continue;
         }
       }
@@ -235,12 +235,12 @@ async function clearPendingUpgradeReview(soClient: SavedObjectsClientContract, p
   }
 }
 
-async function checkDeprecationGate(
+async function checkUserReview(
   soClient: SavedObjectsClientContract,
   soId: string,
   installedPackage: Installation,
   oldPolicyVersion: string | undefined
-): Promise<'allowed' | 'blocked'> {
+): Promise<boolean> {
   const logger = appContextService.getLogger();
   const review = installedPackage.pending_upgrade_review;
 
@@ -249,24 +249,24 @@ async function checkDeprecationGate(
       logger.debug(
         `User accepted policy upgrade for ${installedPackage.name}@${installedPackage.version}, proceeding`
       );
-      return 'allowed';
+      return true;
     }
 
     if (review.action === 'declined') {
       logger.debug(
         `Skipping policy upgrade for ${installedPackage.name}: user declined upgrade to ${installedPackage.version}`
       );
-      return 'blocked';
+      return false;
     }
 
     logger.debug(
       `Skipping policy upgrade for ${installedPackage.name}: pending user review for ${installedPackage.version}`
     );
-    return 'blocked';
+    return false;
   }
 
   if (!oldPolicyVersion) {
-    return 'allowed';
+    return true;
   }
 
   try {
@@ -291,7 +291,7 @@ async function checkDeprecationGate(
         `Blocking policy auto-upgrade for ${installedPackage.name}@${installedPackage.version}: new deprecations detected, awaiting user review`
       );
       await writePendingUpgradeReview(soClient, soId, installedPackage, deprecationDetails);
-      return 'blocked';
+      return false;
     }
   } catch (error) {
     logger.warn(
@@ -299,7 +299,7 @@ async function checkDeprecationGate(
     );
   }
 
-  return 'allowed';
+  return true;
 }
 
 async function writePendingUpgradeReview(
