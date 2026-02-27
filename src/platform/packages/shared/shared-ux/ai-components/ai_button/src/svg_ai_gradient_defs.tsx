@@ -8,34 +8,25 @@
  */
 
 import React from 'react';
+import type { AiGradientColors, SvgLinearGradientGeometry } from './gradient_types';
 
-export interface SvgAiGradientDefsProps {
+const ICON_GRADIENT_START_OFFSET = 16;
+const ICON_GRADIENT_END_OFFSET = 83;
+
+export interface SvgAiGradientDefsProps extends SvgLinearGradientGeometry {
   readonly gradientId: string;
-  readonly startColor: string;
-  readonly endColor: string;
-  readonly startOffsetPercent?: number;
-  readonly endOffsetPercent?: number;
-  readonly gradientUnits?: 'objectBoundingBox' | 'userSpaceOnUse';
-  readonly x1?: string;
-  readonly y1?: string;
-  readonly x2?: string;
-  readonly y2?: string;
+  readonly colors: AiGradientColors;
 }
 
 export const SvgAiGradientDefs = ({
   gradientId,
-  startColor,
-  endColor,
-  startOffsetPercent = 0,
-  endOffsetPercent = 100,
-  gradientUnits = 'objectBoundingBox',
-  x1 = '0',
-  y1 = '0',
-  x2 = '1',
-  y2 = '1',
-}: SvgAiGradientDefsProps) => {
-  // SVG icons need gradient defs to fill vector paths with multiple colors.
-  // CSS/background gradients style boxes, but defs color the actual icon shape.
+  colors,
+  gradientUnits,
+  x1,
+  y1,
+  x2,
+  y2,
+}: SvgAiGradientDefsProps): JSX.Element => {
   return (
     <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: 'absolute' }}>
       <defs>
@@ -47,8 +38,8 @@ export const SvgAiGradientDefs = ({
           y2={y2}
           gradientUnits={gradientUnits}
         >
-          <stop offset={`${startOffsetPercent}%`} stopColor={startColor} />
-          <stop offset={`${endOffsetPercent}%`} stopColor={endColor} />
+          <stop offset={`${ICON_GRADIENT_START_OFFSET}%`} stopColor={colors.startColor} />
+          <stop offset={`${ICON_GRADIENT_END_OFFSET}%`} stopColor={colors.endColor} />
         </linearGradient>
       </defs>
     </svg>

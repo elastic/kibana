@@ -30,24 +30,15 @@ export const AiButtonBase = (props: AiButtonProps) => {
   const { buttonCss, labelCss } = useAiButtonGradientStyles({
     isFilled,
     variant,
+    iconOnly: props.iconOnly,
   });
-  const { gradientId, iconGradientCss, stops, defs } = useSvgAiGradient({
-    isFilled,
-    variant,
-  });
+  const { gradientId, iconGradientCss, colors, defs } = useSvgAiGradient({ variant });
 
   // Render local SVG <defs> so icon paths can reference url(#gradientId).
-  // Defs are rendered before each button/icon to guarantee the id exists in the same DOM tree.
-  const svgGradientDefs = iconGradientCss ? (
-    <SvgAiGradientDefs
-      gradientId={gradientId}
-      startColor={stops.startColor}
-      endColor={stops.endColor}
-      startOffsetPercent={stops.startOffsetPercent}
-      endOffsetPercent={stops.endOffsetPercent}
-      {...defs}
-    />
-  ) : null;
+  const svgGradientDefs =
+    iconGradientCss && defs ? (
+      <SvgAiGradientDefs gradientId={gradientId} colors={colors} {...defs} />
+    ) : null;
 
   if (props.iconOnly === true) {
     const {
