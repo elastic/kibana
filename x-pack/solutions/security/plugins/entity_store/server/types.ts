@@ -26,6 +26,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManager } from './domain/asset_manager';
 import type { FeatureFlags } from './infra/feature_flags';
+import type { CcsLogsExtractionClient } from './domain/ccs_logs_extraction_client';
 import type { LogsExtractionClient } from './domain/logs_extraction_client';
 import type { CRUDClient } from './domain/crud_client';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
@@ -49,9 +50,11 @@ export interface EntityStoreApiRequestHandlerContext {
   logger: Logger;
   assetManager: AssetManager;
   crudClient: CRUDClient;
+  ccsLogsExtractionClient: CcsLogsExtractionClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
   security: SecurityPluginStart;
+  namespace: string;
 }
 
 export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{

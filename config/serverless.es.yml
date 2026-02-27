@@ -3,10 +3,6 @@
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'search']
 
-# Cross Project Search
-cps.enabled: true
-cps.cpsEnabled: false
-
 xpack.search.enabled: false
 xpack.osquery.enabled: false
 
