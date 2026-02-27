@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import { merge, isPlainObject } from 'lodash';
+import { isPlainObject, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
@@ -17,6 +17,7 @@ import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
 import type {
+  AnyObject,
   EnhancedAlertEvent,
   ESClusterInfo,
   ESLicense,
@@ -24,23 +25,22 @@ import type {
   ExtraInfo,
   ListTemplate,
   Nullable,
-  ResponseActionsRuleTelemetryTemplate,
+  PrebuiltRuleCustomizations,
   ResponseActionRules,
+  ResponseActionsRuleTelemetryTemplate,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
   TimelineTelemetryEvent,
   ValueListResponse,
-  AnyObject,
-  PrebuiltRuleCustomizations,
 } from './types';
 import type { TaskExecutionPeriod } from './task';
 import {
-  LIST_DETECTION_RULE_EXCEPTION,
-  LIST_ENDPOINT_EXCEPTION,
-  LIST_ENDPOINT_EVENT_FILTER,
-  LIST_TRUSTED_APPLICATION,
   DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
+  LIST_DETECTION_RULE_EXCEPTION,
+  LIST_ENDPOINT_EVENT_FILTER,
+  LIST_ENDPOINT_EXCEPTION,
+  LIST_TRUSTED_APPLICATION,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 import { resolverEntity } from '../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
@@ -450,10 +450,7 @@ export class TelemetryTimelineFetcher {
     const eventId = event ? event['event.id'] : 'unknown';
     const alertUUID = event ? event['kibana.alert.uuid'] : 'unknown';
 
-    const entities = resolverEntity(
-      [{ _source: event } as estypes.SearchHit],
-      this.receiver.getExperimentalFeatures()
-    );
+    const entities = resolverEntity([{ _source: event } as estypes.SearchHit]);
 
     // Build Tree
     const tree = await this.receiver.buildProcessTree(
