@@ -14,10 +14,7 @@ import {
   RULE_EXECUTION_LOG_PROVIDER,
 } from '../../../event_log/event_log_constants';
 import * as f from '../../../event_log/event_log_fields';
-import {
-  DEFAULT_BASE_RULE_FIELDS,
-  DEFAULT_PERCENTILES,
-} from '../../../utils/es_aggregations';
+import { DEFAULT_BASE_RULE_FIELDS, DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
 
 const RULE_ID_FIELD = 'rule.id';
 
