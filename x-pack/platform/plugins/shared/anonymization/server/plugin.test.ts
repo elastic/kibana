@@ -259,7 +259,9 @@ describe('AnonymizationPlugin policy resolution', () => {
       asScopedToNamespace,
     });
 
-    const findByTarget = jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+    const findByTarget = jest
+      .spyOn(ProfilesRepository.prototype, 'findByTarget')
+      .mockResolvedValue(null);
 
     const start = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),

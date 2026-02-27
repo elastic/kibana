@@ -12,12 +12,8 @@ import type {
 } from '@kbn/core/server';
 import type { AnonymizationConfig } from './config';
 import { configSchema } from './config';
-import type {
-  AnonymizationPluginSetup,
-  AnonymizationPluginStart,
-  AnonymizationSetupDeps,
-  AnonymizationStartDeps,
-} from './plugin';
+import type { AnonymizationPluginSetup, AnonymizationPluginStart } from './types';
+import type { AnonymizationSetupDeps, AnonymizationStartDeps } from './plugin';
 
 export const plugin: PluginInitializer<
   AnonymizationPluginSetup,
