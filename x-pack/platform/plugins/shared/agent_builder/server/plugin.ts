@@ -31,6 +31,7 @@ import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
+import { createModelProviderFactory } from './services/runner/model_provider';
 
 export class AgentBuilderPlugin
   implements
@@ -179,6 +180,13 @@ export class AgentBuilderPlugin
       registerSampleData(this.home, this.logger);
     }
 
+    const modelProviderFactory = createModelProviderFactory({
+      inference,
+      uiSettings,
+      savedObjects,
+      trackingService: this.trackingService,
+    });
+
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
@@ -196,6 +204,9 @@ export class AgentBuilderPlugin
       execution: {
         executeAgent: execution.executeAgent.bind(execution),
         getExecution: execution.getExecution.bind(execution),
+      },
+      runtime: {
+        createModelProvider: modelProviderFactory,
       },
     };
   }
