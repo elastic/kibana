@@ -11,6 +11,8 @@ import { Subject, firstValueFrom } from 'rxjs';
 import { unmountComponentAtNode } from 'react-dom';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
+const DEBUG_PREFIX = '[SystemFlyoutRef]';
+
 /**
  * A SystemFlyoutRef is a reference to an opened system flyout panel.
  * It provides methods to close the flyout and integrates with the EUI Flyout Manager.
@@ -24,21 +26,37 @@ export class SystemFlyoutRef implements OverlayRef {
   constructor(container: HTMLElement) {
     this.container = container;
     this.onClose = firstValueFrom(this.closeSubject);
+    console.debug(
+      `${DEBUG_PREFIX} constructor called`,
+      { containerTagName: container.tagName, dataAttribute: container.getAttribute?.('data-system-flyout') }
+    );
   }
 
   public get isClosed(): boolean {
+    console.debug(`${DEBUG_PREFIX} isClosed getter`, { _isClosed: this._isClosed });
     return this._isClosed;
   }
 
   public close(): Promise<void> {
+    console.debug(`${DEBUG_PREFIX} close() called`, {
+      _isClosedBefore: this._isClosed,
+      willUnmount: !this._isClosed,
+    });
     if (!this._isClosed) {
       this._isClosed = true;
+      console.debug(`${DEBUG_PREFIX} close() unmounting and removing container`, {
+        containerTagName: this.container.tagName,
+      });
       unmountComponentAtNode(this.container);
       this.container.remove();
 
+      console.debug(`${DEBUG_PREFIX} close() emitting and completing closeSubject`);
       this.closeSubject.next();
       this.closeSubject.complete();
+    } else {
+      console.debug(`${DEBUG_PREFIX} close() no-op (already closed)`);
     }
+    console.debug(`${DEBUG_PREFIX} close() returning onClose promise`);
     return this.onClose;
   }
 }
