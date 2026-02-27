@@ -396,6 +396,27 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     expect(getSchemaAtPath(contextSchema, 'event.spaceId').schema).toBeDefined();
   });
 
+  it('should not include timestamp when workflow has custom trigger type but no registered definition', () => {
+    const workflow = {
+      ...baseWorkflow,
+      triggers: [{ type: 'some.unknown_trigger' }],
+    } as unknown as WorkflowYaml;
+
+    const getTriggerDefinitionSpy = jest
+      .spyOn(triggerSchemas, 'getTriggerDefinition')
+      .mockReturnValue(undefined);
+
+    try {
+      const eventKeys = getEventKeys(workflow);
+
+      expect(eventKeys).toContain('spaceId');
+      expect(eventKeys).not.toContain('timestamp');
+      expect(eventKeys).toHaveLength(1);
+    } finally {
+      getTriggerDefinitionSpy.mockRestore();
+    }
+  });
+
   it('should include timestamp and custom trigger eventSchema when workflow has a custom trigger', () => {
     const customEventSchema = z.object({
       severity: z.string(),
