@@ -21,6 +21,7 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -44,4 +45,5 @@ export interface DataVisualizerStartDependencies {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
+  cps: CPSPluginStart;
 }

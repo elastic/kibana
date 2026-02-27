@@ -99,6 +99,18 @@ export const ACCESS_CONTROL_CONFIG: AccessControlConfig = {
         pattern: /ml\/aiops/,
         access: ProjectRoutingAccess.EDITABLE,
       },
+      {
+        pattern: /ml\/jobs\/new_job\/datavisualizer/,
+        access: ProjectRoutingAccess.EDITABLE,
+      },
+      {
+        pattern: /ml\/datavisualizer\/esql/,
+        access: ProjectRoutingAccess.EDITABLE,
+      },
+      {
+        pattern: /ml\/data_drift/,
+        access: ProjectRoutingAccess.EDITABLE,
+      },
     ],
   },
 };

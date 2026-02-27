@@ -108,7 +108,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       // so don't try again
       if (!searchStrategyParams || populatedFieldsInIndexWithoutRuntimeFields === null) return;
 
-      const { index, searchQuery, timeFieldName, earliest, latest } = searchStrategyParams;
+      const { index, searchQuery, timeFieldName, earliest, latest, projectRouting } =
+        searchStrategyParams;
 
       const fetchPopulatedFields = async () => {
         populatedFieldsAbortCtrl.current.abort();
@@ -133,6 +134,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
               },
             },
             includeEmptyFields: false,
+            projectRouting,
           }),
           populatedFieldsAbortCtrl.current
         );
@@ -160,6 +162,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify({ query: searchStrategyParams?.searchQuery }),
       searchStrategyParams?.index,
+      searchStrategyParams?.projectRouting,
     ]
   );
 
@@ -200,6 +203,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         samplingOption,
         sessionId,
         embeddableExecutionContext,
+        projectRouting,
       } = searchStrategyParams;
 
       const searchOptions: ISearchOptions = {
@@ -293,7 +297,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
                 earliest,
                 latest,
                 undefined,
-                runtimeFieldMap
+                runtimeFieldMap,
+                projectRouting
               ),
             },
             searchOptions
