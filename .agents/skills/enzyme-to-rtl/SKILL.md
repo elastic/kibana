@@ -118,8 +118,8 @@ expect(Array.from(items).at(-1)).toHaveTextContent('last');
 | `wrapper.find(X).length` | `container.querySelectorAll(X).length` |
 | `wrapper.find(X).prop('foo')` | See "Testing component props" below |
 | `wrapper.find(X).props()` | See "Testing component props" below |
-| `wrapper.find(X).simulate('click')` | `await userEvent.click(element)` |
-| `wrapper.find('input').simulate('change', { target: { value: 'x' } })` | `await userEvent.type(input, 'x')` or `fireEvent.change(input, { target: { value: 'x' } })` |
+| `wrapper.find(X).simulate('click')` | `fireEvent.click(element)` |
+| `wrapper.find('input').simulate('change', { target: { value: 'x' } })` | `fireEvent.change(input, { target: { value: 'x' } })` and `fireEvent.blur(input)` when validation is blur-driven. Use `userEvent.type` only when per-keystroke behavior matters. |
 | `wrapper.update()` | Not needed — RTL re-queries the DOM automatically. Wrap state updates in `act()` if needed. |
 | `wrapper.setProps({ foo: 'bar' })` | Re-render: `rerender(<Comp foo="bar" />)` |
 
