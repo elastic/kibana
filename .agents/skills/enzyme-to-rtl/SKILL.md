@@ -183,9 +183,6 @@ Use this pattern instead of enzyme's `.find(Component).prop('propName')`. Clear 
 
 - Wait for a UI boundary with `findBy*` (preferred) or `waitFor()` when you need a custom assertion. Use `act()` for explicit timer advancement/flush (e.g. `jest.runOnlyPendingTimersAsync()` in fake-timer suites) or imperative callbacks that trigger React updates.
 
-```typescript
-await screen.findByTestId('results');
-
 - Replace `wrapper.update()` + `nextTick()` patterns with `await waitFor(...)`.
 - For promises that resolve in tests, prefer `findByTestId` (auto-waits) over `getByTestId` + `waitFor`. Prefer reusing the element returned from `findBy*` instead of re-querying with `getBy*` immediately after (re-query only when you expect the DOM to change/replace the element).
 - For elements that should disappear, prefer `waitForElementToBeRemoved(...)` (example: `await waitForElementToBeRemoved(screen.getByTestId('loading'))`).
