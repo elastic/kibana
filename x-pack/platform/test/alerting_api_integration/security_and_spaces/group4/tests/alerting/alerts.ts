@@ -1410,12 +1410,12 @@ instanceStateValue: true
                     m.includes('IDs:[2,]') &&
                     !m.includes('IDs:[1,2,]')
                 );
-                expect(
-                  afterMuteMessage,
+                expect(afterMuteMessage).to.not.eql(
+                  undefined,
                   `Expected at least one action message after mute to show only instance 2. Got: ${messages.join(
                     '; '
                   )}`
-                ).to.be.ok();
+                );
               });
               break;
             default:
