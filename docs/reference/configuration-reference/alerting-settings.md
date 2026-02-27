@@ -25,13 +25,13 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
 `xpack.encryptedSavedObjects.encryptionKey`
 : A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they’re stored in Elasticsearch. Third party credentials — such as the username and password used to connect to an SMTP service — are an example of encrypted properties.
 
-     Kibana offers a [CLI tool](/reference/commands/kibana-encryption-keys.md) to help generate this encryption key.
+    Kibana offers a [CLI tool](/reference/commands/kibana-encryption-keys.md) to help generate this encryption key.
 
-     If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn’t the same on all instances of Kibana.
+    If not set, Kibana will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of Kibana will behave unexpectedly if the key isn’t the same on all instances of Kibana.
 
-     Although the key can be specified in clear text in `kibana.yml`, it’s recommended to store this key securely in the [Kibana Keystore](docs-content://deploy-manage/security/secure-settings.md). Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on [encryption key rotation](docs-content://deploy-manage/security/secure-saved-objects.md#encryption-key-rotation).
+    Although the key can be specified in clear text in `kibana.yml`, it’s recommended to store this key securely in the [Kibana Keystore](docs-content://deploy-manage/security/secure-settings.md). Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on [encryption key rotation](docs-content://deploy-manage/security/secure-saved-objects.md#encryption-key-rotation).
 
-     Data type: `string`
+    Data type: `string`
 
 ## Action settings [action-settings]
 
@@ -159,7 +159,7 @@ $$$action-config-email-domain-allowlist$$$
 : The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
     ::::{warning}
-    This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting
+    This setting alone is insufficient for overriding system defaults for the SES SMTP endpoint. You must also configure the `xpack.actions.email.services.ses.port` setting.
     ::::
 
     Data type: `string`
@@ -184,7 +184,7 @@ $$$action-config-email-domain-allowlist$$$
     Default: `true`
 
 `xpack.actions.enabledActionTypes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
-: A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`, `.gen-ai`, `.bedrock`, `.gemini`, `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
+: A list of action types that are enabled. It defaults to `["*"]`, enabling all types. The names for built-in Kibana action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.opsgenie`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, `.servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.tines`, `.torq`, `.xmatters`, `.gen-ai`, `.bedrock`, `.gemini`, `.d3security`, and `.webhook`. An empty list `[]` will disable all action types.
 
     Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in Kibana and will not function.
 
@@ -243,7 +243,7 @@ $$$action-config-email-domain-allowlist$$$
     xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
     ```
 
-    If applicable, include the subdomain in the hostname
+    If applicable, include the subdomain in the hostname.
 
 `xpack.actions.proxyOnlyHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 : Specifies hostnames which should only use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.
@@ -258,7 +258,7 @@ $$$action-config-email-domain-allowlist$$$
     xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
     ```
 
-    If applicable, include the subdomain in the hostname
+    If applicable, include the subdomain in the hostname.
 
 `xpack.actions.proxyHeaders` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
 : Specifies HTTP headers for the proxy, if using a proxy for actions.
@@ -340,8 +340,7 @@ $$$action-config-verification-mode$$$
     ```
 
 `xpack.actions.queued.max` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
-: Specifies the maximum number of actions that can be queued.
-It is available in {{ecloud}} 8.11.0 and later versions.
+: Specifies the maximum number of actions that can be queued. It is available in {{ecloud}} 8.11.0 and later versions.
 
     Data type: `int`
     Default: `1000000`
@@ -480,7 +479,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     Data type: `string`
 
 `xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod`
-: For a [{{webhook-cm}} connector](/reference/connectors-kibana/cases-webhook-action-type.md), specifies the REST API HTTP request method to create a case in the third-party system
+: For a [{{webhook-cm}} connector](/reference/connectors-kibana/cases-webhook-action-type.md), specifies the REST API HTTP request method to create a case in the third-party system.
 
     Data type: `string`
 
@@ -704,7 +703,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     Data type: `string`
 
 `xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue`
-: For a [{{sn-itsm}}](/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the user identifier. It is required when required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
+: For a [{{sn-itsm}}](/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/reference/connectors-kibana/servicenow-itom-action-type.md), specifies the user identifier. It is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
 
     Data type: `string`
 
@@ -754,8 +753,9 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
     Data type: `string`
 
 `xpack.actions.preconfigured.<connector-id>.secrets.credentialsJson`
-: For an [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), specifies the GCP service account credentials JSON file for authentication.
+: A credentials secret that varies by connector:
 
+    * For a [{{gemini}} connector](/reference/connectors-kibana/gemini-action-type.md), specifies the GCP service account credentials JSON file for authentication.
     * For a [OpenAI connector](/reference/connectors-kibana/openai-action-type.md), specifies the OpenAI or Azure OpenAI API key for authentication.
     * For an [{{opsgenie}} connector](/reference/connectors-kibana/opsgenie-action-type.md), specifies the {{opsgenie}} API authentication key for HTTP basic authentication.
 
@@ -837,7 +837,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 `xpack.actions.preconfigured.<connector-id>.secrets.token`
 : A token secret that varies by connector:
 
-    * For a [D3 Security conector](/reference/connectors-kibana/d3security-action-type.md), specifies the D3 Security token.
+    * For a [D3 Security connector](/reference/connectors-kibana/d3security-action-type.md), specifies the D3 Security token.
     * For a [Slack connector](/reference/connectors-kibana/slack-action-type.md), specifies the Slack bot user OAuth token.
     * For a [Tines connector](/reference/connectors-kibana/tines-action-type.md), specifies the Tines API token.
     * For a [Torq connector](/reference/connectors-kibana/torq-action-type.md), specifies the secret of the webhook authentication header.
@@ -855,7 +855,7 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 `xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl`
 : A URL that varies by connector:
 
-    * For a [Microsoft Teams](/reference/connectors-kibana/teams-action-type.md), specifies the URL of the incoming webhook.
+    * For a [Microsoft Teams connector](/reference/connectors-kibana/teams-action-type.md), specifies the URL of the incoming webhook.
     * For a [Slack connector](/reference/connectors-kibana/slack-action-type.md), specifies the Slack webhook URL.
 
     ::::{note}
