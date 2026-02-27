@@ -9,15 +9,13 @@ import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { App } from './components/app';
-import { useInferenceEndpointsBreadcrumbs } from './hooks/use_inference_endpoints_breadcrumbs';
 import { useKibana } from './hooks/use_kibana';
 import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
 
 export const InferenceEndpointsOverview: React.FC = () => {
   const {
-    services: { console: consolePlugin, history, searchNavigation },
+    services: { console: consolePlugin },
   } = useKibana();
-  useInferenceEndpointsBreadcrumbs();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -31,7 +29,6 @@ export const InferenceEndpointsOverview: React.FC = () => {
         restrictWidth={false}
         grow={false}
         data-test-subj="inferenceEndpointsPage"
-        solutionNav={searchNavigation?.useClassicNavigation(history)}
       >
         <App />
         {embeddableConsole}

@@ -55,7 +55,6 @@ export class SearchInferenceEndpointsPlugin
                 const startDeps: AppPluginStartDependencies = {
                   ...depsStart,
                   history,
-                  searchNavigation: undefined,
                 };
 
                 return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);

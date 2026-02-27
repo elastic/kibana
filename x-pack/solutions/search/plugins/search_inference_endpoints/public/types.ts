@@ -11,7 +11,6 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -31,7 +30,6 @@ export interface AppPluginStartDependencies {
   console?: ConsolePluginStart;
   licensing: LicensingPluginStart;
   ml: MlPluginStart;
-  searchNavigation?: SearchNavigationPluginStart;
   serverless?: ServerlessPluginStart;
   cloud?: CloudStart;
 }
