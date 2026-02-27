@@ -33,9 +33,9 @@ const initializationMock = jest.requireMock('./initialization') as {
   ensureAlertsDataViewProfile: jest.Mock;
 };
 
-const createPlugin = (enabled = true) => {
+const createPlugin = (active = true) => {
   const initializerContext = coreMock.createPluginInitializerContext();
-  (initializerContext.config.get as jest.Mock).mockReturnValue({ enabled });
+  (initializerContext.config.get as jest.Mock).mockReturnValue({ active });
   return new AnonymizationPlugin(initializerContext);
 };
 

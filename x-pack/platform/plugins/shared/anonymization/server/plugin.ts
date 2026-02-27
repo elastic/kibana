@@ -113,7 +113,7 @@ export class AnonymizationPlugin
 
   public start(core: CoreStart, deps: AnonymizationStartDeps): AnonymizationPluginStart {
     this.logger.debug('anonymization: Started');
-    const anonymizationEnabled = this.config.enabled;
+    const anonymizationEnabled = this.config.active;
 
     const esClient = core.elasticsearch.client.asInternalUser;
 

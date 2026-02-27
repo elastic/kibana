@@ -25,11 +25,9 @@ import {
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
 } from '../initialization';
 
-const toErrorMessage = (err: unknown): string =>
-  err instanceof Error ? err.message : String(err);
+const toErrorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
-const toStatusCode = (err: unknown): number =>
-  (err as { statusCode?: number })?.statusCode ?? 500;
+const toStatusCode = (err: unknown): number => (err as { statusCode?: number })?.statusCode ?? 500;
 
 const validateFieldRules = (fieldRules: FieldRule[]): string | undefined => {
   for (const rule of fieldRules) {

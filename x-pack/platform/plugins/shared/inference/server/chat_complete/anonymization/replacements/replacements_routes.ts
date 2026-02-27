@@ -18,11 +18,9 @@ import { ensureReplacementsIndex } from './replacements_index';
 const API_VERSION = '1';
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
 
-const toErrorMessage = (err: unknown): string =>
-  err instanceof Error ? err.message : String(err);
+const toErrorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
-const toStatusCode = (err: unknown): number =>
-  (err as { statusCode?: number })?.statusCode ?? 500;
+const toStatusCode = (err: unknown): number => (err as { statusCode?: number })?.statusCode ?? 500;
 
 let replacementsIndexEnsured = false;
 
