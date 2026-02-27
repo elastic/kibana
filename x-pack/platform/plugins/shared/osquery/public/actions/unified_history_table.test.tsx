@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 import { UnifiedHistoryTable } from './unified_history_table';
 import { useAllLiveQueries } from './use_all_live_queries';
@@ -14,7 +14,7 @@ import { useBulkGetUserProfiles } from './use_user_profiles';
 import { usePacks } from '../packs/use_packs';
 import * as buildHistoryKueryModule from './utils/build_history_kuery';
 import {
-  renderWithProviders,
+  TestProviders,
   createMockSearchHit,
   createMockSearchHitWithResultCounts,
   createMockPackSearchHitWithResultCounts,
@@ -22,6 +22,9 @@ import {
   noRunPermissions,
   resetMockCounter,
 } from './__test_helpers__/mock_data';
+
+const renderWithProviders = (element: React.ReactElement) =>
+  render(element, { wrapper: TestProviders });
 
 const mockPush = jest.fn();
 const mockUseRouterNavigate = jest.fn();
@@ -72,10 +75,7 @@ const mockPacks = (packs: Array<{ id: string }> = []) => {
   usePacksMock.mockReturnValue({ data: { data: packs } } as never);
 };
 
-const mockProfiles = (
-  profilesMap = new Map(),
-  isLoading = false
-) => {
+const mockProfiles = (profilesMap = new Map(), isLoading = false) => {
   useBulkGetUserProfilesMock.mockReturnValue({ profilesMap, isLoading });
 };
 

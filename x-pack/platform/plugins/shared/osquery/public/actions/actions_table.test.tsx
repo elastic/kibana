@@ -6,19 +6,22 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import { ActionsTable } from './actions_table';
 import { useAllLiveQueries } from './use_all_live_queries';
 import { usePacks } from '../packs/use_packs';
 import {
-  renderWithProviders,
+  TestProviders,
   createMockSearchHit,
   createMockPackSearchHit,
   defaultPermissions,
   noRunPermissions,
   resetMockCounter,
 } from './__test_helpers__/mock_data';
+
+const renderWithProviders = (element: React.ReactElement) =>
+  render(element, { wrapper: TestProviders });
 
 const mockPush = jest.fn();
 const mockUseRouterNavigate = jest.fn();

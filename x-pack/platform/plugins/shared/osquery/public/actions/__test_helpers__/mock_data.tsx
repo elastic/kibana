@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
@@ -38,14 +37,13 @@ const createTestQueryClient = () =>
     },
   });
 
-export const renderWithProviders = (element: React.ReactElement) =>
-  render(
-    <EuiProvider>
-      <IntlProvider locale="en">
-        <QueryClientProvider client={createTestQueryClient()}>{element}</QueryClientProvider>
-      </IntlProvider>
-    </EuiProvider>
-  );
+export const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <EuiProvider>
+    <IntlProvider locale="en">
+      <QueryClientProvider client={createTestQueryClient()}>{children}</QueryClientProvider>
+    </IntlProvider>
+  </EuiProvider>
+);
 
 const createMockCounter = () => {
   let value = 0;
