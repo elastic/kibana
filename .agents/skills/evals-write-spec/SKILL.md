@@ -1,5 +1,6 @@
 ---
 name: evals-write-spec
+disable-model-invocation: true
 description: Write LLM evaluation spec files with datasets, tasks, and evaluators using the @kbn/evals Playwright fixture. Use when authoring new eval specs, adding datasets or evaluators, or debugging evaluation test failures.
 ---
 
@@ -22,10 +23,7 @@ evaluate.describe('Suite name', { tag: tags.serverless.observability.complete },
   });
 
   evaluate('test name', async ({ executorClient, connector }) => {
-    await executorClient.runExperiment(
-      { dataset, task },
-      evaluators
-    );
+    await executorClient.runExperiment({ dataset, task }, evaluators);
   });
 });
 ```
@@ -40,12 +38,12 @@ import { evaluate } from '../src/evaluate';
 
 Every `evaluate.describe` must have a tag. Common choices:
 
-| Tag | When to use |
-|-----|-------------|
+| Tag                                      | When to use                |
+| ---------------------------------------- | -------------------------- |
 | `tags.serverless.observability.complete` | Observability domain evals |
-| `tags.serverless.security.complete` | Security domain evals |
-| `tags.serverless.search` | Search domain evals |
-| `tags.stateful.classic` | Stateful-only evals |
+| `tags.serverless.security.complete`      | Security domain evals      |
+| `tags.serverless.search`                 | Search domain evals        |
+| `tags.stateful.classic`                  | Stateful-only evals        |
 
 Import tags from `@kbn/scout` or `@kbn/evals` (re-exported).
 
@@ -54,11 +52,7 @@ Import tags from `@kbn/scout` or `@kbn/evals` (re-exported).
 A dataset is an array of examples with typed `input`, `output` (expected), and optional `metadata`:
 
 ```ts
-type MyExample = Example<
-  { question: string },
-  { expectedAnswer: string },
-  { tags?: string[] }
->;
+type MyExample = Example<{ question: string }, { expectedAnswer: string }, { tags?: string[] }>;
 
 const dataset = {
   name: 'my-dataset',
@@ -87,7 +81,7 @@ The `task` function receives an example and returns the output to evaluate:
 task: async ({ input }) => {
   const result = await someKibanaApi(input.question);
   return { answer: result.content };
-}
+};
 ```
 
 Tasks can use any fixture available in the `evaluate` callback: `fetch`, `inferenceClient`, `connector`, `esClient`, `kbnClient`, or custom fixtures like `chatClient`.
@@ -118,10 +112,12 @@ Deterministic, no LLM call. Use for binary checks:
 Use `evaluators.criteria(criteriaArray)` for subjective quality checks. The judge LLM scores each criterion:
 
 ```ts
-evaluators.criteria([
-  'The response correctly identifies the top users.',
-  'The response includes risk scores.',
-]).evaluate({ input, output, expected, metadata })
+evaluators
+  .criteria([
+    'The response correctly identifies the top users.',
+    'The response includes risk scores.',
+  ])
+  .evaluate({ input, output, expected, metadata });
 ```
 
 ### Correctness Analysis
@@ -129,7 +125,7 @@ evaluators.criteria([
 Compares output against expected answer:
 
 ```ts
-evaluators.correctnessAnalysis().evaluate({ input, output, expected, metadata })
+evaluators.correctnessAnalysis().evaluate({ input, output, expected, metadata });
 ```
 
 ### Groundedness Analysis
@@ -137,12 +133,13 @@ evaluators.correctnessAnalysis().evaluate({ input, output, expected, metadata })
 Checks if output is grounded in provided context:
 
 ```ts
-evaluators.groundednessAnalysis().evaluate({ input, output, expected, metadata })
+evaluators.groundednessAnalysis().evaluate({ input, output, expected, metadata });
 ```
 
 ### Trace-Based Evaluators
 
 Available from `evaluators.traceBasedEvaluators`:
+
 - `inputTokens`, `outputTokens`, `cachedTokens` -- token usage
 - `toolCalls` -- number of tool calls
 - `latency` -- span latency in seconds
@@ -154,28 +151,32 @@ These read from the tracing ES cluster and require EDOT to be running.
 For retrieval-augmented generation with ground truth:
 
 ```ts
-import { createPrecisionAtKEvaluator, createRecallAtKEvaluator, createF1AtKEvaluator } from '@kbn/evals';
+import {
+  createPrecisionAtKEvaluator,
+  createRecallAtKEvaluator,
+  createF1AtKEvaluator,
+} from '@kbn/evals';
 ```
 
 See [evaluator-patterns.md](references/evaluator-patterns.md) for full examples.
 
 ## Available Fixtures
 
-| Fixture | Scope | Description |
-|---------|-------|-------------|
-| `executorClient` | worker | Runs experiments, exports scores to ES |
-| `inferenceClient` | worker | Inference REST client bound to connector |
-| `connector` | worker | The model connector being evaluated |
-| `evaluationConnector` | worker | The judge connector |
-| `evaluators` | worker | `DefaultEvaluators` (criteria, correctness, groundedness, trace-based) |
-| `fetch` | worker | `HttpHandler` for Kibana API calls |
-| `esClient` | worker | Elasticsearch client (Scout cluster) |
-| `kbnClient` | worker | Kibana client with retries |
-| `traceEsClient` | worker | ES client for trace queries |
-| `evaluationsEsClient` | worker | ES client for evaluation score storage |
-| `log` | worker | `ToolingLog` for structured logging |
-| `repetitions` | worker | Number of experiment repetitions |
-| `config` | worker | Scout server config (hosts, auth) |
+| Fixture               | Scope  | Description                                                            |
+| --------------------- | ------ | ---------------------------------------------------------------------- |
+| `executorClient`      | worker | Runs experiments, exports scores to ES                                 |
+| `inferenceClient`     | worker | Inference REST client bound to connector                               |
+| `connector`           | worker | The model connector being evaluated                                    |
+| `evaluationConnector` | worker | The judge connector                                                    |
+| `evaluators`          | worker | `DefaultEvaluators` (criteria, correctness, groundedness, trace-based) |
+| `fetch`               | worker | `HttpHandler` for Kibana API calls                                     |
+| `esClient`            | worker | Elasticsearch client (Scout cluster)                                   |
+| `kbnClient`           | worker | Kibana client with retries                                             |
+| `traceEsClient`       | worker | ES client for trace queries                                            |
+| `evaluationsEsClient` | worker | ES client for evaluation score storage                                 |
+| `log`                 | worker | `ToolingLog` for structured logging                                    |
+| `repetitions`         | worker | Number of experiment repetitions                                       |
+| `config`              | worker | Scout server config (hosts, auth)                                      |
 
 ## The `evaluateDataset` Pattern
 
@@ -192,7 +193,9 @@ export type EvaluateDataset = (opts: {
 }) => Promise<void>;
 
 export function createEvaluateDataset({
-  chatClient, evaluators, executorClient,
+  chatClient,
+  evaluators,
+  executorClient,
 }: {
   chatClient: MyChatClient;
   evaluators: DefaultEvaluators;

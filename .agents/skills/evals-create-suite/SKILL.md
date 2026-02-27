@@ -1,5 +1,6 @@
 ---
 name: evals-create-suite
+disable-model-invocation: true
 description: Scaffold a new LLM evaluation suite package with Playwright config, evaluate fixture, and package files. Use when creating a new eval suite, adding an evals package for a plugin, or setting up the boilerplate for offline LLM evaluations.
 ---
 
@@ -76,10 +77,7 @@ kbn-evals-suite-<name>/
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": [
-    "@kbn/evals",
-    "@kbn/scout"
-  ]
+  "kbn_references": ["@kbn/evals", "@kbn/scout"]
 }
 ```
 
@@ -98,6 +96,7 @@ export default createPlaywrightEvalsConfig({
 ```
 
 Options:
+
 - `testDir` (required) -- directory containing `.spec.ts` files
 - `timeout` (optional, default `5 * 60_000`) -- per-test timeout in ms
 - `repetitions` (optional, default `1`) -- overridable via `EVALUATION_REPETITIONS` env var
@@ -118,10 +117,7 @@ export { evaluate };
 import { evaluate as base } from '@kbn/evals';
 import { MyChatClient } from './chat_client';
 
-export const evaluate = base.extend<
-  {},
-  { chatClient: MyChatClient }
->({
+export const evaluate = base.extend<{}, { chatClient: MyChatClient }>({
   chatClient: [
     async ({ fetch, log, connector }, use) => {
       await use(new MyChatClient(fetch, log, connector.id));
@@ -136,6 +132,7 @@ export const evaluate = base.extend<
 Use the base `evaluate` directly when your task calls Kibana APIs through the built-in `fetch`, `inferenceClient`, or `executorClient` fixtures.
 
 Extend when you need:
+
 - A **chat client** that wraps a specific Kibana API endpoint (e.g. `/api/agent_builder/converse`)
 - An **`evaluateDataset` helper** that encapsulates the `runExperiment` + evaluator wiring for a consistent pattern across specs
 - **`esArchiver`** for loading/unloading ES archives in setup/teardown
@@ -144,10 +141,10 @@ Extend when you need:
 
 ### Real examples
 
-| Suite | Approach | Why |
-|-------|----------|-----|
-| `llm-tasks` | Base `evaluate` directly | Calls task functions in-process; custom CODE evaluators inline |
-| `agent-builder` | Extended with `chatClient` + Phoenix executor | Needs HTTP chat client and external Phoenix executor |
+| Suite                     | Approach                                                                | Why                                                              |
+| ------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `llm-tasks`               | Base `evaluate` directly                                                | Calls task functions in-process; custom CODE evaluators inline   |
+| `agent-builder`           | Extended with `chatClient` + Phoenix executor                           | Needs HTTP chat client and external Phoenix executor             |
 | `security-solution-evals` | Extended with `chatClient`, `esArchiver`, `supertest`, `quickApiClient` | Domain-heavy setup: loads ES archives, uses generated API client |
 
 ## Suite Registration
