@@ -80,7 +80,7 @@ import type {
   GetCategoryArgs,
   BulkCreateCasesArgs,
 } from './types';
-import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
+import type { AttachmentTransformedAttributes } from '../../common/types/attachments_v1';
 import { bulkDecodeSOAttributes } from '../utils';
 import {
   DEFAULT_ATTACHMENT_SEARCH_FIELDS,
