@@ -22,11 +22,11 @@ import {
 } from '@kbn/workflows';
 import { useContextOverrideData } from './use_context_override_data';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
+import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowActions } from '../../../hooks/use_workflow_actions';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
@@ -16,9 +16,9 @@ import type {
   WorkflowListDto,
 } from '@kbn/workflows';
 import { useRunWorkflow } from '@kbn/workflows-ui';
-import { useKibana } from './use_kibana';
-import { useTelemetry } from './use_telemetry';
-import type { WorkflowTriggerTab } from '../features/run_workflow/ui/types';
+import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
