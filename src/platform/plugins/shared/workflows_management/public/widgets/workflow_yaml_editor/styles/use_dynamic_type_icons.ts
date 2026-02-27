@@ -457,10 +457,6 @@ async function injectDynamicShadowIcons(
         className = 'elasticsearch';
       } else if (connectorType.startsWith('kibana.')) {
         className = 'kibana';
-      } else if (connectorType.startsWith('.')) {
-        className = connectorType.substring(1);
-      } else if (connectorType.includes('.')) {
-        className = connectorType.split('.')[0];
       } else {
         className = connectorType;
       }
