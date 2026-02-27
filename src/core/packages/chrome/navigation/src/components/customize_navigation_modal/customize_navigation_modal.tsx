@@ -25,6 +25,7 @@ import {
   EuiTitle,
   euiDragDropReorder,
   useGeneratedHtmlId,
+  useEuiTheme,
   type DropResult,
 } from '@elastic/eui';
 import type {
@@ -85,6 +86,7 @@ export const CustomizeNavigationModal = ({
   setNavigationCustomization,
   setIsEditingNavigation,
 }: CustomizeNavigationModalProps) => {
+  const { euiTheme } = useEuiTheme();
   const [items, setItems] = useState<NavigationItemInfo[]>(() => getNavigationPrimaryItems());
   const [isSaving, setIsSaving] = useState(false);
   const [didReset, setDidReset] = useState(false);
@@ -102,6 +104,9 @@ export const CustomizeNavigationModal = ({
 
   const modalCss = css`
     width: 576px;
+    .euiModalHeader {
+      padding-bottom: ${euiTheme.size.xs};
+    }
   `;
 
   // Enable editing mode
@@ -275,7 +280,7 @@ export const CustomizeNavigationModal = ({
           </EuiDragDropContext>
           {hiddenItems.length > 0 && (
             <>
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">

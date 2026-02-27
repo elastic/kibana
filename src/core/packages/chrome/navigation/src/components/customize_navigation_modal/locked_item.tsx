@@ -28,7 +28,7 @@ const CORE_LOCKED_ITEM_TOOLTIP = i18n.translate(
   'core.ui.chrome.sideNavigation.customizeNavigation.coreLockedItemTooltip',
   {
     defaultMessage:
-      "Discover and Dashboards can't be changed, since they are core items for all solutions",
+      "Can not be changed, as it is a core item across all solutions.",
   }
 );
 
