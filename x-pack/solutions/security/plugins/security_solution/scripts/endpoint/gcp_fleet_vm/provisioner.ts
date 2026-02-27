@@ -313,7 +313,8 @@ const createEnrollmentApiKey = async (kbnClient: KbnClient, policyId: string): P
 const ensureOsqueryIntegrationOnPolicy = async (
   kbnClient: KbnClient,
   log: ToolingLog,
-  policyId: string
+  policyId: string,
+  integrationPolicyName?: string
 ): Promise<void> => {
   // Check if Osquery Manager integration is already on the policy
   const existingIntegrations = await fetchIntegrationPolicyList(kbnClient, {
@@ -332,8 +333,8 @@ const ensureOsqueryIntegrationOnPolicy = async (
   const osqueryPkg = await fetchPackageInfo(kbnClient, 'osquery_manager');
 
   await createIntegrationPolicy(kbnClient, {
-    name: `Osquery Manager - Osquery Only`,
-    description: 'Osquery Manager for Osquery-only GCP VM agents',
+    name: integrationPolicyName ?? `Osquery Manager - ${policyId}`,
+    description: 'Osquery Manager for GCP VM agents',
     namespace: 'default',
     policy_ids: [policyId],
     enabled: true,
@@ -688,7 +689,12 @@ export const provisionGcpFleetVm = async (
     agentPolicyId: agentPolicy.id,
     name: 'Elastic Defend - GCP VM agents',
   });
-  await ensureOsqueryIntegrationOnPolicy(kbnClient, log, agentPolicy.id);
+  await ensureOsqueryIntegrationOnPolicy(
+    kbnClient,
+    log,
+    agentPolicy.id,
+    'Osquery Manager - GCP VM agents'
+  );
 
   // Create (or reuse) Osquery-only policy if osqueryOnlyAgentCount > 0
   let osqueryOnlyPolicy: { id: string; name: string } | undefined;
@@ -702,7 +708,12 @@ export const provisionGcpFleetVm = async (
     osqueryOnlyEnrollmentToken = await createEnrollmentApiKey(kbnClient, osqueryOnlyPolicy.id);
 
     // Add Osquery Manager integration to the Osquery-only policy (if not already present)
-    await ensureOsqueryIntegrationOnPolicy(kbnClient, log, osqueryOnlyPolicy.id);
+    await ensureOsqueryIntegrationOnPolicy(
+      kbnClient,
+      log,
+      osqueryOnlyPolicy.id,
+      'Osquery Manager - Osquery Only'
+    );
   }
 
   const calderaUrl = config.enableCaldera
