@@ -44,7 +44,7 @@ function getEARSAuthUrl(
   config: WorkplaceAIClientConfig,
   kibanaBasePath: string | undefined,
   pkceCodeVerifier: string | undefined,
-  state: string
+  state: string | null
 ): string | undefined {
   if (!kibanaBasePath) {
     return undefined;
