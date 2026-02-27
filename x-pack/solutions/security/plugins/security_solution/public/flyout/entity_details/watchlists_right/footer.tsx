@@ -9,13 +9,21 @@ import React from 'react';
 import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const WatchlistsFlyoutFooter = () => {
+export const WatchlistsFlyoutFooter = ({
+  onSave,
+  isLoading,
+  isDisabled,
+}: {
+  onSave: () => void;
+  isLoading: boolean;
+  isDisabled: boolean;
+}) => {
   return (
     <EuiFlyoutFooter>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton fill>
+            <EuiButton fill onClick={onSave} isLoading={isLoading} isDisabled={isDisabled}>
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.watchlists.flyout.saveButton"
                 defaultMessage="Save"

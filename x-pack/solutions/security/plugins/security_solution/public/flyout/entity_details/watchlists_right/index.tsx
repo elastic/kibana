@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   EuiComboBox,
   EuiFieldText,
@@ -24,14 +25,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { FiltersGlobal } from '../../../common/components/filters_global';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
+import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import { useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import { WatchlistsFlyoutFooter } from './footer';
 import { SUPPORTED_FILE_TYPES } from './constants';
-import { SiemSearchBar } from '../../../common/components/search_bar';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 
 export type WatchlistsFlyoutMode = 'create' | 'edit';
 
@@ -60,6 +62,51 @@ export const WatchlistsFlyoutPanel = ({
         defaultMessage: 'Create watchlist',
       });
 
+  const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>({
+    name: watchlistName ?? '',
+    description: '',
+    riskModifier: 1.5,
+    managed: false,
+  });
+
+  const setWatchlistField = <K extends keyof CreateWatchlistRequestBodyInput>(
+    key: K,
+    value: CreateWatchlistRequestBodyInput[K]
+  ) => {
+    setWatchlist((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const { closeFlyout } = useExpandableFlyoutApi();
+  const queryClient = useQueryClient();
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
+  const { createWatchlist } = useEntityAnalyticsRoutes();
+  const createMutation = useMutation({
+    mutationFn: () => createWatchlist(watchlist),
+    onSuccess: async () => {
+      toasts.addSuccess(
+        i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.flyout.createSuccess', {
+          defaultMessage: 'Watchlist created successfully',
+        })
+      );
+      await queryClient.invalidateQueries({ queryKey: ['watchlists-management-table'] });
+      closeFlyout();
+    },
+    onError: (error: Error) => {
+      toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.createError',
+          {
+            defaultMessage: 'Failed to create watchlist',
+          }
+        ),
+      });
+    },
+  });
+
+  const isDisabled = !watchlist.name.trim() || !watchlist.description?.trim();
+
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} isRulePreview={false} />
@@ -75,7 +122,11 @@ export const WatchlistsFlyoutPanel = ({
         <EuiSpacer size="m" />
         <EuiForm component="form" fullWidth>
           <EuiFormRow label="Name">
-            <EuiFieldText name="Enter Watchlist Name" />
+            <EuiFieldText
+              name="Enter Watchlist Name"
+              value={watchlist.name}
+              onChange={(e) => setWatchlistField('name', e.target.value)}
+            />
           </EuiFormRow>
           <EuiFormRow
             label="Description"
@@ -88,7 +139,11 @@ export const WatchlistsFlyoutPanel = ({
               </EuiText>
             }
           >
-            <EuiFieldText name="Enter Watchlist Description" />
+            <EuiFieldText
+              name="Enter Watchlist Description"
+              value={watchlist.description}
+              onChange={(e) => setWatchlistField('description', e.target.value)}
+            />
           </EuiFormRow>
           <EuiFormRow label="Risk Score Weighting">
             <EuiRange
@@ -97,8 +152,8 @@ export const WatchlistsFlyoutPanel = ({
               step={0.5}
               showTicks
               showInput
-              value={1.5}
-              onChange={() => {}}
+              value={watchlist.riskModifier}
+              onChange={(e) => setWatchlistField('riskModifier', Number(e.currentTarget.value))}
             />
           </EuiFormRow>
           <EuiFormRow label="File upload">
@@ -167,7 +222,11 @@ export const WatchlistsFlyoutPanel = ({
         </EuiForm>
       </FlyoutHeader>
       <EuiFlyoutBody />
-      <WatchlistsFlyoutFooter />
+      <WatchlistsFlyoutFooter
+        onSave={() => createMutation.mutate()}
+        isLoading={createMutation.isLoading}
+        isDisabled={isDisabled}
+      />
     </>
   );
 };

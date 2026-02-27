@@ -36,6 +36,8 @@ import type {
   UpdateEntitySourceResponse,
   UploadAssetCriticalityRecordsResponse,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
+  CreateWatchlistResponse,
+  CreateWatchlistRequestBodyInput,
 } from '../../../common/api/entity_analytics';
 import type { ListWatchlistsResponse } from '../../../common/api/entity_analytics/watchlists/management/list.gen';
 import {
@@ -487,6 +489,18 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    const createWatchlist = async (params: CreateWatchlistRequestBodyInput) =>
+      http.fetch<CreateWatchlistResponse>(WATCHLISTS_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+    const deleteWatchlist = async (params: { id: string }) =>
+      http.fetch<{ deleted: true }>(`${WATCHLISTS_URL}/${params.id}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'DELETE',
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -511,6 +525,8 @@ export const useEntityAnalyticsRoutes = () => {
       fetchPrivilegeMonitoringEngineStatus,
       fetchPrivilegeMonitoringPrivileges,
       fetchWatchlistPrivileges,
+      createWatchlist,
+      deleteWatchlist,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,

@@ -129,6 +129,10 @@ const WatchlistsActionsMenu = ({
             key="delete"
             icon="trash"
             data-test-subj="watchlistsManagementTableActionDelete"
+            onClick={() => {
+              onDelete(record);
+              closePopover();
+            }}
           >
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.watchlistsManagement.table.actions.delete"

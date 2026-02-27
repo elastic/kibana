@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   useEuiTheme,
   EuiFlexGroup,
@@ -15,14 +15,20 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiText,
+  EuiConfirmModal,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { WatchlistsFlyoutKey } from '../../../../../flyout/entity_details/shared/constants';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { useEntityAnalyticsRoutes } from '../../../../api/api';
 import { useWatchlistsTableData } from './hooks/use_watchlists_table_data';
 import { buildWatchlistsManagementTableColumns } from './columns';
 import type { WatchlistTableItemType } from './types';
@@ -34,6 +40,13 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
   const { setQuery, deleteQuery } = useGlobalTime();
   const { euiTheme } = useEuiTheme();
   const { openFlyout } = useExpandableFlyoutApi();
+  const queryClient = useQueryClient();
+  const { addSuccess, addError } = useAppToasts();
+  const { deleteWatchlist } = useEntityAnalyticsRoutes();
+  const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
+    useBoolState();
+  const [pendingDelete, setPendingDelete] = useState<WatchlistTableItemType | null>(null);
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'watchlistsDeleteConfirmation' });
   const onEdit = useCallback(
     (record: WatchlistTableItemType) => {
       openFlyout({
@@ -49,13 +62,66 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
     },
     [openFlyout]
   );
-  const onDelete = useCallback((record: WatchlistTableItemType) => {
-    window.alert(
-      i18n.translate('xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteAlert', {
-        defaultMessage: 'Delete watchlist is not implemented yet.',
-      })
-    );
-  }, []);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteWatchlist({ id }),
+    onSuccess: async () => {
+      addSuccess(
+        i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteSuccess',
+          {
+            defaultMessage: 'Watchlist deleted successfully',
+          }
+        )
+      );
+      await queryClient.invalidateQueries({
+        queryKey: ['watchlists-management-table', spaceId],
+      });
+    },
+    onError: (error: Error) => {
+      addError(error, {
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteError',
+          {
+            defaultMessage: 'Failed to delete watchlist',
+          }
+        ),
+      });
+    },
+  });
+
+  const onDelete = useCallback(
+    (record: WatchlistTableItemType) => {
+      if (!record.id) {
+        addError(new Error('Missing watchlist id'), {
+          title: i18n.translate(
+            'xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteMissingId',
+            {
+              defaultMessage: 'Cannot delete watchlist',
+            }
+          ),
+        });
+        return;
+      }
+      setPendingDelete(record);
+      showDeleteConfirmation();
+    },
+    [addError, showDeleteConfirmation]
+  );
+
+  const onDeleteCancel = useCallback(() => {
+    setPendingDelete(null);
+    hideDeleteConfirmation();
+  }, [hideDeleteConfirmation]);
+
+  const onDeleteConfirm = useCallback(() => {
+    if (!pendingDelete?.id) {
+      onDeleteCancel();
+      return;
+    }
+    deleteMutation.mutate(pendingDelete.id);
+    setPendingDelete(null);
+    hideDeleteConfirmation();
+  }, [deleteMutation, hideDeleteConfirmation, onDeleteCancel, pendingDelete]);
   const columns = buildWatchlistsManagementTableColumns(euiTheme, onEdit, onDelete);
   const { visibleRecords, isLoading, hasError, refetch, inspect } = useWatchlistsTableData(
     spaceId,
@@ -141,6 +207,41 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {isDeleteConfirmationVisible && (
+        <EuiConfirmModal
+          aria-labelledby={modalTitleId}
+          titleProps={{ id: modalTitleId }}
+          title={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteConfirmTitle',
+            {
+              defaultMessage: 'Delete watchlist?',
+            }
+          )}
+          onCancel={onDeleteCancel}
+          onConfirm={onDeleteConfirm}
+          confirmButtonText={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteConfirmButton',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
+          cancelButtonText={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteCancelButton',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+          data-test-subj="watchlistsDeleteConfirmationModal"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteConfirmBody"
+            defaultMessage='This action will delete "{watchlistName}". Click "Delete" to continue.'
+            values={{ watchlistName: pendingDelete?.name ?? '' }}
+          />
+        </EuiConfirmModal>
+      )}
     </InspectButtonContainer>
   );
 };
