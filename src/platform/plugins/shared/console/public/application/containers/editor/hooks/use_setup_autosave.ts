@@ -13,6 +13,7 @@ import { useSaveCurrentTextObject } from '../../../hooks';
 interface SetupAutosaveParams {
   /** The current input value in the Console editor. */
   value: string;
+  enabled?: boolean;
 }
 
 /**
@@ -21,11 +22,18 @@ interface SetupAutosaveParams {
  * @param params The {@link SetupAutosaveParams} to use.
  */
 export const useSetupAutosave = (params: SetupAutosaveParams) => {
-  const { value } = params;
+  const { value, enabled = true } = params;
   const saveCurrentTextObject = useSaveCurrentTextObject();
   const timerRef = useRef<number | undefined>();
 
   useEffect(() => {
+    if (!enabled) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      return;
+    }
+
     function saveCurrentState() {
       try {
         saveCurrentTextObject(value);
@@ -47,5 +55,5 @@ export const useSetupAutosave = (params: SetupAutosaveParams) => {
         clearTimeout(timerRef.current);
       }
     };
-  }, [saveCurrentTextObject, value]);
+  }, [enabled, saveCurrentTextObject, value]);
 };

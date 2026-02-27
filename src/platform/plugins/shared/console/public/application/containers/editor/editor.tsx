@@ -48,34 +48,6 @@ const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
 const DEBOUNCE_DELAY = 500;
 
-type EditorTabId = 'request' | 'response' | 'settings';
-
-const EDITOR_TABS: Array<{ readonly id: EditorTabId; readonly label: string }> = [
-  {
-    id: 'request',
-    label: i18n.translate('console.editor.tabs.requestLabel', {
-      defaultMessage: 'One',
-    }),
-  },
-  {
-    id: 'response',
-    label: i18n.translate('console.editor.tabs.responseLabel', {
-      defaultMessage: 'Two',
-    }),
-  },
-  {
-    id: 'settings',
-    label: i18n.translate('console.editor.tabs.settingsLabel', {
-      defaultMessage: 'Three',
-    }),
-  },
-];
-
-const UNIFIED_TAB_ITEMS: TabItem[] = EDITOR_TABS.map((tab) => ({
-  id: tab.id,
-  label: tab.label,
-}));
-
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -122,7 +94,6 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     services: { storage, objectStorageClient },
   } = useServicesContext();
   const styles = useStyles();
-  console.log('inputEditorValue', inputEditorValue);
 
   const { currentTextObject, customParsedRequestsProvider } = useEditorReadContext();
 
@@ -143,6 +114,9 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     managedItems: [{ label: 'Untitled', id: '1' }],
     managedSelectedItemId: '1',
   });
+
+  const [editorValueByTab, setEditorValueByTab] = useState<Record<string, string>>({});
+  const [internalInputEditorValue, setInternalInputEditorValue] = useState<string>('');
 
   useEffect(() => {
     const debouncedSetFechingAutocompleteEntities = debounce(
@@ -199,6 +173,14 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     debouncedUpdateLocalStorageValue(inputEditorValue);
   }, [debouncedUpdateLocalStorageValue, inputEditorValue]);
 
+  const updateInputEditorValue = useCallback(
+    (nextValue: string) => {
+      setEditorValueByTab((prev) => ({ ...prev, [managedSelectedItemId!]: nextValue }));
+      setInternalInputEditorValue(nextValue);
+    },
+    [managedSelectedItemId, setEditorValueByTab, setInternalInputEditorValue]
+  );
+
   if (!currentTextObject) return null;
 
   const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
@@ -210,7 +192,6 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
         items={managedItems}
         selectedItemId={managedSelectedItemId}
         recentlyClosedItems={[]}
-        maxItemsCount={UNIFIED_TAB_ITEMS.length}
         services={{ core: {} }}
         createItem={() => ({
           id: `${Date.now()}`,
@@ -221,11 +202,13 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
         onClearRecentlyClosed={() => {}}
         onEBTEvent={() => {}}
         onChanged={(nextState) => {
-          console.log('nextState', nextState);
           setState({
             managedItems: nextState.items,
             managedSelectedItemId: nextState.selectedItem?.id,
           });
+          console.log('new editor value', editorValueByTab);
+          // updateInputEditorValue(editorValueByTab[nextState.selectedItem?.id!] || '');
+          setInternalInputEditorValue(editorValueByTab[nextState.selectedItem?.id!] || '');
         }}
         data-test-subj="consoleEditorTabs"
       />
@@ -264,8 +247,8 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                   ) : (
                     <MonacoEditor
                       localStorageValue={currentTextObject.text}
-                      value={inputEditorValue}
-                      setValue={setInputEditorValue}
+                      value={internalInputEditorValue}
+                      setValue={updateInputEditorValue}
                       customParsedRequestsProvider={customParsedRequestsProvider}
                     />
                   )}
@@ -283,7 +266,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                       color="primary"
                       data-test-subj="clearConsoleInput"
                       onClick={() => {
-                        setInputEditorValue('');
+                        setInternalInputEditorValue('');
                       }}
                     >
                       {i18n.translate('console.editor.clearConsoleInputButton', {

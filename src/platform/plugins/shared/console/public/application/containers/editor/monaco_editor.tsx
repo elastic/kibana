@@ -58,6 +58,7 @@ export interface EditorProps {
   value: string;
   setValue: (value: string) => void;
   customParsedRequestsProvider?: (model: any) => any;
+  enableAutosave?: boolean;
 }
 
 export const MonacoEditor = ({
@@ -65,6 +66,7 @@ export const MonacoEditor = ({
   value,
   setValue,
   customParsedRequestsProvider,
+  enableAutosave = true,
 }: EditorProps) => {
   const context = useServicesContext();
   const {
@@ -204,7 +206,7 @@ export const MonacoEditor = ({
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
 
-  useSetupAutosave({ value });
+  useSetupAutosave({ value, enabled: enableAutosave });
 
   // Restore the request from history if there is one
   const updateEditor = useCallback(async () => {
