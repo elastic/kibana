@@ -253,7 +253,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                     ? undefined
                     : column.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG
                 }
-                palette={activePalette}
+                palette={isLegacyTermsMode ? activePalette : undefined}
                 palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
                 setPalette={(palette) => {
