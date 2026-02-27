@@ -34,7 +34,6 @@ import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowsMeteringService } from './metering/metering_service';
-import { UsageReportingService } from './metering/usage_reporting_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -71,7 +70,6 @@ export class WorkflowsExecutionEnginePlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
-  private readonly kibanaVersion: string;
   private concurrencyManager!: ConcurrencyManager;
   private setupDependencies?: SetupDependencies;
   private meteringService?: WorkflowsMeteringService;
@@ -80,7 +78,6 @@ export class WorkflowsExecutionEnginePlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(
@@ -101,11 +98,9 @@ export class WorkflowsExecutionEnginePlugin
     this.setupDependencies = setupDependencies;
 
     // Initialize metering from the centralized Usage API plugin
-    const usageApiConfig = plugins.usageApi?.config;
-    if (usageApiConfig?.enabled && usageApiConfig.url) {
-      const usageReportingService = new UsageReportingService(usageApiConfig, this.kibanaVersion);
+    if (plugins.usageApi?.usageReporting) {
       this.meteringService = new WorkflowsMeteringService(
-        usageReportingService,
+        plugins.usageApi?.usageReporting,
         this.logger.get('workflowsMetering')
       );
       this.logger.debug('Workflows metering service initialized');
