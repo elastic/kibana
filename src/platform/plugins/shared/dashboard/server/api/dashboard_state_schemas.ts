@@ -74,8 +74,8 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
     ),
   };
 
-  // TODO looser route validation for dashboard application requests
-  // when all embeddables register schemas
+  // looser route validation for dashboard application requests
+  // TODO remove when all embeddables register schemas
   if (isDashboardAppRequest) {
     return schema.object({
       ...basePanelProps,
