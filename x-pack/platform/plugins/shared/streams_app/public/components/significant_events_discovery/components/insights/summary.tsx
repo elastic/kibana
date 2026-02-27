@@ -23,6 +23,7 @@ import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getFormattedError } from '../../../../util/errors';
 import { ConnectorListButton } from '../../../connector_list_button/connector_list_button';
 import { FeedbackButtons } from './feedback_buttons';
@@ -34,6 +35,7 @@ export function Summary({ count }: { count: number }) {
     core: { notifications },
   } = useKibana();
 
+  const { start: from, end: to } = useTimeRange();
   const {
     scheduleInsightsDiscoveryTask,
     getInsightsDiscoveryTaskStatus,
@@ -47,9 +49,9 @@ export function Summary({ count }: { count: number }) {
      * Combining scheduling and immediate status update to prevent
      * React updating the UI in between states causing flickering
      */
-    await scheduleInsightsDiscoveryTask();
+    await scheduleInsightsDiscoveryTask(from, to);
     await getTaskStatus();
-  }, [scheduleInsightsDiscoveryTask, getTaskStatus]);
+  }, [scheduleInsightsDiscoveryTask, from, to, getTaskStatus]);
 
   useEffect(() => {
     getTaskStatus();

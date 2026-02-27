@@ -43,6 +43,8 @@ const insightsTaskRoute = createServerRoute({
   },
   params: z.object({
     body: taskActionSchema({
+      from: z.string().describe('Start of the time range (ISO 8601 string)'),
+      to: z.string().describe('End of the time range (ISO 8601 string)'),
       connectorId: z
         .string()
         .optional()
@@ -87,6 +89,8 @@ const insightsTaskRoute = createServerRoute({
                 return {
                   connectorId,
                   streamNames: body.streamNames,
+                  from: body.from,
+                  to: body.to,
                 };
               })(),
               request,

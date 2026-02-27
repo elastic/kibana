@@ -26,6 +26,7 @@ import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useInsightsDiscoveryApi } from '../../../../hooks/use_insights_discovery_api';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useTaskPolling } from '../../../../hooks/use_task_polling';
@@ -65,6 +66,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
       notifications: { toasts },
     },
   } = useKibana();
+  const { start: from, end: to } = useTimeRange();
   const isInitialStatusUpdateDone = useRef(false);
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [isWaitingForInsightsTask, setIsWaitingForInsightsTask] = useState(false);
@@ -105,7 +107,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     const streamNames =
       selectedStreams.length > 0 ? selectedStreams.map((row) => row.stream.name) : undefined;
     try {
-      await scheduleInsightsDiscoveryTask(streamNames);
+      await scheduleInsightsDiscoveryTask(from, to, streamNames);
       setIsWaitingForInsightsTask(true);
       await getInsightsTaskStatus();
     } catch (error) {
@@ -114,7 +116,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
       });
       throw error;
     }
-  }, [scheduleInsightsDiscoveryTask, selectedStreams, toasts, getInsightsTaskStatus]);
+  }, [scheduleInsightsDiscoveryTask, from, to, selectedStreams, toasts, getInsightsTaskStatus]);
 
   // When we started the insights task from this view and it completes, show toast
   useEffect(() => {
