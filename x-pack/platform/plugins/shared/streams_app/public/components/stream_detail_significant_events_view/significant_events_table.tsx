@@ -93,19 +93,6 @@ export function SignificantEventsTable({
     },
     {
       field: 'query',
-      name: i18n.translate('xpack.streams.significantEventsTable.additionalFilterColumnTitle', {
-        defaultMessage: 'Additional filter',
-      }),
-      render: (query: StreamQuery) => {
-        if (!query.feature?.filter) {
-          return '--';
-        }
-
-        return <ConditionDisplay condition={query.feature.filter} />;
-      },
-    },
-    {
-      field: 'query',
       name: i18n.translate('xpack.streams.significantEventsTable.severityColumnTitle', {
         defaultMessage: 'Severity',
       }),

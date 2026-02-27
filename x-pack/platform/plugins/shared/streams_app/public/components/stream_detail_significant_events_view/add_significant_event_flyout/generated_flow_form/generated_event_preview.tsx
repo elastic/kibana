@@ -25,7 +25,6 @@ import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { StreamsESQLEditor } from '../../../esql_query_editor';
 import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
-import { ConditionPanel } from '../../../data_management/shared/condition_display';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
@@ -179,51 +178,6 @@ export function GeneratedEventPreview({
               setQuery({ ...query, severity_score: score });
               setTouched((prev) => ({ ...prev, severity: true }));
             }}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          label={
-            <EuiFormLabel>
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldSystemLabel',
-                { defaultMessage: 'System' }
-              )}
-            </EuiFormLabel>
-          }
-        >
-          <EuiSuperSelect
-            options={options}
-            valueOfSelected={
-              query.feature
-                ? options.find(
-                    (option) =>
-                      option.value.name === query.feature?.name &&
-                      option.value.type === query.feature?.type
-                  )?.value
-                : ALL_DATA_OPTION.value
-            }
-            onBlur={() => {
-              setTouched((prev) => ({ ...prev, feature: true }));
-            }}
-            onChange={(value) => {
-              const feature =
-                value.type === ALL_DATA_OPTION.value.type
-                  ? undefined
-                  : {
-                      name: value.name,
-                      filter: value.filter,
-                      type: value.type,
-                    };
-              setQuery({ ...query, feature });
-              setTouched((prev) => ({ ...prev, feature: true }));
-            }}
-            placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.systemPlaceholder',
-              { defaultMessage: 'Select system' }
-            )}
-            disabled={!isEditing}
-            fullWidth
           />
         </EuiFormRow>
 

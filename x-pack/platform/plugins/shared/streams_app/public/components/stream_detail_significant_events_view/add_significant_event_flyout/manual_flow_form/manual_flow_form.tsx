@@ -14,7 +14,9 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { buildMetadataOption, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -34,7 +36,17 @@ interface ManualFlowFormProps {
 const DEBOUNCE_DELAY_MS = 500;
 
 const getDefaultQueryFrom = (definition: Streams.all.Definition) =>
-  `FROM ${definition.name} METADATA _id, _source`;
+  BasicPrettyPrinter.print(
+    Builder.expression.query([
+      Builder.command({
+        name: 'from',
+        args: [
+          Builder.expression.source.index(getIndexPatternsForStream(definition).join(',')),
+          buildMetadataOption(),
+        ],
+      }),
+    ])
+  );
 
 export function ManualFlowForm({
   definition,
