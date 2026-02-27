@@ -1,5 +1,5 @@
 ---
-name: Scout API Testing
+name: scout-api-testing
 description: Use when creating, updating, debugging, or reviewing Scout API tests in Kibana (apiTest/apiClient/requestAuth/samlAuth/apiServices), including auth choices, response assertions, and API service patterns.
 ---
 
@@ -98,6 +98,11 @@ Tests then import `apiTest` from the local fixtures: `import { apiTest } from '.
 - `run-tests` auto-detects the custom config dir from `.../test/scout_<name>/...` paths (override with `--config-dir <name>` if needed).
 - `start-server` has no Playwright config to inspect, so pass `--config-dir <name>` when your tests require a custom server config.
 - Debug: `SCOUT_LOG_LEVEL=debug`
+
+## CI enablement
+
+- Scout tests run in CI only for modules listed under `plugins.enabled` / `packages.enabled` in `.buildkite/scout_ci_config.yml`.
+- `node scripts/scout.js generate` registers the module under `enabled` so the new configs run in CI.
 
 ## References
 
