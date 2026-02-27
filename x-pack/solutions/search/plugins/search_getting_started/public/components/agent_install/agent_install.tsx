@@ -197,6 +197,7 @@ export const AgentInstallSection = () => {
           }),
           iconType: 'arrowDown',
           iconSide: 'right' as const,
+          'data-test-subj': 'agentInstallLaunchOption',
         },
       ]}
       idSelected="launchAssistant"
@@ -246,14 +247,16 @@ export const AgentInstallSection = () => {
             closePopover={closePopover}
             panelPaddingSize="none"
             anchorPosition="downLeft"
+            data-test-subj="agentInstallLaunchPopover"
           >
             <EuiContextMenuPanel
+              data-test-subj="agentInstallLaunchMenu"
               items={[
                 <EuiContextMenuItem
                   key="cursor"
                   icon="launch"
                   onClick={handleOpenInCursor}
-                  data-test-subj="cursorAgentOpenInCursor"
+                  data-test-subj="agentInstallOpenInCursor"
                 >
                   {i18n.translate('xpack.gettingStarted.cursorAgent.menuCursor', {
                     defaultMessage: 'Cursor',
@@ -263,7 +266,7 @@ export const AgentInstallSection = () => {
                   key="claude-cli"
                   icon="console"
                   onClick={handleOpenInClaudeCli}
-                  data-test-subj="cursorAgentOpenInClaudeCli"
+                  data-test-subj="agentInstallOpenInClaudeCli"
                 >
                   {i18n.translate('xpack.gettingStarted.cursorAgent.menuClaudeCli', {
                     defaultMessage: 'Claude / CLI',
@@ -273,7 +276,7 @@ export const AgentInstallSection = () => {
                   key="agent-builder"
                   icon="wrench"
                   onClick={handleOpenInAgentBuilder}
-                  data-test-subj="cursorAgentOpenInAgentBuilder"
+                  data-test-subj="agentInstallOpenInAgentBuilder"
                 >
                   {i18n.translate('xpack.gettingStarted.cursorAgent.menuAgentBuilder', {
                     defaultMessage: 'Kibana Agent Builder',
