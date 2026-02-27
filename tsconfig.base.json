@@ -2550,6 +2550,8 @@
       "@kbn/workspaces/*": ["src/platform/packages/shared/kbn-workspaces/*"],
       "@kbn/xstate-utils": ["src/platform/packages/shared/kbn-xstate-utils"],
       "@kbn/xstate-utils/*": ["src/platform/packages/shared/kbn-xstate-utils/*"],
+      "@kbn/yaml-loader": ["src/platform/packages/shared/kbn-yaml-loader"],
+      "@kbn/yaml-loader/*": ["src/platform/packages/shared/kbn-yaml-loader/*"],
       "@kbn/yarn-install-scripts": ["packages/kbn-yarn-install-scripts"],
       "@kbn/yarn-install-scripts/*": ["packages/kbn-yarn-install-scripts/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],

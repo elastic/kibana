@@ -5,10 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { parse } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod';
+
+import { loadYaml } from '@kbn/yaml-loader';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
 
@@ -26,11 +27,12 @@ export const zodStringWithDurationValidation = z
   });
 
 export const zodStringWithYamlValidation = z.string().refine(
-  (val) => {
+  async (val) => {
+    const yaml = await loadYaml();
     try {
-      parse(val);
+      yaml.parse(val);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   },

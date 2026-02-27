@@ -9781,6 +9781,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/yaml-loader@link:src/platform/packages/shared/kbn-yaml-loader":
+  version "0.0.0"
+  uid ""
+
 "@kbn/yarn-install-scripts@link:packages/kbn-yarn-install-scripts":
   version "0.0.0"
   uid ""

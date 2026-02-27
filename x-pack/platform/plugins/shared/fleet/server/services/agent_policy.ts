@@ -32,6 +32,8 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
 
+import yaml from 'yaml';
+
 import { copyPackagePolicy } from '../../common/services/copy_package_policy_utils';
 
 import { catchAndSetErrorStackTrace } from '../errors/utils';
@@ -100,7 +102,6 @@ import {
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
-import { toYaml } from '../../common/services';
 
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
@@ -1926,7 +1927,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, toYaml);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, yaml);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');

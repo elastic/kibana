@@ -7,7 +7,8 @@
 
 import type { FullAgentPolicy } from '../types';
 
-import { createYamlKeysSorter } from './yaml_utils';
+import type { YamlModule } from './yaml_utils';
+import { createYamlKeysSorter, toYaml } from './yaml_utils';
 
 const POLICY_KEYS_ORDER = [
   'id',
@@ -28,15 +29,14 @@ const POLICY_KEYS_ORDER = [
   'signed',
 ];
 
-const _sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER);
-
 export const fullAgentPolicyToYaml = (
   policy: FullAgentPolicy,
-  toYaml: (data: any, options: any) => string,
+  yaml: YamlModule,
   apiKey?: string
 ): string => {
-  const yaml = toYaml(policy, { sortMapEntries: _sortYamlKeys, strict: false });
-  const formattedYml = apiKey ? replaceApiKey(yaml, apiKey) : yaml;
+  const sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER, yaml);
+  const yamlText = toYaml(policy, { sortMapEntries: sortYamlKeys, strict: false }, yaml);
+  const formattedYml = apiKey ? replaceApiKey(yamlText, apiKey) : yamlText;
 
   if (!policy?.secret_references?.length) return formattedYml;
 

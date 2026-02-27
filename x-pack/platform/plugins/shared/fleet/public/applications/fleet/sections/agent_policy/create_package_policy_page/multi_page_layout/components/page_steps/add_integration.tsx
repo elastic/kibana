@@ -8,7 +8,6 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { parse } from 'yaml';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 
@@ -35,6 +34,7 @@ import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../../services/ensure_kibana_assets_installed';
+import { useYaml } from '../../../../../../../../services';
 
 const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -90,6 +90,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     props;
 
   const { spaceId } = useFleetStatus();
+  const yaml = useYaml();
   const [basePolicyError, setBasePolicyError] = useState<RequestError>();
 
   const { notifications } = useStartServices();
@@ -109,10 +110,11 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
+      if (!yaml) return undefined;
       const newValidationResult = validatePackagePolicy(
         { ...packagePolicy, ...newPackagePolicy },
         packageInfo,
-        parse
+        yaml.parse
       );
       setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
@@ -120,7 +122,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
 
       return newValidationResult;
     },
-    [packageInfo, packagePolicy]
+    [packageInfo, packagePolicy, yaml]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(

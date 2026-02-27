@@ -6,6 +6,7 @@
  */
 
 export { isAdvancedVar } from './is_advanced_var';
+export type { YamlParseFn } from './has_invalid_but_required_var';
 export { hasInvalidButRequiredVar } from './has_invalid_but_required_var';
 export {
   getVisibleOptions,

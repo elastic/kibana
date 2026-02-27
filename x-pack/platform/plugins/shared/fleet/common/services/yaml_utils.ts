@@ -5,16 +5,34 @@
  * 2.0.
  */
 
-import type { Pair } from 'yaml';
-import { Document, isScalar } from 'yaml';
+/**
+ * Minimal shape of the yaml module required by these utils.
+ * Callers pass the actual yaml module (from static import or loadYaml()) so that
+ * common code does not statically import 'yaml' and pull it into the browser bundle.
+ */
+export interface YamlModule {
+  Document: new (data: unknown, options?: any) => { toString(): string };
+  isScalar: (node: unknown) => boolean;
+}
+
+/**
+ * Pair-like shape for YAML key sorting (key may be a scalar with .value).
+ */
+export interface YamlPairLike {
+  key: { value?: unknown };
+}
 
 /**
  * Creates a YAML key sorter function based on a defined key order.
  * Keys in the order array are sorted first, in the specified order.
  * Keys not in the array are sorted after, maintaining their relative order.
  */
-export function createYamlKeysSorter(keyOrder: string[]) {
-  return (a: Pair, b: Pair): number => {
+export function createYamlKeysSorter(
+  keyOrder: string[],
+  yaml: YamlModule
+): (a: YamlPairLike, b: YamlPairLike) => number {
+  const { isScalar } = yaml;
+  return (a, b): number => {
     if (!isScalar(a.key) || !isScalar(b.key)) {
       return 0;
     }
@@ -41,7 +59,7 @@ export function createYamlKeysSorter(keyOrder: string[]) {
  * Converts data to YAML string using the yaml package Document API.
  * This is the standard toYaml implementation used across Fleet.
  */
-export function toYaml(data: any, options: any): string {
-  const doc = new Document(data, options);
+export function toYaml(data: unknown, options: unknown, yaml: YamlModule): string {
+  const doc = new yaml.Document(data, options);
   return doc.toString();
 }
