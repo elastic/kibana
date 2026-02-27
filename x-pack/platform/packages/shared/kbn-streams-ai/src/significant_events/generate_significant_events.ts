@@ -9,7 +9,6 @@ import type { Feature, Streams } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
@@ -40,10 +39,8 @@ function getErrorMessage(error: unknown): string {
 }
 
 /**
- * Generate significant event definitions, based on:
- * - the description of the system (or stream if system is undefined)
- * - dataset analysis
- * - for the given significant event types
+ * Generate significant event definitions using a reasoning agent that fetches
+ * stream features (including computed dataset analysis) via tool calls.
  */
 export async function generateSignificantEvents({
   stream,
@@ -77,7 +74,6 @@ export async function generateSignificantEvents({
   logger.debug('Starting significant event generation');
 
   const toolUsage = createDefaultSignificantEventsToolUsage();
-  let formattedAnalysis: FormattedDocumentAnalysis | undefined;
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
@@ -87,7 +83,6 @@ export async function generateSignificantEvents({
       input: {
         name: stream.name,
         description: stream.description,
-        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },

@@ -15,7 +15,7 @@ Each query must be a complete, executable ES|QL query. A typical query follows t
 
 ## Context
 
-You will be provided with a name (`name`), a written description (`description`), and sampled dataset context in `dataset_analysis` when available. Use this sampled context as grounding signal, and use tools (especially `get_stream_features`) to enrich/validate your understanding with extracted features.
+You will be provided with a name (`name`) and a written description (`description`). Use the `get_stream_features` tool to retrieve dataset context, including the computed `dataset_analysis` feature which contains schema, field distributions, and sample values. Fetch this early to ground your queries in the actual data, and use other feature types to enrich your understanding.
 
 ### 1. **System Runtime and Execution Context**
 
