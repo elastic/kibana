@@ -15,7 +15,6 @@ import {
   mockIndexPatternWithoutTimeField,
   mockDateRange,
 } from './__mocks__/esql_query_mocks';
-import { normalizeEsql } from './generate_esql_query.test_helpers';
 
 describe('generateEsqlQuery', () => {
   const { uiSettings } = createCoreSetupMock();
@@ -57,10 +56,8 @@ describe('generateEsqlQuery', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(normalizeEsql(result.esql)).toBe(
-        normalizeEsql(
-          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
-        )
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
       );
     }
   });
@@ -164,10 +161,8 @@ describe('generateEsqlQuery', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(normalizeEsql(result.esql)).toBe(
-        normalizeEsql(
-          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
-        )
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
       );
     }
   });
@@ -206,8 +201,8 @@ describe('generateEsqlQuery', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(normalizeEsql(result.esql)).toBe(
-        normalizeEsql('FROM myIndexPattern | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)')
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | STATS COUNT(*) BY BUCKET(order_date, 30 minutes)'
       );
     }
   });
@@ -368,11 +363,9 @@ describe('generateEsqlQuery', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(normalizeEsql(result.esql)).toBe(
-        normalizeEsql(
-          // eslint-disable-next-line prettier/prettier
+      expect(result.esql).toBe(
+        // eslint-disable-next-line prettier/prettier
           'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 30 minutes)'
-        )
       );
     }
   });

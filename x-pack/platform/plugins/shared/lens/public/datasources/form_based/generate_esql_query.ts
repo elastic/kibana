@@ -93,6 +93,14 @@ export interface ColumnRoles {
   [columnId: string]: string;
 }
 
+const SINGLE_CHAR_INTERVAL: Record<string, string> = {
+  d: '1d',
+  h: '1h',
+  m: '1m',
+  s: '1s',
+  ms: '1ms',
+};
+
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
   layer: FormBasedLayer,
@@ -148,7 +156,7 @@ export function generateEsqlQuery(
   const staticValueEvals: string[] = [];
   staticValueEntries.forEach(([colId, col], index) => {
     const staticCol = col as StaticValueIndexPatternColumn;
-    const value = staticCol.params?.value ?? defaultStaticValue;
+    const value = staticCol.params?.value ?? `${defaultStaticValue}`;
 
     // Generate a column name for the static value
     // Priority: 1) semantic role name from visualization, 2) 'static_value' for single, 3) 'static_value_N' for multiple
@@ -176,21 +184,11 @@ export function generateEsqlQuery(
     });
 
     // Generate EVAL statement using composer literal helpers
-    const numValue =
-      typeof value === 'number'
-        ? value
-        : typeof value === 'string' && /^-?\d+(\.\d+)?$/.test(value)
-        ? Number(value)
-        : NaN;
-    const valueForEval =
-      staticCol.dataType === 'number' && !Number.isNaN(numValue)
-        ? `${esql.num(numValue)}`
-        : `${esql.str(String(value))}`;
-    staticValueEvals.push(`${esAggsId} = ${valueForEval}`);
+    staticValueEvals.push(`${esAggsId} = ${esql.num(Number(value))}`);
   });
 
   // Process metrics (excluding static_value which is handled above)
-  const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col], index) => {
+  const metricsResult: EsqlConversion[] = regularMetricEntries.map(([colId, col], _index) => {
     const def = operationDefinitionMap[col.operationType];
 
     if (col.operationType === 'formula') {
@@ -250,17 +248,18 @@ export function generateEsqlQuery(
 
     let metricESQL = rawResult.template;
 
-    if (wrapInFilter) {
-      if (col.filter?.language === 'kuery') {
-        metricESQL += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
-      } else if (col.filter?.language === 'lucene') {
-        metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
-      } else {
+    let filterClause = '';
+    if (wrapInFilter && col.filter) {
+      const { query, language } = col.filter;
+      if (language !== 'kuery' && language !== 'lucene') {
         return getEsqlQueryFailedResult('function_not_supported', col.operationType);
       }
+      const cmd = language === 'kuery' ? 'KQL' : 'QSTR';
+      const filteredQueryString = (query as string).replace(/"""/g, '').trim(); // Assume query is string type
+      filterClause = ` WHERE ${cmd}(${esql.str(filteredQueryString)})`;
     }
 
-    const esAggsId = metricESQL;
+    const esAggsId = (metricESQL += filterClause);
 
     esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
       col,
@@ -312,22 +311,7 @@ export function generateEsqlQuery(
       const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
       const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
-      const cleanInterval = (i: string) => {
-        switch (i) {
-          case 'd':
-            return '1d';
-          case 'h':
-            return '1h';
-          case 'm':
-            return '1m';
-          case 's':
-            return '1s';
-          case 'ms':
-            return '1ms';
-          default:
-            return i;
-        }
-      };
+      const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
       const kibanaInterval =
         dateHistogramColumn.params?.interval === 'auto'
           ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
@@ -450,7 +434,7 @@ export function generateEsqlQuery(
     const query = esql(queryString);
     return {
       success: true,
-      esql: query.print('wrapping'),
+      esql: query.print('basic'),
       partialRows,
       esAggsIdMap,
     };

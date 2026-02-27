@@ -15,7 +15,6 @@ import {
   mockIndexPatternWithoutTimeField,
   mockDateRange,
 } from './__mocks__/esql_query_mocks';
-import { normalizeEsql } from './generate_esql_query.test_helpers';
 
 // Helper to create static_value column with proper typing
 const createStaticValueColumn = (
@@ -73,10 +72,8 @@ describe('generateEsqlQuery metric max (static_value)', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(normalizeEsql(result.esql)).toBe(
-        normalizeEsql(
-          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes) | EVAL static_value = 100'
-        )
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 30 minutes) | EVAL static_value = 100'
       );
       expect(result.esAggsIdMap).toHaveProperty('static_value');
       expect(result.esAggsIdMap.static_value[0].id).toBe('3');
@@ -95,9 +92,7 @@ describe('generateEsqlQuery metric max (static_value)', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(normalizeEsql(result.esql)).toBe(
-        normalizeEsql('FROM myIndexPattern | EVAL static_value = 50')
-      );
+      expect(result.esql).toBe('FROM myIndexPattern | EVAL static_value = 50');
       expect(result.esAggsIdMap).toHaveProperty('static_value');
     }
   });
@@ -127,8 +122,8 @@ describe('generateEsqlQuery metric max (static_value)', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(normalizeEsql(result.esql)).toBe(
-        normalizeEsql('FROM myIndexPattern | STATS COUNT(*) | EVAL static_max_value = 100')
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | STATS COUNT(*) | EVAL static_max_value = 100'
       );
       expect(result.esAggsIdMap).toHaveProperty('static_max_value');
     }
@@ -149,8 +144,8 @@ describe('generateEsqlQuery metric max (static_value)', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(normalizeEsql(result.esql)).toBe(
-        normalizeEsql('FROM myIndexPattern | EVAL static_value_0 = 100, static_value_1 = 200')
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | EVAL static_value_0 = 100, static_value_1 = 200'
       );
       expect(result.esAggsIdMap).toHaveProperty('static_value_0');
       expect(result.esAggsIdMap).toHaveProperty('static_value_1');
