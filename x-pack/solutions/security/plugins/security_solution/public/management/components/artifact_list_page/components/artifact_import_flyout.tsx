@@ -56,21 +56,18 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
             toasts.addError(error, { title: labels.pageImportErrorToastTitle });
           },
           onSuccess: (response) => {
-            // todo: response contains lot of useful information, show somewhere?
-            toasts.addSuccess(labels.pageImportSuccessToastTitle);
+            toasts.addSuccess({
+              title: labels.pageImportSuccessToastTitle,
+              text: labels.getPageImportSuccessToastText?.(
+                response.success_count_exception_list_items
+              ),
+            });
             onSuccess();
           },
         }
       );
     }
-  }, [
-    file,
-    labels.pageImportErrorToastTitle,
-    labels.pageImportSuccessToastTitle,
-    mutate,
-    onSuccess,
-    toasts,
-  ]);
+  }, [file, labels, mutate, onSuccess, toasts]);
 
   const handleOnFileChange: EuiFilePickerProps['onChange'] = useCallback(
     (files: FileList | null) => {

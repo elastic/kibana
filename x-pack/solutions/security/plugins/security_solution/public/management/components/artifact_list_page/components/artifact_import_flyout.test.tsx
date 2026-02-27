@@ -119,9 +119,10 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     await ui.uploadFile();
     await userEvent.click(ui.getImportButton());
 
-    expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-      'Artifact list imported successfully'
-    );
+    expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      text: '2 items imported',
+      title: 'Artifact list imported successfully',
+    });
     expect(props.onSuccess).toHaveBeenCalled();
   });
 
