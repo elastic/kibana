@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const CREATE_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.createCase.label', {
-  defaultMessage: 'Create case',
+  defaultMessage: 'Cases - Create case',
 });
 
 export const CREATE_CASE_STEP_DESCRIPTION = i18n.translate(
@@ -29,7 +29,7 @@ export const CREATE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 export const CREATE_CASE_FROM_TEMPLATE_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.createCaseFromTemplate.label',
   {
-    defaultMessage: 'Create case from template',
+    defaultMessage: 'Cases - Create case from template',
   }
 );
 
@@ -50,7 +50,7 @@ export const CREATE_CASE_FROM_TEMPLATE_STEP_DOCUMENTATION_DETAILS = i18n.transla
 );
 
 export const UPDATE_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.updateCase.label', {
-  defaultMessage: 'Update case',
+  defaultMessage: 'Cases - Update case',
 });
 
 export const UPDATE_CASE_STEP_DESCRIPTION = i18n.translate(
@@ -69,7 +69,7 @@ export const UPDATE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const ADD_COMMENT_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.addComment.label', {
-  defaultMessage: 'Add case comment',
+  defaultMessage: 'Cases - Add comment',
 });
 
 export const ADD_COMMENT_STEP_DESCRIPTION = i18n.translate(
@@ -87,7 +87,7 @@ export const ADD_COMMENT_STEP_DOCUMENTATION_DETAILS = i18n.translate(
 );
 
 export const GET_CASE_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.getCase.label', {
-  defaultMessage: 'Get case by ID',
+  defaultMessage: 'Cases - Get case by ID',
 });
 
 export const GET_CASE_STEP_DESCRIPTION = i18n.translate(
