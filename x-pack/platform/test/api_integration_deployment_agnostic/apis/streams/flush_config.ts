@@ -39,31 +39,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
       const logs = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: {
-          path: { name: 'logs' },
+          path: { name: 'logs.otel' },
         },
       });
-      expect(getChildNames(logs.body.stream)).to.contain('logs.deeply');
+      expect(getChildNames(logs.body.stream)).to.contain('logs.otel.deeply');
 
       const logsDeeply = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: {
-          path: { name: 'logs.deeply' },
+          path: { name: 'logs.otel.deeply' },
         },
       });
-      expect(getChildNames(logsDeeply.body.stream)).to.contain('logs.deeply.nested');
+      expect(getChildNames(logsDeeply.body.stream)).to.contain('logs.otel.deeply.nested');
 
       const logsDeeplyNested = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: {
-          path: { name: 'logs.deeply.nested' },
+          path: { name: 'logs.otel.deeply.nested' },
         },
       });
       expect(getChildNames(logsDeeplyNested.body.stream)).to.contain(
-        'logs.deeply.nested.streamname'
+        'logs.otel.deeply.nested.streamname'
       );
       const logsDeeplyNestedStreamname = await apiClient.fetch(
         'GET /api/streams/{name} 2023-10-31',
         {
           params: {
-            path: { name: 'logs.deeply.nested.streamname' },
+            path: { name: 'logs.otel.deeply.nested.streamname' },
           },
         }
       );
@@ -79,7 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('puts the data in the right data streams', async () => {
       const logsResponse = await esClient.search({
-        index: 'logs',
+        index: 'logs.otel',
         query: {
           match: { severity_text: 'info' },
         },
@@ -88,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(logsResponse.hits.total).to.eql({ value: 1, relation: 'eq' });
 
       const logsTestResponse = await esClient.search({
-        index: 'logs.test',
+        index: 'logs.otel.test',
         query: {
           match: { 'attributes.numberfield': 20 },
         },
@@ -97,7 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(logsTestResponse.hits.total).to.eql({ value: 1, relation: 'eq' });
 
       const logsTest2Response = await esClient.search({
-        index: 'logs.test2',
+        index: 'logs.otel.test2',
         query: {
           match: { 'attributes.field2': 'abc' },
         },
@@ -107,31 +107,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     async function indexDocuments() {
-      // send data that stays in logs
+      // send data that stays in logs.otel
       const doc = {
         '@timestamp': '2024-01-01T00:00:00.000Z',
         message: 'test',
         'log.level': 'info',
       };
-      const response = await indexDocument(esClient, 'logs', doc);
+      const response = await indexDocument(esClient, 'logs.otel', doc);
       expect(response.result).to.eql('created');
 
-      // send data that lands in logs.test
+      // send data that lands in logs.otel.test
       const doc2 = {
         '@timestamp': '2024-01-01T00:00:00.000Z',
         message: 'test',
         numberfield: 20,
       };
-      const response2 = await indexDocument(esClient, 'logs', doc2);
+      const response2 = await indexDocument(esClient, 'logs.otel', doc2);
       expect(response2.result).to.eql('created');
 
-      // send data that lands in logs.test2
+      // send data that lands in logs.otel.test2
       const doc3 = {
         '@timestamp': '2024-01-01T00:00:00.000Z',
         message: '123',
         field2: 'abc',
       };
-      const response3 = await indexDocument(esClient, 'logs', doc3);
+      const response3 = await indexDocument(esClient, 'logs.otel', doc3);
       expect(response3.result).to.eql('created');
     }
   });

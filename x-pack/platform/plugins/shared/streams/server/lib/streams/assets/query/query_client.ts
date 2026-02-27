@@ -24,7 +24,7 @@ import type {
   Streams,
 } from '@kbn/streams-schema';
 import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
-import { isArray, isEqual, map, partition } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -58,12 +58,13 @@ import {
   QUERY_TYPE,
   QUERY_UPDATED_AT,
   RULE_BACKED,
+  RULE_ID,
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
-import { getRuleIdFromQueryLink } from './helpers/query';
 import { parseError } from '../../errors/parse_error';
 import { SecurityError } from '../../errors/security_error';
+import { computeRuleId } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
@@ -91,9 +92,7 @@ function termsQuery<T extends string>(
     return [];
   }
 
-  const filteredValues = values.filter(
-    (value) => value !== undefined
-  ) as unknown as TermQueryFieldValue[];
+  const filteredValues = values.filter((value) => value !== undefined) as TermQueryFieldValue[];
 
   return [{ terms: { [field]: filteredValues } }];
 }
@@ -196,6 +195,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     ...storageFields,
     stream_name: link[STREAM_NAME],
     rule_backed: storageFields[RULE_BACKED] ?? LEGACY_RULE_BACKED_FALLBACK,
+    rule_id: storageFields[RULE_ID],
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
@@ -257,7 +257,8 @@ function toStorage(
     [QUERY_CREATED_AT]: query.created_at,
     [QUERY_UPDATED_AT]: query.updated_at,
     [RULE_BACKED]: ruleBacked,
-  } as unknown as StoredQueryLink;
+    [RULE_ID]: link.rule_id,
+  } as StoredQueryLink;
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
@@ -268,12 +269,14 @@ function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): b
 }
 
 function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
+  const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
-    'asset.uuid': getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id }),
+    'asset.uuid': assetUuid,
     'asset.type': 'query',
     'asset.id': query.id,
     query,
     stream_name: stream,
+    rule_id: computeRuleId(assetUuid, query.esql.query),
   };
 }
 
@@ -290,17 +293,6 @@ export class QueryClient {
   ) {}
 
   // ==================== Storage Operations ====================
-
-  async linkQuery(definition: Streams.all.Definition, link: QueryLinkRequest): Promise<QueryLink> {
-    const document = toStorage(definition, link);
-
-    await this.dependencies.storageClient.index({
-      id: document[ASSET_UUID],
-      document,
-    });
-
-    return toQueryLink(definition, link);
-  }
 
   async syncQueryList(
     definition: Streams.all.Definition,
@@ -490,7 +482,9 @@ export class QueryClient {
       return { buckets: [], total: 0 };
     }
 
-    const ruleIds = filteredQueryLinks.map((queryLink) => getRuleIdFromQueryLink(queryLink));
+    const ruleIds = filteredQueryLinks.map((queryLink) =>
+      computeRuleId(queryLink[ASSET_UUID], queryLink.query.esql.query)
+    );
 
     const response = await this.dependencies.scopedClusterClient.asCurrentUser
       .search<
@@ -696,6 +690,7 @@ export class QueryClient {
         query: link.query,
         title: link.query.title,
         stream_name: link.stream_name,
+        rule_id: link.rule_id,
       };
     });
   }
@@ -722,28 +717,34 @@ export class QueryClient {
      * - If a query is deleted, it removes the associated rule.
      */
     const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
-    const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
+    const currentLinkByQueryId = new Map(currentQueryLinks.map((link) => [link.query.id, link]));
     const nextIds = new Set(queries.map((query) => query.id));
 
-    const nextQueriesToCreate = queries
-      .filter((query) => !currentIds.has(query.id))
-      .map((query) => toQueryLinkFromQuery(query, stream));
+    const nextQueriesToCreate: QueryLink[] = [];
+    const nextQueriesUpdatedWithBreakingChange: QueryLink[] = [];
+    const nextQueriesUpdatedWithoutBreakingChange: QueryLink[] = [];
+    const allNextQueryLinks: QueryLink[] = [];
+
+    for (const query of queries) {
+      const currentLink = currentLinkByQueryId.get(query.id);
+      if (!currentLink) {
+        const link = toQueryLinkFromQuery(query, stream);
+        nextQueriesToCreate.push(link);
+        allNextQueryLinks.push(link);
+      } else if (hasBreakingChange(currentLink.query, query)) {
+        const link = toQueryLinkFromQuery(query, stream);
+        nextQueriesUpdatedWithBreakingChange.push(link);
+        allNextQueryLinks.push(link);
+      } else {
+        const link = { ...currentLink, query };
+        nextQueriesUpdatedWithoutBreakingChange.push(link);
+        allNextQueryLinks.push(link);
+      }
+    }
 
     const currentQueriesToDelete = currentQueryLinks.filter((link) => !nextIds.has(link.query.id));
-
     const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
-      queries.some((query) => query.id === link.query.id && hasBreakingChange(link.query, query))
-    );
-
-    const [nextQueriesUpdatedWithBreakingChange, nextQueriesUpdatedWithoutBreakingChange] = map(
-      partition(
-        queries.filter((query) => currentIds.has(query.id)),
-        (query) => {
-          const currentLink = currentQueryLinks.find((link) => link.query.id === query.id);
-          return hasBreakingChange(currentLink!.query, query);
-        }
-      ),
-      (partitionedQueries) => partitionedQueries.map((query) => toQueryLinkFromQuery(query, stream))
+      nextQueriesUpdatedWithBreakingChange.some((updated) => updated.query.id === link.query.id)
     );
 
     await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
@@ -755,11 +756,12 @@ export class QueryClient {
 
     await this.syncQueryList(
       definition,
-      queries.map((query) => ({
-        [ASSET_ID]: query.id,
-        [ASSET_TYPE]: 'query',
-        query,
+      allNextQueryLinks.map((link) => ({
+        [ASSET_ID]: link[ASSET_ID],
+        [ASSET_TYPE]: link[ASSET_TYPE],
+        query: link.query,
         rule_backed: true,
+        rule_id: link.rule_id,
       }))
     );
   }
@@ -872,6 +874,7 @@ export class QueryClient {
           [ASSET_TYPE]: link[ASSET_TYPE],
           query: link.query,
           rule_backed: link.rule_backed,
+          rule_id: link.rule_id,
         }))
       );
       return;
@@ -901,7 +904,9 @@ export class QueryClient {
 
     const unbacked = await this.getUnbackedQueryLinks(streamName);
     const idSet = new Set(queryIds);
-    const toPromote = unbacked.filter((link) => idSet.has(link.query.id));
+    const toPromote = unbacked
+      .filter((link) => idSet.has(link.query.id))
+      .map((link) => toQueryLinkFromQuery(link.query, streamName));
 
     if (toPromote.length === 0) {
       return { promoted: 0 };
@@ -915,6 +920,7 @@ export class QueryClient {
         [ASSET_TYPE]: link[ASSET_TYPE],
         query: link.query,
         rule_backed: true,
+        rule_id: link.rule_id,
       });
       return {
         index: {
@@ -977,8 +983,9 @@ export class QueryClient {
     }
 
     const { rulesClient } = this.dependencies;
+    const ruleIds = queries.map((q) => q.rule_id);
     await rulesClient
-      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink), ignoreInternalRuleTypes: false })
+      .bulkDeleteRules({ ids: ruleIds, ignoreInternalRuleTypes: false })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 400) {
           return;
@@ -988,7 +995,7 @@ export class QueryClient {
   }
 
   private toCreateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
-    const ruleId = getRuleIdFromQueryLink(query);
+    const { rule_id: ruleId } = query;
     const indices = getIndexPatternsForStream(definition);
 
     const esqlQuery = buildEsqlQuery(indices, query.query, true);
@@ -1015,7 +1022,7 @@ export class QueryClient {
   }
 
   private toUpdateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
-    const ruleId = getRuleIdFromQueryLink(query);
+    const { rule_id: ruleId } = query;
     const indices = getIndexPatternsForStream(definition);
     const esqlQuery = buildEsqlQuery(indices, query.query, true);
     return {

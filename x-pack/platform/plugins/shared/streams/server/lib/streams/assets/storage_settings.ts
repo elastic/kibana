@@ -26,6 +26,7 @@ import {
   QUERY_TYPE,
   QUERY_UPDATED_AT,
   RULE_BACKED,
+  RULE_ID,
   STREAM_NAME,
 } from './fields';
 
@@ -57,6 +58,7 @@ export const queryStorageSettings = {
       [QUERY_MODEL]: types.keyword(),
       [QUERY_CREATED_AT]: types.date(),
       [QUERY_UPDATED_AT]: types.date(),
+      [RULE_ID]: types.keyword(),
       experimental: types.object({ enabled: false }),
     },
   },
