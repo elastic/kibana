@@ -8,7 +8,14 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
+import useWindowSize from 'react-use/lib/useWindowSize';
+import { cx } from '@emotion/css';
+import {
+  useServiceMapFullScreen,
+  applyServiceMapFullScreenBodyClasses,
+} from './use_service_map_fullscreen';
+import { SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS, SERVICE_MAP_FULL_SCREEN_CLASS } from './constants';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
@@ -106,11 +113,48 @@ export function ServiceMap({
   });
 
   const { ref, height } = useRefDimensions();
+  const windowHeight = useWindowSize().height;
   const { euiTheme } = useEuiTheme();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { styles, bodyClassesToToggle } = useServiceMapFullScreen();
+  const fullScreenContainerStyles = styles[SERVICE_MAP_FULL_SCREEN_CLASS];
 
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
   const heightWithPadding = height - PADDING_BOTTOM;
+
+  /** Store height when entering fullscreen; use it when exiting so zoom/actions don't corrupt measurement */
+  const heightBeforeFullscreenRef = useRef(heightWithPadding);
+  const [useStoredHeight, setUseStoredHeight] = useState(false);
+
+  if (!isFullscreen && !useStoredHeight) {
+    heightBeforeFullscreenRef.current = heightWithPadding;
+  }
+
+  const mapHeight = isFullscreen
+    ? windowHeight - PADDING_BOTTOM
+    : useStoredHeight
+    ? heightBeforeFullscreenRef.current
+    : heightWithPadding;
+
+  const onToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => {
+      if (prev) {
+        setUseStoredHeight(true);
+      }
+      return !prev;
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isFullscreen) {
+      applyServiceMapFullScreenBodyClasses(true, bodyClassesToToggle);
+      return () => {
+        applyServiceMapFullScreenBodyClasses(false, bodyClassesToToggle);
+        setUseStoredHeight(false);
+      };
+    }
+  }, [isFullscreen, bodyClassesToToggle]);
 
   if (!license) {
     return null;
@@ -171,28 +215,39 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showTimeComparison />
-      <EuiPanel hasBorder={true} paddingSize="none">
-        <div
-          data-test-subj="serviceMap"
-          style={{
-            height: heightWithPadding,
-            zIndex: Number(euiTheme.levels.content) + 1,
-          }}
-          ref={ref}
-        >
-          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-          <ServiceMapGraph
-            height={heightWithPadding}
-            nodes={data.nodes}
-            edges={data.edges}
-            serviceName={serviceName}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-          />
-        </div>
-      </EuiPanel>
+      <div
+        className={cx({
+          [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+          [SERVICE_MAP_FULL_SCREEN_CLASS]: isFullscreen,
+        })}
+        css={isFullscreen ? fullScreenContainerStyles : undefined}
+      >
+        <EuiPanel hasBorder={true} paddingSize="none">
+          <div
+            data-test-subj="serviceMap"
+            style={{
+              height: isFullscreen ? '100%' : mapHeight,
+              zIndex: Number(euiTheme.levels.content) + 1,
+              ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
+            }}
+            ref={ref}
+          >
+            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            <ServiceMapGraph
+              height={mapHeight}
+              nodes={data.nodes}
+              edges={data.edges}
+              serviceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={onToggleFullscreen}
+            />
+          </div>
+        </EuiPanel>
+      </div>
     </>
   );
 }
