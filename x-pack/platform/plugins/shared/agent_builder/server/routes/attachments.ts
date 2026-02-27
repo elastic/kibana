@@ -691,7 +691,7 @@ export function registerAttachmentRoutes({
         tags: ['attachment', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
-          since: '9.2.0',
+          since: '9.4.0',
         },
       },
     })
@@ -717,6 +717,9 @@ export function registerAttachmentRoutes({
               }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/attachments_update_origin.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
