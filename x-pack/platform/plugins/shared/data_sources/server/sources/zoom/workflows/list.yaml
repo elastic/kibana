@@ -1,6 +1,6 @@
 version: "1"
 name: "sources.zoom.list"
-description: "List Zoom resources. Actions and inputs: listUpcomingMeetings — list scheduled/upcoming meetings for a user (optional user_id, optional type, optional page_size, optional next_page_token); listUserRecordings — list cloud recordings for a user in a date range (optional user_id, optional from, optional to, optional page_size, optional next_page_token); listMeetingParticipants — list people who ACTUALLY ATTENDED a meeting that has already ended, returns join/leave times and duration, ONLY works for past meetings (meeting_id, optional page_size, optional next_page_token); listMeetingRegistrants — list people who SIGNED UP / REGISTERED for a meeting, works for both upcoming AND past meetings that have registration enabled, use this when asking about a future meeting's expected attendees (meeting_id, optional status, optional page_size, optional next_page_token)."
+description: "List Zoom resources. Actions and inputs: listUpcomingMeetings — list scheduled/upcoming meetings for a user (optional user_id, optional type, optional page_size, optional next_page_token); listUserRecordings — list cloud recordings for a user in a date range (optional user_id, optional from, optional to, optional page_size, optional next_page_token)."
 tags: ["agent-builder-tool"]
 enabled: true
 triggers:
@@ -11,27 +11,17 @@ inputs:
     options:
       - "listUpcomingMeetings"
       - "listUserRecordings"
-      - "listMeetingParticipants"
-      - "listMeetingRegistrants"
     required: true
   - name: user_id
     type: string
     required: false
     default: "me"
-    description: "User ID or email address. Defaults to 'me' for the authenticated user. Used by listUpcomingMeetings and listUserRecordings."
+    description: "User ID or email address. Defaults to 'me' for the authenticated user."
   - name: type
     type: string
     required: false
     default: "upcoming"
     description: "Meeting type filter for listUpcomingMeetings. Valid values: scheduled, live, upcoming, upcoming_meetings, previous_meetings."
-  - name: meeting_id
-    type: string
-    required: false
-    description: "Meeting ID or UUID. Required for listMeetingParticipants (only works for meetings that have already ended) and listMeetingRegistrants (works for any meeting with registration enabled, past or future)."
-  - name: status
-    type: string
-    required: false
-    description: "Registration status filter for listMeetingRegistrants. Valid values: pending, approved, denied. Defaults to approved."
   - name: from
     type: string
     required: false
@@ -68,23 +58,6 @@ steps:
       to: "${{inputs.to}}"
       pageSize: ${{inputs.page_size}}
       nextPageToken: "${{inputs.next_page_token}}"
-  - name: list-meeting-participants
-    type: zoom.getMeetingParticipants
-    if: "${{ inputs.list_action == 'listMeetingParticipants' and inputs.meeting_id }}"
-    connector-id: <%= zoom-stack-connector-id %>
-    with:
-      meetingId: "${{inputs.meeting_id}}"
-      pageSize: ${{inputs.page_size}}
-      nextPageToken: "${{inputs.next_page_token}}"
-  - name: list-meeting-registrants
-    type: zoom.getMeetingRegistrants
-    if: "${{ inputs.list_action == 'listMeetingRegistrants' and inputs.meeting_id }}"
-    connector-id: <%= zoom-stack-connector-id %>
-    with:
-      meetingId: "${{inputs.meeting_id}}"
-      status: "${{inputs.status}}"
-      pageSize: ${{inputs.page_size}}
-      nextPageToken: "${{inputs.next_page_token}}"
   - name: set-list-result
     type: if
     condition: "${{ inputs.list_action == 'listUpcomingMeetings' }}"
@@ -94,25 +67,7 @@ steps:
         with:
           result: "${{ steps.list-upcoming-meetings.output }}"
     else:
-      - name: check-recordings-or-people
-        type: if
-        condition: "${{ inputs.list_action == 'listUserRecordings' }}"
-        steps:
-          - name: set-recordings-output
-            type: data.set
-            with:
-              result: "${{ steps.list-user-recordings.output }}"
-        else:
-          - name: check-participants-or-registrants
-            type: if
-            condition: "${{ inputs.list_action == 'listMeetingParticipants' }}"
-            steps:
-              - name: set-participants-output
-                type: data.set
-                with:
-                  result: "${{ steps.list-meeting-participants.output }}"
-            else:
-              - name: set-registrants-output
-                type: data.set
-                with:
-                  result: "${{ steps.list-meeting-registrants.output }}"
+      - name: set-recordings-output
+        type: data.set
+        with:
+          result: "${{ steps.list-user-recordings.output }}"

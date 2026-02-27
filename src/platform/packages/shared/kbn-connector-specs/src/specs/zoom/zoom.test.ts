@@ -27,7 +27,6 @@ interface TestResult {
 describe('Zoom', () => {
   const mockClient = {
     get: jest.fn(),
-    post: jest.fn(),
   };
 
   const mockContext = {
@@ -106,6 +105,118 @@ describe('Zoom', () => {
       await expect(
         Zoom.actions.listMeetings.handler(mockContext, { userId: 'me', type: 'upcoming' })
       ).rejects.toThrow('Unauthorized');
+    });
+  });
+
+  describe('getMeetingDetails action', () => {
+    it('should get details of a scheduled meeting', async () => {
+      const mockResponse = {
+        data: {
+          uuid: 'uuid-123',
+          id: 111,
+          host_id: 'host-1',
+          host_email: 'host@example.com',
+          topic: 'Sprint Planning',
+          type: 2,
+          status: 'waiting',
+          start_time: '2026-03-01T10:00:00Z',
+          duration: 60,
+          timezone: 'America/New_York',
+          agenda: 'Plan the next sprint',
+          created_at: '2026-02-20T08:00:00Z',
+          join_url: 'https://zoom.us/j/111',
+          settings: { host_video: true, participant_video: false },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Zoom.actions.getMeetingDetails.handler(mockContext, {
+        meetingId: '111',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/meetings/111');
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should double-encode a UUID that starts with /', async () => {
+      const mockResponse = { data: { id: 111, topic: 'Test' } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Zoom.actions.getMeetingDetails.handler(mockContext, {
+        meetingId: '/abc+123==',
+      });
+
+      const expectedId = encodeURIComponent(encodeURIComponent('/abc+123=='));
+      expect(mockClient.get).toHaveBeenCalledWith(`https://api.zoom.us/v2/meetings/${expectedId}`);
+    });
+
+    it('should strip whitespace from a meeting ID', async () => {
+      const mockResponse = { data: { id: 111 } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Zoom.actions.getMeetingDetails.handler(mockContext, {
+        meetingId: '847 3703 8563',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/meetings/84737038563');
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Meeting not found'));
+
+      await expect(
+        Zoom.actions.getMeetingDetails.handler(mockContext, { meetingId: '999' })
+      ).rejects.toThrow('Meeting not found');
+    });
+  });
+
+  describe('getPastMeetingDetails action', () => {
+    it('should get summary of a past meeting', async () => {
+      const mockResponse = {
+        data: {
+          uuid: 'uuid-456',
+          id: 222,
+          host_id: 'host-1',
+          type: 2,
+          topic: 'Retrospective',
+          start_time: '2026-02-25T14:00:00Z',
+          end_time: '2026-02-25T15:00:00Z',
+          duration: 58,
+          total_minutes: 232,
+          participants_count: 4,
+          source: 'Zoom',
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Zoom.actions.getPastMeetingDetails.handler(mockContext, {
+        meetingId: '222',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://api.zoom.us/v2/past_meetings/222');
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should double-encode a UUID containing //', async () => {
+      const mockResponse = { data: { id: 222 } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Zoom.actions.getPastMeetingDetails.handler(mockContext, {
+        meetingId: 'abc//123==',
+      });
+
+      const expectedId = encodeURIComponent(encodeURIComponent('abc//123=='));
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `https://api.zoom.us/v2/past_meetings/${expectedId}`
+      );
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Meeting does not exist'));
+
+      await expect(
+        Zoom.actions.getPastMeetingDetails.handler(mockContext, { meetingId: '999' })
+      ).rejects.toThrow('Meeting does not exist');
     });
   });
 

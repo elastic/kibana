@@ -1,0 +1,109 @@
+version: "1"
+name: "sources.zoom.get_meeting"
+description: "Get information about a specific Zoom meeting. Actions and inputs: getMeetingDetails — get the topic, agenda, start time, duration, host, join URL, and settings for a scheduled or recurring meeting (meeting_id); getPastMeetingDetails — get summary statistics for a meeting that has already ended, including total minutes, participant count, and actual start/end times, ONLY works for past meetings (meeting_id); getMeetingRecordings — get cloud recording files for a meeting, each file has recording_type (shared_screen_with_speaker_view, audio_only, audio_transcript, chat_file, etc.), download_url, file_type, file_size, and status (meeting_id); getMeetingParticipants — list people who ACTUALLY ATTENDED a meeting that has already ended, returns join/leave times and duration, ONLY works for past meetings (meeting_id, optional page_size, optional next_page_token); getMeetingRegistrants — list people who SIGNED UP / REGISTERED for a meeting, works for both upcoming AND past meetings that have registration enabled, use this when asking about a future meeting's expected attendees (meeting_id, optional status, optional page_size, optional next_page_token)."
+tags: ["agent-builder-tool"]
+enabled: true
+triggers:
+  - type: "manual"
+inputs:
+  - name: get_action
+    type: choice
+    options:
+      - "getMeetingDetails"
+      - "getPastMeetingDetails"
+      - "getMeetingRecordings"
+      - "getMeetingParticipants"
+      - "getMeetingRegistrants"
+    required: true
+  - name: meeting_id
+    type: string
+    required: true
+    description: "The meeting ID or UUID."
+  - name: status
+    type: string
+    required: false
+    description: "Registration status filter for getMeetingRegistrants. Valid values: pending, approved, denied. Defaults to approved."
+  - name: page_size
+    type: number
+    required: false
+    description: "Number of results per page (1-300). Used by getMeetingParticipants and getMeetingRegistrants."
+  - name: next_page_token
+    type: string
+    required: false
+    description: "Pagination token from a previous response. Used by getMeetingParticipants and getMeetingRegistrants."
+steps:
+  - name: get-meeting-details
+    type: zoom.getMeetingDetails
+    if: "${{ inputs.get_action == 'getMeetingDetails' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      meetingId: "${{inputs.meeting_id}}"
+  - name: get-past-meeting-details
+    type: zoom.getPastMeetingDetails
+    if: "${{ inputs.get_action == 'getPastMeetingDetails' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      meetingId: "${{inputs.meeting_id}}"
+  - name: get-meeting-recordings
+    type: zoom.getMeetingRecordings
+    if: "${{ inputs.get_action == 'getMeetingRecordings' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      meetingId: "${{inputs.meeting_id}}"
+  - name: get-meeting-participants
+    type: zoom.getMeetingParticipants
+    if: "${{ inputs.get_action == 'getMeetingParticipants' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      meetingId: "${{inputs.meeting_id}}"
+      pageSize: ${{inputs.page_size}}
+      nextPageToken: "${{inputs.next_page_token}}"
+  - name: get-meeting-registrants
+    type: zoom.getMeetingRegistrants
+    if: "${{ inputs.get_action == 'getMeetingRegistrants' }}"
+    connector-id: <%= zoom-stack-connector-id %>
+    with:
+      meetingId: "${{inputs.meeting_id}}"
+      status: "${{inputs.status}}"
+      pageSize: ${{inputs.page_size}}
+      nextPageToken: "${{inputs.next_page_token}}"
+  - name: set-get-result
+    type: if
+    condition: "${{ inputs.get_action == 'getMeetingDetails' }}"
+    steps:
+      - name: set-details-output
+        type: data.set
+        with:
+          result: "${{ steps.get-meeting-details.output }}"
+    else:
+      - name: check-past-or-others
+        type: if
+        condition: "${{ inputs.get_action == 'getPastMeetingDetails' }}"
+        steps:
+          - name: set-past-output
+            type: data.set
+            with:
+              result: "${{ steps.get-past-meeting-details.output }}"
+        else:
+          - name: check-recordings-or-people
+            type: if
+            condition: "${{ inputs.get_action == 'getMeetingRecordings' }}"
+            steps:
+              - name: set-recordings-output
+                type: data.set
+                with:
+                  result: "${{ steps.get-meeting-recordings.output }}"
+            else:
+              - name: check-participants-or-registrants
+                type: if
+                condition: "${{ inputs.get_action == 'getMeetingParticipants' }}"
+                steps:
+                  - name: set-participants-output
+                    type: data.set
+                    with:
+                      result: "${{ steps.get-meeting-participants.output }}"
+                else:
+                  - name: set-registrants-output
+                    type: data.set
+                    with:
+                      result: "${{ steps.get-meeting-registrants.output }}"

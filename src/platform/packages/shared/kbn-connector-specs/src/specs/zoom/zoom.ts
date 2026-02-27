@@ -12,24 +12,28 @@
  *
  * Provides integration with Zoom via the Zoom REST API v2. Features include:
  * - Listing upcoming meetings
+ * - Retrieving meeting details and past meeting summaries
  * - Retrieving meeting recordings (including transcripts and chat files)
  * - Downloading recording files (transcripts, chat logs, audio, video)
  * - Listing participants of past meetings
+ * - Listing meeting registrants
  *
  * Auth: Bearer token (manual entry) until Kibana supports Zoom's S2S OAuth
  * (grant_type=account_credentials). Generate a token via:
  *   curl -X POST "https://zoom.us/oauth/token?grant_type=account_credentials&account_id=ACCOUNT_ID" \
- *     -H "Authorization: Basic $(echo -n 'CLIENT_ID:CLIENT_SECRET' | base64)"
+ *     -u "CLIENT_ID:CLIENT_SECRET"
  * Tokens expire after 1 hour.
  * See https://developers.zoom.us/docs/internal-apps/s2s-oauth/
  *
  * Required granular scopes on the Zoom S2S OAuth app:
  *   user:read:user:admin
+ *   meeting:read:meeting:admin
  *   meeting:read:list_meetings:admin
+ *   meeting:read:past_meeting:admin
  *   meeting:read:list_past_participants:admin
+ *   meeting:read:list_registrants:admin
  *   cloud_recording:read:list_recording_files:admin
  *   cloud_recording:read:list_user_recordings:admin
- *   meeting:read:list_registrants:admin
  */
 
 import { i18n } from '@kbn/i18n';
@@ -154,6 +158,84 @@ export const Zoom: ConnectorSpec = {
       },
     },
 
+    getMeetingDetails: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.zoom.actions.getMeetingDetails.description',
+        {
+          defaultMessage:
+            'Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, and settings. Use this to understand what a meeting is about before looking at recordings or participants.',
+        }
+      ),
+      input: z.object({
+        meetingId: z.string().describe('Meeting ID or UUID'),
+      }),
+      output: z.object({
+        uuid: z.string().optional(),
+        id: z.number().optional(),
+        host_id: z.string().optional(),
+        host_email: z.string().optional(),
+        topic: z.string().optional(),
+        type: z
+          .number()
+          .optional()
+          .describe(
+            'Meeting type: 1=instant, 2=scheduled, 3=recurring no fixed time, 8=recurring fixed time'
+          ),
+        status: z.string().optional().describe('Meeting status: waiting or started'),
+        start_time: z.string().optional(),
+        duration: z.number().optional().describe('Scheduled duration in minutes'),
+        timezone: z.string().optional(),
+        agenda: z.string().optional().describe('Meeting agenda/description'),
+        created_at: z.string().optional(),
+        join_url: z.string().optional(),
+        settings: z.any().optional().describe('Meeting settings object'),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { meetingId: string };
+        const encodedId = encodeZoomId(typedInput.meetingId);
+        ctx.log.debug(`Zoom getting meeting details for ${typedInput.meetingId}`);
+
+        const response = await ctx.client.get(`${ZOOM_API_BASE}/meetings/${encodedId}`);
+        return response.data;
+      },
+    },
+
+    getPastMeetingDetails: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.zoom.actions.getPastMeetingDetails.description',
+        {
+          defaultMessage:
+            'Get summary information for a meeting that has already ended. Returns total minutes, participant count, start/end times, and source. Only works for past meetings.',
+        }
+      ),
+      input: z.object({
+        meetingId: z.string().describe('Past meeting ID or UUID'),
+      }),
+      output: z.object({
+        uuid: z.string().optional(),
+        id: z.number().optional(),
+        host_id: z.string().optional(),
+        type: z.number().optional(),
+        topic: z.string().optional(),
+        start_time: z.string().optional(),
+        end_time: z.string().optional(),
+        duration: z.number().optional().describe('Actual meeting duration in minutes'),
+        total_minutes: z.number().optional().describe('Sum of all participant minutes'),
+        participants_count: z.number().optional(),
+        source: z.string().optional(),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { meetingId: string };
+        const encodedId = encodeZoomId(typedInput.meetingId);
+        ctx.log.debug(`Zoom getting past meeting details for ${typedInput.meetingId}`);
+
+        const response = await ctx.client.get(`${ZOOM_API_BASE}/past_meetings/${encodedId}`);
+        return response.data;
+      },
+    },
+
     getMeetingRecordings: {
       isTool: true,
       description: i18n.translate(
@@ -265,7 +347,8 @@ export const Zoom: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { downloadUrl: string };
-        ctx.log.debug(`Zoom downloading recording file from ${typedInput.downloadUrl}`);
+        const sanitizedUrl = typedInput.downloadUrl.split('?')[0];
+        ctx.log.debug(`Zoom downloading recording file from ${sanitizedUrl}`);
 
         const response = await ctx.client.get(typedInput.downloadUrl, {
           responseType: 'arraybuffer',
@@ -353,10 +436,11 @@ export const Zoom: ConnectorSpec = {
           pageSize?: number;
           nextPageToken?: string;
         };
+        const encodedId = encodeZoomId(typedInput.meetingId);
         ctx.log.debug(`Zoom listing registrants for meeting ${typedInput.meetingId}`);
 
         const response = await ctx.client.get(
-          `${ZOOM_API_BASE}/meetings/${encodeZoomId(typedInput.meetingId)}/registrants`,
+          `${ZOOM_API_BASE}/meetings/${encodedId}/registrants`,
           {
             params: {
               ...(typedInput.status && { status: typedInput.status }),

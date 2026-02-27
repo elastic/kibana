@@ -36,6 +36,14 @@ List meetings
     - **pageSize** (optional): Number of results per page (1–300).
     - **nextPageToken** (optional): Pagination token from a previous response.
 
+Get meeting details
+:   Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, and settings. Use this to understand what a meeting is about before looking at recordings or participants.
+    - **meetingId** (required): Meeting ID or UUID.
+
+Get past meeting details
+:   Get summary information for a meeting that has already ended. Returns total minutes, participant count, and actual start/end times. Only works for past meetings.
+    - **meetingId** (required): Past meeting ID or UUID.
+
 Get meeting recordings
 :   Get cloud recordings for a specific meeting. The response includes `recording_files` with types such as `audio_transcript` (VTT), `chat_file` (TXT), `shared_screen_with_speaker_view`, `audio_only`, and more.
     - **meetingId** (required): Meeting ID or UUID.
@@ -88,7 +96,9 @@ To use the Zoom connector, you need to create a Server-to-Server OAuth app in th
    - Navigate to the **Scopes** tab
    - Add the following granular scopes:
      - `user:read:user:admin` — verify connection
+     - `meeting:read:meeting:admin` — get meeting details
      - `meeting:read:list_meetings:admin` — list meetings
+     - `meeting:read:past_meeting:admin` — get past meeting details
      - `meeting:read:list_past_participants:admin` — list past meeting participants
      - `meeting:read:list_registrants:admin` — list meeting registrants
      - `cloud_recording:read:list_recording_files:admin` — get meeting recordings
