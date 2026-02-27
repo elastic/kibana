@@ -106,7 +106,12 @@ export default function SLODetailsFlyout({
     }
     if (slo && sloDetailsUrl) {
       return (
-        <EuiLink href={sloDetailsUrl} data-test-subj="sloDetailsFlyoutTitleLink" target="_blank">
+        <EuiLink
+          href={sloDetailsUrl}
+          data-test-subj="sloDetailsFlyoutTitleLink"
+          target="_blank"
+          data-event-element="linkOpenFullSloInApp"
+        >
           {slo.name}
         </EuiLink>
       );
@@ -188,6 +193,7 @@ export default function SLODetailsFlyout({
       size={size}
       session={session}
       resizable
+      data-event-location="sloDetailsFlyout"
     >
       <EuiFlyoutHeader hasBorder={!slo}>
         <EuiTitle size="s">

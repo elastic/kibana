@@ -353,6 +353,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                   { defaultMessage: 'active alerts badge' }
                 )}
                 data-test-subj="apmSloOverviewFlyoutTableActiveAlertsBadge"
+                data-event-element="activeAlertsTableBadge"
                 css={{ cursor: 'pointer' }}
               >
                 {alertCount}
@@ -383,6 +384,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
             <EuiLink
               data-test-subj="apmSloOverviewFlyoutTableSloNameLink"
+              data-event-element="sloNameTable"
               onClick={() => handleSloClick(sloItem.id)}
               css={{
                 display: 'flex',
@@ -440,11 +442,17 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       flyoutMenuProps={{
         title: flyoutTitle,
       }}
+      data-event-location="sloOverviewFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>
-            <EuiLink href={sloAppUrl} target="_blank" data-test-subj="sloOverviewFlyoutSloLink">
+            <EuiLink
+              href={sloAppUrl}
+              target="_blank"
+              data-test-subj="sloOverviewFlyoutSloLink"
+              data-event-element="linkOpenInSlosApp"
+            >
               {flyoutTitle}
             </EuiLink>
           </h2>
@@ -457,6 +465,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           color="hollow"
           css={{ color: euiTheme.colors.textPrimary }}
           data-test-subj="sloOverviewFlyoutServiceLink"
+          data-event-element="linkServiceName"
         >
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             {agentName && (

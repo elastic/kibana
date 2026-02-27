@@ -45,6 +45,7 @@ export default function CreateSLOFormFlyout({
       maxWidth={620}
       ownFocus
       session="start"
+      data-event-location="sloCreateFormFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="addSLOFlyoutTitle">
