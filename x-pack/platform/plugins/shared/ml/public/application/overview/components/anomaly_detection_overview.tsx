@@ -12,7 +12,7 @@ import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../locator';
-import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.png';
+import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.svg';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
@@ -113,7 +113,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
   ]);
 
   return showEmptyState ? (
-    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} />
+    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} iconSize="m" />
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
@@ -121,6 +121,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       hasBorder={true}
       hasShadow={false}
       iconSrc={adImage}
+      iconSize="m"
       iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {
         defaultMessage: 'Anomaly detection',
       })}
