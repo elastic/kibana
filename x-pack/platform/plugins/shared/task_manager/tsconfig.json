@@ -45,7 +45,6 @@
     "@kbn/connector-specs",
     "@kbn/es-errors",
     "@kbn/core-http-server",
-    "@kbn/event-log-plugin",
   ],
   "exclude": ["target/**/*"]
 }
