@@ -83,6 +83,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
+  isSingleInputAndStreams?: boolean;
   isEditPage?: boolean;
   isUpgrade?: boolean;
   varGroupSelections?: Record<string, string>;
@@ -95,6 +96,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
+    isSingleInputAndStreams = false,
     isEditPage = false,
     isUpgrade = false,
     varGroupSelections = {},
@@ -165,6 +167,12 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     );
     const showTopLevelDescription = inputStreams.length === 1;
 
+    const topLevelDescription = showTopLevelDescription && (
+      <EuiText size="s" color="subdued">
+        <ReactMarkdown>{String(inputStreams[0]?.packageInputStream?.description)}</ReactMarkdown>
+      </EuiText>
+    );
+
     const allStreamsDeprecated = useMemo(
       () => packageInputStreams.length > 0 && packageInputStreams.every((s) => !!s.deprecated),
       [packageInputStreams]
@@ -209,82 +217,91 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       <>
         {/* Header / input-level toggle */}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              data-test-subj="PackagePolicy.InputStreamConfig.Switch"
-              label={
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h3
-                        data-test-subj="PackagePolicy.InputStreamConfig.title"
-                        style={
-                          isDeprecatedInput
-                            ? { color: theme.euiTheme.colors.textSubdued }
-                            : undefined
-                        }
-                      >
-                        {packageInput.title || packageInput.type}
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  {isUpgrade && packagePolicyInput.migrate_from && !isDeprecatedInput && (
+          {isSingleInputAndStreams ? (
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3
+                  data-test-subj="PackagePolicy.InputStreamConfig.title"
+                  style={
+                    isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
+                  }
+                >
+                  {packageInput.title || packageInput.type}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {showTopLevelDescription && topLevelDescription}
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                data-test-subj="PackagePolicy.InputStreamConfig.Switch"
+                label={
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="info"
-                        color="subdued"
-                        content={i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
-                          {
-                            defaultMessage:
-                              'This input was automatically migrated from {migrateFrom}.',
-                            values: { migrateFrom: packagePolicyInput.migrate_from },
+                      <EuiTitle size="xs">
+                        <h3
+                          data-test-subj="PackagePolicy.InputStreamConfig.title"
+                          style={
+                            isDeprecatedInput
+                              ? { color: theme.euiTheme.colors.textSubdued }
+                              : undefined
                           }
-                        )}
-                      />
+                        >
+                          {packageInput.title || packageInput.type}
+                        </h3>
+                      </EuiTitle>
                     </EuiFlexItem>
-                  )}
-                  {isDeprecatedInput && (
-                    <EuiFlexItem grow={false}>
-                      <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedIcon">
+                    {isUpgrade && packagePolicyInput.migrate_from && !isDeprecatedInput && (
+                      <EuiFlexItem grow={false}>
                         <EuiIconTip
-                          type="warning"
-                          color="warning"
-                          position="top"
-                          content={deprecatedInputTooltip}
+                          type="info"
+                          color="subdued"
+                          content={i18n.translate(
+                            'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
+                            {
+                              defaultMessage:
+                                'This input was automatically migrated from {migrateFrom}.',
+                              values: { migrateFrom: packagePolicyInput.migrate_from },
+                            }
+                          )}
                         />
-                      </span>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              }
-              checked={packagePolicyInput.enabled}
-              disabled={packagePolicyInput.keep_enabled}
-              onChange={(e) => {
-                const enabled = e.target.checked;
-                updatePackagePolicyInput({
-                  enabled,
-                  streams: packagePolicyInput.streams.map((stream) => ({
-                    ...stream,
-                    enabled,
-                  })),
-                });
-                if (!enabled && isShowingStreams) {
-                  setIsShowingStreams(false);
+                      </EuiFlexItem>
+                    )}
+                    {isDeprecatedInput && (
+                      <EuiFlexItem grow={false}>
+                        <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedIcon">
+                          <EuiIconTip
+                            type="warning"
+                            color="warning"
+                            position="top"
+                            content={deprecatedInputTooltip}
+                          />
+                        </span>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 }
-              }}
-            />
-            <EuiSpacer size="s" />
-            {/* show the description under the top level toggle if theres only one stream */}
-            {showTopLevelDescription && (
-              <EuiText size="s" color="subdued">
-                <ReactMarkdown>
-                  {String(inputStreams[0]?.packageInputStream?.description)}
-                </ReactMarkdown>
-              </EuiText>
-            )}
-          </EuiFlexItem>
-
+                checked={packagePolicyInput.enabled}
+                disabled={packagePolicyInput.keep_enabled}
+                onChange={(e) => {
+                  const enabled = e.target.checked;
+                  updatePackagePolicyInput({
+                    enabled,
+                    streams: packagePolicyInput.streams.map((stream) => ({
+                      ...stream,
+                      enabled,
+                    })),
+                  });
+                  if (!enabled && isShowingStreams) {
+                    setIsShowingStreams(false);
+                  }
+                }}
+              />
+              <EuiSpacer size="s" />
+              {showTopLevelDescription && topLevelDescription}
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {/* Bubble up deprecation warning when collapsed and input has deprecated features */}
@@ -360,6 +377,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
+              showDescriptionColumn={!isSingleInputAndStreams}
             />
             {hasInputStreams ? <ShortenedHorizontalRule margin="m" /> : <EuiSpacer size="l" />}
           </Fragment>
@@ -376,6 +394,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   packageInputStream={packageInputStream}
                   totalStreams={inputStreams.length}
                   packagePolicyInputStream={packagePolicyInputStream!}
+                  showDescriptionColumn={!isSingleInputAndStreams}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
                   ) => {

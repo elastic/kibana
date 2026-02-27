@@ -15,11 +15,13 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiSpacer,
   EuiTextColor,
   EuiSkeletonText,
   EuiToolTip,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { QUERY_TIMEOUT } from '../../common/constants';
@@ -30,9 +32,12 @@ import type { ActionDetails, SearchHit } from '../../common/search_strategy';
 import type { PackResultCounts } from '../../common/search_strategy/osquery/actions';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 import { RunByColumn } from './components/run_by_column';
+import { HistoryFilters } from './components/history_filters';
 import { SourceColumn } from './components/source_column';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
+import { buildHistoryKuery } from './utils/build_history_kuery';
 
 const EMPTY_ARRAY: SearchHit[] = [];
 
@@ -65,12 +70,43 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({
 
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
+const SEARCH_DEBOUNCE_MS = 400;
+
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
+
+  const [searchValue, setSearchValue] = useState('');
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState('');
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchValue(searchValue), SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
+  const kuery = useMemo(() => {
+    if (!isHistoryEnabled) return 'user_id: *';
+
+    return buildHistoryKuery({
+      searchTerm: debouncedSearchValue,
+      selectedUserIds,
+    });
+  }, [isHistoryEnabled, debouncedSearchValue, selectedUserIds]);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchValue(value);
+    setPageIndex(0);
+  }, []);
+
+  const handleSelectedUsersChanged = useCallback((userIds: string[]) => {
+    setSelectedUserIds(userIds);
+    setPageIndex(0);
+  }, []);
 
   const { data: packsData } = usePacks({});
 
@@ -81,7 +117,7 @@ const ActionsTableComponent = () => {
   } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    ...(!isHistoryEnabled ? { kuery: 'user_id: *' } : {}),
+    kuery,
     withResultCounts: isHistoryEnabled,
   });
 
@@ -94,19 +130,20 @@ const ActionsTableComponent = () => {
     isHistoryEnabled ? actionItems : EMPTY_ARRAY
   );
 
-  const onTableChange = useCallback(({ page = {} }: any) => {
-    const { index, size } = page;
-
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<SearchHit>) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    },
+    [setPageSize]
+  );
 
   const renderQueryColumn = useCallback((_: any, item: any) => {
     if (item._source.pack_name) {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="package" />
+            <EuiIcon type="package" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
         </EuiFlexGroup>
@@ -398,7 +435,7 @@ const ActionsTableComponent = () => {
       pageIndex,
       pageSize,
       totalItemCount: actionsData?.data?.total ?? 0,
-      pageSizeOptions: [20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [actionsData, pageIndex, pageSize]
   );
@@ -415,19 +452,32 @@ const ActionsTableComponent = () => {
   }
 
   return (
-    <EuiBasicTable
-      items={actionItems}
-      loading={isFetching && !isLoading}
-      // @ts-expect-error update types
-      columns={columns}
-      pagination={pagination}
-      onChange={onTableChange}
-      rowProps={rowProps}
-      data-test-subj="liveQueryActionsTable"
-      tableCaption={i18n.translate('xpack.osquery.liveQueryActions.table.tableCaption', {
-        defaultMessage: 'Live query actions',
-      })}
-    />
+    <>
+      {isHistoryEnabled && (
+        <>
+          <HistoryFilters
+            searchValue={searchValue}
+            onSearchChange={handleSearchChange}
+            selectedUserIds={selectedUserIds}
+            onSelectedUsersChanged={handleSelectedUsersChanged}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiBasicTable
+        items={actionItems}
+        loading={isFetching && !isLoading}
+        // @ts-expect-error update types
+        columns={columns}
+        pagination={pagination}
+        onChange={onTableChange}
+        rowProps={rowProps}
+        data-test-subj="liveQueryActionsTable"
+        tableCaption={i18n.translate('xpack.osquery.liveQueryActions.table.tableCaption', {
+          defaultMessage: 'Live query actions',
+        })}
+      />
+    </>
   );
 };
 
