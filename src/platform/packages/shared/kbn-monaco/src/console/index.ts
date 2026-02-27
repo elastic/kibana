@@ -67,7 +67,14 @@ export const ConsoleLang: LangModuleType = {
             context,
             esqlCallbacks
           );
-          return wrapAsMonacoSuggestions(esqlSuggestions, queryText, false, !insideTripleQuotes);
+          return {
+            suggestions: wrapAsMonacoSuggestions(
+              esqlSuggestions,
+              queryText,
+              false,
+              !insideTripleQuotes
+            ),
+          };
         } else if (actionsProvider.current) {
           return actionsProvider.current?.provideCompletionItems(model, position, context);
         }
