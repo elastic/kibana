@@ -53,7 +53,7 @@ describe('StoreAlertEventsStep', () => {
       expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0];
-      expect(bulkCall.refresh).toBe('wait_for');
+      expect(bulkCall.refresh).toBe(false);
       expect(bulkCall.operations).toHaveLength(4);
 
       const operations = bulkCall.operations as Array<Record<string, unknown>>;

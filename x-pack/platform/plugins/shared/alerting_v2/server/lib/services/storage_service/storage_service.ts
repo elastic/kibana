@@ -47,7 +47,7 @@ export class StorageService implements StorageServiceContract {
     try {
       const response = await this.esClient.bulk({
         operations,
-        refresh: 'wait_for',
+        refresh: false,
       });
 
       this.logBulkIndexResponse({ index, docsCount: docs.length, response });
