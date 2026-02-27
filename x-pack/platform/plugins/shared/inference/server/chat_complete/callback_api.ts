@@ -7,11 +7,8 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  ChatCompleteOptions,
-  AnonymizationRule,
-  ChatCompleteAnonymizationTarget,
-} from '@kbn/inference-common';
+import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
+import type { ChatCompleteAnonymizationTarget } from '@kbn/inference-common/src/chat_complete/metadata';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -55,6 +52,7 @@ interface CreateChatCompleteApiOptions {
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
   replacementsEncryptionKey?: string;
+  usePersistentReplacements?: boolean;
   callbackManager?: InferenceCallbackManager;
   saltPromise?: Promise<string | undefined>;
   resolveEffectivePolicy?: (
@@ -97,6 +95,7 @@ export function createChatCompleteCallbackApi({
   esClient,
   replacementsEsClient,
   replacementsEncryptionKey,
+  usePersistentReplacements = true,
   callbackManager,
   saltPromise,
   resolveEffectivePolicy,
@@ -149,6 +148,19 @@ export function createChatCompleteCallbackApi({
               const effectivePolicy = await resolveEffectivePolicy?.(
                 metadata?.anonymization?.target
               );
+              if (!usePersistentReplacements) {
+                const anonymization = await anonymizeMessages({
+                  system,
+                  messages,
+                  anonymizationRules,
+                  regexWorker,
+                  esClient,
+                  salt: salt ?? undefined,
+                  effectivePolicy,
+                });
+                return { anonymization, replacementsId: undefined, effectivePolicy };
+              }
+
               const carriedReplacementsId = metadata?.anonymization?.replacementsId;
               // Replacements are stored in a hidden `.kibana-*` system index. Use an internal client
               // for persistence so authorized Kibana users don't also need direct ES index privileges.

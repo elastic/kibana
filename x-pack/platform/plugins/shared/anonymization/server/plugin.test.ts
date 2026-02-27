@@ -33,6 +33,12 @@ const initializationMock = jest.requireMock('./initialization') as {
   ensureAlertsDataViewProfile: jest.Mock;
 };
 
+const createPlugin = (enabled = true) => {
+  const initializerContext = coreMock.createPluginInitializerContext();
+  (initializerContext.config.get as jest.Mock).mockReturnValue({ enabled });
+  return new AnonymizationPlugin(initializerContext);
+};
+
 const createProfile = ({
   targetType,
   targetId,
@@ -71,8 +77,7 @@ describe('AnonymizationPlugin policy resolution', () => {
   });
 
   it('merges data view and referenced index-pattern policies with most-restrictive precedence', async () => {
-    const initializerContext = coreMock.createPluginInitializerContext();
-    const plugin = new AnonymizationPlugin(initializerContext);
+    const plugin = createPlugin();
     const coreStart = coreMock.createStart();
 
     const resolve = jest.fn().mockResolvedValue({
@@ -149,8 +154,7 @@ describe('AnonymizationPlugin policy resolution', () => {
   });
 
   it('falls back to data-view profile rules when data view resolution fails', async () => {
-    const initializerContext = coreMock.createPluginInitializerContext();
-    const plugin = new AnonymizationPlugin(initializerContext);
+    const plugin = createPlugin();
     const coreStart = coreMock.createStart();
 
     const notFoundError = SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -194,8 +198,7 @@ describe('AnonymizationPlugin policy resolution', () => {
   });
 
   it('registers routes and encrypted salt type on setup', () => {
-    const initializerContext = coreMock.createPluginInitializerContext();
-    const plugin = new AnonymizationPlugin(initializerContext);
+    const plugin = createPlugin();
     const setup = coreMock.createSetup();
     const features = featuresPluginMock.createSetup();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -211,8 +214,7 @@ describe('AnonymizationPlugin policy resolution', () => {
   });
 
   it('does not bootstrap global profile on start and lazily ensures/migrates it on first policy resolution', async () => {
-    const initializerContext = coreMock.createPluginInitializerContext();
-    const plugin = new AnonymizationPlugin(initializerContext);
+    const plugin = createPlugin();
     const coreStart = coreMock.createStart();
 
     const resolve = jest.fn().mockResolvedValue({
@@ -240,5 +242,38 @@ describe('AnonymizationPlugin policy resolution', () => {
     });
 
     expect(initializationMock.ensureGlobalProfileForNamespace).toHaveBeenCalled();
+  });
+
+  it('returns no policy and skips initialization when plugin is disabled', async () => {
+    const plugin = createPlugin(false);
+    const coreStart = coreMock.createStart();
+    const resolve = jest.fn().mockResolvedValue({
+      saved_object: { attributes: { title: 'logs-*' } },
+    });
+    const get = jest.fn().mockResolvedValue({ id: 'security-solution-alert-default' });
+    const asScopedToNamespace = jest.fn().mockReturnValue({
+      resolve,
+      get,
+    });
+    coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue({
+      asScopedToNamespace,
+    });
+
+    const findByTarget = jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+
+    const start = plugin.start(coreStart, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+    });
+    const policyService = start.getPolicyService();
+
+    const effectivePolicy = await policyService.resolveEffectivePolicy('default', {
+      type: 'data_view',
+      id: 'my-data-view',
+    });
+
+    expect(start.isEnabled()).toBe(false);
+    expect(effectivePolicy).toEqual({});
+    expect(findByTarget).not.toHaveBeenCalled();
+    expect(initializationMock.ensureGlobalProfileForNamespace).not.toHaveBeenCalled();
   });
 });

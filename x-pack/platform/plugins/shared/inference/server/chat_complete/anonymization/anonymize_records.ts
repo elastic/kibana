@@ -10,6 +10,7 @@ import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/inference-c
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { partition } from 'lodash';
 import { unescapePointerToken, type AnonymizationState } from './types';
+import { executeRegexRules } from './execute_regex_rules';
 import { executeNerRule } from './execute_ner_rule';
 import type { RegexWorkerService } from './regex_worker_service';
 import { resolveOverlapsAndMask } from './resolve_overlaps_and_mask';
@@ -257,9 +258,10 @@ export async function anonymizeRecords({
     (rule): rule is RegexAnonymizationRule => rule.type === 'RegExp'
   );
 
-  const detectedRegexEntities = await regexWorker.run({
-    rules: regexRules,
+  const detectedRegexEntities = await executeRegexRules({
     records: state.records,
+    rules: regexRules,
+    regexWorker,
   });
 
   // Process detected regex matches to resolve overlaps and apply masks

@@ -37,6 +37,7 @@ export interface CreateChatModelOptions {
   ) => Promise<EffectivePolicy | undefined>;
   callbacks?: InferenceCallbacks;
   replacementsEncryptionKey?: string;
+  usePersistentReplacements?: boolean;
 }
 
 export const createChatModel = async ({
@@ -53,6 +54,7 @@ export const createChatModel = async ({
   resolveEffectivePolicy,
   callbacks,
   replacementsEncryptionKey,
+  usePersistentReplacements,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
@@ -66,6 +68,7 @@ export const createChatModel = async ({
     resolveEffectivePolicy,
     callbacks,
     replacementsEncryptionKey,
+    usePersistentReplacements,
   });
   const connector = await getConnectorById({ connectorId, actions, request });
   return new InferenceChatModel({

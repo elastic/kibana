@@ -5,12 +5,32 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type {
+  PluginConfigDescriptor,
+  PluginInitializer,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { AnonymizationConfig } from './config';
+import { configSchema } from './config';
+import type {
+  AnonymizationPluginSetup,
+  AnonymizationPluginStart,
+  AnonymizationSetupDeps,
+  AnonymizationStartDeps,
+} from './plugin';
 
-export async function plugin(initializerContext: PluginInitializerContext) {
+export const plugin: PluginInitializer<
+  AnonymizationPluginSetup,
+  AnonymizationPluginStart,
+  AnonymizationSetupDeps,
+  AnonymizationStartDeps
+> = async (initializerContext: PluginInitializerContext<AnonymizationConfig>) => {
   const { AnonymizationPlugin } = await import('./plugin');
   return new AnonymizationPlugin(initializerContext);
-}
+};
 
 export type { AnonymizationPluginSetup, AnonymizationPluginStart } from './types';
 export type { AnonymizationPolicyService, AnonymizationTarget } from './types';
+export const config: PluginConfigDescriptor<AnonymizationConfig> = {
+  schema: configSchema,
+};

@@ -55,6 +55,11 @@ export interface AnonymizationPluginSetup {}
 
 export interface AnonymizationPluginStart {
   /**
+   * Returns whether the new anonymization profile-based flow is enabled.
+   */
+  isEnabled: () => boolean;
+
+  /**
    * Returns the policy service for resolving anonymization policy.
    */
   getPolicyService: () => AnonymizationPolicyService;

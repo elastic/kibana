@@ -12,7 +12,9 @@ import type {
   InferenceClient,
   AnonymizationRule,
   ChatCompleteAnonymizationTarget,
+  AnonymizationSettings,
 } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
@@ -30,6 +32,30 @@ import { uiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById } from './util/get_connector_by_id';
+
+const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
+  let parsed: unknown = value;
+
+  if (typeof value === 'string') {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+
+  if (
+    !parsed ||
+    typeof parsed !== 'object' ||
+    !Array.isArray((parsed as AnonymizationSettings).rules)
+  ) {
+    return [];
+  }
+
+  const allRules = (parsed as AnonymizationSettings).rules;
+  const enabledRules = allRules.filter((rule) => rule.enabled);
+  return enabledRules;
+};
 
 export class InferencePlugin
   implements
@@ -76,9 +102,19 @@ export class InferencePlugin
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const namespace =
         core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+      const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
       const policyService = pluginsStart.anonymization?.getPolicyService();
-      if (!policyService) {
-        return [];
+      const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
+
+      const getLegacyRules = async (): Promise<AnonymizationRule[]> => {
+        const legacySettings = await uiSettingsClient.get<unknown>(aiAnonymizationSettings);
+        const parsedRules = parseLegacyAnonymizationRules(legacySettings);
+        return parsedRules;
+      };
+
+      if (!anonymizationEnabled || !policyService) {
+        return getLegacyRules();
       }
 
       await policyService.ensureGlobalProfile(namespace);
@@ -107,15 +143,16 @@ export class InferencePlugin
       const namespace =
         core.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
       const policyService = pluginsStart.anonymization?.getPolicyService();
+      const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
       return {
         namespace,
         anonymizationRulesPromise: createAnonymizationRulesPromise(request),
         regexWorker: this.regexWorker!,
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         replacementsEsClient: core.elasticsearch.client.asInternalUser,
-        saltPromise: policyService?.getSalt(namespace),
+        saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
         resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
-          if (!policyService || !target) {
+          if (!anonymizationEnabled || !policyService || !target) {
             return undefined;
           }
           return policyService.resolveEffectivePolicy(namespace, {
@@ -123,7 +160,10 @@ export class InferencePlugin
             id: target.targetId,
           });
         },
-        replacementsEncryptionKey: this.config.replacements.encryptionKey,
+        replacementsEncryptionKey: anonymizationEnabled
+          ? this.config.replacements.encryptionKey
+          : undefined,
+        usePersistentReplacements: anonymizationEnabled,
       };
     };
 

@@ -21,6 +21,7 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { AnonymizationConfig } from './config';
 
 import type {
   AnonymizationPluginSetup,
@@ -42,12 +43,12 @@ import {
   ensureGlobalProfileForNamespace,
 } from './initialization';
 
-interface AnonymizationSetupDeps {
+export interface AnonymizationSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
 }
 
-interface AnonymizationStartDeps {
+export interface AnonymizationStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
@@ -65,10 +66,12 @@ export class AnonymizationPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: AnonymizationConfig;
   private policyService: AnonymizationPolicyService | undefined;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<AnonymizationConfig>) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<AnonymizationConfig>();
   }
 
   public setup(core: CoreSetup<AnonymizationStartDeps>, deps: AnonymizationSetupDeps) {
@@ -110,6 +113,7 @@ export class AnonymizationPlugin
 
   public start(core: CoreStart, deps: AnonymizationStartDeps): AnonymizationPluginStart {
     this.logger.debug('anonymization: Started');
+    const anonymizationEnabled = this.config.enabled;
 
     const esClient = core.elasticsearch.client.asInternalUser;
 
@@ -177,6 +181,10 @@ export class AnonymizationPlugin
 
     this.policyService = {
       resolveEffectivePolicy: async (namespace, target) => {
+        if (!anonymizationEnabled) {
+          return {};
+        }
+
         await ensureProfilesIndexReady();
         await ensureGlobalProfileForNamespace({
           namespace,
@@ -239,10 +247,18 @@ export class AnonymizationPlugin
       },
 
       getProfile: async (namespace, profileId) => {
+        if (!anonymizationEnabled) {
+          return null;
+        }
+
         return profilesRepo.get(namespace, profileId);
       },
 
       getGlobalProfile: async (namespace) => {
+        if (!anonymizationEnabled) {
+          return null;
+        }
+
         return profilesRepo.findByTarget(
           namespace,
           GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
@@ -251,6 +267,10 @@ export class AnonymizationPlugin
       },
 
       ensureGlobalProfile: async (namespace) => {
+        if (!anonymizationEnabled) {
+          return;
+        }
+
         await ensureProfilesIndexReady();
         await ensureGlobalProfileForNamespace({
           namespace,
@@ -266,6 +286,7 @@ export class AnonymizationPlugin
     };
 
     return {
+      isEnabled: () => anonymizationEnabled,
       getPolicyService: () => {
         if (!this.policyService) {
           throw new Error('AnonymizationPolicyService is not initialized');

@@ -38,6 +38,7 @@ interface CreateClientOptions {
     target?: ChatCompleteAnonymizationTarget
   ) => Promise<EffectivePolicy | undefined>;
   replacementsEncryptionKey?: string;
+  usePersistentReplacements?: boolean;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -62,6 +63,7 @@ export function createClient(
     resolveEffectivePolicy,
     replacementsEsClient,
     replacementsEncryptionKey,
+    usePersistentReplacements,
   } = options;
   const client = createInferenceClient({
     request,
@@ -76,6 +78,7 @@ export function createClient(
     saltPromise,
     resolveEffectivePolicy,
     replacementsEncryptionKey,
+    usePersistentReplacements,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);

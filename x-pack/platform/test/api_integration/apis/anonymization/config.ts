@@ -13,6 +13,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseIntegrationTestsConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...baseIntegrationTestsConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.anonymization.enabled=true',
+      ],
+    },
     esTestCluster: {
       ...baseIntegrationTestsConfig.get('esTestCluster'),
       serverArgs: [
