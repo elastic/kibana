@@ -65,12 +65,17 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'should display trace-specific columns in ES|QL mode',
+      'should display trace-specific columns in ESQL mode',
       async ({ page, pageObjects }) => {
-        await spaceTest.step('switch to ES|QL mode with a different index pattern', async () => {
+        // Using this step to switch to a different index pattern because
+        // navigating directly to the ESQL mode from the classic mode
+        // resets the data table columns to the default columns.
+        await spaceTest.step('switch to ESQL mode with a different index pattern', async () => {
           await pageObjects.discover.writeEsqlQuery('FROM traces-*');
         });
 
+        // By triggering a new query with the intended index pattern,
+        // we can ensure the data table columns are resolved loaded correctly.
         await spaceTest.step('change to traces-apm* to trigger profile columns', async () => {
           await pageObjects.discover.updateEsqlQuery(TRACES.ESQL_QUERY);
         });
