@@ -54,7 +54,11 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
               expect(muteResponse.statusCode).to.eql(403);
               expect(muteResponse.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('muteAlert', 'test.always-firing', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage(
+                  'muteAlert',
+                  'test.always-firing',
+                  'alertsFixture'
+                ),
                 statusCode: 403,
               });
               break;
@@ -72,7 +76,10 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
                 .expect(200);
               expect(ruleAfterMute.muted_alert_ids || []).to.contain('1');
 
-              const unmuteResponse = await alertUtils.getUnmuteInstanceRequest(createdAlert.id, '1');
+              const unmuteResponse = await alertUtils.getUnmuteInstanceRequest(
+                createdAlert.id,
+                '1'
+              );
               expect(unmuteResponse.statusCode).to.eql(204);
               const { body: ruleAfterUnmute } = await supertestWithoutAuth
                 .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -103,7 +110,9 @@ export default function mutedAlertsSecurityTests({ getService }: FtrProviderCont
           const expiresAt = new Date(Date.now() + 86400000).toISOString();
           let snoozeRequest = supertestWithoutAuth
             .post(
-              `${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute?validate_alerts_existence=false`
+              `${getUrlPrefix(space.id)}/api/alerting/rule/${
+                createdAlert.id
+              }/alert/1/_mute?validate_alerts_existence=false`
             )
             .set('kbn-xsrf', 'foo')
             .send({ expires_at: expiresAt });

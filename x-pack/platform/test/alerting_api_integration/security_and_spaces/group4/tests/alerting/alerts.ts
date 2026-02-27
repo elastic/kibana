@@ -1412,7 +1412,9 @@ instanceStateValue: true
                 );
                 expect(
                   afterMuteMessage,
-                  `Expected at least one action message after mute to show only instance 2. Got: ${messages.join('; ')}`
+                  `Expected at least one action message after mute to show only instance 2. Got: ${messages.join(
+                    '; '
+                  )}`
                 ).to.be.ok();
               });
               break;

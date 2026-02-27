@@ -613,7 +613,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const expiresAt = new Date(Date.now() + snoozeMs).toISOString();
       await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
         )
         .set('kbn-xsrf', 'foo')
         .send({ expires_at: expiresAt })
@@ -650,7 +652,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
       await retry.try(async () => {
         const unsnoozedAlerts = await getAlertsByRuleId(ruleId);
-        const a = unsnoozedAlerts.find((x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId);
+        const a = unsnoozedAlerts.find(
+          (x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
         expect(a).to.not.be(undefined);
         expect(a._source[ALERT_MUTED]).to.be(false);
       });
@@ -670,7 +674,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const expiresAt = new Date(Date.now() + 86400000).toISOString();
       await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
         )
         .set('kbn-xsrf', 'foo')
         .send({ expires_at: expiresAt })
@@ -689,8 +695,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const { body: rule } = await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
         .expect(200);
-      expect((rule.snoozed_instances ?? []).some((e: any) => e.instance_id === alertInstanceId)).to
-        .be(false);
+      expect(
+        (rule.snoozed_instances ?? []).some((e: any) => e.instance_id === alertInstanceId)
+      ).to.be(false);
 
       await retry.try(async () => {
         const unmutedAlerts = await getAlertsByRuleId(ruleId);
@@ -721,7 +728,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const expiresAt = new Date(Date.now() + 86400000).toISOString();
       await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
         )
         .set('kbn-xsrf', 'foo')
         .send({ expires_at: expiresAt })
@@ -759,7 +768,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
       const { body, status } = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
         )
         .set('kbn-xsrf', 'foo')
         .send({ expires_at: expiresAt });
@@ -782,7 +793,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const expiresAt = new Date(Date.now() + 86400000).toISOString();
       await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
         )
         .set('kbn-xsrf', 'foo')
         .send({ expires_at: expiresAt })
@@ -799,8 +812,11 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const { body: ruleAfterUnmute } = await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
         .expect(200);
-      expect((ruleAfterUnmute.snoozed_instances ?? []).filter((e: any) => e.instance_id === alertInstanceId))
-        .to.have.length(0);
+      expect(
+        (ruleAfterUnmute.snoozed_instances ?? []).filter(
+          (e: any) => e.instance_id === alertInstanceId
+        )
+      ).to.have.length(0);
     });
 
     it('should return snoozed_instances with conditions and condition_operator in GET rule', async () => {
@@ -816,13 +832,13 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
       await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
         )
         .set('kbn-xsrf', 'foo')
         .send({
-          conditions: [
-            { type: 'severity_equals', field: 'kibana.alert.severity', value: 'low' },
-          ],
+          conditions: [{ type: 'severity_equals', field: 'kibana.alert.severity', value: 'low' }],
           condition_operator: 'any',
         })
         .expect(204);
@@ -854,7 +870,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       const expiresAt = new Date(Date.now() + snoozeMs).toISOString();
       await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
         )
         .set('kbn-xsrf', 'foo')
         .send({ expires_at: expiresAt })

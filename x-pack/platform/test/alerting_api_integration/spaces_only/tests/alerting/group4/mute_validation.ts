@@ -10,12 +10,7 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integrati
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  AlertUtils,
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-} from '../../../../common/lib';
+import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
 const alertAsDataIndexPattern = '.internal.alerts-observability.test.alerts.alerts-default-*';
 
@@ -63,10 +58,7 @@ export default function muteValidationTests({ getService }: FtrProviderContext) 
         ignore_unavailable: true,
         query: {
           bool: {
-            must: [
-              { term: { [ALERT_RULE_UUID]: ruleId } },
-              { term: { [ALERT_STATUS]: 'active' } },
-            ],
+            must: [{ term: { [ALERT_RULE_UUID]: ruleId } }, { term: { [ALERT_STATUS]: 'active' } }],
           },
         },
       });
@@ -111,7 +103,9 @@ export default function muteValidationTests({ getService }: FtrProviderContext) 
     it('returns 400 when body has only condition_operator', async () => {
       const { body, status } = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
         )
         .set('kbn-xsrf', 'foo')
         .send({ condition_operator: 'all' });
@@ -124,7 +118,9 @@ export default function muteValidationTests({ getService }: FtrProviderContext) 
     it('returns 400 when body has empty conditions array', async () => {
       const { body, status } = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
         )
         .set('kbn-xsrf', 'foo')
         .send({ conditions: [] });
@@ -137,7 +133,9 @@ export default function muteValidationTests({ getService }: FtrProviderContext) 
     it('returns 400 when body has invalid expires_at format', async () => {
       const { body, status } = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
         )
         .set('kbn-xsrf', 'foo')
         .send({ expires_at: 'not-a-date' });
@@ -149,7 +147,9 @@ export default function muteValidationTests({ getService }: FtrProviderContext) 
     it('returns 204 when body is empty object for indefinite mute', async () => {
       const { status } = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
         )
         .set('kbn-xsrf', 'foo')
         .send({});
@@ -160,7 +160,9 @@ export default function muteValidationTests({ getService }: FtrProviderContext) 
     it('returns 204 when no body is sent for indefinite mute', async () => {
       const { status } = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
         )
         .set('kbn-xsrf', 'foo');
 
