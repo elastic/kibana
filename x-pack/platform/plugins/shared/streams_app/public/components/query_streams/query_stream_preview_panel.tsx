@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingElastic,
   EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { ESQL_VIEW_PREFIX, Streams } from '@kbn/streams-schema';
 import type { SampleDocument } from '@kbn/streams-schema';
 import { MemoPreviewTable } from '../data_management/shared';
 import { AssetImage } from '../asset_image';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface QueryStreamPreviewPanelProps {
   documents?: SampleDocument[];
@@ -30,7 +34,50 @@ export function QueryStreamPreviewPanel({
   isLoading,
   error,
 }: QueryStreamPreviewPanelProps) {
+  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const hasDocuments = documents && !isEmpty(documents);
+
+  const unknownIndexName = useMemo(() => {
+    if (!error?.message) return undefined;
+    const match = error.message.match(/Unknown index \[([^\]]+)\]/);
+    if (!match || match[1].startsWith(ESQL_VIEW_PREFIX)) return undefined;
+    return match[1];
+  }, [error]);
+
+  const [confirmedQueryStreamName, setConfirmedQueryStreamName] = useState<string>();
+
+  useEffect(() => {
+    if (!unknownIndexName) {
+      setConfirmedQueryStreamName(undefined);
+      return;
+    }
+    const abortController = new AbortController();
+    streamsRepositoryClient
+      .fetch('GET /api/streams/{name} 2023-10-31', {
+        params: { path: { name: unknownIndexName } },
+        signal: abortController.signal,
+      })
+      .then((response) => {
+        if (!abortController.signal.aborted && Streams.QueryStream.Definition.is(response.stream)) {
+          setConfirmedQueryStreamName(unknownIndexName);
+        }
+      })
+      .catch(() => {
+        if (!abortController.signal.aborted) {
+          setConfirmedQueryStreamName(undefined);
+        }
+      });
+    return () => {
+      abortController.abort();
+    };
+  }, [unknownIndexName, streamsRepositoryClient]);
+
+  const queryStreamHint = confirmedQueryStreamName
+    ? {
+        indexName: confirmedQueryStreamName,
+        suggestedView: `${ESQL_VIEW_PREFIX}${confirmedQueryStreamName}`,
+      }
+    : undefined;
 
   const [sorting, setSorting] = useState<{
     fieldName?: string;
@@ -59,7 +106,34 @@ export function QueryStreamPreviewPanel({
             })}
           </h2>
         }
-        body={error.message}
+        body={
+          <>
+            <p>{error.message}</p>
+            {queryStreamHint && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  announceOnMount
+                  title={i18n.translate('xpack.streams.queryStreamPreview.unknownIndexHint', {
+                    defaultMessage: '"{indexName}" is a query stream — use FROM {suggestedView}',
+                    values: queryStreamHint,
+                  })}
+                  color="warning"
+                  iconType="help"
+                  size="s"
+                >
+                  <p>
+                    {i18n.translate('xpack.streams.queryStreamPreview.unknownIndexExplanation', {
+                      defaultMessage:
+                        'Query streams use a {prefix} prefix for their ES|QL view names and must be referenced with it.',
+                      values: { prefix: ESQL_VIEW_PREFIX },
+                    })}
+                  </p>
+                </EuiCallOut>
+              </>
+            )}
+          </>
+        }
       />
     );
   } else if (!hasDocuments) {
