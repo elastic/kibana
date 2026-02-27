@@ -67,8 +67,6 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
             dispatch(setDataView({ tabId: tab.id, dataView }));
           }
 
-          tabStateContainer.savedSearchState.set(savedSearch);
-
           initialAppState = getInitialAppState({
             initialUrlState: undefined,
             persistedTab: tab,

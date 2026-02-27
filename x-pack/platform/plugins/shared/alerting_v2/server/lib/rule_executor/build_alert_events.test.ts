@@ -5,14 +5,30 @@
  * 2.0.
  */
 
-import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
-  buildAlertEventsFromEsqlResponse,
+  createAlertEventsBatchBuilder,
   buildRecoveryAlertEvents,
   buildQueryRecoveryAlertEvents,
 } from './build_alert_events';
+import type { BuildAlertEventsBaseOpts } from './build_alert_events';
 
-describe('buildAlertEventsFromEsqlResponse', () => {
+function buildAlertEventsFromEsqlResponse(
+  opts: BuildAlertEventsBaseOpts & { esqlResponse: EsqlQueryResponse }
+) {
+  const { esqlResponse, ...baseOpts } = opts;
+  const buildBatch = createAlertEventsBatchBuilder(baseOpts);
+  const rows = (esqlResponse.values ?? []).map((row) => {
+    const record: Record<string, unknown> = {};
+    (esqlResponse.columns ?? []).forEach((col, i) => {
+      record[col.name] = row[i];
+    });
+    return record;
+  });
+  return buildBatch(rows);
+}
+
+describe('createAlertEventsBatchBuilder', () => {
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -22,27 +38,21 @@ describe('buildAlertEventsFromEsqlResponse', () => {
     jest.useRealTimers();
   });
 
-  it('transforms ES|QL response rows into alert documents', () => {
-    const esqlResponse: EsqlEsqlResult = {
-      columns: [
-        { name: 'host.name', type: 'keyword' },
-        { name: 'region', type: 'keyword' },
-        { name: 'count', type: 'number' },
-      ],
-      values: [
-        ['host-a', 'us-east', 10],
-        ['host-b', 'eu-west', 5],
-      ],
-    };
+  it('transforms ES|QL rows into alert documents', () => {
+    const rows = [
+      { 'host.name': 'host-a', region: 'us-east', count: 10 },
+      { 'host.name': 'host-b', region: 'eu-west', count: 5 },
+    ];
 
-    const docs = buildAlertEventsFromEsqlResponse({
+    const buildBatch = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
       ruleAttributes: { grouping: { fields: ['host.name', 'region'] } },
-      esqlResponse,
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
     });
+
+    const docs = buildBatch(rows);
 
     expect(docs).toHaveLength(2);
 
@@ -148,7 +158,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
   });
 
   it('creates recovered events for active groups matching the recovery query', () => {
-    const esqlResponse: EsqlEsqlResult = {
+    const esqlResponse: EsqlQueryResponse = {
       columns: [
         { name: 'host.name', type: 'keyword' },
         { name: 'status', type: 'keyword' },
@@ -209,7 +219,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
   });
 
   it('ignores recovery query rows that do not match any active group', () => {
-    const esqlResponse: EsqlEsqlResult = {
+    const esqlResponse: EsqlQueryResponse = {
       columns: [{ name: 'host.name', type: 'keyword' }],
       values: [['host-unknown']],
     };
@@ -228,7 +238,7 @@ describe('buildQueryRecoveryAlertEvents', () => {
   });
 
   it('deduplicates when multiple recovery rows produce the same group hash', () => {
-    const esqlResponse: EsqlEsqlResult = {
+    const esqlResponse: EsqlQueryResponse = {
       columns: [
         { name: 'host.name', type: 'keyword' },
         { name: 'msg', type: 'keyword' },
