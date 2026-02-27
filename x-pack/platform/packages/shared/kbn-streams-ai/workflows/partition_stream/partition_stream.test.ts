@@ -237,6 +237,42 @@ describe('partitionStream', () => {
         })
       );
     });
+
+    it('should handle not conditions in excludeConditions', async () => {
+      const definition = createMockDefinition([
+        {
+          destination: 'logs.test.child-with-not',
+          where: { not: { field: 'cloud.availability_zone', eq: 'us-east-1a' } },
+          status: 'enabled',
+        },
+      ]);
+
+      mockClusterLogs.mockResolvedValueOnce([
+        {
+          name: 'Uncategorized logs',
+          condition: { always: {} },
+          clustering: { sampled: 0, noise: [], clusters: [] },
+        },
+      ]);
+
+      (mockEsClient.count as jest.Mock).mockResolvedValueOnce({ count: 100 });
+
+      const result = await partitionStream({
+        ...defaultParams,
+        definition,
+      });
+
+      expect(result).toEqual({
+        partitions: [],
+        reason: 'all_data_partitioned',
+      });
+
+      expect(mockClusterLogs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          excludeConditions: [{ not: { field: 'cloud.availability_zone', eq: 'us-east-1a' } }],
+        })
+      );
+    });
   });
 
   describe('LLM reasoning path', () => {

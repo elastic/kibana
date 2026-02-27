@@ -21,7 +21,12 @@ export interface ClusterLogsResponse {
   clusters: Array<{ count: number; analysis: FormattedDocumentAnalysis }>;
 }
 
-function getFields(condition: Condition): string[] {
+/**
+ * Extracts all field names from a condition, recursively handling
+ * nested conditions (and, or, not).
+ * @internal Exported for testing purposes only
+ */
+export function getFields(condition: Condition): string[] {
   if ('field' in condition) {
     return [condition.field];
   }
@@ -31,6 +36,9 @@ function getFields(condition: Condition): string[] {
   }
   if ('or' in condition) {
     return condition.or.flatMap(getFields);
+  }
+  if ('not' in condition) {
+    return getFields(condition.not);
   }
 
   return [];
