@@ -19,6 +19,9 @@ export enum ExecutionStatus {
   WAITING_FOR_INPUT = 'waiting_for_input',
   RUNNING = 'running',
 
+  // Waiting for a concurrency slot to open (queue strategy)
+  QUEUED = 'queued',
+
   // Done
   COMPLETED = 'completed',
   FAILED = 'failed',
@@ -42,6 +45,15 @@ export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
   ExecutionStatus.RUNNING,
+  ExecutionStatus.QUEUED,
+] as const;
+
+// Statuses that actively occupy a concurrency slot (excludes QUEUED, which is waiting for one)
+export const ActiveExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.RUNNING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
 ] as const;
 
 export enum ExecutionType {
@@ -187,6 +199,7 @@ export interface WorkflowExecutionDto {
   id: string;
   status: ExecutionStatus;
   isTestRun: boolean;
+  createdAt: string;
   startedAt: string;
   error: SerializedError | null;
   finishedAt: string;

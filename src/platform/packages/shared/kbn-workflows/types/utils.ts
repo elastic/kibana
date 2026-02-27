@@ -70,6 +70,7 @@ export function isCancelableStatus(status: ExecutionStatus) {
     ExecutionStatus.WAITING,
     ExecutionStatus.WAITING_FOR_INPUT,
     ExecutionStatus.PENDING,
+    ExecutionStatus.QUEUED,
   ];
   return CancelableStatus.includes(status);
 }

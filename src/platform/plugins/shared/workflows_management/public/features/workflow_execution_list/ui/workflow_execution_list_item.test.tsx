@@ -23,6 +23,7 @@ jest.mock('../../../shared/ui/use_formatted_date', () => ({
 const defaultProps = {
   status: ExecutionStatus.COMPLETED,
   isTestRun: false,
+  createdAt: new Date('2026-01-01T00:00:00Z'),
   startedAt: new Date('2026-01-01T00:00:00Z'),
   duration: 1000,
   executedBy: 'tal',

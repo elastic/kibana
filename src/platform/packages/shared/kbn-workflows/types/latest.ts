@@ -73,6 +73,7 @@ export {
   ExecutionTypeValues,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
+  ActiveExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
 } from './v1';

@@ -627,6 +627,48 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   });
 });
 
+describe('QUEUED execution cancellation', () => {
+  it('should directly transition QUEUED execution to CANCELLED without TM interaction', async () => {
+    const esClient =
+      elasticsearchServiceMock.createElasticsearchClient() as unknown as jest.Mocked<Client>;
+    esClient.update = jest.fn().mockResolvedValue({} as any);
+    esClient.get = jest.fn().mockResolvedValue({
+      _source: {
+        id: 'queued-exec-1',
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        status: ExecutionStatus.QUEUED,
+      },
+    } as any);
+
+    const repo = new WorkflowExecutionRepository(esClient);
+
+    const execution = await repo.getWorkflowExecutionById('queued-exec-1', 'default');
+    expect(execution?.status).toBe(ExecutionStatus.QUEUED);
+
+    await repo.updateWorkflowExecution({
+      id: 'queued-exec-1',
+      status: ExecutionStatus.CANCELLED,
+      cancelRequested: true,
+      cancellationReason: 'Cancelled by user',
+      cancelledAt: new Date().toISOString(),
+      cancelledBy: 'system',
+    });
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        id: 'queued-exec-1',
+        doc: expect.objectContaining({
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled by user',
+        }),
+      })
+    );
+  });
+});
+
 describe('elastic-apm-node dynamic import pattern', () => {
   const mockStartSpan = jest.fn().mockReturnValue({ end: jest.fn() });
   const mockSetLabel = jest.fn();

@@ -58,14 +58,20 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
   return schema;
 }
 
-export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop']);
+export const CollisionStrategySchema = z.enum(['cancel-in-progress', 'drop', 'queue']);
 export type CollisionStrategy = z.infer<typeof CollisionStrategySchema>;
 
-export const ConcurrencySettingsSchema = z.object({
-  key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
-  strategy: CollisionStrategySchema.optional(), // 'drop' or 'cancel-in-progress'
-  max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
-});
+export const ConcurrencySettingsSchema = z
+  .object({
+    key: z.string().optional(), // Concurrency group identifier e.g., '{{ event.host.name }}'
+    strategy: CollisionStrategySchema.optional(), // 'drop', 'cancel-in-progress', or 'queue'
+    max: z.number().int().min(1).optional(), // Max concurrent runs per concurrency group
+    maxQueueSize: z.number().int().min(1).optional(), // Max items waiting in queue (required when strategy is 'queue')
+  })
+  .refine((data) => data.strategy !== 'queue' || data.maxQueueSize !== undefined, {
+    message: 'maxQueueSize is required when strategy is queue',
+    path: ['maxQueueSize'],
+  });
 export type ConcurrencySettings = z.infer<typeof ConcurrencySettingsSchema>;
 
 export const WorkflowSettingsSchema = z.object({

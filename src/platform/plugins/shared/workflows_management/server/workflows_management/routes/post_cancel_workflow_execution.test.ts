@@ -61,7 +61,11 @@ describe('POST /api/workflowExecutions/{workflowExecutionId}/cancel', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith('execution-123', 'default');
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'execution-123',
+        'default',
+        mockRequest
+      );
       expect(mockResponse.ok).toHaveBeenCalledWith();
     });
 
@@ -103,7 +107,8 @@ describe('POST /api/workflowExecutions/{workflowExecutionId}/cancel', () => {
 
       expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
         'execution-456',
-        'custom-space'
+        'custom-space',
+        mockRequest
       );
       expect(mockResponse.ok).toHaveBeenCalledWith();
     });

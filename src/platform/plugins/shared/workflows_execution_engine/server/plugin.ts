@@ -16,7 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, TerminalExecutionStatuses, WorkflowRepository } from '@kbn/workflows';
 import type {
   ConcurrencySettings,
   EsWorkflowExecution,
@@ -73,6 +73,8 @@ export class WorkflowsExecutionEnginePlugin
   private readonly config: WorkflowsExecutionEngineConfig;
   private readonly kibanaVersion: string;
   private concurrencyManager!: ConcurrencyManager;
+  private workflowTaskManager!: WorkflowTaskManager;
+  private workflowExecutionRepository!: WorkflowExecutionRepository;
   private setupDependencies?: SetupDependencies;
   private meteringService?: WorkflowsMeteringService;
   private initializePromise?: Promise<void>;
@@ -167,16 +169,23 @@ export class WorkflowsExecutionEnginePlugin
                 workflowsExtensions: pluginsStart.workflowsExtensions,
               };
 
-              await runWorkflow({
-                workflowRunId,
-                spaceId,
-                taskAbortController,
-                config,
-                logger,
-                fakeRequest,
-                dependencies,
-                meteringService: this.meteringService,
-              });
+              try {
+                await runWorkflow({
+                  workflowRunId,
+                  spaceId,
+                  taskAbortController,
+                  config,
+                  logger,
+                  fakeRequest,
+                  dependencies,
+                  meteringService: this.meteringService,
+                });
+              } finally {
+                await this.promoteNextQueuedIfNeeded(workflowRunId, spaceId, fakeRequest).catch(
+                  (err) =>
+                    this.logger.error(`Promotion failed after execution ${workflowRunId}: ${err}`)
+                );
+              }
             },
             cancel: async () => {
               taskAbortController.abort();
@@ -242,16 +251,23 @@ export class WorkflowsExecutionEnginePlugin
                 workflowsExtensions: pluginsStart.workflowsExtensions,
               };
 
-              await resumeWorkflow({
-                workflowRunId,
-                spaceId,
-                taskAbortController,
-                config,
-                logger,
-                fakeRequest,
-                dependencies,
-                meteringService: this.meteringService,
-              });
+              try {
+                await resumeWorkflow({
+                  workflowRunId,
+                  spaceId,
+                  taskAbortController,
+                  config,
+                  logger,
+                  fakeRequest,
+                  dependencies,
+                  meteringService: this.meteringService,
+                });
+              } finally {
+                await this.promoteNextQueuedIfNeeded(workflowRunId, spaceId, fakeRequest).catch(
+                  (err) =>
+                    this.logger.error(`Promotion failed after execution ${workflowRunId}: ${err}`)
+                );
+              }
             },
             cancel: async () => {
               taskAbortController.abort();
@@ -445,16 +461,28 @@ export class WorkflowsExecutionEnginePlugin
                 throw new Error('Workflow execution must have id and spaceId');
               }
 
-              await runWorkflow({
-                workflowRunId: workflowExecution.id,
-                spaceId: workflowExecution.spaceId,
-                taskAbortController,
-                logger,
-                config,
-                fakeRequest,
-                dependencies,
-                meteringService: this.meteringService,
-              });
+              try {
+                await runWorkflow({
+                  workflowRunId: workflowExecution.id,
+                  spaceId: workflowExecution.spaceId,
+                  taskAbortController,
+                  logger,
+                  config,
+                  fakeRequest,
+                  dependencies,
+                  meteringService: this.meteringService,
+                });
+              } finally {
+                await this.promoteNextQueuedIfNeeded(
+                  workflowExecution.id as string,
+                  workflowExecution.spaceId as string,
+                  fakeRequest
+                ).catch((err) =>
+                  this.logger.error(
+                    `Promotion failed after execution ${workflowExecution.id}: ${err}`
+                  )
+                );
+              }
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
               logger.debug(
@@ -484,6 +512,8 @@ export class WorkflowsExecutionEnginePlugin
     const workflowExecutionRepository = new WorkflowExecutionRepository(
       coreStart.elasticsearch.client.asInternalUser
     );
+    this.workflowTaskManager = workflowTaskManager;
+    this.workflowExecutionRepository = workflowExecutionRepository;
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
       workflowExecutionRepository
@@ -603,16 +633,26 @@ export class WorkflowsExecutionEnginePlugin
           `Executing workflow directly (already in Task Manager context): ${workflow.id}`
         );
 
-        await runWorkflow({
-          workflowRunId: workflowExecution.id as string,
-          spaceId: workflowExecution.spaceId || 'default',
-          taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
-          logger: this.logger,
-          config: this.config,
-          fakeRequest: request,
-          dependencies,
-          meteringService: this.meteringService,
-        });
+        try {
+          await runWorkflow({
+            workflowRunId: workflowExecution.id as string,
+            spaceId: workflowExecution.spaceId || 'default',
+            taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
+            logger: this.logger,
+            config: this.config,
+            fakeRequest: request,
+            dependencies,
+            meteringService: this.meteringService,
+          });
+        } finally {
+          await this.promoteNextQueuedIfNeeded(
+            workflowExecution.id as string,
+            workflowExecution.spaceId || 'default',
+            request
+          ).catch((err) =>
+            this.logger.error(`Promotion failed after execution ${workflowExecution.id}: ${err}`)
+          );
+        }
       } else {
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
         await plugins.taskManager.schedule(taskInstance, { request: request as KibanaRequest });
@@ -729,7 +769,8 @@ export class WorkflowsExecutionEnginePlugin
 
     const cancelWorkflowExecution: CancelWorkflowExecution = async (
       workflowExecutionId,
-      spaceId
+      spaceId,
+      request?
     ) => {
       await checkLicense(plugins.licensing);
 
@@ -748,7 +789,38 @@ export class WorkflowsExecutionEnginePlugin
           workflowExecution.status
         )
       ) {
-        // Already in a terminal state or being canceled
+        return;
+      }
+
+      // QUEUED and PENDING executions may have no TM task — cancel directly.
+      // QUEUED never had a task; PENDING may be a zombie (promotion succeeded but
+      // task scheduling failed). Either way, the task hasn't started running, so
+      // a direct status transition is safe. Then promote the next queued execution
+      // to fill the freed slot.
+      if (
+        workflowExecution.status === ExecutionStatus.QUEUED ||
+        workflowExecution.status === ExecutionStatus.PENDING
+      ) {
+        await workflowExecutionRepository.updateWorkflowExecution(
+          {
+            id: workflowExecution.id,
+            status: ExecutionStatus.CANCELLED,
+            cancelRequested: true,
+            cancellationReason: 'Cancelled by user',
+            cancelledAt: new Date().toISOString(),
+            cancelledBy: 'system',
+            finishedAt: new Date().toISOString(),
+          },
+          { refresh: 'wait_for' }
+        );
+        if (request) {
+          await this.promoteNextQueuedIfNeeded(workflowExecutionId, spaceId, request).catch(
+            (err) =>
+              this.logger.error(
+                `Promotion failed after cancelling ${workflowExecutionId}: ${err}`
+              )
+          );
+        }
         return;
       }
 
@@ -766,6 +838,10 @@ export class WorkflowsExecutionEnginePlugin
       coreStart.dataStreams,
       this.logger,
       this.config.logging.console
+    );
+
+    this.recoverOrphanedQueuedExecutions().catch((err) =>
+      this.logger.warn(`Failed to recover orphaned queued executions on startup: ${err}`)
     );
 
     return {
@@ -890,6 +966,172 @@ export class WorkflowsExecutionEnginePlugin
         this.logger.debug(`Concurrency enforcement error stack: ${error.stack}`);
       }
       return true; // On error, allow execution to proceed
+    }
+  }
+
+  /**
+   * After an execution completes (success or failure), checks whether there are queued
+   * executions for the same concurrency group that can now be promoted and scheduled.
+   *
+   * Early-returns for non-queue workflows so there's zero overhead for drop/cancel-in-progress.
+   */
+  private async promoteNextQueuedIfNeeded(
+    workflowRunId: string,
+    spaceId: string,
+    fakeRequest: KibanaRequest
+  ): Promise<void> {
+    if (!this.workflowExecutionRepository || !this.workflowTaskManager) {
+      return;
+    }
+
+    const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    const concurrency = execution?.workflowDefinition?.settings?.concurrency;
+
+    if (concurrency?.strategy !== 'queue' || !execution?.concurrencyGroupKey) {
+      return;
+    }
+
+    const max = concurrency.max ?? 1;
+
+    // Conditionally exclude the triggering execution from the active count:
+    // - Terminal (COMPLETED/FAILED/…): exclude it, because the ES search index may not yet
+    //   reflect the status update (near-real-time lag) and would still count it as active.
+    // - Non-terminal (WAITING for resume, etc.): do NOT exclude — it still occupies a slot.
+    const excludeId = TerminalExecutionStatuses.includes(execution.status)
+      ? workflowRunId
+      : undefined;
+    const activeIds = await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
+      execution.concurrencyGroupKey,
+      spaceId,
+      excludeId
+    );
+    const availableSlots = max - activeIds.length;
+
+    if (availableSlots <= 0) {
+      return;
+    }
+
+    const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
+      execution.concurrencyGroupKey,
+      spaceId,
+      availableSlots
+    );
+
+    for (const exec of queued) {
+      const result = await this.workflowExecutionRepository.promoteQueuedExecution(exec.id);
+      if (result === 'updated') {
+        try {
+          await this.workflowTaskManager.scheduleExecutionTask({
+            executionId: exec.id,
+            workflowId: exec.workflowId,
+            spaceId,
+            fakeRequest,
+          });
+        } catch (err) {
+          this.logger.error(
+            `Failed to schedule promoted execution ${exec.id}, reverting to QUEUED: ${err}`
+          );
+          await this.workflowExecutionRepository
+            .updateWorkflowExecution(
+              { id: exec.id, status: ExecutionStatus.QUEUED },
+              { refresh: 'wait_for' }
+            )
+            .catch((revertErr) =>
+              this.logger.error(`Failed to revert execution ${exec.id} to QUEUED: ${revertErr}`)
+            );
+        }
+      }
+    }
+  }
+
+  /**
+   * Recovers orphaned QUEUED executions after a Kibana restart.
+   * Also detects stuck PENDING executions from queue-strategy workflows and
+   * reverts them to QUEUED so they can be re-promoted with fresh TM tasks.
+   *
+   * QUEUED docs have no TM task, so if Kibana restarts while executions are queued
+   * and the group has no running executions, the queue would be permanently stuck.
+   * PENDING docs from a failed promotion (TM task never scheduled) block the
+   * concurrency slot and prevent any queued executions from being promoted.
+   */
+  private async recoverOrphanedQueuedExecutions(): Promise<void> {
+    if (!this.workflowExecutionRepository || !this.workflowTaskManager) {
+      return;
+    }
+
+    // Revert stuck PENDING executions from queue-strategy workflows back to QUEUED.
+    // A PENDING execution without a running TM task blocks the concurrency slot forever.
+    // On restart, it's safe to revert because any legitimate TM task from the previous
+    // instance would need to be re-created anyway.
+    // Uses refresh: 'wait_for' so the revert is visible before the active-count query below.
+    const stuckPending = await this.workflowExecutionRepository.searchWorkflowExecutions(
+      {
+        bool: {
+          filter: [
+            { term: { status: ExecutionStatus.PENDING } },
+            { exists: { field: 'concurrencyGroupKey' } },
+          ],
+        },
+      },
+      10000
+    );
+
+    for (const hit of stuckPending) {
+      const doc = hit._source;
+      if (doc?.id && doc.workflowDefinition?.settings?.concurrency?.strategy === 'queue') {
+        if (doc.cancelRequested) {
+          this.logger.info(
+            `Completing cancellation of stuck PENDING execution ${doc.id} (cancel was requested)`
+          );
+          await this.workflowExecutionRepository
+            .updateWorkflowExecution(
+              {
+                id: doc.id,
+                status: ExecutionStatus.CANCELLED,
+                finishedAt: new Date().toISOString(),
+              },
+              { refresh: 'wait_for' }
+            )
+            .catch((err) =>
+              this.logger.error(
+                `Failed to cancel stuck PENDING execution ${doc.id}: ${err}`
+              )
+            );
+        } else {
+          this.logger.info(
+            `Reverting stuck PENDING execution ${doc.id} to QUEUED for re-promotion`
+          );
+          await this.workflowExecutionRepository
+            .updateWorkflowExecution(
+              { id: doc.id, status: ExecutionStatus.QUEUED },
+              { refresh: 'wait_for' }
+            )
+            .catch((err) =>
+              this.logger.error(
+                `Failed to revert PENDING execution ${doc.id} to QUEUED: ${err}`
+              )
+            );
+        }
+      }
+    }
+
+    // Note: we intentionally do NOT promote QUEUED → PENDING here because
+    // scheduling a TM task requires the user's request/API-key context, which
+    // is unavailable during a server restart. Queued executions will be promoted
+    // when the next workflow execution completes (via promoteNextQueuedIfNeeded)
+    // or when a user cancels a stuck execution.
+    const queuedCount = await this.workflowExecutionRepository.searchWorkflowExecutions(
+      { bool: { filter: [{ term: { status: ExecutionStatus.QUEUED } }] } },
+      0
+    );
+    if (queuedCount.length > 0 || stuckPending.length > 0) {
+      this.logger.info(
+        `Queue recovery: cleaned up ${stuckPending.length} stuck PENDING executions. ` +
+          `${queuedCount.length} QUEUED executions remain and will drain on the next trigger.`
+      );
     }
   }
 }

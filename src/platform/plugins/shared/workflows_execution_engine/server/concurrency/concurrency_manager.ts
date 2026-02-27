@@ -130,6 +130,33 @@ export class ConcurrencyManager {
       return true;
     }
 
+    // Handle 'queue' strategy: hold the execution in a queue until a slot opens
+    if (strategy === 'queue') {
+      const maxQueueSize = concurrencySettings.maxQueueSize ?? 1;
+      const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
+        concurrencyGroupKey,
+        spaceId
+      );
+
+      if (queued.length >= maxQueueSize) {
+        await this.workflowExecutionRepository.updateWorkflowExecution({
+          id: currentExecutionId,
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: `Queue full (maxQueueSize: ${maxQueueSize})`,
+          cancelledAt: new Date().toISOString(),
+          cancelledBy: 'system',
+        });
+        return false;
+      }
+
+      await this.workflowExecutionRepository.updateWorkflowExecution({
+        id: currentExecutionId,
+        status: ExecutionStatus.QUEUED,
+      });
+      return false;
+    }
+
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
