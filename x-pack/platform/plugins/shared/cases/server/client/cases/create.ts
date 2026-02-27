@@ -99,6 +99,12 @@ export const create = async (
       refresh: false,
     });
 
+    caseService.syncCaseToAnalyticsContentIndex(
+      newCase.id,
+      newCase.attributes.owner,
+      clientArgs.spaceId
+    );
+
     await userActionService.creator.createUserAction({
       userAction: {
         type: UserActionTypes.create_case,

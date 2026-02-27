@@ -10,17 +10,17 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
-  getCommentsDestinationIndexName,
-  getCommentsDestinationIndexAlias,
-  CAI_COMMENTS_INDEX_VERSION,
-  CAI_COMMENTS_SOURCE_INDEX,
-  getCommentsSourceQuery,
-  getCAICommentsBackfillTaskId,
+  getContentDestinationIndexName,
+  getContentIndexName,
+  CAI_CONTENT_INDEX_VERSION,
+  CAI_CONTENT_SOURCE_INDEX,
+  getContentSourceQuery,
+  getCAIContentBackfillTaskId,
 } from './constants';
-import { CAI_COMMENTS_INDEX_MAPPINGS } from './mappings';
-import { CAI_COMMENTS_INDEX_SCRIPT, CAI_COMMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
+import { CAI_CONTENT_INDEX_MAPPINGS } from './mappings';
+import { CAI_CONTENT_INDEX_SCRIPT_ID, CAI_CONTENT_INDEX_SCRIPT } from './painless_scripts';
 
-export const createCommentsAnalyticsIndex = ({
+export const createContentAnalyticsIndex = ({
   esClient,
   logger,
   isServerless,
@@ -40,13 +40,13 @@ export const createCommentsAnalyticsIndex = ({
     esClient,
     isServerless,
     taskManager,
-    indexName: getCommentsDestinationIndexName(spaceId, owner),
-    indexAlias: getCommentsDestinationIndexAlias(spaceId, owner),
-    indexVersion: CAI_COMMENTS_INDEX_VERSION,
-    mappings: CAI_COMMENTS_INDEX_MAPPINGS,
-    painlessScriptId: CAI_COMMENTS_INDEX_SCRIPT_ID,
-    painlessScript: CAI_COMMENTS_INDEX_SCRIPT,
-    taskId: getCAICommentsBackfillTaskId(spaceId, owner),
-    sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-    sourceQuery: getCommentsSourceQuery(spaceId, owner),
+    indexName: getContentDestinationIndexName(spaceId, owner),
+    indexAlias: getContentIndexName(owner, spaceId),
+    indexVersion: CAI_CONTENT_INDEX_VERSION,
+    mappings: CAI_CONTENT_INDEX_MAPPINGS,
+    painlessScriptId: CAI_CONTENT_INDEX_SCRIPT_ID,
+    painlessScript: CAI_CONTENT_INDEX_SCRIPT,
+    taskId: getCAIContentBackfillTaskId(spaceId, owner),
+    sourceIndex: CAI_CONTENT_SOURCE_INDEX,
+    sourceQuery: getContentSourceQuery(spaceId, owner),
   });

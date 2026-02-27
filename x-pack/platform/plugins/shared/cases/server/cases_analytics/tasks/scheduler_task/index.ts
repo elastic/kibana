@@ -13,7 +13,11 @@ import type {
 import type { SavedObjectsClientContract, CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { ConfigType } from '../../../config';
-import { ANALYTICS_SCHEDULER_TASK_TYPE, CASE_SAVED_OBJECT } from '../../../../common/constants';
+import {
+  ANALYTICS_SCHEDULER_TASK_TYPE,
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+} from '../../../../common/constants';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSchedulerTaskFactory } from './scheduler_task_factory';
 import { CAI_SCHEDULER_TASK_ID } from './constants';
@@ -33,6 +37,7 @@ export function registerCAISchedulerTask({
     const [{ savedObjects }] = await core.getStartServices();
     const internalSavedObjectsRepository = savedObjects.createInternalRepository([
       CASE_SAVED_OBJECT,
+      CASE_CONFIGURE_SAVED_OBJECT,
     ]);
     return new SavedObjectsClient(internalSavedObjectsRepository);
   };
@@ -79,9 +84,9 @@ export async function scheduleCAISchedulerTask({
       id: CAI_SCHEDULER_TASK_ID,
       taskType: ANALYTICS_SCHEDULER_TASK_TYPE,
       params: {},
-      runAt: new Date(Date.now() + 60 * 1000),
+      runAt: new Date(Date.now() + 10 * 1000),
       schedule: {
-        interval: '1h',
+        interval: '1m',
       },
       state: {},
     });

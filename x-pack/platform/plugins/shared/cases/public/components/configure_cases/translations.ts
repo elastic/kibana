@@ -214,3 +214,19 @@ export const SHOW_ALL_TEMPLATES = i18n.translate(
     defaultMessage: 'Show all templates',
   }
 );
+
+export const ANALYTICS_TITLE = i18n.translate('xpack.cases.configureCases.analyticsTitle', {
+  defaultMessage: 'Cases analytics',
+});
+
+export const ANALYTICS_DESC = i18n.translate('xpack.cases.configureCases.analyticsDesc', {
+  defaultMessage:
+    'Enable analytics to build dashboards and run queries on your cases data. When enabled, cases are indexed into a dedicated analytics index.',
+});
+
+export const ANALYTICS_ENABLED_LABEL = i18n.translate(
+  'xpack.cases.configureCases.analyticsEnabledLabel',
+  {
+    defaultMessage: 'Enable cases analytics',
+  }
+);

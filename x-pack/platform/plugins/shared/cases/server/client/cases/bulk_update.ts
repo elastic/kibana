@@ -486,6 +486,17 @@ export const bulkUpdate = async (
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
+    for (const updatedCase of updatedCases.saved_objects) {
+      const originalCase = casesMap.get(updatedCase.id);
+      if (originalCase) {
+        caseService.syncCaseToAnalyticsContentIndex(
+          updatedCase.id,
+          originalCase.attributes.owner,
+          clientArgs.spaceId
+        );
+      }
+    }
+
     // If a status update occurred and the case is synced then we need to update all alerts' status
     // attached to the case to the new status.
     const casesWithStatusChangedAndSynced = casesToUpdate.filter(({ updateReq, originalCase }) => {

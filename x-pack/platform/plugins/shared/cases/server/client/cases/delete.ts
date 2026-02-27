@@ -85,6 +85,16 @@ export async function deleteCases(
       alertsService.removeCaseIdsFromAllAlerts({ caseIds: ids }),
     ]);
 
+    for (const theCase of cases.saved_objects) {
+      if (!isSOError(theCase)) {
+        caseService.deleteCasesFromAnalyticsContentIndex(
+          [theCase.id],
+          theCase.attributes.owner,
+          clientArgs.spaceId
+        );
+      }
+    }
+
     await userActionService.creator.bulkAuditLogCaseDeletion(
       cases.saved_objects.map((caseInfo) => caseInfo.id)
     );

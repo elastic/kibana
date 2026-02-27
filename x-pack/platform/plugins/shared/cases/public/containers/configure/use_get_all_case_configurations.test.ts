@@ -34,6 +34,7 @@ describe('Use get all case configurations hook', () => {
 
     expect(result.current.data).toEqual([
       {
+        analyticsEnabled: false,
         closureType: 'close-by-user',
         connector: { fields: null, id: 'none', name: 'none', type: '.none' },
         customFields: [],
@@ -66,6 +67,7 @@ describe('Use get all case configurations hook', () => {
     await waitFor(() =>
       expect(result.current.data).toEqual([
         {
+          analyticsEnabled: false,
           closureType: 'close-by-user',
           connector: { fields: null, id: 'none', name: 'none', type: '.none' },
           customFields: [],

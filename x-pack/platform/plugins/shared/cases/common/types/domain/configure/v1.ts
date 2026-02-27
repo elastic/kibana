@@ -150,6 +150,15 @@ export const ConfigurationActivityFieldsRt = rt.strict({
 export const ConfigurationAttributesRt = rt.intersection([
   CasesConfigureBasicRt,
   ConfigurationActivityFieldsRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * Whether the cases analytics index is enabled for this space and solution.
+       * When true the scheduler will create the analytics index and run sync tasks for this space.
+       */
+      analytics_enabled: rt.boolean,
+    })
+  ),
 ]);
 
 export const ConfigurationRt = rt.intersection([

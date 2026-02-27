@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import {
+  createConfiguration,
+  deleteConfiguration,
+  getConfigurationRequest,
+} from '../../../../../common/lib/api';
 import { runSchedulerTask } from '../../../../../common/lib/api/analytics';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -17,7 +22,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('analytics indexes creation', () => {
     const indexVersion = 1;
+
     before(async () => {
+      // Enable analytics for the securitySolutionFixture owner in the default space.
+      // The scheduler only processes spaces that have opted in via analytics_enabled=true.
+      await createConfiguration(
+        supertestService,
+        getConfigurationRequest({ overrides: { analytics_enabled: true } })
+      );
+
       await supertestService
         .post('/api/saved_objects/_import')
         .query({ overwrite: true })
@@ -47,10 +60,14 @@ export default ({ getService }: FtrProviderContext): void => {
       await runSchedulerTask(supertestService);
     });
 
-    it('cases index should be created with the correct mappings and scripts on startup', async () => {
-      const indexName = '.internal.cases.securitysolution-default';
-      const painlessScriptId = 'cai_cases_script_1';
-      const version = indexVersion;
+    after(async () => {
+      await deleteConfiguration(esClient);
+    });
+
+    it('content index (cases + comments + attachments) should be created with correct mappings and scripts', async () => {
+      // Internal destination: .internal.cases-analytics.{owner}-{spaceId}
+      const indexName = '.internal.cases-analytics.securitysolutionfixture-default';
+      const painlessScriptId = 'cai_content_script_1';
 
       await retry.try(async () => {
         expect(
@@ -64,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
         index: indexName,
       });
 
-      expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(version);
+      expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(indexVersion);
       expect(mappingDict[indexName].mappings._meta?.painless_script_id).to.be(painlessScriptId);
 
       const painlessScript = await esClient.getScript({
@@ -74,10 +91,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(painlessScript.found).to.be(true);
     });
 
-    it('activity index should be created with the correct mappings and scripts on startup', async () => {
-      const indexName = '.internal.cases-activity.securitysolution-default';
+    it('activity index should be created with the correct mappings and scripts', async () => {
+      // Internal destination: .internal.cases-analytics-activity.{owner}-{spaceId}
+      const indexName = '.internal.cases-analytics-activity.securitysolutionfixture-default';
       const painlessScriptId = 'cai_activity_script_1';
-      const version = indexVersion;
 
       await retry.try(async () => {
         expect(
@@ -91,61 +108,7 @@ export default ({ getService }: FtrProviderContext): void => {
         index: indexName,
       });
 
-      expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(version);
-      expect(mappingDict[indexName].mappings._meta?.painless_script_id).to.be(painlessScriptId);
-
-      const painlessScript = await esClient.getScript({
-        id: painlessScriptId,
-      });
-
-      expect(painlessScript.found).to.be(true);
-    });
-
-    it('attachments index should be created with the correct mappings and scripts on startup', async () => {
-      const indexName = '.internal.cases-attachments.securitysolution-default';
-      const painlessScriptId = 'cai_attachments_script_1';
-      const version = indexVersion;
-
-      await retry.try(async () => {
-        expect(
-          await esClient.indices.exists({
-            index: indexName,
-          })
-        ).to.be(true);
-      });
-
-      const mappingDict = await esClient.indices.getMapping({
-        index: indexName,
-      });
-
-      expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(version);
-      expect(mappingDict[indexName].mappings._meta?.painless_script_id).to.be(painlessScriptId);
-
-      const painlessScript = await esClient.getScript({
-        id: painlessScriptId,
-      });
-
-      expect(painlessScript.found).to.be(true);
-    });
-
-    it('comments index should be created with the correct mappings and scripts on startup', async () => {
-      const indexName = '.internal.cases-comments.securitysolution-default';
-      const painlessScriptId = 'cai_comments_script_1';
-      const version = indexVersion;
-
-      await retry.try(async () => {
-        expect(
-          await esClient.indices.exists({
-            index: indexName,
-          })
-        ).to.be(true);
-      });
-
-      const mappingDict = await esClient.indices.getMapping({
-        index: indexName,
-      });
-
-      expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(version);
+      expect(mappingDict[indexName].mappings._meta?.mapping_version).to.be(indexVersion);
       expect(mappingDict[indexName].mappings._meta?.painless_script_id).to.be(painlessScriptId);
 
       const painlessScript = await esClient.getScript({

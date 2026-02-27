@@ -125,6 +125,7 @@ const convertConfigureResponseToCasesConfigure = (
     connector,
     owner,
     observableTypes,
+    analyticsEnabled,
   } = configuration;
 
   return {
@@ -137,5 +138,6 @@ const convertConfigureResponseToCasesConfigure = (
     connector,
     owner,
     observableTypes,
+    analyticsEnabled,
   };
 };

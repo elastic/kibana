@@ -15,11 +15,14 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
+  EuiDescribedFormGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiLink,
   EuiPageBody,
   EuiPageSection,
   EuiSpacer,
+  EuiSwitch,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -152,6 +155,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     customFields,
     templates,
     observableTypes,
+    analyticsEnabled,
   } = currentConfiguration;
 
   const {
@@ -429,6 +433,31 @@ export const ConfigureCases: React.FC = React.memo(() => {
     setFlyOutVisibility({ type: 'observableTypes', visible: false });
     setObservableTypeToEdit(null);
   }, [setFlyOutVisibility]);
+
+  const onChangeAnalyticsEnabled = useCallback(
+    (enabled: boolean) => {
+      persistCaseConfigure({
+        connector,
+        closureType,
+        customFields,
+        templates,
+        observableTypes,
+        id: configurationId,
+        version: configurationVersion,
+        analyticsEnabled: enabled,
+      });
+    },
+    [
+      connector,
+      closureType,
+      customFields,
+      templates,
+      observableTypes,
+      configurationId,
+      configurationVersion,
+      persistCaseConfigure,
+    ]
+  );
 
   const onObservableTypeSave = useCallback(
     (data: ObservableTypeConfiguration) => {
@@ -752,6 +781,27 @@ export const ConfigureCases: React.FC = React.memo(() => {
               </div>
             </>
           )}
+
+          <EuiSpacer size="xl" />
+
+          <div css={sectionWrapperCss}>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={<h3>{i18n.ANALYTICS_TITLE}</h3>}
+              description={i18n.ANALYTICS_DESC}
+              data-test-subj="case-analytics-form-group"
+            >
+              <EuiFormRow>
+                <EuiSwitch
+                  label={i18n.ANALYTICS_ENABLED_LABEL}
+                  checked={analyticsEnabled ?? false}
+                  onChange={(e) => onChangeAnalyticsEnabled(e.target.checked)}
+                  disabled={isLoadingCaseConfiguration || !permissions.settings}
+                  data-test-subj="configure-cases-analytics-switch"
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          </div>
 
           <EuiSpacer size="xl" />
 

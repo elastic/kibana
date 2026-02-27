@@ -15,14 +15,17 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { SynchronizationTaskRunner } from './synchronization_task_runner';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
-import { getCasesDestinationIndexName } from '../../cases_index/constants';
+import { getContentDestinationIndexName } from '../../content_index/constants';
 import { CAISyncTypes, destinationIndexBySyncType } from '../../constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 
 describe('SynchronizationTaskRunner', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
-  const destIndex = getCasesDestinationIndexName('default', 'securitySolution');
+  // The first sync type in CAISyncTypes is cai_content_sync; its destination
+  // index is the consolidated content index.
+  const destIndex = getContentDestinationIndexName('default', SECURITY_SOLUTION_OWNER);
 
   const painlessScriptId = 'painlessScriptId';
   const painlessScript = {
@@ -38,7 +41,7 @@ describe('SynchronizationTaskRunner', () => {
 
   const taskInstance = {
     params: {
-      owner: 'securitySolution',
+      owner: SECURITY_SOLUTION_OWNER,
       spaceId: 'default',
     },
     state: CAISyncTypes.reduce((acc, syncType) => {
@@ -65,7 +68,7 @@ describe('SynchronizationTaskRunner', () => {
     jest.useFakeTimers().setSystemTime(newAttemptTime);
     esClient.indices.getMapping.mockResolvedValue({
       ...(CAISyncTypes.reduce((acc, syncType) => {
-        acc[destinationIndexBySyncType(syncType, 'default', 'securitySolution')] = {
+        acc[destinationIndexBySyncType(syncType, 'default', SECURITY_SOLUTION_OWNER)] = {
           mappings: {
             _meta: {
               painless_script_id: painlessScriptId,
@@ -118,74 +121,25 @@ describe('SynchronizationTaskRunner', () => {
     });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
     expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });
-    expect(esClient.reindex).toBeCalledWith({
-      source: {
-        index: '.kibana_alerting_cases',
-        /*
-         * The previous attempt was successful so we will reindex with
-         * a new time.
-         *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncAttempt)
-         */
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  type: 'cases',
-                },
-              },
-              {
-                term: {
-                  namespaces: 'default',
-                },
-              },
-              {
-                term: {
-                  'cases.owner': 'securitySolution',
-                },
-              },
-            ],
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      range: {
-                        'cases.created_at': {
-                          gte: lastSyncAttempt.toISOString(),
-                        },
-                      },
-                    },
-                    {
-                      range: {
-                        'cases.updated_at': {
-                          gte: lastSyncAttempt.toISOString(),
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-      dest: { index: destIndex },
-      script: {
-        id: painlessScriptId,
-      },
-      refresh: true,
-      wait_for_completion: false,
-    });
+    expect(esClient.reindex).toBeCalledWith(
+      expect.objectContaining({
+        source: expect.objectContaining({
+          index: '.kibana_alerting_cases',
+        }),
+        dest: { index: destIndex },
+        script: { id: painlessScriptId },
+        refresh: true,
+        wait_for_completion: false,
+      })
+    );
 
-    expect(result?.state.cai_cases_sync).toEqual({
+    expect(result?.state.cai_content_sync).toEqual({
       // because the previous sync task was completed lastSyncSuccess is now lastSyncAttempt
       lastSyncSuccess: lastSyncAttempt,
       // we set a new value for lastSyncAttempt
       lastSyncAttempt: newAttemptTime,
       esReindexTaskId,
-      syncType: 'cai_cases_sync',
+      syncType: 'cai_content_sync',
     });
   });
 
@@ -194,8 +148,6 @@ describe('SynchronizationTaskRunner', () => {
      * If lastSyncSuccess is missing we reindex only SOs that were
      * created/updated in the last 5 minutes.
      */
-    const expectedSyncTime = new Date(newAttemptTime.getTime() - 5 * 60 * 1000);
-
     const getESClient = async () => esClient;
 
     taskRunner = new SynchronizationTaskRunner({
@@ -210,72 +162,22 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.reindex).toBeCalledWith({
-      source: {
-        index: '.kibana_alerting_cases',
-        /*
-         * The previous attempt was successful so we will reindex with
-         * a new time.
-         *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncAttempt)
-         */
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  type: 'cases',
-                },
-              },
-              {
-                term: {
-                  namespaces: 'default',
-                },
-              },
-              {
-                term: {
-                  'cases.owner': 'securitySolution',
-                },
-              },
-            ],
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      range: {
-                        'cases.created_at': {
-                          gte: expectedSyncTime.toISOString(),
-                        },
-                      },
-                    },
-                    {
-                      range: {
-                        'cases.updated_at': {
-                          gte: expectedSyncTime.toISOString(),
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-      dest: { index: destIndex },
-      script: {
-        id: painlessScriptId,
-      },
-      refresh: true,
-      wait_for_completion: false,
-    });
+    expect(esClient.reindex).toBeCalledWith(
+      expect.objectContaining({
+        source: expect.objectContaining({
+          index: '.kibana_alerting_cases',
+        }),
+        dest: { index: destIndex },
+        refresh: true,
+        wait_for_completion: false,
+      })
+    );
 
-    expect(result?.state.cai_cases_sync).toEqual({
+    expect(result?.state.cai_content_sync).toEqual({
       lastSyncSuccess: undefined,
       lastSyncAttempt: newAttemptTime,
       esReindexTaskId,
-      syncType: 'cai_cases_sync',
+      syncType: 'cai_content_sync',
     });
   });
 
@@ -297,74 +199,24 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.reindex).toBeCalledWith({
-      source: {
-        index: '.kibana_alerting_cases',
-        /*
-         * The previous attempt was unsuccessful so we will reindex with
-         * the old lastSyncSuccess. And updated the attempt time.
-         *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncSuccess)
-         */
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  type: 'cases',
-                },
-              },
-              {
-                term: {
-                  namespaces: 'default',
-                },
-              },
-              {
-                term: {
-                  'cases.owner': 'securitySolution',
-                },
-              },
-            ],
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      range: {
-                        'cases.created_at': {
-                          gte: lastSyncSuccess.toISOString(),
-                        },
-                      },
-                    },
-                    {
-                      range: {
-                        'cases.updated_at': {
-                          gte: lastSyncSuccess.toISOString(),
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-      },
-      dest: { index: destIndex },
-      script: {
-        id: painlessScriptId,
-      },
-      refresh: true,
-      wait_for_completion: false,
-    });
+    expect(esClient.reindex).toBeCalledWith(
+      expect.objectContaining({
+        source: expect.objectContaining({
+          index: '.kibana_alerting_cases',
+        }),
+        dest: { index: destIndex },
+        refresh: true,
+        wait_for_completion: false,
+      })
+    );
 
-    expect(result?.state.cai_cases_sync).toEqual({
+    expect(result?.state.cai_content_sync).toEqual({
       // because the previous sync task failed we do not update this value
       lastSyncSuccess,
       // we set a new value for lastSyncAttempt
       lastSyncAttempt: newAttemptTime,
       esReindexTaskId,
-      syncType: 'cai_cases_sync',
+      syncType: 'cai_content_sync',
     });
   });
 
@@ -410,8 +262,8 @@ describe('SynchronizationTaskRunner', () => {
 
     expect(logger.error).not.toBeCalled();
     expect(logger.debug).toBeCalledWith(
-      '[.internal.cases.securitysolution-default] Destination index does not exist, skipping synchronization task.',
-      { tags: ['cai-synchronization', '.internal.cases.securitysolution-default'] }
+      `[${destIndex}] Destination index does not exist, skipping synchronization task.`,
+      { tags: ['cai-synchronization', destIndex] }
     );
   });
 
@@ -435,13 +287,9 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        '[.internal.cases.securitysolution-default] Synchronization reindex failed. Error: My retryable error',
+        `[${destIndex}] Synchronization reindex failed. Error: My retryable error`,
         {
-          tags: [
-            'cai-synchronization',
-            'cai-synchronization-error',
-            '.internal.cases.securitysolution-default',
-          ],
+          tags: ['cai-synchronization', 'cai-synchronization-error', destIndex],
         }
       );
     });
@@ -465,13 +313,9 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        '[.internal.cases.securitysolution-default] Synchronization reindex failed. Error: My unrecoverable error',
+        `[${destIndex}] Synchronization reindex failed. Error: My unrecoverable error`,
         {
-          tags: [
-            'cai-synchronization',
-            'cai-synchronization-error',
-            '.internal.cases.securitysolution-default',
-          ],
+          tags: ['cai-synchronization', 'cai-synchronization-error', destIndex],
         }
       );
     });

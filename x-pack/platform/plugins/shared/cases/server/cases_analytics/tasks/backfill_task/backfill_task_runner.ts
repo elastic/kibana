@@ -89,23 +89,73 @@ export class BackfillTaskRunner implements CancellableTask {
     const painlessScript = await this.getPainlessScript(esClient);
 
     if (painlessScript.found) {
+      // ------------------------------------------------------------------
+      // Diagnostic: count and sample matching source documents before reindex
+      // ------------------------------------------------------------------
+      this.logger.info(`[${this.destIndex}] Source query: ${JSON.stringify(this.sourceQuery)}`);
+
+      const countResult = await esClient.count({
+        index: this.sourceIndex,
+        query: this.sourceQuery,
+      });
+      this.logger.info(
+        `[${this.destIndex}] Source document count in "${this.sourceIndex}": ${countResult.count}`
+      );
+
+      if (countResult.count > 0) {
+        const sampleResult = await esClient.search({
+          index: this.sourceIndex,
+          query: this.sourceQuery,
+          size: 5,
+          _source: ['type', 'namespaces', 'cases.owner', 'cases.title', 'cases.status'],
+        });
+        this.logger.info(
+          `[${this.destIndex}] Sample source documents (up to 5): ${JSON.stringify(
+            sampleResult.hits.hits.map((hit) => ({ _id: hit._id, _source: hit._source }))
+          )}`
+        );
+      } else {
+        this.logger.info(
+          `[${this.destIndex}] No documents matched the source query — nothing will be reindexed. ` +
+            `Check that the owner and spaceId in the query match your actual cases data.`
+        );
+      }
+      // ------------------------------------------------------------------
+
       this.logDebug(`Reindexing from ${this.sourceIndex} to ${this.destIndex}.`);
       const painlessScriptId = await this.getPainlessScriptId(esClient);
 
-      await esClient.reindex({
-        source: {
-          index: this.sourceIndex,
-          query: this.sourceQuery,
+      const reindexResponse = await esClient.reindex(
+        {
+          source: {
+            index: this.sourceIndex,
+            query: this.sourceQuery,
+          },
+          dest: { index: this.destIndex },
+          script: {
+            id: painlessScriptId,
+          },
+          refresh: true,
+          /** Wait for completion so we can log errors and results directly. */
+          wait_for_completion: true,
         },
-        dest: { index: this.destIndex },
-        script: {
-          id: painlessScriptId,
-        },
-        /** If `true`, the request refreshes affected shards to make this operation visible to search. */
-        refresh: true,
-        /** We do not wait for the es reindex operation to be completed. */
-        wait_for_completion: false,
-      });
+        { requestTimeout: 300_000 }
+      );
+
+      this.logger.info(
+        `[${this.destIndex}] Reindex complete — ` +
+          `total=${reindexResponse.total} created=${reindexResponse.created} ` +
+          `updated=${reindexResponse.updated} deleted=${reindexResponse.deleted} ` +
+          `failures=${reindexResponse.failures?.length ?? 0} took=${reindexResponse.took}ms`
+      );
+
+      if (reindexResponse.failures && reindexResponse.failures.length > 0) {
+        this.logger.error(
+          `[${this.destIndex}] Reindex failures (first 5): ${JSON.stringify(
+            reindexResponse.failures.slice(0, 5)
+          )}`
+        );
+      }
     } else {
       throw createTaskRunError(
         new Error(this.getErrorMessage('Painless script not found.')),

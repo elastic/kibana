@@ -189,6 +189,10 @@ export const ConfigurationRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      /**
+       * Whether the cases analytics index is enabled for this space and solution.
+       */
+      analytics_enabled: rt.boolean,
     })
   ),
 ]);
@@ -215,6 +219,10 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      /**
+       * Whether the cases analytics index is enabled for this space and solution.
+       */
+      analytics_enabled: rt.boolean,
     })
   ),
   rt.strict({ version: rt.string }),

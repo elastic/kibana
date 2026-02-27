@@ -9,7 +9,7 @@ import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { CancellableTask } from '@kbn/task-manager-plugin/server/task';
 import type { ConfigType } from '../../../config';
-import { getAllSpacesWithCases } from '../../utils';
+import { getSpacesWithAnalyticsEnabled } from '../../utils';
 import {
   createCasesAnalyticsIndexesForSpaceId,
   getIndicesForSpaceId,
@@ -47,40 +47,71 @@ export class SchedulerTaskRunner implements CancellableTask {
 
   public async run() {
     if (!this.analyticsConfig.index.enabled) {
-      this.logger.debug('Analytics index is disabled, skipping scheduler task.');
+      this.logger.info(
+        '[CAI Scheduler] Analytics indexing is disabled (xpack.cases.analytics.index.enabled=false). Skipping.'
+      );
       return;
     }
+
+    this.logger.info('[CAI Scheduler] Starting cases analytics scheduler task.');
+
     try {
       const unsecureSavedObjectsClient = await this.getUnsecureSavedObjectsClient();
-      const spaces = await getAllSpacesWithCases(unsecureSavedObjectsClient);
+      const pairs = await getSpacesWithAnalyticsEnabled(unsecureSavedObjectsClient);
+
+      if (pairs.length === 0) {
+        this.logger.info(
+          '[CAI Scheduler] No spaces have analytics_enabled=true on their cases-configure saved object. Nothing to do.'
+        );
+        return;
+      }
+
+      this.logger.info(
+        `[CAI Scheduler] Found ${pairs.length} space+owner pair(s) with analytics enabled: [${pairs
+          .map(({ spaceId, owner }) => `${spaceId}/${owner}`)
+          .join(', ')}]`
+      );
+
       const taskManager = await this.getTaskManager();
       const esClient = await this.getESClient();
 
-      for (const spaceId of spaces) {
-        const indices = getIndicesForSpaceId(spaceId);
+      for (const { spaceId, owner } of pairs) {
+        const indices = getIndicesForSpaceId(spaceId, owner);
         const destIndicesExist = await esClient.indices.exists({ index: indices });
+
         if (!destIndicesExist) {
-          // Create the necessary analytics indexes without scheduling the sync tasks
+          this.logger.info(
+            `[CAI Scheduler] Space "${spaceId}" owner "${owner}": analytics indices do not exist yet — creating indices and scheduling backfill.`
+          );
           createCasesAnalyticsIndexesForSpaceId({
             spaceId,
+            owner,
             esClient,
             logger: this.logger,
             isServerless: false,
             taskManager,
           }).catch(() => {
-            this.logger.error(`Failed to create analytics indexes for space ${spaceId}`);
+            this.logger.error(
+              `[CAI Scheduler] Space "${spaceId}" owner "${owner}": failed to create analytics indices.`
+            );
           });
         } else {
+          this.logger.info(
+            `[CAI Scheduler] Space "${spaceId}" owner "${owner}": analytics indices exist — scheduling incremental sync tasks.`
+          );
           scheduleCasesAnalyticsSyncTasks({
             spaceId,
+            owner,
             taskManager,
             logger: this.logger,
           });
         }
       }
+
+      this.logger.info('[CAI Scheduler] Cases analytics scheduler task completed.');
     } catch (error) {
       this.logger.error(
-        `Error occurred while running case analytics scheduler task: ${error.message}`
+        `[CAI Scheduler] Error occurred while running case analytics scheduler task: ${error.message}`
       );
     }
   }

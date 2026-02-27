@@ -10,12 +10,12 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { Owner } from '../../../common/constants/types';
 
-const CAI_ACTIVITY_INDEX_NAME_BASE = '.internal.cases-activity';
+const CAI_ACTIVITY_INDEX_NAME_BASE = '.internal.cases-analytics-activity';
 export function getActivityDestinationIndexName(spaceId: string, owner: Owner) {
   return `${CAI_ACTIVITY_INDEX_NAME_BASE}.${owner}-${spaceId}`.toLowerCase();
 }
 
-const CAI_ACTIVITY_INDEX_ALIAS_BASE = '.cases-activity';
+const CAI_ACTIVITY_INDEX_ALIAS_BASE = '.cases-analytics-activity';
 export function getActivityDestinationIndexAlias(spaceId: string, owner: Owner) {
   return `${CAI_ACTIVITY_INDEX_ALIAS_BASE}.${owner}-${spaceId}`.toLowerCase();
 }

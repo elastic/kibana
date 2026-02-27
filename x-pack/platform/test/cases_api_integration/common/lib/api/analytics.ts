@@ -14,34 +14,23 @@ import {
   getActivitySourceQuery,
 } from '@kbn/cases-plugin/server/cases_analytics/activity_index/constants';
 import {
-  getCAIAttachmentsBackfillTaskId,
-  CAI_ATTACHMENTS_SOURCE_INDEX,
-  getAttachmentsDestinationIndexName,
-  getAttachmentsSourceQuery,
-} from '@kbn/cases-plugin/server/cases_analytics/attachments_index/constants';
-import {
-  getCAICasesBackfillTaskId,
-  CAI_CASES_SOURCE_INDEX,
-  getCasesDestinationIndexName,
-  getCasesSourceQuery,
-} from '@kbn/cases-plugin/server/cases_analytics/cases_index/constants';
-import {
-  getCAICommentsBackfillTaskId,
-  CAI_COMMENTS_SOURCE_INDEX,
-  getCommentsDestinationIndexName,
-  getCommentsSourceQuery,
-} from '@kbn/cases-plugin/server/cases_analytics/comments_index/constants';
+  getCAIContentBackfillTaskId,
+  CAI_CONTENT_SOURCE_INDEX,
+  getContentDestinationIndexName,
+  getContentSourceQuery,
+} from '@kbn/cases-plugin/server/cases_analytics/content_index/constants';
 import { getSynchronizationTaskId } from '@kbn/cases-plugin/server/cases_analytics/tasks/synchronization_task';
 
-export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
+/** Triggers the content backfill task (cases + comments + attachments) for the default space. */
+export const runContentBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send({
-      taskId: getCAICasesBackfillTaskId('default', 'securitySolution'),
-      sourceIndex: CAI_CASES_SOURCE_INDEX,
-      destIndex: getCasesDestinationIndexName('default', 'securitySolution'),
-      sourceQuery: JSON.stringify(getCasesSourceQuery('default', 'securitySolution')),
+      taskId: getCAIContentBackfillTaskId('default', 'securitySolution'),
+      sourceIndex: CAI_CONTENT_SOURCE_INDEX,
+      destIndex: getContentDestinationIndexName('default', 'securitySolution'),
+      sourceQuery: JSON.stringify(getContentSourceQuery('default', 'securitySolution')),
     })
     .expect(200);
 };
@@ -54,37 +43,11 @@ export const runCAISynchronizationTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runAttachmentsBackfillTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/backfill/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({
-      taskId: getCAIAttachmentsBackfillTaskId('default', 'securitySolution'),
-      sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-      destIndex: getAttachmentsDestinationIndexName('default', 'securitySolution'),
-      sourceQuery: JSON.stringify(getAttachmentsSourceQuery('default', 'securitySolution')),
-    })
-    .expect(200);
-};
-
 export const runSchedulerTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/scheduler/run_soon')
     .set('kbn-xsrf', 'xxx')
     .send()
-    .expect(200);
-};
-
-export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/backfill/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({
-      taskId: getCAICommentsBackfillTaskId('default', 'securitySolution'),
-      sourceIndex: CAI_COMMENTS_SOURCE_INDEX,
-      destIndex: getCommentsDestinationIndexName('default', 'securitySolution'),
-      sourceQuery: JSON.stringify(getCommentsSourceQuery('default', 'securitySolution')),
-    })
     .expect(200);
 };
 
@@ -100,3 +63,15 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
     })
     .expect(200);
 };
+
+// ---------------------------------------------------------------------------
+// Deprecated aliases — kept so that existing skipped tests continue to compile.
+// New code should use runContentBackfillTask instead.
+// ---------------------------------------------------------------------------
+
+/** @deprecated Use runContentBackfillTask — cases, comments, and attachments are now in one index. */
+export const runCasesBackfillTask = runContentBackfillTask;
+/** @deprecated Use runContentBackfillTask — cases, comments, and attachments are now in one index. */
+export const runAttachmentsBackfillTask = runContentBackfillTask;
+/** @deprecated Use runContentBackfillTask — cases, comments, and attachments are now in one index. */
+export const runCommentsBackfillTask = runContentBackfillTask;

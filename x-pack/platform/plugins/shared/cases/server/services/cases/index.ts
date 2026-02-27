@@ -94,6 +94,8 @@ import {
   convertFindQueryParams,
   mergeSearchQuery,
 } from './utils';
+import { getContentIndexName } from '../../cases_analytics/content_index/constants';
+import { CAI_CONTENT_INDEX_SCRIPT_ID } from '../../cases_analytics/content_index/painless_scripts';
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
@@ -182,6 +184,61 @@ export class CasesService {
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
     this.esClient = esClient;
+  }
+
+  /**
+   * Real-time analytics sync: triggers a targeted reindex of a single case SO into
+   * the content analytics index using the stored Painless script.
+   * Fire-and-forget — HTTP-level errors are logged as warnings and never propagated to the caller.
+   * The reindex runs asynchronously inside an ES task (wait_for_completion: false), so errors
+   * such as index_not_found are handled by ES and do not surface here.
+   */
+  public syncCaseToAnalyticsContentIndex(caseId: string, owner: string, spaceId: string): void {
+    const destIndex = getContentIndexName(owner, spaceId);
+    const sourceDocId = `${CASE_SAVED_OBJECT}:${caseId}`;
+    void this.esClient
+      .reindex({
+        source: {
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          query: { ids: { values: [sourceDocId] } },
+        },
+        dest: { index: destIndex },
+        script: { id: CAI_CONTENT_INDEX_SCRIPT_ID },
+        conflicts: 'proceed',
+        wait_for_completion: false,
+      })
+      .then(() => {
+        this.log.debug(`[CAI] Real-time sync succeeded for case ${caseId} → "${destIndex}"`);
+      })
+      .catch((err: Error) => {
+        this.log.warn(
+          `[CAI] Real-time sync failed for case ${caseId} → "${destIndex}": ${err.message}`
+        );
+      });
+  }
+
+  /**
+   * Real-time analytics delete: removes case documents from the content analytics index.
+   * Fire-and-forget — 404s (analytics not enabled / already deleted) are silently ignored.
+   */
+  public deleteCasesFromAnalyticsContentIndex(
+    caseIds: string[],
+    owner: string,
+    spaceId: string
+  ): void {
+    const destIndex = getContentIndexName(owner, spaceId);
+    for (const caseId of caseIds) {
+      const docId = `${CASE_SAVED_OBJECT}:${caseId}`;
+      void this.esClient
+        .delete({ index: destIndex, id: docId, refresh: true })
+        .catch((err: Error & { statusCode?: number }) => {
+          if (err.statusCode !== 404) {
+            this.log.warn(
+              `[CAI] Real-time delete failed for case ${caseId} in "${destIndex}": ${err.message}`
+            );
+          }
+        });
+    }
   }
 
   private buildCaseIdsAggs = (
@@ -829,7 +886,7 @@ export class CasesService {
       const typeOptions = ['keyword', 'boolean', 'date', 'ip', 'text', 'long', 'integer', 'float'];
       const sampleIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1', '8.8.8.8', '255.255.255.0'];
 
-      for (let i = 0; i < 1000; i++) {
+      for (let i = 0; i < 200; i++) {
         const mappingType = typeOptions[i % typeOptions.length];
         const value: string | number | boolean =
           mappingType === 'keyword'
@@ -851,10 +908,10 @@ export class CasesService {
         transformedAttributes.attributes.extended_fields[`field_${i}_as_${mappingType}`] = value;
       }
 
-      await this.esClient.indices.putMapping({
-        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-        runtime: generateExtendedFieldsRuntimeMappings(),
-      });
+      // await this.esClient.indices.putMapping({
+      //   index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      //   runtime: generateExtendedFieldsRuntimeMappings(),
+      // });
 
       const createdCase = await this.unsecuredSavedObjectsClient.create<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,

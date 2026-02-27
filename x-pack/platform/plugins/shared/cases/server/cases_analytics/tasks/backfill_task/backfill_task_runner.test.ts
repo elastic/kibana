@@ -79,18 +79,21 @@ describe('BackfillTaskRunner', () => {
     });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
     expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });
-    expect(esClient.reindex).toBeCalledWith({
-      source: {
-        index: sourceIndex,
-        query: sourceQuery,
+    expect(esClient.reindex).toBeCalledWith(
+      {
+        source: {
+          index: sourceIndex,
+          query: sourceQuery,
+        },
+        dest: { index: destIndex },
+        script: {
+          id: painlessScriptId,
+        },
+        refresh: true,
+        wait_for_completion: true,
       },
-      dest: { index: destIndex },
-      script: {
-        id: painlessScriptId,
-      },
-      refresh: true,
-      wait_for_completion: false,
-    });
+      { requestTimeout: 300_000 }
+    );
     expect(result).toEqual({ state: {} });
   });
 

@@ -6,7 +6,14 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { fromKueryExpression } from '@kbn/es-query';
+import {
+  CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+  OWNERS,
+} from '../../common/constants';
+import type { Owner } from '../../common/constants/types';
 
 const MAX_BUCKETS_LIMIT = 65535;
 export async function getAllSpacesWithCases(savedObjectsClient: SavedObjectsClientContract) {
@@ -43,4 +50,41 @@ export async function getAllSpacesWithCases(savedObjectsClient: SavedObjectsClie
     },
   });
   return spaces.aggregations?.spaces.buckets.map((space) => space.key) ?? [];
+}
+
+/**
+ * Returns the list of {spaceId, owner} pairs that have a cases-configure SO with analytics_enabled === true.
+ *
+ * The analytics_enabled and owner fields must be indexed in the SO mapping for this filter to work.
+ * Spaces without a configure SO, or with analytics_enabled === false / undefined, are excluded.
+ * Each pair is unique — two configure SOs in the same space with different owners produce two entries.
+ */
+export async function getSpacesWithAnalyticsEnabled(
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<Array<{ spaceId: string; owner: Owner }>> {
+  const result = await savedObjectsClient.find<{ analytics_enabled?: boolean; owner?: string }>({
+    type: CASE_CONFIGURE_SAVED_OBJECT,
+    perPage: MAX_DOCS_PER_PAGE,
+    namespaces: ['*'],
+    filter: fromKueryExpression(
+      `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.analytics_enabled: true`
+    ),
+  });
+
+  const seen = new Set<string>();
+  const pairs: Array<{ spaceId: string; owner: Owner }> = [];
+  for (const so of result.saved_objects) {
+    const rawOwner = so.attributes.owner;
+    const owner = OWNERS.find((o) => o === rawOwner);
+    if (owner) {
+      for (const ns of so.namespaces ?? []) {
+        const key = `${ns}:${owner}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          pairs.push({ spaceId: ns, owner });
+        }
+      }
+    }
+  }
+  return pairs;
 }

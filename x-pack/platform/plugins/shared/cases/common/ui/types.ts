@@ -162,6 +162,7 @@ export type CasesConfigurationUI = Pick<
   | 'version'
   | 'owner'
   | 'observableTypes'
+  | 'analyticsEnabled'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

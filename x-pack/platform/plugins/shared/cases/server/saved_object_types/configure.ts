@@ -71,6 +71,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       owner: {
         type: 'keyword',
       },
+      analytics_enabled: {
+        type: 'boolean',
+      },
       /*
       updated_at: {
         type: 'date',

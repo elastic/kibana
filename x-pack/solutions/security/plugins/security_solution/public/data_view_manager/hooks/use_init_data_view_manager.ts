@@ -143,10 +143,11 @@ export const useInitDataViewManager = () => {
         dispatch(removeListener(dataViewSelectedListener));
       });
     };
+    // This is specifically for the logger as it looks to create a new instance on every run of this hook
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     enableAlertsAndAttacksAlignment,
     dispatch,
-    logger,
     newDataViewPickerEnabled,
     services.application,
     services.dataViews,

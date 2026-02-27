@@ -33,6 +33,7 @@ export interface ConfigurationPersistedAttributes {
   customFields?: PersistedCustomFieldsConfiguration;
   templates?: PersistedTemplatesConfiguration;
   observableTypes?: PersistedObservableTypesConfiguration;
+  analytics_enabled?: boolean;
 }
 
 type PersistedObservableTypesConfiguration = Array<{
@@ -77,6 +78,7 @@ export const ConfigurationPartialAttributesRt = rt.intersection([
   rt.exact(
     rt.partial({
       owner: rt.string,
+      analytics_enabled: rt.boolean,
     })
   ),
 ]);

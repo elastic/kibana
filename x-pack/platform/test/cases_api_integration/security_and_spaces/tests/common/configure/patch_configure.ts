@@ -691,5 +691,49 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
     });
+
+    describe('analytics_enabled', () => {
+      it('should enable analytics by patching analytics_enabled to true', async () => {
+        const configuration = await createConfiguration(supertest);
+        expect(configuration.analytics_enabled).to.be(undefined);
+
+        const updated = await updateConfiguration(supertest, configuration.id, {
+          version: configuration.version,
+          analytics_enabled: true,
+        });
+
+        expect(updated.analytics_enabled).to.be(true);
+      });
+
+      it('should disable analytics by patching analytics_enabled to false', async () => {
+        const configuration = await createConfiguration(supertest, {
+          ...getConfigurationRequest(),
+          analytics_enabled: true,
+        });
+        expect(configuration.analytics_enabled).to.be(true);
+
+        const updated = await updateConfiguration(supertest, configuration.id, {
+          version: configuration.version,
+          analytics_enabled: false,
+        });
+
+        expect(updated.analytics_enabled).to.be(false);
+      });
+
+      it('should preserve analytics_enabled when patching other fields', async () => {
+        const configuration = await createConfiguration(supertest, {
+          ...getConfigurationRequest(),
+          analytics_enabled: true,
+        });
+
+        const updated = await updateConfiguration(supertest, configuration.id, {
+          version: configuration.version,
+          closure_type: 'close-by-pushing',
+        });
+
+        expect(updated.analytics_enabled).to.be(true);
+        expect(updated.closure_type).to.be('close-by-pushing');
+      });
+    });
   });
 };

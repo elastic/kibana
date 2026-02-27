@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
@@ -96,10 +96,12 @@ export class RenderingService implements IRenderingService {
     const Layout = layout.getComponent();
 
     ReactDOM.render(
-      <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
-        <Layout />
-      </KibanaRootContextProvider>,
+      <StrictMode>
+        <KibanaRootContextProvider {...startServices} globalStyles={true}>
+          <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
+          <Layout />
+        </KibanaRootContextProvider>
+      </StrictMode>,
       targetDomElement
     );
   }

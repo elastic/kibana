@@ -908,45 +908,18 @@ export const findInternalCaseUserActions = async ({
 
 export const deleteAllCaseAnalyticsItems = async (es: Client) => {
   try {
-    await Promise.all([
-      deleteCasesAnalytics(es),
-      deleteAttachmentsAnalytics(es),
-      deleteCommentsAnalytics(es),
-      deleteActivityAnalytics(es),
-    ]);
+    await Promise.all([deleteContentAnalytics(es), deleteActivityAnalytics(es)]);
   } catch (_) {
     // ignore errors, indexes might not exist yet
   }
 };
 
-export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: ['.internal.cases.securitysolution-default', '.internal.cases.securitysolution-space1'],
-    query: { match_all: {} },
-    wait_for_completion: true,
-    refresh: true,
-    conflicts: 'proceed',
-  });
-};
-
-export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
+/** Delete all documents from the consolidated content analytics index (cases + comments + attachments). */
+export const deleteContentAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [
-      '.internal.cases-attachments.securitysolution-default',
-      '.internal.cases-attachments.securitysolution-space1',
-    ],
-    query: { match_all: {} },
-    wait_for_completion: true,
-    refresh: true,
-    conflicts: 'proceed',
-  });
-};
-
-export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: [
-      '.internal.cases-comments.securitysolution-default',
-      '.internal.cases-comments.securitysolution-space1',
+      '.internal.cases-analytics.securitysolution-default',
+      '.internal.cases-analytics.securitysolution-space1',
     ],
     query: { match_all: {} },
     wait_for_completion: true,
@@ -958,8 +931,8 @@ export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
 export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [
-      '.internal.cases-activity.securitysolution-default',
-      '.internal.cases-activity.securitysolution-space1',
+      '.internal.cases-analytics-activity.securitysolution-default',
+      '.internal.cases-analytics-activity.securitysolution-space1',
     ],
     query: { match_all: {} },
     wait_for_completion: true,
@@ -967,3 +940,15 @@ export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
     conflicts: 'proceed',
   });
 };
+
+// ---------------------------------------------------------------------------
+// Deprecated aliases — kept so that any existing skipped tests continue to
+// compile. New code should use deleteContentAnalytics.
+// ---------------------------------------------------------------------------
+
+/** @deprecated Use deleteContentAnalytics — cases, comments, and attachments are now in one index. */
+export const deleteCasesAnalytics = deleteContentAnalytics;
+/** @deprecated Use deleteContentAnalytics — cases, comments, and attachments are now in one index. */
+export const deleteAttachmentsAnalytics = deleteContentAnalytics;
+/** @deprecated Use deleteContentAnalytics — cases, comments, and attachments are now in one index. */
+export const deleteCommentsAnalytics = deleteContentAnalytics;
