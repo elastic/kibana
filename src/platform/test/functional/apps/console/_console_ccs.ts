@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
 
@@ -48,10 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.console.clickPlay();
 
-        await retry.waitFor('console response status badge to appear', async () => {
-          return await testSubjects.exists('consoleResponseStatusBadge');
-        });
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.waitForRequestToComplete();
 
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getOutputText();

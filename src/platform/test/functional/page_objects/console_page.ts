@@ -247,6 +247,32 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async waitForRequestToComplete() {
+    // Wait for a visual "request started" signal.
+    await this.retry.try(async () => {
+      const started =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+
+      if (!started) {
+        throw new Error('Expected console request to enter loading state');
+      }
+    });
+
+    // Wait for the request to finish: loading indicators go away and output/status are present.
+    await this.retry.try(async () => {
+      const inProgress =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+      const outputReady = await this.testSubjects.exists('consoleMonacoOutput');
+      const statusReady = await this.testSubjects.exists('consoleResponseStatusBadge');
+
+      if (inProgress || !outputReady || !statusReady) {
+        throw new Error('Expected console request to finish and render output');
+      }
+    });
+  }
+
   public async isPlayButtonVisible() {
     return await this.testSubjects.exists('sendRequestButton');
   }

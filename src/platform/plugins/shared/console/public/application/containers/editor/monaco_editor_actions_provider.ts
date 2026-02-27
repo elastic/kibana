@@ -310,6 +310,10 @@ export class MonacoEditorActionsProvider {
     } = context;
     const { toasts } = notifications;
     try {
+      // Flip request state immediately so the UI can reflect progress
+      // even if parsing / sending the request is slow.
+      dispatch({ type: 'sendRequest', payload: undefined });
+
       const allRequests = await this.getRequests();
       const selectedRequests = await this.getSelectedParsedRequests();
       if (selectedRequests.length) {
@@ -328,6 +332,7 @@ export class MonacoEditorActionsProvider {
               },
             })
           );
+          dispatch({ type: 'cleanRequest', payload: undefined });
           return;
         }
       }
@@ -349,6 +354,7 @@ export class MonacoEditorActionsProvider {
             defaultMessage: 'The selected request is not valid.',
           })
         );
+        dispatch({ type: 'cleanRequest', payload: undefined });
         return;
       } else if (!requests.length) {
         toasts.add(
@@ -357,10 +363,9 @@ export class MonacoEditorActionsProvider {
               'No request selected. Select a request by placing the cursor inside it.',
           })
         );
+        dispatch({ type: 'cleanRequest', payload: undefined });
         return;
       }
-
-      dispatch({ type: 'sendRequest', payload: undefined });
 
       // track the requests
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
