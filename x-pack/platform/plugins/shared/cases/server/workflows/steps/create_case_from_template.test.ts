@@ -22,7 +22,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
     expect(typeof definition.handler).toBe('function');
     expect(
       definition.inputSchema.safeParse({
-        'case-template-id': 'triage_template',
+        case_template_id: 'triage_template',
       }).success
     ).toBe(true);
   });
@@ -60,7 +60,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
     const definition = createCaseFromTemplateStepDefinition(getCasesClient);
     const result = await definition.handler(
       createContext({
-        'case-template-id': 'triage_template',
+        case_template_id: 'triage_template',
         overwrites: {
           title: 'Overwrite title',
           status: 'in-progress',
@@ -136,7 +136,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
     await definition.handler(
       createContext({
-        'case-template-id': 'triage_template',
+        case_template_id: 'triage_template',
       })
     );
 
@@ -173,7 +173,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
     await definition.handler(
       createContext({
-        'case-template-id': 'triage_template',
+        case_template_id: 'triage_template',
       })
     );
 
@@ -202,7 +202,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
 
     const result = await definition.handler(
       createContext({
-        'case-template-id': 'missing_template',
+        case_template_id: 'missing_template',
       })
     );
 
@@ -238,7 +238,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
     await definition.handler(
       createContext(
         {
-          'case-template-id': 'triage_template',
+          case_template_id: 'triage_template',
         },
         { 'push-case': true }
       )

@@ -66,7 +66,7 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
 
     return {
       definition,
-      templateSelection: inputHandlers['case-template-id']?.selection,
+      templateSelection: inputHandlers.case_template_id.selection,
     };
   };
 
@@ -84,12 +84,12 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
     const searchResults = await templateSelection!.search('triage', {
       stepType: 'cases.createCaseFromTemplate',
       scope: 'input',
-      propertyKey: 'case-template-id',
+      propertyKey: 'case_template_id',
     });
     const resolved = await templateSelection!.resolve('triage_template', {
       stepType: 'cases.createCaseFromTemplate',
       scope: 'input',
-      propertyKey: 'case-template-id',
+      propertyKey: 'case_template_id',
     });
 
     expect(getCaseConfigureMock).toHaveBeenCalledTimes(2);
@@ -114,7 +114,7 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
       templateSelection!.search('   ', {
         stepType: 'cases.createCaseFromTemplate',
         scope: 'input',
-        propertyKey: 'case-template-id',
+        propertyKey: 'case_template_id',
       })
     ).resolves.toEqual([]);
   });
@@ -126,7 +126,7 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
       templateSelection!.search('observability', {
         stepType: 'cases.createCaseFromTemplate',
         scope: 'input',
-        propertyKey: 'case-template-id',
+        propertyKey: 'case_template_id',
       })
     ).resolves.toEqual([]);
   });
@@ -136,12 +136,12 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
 
     const resolvedDetails = await templateSelection!.getDetails(
       'triage_template',
-      { stepType: 'cases.createCaseFromTemplate', scope: 'input', propertyKey: 'case-template-id' },
+      { stepType: 'cases.createCaseFromTemplate', scope: 'input', propertyKey: 'case_template_id' },
       { value: 'triage_template', label: 'Triage template' }
     );
     const unresolvedDetails = await templateSelection!.getDetails(
       'missing_template',
-      { stepType: 'cases.createCaseFromTemplate', scope: 'input', propertyKey: 'case-template-id' },
+      { stepType: 'cases.createCaseFromTemplate', scope: 'input', propertyKey: 'case_template_id' },
       null
     );
 
@@ -158,7 +158,7 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
       templateSelection!.search('triage', {
         stepType: 'cases.createCaseFromTemplate',
         scope: 'input',
-        propertyKey: 'case-template-id',
+        propertyKey: 'case_template_id',
       })
     ).rejects.toThrow(error.message);
   });

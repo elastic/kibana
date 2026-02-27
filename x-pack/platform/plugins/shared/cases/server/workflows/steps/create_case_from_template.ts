@@ -44,11 +44,11 @@ export const createCaseFromTemplateStepDefinition = (
       CreateCaseFromTemplateStepOutput['case']
     >(getCasesClient, async (casesClient, input) => {
       const configurations = await casesClient.configure.get({ owner: WORKFLOW_CASE_OWNER });
-      const template = findTemplateById(configurations, input['case-template-id']);
+      const template = findTemplateById(configurations, input.case_template_id);
 
       if (!template) {
         throw new Error(
-          `Case template not found for owner "${WORKFLOW_CASE_OWNER}": ${input['case-template-id']}`
+          `Case template not found for owner "${WORKFLOW_CASE_OWNER}": ${input.case_template_id}`
         );
       }
 

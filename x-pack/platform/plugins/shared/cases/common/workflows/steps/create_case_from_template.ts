@@ -21,7 +21,7 @@ export const OverwritesSchema = UpdateCaseRequestSchema.shape.cases.element.omit
 });
 
 export const InputSchema = z.object({
-  'case-template-id': z.string().min(1, 'case-template-id is required'),
+  case_template_id: z.string().min(1, 'case_template_id is required'),
   overwrites: OverwritesSchema.optional(),
 });
 

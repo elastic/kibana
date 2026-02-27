@@ -42,14 +42,14 @@ export const createCreateCaseFromTemplateStepDefinition = () =>
 - name: create_case_from_template
   type: ${CreateCaseFromTemplateStepTypeId}
   with:
-    case-template-id: "triage_template"
+    case_template_id: "triage_template"
 \`\`\``,
         `## Create case from template with overwrites
 \`\`\`yaml
 - name: create_case_from_template_with_overwrites
   type: ${CreateCaseFromTemplateStepTypeId}
   with:
-    case-template-id: "triage_template"
+    case_template_id: "triage_template"
     overwrites:
       title: "Template based case title"
       severity: "high"
@@ -60,7 +60,7 @@ export const createCreateCaseFromTemplateStepDefinition = () =>
     actionsMenuGroup: ActionsMenuGroup.kibana,
     editorHandlers: {
       input: {
-        'case-template-id': {
+        case_template_id: {
           selection: {
             search: async (input) => {
               const templates = await getTemplatesForWorkflowOwner();
