@@ -42,6 +42,19 @@ export class EsIndexDataProvider {
   }
 
   async destroyIndex() {
+    // Resolve alias to concrete indices if the name matches an alias,
+    // because ES rejects indices.delete on alias names.
+    try {
+      const aliasResult = await this.es.indices.getAlias({ name: this.index });
+      const concreteIndices = Object.keys(aliasResult);
+      if (concreteIndices.length > 0) {
+        await this.es.indices.delete({ index: concreteIndices });
+        return;
+      }
+    } catch {
+      // Not an alias — fall through to delete as a concrete index
+    }
+
     const indexExists = await this.es.indices.exists({ index: this.index });
 
     if (indexExists) {
