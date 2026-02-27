@@ -90,7 +90,7 @@ export class SLOPlugin
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
         sloClient,
-        telemetry: this.telemetryService.start(core.analytics),
+        telemetry: this.telemetryService.start(coreStart.analytics),
       });
     };
     const appUpdater$ = this.appUpdater$;
