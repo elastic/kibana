@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import type {
-  RuleHealthOverviewStats,
-  LogLevel,
-  NumberOfDetectedGaps,
-  NumberOfExecutions,
-  NumberOfLoggedMessages,
-  RuleExecutionStatus,
-  TopMessages,
-} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevelEnum,
   RuleExecutionStatusEnum,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+
 import type { RawData } from '../../../utils/normalization';
-import type { RuleExecutionStatsAggregationLevel } from '../aggregation_level';
+import type { RuleExecutionStatsAggregationLevel } from '../aggregations/rule_execution_stats';
 import { normalizeAggregatedMetric } from './normalize_aggregated_metric';
+
+import type {
+  HealthOverviewStats,
+  NumberOfDetectedGaps,
+  NumberOfExecutions,
+  NumberOfLoggedMessages,
+  TopMessages,
+} from '../aggregations/types';
+
+type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'trace';
 
 export const normalizeRuleExecutionStatsAggregationResult = (
   aggregations: Record<string, RawData>,
   aggregationLevel: RuleExecutionStatsAggregationLevel
-): RuleHealthOverviewStats => {
+): HealthOverviewStats => {
   const executeEvents = aggregations.executeEvents || {};
   const statusChangeEvents = aggregations.statusChangeEvents || {};
   const executionMetricsEvents = aggregations.executionMetricsEvents || {};
@@ -65,7 +68,7 @@ const normalizeNumberOfExecutions = (
   executionsByStatus: RawData
 ): NumberOfExecutions => {
   const getStatusCount = (status: RuleExecutionStatus): number => {
-    const bucket = executionsByStatus.buckets.find((b: RawData) => b.key === status);
+    const bucket = executionsByStatus.buckets?.find((b: RawData) => b.key === status);
     return Number(bucket?.doc_count || 0);
   };
 
@@ -85,7 +88,7 @@ const normalizeNumberOfLoggedMessages = (
   const messagesByLogLevel = messageContainingEvents.messagesByLogLevel || {};
 
   const getMessageCount = (level: LogLevel): number => {
-    const bucket = messagesByLogLevel.buckets.find((b: RawData) => b.key === level);
+    const bucket = messagesByLogLevel.buckets?.find((b: RawData) => b.key === level);
     return Number(bucket?.doc_count || 0);
   };
 

@@ -7,17 +7,18 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
-import type {
-  HealthOverviewStats,
-  HealthHistory,
-} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
+import type {
+  HealthHistory,
+  HealthOverInterval,
+  HealthOverviewStats,
+} from '../aggregations/types';
 import { normalizeRuleExecutionStatsAggregationResult } from './normalize_rule_execution_stats_aggregation_result';
 
 export const normalizeRuleHealthAggregationResult = (
   result: AggregateEventsBySavedObjectResult,
   requestAggs: Record<string, estypes.AggregationsAggregationContainer>
-) => {
+): HealthOverInterval => {
   const aggregations = result.aggregations ?? {};
   return {
     stats_over_interval: normalizeRuleExecutionStatsAggregationResult(
@@ -40,7 +41,7 @@ const normalizeRuleHistoryOverInterval = (
   const statsHistory = aggregations.statsHistory || {};
 
   return {
-    buckets: statsHistory.buckets.map((rawBucket: RawData) => {
+    buckets: (statsHistory.buckets || []).map((rawBucket: RawData) => {
       const timestamp: string = String(rawBucket.key_as_string);
       const stats = normalizeRuleExecutionStatsAggregationResult(rawBucket, 'histogram');
       return { timestamp, stats };

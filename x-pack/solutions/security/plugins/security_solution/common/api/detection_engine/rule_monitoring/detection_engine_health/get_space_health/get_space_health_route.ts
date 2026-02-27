@@ -38,7 +38,7 @@ export interface GetSpaceHealthRequest {
   interval: HealthInterval;
 
   /**
-   * Number of top rules for each metric
+   * Number of top rules for each metric.
    */
   num_of_top_rules: number;
 

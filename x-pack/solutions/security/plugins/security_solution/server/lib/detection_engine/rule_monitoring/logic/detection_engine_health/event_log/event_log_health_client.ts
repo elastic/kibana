@@ -25,12 +25,14 @@ import {
 } from '../../event_log/event_log_constants';
 import { kqlOr } from '../../utils/kql';
 import type { IRuleSpacesClient } from '../rule_spaces/rule_spaces_client';
+import { getRuleHealthAggregation } from './aggregations/health_stats_for_rule';
+import { getSpacesHealthAggregation } from './aggregations/get_spaces_health_aggregation';
 import {
   normalizeRuleHealthAggregationResult,
   normalizeSpacesHealthAggregationResult,
 } from './normalizers';
-import { getRuleHealthAggregation, getSpacesHealthAggregation } from './aggregations';
 import type { HealthOverInterval } from './aggregations/types';
+import type { SpacesHealthOverInterval } from './normalizers/normalize_spaces_health_aggregation_result';
 
 /**
  * Client for calculating health stats based on events in .kibana-event-log-* index.
@@ -56,8 +58,8 @@ export interface IEventLogHealthClient {
 }
 
 type RuleHealth = HealthOverInterval;
-type SpaceHealth = HealthOverInterval;
-type ClusterHealth = HealthOverInterval;
+type SpaceHealth = SpacesHealthOverInterval;
+type ClusterHealth = SpacesHealthOverInterval;
 
 export const createEventLogHealthClient = (
   eventLog: IEventLogClient,

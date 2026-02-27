@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { HealthIntervalGranularity } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import * as f from '../../../event_log/event_log_fields';
-import { getRuleExecutionStatsAggregation } from './get_rule_execution_stats_aggregation';
+import { getRuleExecutionStatsAggregation } from './rule_execution_stats';
 import { getTopRulesByMetricsAggregation } from './get_top_rules_by_metrics_aggregation';
 
 export const getSpacesHealthAggregation = (

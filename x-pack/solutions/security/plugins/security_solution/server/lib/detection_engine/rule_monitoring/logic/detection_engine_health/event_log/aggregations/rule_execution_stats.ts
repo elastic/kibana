@@ -6,18 +6,21 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+
 import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
   RuleExecutionStatusEnum,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+
 import {
   ALERTING_PROVIDER,
   RULE_EXECUTION_LOG_PROVIDER,
 } from '../../../event_log/event_log_constants';
 import * as f from '../../../event_log/event_log_fields';
 import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
-import type { RuleExecutionStatsAggregationLevel } from '../aggregation_level';
+
+export type RuleExecutionStatsAggregationLevel = 'whole-interval' | 'histogram';
 
 export const getRuleExecutionStatsAggregation = (
   aggregationLevel: RuleExecutionStatsAggregationLevel

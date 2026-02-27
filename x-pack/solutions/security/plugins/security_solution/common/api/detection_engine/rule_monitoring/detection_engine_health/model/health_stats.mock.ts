@@ -7,10 +7,11 @@
 
 import type {
   AggregatedMetric,
-  HealthOverviewState,
-  TotalEnabledDisabled,
-  RuleHealthOverviewStats,
   ClusterHealthOverviewStats,
+  HealthOverviewStats,
+  HealthOverviewState,
+  SpaceHealthOverviewStats,
+  TotalEnabledDisabled,
 } from './health_stats';
 
 const getEmptyHealthOverviewState = (): HealthOverviewState => {
@@ -35,7 +36,7 @@ const getZeroTotalEnabledDisabled = (): TotalEnabledDisabled => {
   };
 };
 
-const getEmptyRuleHealthOverviewStats = (): RuleHealthOverviewStats => {
+const getEmptyHealthOverviewStats = (): HealthOverviewStats => {
   return {
     number_of_executions: {
       total: 0,
@@ -69,20 +70,27 @@ const getEmptyRuleHealthOverviewStats = (): RuleHealthOverviewStats => {
   };
 };
 
-const getEmptySpaceHealthOverviewStats = (): ClusterHealthOverviewStats => {
+const getEmptyTopRules = () => ({
+  by_execution_duration_ms: [],
+  by_schedule_delay_ms: [],
+  by_search_duration_ms: [],
+  by_indexing_duration_ms: [],
+  by_enrichment_duration_ms: [],
+});
+
+const getEmptySpaceHealthOverviewStats = (): SpaceHealthOverviewStats => {
   return {
-    ...getEmptyRuleHealthOverviewStats(),
-    top_rules: {
-      by_execution_duration_ms: [],
-      by_schedule_delay_ms: [],
-      by_search_duration_ms: [],
-      by_indexing_duration_ms: [],
-      by_enrichment_duration_ms: [],
-    },
+    ...getEmptyHealthOverviewStats(),
+    top_rules: getEmptyTopRules(),
   };
 };
 
-const getEmptyClusterHealthOverviewStats = getEmptySpaceHealthOverviewStats;
+const getEmptyClusterHealthOverviewStats = (): ClusterHealthOverviewStats => {
+  return {
+    ...getEmptyHealthOverviewStats(),
+    top_rules: getEmptyTopRules(),
+  };
+};
 
 const getZeroAggregatedMetric = (): AggregatedMetric<number> => {
   return {
@@ -97,7 +105,7 @@ const getZeroAggregatedMetric = (): AggregatedMetric<number> => {
 
 export const healthStatsMock = {
   getEmptyHealthOverviewState,
-  getEmptyRuleHealthOverviewStats,
+  getEmptyHealthOverviewStats,
   getEmptySpaceHealthOverviewStats,
   getEmptyClusterHealthOverviewStats,
 };

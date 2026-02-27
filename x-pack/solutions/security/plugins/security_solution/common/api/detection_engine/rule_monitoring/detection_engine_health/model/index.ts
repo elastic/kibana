@@ -6,9 +6,9 @@
  */
 
 export type * from './cluster_health';
+export * from './default_top_n_rules_limit';
 export * from './health_interval';
 export type * from './health_metadata';
 export type * from './health_stats';
 export type * from './rule_health';
 export type * from './space_health';
-export * from './default_top_n_rules_limit';

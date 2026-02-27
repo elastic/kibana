@@ -11,6 +11,7 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+
 import type {
   GetClusterHealthRequest,
   GetClusterHealthResponse,
@@ -111,10 +112,7 @@ const handleClusterHealthRequest = async (args: HandleClusterHealthRequestArgs) 
     const params = resolveParameters();
     const { healthClient } = await resolveDependencies();
 
-    const clusterHealthParameters = {
-      interval: params.interval,
-      num_of_top_rules: params.num_of_top_rules,
-    };
+    const clusterHealthParameters = { interval: params.interval, num_of_top_rules: params.num_of_top_rules };
     const clusterHealth = await healthClient.calculateClusterHealth(clusterHealthParameters);
 
     const responseBody: GetClusterHealthResponse = {

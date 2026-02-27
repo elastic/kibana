@@ -9,22 +9,26 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import type {
   HealthHistory,
-  SpaceHealthSnapshot,
-  SpaceHealthStats,
+  RuleInfo,
+  RuleInfoWithPercentiles,
   SpaceHealthOverviewStats,
   TopRulesByMetrics,
-  RuleInfoWithPercentiles,
-  RuleInfo,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
-import type { RuleExecutionStatsAggregationLevel } from '../aggregation_level';
+import type { RuleExecutionStatsAggregationLevel } from '../aggregations/rule_execution_stats';
 import { normalizeAggregatedMetric } from './normalize_aggregated_metric';
 import { normalizeRuleExecutionStatsAggregationResult } from './normalize_rule_execution_stats_aggregation_result';
+
+export interface SpacesHealthOverInterval {
+  stats_over_interval: SpaceHealthOverviewStats;
+  history_over_interval: HealthHistory<SpaceHealthOverviewStats>;
+  debug?: Record<string, unknown>;
+}
 
 export const normalizeSpacesHealthAggregationResult = (
   result: AggregateEventsBySavedObjectResult,
   requestAggs: Record<string, estypes.AggregationsAggregationContainer>
-): Omit<SpaceHealthSnapshot, 'state_at_the_moment'> => {
+): SpacesHealthOverInterval => {
   const aggregations = result.aggregations ?? {};
   return {
     stats_over_interval: normalizeSpacesExecutionStatsAggregationResult(
@@ -76,40 +80,43 @@ const normalizeTopRuleAggregationResult = (
   topRules: RawData,
   metricModifier?: (value: number) => number
 ): RuleInfoWithPercentiles[] | undefined => {
-  if (!topRules?.rules?.buckets) {
+  // Note: by_rule matches the sub-aggregation name in get_top_rules_by_metrics_aggregation.ts
+  if (!topRules?.by_rule?.buckets) {
     return undefined;
   }
 
-  return topRules.rules.buckets.map((bucket: RawData) => ({
-    ...normalizeRuleInfo(bucket.rule),
+  return topRules.by_rule.buckets.map((bucket: RawData) => ({
+    ...normalizeRuleInfo(bucket.rule_metadata),
     ...normalizeAggregatedMetric(bucket.percentiles, metricModifier),
   }));
 };
 
-const normalizeRuleInfo = (ruleBucket: RawData): RuleInfo | undefined => {
+const normalizeRuleInfo = (ruleBucket: RawData): RuleInfo => {
+  const defaultRuleInfo: RuleInfo = { id: '', name: '', category: '' };
+
   if (
     !ruleBucket?.hits?.hits?.[0]?._source?.rule ||
     typeof ruleBucket.hits.hits[0]._source.rule !== 'object'
   ) {
-    return undefined;
+    return defaultRuleInfo;
   }
 
   const ruleData = ruleBucket.hits.hits[0]._source.rule;
 
   return {
-    id: ruleData.id,
-    name: ruleData.name,
-    category: ruleData.category,
+    id: ruleData.id ?? '',
+    name: ruleData.name ?? '',
+    category: ruleData.category ?? '',
   };
 };
 
 const normalizeSpacesHistoryOverInterval = (
   aggregations: Record<string, RawData>
-): HealthHistory<SpaceHealthStats> => {
+): HealthHistory<SpaceHealthOverviewStats> => {
   const statsHistory = aggregations.statsHistory || {};
 
   return {
-    buckets: statsHistory.buckets.map((rawBucket: RawData) => {
+    buckets: (statsHistory.buckets || []).map((rawBucket: RawData) => {
       const timestamp: string = String(rawBucket.key_as_string);
       const stats = normalizeSpacesExecutionStatsAggregationResult(rawBucket, 'histogram');
       return { timestamp, stats };
