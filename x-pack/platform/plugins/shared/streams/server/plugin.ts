@@ -48,6 +48,7 @@ import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_
 import { TaskService } from './lib/tasks/task_service';
 import { SystemService } from './lib/streams/system/system_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
+import { registerSignificantEventsAgent } from './agent/register_significant_events_agent';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -258,6 +259,12 @@ export class StreamsPlugin
         createStreamsGlobalSearchResultProvider(core, this.logger)
       );
     }
+
+    registerSignificantEventsAgent(plugins.agentBuilder, {
+      getScopedClients,
+      logger: this.logger,
+      telemetry: telemetryClient,
+    });
 
     return {};
   }

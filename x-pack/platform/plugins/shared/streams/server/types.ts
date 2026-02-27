@@ -30,6 +30,10 @@ import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/serv
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server/types';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -56,6 +60,7 @@ export interface StreamsPluginSetupDependencies {
   usageCollection: UsageCollectionSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  agentBuilder: AgentBuilderPluginSetup;
 }
 
 export interface StreamsPluginStartDependencies {
@@ -70,4 +75,5 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   spaces?: SpacesPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 }

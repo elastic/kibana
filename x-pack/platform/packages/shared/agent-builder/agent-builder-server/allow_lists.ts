@@ -38,6 +38,19 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+
+  // Streams
+  `${internalNamespaces.streams}.gather_context`,
+  `${internalNamespaces.streams}.find_changed_queries`,
+  `${internalNamespaces.streams}.cluster_by_time`,
+  `${internalNamespaces.streams}.group_within_window`,
+  `${internalNamespaces.streams}.sample_cluster`,
+  `${internalNamespaces.streams}.describe_cluster`,
+  `${internalNamespaces.streams}.get_entity_timeline`,
+  `${internalNamespaces.streams}.explore_topology`,
+  `${internalNamespaces.streams}.compare_to_baseline`,
+  `${internalNamespaces.streams}.context_expansion`,
+  `${internalNamespaces.streams}.embedding_search_similar`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -49,6 +62,8 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.observability}.agent`,
   `${internalNamespaces.security}.agent`,
+  `${internalNamespaces.observability}.significant_events_agent`,
+  `${internalNamespaces.streams}.significant_events_agent`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];

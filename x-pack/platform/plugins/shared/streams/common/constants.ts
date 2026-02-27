@@ -13,6 +13,9 @@ export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
 
 export const STREAMS_FEATURE_ID = 'streams';
 export const STREAMS_CONSUMER = 'streams';
+
+/** Agent Builder agent ID for the Significant Events agent */
+export const SIGNIFICANT_EVENTS_AGENT_ID = 'streams.significant_events_agent';
 export const STREAMS_PRODUCER = 'streams';
 
 export const STREAMS_RULE_REGISTRATION_CONTEXT = 'streams';

@@ -23,7 +23,8 @@
       "security",
       "taskManager",
       "usageCollection",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "agentBuilder",
     ],
     "optionalPlugins": ["cloud", "serverless", "globalSearch", "spaces"],
     "requiredBundles": [],
