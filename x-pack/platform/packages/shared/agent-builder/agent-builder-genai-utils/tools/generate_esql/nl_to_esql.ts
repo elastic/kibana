@@ -102,7 +102,6 @@ export const generateEsql = async ({
     model,
     esClient,
     docBase,
-    events,
     esqlCallbacks,
   });
 
