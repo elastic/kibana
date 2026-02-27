@@ -86,7 +86,7 @@ export const CasesMetrics: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
     </>
   );
 };
