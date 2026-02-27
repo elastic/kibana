@@ -100,7 +100,11 @@ const useStatusCodeClassNames = (): StatusCodeClassNames => {
   );
 };
 
-export const MonacoEditorOutput: FunctionComponent = () => {
+export const MonacoEditorOutput: FunctionComponent<{
+  setVal: (value: string) => void;
+  val: string;
+}> = ({ setVal, val }) => {
+  console.log('output render', val);
   const context = useServicesContext();
   const {
     services: { notifications },
@@ -109,7 +113,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const {
     lastResult: { data },
   } = useRequestReadContext();
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(val);
   const [mode, setMode] = useState('text');
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
@@ -117,6 +121,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const statusCodeClassNames = useStatusCodeClassNames();
   const highlightedLinesClassName = useHighlightedLinesClassName();
   const lineDecorations = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const lastSyncedValueRef = useRef<string | null>(null);
 
   const actionsProvider = useRef<MonacoEditorOutputActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
@@ -150,26 +155,29 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           ? CONSOLE_OUTPUT_LANG_ID
           : languageForContentType(data[0].response.contentType)
       );
-      setValue(
-        data
-          .map((result) => {
-            const { value: newValue, contentType } = result.response;
+      const newVal = data
+        .map((result) => {
+          const { value: newValue, contentType } = result.response;
 
-            let editorOutput;
-            if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
-              editorOutput = safeExpandLiteralStrings(newValue as string);
-            } else if (isMapboxVectorTile(contentType)) {
-              const vectorTile = new VectorTile(new Protobuf(newValue as ArrayBuffer));
-              const vectorTileJson = convertMapboxVectorTileToJson(vectorTile);
-              editorOutput = safeExpandLiteralStrings(vectorTileJson as string);
-            } else {
-              editorOutput = newValue;
-            }
+          let editorOutput;
+          if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
+            editorOutput = safeExpandLiteralStrings(newValue as string);
+          } else if (isMapboxVectorTile(contentType)) {
+            const vectorTile = new VectorTile(new Protobuf(newValue as ArrayBuffer));
+            const vectorTileJson = convertMapboxVectorTileToJson(vectorTile);
+            editorOutput = safeExpandLiteralStrings(vectorTileJson as string);
+          } else {
+            editorOutput = newValue;
+          }
 
-            return editorOutput;
-          })
-          .join('\n')
-      );
+          return editorOutput;
+        })
+        .join('\n');
+      setValue(newVal);
+      if (lastSyncedValueRef.current !== newVal) {
+        lastSyncedValueRef.current = newVal;
+        setVal(newVal);
+      }
       if (isMultipleRequest) {
         // If there are multiple responses, add decorations for their status codes
         const decorations = getStatusCodeDecorations(data, statusCodeClassNames);
@@ -179,8 +187,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
       }
     } else {
       setValue('');
+      if (lastSyncedValueRef.current !== '') {
+        lastSyncedValueRef.current = '';
+        setVal('');
+      }
     }
-  }, [readOnlySettings, data, value, statusCodeClassNames]);
+  }, [readOnlySettings.tripleQuotes, data, statusCodeClassNames, setVal]);
 
   const copyOutputCallback = useCallback(async () => {
     const selectedText = (await actionsProvider.current?.getParsedOutput()) as string;
