@@ -126,29 +126,98 @@ describe('Metric Schema', () => {
       expect(validated).toEqual({ ...defaultValues, ...input });
     });
 
-    it('should throw for invalid color by value configuration', () => {
-      const input = {
-        ...baseMetricConfig,
-        metrics: [
-          {
-            type: 'primary',
-            operation: 'average',
-            field: 'temperature',
-            color: {
-              type: 'dynamic',
-              range: 'percentage',
-              steps: [
-                { type: 'from', from: 0, color: '#blue' },
-                { type: 'to', to: 100, color: '#red' },
-              ],
+    describe('coloring configuration', () => {
+      it('should throw for invalid color by value configuration', () => {
+        const input = {
+          ...baseMetricConfig,
+          metrics: [
+            {
+              type: 'primary',
+              operation: 'average',
+              field: 'temperature',
+              color: {
+                type: 'dynamic',
+                range: 'percentage',
+                min: 0,
+                max: 100,
+                steps: [
+                  { type: 'from', from: 0, color: '#blue' },
+                  { type: 'to', to: 100, color: '#red' },
+                ],
+              },
+              fit: false,
+              alignments: { labels: 'left', value: 'left' },
             },
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
-          },
-        ],
-      };
+          ],
+        };
 
-      expect(() => metricStateSchema.validate(input)).toThrow();
+        expect(() => metricStateSchema.validate(input)).toThrow(
+          'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.'
+        );
+      });
+
+      it('accepts percentage-based dynamic coloring with breakdown_by', () => {
+        const input = {
+          ...baseMetricConfig,
+          metrics: [
+            {
+              type: 'primary',
+              operation: 'average',
+              field: 'temperature',
+              color: {
+                type: 'dynamic',
+                range: 'percentage',
+                min: 0,
+                max: 100,
+                steps: [
+                  { type: 'from', from: 0, color: '#blue' },
+                  { type: 'to', to: 100, color: '#red' },
+                ],
+              },
+              fit: false,
+              alignments: { labels: 'left', value: 'left' },
+            },
+          ],
+          breakdown_by: {
+            operation: 'terms',
+            fields: ['category'],
+            columns: 3,
+          },
+        };
+
+        expect(() => metricStateSchema.validate(input)).not.toThrow();
+      });
+
+      it('accepts percentage-based dynamic coloring with bar background_chart', () => {
+        const input = {
+          ...baseMetricConfig,
+          metrics: [
+            {
+              type: 'primary',
+              operation: 'average',
+              field: 'temperature',
+              color: {
+                type: 'dynamic',
+                range: 'percentage',
+                min: 0,
+                max: 100,
+                steps: [
+                  { type: 'from', from: 0, color: '#blue' },
+                  { type: 'to', to: 100, color: '#red' },
+                ],
+              },
+              fit: false,
+              alignments: { labels: 'left', value: 'left' },
+              background_chart: {
+                type: 'bar',
+                max_value: { operation: 'static_value', value: 100 },
+              },
+            },
+          ],
+        };
+
+        expect(() => metricStateSchema.validate(input)).not.toThrow();
+      });
     });
   });
 

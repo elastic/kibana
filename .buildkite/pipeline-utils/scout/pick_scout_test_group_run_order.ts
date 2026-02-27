@@ -36,9 +36,15 @@ if (process.env.UIAM_DOCKER_IMAGE) {
   scoutExtraEnv.UIAM_DOCKER_IMAGE = process.env.UIAM_DOCKER_IMAGE;
 }
 
+if (process.env.UIAM_COSMOSDB_DOCKER_IMAGE) {
+  scoutExtraEnv.UIAM_COSMOSDB_DOCKER_IMAGE = process.env.UIAM_COSMOSDB_DOCKER_IMAGE;
+}
+
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
+  const pipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG as string;
+  const cancelOnBuildFailing = pipelineSlug !== 'kibana-on-merge';
 
   if (!Fs.existsSync(scoutConfigsPath)) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
@@ -83,6 +89,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
           ({ label, key, group, agents }): BuildkiteStep => ({
             label,
             command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+            cancel_on_build_failing: cancelOnBuildFailing,
             timeout_in_minutes: 60,
             agents,
             env: {
