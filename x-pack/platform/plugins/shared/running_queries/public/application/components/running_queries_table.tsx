@@ -138,6 +138,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         }),
         width: '220px',
         sortable: true,
+        truncateText: true,
         render: (startTime: number) => moment(startTime).format('MMM D YYYY, HH:mm:ss'),
       },
       {
@@ -145,7 +146,9 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
         name: i18n.translate('xpack.runningQueries.table.runTimeColumn', {
           defaultMessage: 'Run time',
         }),
+        width: '140px',
         sortable: true,
+        truncateText: true,
         render: (startTime: number) => moment(startTime).fromNow(true),
       },
       {
