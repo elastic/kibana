@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
         expect(headers.warning).to.contain(
-          'The "deserializer" parameter is not supported and will be ignored. Custom serializers have been removed.'
+          'The "deserializer" parameter is not supported and will be ignored. Custom deserializers have been removed.'
         );
         const bodyToCompare = removeListServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(
