@@ -77,8 +77,7 @@ export const EarsConnectionsSection: React.FC = () => {
     if (!code) {
       sessionStorage.setItem('ears_oauth_state', oauthState);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [code, oauthState]);
 
   const urlState = urlParams.get('state');
   const storedState = sessionStorage.getItem('ears_oauth_state');
