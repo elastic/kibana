@@ -7,7 +7,6 @@
 
 import { useCallback } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { ALERT_CLOSING_REASON_PANEL_ID } from '@kbn/response-ops-alerts-table';
 import type { CaseUpdateRequest } from '../../../../common/ui';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { CasesUI } from '../../../../common';
@@ -44,7 +43,7 @@ export const useStatusAction = ({
   isDisabled,
   selectedStatus,
 }: UseStatusActionProps) => {
-  const { mutate: updateCases } = useUpdateCases();
+  const { mutate: updateCases, isLoading: isUpdatingStatus } = useUpdateCases();
   const { canUpdate, canReopenCase } = useUserPermissions();
   const handleUpdateCaseStatus = useCallback(
     (selectedCases: CasesUI, status: CaseStatuses, closeReason?: string) => {
@@ -95,13 +94,17 @@ export const useStatusAction = ({
         icon: getStatusIcon(CaseStatuses.closed),
         disabled: isDisabled || shouldDisableStatus(selectedCases),
         'data-test-subj': 'cases-bulk-action-status-closed',
-        key: 'cases-bulk-status-action',
-        panel: ALERT_CLOSING_REASON_PANEL_ID,
+        key: 'cases-bulk-action-status-closed',
       },
     ];
   };
 
-  return { getActions, canUpdateStatus: canUpdate || canReopenCase, handleUpdateCaseStatus };
+  return {
+    getActions,
+    canUpdateStatus: canUpdate || canReopenCase,
+    handleUpdateCaseStatus,
+    isUpdatingStatus,
+  };
 };
 
 export type UseStatusAction = ReturnType<typeof useStatusAction>;

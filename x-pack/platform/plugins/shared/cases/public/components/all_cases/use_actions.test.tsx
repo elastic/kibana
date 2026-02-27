@@ -26,6 +26,7 @@ import {
   renderWithTestingProviders,
 } from '../../common/mock';
 import React from 'react';
+import * as i18n from './translations';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
@@ -70,7 +71,14 @@ describe('useActions', () => {
       wrapper: TestProviders,
     });
 
-    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+    const comp = result.current.actions!.render({
+      ...basicCase,
+      totalAlerts: 2,
+      settings: {
+        ...basicCase.settings,
+        syncAlerts: true,
+      },
+    }) as React.ReactElement;
     renderWithTestingProviders(comp);
 
     expect(screen.getByTestId(`case-action-popover-${basicCase.id}`)).toBeInTheDocument();
@@ -81,7 +89,14 @@ describe('useActions', () => {
       wrapper: TestProviders,
     });
 
-    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+    const comp = result.current.actions!.render({
+      ...basicCase,
+      totalAlerts: 2,
+      settings: {
+        ...basicCase.settings,
+        syncAlerts: true,
+      },
+    }) as React.ReactElement;
     renderWithTestingProviders(comp);
 
     await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
@@ -100,7 +115,14 @@ describe('useActions', () => {
       wrapper: TestProviders,
     });
 
-    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+    const comp = result.current.actions!.render({
+      ...basicCase,
+      totalAlerts: 2,
+      settings: {
+        ...basicCase.settings,
+        syncAlerts: true,
+      },
+    }) as React.ReactElement;
     renderWithTestingProviders(comp);
 
     await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
@@ -127,7 +149,14 @@ describe('useActions', () => {
       wrapper: TestProviders,
     });
 
-    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+    const comp = result.current.actions!.render({
+      ...basicCase,
+      totalAlerts: 2,
+      settings: {
+        ...basicCase.settings,
+        syncAlerts: true,
+      },
+    }) as React.ReactElement;
     renderWithTestingProviders(comp);
 
     await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
@@ -137,10 +166,13 @@ describe('useActions', () => {
     await waitForEuiContextMenuPanelTransition();
 
     await user.click(screen.getByTestId('cases-bulk-action-status-closed'));
-    await waitForEuiContextMenuPanelTransition();
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).toBeInTheDocument();
+    });
 
-    await user.click(screen.getByText('Close without reason'));
-    await user.click(screen.getByRole('button', { name: 'Close' }));
+    await user.click(screen.getByText(i18n.CLOSE_CASE_MODAL_SYNC_CLOSE_REASON));
+    await user.click(screen.getByText('Duplicate'));
+    await user.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalledWith(
@@ -150,6 +182,96 @@ describe('useActions', () => {
               id: basicCase.id,
               status: CaseStatuses.closed,
               version: basicCase.version,
+              closeReason: 'duplicate',
+            }),
+          ],
+        })
+      );
+    });
+  });
+
+  it('changes the status to closed without syncing close reason to alerts', async () => {
+    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
+      wrapper: TestProviders,
+    });
+
+    const comp = result.current.actions!.render({
+      ...basicCase,
+      totalAlerts: 2,
+      settings: {
+        ...basicCase.settings,
+        syncAlerts: false,
+      },
+    }) as React.ReactElement;
+    renderWithTestingProviders(comp);
+
+    await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await waitForEuiPopoverOpen();
+
+    await user.click(screen.getByTestId(`case-action-status-panel-${basicCase.id}`));
+    await waitForEuiContextMenuPanelTransition();
+
+    await user.click(screen.getByTestId('cases-bulk-action-status-closed'));
+    expect(screen.queryByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(updateCasesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            expect.objectContaining({
+              id: basicCase.id,
+              status: CaseStatuses.closed,
+              version: basicCase.version,
+            }),
+          ],
+        })
+      );
+    });
+  });
+
+  it('changes the status to closed and syncs close reason to alerts', async () => {
+    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
+      wrapper: TestProviders,
+    });
+
+    const comp = result.current.actions!.render({
+      ...basicCase,
+      totalAlerts: 2,
+    }) as React.ReactElement;
+    renderWithTestingProviders(comp);
+
+    await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await waitForEuiPopoverOpen();
+
+    await user.click(screen.getByTestId(`case-action-status-panel-${basicCase.id}`));
+    await waitForEuiContextMenuPanelTransition();
+
+    await user.click(screen.getByTestId('cases-bulk-action-status-closed'));
+    await waitFor(() => {
+      expect(screen.getByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText(i18n.CLOSE_CASE_MODAL_SYNC_CLOSE_REASON));
+    await waitFor(() => {
+      expect(screen.getByText('Close without reason')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('Duplicate'));
+    await user.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
+
+    await waitFor(() => {
+      expect(updateCasesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            expect.objectContaining({
+              id: basicCase.id,
+              status: CaseStatuses.closed,
+              version: basicCase.version,
+              closeReason: 'duplicate',
             }),
           ],
         })

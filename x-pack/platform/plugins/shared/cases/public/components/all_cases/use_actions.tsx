@@ -14,7 +14,6 @@ import type {
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseStatuses } from '@kbn/cases-components';
-import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-table';
 import type { CaseUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -31,13 +30,15 @@ import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
+import { useCloseCaseModal } from './close_case_modal';
+import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 
 const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
   theCase,
   disableActions,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
   const { permissions } = useCasesContext();
@@ -85,12 +86,36 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     onActionSuccess: refreshCases,
   });
 
-  const { panels: closingReasonPanels } = useBulkClosingReasonItems({
-    isEnabled: true,
-    onSubmitCloseReason: (params) => {
-      statusAction.handleUpdateCaseStatus([theCase], CaseStatuses.closed, params.reason);
+  const onCloseCase = useCallback(
+    (closeReason?: string) => {
+      statusAction.handleUpdateCaseStatus([theCase], CaseStatuses.closed, closeReason);
     },
+    [statusAction, theCase]
+  );
+  const canSyncCloseReasonToAlerts = useCanSyncCloseReasonToAlerts({
+    totalAlerts: theCase.totalAlerts,
+    syncAlertsEnabled: theCase.settings.syncAlerts,
   });
+
+  const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
+    canSyncCloseReasonToAlerts,
+    onCloseCase,
+  });
+
+  const statusActions: EuiContextMenuPanelItemDescriptor[] = useMemo(() => {
+    return statusAction
+      .getActions([theCase])
+      .map((statusActionMenuItem: EuiContextMenuPanelItemDescriptor) => {
+        if (statusActionMenuItem.key === 'cases-bulk-action-status-closed') {
+          return {
+            ...statusActionMenuItem,
+            onClick: openCloseCaseModal,
+          } as EuiContextMenuPanelItemDescriptor;
+        }
+        return statusActionMenuItem;
+      });
+  }, [openCloseCaseModal, statusAction, theCase]);
+
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
   const canAssign = permissions.assign;
@@ -163,20 +188,8 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
       panelsToBuild.push({
         id: 1,
         title: i18n.STATUS,
-        items: statusAction.getActions([theCase]),
+        items: statusActions,
       });
-      if (closingReasonPanels.length > 0) {
-        const closingReasonPanel = closingReasonPanels[0];
-        panelsToBuild.push({
-          ...closingReasonPanel,
-          content: closingReasonPanel.renderContent({
-            alertItems: [],
-            closePopoverMenu: () =>
-              statusAction.handleUpdateCaseStatus([theCase], CaseStatuses.closed),
-            setIsBulkActionsLoading: () => {},
-          }),
-        });
-      }
     }
     if (severityAction.canUpdateSeverity) {
       panelsToBuild.push({
@@ -188,7 +201,6 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
 
     return panelsToBuild;
   }, [
-    closingReasonPanels,
     assigneesAction,
     canDelete,
     canAssign,
@@ -197,6 +209,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     deleteAction,
     severityAction,
     statusAction,
+    statusActions,
     tagsAction,
     theCase,
     shouldDisableStatus,
@@ -210,7 +223,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         data-test-subj={`case-action-popover-${theCase.id}`}
         button={
           <EuiButtonIcon
-            onClick={tooglePopover}
+            onClick={togglePopover}
             iconType="boxesHorizontal"
             aria-label={i18n.ACTIONS_BUTTON_ARIA_LABEL(theCase.title)}
             color="text"
@@ -256,6 +269,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
           focusButtonRef={buttonRef}
         />
       ) : null}
+      {closeCaseModal}
     </>
   );
 };
