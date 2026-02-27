@@ -352,7 +352,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                   'xpack.apm.sloOverviewFlyout.activeAlertsBadge.ariaLabel',
                   { defaultMessage: 'active alerts badge' }
                 )}
-                data-test-subj="apmSloOverviewFlyoutTableActiveAlertsBadge"
+                data-test-subj="apmSloActiveAlertsBadge"
                 data-event-element="activeAlertsTableBadge"
                 css={{ cursor: 'pointer' }}
               >
@@ -383,7 +383,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         render: (name: string, sloItem: SLOWithSummaryResponse) => (
           <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
             <EuiLink
-              data-test-subj="apmSloOverviewFlyoutTableSloNameLink"
+              data-test-subj="apmSloNameLink"
               data-event-element="sloNameTable"
               onClick={() => handleSloClick(sloItem.id)}
               css={{
