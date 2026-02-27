@@ -459,6 +459,10 @@ const topNavStyles = {
         padding: euiTheme.size.base,
         paddingTop: 0,
       },
+      // Dashboard-only: override unified search bar bottom padding
+      '[data-test-subj="globalQueryBar"]': {
+        paddingBottom: euiTheme.size.s,
+      },
     }),
   updateIcon: () =>
     css({
