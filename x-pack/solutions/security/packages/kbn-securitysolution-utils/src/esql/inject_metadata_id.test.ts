@@ -65,9 +65,9 @@ describe('injectMetadataId', () => {
       );
     });
 
-    it('stops injection when KEEP contains any wildcard', () => {
+    it('adds _id to KEEP with partial wildcard', () => {
       expect(injectMetadataId('FROM logs* | KEEP agent.*')).toBe(
-        'FROM logs* METADATA _id | KEEP agent.*'
+        'FROM logs* METADATA _id | KEEP agent.*, _id'
       );
     });
 
@@ -205,12 +205,14 @@ describe('injectMetadataId', () => {
   });
 
   describe('KEEP with wildcards', () => {
-    it('does not add _id to KEEP * (already includes all fields)', () => {
-      expect(injectMetadataId('FROM logs* | KEEP *')).toBe('FROM logs* METADATA _id | KEEP *');
+    it('adds _id to KEEP * (redundant but harmless)', () => {
+      expect(injectMetadataId('FROM logs* | KEEP *')).toBe('FROM logs* METADATA _id | KEEP *, _id');
     });
 
-    it('does not add _id to KEEP _* (wildcard covers _id)', () => {
-      expect(injectMetadataId('FROM logs* | KEEP _*')).toBe('FROM logs* METADATA _id | KEEP _*');
+    it('adds _id to KEEP _* (redundant but harmless)', () => {
+      expect(injectMetadataId('FROM logs* | KEEP _*')).toBe(
+        'FROM logs* METADATA _id | KEEP _*, _id'
+      );
     });
   });
 
