@@ -1081,41 +1081,6 @@ function getAlwaysFiringAlertAsDataRuleType() {
   return result;
 }
 
-function getMultiAlertAsDataRuleType() {
-  const paramsSchema = schema.object({
-    index: schema.string(),
-    reference: schema.string(),
-    alertCount: schema.number({ defaultValue: 10 }),
-  });
-  type ParamsType = TypeOf<typeof paramsSchema>;
-
-  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
-    id: 'test.multi-alert-as-data',
-    name: 'Test: Multi Alert As Data',
-    actionGroups: [{ id: 'default', name: 'Default' }],
-    validate: { params: paramsSchema },
-    category: 'management',
-    producer: 'alertsFixture',
-    solution: 'stack',
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    async executor({ services, params }) {
-      for (let i = 0; i < params.alertCount; i++) {
-        services.alertsClient?.report({ id: String(i), actionGroup: 'default' });
-      }
-      return { state: {} };
-    },
-    alerts: {
-      context: 'observability.test.alerts',
-      mappings: { fieldMap: {} },
-      useLegacyAlerts: true,
-      shouldWrite: true,
-    },
-  };
-  return result;
-}
-
 function getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType() {
   const paramsSchema = schema.object({
     dynamic_fields: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
@@ -1806,7 +1771,6 @@ export function defineRuleTypes(
   alerting.registerType(getPatternSuccessOrFailureRuleType());
   alerting.registerType(getExceedsAlertLimitRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType());
-  alerting.registerType(getMultiAlertAsDataRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType());
   alerting.registerType(getPatternFiringAutoRecoverFalseRuleType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
