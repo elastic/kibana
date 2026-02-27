@@ -52,8 +52,9 @@ export const createSkillTools = (
         return `Skill "${skillNamespace}" not found.`;
       }
       const toolDescriptions = skill.tools.map((t) => `- **${t.name}**: ${t.description}`);
-      return `### ${skill.name} (${skill.namespace})\n${skill.description
-        }\n\n**Tools:**\n${toolDescriptions.join('\n')}`;
+      return `### ${skill.name} (${skill.namespace})\n${
+        skill.description
+      }\n\n**Tools:**\n${toolDescriptions.join('\n')}`;
     },
   });
 
