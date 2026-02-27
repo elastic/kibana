@@ -8,7 +8,7 @@
 import { parse as parseCookie } from 'tough-cookie';
 
 import { createSAMLResponse, MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN } from '@kbn/mock-idp-utils';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
@@ -39,7 +39,7 @@ export const extractAttributeValue = (xmlDocument: string, attributeName: string
 
 const RULE_NAME = 'scout-create-rule';
 
-apiTest.describe('Alerting Rule', { tag: tags.serverless.observability.complete }, () => {
+apiTest.describe('Alerting Rule', { tag: '@local-serverless-observability_complete' }, () => {
   let createdRuleId: string;
   let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
 
