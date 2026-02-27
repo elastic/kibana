@@ -28,8 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }, t);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/253747
-  describe.skip('GlobalSearch providers', function () {
+  describe('GlobalSearch providers', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
@@ -92,8 +91,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Applications provider', function () {
       it('can search for root-level applications', async () => {
-        const results = await findResultsWithApi('discover');
-        expect(results.length).to.be(2);
+        // Force Levenshtein distance to be non-zero by searching for an inexact term. This ensures we're not just getting exact matches, but that the search is actually working.
+        // Disregards results such as "Attack Discovery" or "Cloud Asset Discovery" that may be returned when simply searching for "Discover" because these do not contain the "Discover app" term.
+        const results = await findResultsWithApi('Discover app');
+        expect(results.length).to.be(1);
         expect(results[0].title).to.be('Discover');
       });
 
