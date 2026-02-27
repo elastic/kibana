@@ -11,6 +11,7 @@ import {
   AUDIT_TYPE,
   AgentBuilderAuditAction,
   agentAuditEvent,
+  skillAuditEvent,
   toolAuditEvent,
 } from './audit_events';
 
@@ -104,6 +105,43 @@ describe('Agent Builder audit event builders', () => {
         message: 'User has deleted tool [id=my.tool]',
         event: {
           action: AgentBuilderAuditAction.TOOL_DELETE,
+          category: [AUDIT_CATEGORY.DATABASE],
+          type: [AUDIT_TYPE.DELETION],
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+    });
+  });
+
+  describe('skillAuditEvent', () => {
+    it('returns a creation audit event for skill create', () => {
+      const event = skillAuditEvent({
+        action: AgentBuilderAuditAction.SKILL_CREATE,
+        skillId: 'my.skill',
+        skillName: 'My Skill',
+      });
+
+      expect(event).toMatchObject({
+        message: 'User has created skill [id=my.skill, name="My Skill"]',
+        event: {
+          action: AgentBuilderAuditAction.SKILL_CREATE,
+          category: [AUDIT_CATEGORY.DATABASE],
+          type: [AUDIT_TYPE.CREATION],
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+    });
+
+    it('returns a deletion audit event for skill delete with only the id', () => {
+      const event = skillAuditEvent({
+        action: AgentBuilderAuditAction.SKILL_DELETE,
+        skillId: 'my.skill',
+      });
+
+      expect(event).toMatchObject({
+        message: 'User has deleted skill [id=my.skill]',
+        event: {
+          action: AgentBuilderAuditAction.SKILL_DELETE,
           category: [AUDIT_CATEGORY.DATABASE],
           type: [AUDIT_TYPE.DELETION],
           outcome: AUDIT_OUTCOME.SUCCESS,

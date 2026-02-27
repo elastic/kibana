@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
+import { asError } from '../utils/as_error';
 import type {
   ListSkillsResponse,
   GetSkillResponse,
@@ -210,13 +211,27 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { skills: skillService } = getInternalServices();
+        const { skills: skillService, auditLogService } = getInternalServices();
         const createRequest: CreateSkillPayload = request.body;
         const registry = await skillService.getRegistry({ request });
-        const skill = await registry.create(createRequest);
-        return response.ok<CreateSkillResponse>({
-          body: await internalToPublicDefinition(skill),
-        });
+
+        try {
+          const skill = await registry.create(createRequest);
+          auditLogService.logSkillCreated(request, {
+            skillId: skill.id,
+            skillName: skill.name,
+          });
+          return response.ok<CreateSkillResponse>({
+            body: await internalToPublicDefinition(skill),
+          });
+        } catch (error) {
+          auditLogService.logSkillCreated(request, {
+            skillId: createRequest.id,
+            skillName: createRequest.name,
+            error: asError(error),
+          });
+          throw error;
+        }
       }, featureFlagConfig)
     );
 
@@ -249,14 +264,27 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { skills: skillService } = getInternalServices();
+        const { skills: skillService, auditLogService } = getInternalServices();
         const { skillId } = request.params;
         const update: UpdateSkillPayload = request.body;
         const registry = await skillService.getRegistry({ request });
-        const skill = await registry.update(skillId, update);
-        return response.ok<UpdateSkillResponse>({
-          body: await internalToPublicDefinition(skill),
-        });
+
+        try {
+          const skill = await registry.update(skillId, update);
+          auditLogService.logSkillUpdated(request, {
+            skillId: skill.id,
+            skillName: skill.name,
+          });
+          return response.ok<UpdateSkillResponse>({
+            body: await internalToPublicDefinition(skill),
+          });
+        } catch (error) {
+          auditLogService.logSkillUpdated(request, {
+            skillId,
+            error: asError(error),
+          });
+          throw error;
+        }
       }, featureFlagConfig)
     );
 
@@ -289,12 +317,26 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       },
       wrapHandler(async (ctx, request, response) => {
         const { skillId } = request.params;
-        const { skills: skillService } = getInternalServices();
+        const { skills: skillService, auditLogService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
-        await registry.delete(skillId);
-        return response.ok<DeleteSkillResponse>({
-          body: { success: true },
-        });
+
+        try {
+          const skill = await registry.get(skillId);
+          await registry.delete(skillId);
+          auditLogService.logSkillDeleted(request, {
+            skillId: skill.id,
+            skillName: skill.name,
+          });
+          return response.ok<DeleteSkillResponse>({
+            body: { success: true },
+          });
+        } catch (error) {
+          auditLogService.logSkillDeleted(request, {
+            skillId,
+            error: asError(error),
+          });
+          throw error;
+        }
       }, featureFlagConfig)
     );
 }

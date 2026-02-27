@@ -127,6 +127,48 @@ describe('AuditLogService', () => {
     );
   });
 
+  it('logs skill create event', () => {
+    const auditLogger = { log: jest.fn() };
+    const { service } = createService({ auditLogger });
+    const request = {} as KibanaRequest;
+
+    service.logSkillCreated(request, { skillId: 's-1', skillName: 'My Skill' });
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: AgentBuilderAuditAction.SKILL_CREATE }),
+      })
+    );
+  });
+
+  it('logs skill update event', () => {
+    const auditLogger = { log: jest.fn() };
+    const { service } = createService({ auditLogger });
+    const request = {} as KibanaRequest;
+
+    service.logSkillUpdated(request, { skillId: 's-1', skillName: 'My Skill' });
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: AgentBuilderAuditAction.SKILL_UPDATE }),
+      })
+    );
+  });
+
+  it('logs skill delete event', () => {
+    const auditLogger = { log: jest.fn() };
+    const { service } = createService({ auditLogger });
+    const request = {} as KibanaRequest;
+
+    service.logSkillDeleted(request, { skillId: 's-1' });
+
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: AgentBuilderAuditAction.SKILL_DELETE }),
+      })
+    );
+  });
+
   it('swallows errors when audit logger throws', () => {
     const auditLogger = {
       log: jest.fn(() => {
