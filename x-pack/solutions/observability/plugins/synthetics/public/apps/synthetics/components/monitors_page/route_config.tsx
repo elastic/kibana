@@ -38,7 +38,7 @@ export const getMonitorsRoute = (
       component: OverviewPage,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
-        ...sharedProps,
+        // ...sharedProps,
         tabs: getMonitorsTabs(syntheticsPath, 'overview', location),
       },
     },

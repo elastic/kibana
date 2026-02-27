@@ -109,13 +109,13 @@ export function ServiceGroupTemplate({
             ...(selectedTab
               ? [
                   {
-                    title: selectedTab.breadcrumbLabel || selectedTab.label,
+                    title: TAB_BREADCRUMB_LABELS[serviceGroupContextTab],
                     href: selectedTab.href,
-                  } as { title: string; href: string },
+                  },
                 ]
               : []),
           ],
-    [pagePath, pageTitle, query, router, selectedTab, serviceGroupName, serviceGroupsLink],
+    [pagePath, pageTitle, query, router, selectedTab, serviceGroupContextTab, serviceGroupName, serviceGroupsLink],
     {
       omitRootOnServerless: true,
     }
@@ -145,9 +145,17 @@ export function ServiceGroupTemplate({
   );
 }
 
+const TAB_BREADCRUMB_LABELS: Record<'service-inventory' | 'service-map', string> = {
+  'service-inventory': i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+    defaultMessage: 'Inventory',
+  }),
+  'service-map': i18n.translate('xpack.apm.serviceGroup.serviceMap', {
+    defaultMessage: 'Service map',
+  }),
+};
+
 type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key: 'service-inventory' | 'service-map';
-  breadcrumbLabel?: string;
 };
 
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
@@ -157,9 +165,6 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const tabs: ServiceGroupContextTab[] = [
     {
       key: 'service-inventory',
-      breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
-        defaultMessage: 'Inventory',
-      }),
       label: (
         <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -180,12 +185,12 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
     },
   ];
 
+  // Omit breadcrumbLabel so it is not passed to EuiTab (React will warn on unknown DOM props)
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, breadcrumbLabel }) => ({
+    .map(({ href, key, label }) => ({
       href,
       label,
       isSelected: key === selectedTab,
-      breadcrumbLabel,
     }));
 }
