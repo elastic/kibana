@@ -40,6 +40,7 @@ import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagno
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 import { AgentDetailsJsonFlyout } from '../agent_details_page/components/agent_details_json_flyout';
 import { AgentRollbackModal } from '../components/agent_rollback_modal';
+import { AgentPolicyYamlFlyout } from '../../../components';
 
 import type { SelectionMode } from './components/types';
 
@@ -54,6 +55,7 @@ import {
   AgentMigrateFlyout,
   ChangeAgentPrivilegeLevelFlyout,
 } from './components';
+import { AddCollectorFlyout } from './components/add_collector_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
@@ -95,7 +97,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     undefined
   );
   const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
+  const [agentToViewPolicy, setAgentToViewPolicy] = useState<Agent | undefined>(undefined);
   const [agentToRollback, setAgentToRollback] = useState<Agent | undefined>(undefined);
+
+  const [isAddCollectorFlyoutOpen, setAddCollectorFlyoutOpen] = useState(false);
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
@@ -225,6 +230,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onMigrateAgentClick={() => setAgentToMigrate(agent)}
         onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
         onViewAgentJsonClick={() => setAgentToViewJson(agent)}
+        onViewAgentPolicyClick={() => setAgentToViewPolicy(agent)}
         onRollbackClick={() => setAgentToRollback(agent)}
       />
     );
@@ -312,6 +318,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   return (
     <>
+      {isAddCollectorFlyoutOpen && (
+        <EuiPortal>
+          <AddCollectorFlyout
+            onClose={() => setAddCollectorFlyoutOpen(false)}
+            onClickViewAgents={() => {
+              setAddCollectorFlyoutOpen(false);
+              fetchData();
+            }}
+          />
+        </EuiPortal>
+      )}
       {isAgentActivityFlyoutOpen ? (
         <EuiPortal>
           <AgentActivityFlyout
@@ -483,6 +500,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
+      {agentToViewPolicy && agentToViewPolicy.policy_id && (
+        <EuiPortal>
+          <AgentPolicyYamlFlyout
+            policyId={agentToViewPolicy.policy_id}
+            revision={agentToViewPolicy.policy_revision}
+            onClose={() => setAgentToViewPolicy(undefined)}
+          />
+        </EuiPortal>
+      )}
       {showUnhealthyCallout && (
         <>
           {cloud?.deploymentUrl ? (
@@ -529,6 +555,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
+        onClickAddCollector={() => setAddCollectorFlyoutOpen(true)}
         agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         shouldShowAgentActivityTour={showAgentActivityTour}

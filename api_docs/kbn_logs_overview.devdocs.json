@@ -484,7 +484,7 @@
         "signature": [
           "Pick<",
           "LogsOverviewContentProps",
-          ", \"height\" | \"timeRange\"> & { dependencies: ",
+          ", \"timeRange\" | \"height\"> & { dependencies: ",
           {
             "pluginId": "@kbn/logs-overview",
             "scope": "public",
