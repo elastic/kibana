@@ -40,11 +40,16 @@ function getIntegrationStatus(
         item.installationInfo && semverLt(item.installationInfo.version, attempt.target_version)
     );
 
+    const review = item?.installationInfo?.pending_upgrade_review;
+    const hasPendingUpgradeReview = !!review && !review.action;
+
     const isUpgradeAvailable =
       (item?.installationInfo && semverLt(item.installationInfo.version, item.version)) ?? false;
 
     return isUpgradeFailed
       ? 'upgrade_failed'
+      : hasPendingUpgradeReview
+      ? 'pending_upgrade_review'
       : isUpgradeAvailable
       ? 'upgrade_available'
       : 'installed';

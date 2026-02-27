@@ -22,6 +22,7 @@ import type {
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetBulkAssetsRequest,
   GetBulkAssetsResponse,
   GetVerificationKeyIdResponse,
@@ -479,6 +480,29 @@ export const useUpdatePackageMutation = () => {
         body,
       })
   );
+};
+
+interface ReviewUpgradeArgs {
+  pkgName: string;
+  action: 'accept' | 'decline';
+  targetVersion: string;
+}
+
+export const useReviewUpgradeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ReviewUpgradeResponse, RequestError, ReviewUpgradeArgs>({
+    mutationFn: ({ pkgName, action, targetVersion }: ReviewUpgradeArgs) =>
+      sendRequestForRq<ReviewUpgradeResponse>({
+        path: epmRouteService.getReviewUpgradePath(pkgName),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+        body: { action, target_version: targetVersion },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['get-packages']);
+    },
+  });
 };
 
 export const useInstallKibanaAssetsMutation = () => {

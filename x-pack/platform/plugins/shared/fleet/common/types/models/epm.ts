@@ -744,6 +744,13 @@ export interface Installation {
   previous_version?: string | null;
   rolled_back?: boolean;
   is_rollback_ttl_expired?: boolean;
+  pending_upgrade_review?: {
+    target_version: string;
+    reason: 'deprecated';
+    created_at: string;
+    deprecation_details?: DeprecationInfo;
+    action?: 'accepted' | 'declined';
+  };
 }
 
 export interface PackageUsageStats {

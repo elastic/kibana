@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiPopover,
@@ -16,10 +16,15 @@ import {
   EuiButton,
   EuiToolTip,
   EuiLoadingSpinner,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 
-import { useAuthz } from '../../../../../../../hooks';
+import {
+  useAuthz,
+  useReviewUpgradeMutation,
+  useStartServices,
+} from '../../../../../../../hooks';
 import type { InstallFailedAttempt } from '../../../../../../../../common/types';
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
@@ -231,6 +236,131 @@ const InstallUpgradeFailedVersionStatus: React.FunctionComponent<{
   );
 });
 
+const PendingUpgradeReviewStatus: React.FunctionComponent<{
+  item: InstalledPackageUIPackageListItem;
+}> = React.memo(({ item }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const reviewUpgradeMutation = useReviewUpgradeMutation();
+  const { notifications } = useStartServices();
+
+  const pendingReview = item.installationInfo?.pending_upgrade_review;
+  const targetVersion = pendingReview?.target_version ?? '';
+  const description =
+    pendingReview?.deprecation_details?.description ?? '';
+
+  const handleAccept = useCallback(() => {
+    reviewUpgradeMutation.mutate(
+      { pkgName: item.name, action: 'accept', targetVersion },
+      {
+        onSuccess: () => {
+          setIsPopoverOpen(false);
+          notifications.toasts.addSuccess({
+            title: (
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.upgradeReviewAcceptedTitle"
+                defaultMessage="Policy upgrade accepted"
+              />
+            ) as unknown as string,
+          });
+        },
+      }
+    );
+  }, [reviewUpgradeMutation, item.name, targetVersion, notifications.toasts]);
+
+  const handleDismiss = useCallback(() => {
+    reviewUpgradeMutation.mutate(
+      { pkgName: item.name, action: 'decline', targetVersion },
+      {
+        onSuccess: () => {
+          setIsPopoverOpen(false);
+          notifications.toasts.addInfo({
+            title: (
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.upgradeReviewDismissedTitle"
+                defaultMessage="Policy upgrade dismissed"
+              />
+            ) as unknown as string,
+            text: (
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.upgradeReviewDismissedText"
+                defaultMessage="Auto-upgrade is paused for version {version}. A newer version will re-prompt."
+                values={{ version: targetVersion }}
+              />
+            ) as unknown as string,
+          });
+        },
+      }
+    );
+  }, [reviewUpgradeMutation, item.name, targetVersion, notifications.toasts]);
+
+  const button = (
+    <EuiButtonEmpty
+      size="s"
+      flush="left"
+      onClick={() => setIsPopoverOpen((currentVal) => !currentVal)}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon size="m" type="warning" color="warning" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.fleet.epmInstalledIntegrations.statusPendingReviewLabel"
+            defaultMessage="Review upgrade"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiButtonEmpty>
+  );
+
+  return (
+    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={() => setIsPopoverOpen(false)}>
+      <EuiCallOut
+        css={{ maxWidth: 400 }}
+        color="warning"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.epmInstalledIntegrations.pendingUpgradeReviewTitle"
+            defaultMessage="Version {version} introduces deprecations"
+            values={{ version: targetVersion }}
+          />
+        }
+      >
+        {description && <p>{description}</p>}
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="warning"
+              fill={true}
+              size="s"
+              onClick={handleAccept}
+              isLoading={reviewUpgradeMutation.isLoading}
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.acceptUpgradeButton"
+                defaultMessage="Accept upgrade"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              onClick={handleDismiss}
+              isLoading={reviewUpgradeMutation.isLoading}
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.dismissUpgradeButton"
+                defaultMessage="Dismiss"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCallOut>
+    </EuiPopover>
+  );
+});
+
 export const InstallationVersionStatus: React.FunctionComponent<{
   item: InstalledPackageUIPackageListItem;
 }> = React.memo(({ item }) => {
@@ -240,6 +370,8 @@ export const InstallationVersionStatus: React.FunctionComponent<{
     return <InstalledVersionStatus item={item} />;
   } else if (status === 'upgrade_available') {
     return <UpgradeAvailableVersionStatus item={item} />;
+  } else if (status === 'pending_upgrade_review') {
+    return <PendingUpgradeReviewStatus item={item} />;
   } else if (status === 'upgrading') {
     return <UpgradingVersionStatus item={item} />;
   } else if (status === 'uninstalling') {

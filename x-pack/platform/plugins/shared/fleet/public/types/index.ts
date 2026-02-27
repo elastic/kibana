@@ -130,6 +130,7 @@ export type {
   PackageSpecCategory,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetDownloadSourceResponse,
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,

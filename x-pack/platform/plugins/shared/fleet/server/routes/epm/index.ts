@@ -37,6 +37,8 @@ import {
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
+  ReviewUpgradeRequestSchema,
+  ReviewUpgradeResponseSchema,
   ReauthorizeTransformRequestSchema,
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
@@ -103,6 +105,7 @@ import {
   rollbackPackageHandler,
   rollbackAvailableCheckHandler,
   bulkRollbackAvailableCheckHandler,
+  reviewUpgradeHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -460,6 +463,35 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       updatePackageHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.REVIEW_UPGRADE_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Review a pending policy upgrade for a package with deprecations`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: ReviewUpgradeRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => ReviewUpgradeResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      reviewUpgradeHandler
     );
 
   router.versioned

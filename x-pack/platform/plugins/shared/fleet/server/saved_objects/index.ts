@@ -1235,6 +1235,7 @@ export const getSavedObjectTypes = (
             },
           },
           previous_version: { type: 'keyword' },
+          pending_upgrade_review: { type: 'object', enabled: false },
         },
       },
       modelVersions: {
@@ -1282,6 +1283,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 previous_version: { type: 'keyword' },
+              },
+            },
+          ],
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                pending_upgrade_review: { type: 'object', enabled: false },
               },
             },
           ],
