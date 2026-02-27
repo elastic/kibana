@@ -242,11 +242,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
 
         <EuiCodeBlock
           language={
-            query.queryType === 'ES|QL'
-              ? 'esql'
-              : query.queryType === 'SQL'
-                ? 'sql'
-                : 'json'
+            query.queryType === 'ES|QL' ? 'esql' : query.queryType === 'SQL' ? 'sql' : 'json'
           }
           lineNumbers
           overflowHeight={300}

@@ -169,7 +169,9 @@ describe('isIncludedTask', () => {
   });
 
   it('includes async_search tasks', () => {
-    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/async_search/submit' })).toBe(true);
+    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/async_search/submit' })).toBe(
+      true
+    );
   });
 
   it('excludes child tasks with parent_task_id', () => {
