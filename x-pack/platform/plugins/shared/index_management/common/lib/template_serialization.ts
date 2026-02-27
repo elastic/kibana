@@ -189,16 +189,13 @@ export function serializeLegacyTemplate({
   version,
   order,
 }: TemplateDeserialized): LegacyTemplateSerialized {
-  // Normalize deprecated `_source.mode` (mappings) into `index.mapping.source.mode` (settings)
-  // and strip the deprecated `_source.mode` from mappings.
-  const migratedSettings = buildTemplateSettings(template, undefined);
   const migratedMappings = buildTemplateMappings(template as any);
 
   return {
     version,
     order,
     index_patterns: indexPatterns,
-    settings: migratedSettings,
+    settings: template?.settings,
     aliases: template?.aliases,
     mappings: migratedMappings,
   };
