@@ -151,7 +151,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   /**
    * Converts Elasticsearch API keys into UIAM API keys.
    *
-   * @param key The parameters containing the keys to convert.
+   * @param keys Array containing the keys to convert.
    * @returns A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled.
    */
   async convert(keys: string[]): Promise<ConvertUiamAPIKeysResponse | null> {
@@ -162,10 +162,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     this.logger.debug(`Trying to convert ${keys.length} API key(s)`);
 
     try {
-      const response = await this.uiam.convertApiKeys(keys);
-
-      this.logger.debug('API key(s) converted successfully');
-      return response;
+      return await this.uiam.convertApiKeys(keys);
     } catch (e) {
       this.logger.error(`Failed to convert API keys: ${getDetailedErrorMessage(e)}`);
       throw e;

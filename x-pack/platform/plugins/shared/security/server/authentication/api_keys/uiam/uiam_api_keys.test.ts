@@ -330,7 +330,6 @@ describe('UiamAPIKeys', () => {
       expect(result).toEqual(mockResponse);
       expect(mockUiam.convertApiKeys).toHaveBeenCalledWith(['es-api-key-base64']);
       expect(logger.debug).toHaveBeenCalledWith('Trying to convert 1 API key(s)');
-      expect(logger.debug).toHaveBeenCalledWith('API key(s) converted successfully');
     });
 
     it('injects the same elasticsearch URL endpoint for all keys', async () => {
