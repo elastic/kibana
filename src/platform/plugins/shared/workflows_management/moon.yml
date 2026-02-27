@@ -19,6 +19,7 @@ project:
     sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
   - '@kbn/core'
+  - '@kbn/eval-kql'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
