@@ -537,7 +537,7 @@ export class SecurityPlugin
 
       const esHost = esId ? `${esId}.${host}` : host;
       const endpoint = `https://${esHost}:${esPort}`;
-      this.logger.info('Endpoint: ' + endpoint);
+      this.logger.debug(`Endpoint: ${endpoint}`);
       return endpoint;
     } catch {
       this.logger.debug(`Failed to decode cloud.id: ${cloudId}`);
