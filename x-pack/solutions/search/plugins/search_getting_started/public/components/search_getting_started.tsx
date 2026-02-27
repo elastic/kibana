@@ -13,7 +13,7 @@ import { AnalyticsEvents } from '../../common';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { SearchGettingStartedConnectCode } from './connect_code';
-import { AgentInstallSection } from './agent_install';
+import { AgentInstallSection } from './agent_install/agent_install';
 import { GettingStartedFooter } from './footer';
 import { SearchGettingStartedHeader } from './header';
 
