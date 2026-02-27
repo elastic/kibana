@@ -16,7 +16,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import type { Feature, Streams } from '@kbn/streams-schema';
-import { TableTitle } from '../stream_systems/table_title';
+import { TableTitle } from '../table_title';
 import { FeatureDetailsFlyout } from './feature_details_flyout';
 import { DeleteFeatureModal } from './delete_feature_modal';
 import {
