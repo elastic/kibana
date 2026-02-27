@@ -24,8 +24,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     );
 
     await kibanaServer.importExport.load(
-            'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
-          );
+      'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
+    );
   }
 
   async function unloadCurrentData() {
