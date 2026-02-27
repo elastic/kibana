@@ -119,6 +119,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/reporting-common'
   - '@kbn/reporting-plugin'
+  - '@kbn/yaml-loader'
 tags:
   - plugin
   - prod
