@@ -53,6 +53,8 @@ export type RouteProps = LazyObservabilityPageTemplateProps & {
   component: React.FC;
   dataTestSubj: string;
   title: string;
+  /** Rendered above the page template (full-width, flush with container). */
+  contentAboveTemplate?: React.ReactNode;
 };
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
@@ -198,11 +200,13 @@ export const PageRouter: FC = () => {
           component: RouteComponent,
           dataTestSubj,
           pageHeader,
+          contentAboveTemplate,
           ...pageTemplateProps
         }: RouteProps) => (
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
+              {contentAboveTemplate}
               <SyntheticsPageTemplateComponent
                 pageHeader={isUnprivileged ? undefined : pageHeader}
                 data-test-subj={'synthetics-page-template'}

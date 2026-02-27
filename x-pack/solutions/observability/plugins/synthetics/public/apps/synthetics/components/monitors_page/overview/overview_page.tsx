@@ -26,7 +26,6 @@ import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
-import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 
 export const OverviewPage: React.FC = () => {
@@ -78,7 +77,6 @@ export const OverviewPage: React.FC = () => {
   return (
     <>
       <DisabledCallout total={absoluteTotal} />
-      <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />

@@ -72,7 +72,6 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
         missingConfig={Boolean(showCallout)}
         missingRules={missingRules}
       />
-      <EuiSpacer size="m" />
     </>
   );
 };
