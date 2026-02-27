@@ -106,10 +106,13 @@ export const syncEditedMonitorBulk = async ({
         namespace,
       }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
-      referenceUpdates.length > 0
-        ? monitorConfigRepository.bulkUpdatePackagePolicyReferences(referenceUpdates, namespace)
-        : Promise.resolve(),
     ]);
+
+    // Reference update must run after bulkUpdate completes,
+    // because bulkUpdate may delete and recreate saved objects when spaces change.
+    if (referenceUpdates.length > 0) {
+      await monitorConfigRepository.bulkUpdatePackagePolicyReferences(referenceUpdates, namespace);
+    }
 
     const { failedPolicyUpdates, publicSyncErrors } = editSyncResponse;
 
