@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
+import { BehaviorSubject, take, mergeMap, type Subscription } from 'rxjs';
 
 import type {
   AppUpdater,
@@ -46,22 +46,34 @@ export class SearchInferenceEndpointsPlugin
 
     registerLocators(plugins.share);
 
-    plugins.management.sections.section.machineLearning.registerApp({
-      id: INFERENCE_ENDPOINTS_APP_ID,
-      title: PLUGIN_TITLE,
-      order: 2,
-      async mount({ element, history }: ManagementAppMountParams) {
-        const { renderInferenceEndpointsMgmtApp } = await import('./application');
-        const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: AppPluginStartDependencies = {
-          ...depsStart,
-          history,
-          searchNavigation: undefined,
-        };
+    plugins.licensing.license$
+      .pipe(take(1))
+      .pipe(
+        mergeMap(async (license) => {
+          const hasEnterpriseLicense =
+            license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise');
 
-        return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
-      },
-    });
+          if (hasEnterpriseLicense) {
+            plugins.management.sections.section.machineLearning.registerApp({
+              id: INFERENCE_ENDPOINTS_APP_ID,
+              title: PLUGIN_TITLE,
+              order: 2,
+              async mount({ element, history }: ManagementAppMountParams) {
+                const { renderInferenceEndpointsMgmtApp } = await import('./application');
+                const [coreStart, depsStart] = await core.getStartServices();
+                const startDeps: AppPluginStartDependencies = {
+                  ...depsStart,
+                  history,
+                  searchNavigation: undefined,
+                };
+
+                return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
+              },
+            });
+          }
+        })
+      )
+      .subscribe();
 
     return {};
   }

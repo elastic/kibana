@@ -13,7 +13,7 @@ import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
@@ -40,6 +40,7 @@ export interface AppPluginSetupDependencies {
   history: AppMountParameters['history'];
   share: SharePluginSetup;
   console?: ConsolePluginSetup;
+  licensing: LicensingPluginSetup;
   management: ManagementSetup;
 }
 
