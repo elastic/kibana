@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { memo, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,7 +15,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import React, { memo, useMemo } from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { HealthData } from './types';
 import * as i18n from './translations';
@@ -70,7 +70,6 @@ export const HistoricalTrendsSection = memo(function HistoricalTrendsSection({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      {/* Executions over time */}
       <EuiFlexItem>
         <EuiTitle size="xxs">
           <h5>{i18n.EXECUTIONS_OVER_TIME}</h5>
@@ -105,7 +104,6 @@ export const HistoricalTrendsSection = memo(function HistoricalTrendsSection({
         </Chart>
       </EuiFlexItem>
 
-      {/* Schedule delay over time */}
       <EuiFlexItem>
         <EuiTitle size="xxs">
           <h5>{i18n.P95_DELAY_OVER_TIME}</h5>
@@ -129,7 +127,6 @@ export const HistoricalTrendsSection = memo(function HistoricalTrendsSection({
         </Chart>
       </EuiFlexItem>
 
-      {/* Gaps over time */}
       <EuiFlexItem>
         <EuiTitle size="xxs">
           <h5>{i18n.GAPS_OVER_TIME}</h5>

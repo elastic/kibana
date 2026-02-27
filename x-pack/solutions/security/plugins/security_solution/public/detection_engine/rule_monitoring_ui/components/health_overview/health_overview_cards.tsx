@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { Chart, LayoutDirection, Metric } from '@elastic/charts';
 import type { HealthData } from './types';
 import * as i18n from './translations';
@@ -15,6 +16,8 @@ export const HealthOverviewCards = memo(function HealthOverviewCards({
 }: {
   health: HealthData;
 }) {
+  const { euiTheme } = useEuiTheme();
+
   const { number_of_rules } = health.state_at_the_moment;
   const stats = health.stats_over_interval;
 
@@ -35,13 +38,16 @@ export const HealthOverviewCards = memo(function HealthOverviewCards({
         data={[
           [
             {
-              color: '#6092C0',
+              color: euiTheme.colors.vis.euiColorVis0,
               title: i18n.TOTAL_RULES,
               value: totalRules,
               valueFormatter: (v) => `${v}`,
             },
             {
-              color: enabledRules > 0 ? '#00BFB3' : '#E7664C',
+              color:
+                enabledRules > 0
+                  ? euiTheme.colors.vis.euiColorVisSuccess0
+                  : euiTheme.colors.vis.euiColorVisDanger0,
               title: i18n.ENABLED_RULES,
               value: enabledRules,
               domainMax: totalRules || 1,
@@ -49,13 +55,16 @@ export const HealthOverviewCards = memo(function HealthOverviewCards({
               progressBarDirection: LayoutDirection.Vertical,
             },
             {
-              color: '#00BFB3',
+              color: euiTheme.colors.vis.euiColorVisSuccess0,
               title: i18n.TOTAL_EXECUTIONS,
               value: totalExec,
               valueFormatter: (v) => `${v}`,
             },
             {
-              color: failures > 0 ? '#E7664C' : '#00BFB3',
+              color:
+                failures > 0
+                  ? euiTheme.colors.vis.euiColorVisDanger0
+                  : euiTheme.colors.vis.euiColorVisSuccess0,
               title: i18n.FAILURES,
               value: failures,
               valueFormatter: (v) => `${v}`,
@@ -65,10 +74,10 @@ export const HealthOverviewCards = memo(function HealthOverviewCards({
             {
               color:
                 scheduleDelayP95 > 5000
-                  ? '#E7664C'
+                  ? euiTheme.colors.vis.euiColorVisDanger0
                   : scheduleDelayP95 > 1000
-                  ? '#D6BF57'
-                  : '#00BFB3',
+                  ? euiTheme.colors.vis.euiColorVisWarning0
+                  : euiTheme.colors.vis.euiColorVisSuccess0,
               title: i18n.SCHEDULE_DELAY_P95,
               value: scheduleDelayP95,
               valueFormatter: (v) => humanizeMs(Math.round(v)),
@@ -76,23 +85,29 @@ export const HealthOverviewCards = memo(function HealthOverviewCards({
             {
               color:
                 searchDurationP95 > 5000
-                  ? '#E7664C'
+                  ? euiTheme.colors.vis.euiColorVisDanger0
                   : searchDurationP95 > 1000
-                  ? '#D6BF57'
-                  : '#00BFB3',
+                  ? euiTheme.colors.vis.euiColorVisWarning0
+                  : euiTheme.colors.vis.euiColorVisSuccess0,
               title: i18n.SEARCH_DURATION_P95,
               value: searchDurationP95,
               valueFormatter: (v) => humanizeMs(Math.round(v)),
             },
             {
-              color: gaps > 0 ? '#E7664C' : '#00BFB3',
+              color:
+                gaps > 0
+                  ? euiTheme.colors.vis.euiColorVisDanger0
+                  : euiTheme.colors.vis.euiColorVisSuccess0,
               title: i18n.DETECTED_GAPS,
               value: gaps,
               valueFormatter: (v) => `${v}`,
             },
 
             {
-              color: warnings > 0 ? '#D6BF57' : '#00BFB3',
+              color:
+                warnings > 0
+                  ? euiTheme.colors.vis.euiColorVisWarning0
+                  : euiTheme.colors.vis.euiColorVisSuccess0,
               title: i18n.WARNINGS,
               value: warnings,
               valueFormatter: (v) => `${v}`,

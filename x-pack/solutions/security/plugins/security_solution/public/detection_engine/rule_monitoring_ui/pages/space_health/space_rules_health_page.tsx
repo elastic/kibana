@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiFlexGroup,
@@ -15,9 +16,7 @@ import {
   EuiSkeletonTitle,
   EuiAccordion,
   EuiCodeBlock,
-  useEuiTheme,
 } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { HealthIntervalParameters } from '../../../../../common/api/detection_engine';
 import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -25,7 +24,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { useSpaceRulesHealth } from '../../../rule_monitoring/logic/detection_engine_health/use_space_rules_health';
 import { SectionPanel } from '../../components/section_panel';
-import { DonutChart } from '../../components/donut_chart';
 import {
   HealthOverviewCards,
   RulesByTypeBar,
@@ -36,6 +34,7 @@ import {
   HistoricalTrendsSection,
 } from '../../components/health_overview';
 import { HealthIntervalFilter } from './health_interval_filter';
+import { ExecutionOutcomesChart } from '../../components/health_overview/execution_outcomes';
 
 export const DetectionEngineSpaceRulesHealthPage = memo(
   function DetectionEngineSpaceRulesHealthPage(): JSX.Element {
@@ -43,7 +42,6 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
     const requestBody = useMemo(() => (interval ? { interval } : {}), [interval]);
     const spaceRulesHealth = useSpaceRulesHealth(requestBody);
     const isLoading = spaceRulesHealth.isLoading || spaceRulesHealth.isFetching;
-    const { euiTheme } = useEuiTheme();
 
     const handleIntervalChange = useCallback((params: HealthIntervalParameters) => {
       setInterval(params);
@@ -78,61 +76,12 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
       if (!spaceRulesHealth.data) return null;
 
       const { health } = spaceRulesHealth.data;
-      const numOfRules = health.state_at_the_moment.number_of_rules;
-      const exec = health.stats_over_interval.number_of_executions;
-      const succeeded = exec.by_outcome?.succeeded ?? 0;
-      const warning = exec.by_outcome?.warning ?? 0;
-      const failed = exec.by_outcome?.failed ?? 0;
-      const failRate = exec.total > 0 ? ((failed / exec.total) * 100).toFixed(1) : '0';
 
       return (
         <>
           <HealthOverviewCards health={health} />
 
           <EuiSpacer size="l" />
-
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <SectionPanel title="Rules by Status">
-                <DonutChart
-                  id="rulesByStatus"
-                  data={[
-                    { label: 'Enabled', value: numOfRules.all.enabled },
-                    { label: 'Disabled', value: numOfRules.all.disabled },
-                  ]}
-                  colors={[euiTheme.colors.vis.euiColorVis0, euiTheme.colors.vis.euiColorVis5]}
-                  total={numOfRules.all.total}
-                  centerLabel="Total"
-                  emptyTitle="No rules"
-                  emptyBody="No detection rules found."
-                />
-              </SectionPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <SectionPanel title="Rules by Origin">
-                <DonutChart
-                  id="rulesByOrigin"
-                  data={[
-                    {
-                      label: 'Prebuilt',
-                      value: numOfRules.by_origin.prebuilt?.total ?? 0,
-                    },
-                    {
-                      label: 'Custom',
-                      value: numOfRules.by_origin.custom?.total ?? 0,
-                    },
-                  ]}
-                  colors={[euiTheme.colors.vis.euiColorVis1, euiTheme.colors.vis.euiColorVis2]}
-                  total={numOfRules.all.total}
-                  centerLabel="Total"
-                  emptyTitle="No rules"
-                  emptyBody="No detection rules found."
-                />
-              </SectionPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="m" />
 
           <SectionPanel title="Rules by Type">
             <RulesByTypeBar health={health} />
@@ -143,23 +92,7 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
           <EuiFlexGroup>
             <EuiFlexItem>
               <SectionPanel title="Execution Outcomes (24h)">
-                <DonutChart
-                  id="executionOutcomes"
-                  data={[
-                    { label: 'Succeeded', value: succeeded },
-                    { label: 'Warning', value: warning },
-                    { label: 'Failed', value: failed },
-                  ]}
-                  colors={[
-                    euiTheme.colors.vis.euiColorVis0,
-                    euiTheme.colors.vis.euiColorVis5,
-                    euiTheme.colors.vis.euiColorVis9,
-                  ]}
-                  total={exec.total}
-                  centerLabel={`Fail: ${failRate}%`}
-                  emptyTitle="No executions"
-                  emptyBody="No executions recorded in the selected interval."
-                />
+                <ExecutionOutcomesChart health={health} />
               </SectionPanel>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -200,7 +133,7 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
           </EuiAccordion>
         </>
       );
-    }, [spaceRulesHealth.data, euiTheme]);
+    }, [spaceRulesHealth.data]);
 
     return (
       <>

@@ -24,11 +24,11 @@ export const LoggedMessagesBar = memo(function LoggedMessagesBar({
 
   const levelColors = useMemo(
     () => [
-      euiTheme.colors.vis.euiColorVis9, // error – red
-      euiTheme.colors.vis.euiColorVis5, // warn  – orange
-      euiTheme.colors.vis.euiColorVis0, // info  – green
-      euiTheme.colors.vis.euiColorVis1, // debug – blue
-      euiTheme.colors.vis.euiColorVis3, // trace – teal
+      euiTheme.colors.vis.euiColorVisDanger0, // error
+      euiTheme.colors.vis.euiColorVisWarning0, // warn
+      euiTheme.colors.vis.euiColorVisNeutral0, // info
+      euiTheme.colors.vis.euiColorVis0, // debug
+      euiTheme.colors.vis.euiColorVis3, // trace
     ],
     [euiTheme]
   );

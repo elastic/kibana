@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiBasicTable, EuiText } from '@elastic/eui';
-import React, { memo } from 'react';
 import { SectionPanel } from '../section_panel';
-import type { HealthData } from './constants';
+import type { HealthData } from './types';
 import * as i18n from './translations';
 
 interface TopMessageItem {

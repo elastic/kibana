@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { memo, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import type { PartialTheme } from '@elastic/charts';
-import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
-import React, { memo, useMemo } from 'react';
+import { Chart, Partition, PartitionLayout, Settings, INPUT_KEY } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 const DEFAULT_HEIGHT = 220;
@@ -80,8 +80,8 @@ export const DonutChart = memo(function DonutChart({
             {
               groupByRollup: (d: { label: string }) => d.label,
               shape: {
-                fillColor: (_key: string | number, sortIndex: number) =>
-                  colors[sortIndex % colors.length],
+                fillColor: (_key: string | number, sortIndex: number, node) =>
+                  colors[(node[INPUT_KEY]?.[0] ?? sortIndex) % colors.length],
               },
             },
           ]}
