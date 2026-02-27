@@ -17,6 +17,7 @@ import {
 import type { DashboardState } from '../../server';
 import { getSanitizedExportSource } from './dashboard_export_source_client';
 import { ExportSourceAssetPanel } from './export_source_asset_panel';
+import { buildExportSourceFilename } from './export_source_share_utils';
 
 export interface ExportSourceSharingData {
   title: string;
@@ -25,27 +26,6 @@ export interface ExportSourceSharingData {
 
 const jsonMimeType = 'application/json';
 const jsonFileExtension = '.json';
-const DEFAULT_FILENAME_BASE = 'export';
-
-function normalizeExtension(ext: string): string {
-  const trimmed = ext.trim();
-  if (!trimmed) return '';
-  return trimmed.startsWith('.') ? trimmed : `.${trimmed}`;
-}
-
-function sanitizeFilenameBase(input: string): string {
-  const trimmed = input.trim();
-  if (!trimmed) return DEFAULT_FILENAME_BASE;
-
-  const withoutControlChars = trimmed.replace(/[\u0000-\u001F\u007F]/g, '');
-  const withoutInvalidChars = withoutControlChars.replace(/[\\/:*?"<>|]/g, '_');
-  const collapsedWhitespace = withoutInvalidChars.replace(/\s+/g, ' ').trim();
-  return (collapsedWhitespace || DEFAULT_FILENAME_BASE).slice(0, 180);
-}
-
-function getFileName(filenameBase: string) {
-  return `${sanitizeFilenameBase(filenameBase)}${normalizeExtension(jsonFileExtension)}`;
-}
 
 export const exportSourceDashboardShareIntegration =
   (): RegisterShareIntegrationArgs<ExportShare> => {
@@ -67,15 +47,13 @@ export const exportSourceDashboardShareIntegration =
             defaultMessage: 'Download JSON',
           }),
           generateAssetComponent: (
-            <ExportSourceAssetPanel
-              dashboardState={typedSharingData.exportSource}
-            />
+            <ExportSourceAssetPanel dashboardState={typedSharingData.exportSource} />
           ),
           generateAssetExport: async (_opts) => {
             const data = await getSanitizedExportSource(typedSharingData.exportSource)
               .then((result) => result.data)
               .catch(() => typedSharingData.exportSource);
-            const filename = getFileName(typedSharingData.title);
+            const filename = buildExportSourceFilename(typedSharingData.title, jsonFileExtension);
             const content = JSON.stringify(data, null, 2);
             await downloadFileAs(filename, { content, type: jsonMimeType });
           },
