@@ -177,7 +177,7 @@ function createSyntheticsServices(
     const testData = {
       alert: { status: { enabled: true }, tls: options.tls },
       ...locationPayload,
-      ...(restData?.type !== 'browser' ? {} : restData),
+      ...(restData?.type !== 'browser' ? {} : defaultBrowserMonitorData),
       ...restData,
       name,
     };
@@ -373,6 +373,7 @@ function createSyntheticsServices(
     await kbnClient.savedObjects.clean({
       types: ['synthetics-private-location', 'ingest-agent-policies', 'ingest-package-policies'],
     });
+    cachedLocation = null;
   };
 
   /**
