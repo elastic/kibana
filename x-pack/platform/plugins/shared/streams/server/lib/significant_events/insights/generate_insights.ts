@@ -9,7 +9,7 @@ import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/infere
 import { sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
-import type { InsightsResult } from '@kbn/streams-schema';
+import type { GenerateInsightsResult } from '@kbn/streams-schema';
 import type { LogMeta } from '@kbn/logging';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
@@ -35,7 +35,7 @@ export async function generateInsights({
   logger: Logger;
   /** When provided, only generate insights for these streams. Otherwise all streams are used. */
   streamNames?: string[];
-}): Promise<InsightsResult> {
+}): Promise<GenerateInsightsResult> {
   const allStreams = await streamsClient.listStreams();
   let streams = allStreams;
   if (streamNames !== undefined && streamNames.length > 0) {
@@ -124,7 +124,7 @@ async function generateStreamInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-}): Promise<InsightsResult> {
+}): Promise<GenerateInsightsResult> {
   const queries = await queryClient.getAssets(stream.name);
 
   const queryDataResults = await Promise.all(
