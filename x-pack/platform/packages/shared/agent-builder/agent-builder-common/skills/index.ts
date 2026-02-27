@@ -6,6 +6,14 @@
  */
 
 export {
+  type SkillSelection,
+  allSkillsSelectionWildcard,
+  allBuiltInSkillsSelection,
+  skillMatchSelection,
+  hasSkillSelectionWildcard,
+  getExplicitSkillIds,
+} from './skill_selection';
+export {
   type PublicSkillDefinition,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,

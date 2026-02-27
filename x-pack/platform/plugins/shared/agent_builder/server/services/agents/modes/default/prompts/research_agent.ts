@@ -18,6 +18,11 @@ import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
 import { getFileSystemInstructions } from '../../../../runner/store';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
+import { getPlanExecutionInstructions } from './plan_execution_instructions';
+import {
+  getModeSuggestionInstructions,
+  getSelfPlanningInstructions,
+} from './mode_suggestion_instructions';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -63,6 +68,7 @@ export const getBaseSystemMessage = async ({
   outputSchema,
   filestore,
   experimentalFeatures,
+  plan,
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -90,6 +96,12 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
 
+${plan ? getPlanExecutionInstructions(plan) : ''}
+
+${experimentalFeatures.planning && !plan ? getModeSuggestionInstructions() : ''}
+
+${experimentalFeatures.planning && !plan ? getSelfPlanningInstructions() : ''}
+
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information or performed the requested task? If NO, my response MUST be a tool call.
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
@@ -105,6 +117,7 @@ export const getResearchSystemMessage = async ({
   outputSchema,
   filestore,
   experimentalFeatures,
+  plan,
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -209,6 +222,12 @@ ${attachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
+
+${plan ? getPlanExecutionInstructions(plan) : ''}
+
+${experimentalFeatures.planning && !plan ? getModeSuggestionInstructions() : ''}
+
+${experimentalFeatures.planning && !plan ? getSelfPlanningInstructions() : ''}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
 - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call (see OPERATING PROTOCOL and TOOL SELECTION POLICY).

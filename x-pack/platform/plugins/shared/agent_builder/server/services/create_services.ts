@@ -93,12 +93,7 @@ export class ServiceManager {
       actions,
     });
 
-    const skillsServiceStart = this.services.skills.start({
-      elasticsearch,
-      spaces,
-      logger: logger.get('skills'),
-      getToolRegistry: tools.getRegistry,
-    });
+    const skillsServiceStart = this.services.skills.start();
 
     const agents = this.services.agents.start({
       spaces,

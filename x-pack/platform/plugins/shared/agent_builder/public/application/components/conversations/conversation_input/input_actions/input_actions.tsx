@@ -17,6 +17,7 @@ interface InputActionsProps {
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
   agentId?: string;
+  modeSelector?: React.ReactNode;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
@@ -24,6 +25,7 @@ export const InputActions: React.FC<InputActionsProps> = ({
   isSubmitDisabled,
   resetToPendingMessage,
   agentId,
+  modeSelector,
 }) => {
   const { getStepProps } = useAgentBuilderTour();
 
@@ -36,9 +38,14 @@ export const InputActions: React.FC<InputActionsProps> = ({
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <EuiTourStep {...getStepProps(TourStep.LlmSelector)}>
-            <ConnectorSelector />
-          </EuiTourStep>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTourStep {...getStepProps(TourStep.LlmSelector)}>
+                <ConnectorSelector />
+              </EuiTourStep>
+            </EuiFlexItem>
+            {modeSelector && <EuiFlexItem grow={false}>{modeSelector}</EuiFlexItem>}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">

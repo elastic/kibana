@@ -14,6 +14,7 @@ import type {
   ConversationAction,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type { AgentMode, Plan } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   ScreenContextAttachmentData,
@@ -33,11 +34,16 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 
 interface UseSendMessageMutationProps {
   connectorId?: string;
+  agentMode?: AgentMode;
+  plan?: Plan;
+  onPlanUpdate?: (plan: Plan) => void;
+  onModeSuggestion?: (suggestion: { reason: string }) => void;
 }
 
 interface SendMessageParams {
   message?: string;
   action?: ConversationAction;
+  agentModeOverride?: AgentMode;
 }
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
@@ -106,7 +112,13 @@ const withScreenContextAttachment = async ({
   ];
 };
 
-export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
+export const useSendMessageMutation = ({
+  connectorId,
+  agentMode,
+  plan: activePlan,
+  onPlanUpdate,
+  onModeSuggestion,
+}: UseSendMessageMutationProps = {}) => {
   const { chatService } = useAgentBuilderServices();
   const { services } = useKibana();
   const { conversationActions, attachments, resetAttachments, browserApiTools } =
@@ -154,9 +166,11 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
     browserToolExecutor,
+    onPlanUpdate,
+    onModeSuggestion,
   });
 
-  const sendMessage = async ({ message, action }: SendMessageParams) => {
+  const sendMessage = async ({ message, action, agentModeOverride }: SendMessageParams) => {
     const signal = messageControllerRef.current?.signal;
     const isRegenerate = action === 'regenerate';
     if (!signal) {
@@ -189,6 +203,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationAttachments: conversation?.attachments,
     });
 
+    const effectiveAgentMode = agentModeOverride ?? agentMode;
+
     const events$ = chatService.chat({
       signal,
       input: message,
@@ -197,6 +213,8 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       connectorId,
       attachments: [...(attachments || []), ...contextAttachments],
       browserApiTools: browserApiToolsMetadata,
+      agentMode: effectiveAgentMode,
+      executionMode: activePlan ? 'local' : undefined,
     });
 
     return subscribeToChatEvents(events$);

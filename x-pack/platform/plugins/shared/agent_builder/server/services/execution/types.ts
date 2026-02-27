@@ -13,6 +13,7 @@ import type {
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
   ConversationAction,
+  AgentMode,
 } from '@kbn/agent-builder-common';
 import type { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -59,6 +60,8 @@ export interface AgentExecutionParams {
   configurationOverrides?: AgentConfigurationOverrides;
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
+  /** Agent execution mode: 'agent' for standard execution, 'planning' for plan creation. */
+  agentMode?: AgentMode;
 }
 
 /**

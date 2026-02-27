@@ -6,6 +6,7 @@
  */
 
 export { addRoundCompleteEvent } from './add_round_complete_event';
+export { builtinToolToExecutable } from './builtin_tool_to_executable';
 export { extractRound } from './extract_round';
 export { convertPreviousRounds } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';

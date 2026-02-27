@@ -26,11 +26,13 @@ import {
   useHasActiveConversation,
   useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
-import { MessageEditor, useMessageEditor } from './message_editor';
+import { MessageEditor, useMessageEditor, type MessageEditorInstance } from './message_editor';
 import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
+import { AgentModeSelector } from './agent_mode_selector';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 const INPUT_MIN_HEIGHT = '150px';
 const useInputBorderStyles = () => {
@@ -102,6 +104,7 @@ const InputContainer: React.FC<
 
 interface ConversationInputProps {
   onSubmit?: () => void;
+  messageEditorRef?: React.MutableRefObject<MessageEditorInstance | null>;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -118,13 +121,25 @@ const enabledPlaceholder = i18n.translate(
   }
 );
 
-export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
+export const ConversationInput: React.FC<ConversationInputProps> = ({
+  onSubmit,
+  messageEditorRef,
+}) => {
   const isSendingMessage = useIsSendingMessage();
-  const { sendMessage, pendingMessage, error, isResuming } = useSendMessage();
+  const { sendMessage, pendingMessage, error, isResuming, agentMode, setAgentMode, plan } =
+    useSendMessage();
+  const experimentalFeatures = useExperimentalFeatures();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
   const messageEditor = useMessageEditor();
+
+  // Expose the message editor instance to the parent via ref
+  useEffect(() => {
+    if (messageEditorRef) {
+      messageEditorRef.current = messageEditor;
+    }
+  }, [messageEditor, messageEditorRef]);
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
   const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
@@ -223,6 +238,26 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
             }
           }}
           agentId={agentId}
+          modeSelector={
+            experimentalFeatures.planning ? (
+              <AgentModeSelector
+                agentMode={agentMode}
+                onModeChange={(newMode) => {
+                  setAgentMode(newMode);
+                  // Pre-fill when switching to agent mode with a ready user-initiated plan
+                  if (
+                    newMode === 'agent' &&
+                    plan?.status === 'ready' &&
+                    plan?.source === 'planning'
+                  ) {
+                    messageEditor.setContent('Execute the plan.');
+                    messageEditor.focus();
+                  }
+                }}
+                disabled={isSendingMessage}
+              />
+            ) : undefined
+          }
         />
       )}
     </InputContainer>

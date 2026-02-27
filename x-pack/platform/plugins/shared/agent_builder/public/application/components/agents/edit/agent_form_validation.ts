@@ -83,6 +83,5 @@ export const agentFormSchema = z.object({
         tool_ids: z.array(z.string()),
       })
     ),
-    workflow_ids: z.array(z.string()).optional(),
   }),
 });

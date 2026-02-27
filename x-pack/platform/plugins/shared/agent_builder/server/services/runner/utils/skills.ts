@@ -10,7 +10,9 @@ import type { SkillsService, ExecutableTool } from '@kbn/agent-builder-server/ru
 import type { Runner, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { ToolType } from '@kbn/agent-builder-common';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import type { SkillServiceStart } from '../../skills';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import type { SkillRegistry } from '../../skills';
 import type { AnyToolTypeDefinition, ToolTypeDefinition } from '../../tools/tool_types';
 import { convertTool } from '../../tools/builtin/converter';
 import { toExecutableTool } from '../../tools/utils/tool_conversion';
@@ -20,20 +22,29 @@ import { isDisabledDefinition } from '../../tools/tool_types/definitions';
 import { ToolAvailabilityCache } from '../../tools/builtin/availability_cache';
 import type { ToolsServiceStart } from '../../tools';
 
-export const createSkillsService = async ({
-  skillServiceStart,
+/**
+ * Type guard to determine if a skill result is a SkillDefinition (built-in)
+ * vs a PublicSkillDefinition (persisted).
+ */
+const isSkillDefinition = (
+  skill: SkillDefinition | PublicSkillDefinition
+): skill is SkillDefinition => {
+  return 'basePath' in skill;
+};
+
+export const createSkillsService = ({
+  skillRegistry,
   toolsServiceStart,
   runner,
   request,
   spaceId,
 }: {
-  skillServiceStart: SkillServiceStart;
+  skillRegistry: SkillRegistry;
   toolsServiceStart: ToolsServiceStart;
   runner: Runner;
   request: KibanaRequest;
   spaceId: string;
-}): Promise<SkillsService> => {
-  const skillRegistry = await skillServiceStart.getRegistry({ request });
+}): SkillsService => {
   const toolConverterFn = createSkillToolConverter({
     request,
     spaceId,
@@ -42,13 +53,15 @@ export const createSkillsService = async ({
   });
 
   return {
-    list: () => skillRegistry.list(),
-    get: async (skillId) => {
-      try {
-        return await skillRegistry.get(skillId);
-      } catch {
-        return undefined;
+    list: async () => {
+      return skillRegistry.listSkillDefinitions();
+    },
+    getSkillDefinition: async (skillId) => {
+      const skill = await skillRegistry.get(skillId);
+      if (skill && isSkillDefinition(skill)) {
+        return skill;
       }
+      return undefined;
     },
     convertSkillTool: toolConverterFn,
   };

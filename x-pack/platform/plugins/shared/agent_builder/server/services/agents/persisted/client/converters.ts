@@ -35,6 +35,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
+      skills: configuration.skills,
       workflow_ids: configuration.workflow_ids,
     },
   };
@@ -61,6 +62,7 @@ export const createRequestToEs = ({
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
+      skills: profile.configuration.skills,
       workflow_ids: profile.configuration.workflow_ids,
     },
     created_at: creationDate.toISOString(),
