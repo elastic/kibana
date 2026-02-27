@@ -97,8 +97,16 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
 
     await pageObjects.dashboard.saveDashboard(duplicatedDashboardTitle);
 
-    const heading = page.testSubj.locator('breadcrumb last');
-    await expect(heading).toHaveText(duplicatedDashboardTitle);
+    await pageObjects.dashboard.goto();
+
+    const originalLink = page.testSubj.locator(
+      `dashboardListingTitleLink-${logsDashboardTitle.split(' ').join('-')}`
+    );
+    const duplicatedLink = page.testSubj.locator(
+      `dashboardListingTitleLink-${duplicatedDashboardTitle.split(' ').join('-')}`
+    );
+    await expect(originalLink).toBeVisible();
+    await expect(duplicatedLink).toBeVisible();
   });
 
   test('Add Dashboard link type and URL link types to a dashboard', async ({
