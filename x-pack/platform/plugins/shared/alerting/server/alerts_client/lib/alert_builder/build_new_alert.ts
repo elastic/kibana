@@ -73,8 +73,7 @@ function snoozeEntryToAadFields(entry: SnoozedInstanceEntry): Partial<Record<str
 
 /**
  * Builds a map of instanceId ---> AAD snooze fields from the rule's snoozedInstances.
- * Call once per rule run and pass the result to buildNewAlert for O(1) lookup instead
- * of scanning the array per new alert.
+ * Used by tests and any caller that needs the map without an Alert instance.
  */
 export function buildSnoozeFromRuleMap(
   ruleData?: AlertRuleData
@@ -86,14 +85,6 @@ export function buildSnoozeFromRuleMap(
   return map;
 }
 
-function getSnoozeFieldsFromRule(
-  alertInstanceId: string,
-  ruleData?: AlertRuleData
-): Partial<Record<string, unknown>> {
-  const entry = (ruleData?.snoozedInstances ?? []).find((e) => e.instanceId === alertInstanceId);
-  return entry ? snoozeEntryToAadFields(entry) : {};
-}
-
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
@@ -102,8 +93,6 @@ interface BuildNewAlertOpts<
   RecoveryActionGroupId extends string
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
-  /** Precomputed snooze fields from rule (e.g. from buildSnoozeFromRuleMap) for O(1) lookup; falls back to getSnoozeFieldsFromRule when not provided */
-  snoozeFromRule?: Partial<Record<string, unknown>>;
   rule: AlertRule;
   ruleData?: AlertRuleData;
   payload?: DeepPartial<AlertData>;
@@ -126,7 +115,6 @@ export const buildNewAlert = <
   RecoveryActionGroupId extends string
 >({
   legacyAlert,
-  snoozeFromRule,
   rule,
   ruleData,
   runTimestamp,
@@ -147,9 +135,10 @@ export const buildNewAlert = <
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
-  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData, legacyAlert);
 
-  const snoozeFields = snoozeFromRule ?? getSnoozeFieldsFromRule(alertInstanceId, ruleData);
+  const snoozeEntry = legacyAlert.getSnoozeConfig();
+  const snoozeFields = snoozeEntry ? snoozeEntryToAadFields(snoozeEntry) : {};
 
   return deepmerge.all(
     [

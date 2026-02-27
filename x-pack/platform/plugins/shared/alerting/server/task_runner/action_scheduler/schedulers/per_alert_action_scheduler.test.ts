@@ -541,14 +541,17 @@ describe('Per-Alert Action Scheduler', () => {
     });
 
     test('should auto-unmute alert when conditional snooze TTL expires (rule SO)', async () => {
-      // Alert 2 has a conditional snooze on the rule SO with an expired TTL.
+      // Alert 2 has a conditional snooze with an expired TTL (carried on alert from initializeExecution).
+      const expiredSnooze = {
+        instanceId: '2',
+        expiresAt: new Date(Date.now() - 60000).toISOString(),
+      };
+      alerts['2'].setSnoozeConfig(expiredSnooze);
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: {
           ...rule,
-          snoozedInstances: [
-            { instanceId: '2', expiresAt: new Date(Date.now() - 60000).toISOString() },
-          ],
+          snoozedInstances: [expiredSnooze],
         },
       });
       const results = await scheduler.getActionsToSchedule({
@@ -563,14 +566,17 @@ describe('Per-Alert Action Scheduler', () => {
     });
 
     test('should keep alert muted when conditional snooze TTL not expired (rule SO)', async () => {
-      // Alert 2 has a conditional snooze on the rule SO with a future expiry.
+      // Alert 2 has a conditional snooze with a future expiry (carried on alert from initializeExecution).
+      const futureSnooze = {
+        instanceId: '2',
+        expiresAt: new Date(Date.now() + 3600000).toISOString(),
+      };
+      alerts['2'].setSnoozeConfig(futureSnooze);
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: {
           ...rule,
-          snoozedInstances: [
-            { instanceId: '2', expiresAt: new Date(Date.now() + 3600000).toISOString() },
-          ],
+          snoozedInstances: [futureSnooze],
         },
       });
       const results = await scheduler.getActionsToSchedule({
@@ -586,17 +592,20 @@ describe('Per-Alert Action Scheduler', () => {
     });
 
     test('should auto-unmute alert when conditional snooze TTL expires and rule has no actions', async () => {
-      // Rule has no actions; alert 2 has an expired per-alert snooze.
+      // Rule has no actions; alert 2 has an expired per-alert snooze (carried on alert).
       // Without the dedicated evaluateAlertForAutoUnmute pass, we would never
       // enter the actions loop and alertsToAutoUnmute would stay empty.
+      const expiredSnooze = {
+        instanceId: '2',
+        expiresAt: new Date(Date.now() - 60000).toISOString(),
+      };
+      alerts['2'].setSnoozeConfig(expiredSnooze);
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: {
           ...rule,
           actions: [],
-          snoozedInstances: [
-            { instanceId: '2', expiresAt: new Date(Date.now() - 60000).toISOString() },
-          ],
+          snoozedInstances: [expiredSnooze],
         },
       });
       const results = await scheduler.getActionsToSchedule({
@@ -644,18 +653,16 @@ describe('Per-Alert Action Scheduler', () => {
         return undefined;
       });
 
+      const conditionSnooze = {
+        instanceId: '2',
+        conditions: [{ type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' }],
+      };
+      alerts['2'].setSnoozeConfig(conditionSnooze);
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: {
           ...rule,
-          snoozedInstances: [
-            {
-              instanceId: '2',
-              conditions: [
-                { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
-              ],
-            },
-          ],
+          snoozedInstances: [conditionSnooze],
         },
       });
       const results = await scheduler.getActionsToSchedule({ activeAlerts: alerts });
@@ -670,18 +677,16 @@ describe('Per-Alert Action Scheduler', () => {
     test('should not auto-unmute when built alert is unavailable (no fallback to tracked data)', async () => {
       alertsClient.getBuiltAlertByInstanceId.mockReturnValue(undefined);
 
+      const conditionSnooze = {
+        instanceId: '2',
+        conditions: [{ type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' }],
+      };
+      alerts['2'].setSnoozeConfig(conditionSnooze);
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: {
           ...rule,
-          snoozedInstances: [
-            {
-              instanceId: '2',
-              conditions: [
-                { type: 'severity_equals', field: 'kibana.alert.severity', value: 'medium' },
-              ],
-            },
-          ],
+          snoozedInstances: [conditionSnooze],
         },
       });
       const results = await scheduler.getActionsToSchedule({ activeAlerts: alerts });
@@ -1511,6 +1516,9 @@ describe('Per-Alert Action Scheduler', () => {
         instanceId: String(i + 1),
         expiresAt: new Date(Date.now() + 60_000).toISOString(),
       }));
+      snoozedInstances.forEach((entry, i) => {
+        activeAlerts[String(i + 1)].setSnoozeConfig(entry);
+      });
       alertsClient.getSummarizedAlerts.mockResolvedValue({
         all: { total: 0, data: [], count: 0 },
         new: { total: 0, data: [], count: 0 },

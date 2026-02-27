@@ -510,19 +510,13 @@ describe('buildNewAlert', () => {
       const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
       legacyAlert.scheduleActions('default');
       const expiresAt = new Date(Date.now() + 3600000).toISOString();
+      const snoozeEntry = { instanceId: 'alert-A', expiresAt };
+      legacyAlert.setSnoozeConfig(snoozeEntry);
 
       const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        ruleData: {
-          ...ruleData,
-          snoozedInstances: [
-            {
-              instanceId: 'alert-A',
-              expiresAt,
-            },
-          ],
-        },
+        ruleData,
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       });
@@ -542,21 +536,18 @@ describe('buildNewAlert', () => {
           snapshotValue: 'critical',
         },
       ];
+      const snoozeEntry = {
+        instanceId: 'alert-B',
+        expiresAt,
+        conditions,
+        conditionOperator: 'any' as const,
+      };
+      legacyAlert.setSnoozeConfig(snoozeEntry);
 
       const result = buildNewAlert<{}, {}, {}, 'default', 'recovered'>({
         legacyAlert,
         rule: alertRule,
-        ruleData: {
-          ...ruleData,
-          snoozedInstances: [
-            {
-              instanceId: 'alert-B',
-              expiresAt,
-              conditions,
-              conditionOperator: 'any' as const,
-            },
-          ],
-        },
+        ruleData,
         timestamp: '2023-03-28T12:27:28.159Z',
         kibanaVersion: '8.9.0',
       });

@@ -98,6 +98,7 @@ export class LegacyAlertsClient<
     flappingSettings,
     activeAlertsFromState,
     recoveredAlertsFromState,
+    snoozedInstances,
   }: InitializeExecutionOpts) {
     this.maxAlerts = getMaxAlertLimit(maxAlerts);
     this.flappingSettings = flappingSettings;
@@ -106,6 +107,10 @@ export class LegacyAlertsClient<
 
     for (const id of keys(activeAlertsFromState)) {
       this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
+      const snoozeEntry = (snoozedInstances ?? []).find((e) => e.instanceId === id);
+      if (snoozeEntry) {
+        this.trackedAlerts.active[id].setSnoozeConfig(snoozeEntry);
+      }
     }
 
     for (const id of keys(recoveredAlertsFromState)) {

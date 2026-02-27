@@ -147,6 +147,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt,
+      snoozedInstances: undefined,
     });
     spy1.mockRestore();
   });
@@ -210,6 +211,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      snoozedInstances: undefined,
     });
     spy1.mockRestore();
   });
@@ -281,6 +283,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      snoozedInstances: undefined,
     });
     spy1.mockRestore();
   });
@@ -357,6 +360,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      snoozedInstances: undefined,
     });
     spy1.mockRestore();
   });

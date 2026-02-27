@@ -62,7 +62,6 @@ export class PerAlertActionScheduler<
 {
   private actions: RuleAction[] = [];
   private mutedAlertIdsSet: Set<string> = new Set();
-  private snoozedInstancesMap: Map<string, SnoozedInstanceConfig> = new Map();
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
 
@@ -85,16 +84,6 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
-    this.snoozedInstancesMap = new Map(
-      (context.rule.snoozedInstances ?? []).map((e) => [
-        e.instanceId,
-        {
-          expiresAt: e.expiresAt,
-          conditions: e.conditions,
-          conditionOperator: e.conditionOperator,
-        },
-      ])
-    );
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
@@ -320,6 +309,7 @@ export class PerAlertActionScheduler<
     action,
     summarizedAlerts,
   }: IsExecutableAlertOpts<ActionGroupIds, RecoveryActionGroupId>) {
+    // Snooze is carried on the alert (set in initializeExecution); isAlertMuted uses alert.getSnoozeConfig().
     return (
       !this.hasActiveMaintenanceWindow({ alert, action }) &&
       !this.isAlertMuted(alert) &&
@@ -407,17 +397,17 @@ export class PerAlertActionScheduler<
   }
 
   /**
-   * Evaluates whether an alert's per-alert snooze (snoozedInstances entry) has expired
+   * Evaluates whether an alert's per-alert snooze (from alert.getSnoozeConfig()) has expired
    * and should be auto-unmuted. Returns null if the alert has no snooze config.
    *
    * Alert field data for condition evaluation must come from the current execution
    * (via the caller), not from persisted alert-as-data documents.
    */
   private evaluateSnoozeForAlert(
-    alertId: string,
-    currentAlertFields: Record<string, unknown>
+    _alertId: string,
+    currentAlertFields: Record<string, unknown>,
+    snoozeInstanceConfig: SnoozedInstanceConfig | undefined | null
   ): { shouldUnmute: boolean; reason?: string } | null {
-    const snoozeInstanceConfig = this.snoozedInstancesMap.get(alertId);
     if (!snoozeInstanceConfig) {
       return null;
     }
@@ -445,7 +435,11 @@ export class PerAlertActionScheduler<
   ): void {
     const alertId = alert.getId();
     const currentAlertFields = this.getCurrentAlertFields(alertId);
-    const result = this.evaluateSnoozeForAlert(alertId, currentAlertFields);
+    const result = this.evaluateSnoozeForAlert(
+      alertId,
+      currentAlertFields,
+      alert.getSnoozeConfig() ?? undefined
+    );
     if (!result?.shouldUnmute) {
       return;
     }
@@ -470,14 +464,18 @@ export class PerAlertActionScheduler<
       return this.markAlertAsMuted(alertId);
     }
 
-    // Path 2: Conditional snooze from rule SO snoozedInstances (durable store).
+    // Path 2: Conditional snooze from alert.getSnoozeConfig() (set in initializeExecution from rule SO).
     // Skip re-evaluation if already in alertsToAutoUnmute (e.g. from initial pass).
     if (this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
       return false;
     }
 
     const currentAlertFields = this.getCurrentAlertFields(alertId);
-    const result = this.evaluateSnoozeForAlert(alertId, currentAlertFields);
+    const result = this.evaluateSnoozeForAlert(
+      alertId,
+      currentAlertFields,
+      alert.getSnoozeConfig() ?? undefined
+    );
     if (!result) {
       return false;
     }

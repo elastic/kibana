@@ -137,6 +137,20 @@ describe('getAlertMutedStatus', () => {
     expect(getAlertMutedStatus('alert-1', ruleData)).toBe(true);
   });
 
+  test('should return true when legacyAlert has getSnoozeConfig() set (snooze from alert)', () => {
+    const ruleData = createMockRuleData();
+    const legacyAlert = {
+      getSnoozeConfig: () => ({ instanceId: 'alert-1', expiresAt: new Date().toISOString() }),
+    };
+    expect(getAlertMutedStatus('alert-1', ruleData, legacyAlert)).toBe(true);
+  });
+
+  test('should return false when legacyAlert has getSnoozeConfig() returning undefined', () => {
+    const ruleData = createMockRuleData();
+    const legacyAlert = { getSnoozeConfig: () => undefined };
+    expect(getAlertMutedStatus('alert-1', ruleData, legacyAlert)).toBe(false);
+  });
+
   describe('micro-benchmarks', () => {
     const runTimingLoop = (fn: () => void, runs: number): { totalMs: number; meanMs: number } => {
       const start = performance.now();

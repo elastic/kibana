@@ -37,19 +37,9 @@ import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_
 import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
+import type { SnoozedInstanceConfig, SnoozedInstanceEntry } from '../lib/snooze_types';
 
-export interface SnoozedInstanceConfig {
-  expiresAt?: string;
-  conditions?: Array<{
-    type: string;
-    field: string;
-    value?: string;
-    snapshotValue?: string;
-  }>;
-  conditionOperator?: 'any' | 'all';
-}
-
-export type SnoozedInstanceEntry = { instanceId: string } & SnoozedInstanceConfig;
+export type { SnoozedInstanceConfig, SnoozedInstanceEntry };
 
 export interface AlertRuleData {
   consumer: string;
@@ -170,6 +160,7 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  snoozedInstances?: SnoozedInstanceEntry[];
 }
 
 export interface TrackedAlerts<

@@ -26,7 +26,7 @@ import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import type { IIndexPatternString } from '../../../alerts_service/resource_installer_utils';
 import type { TrackedAADAlerts } from '../../alerts_client';
 import { buildOngoingAlert } from './build_ongoing_alert';
-import { buildNewAlert, buildSnoozeFromRuleMap } from './build_new_alert';
+import { buildNewAlert } from './build_new_alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
 import { buildUpdatedRecoveredAlert } from './build_updated_recovered_alert';
 import { buildDelayedAlert } from './build_delayed_alert';
@@ -172,9 +172,6 @@ export class AlertBuilder<
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_ACTIVE);
     const delayedAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_DELAYED);
 
-    // Build snooze map once per run for O(1) lookup when building new alerts (re-fire, etc.)
-    const snoozeFromRuleMap = buildSnoozeFromRuleMap(this.alertRuleData);
-
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
@@ -214,12 +211,10 @@ export class AlertBuilder<
           // "New" / open lifecycle:
           // (1) no tracked doc for this UUID (first-time active or re-fire with new UUID), or
           // (2) tracked doc exists but is recovered (new alert, reusing recovered doc).
-          // Snooze fields always come from the rule SO (source of truth), never from
-          // the existing alert doc.
+          // Snooze is carried on the alert (set in initializeExecution from rule SO).
           activeAlertsToIndex.push(
             buildNewAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
               legacyAlert: activeAlert,
-              snoozeFromRule: snoozeFromRuleMap.get(activeAlert.getId()),
               rule: this.rule,
               ruleData: this.alertRuleData,
               runTimestamp: this.runTimestampString,

@@ -140,6 +140,7 @@ export const initializeAlertsClient = async <
     runTimestamp,
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
+    snoozedInstances: rule.snoozedInstances,
   });
 
   return alertsClient;

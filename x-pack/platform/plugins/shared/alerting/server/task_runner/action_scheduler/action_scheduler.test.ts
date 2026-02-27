@@ -176,19 +176,22 @@ describe('Action Scheduler', () => {
 
   describe('getAlertsToAutoUnmute', () => {
     test('returns alerts to auto-unmute when conditional snooze TTL has expired', async () => {
-      const actionScheduler = new ActionScheduler(
-        getSchedulerContext({
-          rule: getRule({
-            snoozedInstances: [
-              { instanceId: '2', expiresAt: new Date(Date.now() - 60000).toISOString() },
-            ],
-          }),
-        })
-      );
+      const expiredSnooze = {
+        instanceId: '2',
+        expiresAt: new Date(Date.now() - 60000).toISOString(),
+      };
       const activeAlerts = {
         ...generateAlert({ id: 1 }),
         ...generateAlert({ id: 2 }),
       };
+      activeAlerts['2'].setSnoozeConfig(expiredSnooze);
+      const actionScheduler = new ActionScheduler(
+        getSchedulerContext({
+          rule: getRule({
+            snoozedInstances: [expiredSnooze],
+          }),
+        })
+      );
       await actionScheduler.run({ activeAlerts, recoveredAlerts: {} });
 
       const alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
