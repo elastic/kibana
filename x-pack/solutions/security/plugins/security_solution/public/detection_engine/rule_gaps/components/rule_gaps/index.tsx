@@ -308,7 +308,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
                 />
               </DatePickerEuiFlexItem>
             </EuiFlexItem>
-            {canEditRules && (
+            {canManualRunRules && (
               <EuiFlexItem grow={false}>
                 <FillRuleGapsButton ruleId={ruleId} />
               </EuiFlexItem>
