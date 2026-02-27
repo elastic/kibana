@@ -52,22 +52,17 @@ When the component needs i18n, wrap it in `I18nProvider` or use a test wrapper. 
 | `shallowWithIntl(<Comp />)` | `render(<I18nProvider><Comp /></I18nProvider>)` |
 | `mountWithIntl(<Comp />)` | `render(<I18nProvider><Comp /></I18nProvider>)` |
 
-RTL's `render()` returns `{ container, ...queries }`. Destructure what you need:
-
-```typescript
-const { container, getByTestId, getByText } = render(<MyComponent />);
-```
-
-Or use `screen` for queries (preferred when not needing `container`):
+Use `screen` for queries (queries `document.body`, so portals are reachable too):
 
 ```typescript
 render(<MyComponent />);
 expect(screen.getByTestId('foo')).toBeInTheDocument();
-```
 
 ## Selector migration
 
 ### Test subject selectors
+
+Note: In Kibana Jest setup, RTL uses `testIdAttribute: 'data-test-subj'`, so `getByTestId('x')` queries `data-test-subj="x"` (not `data-testid`).
 
 | Enzyme | RTL |
 |---|---|
@@ -76,6 +71,7 @@ expect(screen.getByTestId('foo')).toBeInTheDocument();
 | `wrapper.find('[data-test-subj="x"]').exists()` | `screen.queryByTestId('x')` (returns `null` if absent) |
 | Nested: `wrapper.find('[data-test-subj="a"] [data-test-subj="b"]')` | `within(screen.getByTestId('a')).getByTestId('b')` |
 
+Note: Some EUI components reuse the same `data-test-subj` on both a wrapper and the actual control. If `getByTestId` throws “Found multiple elements”, use `getAllByTestId`/`queryAllByTestId` and narrow (or scope with `within(...)`) instead of switching to brittle CSS selectors.
 ### CSS selectors
 
 | Enzyme | RTL |
@@ -94,12 +90,14 @@ links[3]?.querySelectorAll('div span')[2]?.textContent;
 
 ### Global selectors (modals, popovers)
 
-For elements rendered outside the component's container (portals):
+For elements rendered outside the component's container (portals), prefer `screen` / `within(document.body)`:
 
 ```typescript
-document.querySelector('[data-test-subj="modal-confirm"]')
-document.querySelectorAll('.euiPopover')
-```
+// Portal content is in document.body, so screen queries can find it
+expect(screen.getByTestId('modal-confirm')).toBeInTheDocument();
+
+// Or scope explicitly
+within(document.body).getByTestId('modal-confirm');
 
 ### Targeting the last element in a NodeList
 
@@ -167,7 +165,7 @@ await screen.findByTestId('results')
 ```
 
 - Replace `wrapper.update()` + `nextTick()` patterns with `await waitFor(...)`.
-- For promises that resolve in tests, prefer `findByTestId` (auto-waits) over `getByTestId` + `waitFor`.
+- For promises that resolve in tests, prefer `findByTestId` (auto-waits) over `getByTestId` + `waitFor`. Prefer reusing the element returned from `findBy*` instead of re-querying with `getBy*` immediately after (re-query only when you expect the DOM to change/replace the element).
 - For elements that should disappear, prefer `waitForElementToBeRemoved(...)` (example: `await waitForElementToBeRemoved(screen.getByTestId('loading'))`).
 
 ## Snapshot strategy
@@ -212,7 +210,7 @@ await waitFor(() => {
 - **Missing providers after removing shallow.** Enzyme `shallow` doesn't render children deeply, hiding missing context providers. After switching to `render()`, add required providers (I18n, Redux, Router, Theme, etc.) or mock them.
 - **EUI component explosions.** Some EUI components render complex DOM. Mock them if the test doesn't care about their internals. Prefer shared mocks when available (e.g. `import "@kbn/code-editor-mock/jest_helper"`), then plugin-local `__mocks__/` files (e.g. `<pluginRoot>/__mocks__/@elastic/charts/index.tsx`), then an inline mock factory as a fallback. When stubbing components to `<div>`s, add a `data-test-subj` only when the test needs a stable query for "mock rendered".
 - **Portal-based elements.** Modals, toasts, and popovers render outside `container`. Use `document.querySelector` or `screen` (which queries the whole document body). Never snapshot these — use targeted assertions instead (see Snapshot strategy).
-- **`act()` warnings.** State updates in effects or callbacks need to be wrapped. Use `await waitFor(...)` or `await act(async () => { ... })`.
+- **`act()` warnings.** Usually caused by missing `await` / missing async UI boundary after an interaction. Prefer `await screen.findBy...` / `await waitFor(...)` over wrapping events in `act()` (events are already wrapped). Use `act()` when you're manually advancing timers or otherwise triggering React updates outside RTL helpers.
 - **`userEvent` performance.** `userEvent` simulates full event sequences and scales poorly in CI (geometrically with interaction count). Prefer `fireEvent` for simple clicks and value changes. Replace `userEvent.type(input, 'text')` with `fireEvent.change(input, { target: { value: 'text' } })` + `fireEvent.blur(input)` unless the test is specifically exercising per-keystroke behavior (e.g. keydown handlers, typeahead suggestions, input masking/formatting, debounce-on-each-char). When `fireEvent.change` causes act warnings inside portals/overlays, prefer `userEvent.paste` over `userEvent.type` — it sets the full value in one step without per-character overhead.
 - **Timer-based tests.** Replace `jest.advanceTimersByTime` patterns carefully — RTL's `userEvent` uses real timers by default. Use `userEvent.setup({ advanceTimers: jest.advanceTimersByTime })` when fake timers are needed.
 
