@@ -575,6 +575,29 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
   );
 });
 
+const CascadeDataGrid = React.memo(function CascadeDataGrid({
+  expandedDocStore,
+  cellId,
+  setExpandedDoc,
+  ...rest
+}: Omit<UnifiedDataTableProps, 'expandedDoc'> & {
+  expandedDocStore?: ExpandedDocStore;
+  cellId: string;
+  setExpandedDoc: (doc: DataTableRecord | undefined) => void;
+}) {
+  const subscribe = useCallback(
+    (cb: () => void) => expandedDocStore?.subscribe(cellId, cb) ?? (() => {}),
+    [expandedDocStore, cellId]
+  );
+  const getSnapshot = useCallback(
+    () => expandedDocStore?.getDoc(cellId),
+    [expandedDocStore, cellId]
+  );
+  const expandedDoc = useSyncExternalStore(subscribe, getSnapshot);
+
+  return <UnifiedDataTable {...rest} expandedDoc={expandedDoc} setExpandedDoc={setExpandedDoc} />;
+});
+
 export const ESQLDataCascadeLeafCell = React.memo(
   ({
     cellData,
@@ -596,16 +619,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
 
-    const subscribeToExpandedDoc = useCallback(
-      (onStoreChange: () => void) =>
-        expandedDocStore?.subscribe(cellId, onStoreChange) ?? (() => {}),
-      [expandedDocStore, cellId]
-    );
-    const getExpandedDocSnapshot = useCallback(
-      () => expandedDocStore?.getDoc(cellId),
-      [expandedDocStore, cellId]
-    );
-    const expandedDoc = useSyncExternalStore(subscribeToExpandedDoc, getExpandedDocSnapshot);
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
     );
@@ -773,7 +786,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
             onOpenInDiscoverTab={openInDiscoverTab}
           />
         ) : (
-          <UnifiedDataTable
+          <CascadeDataGrid
+            expandedDocStore={expandedDocStore}
+            cellId={cellId}
             isPlainRecord
             dataView={dataView}
             showTimeCol={showTimeCol}
@@ -783,14 +798,12 @@ export const ESQLDataCascadeLeafCell = React.memo(
             isSortEnabled={false}
             enableInTableSearch
             ariaLabelledBy="data-cascade-leaf-cell"
-            // TODO: I think this will pollute local storage
             consumer={`discover_esql_cascade_row_leaf_${cellId}`}
             rows={cellData}
             loadingState={DataLoadingState.loaded}
             columns={selectedColumns}
             onSetColumns={setSelectedColumns}
             renderCustomToolbar={renderCustomToolbarWithElements}
-            expandedDoc={expandedDoc}
             setExpandedDoc={setExpandedDocFn}
             dataGridDensityState={cascadeDataGridDensityState}
             onUpdateDataGridDensity={setCascadeDataGridDensityState}
