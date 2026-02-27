@@ -127,7 +127,7 @@ describe('created_by filter', () => {
     // wait until first render
     expect(await screen.findByTestId('itemsInMemTable')).toBeVisible();
 
-    // 5 items in the list
+    // 4 items in the list
     expect(screen.getAllByTestId(/userContentListingTitleLink/)).toHaveLength(4);
 
     await user.click(screen.getByTestId('userFilterPopoverButton'));
