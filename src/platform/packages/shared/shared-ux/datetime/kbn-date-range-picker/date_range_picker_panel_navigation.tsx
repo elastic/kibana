@@ -156,7 +156,9 @@ function useFocusRestore(isActive: boolean) {
 
   if (wasActiveRef.current && !isActive && containerRef.current) {
     const focusables = containerRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-    focusedIndexRef.current = Array.from(focusables).indexOf(document.activeElement as HTMLElement);
+    const activeElement = document.activeElement;
+    focusedIndexRef.current =
+      activeElement instanceof HTMLElement ? Array.from(focusables).indexOf(activeElement) : -1;
   }
   wasActiveRef.current = isActive;
 
