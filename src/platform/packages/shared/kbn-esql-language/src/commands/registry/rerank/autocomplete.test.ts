@@ -180,9 +180,14 @@ describe('RERANK Autocomplete', () => {
     test('suggests field columns after ON keyword', async () => {
       const query = buildRerankQuery({ query: '"search query"' }) + ' ON ';
 
-      await expectRerankSuggestions(query, {
-        contains: ['textField', 'keywordField', 'integerField'],
-      });
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField'],
+        },
+        mockCallbacks
+      );
     });
 
     test('suggests field columns after a list of keyword fields and comma', async () => {
@@ -192,23 +197,34 @@ describe('RERANK Autocomplete', () => {
           onClause: 'textField, col0 = TRUE, keywordField, integerField,',
         }) + ' ';
 
-      await expectRerankSuggestions(query, {
-        contains: ['textField', 'keywordField', 'integerField'],
-      });
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField'],
+        },
+        mockCallbacks
+      );
     });
 
     test('suggests field continuations after selecting a field', async () => {
       const query = buildRerankQuery({ query: '"search query"', onClause: 'keywordField' });
 
-      await expectRerankSuggestions(query, {
-        contains: [
-          ', ',
-          'WITH { $0 }',
-          '| ',
-          ...getFieldNamesByType('any'),
-          ...getFunctionSignaturesByReturnType(Location.RERANK, 'any', { scalar: true }),
-        ],
-      });
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: [
+            ', ',
+            'WITH { $0 }',
+            '| ',
+            ...getFieldNamesByType(['text', 'keyword']),
+            ...getFunctionSignaturesByReturnType(Location.RERANK, ['text', 'keyword'], {
+              scalar: true,
+            }),
+          ],
+        },
+        mockCallbacks
+      );
     });
 
     test('suggests continuations after field with more trailing spaces', async () => {
