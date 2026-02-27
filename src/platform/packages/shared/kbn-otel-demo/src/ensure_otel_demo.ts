@@ -174,14 +174,6 @@ export async function ensureOtelDemo({
     log,
   });
 
-  // Create a data view for logs (useful for Discover and dashboards)
-  await createDataView({
-    kibanaUrl,
-    username: elasticsearchUsername,
-    password: elasticsearchPassword,
-    log,
-  });
-
   // Stop any existing deployment
   log.debug('Removing existing deployment');
   await down(log, namespace, demoConfig.displayName);
@@ -221,8 +213,8 @@ export async function ensureOtelDemo({
   // Generate OTel Collector configuration
   const collectorConfig = getFullOtelCollectorConfig({
     elasticsearchEndpoint: elasticsearchHost,
-    username: elasticsearchUsername,
-    password: elasticsearchPassword,
+    username: kibanaCredentials.username,
+    password: kibanaCredentials.password,
     logsIndex,
     namespace: demoConfig.namespace,
   });
