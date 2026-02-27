@@ -8,7 +8,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import expect from 'expect';
 import type { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('lists `security_detection_engine` as a bundled fleet package in the `fleet_package.json` file', async () => {
       const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
       const fleetPackages = await fs.readFile(configFilePath, 'utf8');
-      const parsedFleetPackages: PackageSpecManifest[] = JSON5.parse(fleetPackages);
+      const parsedFleetPackages: PackageSpecManifest[] = parse(fleetPackages);
 
       expect(parsedFleetPackages).toEqual(
         expect.arrayContaining([expect.objectContaining({ name: 'security_detection_engine' })])

@@ -85,6 +85,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
 
     expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
     expect(mockedAgentPolicyService.deployPolicies).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      expect.stringContaining('has mismatched revisions')
+    );
   });
 
   it('should do deploy policies out of sync', async () => {
@@ -117,6 +120,9 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Policy [policy2] has mismatched revisions: .kibana_ingest revision [2], .fleet-policies revision_idx [1]'
+    );
   });
 
   it('should do deploy policies never deployed', async () => {
