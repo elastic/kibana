@@ -9,6 +9,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { basename, join } from 'path';
+import minimatch from 'minimatch';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -62,16 +63,48 @@ function getSegmentPaths(relativePath) {
   return segmentPaths;
 }
 
+function toSnakeCase(resourceName) {
+  return resourceName.toLowerCase().replace(/[ \-]+/g, '_');
+}
+
+function toKebabCase(resourceName) {
+  return resourceName.toLowerCase().replace(/[ \_]+/g, '-');
+}
+
+function getSuggestedResourceName(resourceName, expectedCasing) {
+  if (expectedCasing === 'snake_case') {
+    return toSnakeCase(resourceName);
+  }
+
+  return toKebabCase(resourceName);
+}
+
+function formatViolation(violation) {
+  const { path, resourceName, expectedCasing } = violation;
+  const suggestedResourceName = getSuggestedResourceName(resourceName, expectedCasing);
+  const suggestionText =
+    suggestedResourceName !== resourceName ? `, e.g. '${suggestedResourceName}'` : '';
+
+  return `${path} (segment '${resourceName}' must use ${expectedCasing}${suggestionText})`;
+}
+
 export async function checkFileCasing(log, paths, getExpectedCasing, options = {}) {
-  const { exceptions = [], generateExceptions = false, packageRootDirs } = options;
+  const {
+    exceptions = [],
+    generateExceptions = false,
+    packageRootDirs,
+    ignorePatterns = [],
+  } = options;
 
   const violations = [];
+  const isIgnoredPath = (path) => ignorePatterns.some((pattern) => minimatch(path, pattern));
 
   const pathsToValidate = uniq(
     paths
       .map((path) => (path instanceof File ? path : new File(path)))
       .map((file) => normalizePath(file.getRelativePath()))
       .flatMap((path) => getSegmentPaths(path))
+      .filter((path) => !isIgnoredPath(path))
       .filter((path) => generateExceptions || !exceptions.includes(path))
   );
 
@@ -82,12 +115,22 @@ export async function checkFileCasing(log, paths, getExpectedCasing, options = {
     switch (expectedCasing) {
       case 'kebab-case':
         if (NON_KEBAB_CASE_RE.test(resourceName)) {
-          violations.push({ path, expected: `'${resourceName}' should be kebab-case` });
+          violations.push({
+            path,
+            resourceName,
+            expectedCasing: 'kebab-case',
+            expected: `'${resourceName}' should be kebab-case`,
+          });
         }
         break;
       case 'snake_case':
         if (NON_SNAKE_CASE_RE.test(resourceName)) {
-          violations.push({ path, expected: `'${resourceName}' should be snake_case` });
+          violations.push({
+            path,
+            resourceName,
+            expectedCasing: 'snake_case',
+            expected: `'${resourceName}' should be snake_case`,
+          });
         }
         break;
       default:
@@ -122,10 +165,8 @@ export async function checkFileCasing(log, paths, getExpectedCasing, options = {
   if (violations.length > 0) {
     const message =
       violations.length === 1
-        ? `Path MUST use ${violations[0].expected}: ${violations[0].path}`
-        : `Casing violations (path → expected):\n${listPaths(
-            violations.map((v) => `${v.path} → ${v.expected}`)
-          )}`;
+        ? `Casing violation: ${formatViolation(violations[0])}`
+        : `Casing violations:\n${listPaths(violations.map(formatViolation))}`;
     throw createFailError(message);
   }
 }
