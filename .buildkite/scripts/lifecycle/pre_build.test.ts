@@ -137,6 +137,8 @@ const runPreBuildScript = (overrides: Record<string, string> = {}) => {
   }
 };
 
+const hasCall = (calls: string[], value: string) => calls.some((call) => call.includes(value));
+
 describe('lifecycle pre_build.sh', () => {
   it('succeeds and records expected metadata calls for PR builds', () => {
     const result = runPreBuildScript({
@@ -157,6 +159,59 @@ describe('lifecycle pre_build.sh', () => {
         expect.stringContaining('buildkite-agent meta-data set ingest:pr_labels ci:foo,ci:bar'),
       ])
     );
+  });
+
+  it('does not execute CI Stats network path in this test harness', () => {
+    const result = runPreBuildScript();
+
+    expect(result.status).toBe(0);
+    // We stub ts-node itself, so ci_stats_start.ts is not executed in tests.
+    expect(hasCall(result.calls, 'ts-node ')).toBe(true);
+    // If ci_stats_start.ts had run, it would set ci_stats_build_id via buildkite-agent meta-data.
+    expect(hasCall(result.calls, 'buildkite-agent meta-data set ci_stats_build_id')).toBe(false);
+  });
+
+  it('annotates when Kibana build reuse env is present', () => {
+    const reusableJobUrl = 'https://buildkite.com/example/reused-job';
+    const result = runPreBuildScript({
+      KIBANA_BUILD_ID: 'build-id-123',
+      KIBANA_REUSABLE_BUILD_JOB_URL: reusableJobUrl,
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.calls).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'buildkite-agent annotate --style default --context kibana-reusable-build'
+        ),
+      ])
+    );
+  });
+
+  it('does not set ingest metadata when base branch is empty', () => {
+    const result = runPreBuildScript({
+      BUILDKITE_PULL_REQUEST_BASE_BRANCH: '',
+      GITHUB_PR_DRAFT: 'true',
+      GITHUB_PR_LABELS: 'ci:foo',
+    });
+
+    expect(result.status).toBe(0);
+    expect(hasCall(result.calls, 'buildkite-agent meta-data set ingest:is_draft_pr')).toBe(false);
+    expect(hasCall(result.calls, 'buildkite-agent meta-data set ingest:pr_labels')).toBe(false);
+  });
+
+  it('does not set ingest:pr_labels when labels are empty', () => {
+    const result = runPreBuildScript({
+      BUILDKITE_PULL_REQUEST_BASE_BRANCH: 'main',
+      GITHUB_PR_DRAFT: 'false',
+      GITHUB_PR_LABELS: '',
+    });
+
+    expect(result.status).toBe(0);
+    expect(hasCall(result.calls, 'buildkite-agent meta-data set ingest:is_draft_pr false')).toBe(
+      true
+    );
+    expect(hasCall(result.calls, 'buildkite-agent meta-data set ingest:pr_labels')).toBe(false);
   });
 
   it('fails when buildkite metadata write fails', () => {
