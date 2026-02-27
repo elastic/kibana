@@ -79,6 +79,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
   const onJsonUpdate: OnJsonEditorUpdateHandler = useCallback((jsonUpdateData) => {
     setEditorContent(jsonUpdateData.data.raw);
     setIsValidJson(isValidXJson(jsonUpdateData.data.raw));
+    setError(undefined);
   }, []);
 
   const modalTitleId = useGeneratedHtmlId();
@@ -108,7 +109,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
             }
           }}
           cancelButtonText={i18nTexts.buttons.cancel}
-          confirmButtonDisabled={!isValidJson}
+          confirmButtonDisabled={!isValidJson || Boolean(error)}
           confirmButtonText={i18nTexts.buttons.confirm}
           maxWidth={600}
         >
@@ -141,7 +142,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
               label={i18nTexts.editor.label}
               value={editorContent}
               onUpdate={onJsonUpdate}
-              error={isValidJson ? null : i18nTexts.error.body}
+              error={!isValidJson || error ? i18nTexts.error.body : null}
               codeEditorProps={{
                 height: '300px',
                 languageId: 'xjson',

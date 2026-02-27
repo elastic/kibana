@@ -60,7 +60,31 @@ describe('Load from JSON ModalProvider', () => {
     expect(within(modal).getByTestId('errorCallOut')).toHaveTextContent(
       'Please ensure the JSON is a valid pipeline object.'
     );
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).toBeDisabled();
     expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('clears serialization errors on edit and re-enables submit', async () => {
+    fireEvent.click(screen.getByTestId('button'));
+
+    const modal = screen.getByTestId('loadJsonConfirmationModal');
+
+    fireEvent.change(within(modal).getByRole('textbox'), { target: { value: '{}' } });
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    expect(within(modal).getByTestId('errorCallOut')).toBeInTheDocument();
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).toBeDisabled();
+
+    const validPipeline = JSON.stringify({ processors: [] });
+    fireEvent.change(within(modal).getByRole('textbox'), { target: { value: validPipeline } });
+
+    expect(within(modal).queryByTestId('errorCallOut')).not.toBeInTheDocument();
+    expect(within(modal).getByTestId('confirmModalConfirmButton')).not.toBeDisabled();
+
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('loadJsonConfirmationModal')).not.toBeInTheDocument()
+    );
+    expect(onDone).toHaveBeenCalledTimes(1);
   });
 
   it('passes through a valid pipeline object', async () => {
@@ -116,10 +140,9 @@ describe('Load from JSON ModalProvider', () => {
     `);
   });
 
-  it('passes through a valid pipeline object with triple-quoted strings (xJSON)', () => {
-    const { find, exists } = testBed;
-    find('button').simulate('click');
-    expect(exists('loadJsonConfirmationModal'));
+  it('passes through a valid pipeline object with triple-quoted strings (xJSON)', async () => {
+    fireEvent.click(screen.getByTestId('button'));
+    const modal = screen.getByTestId('loadJsonConfirmationModal');
     const validPipelineWithTripleQuotes = `{
       "processors": [
         {
@@ -133,13 +156,13 @@ describe('Load from JSON ModalProvider', () => {
         }
       ]
     }`;
-    find('mockCodeEditor')
-      .getDOMNode()
-      .setAttribute('data-currentvalue', validPipelineWithTripleQuotes);
-    find('mockCodeEditor').simulate('change');
+    const codeEditor = within(modal).getByTestId('mockedCodeEditor');
+    fireEvent.change(codeEditor, { target: { value: validPipelineWithTripleQuotes } });
 
-    find('confirmModalConfirmButton').simulate('click');
-    expect(!exists('loadJsonConfirmationModal'));
+    fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('loadJsonConfirmationModal')).not.toBeInTheDocument()
+    );
     expect(onDone).toHaveBeenCalledTimes(1);
     expect(onDone.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
