@@ -45,6 +45,8 @@ export interface StreamsTestApiService {
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
   enableQueryStreams: () => Promise<void>;
   disableQueryStreams: () => Promise<void>;
+  createEsqlView: (viewName: string, query: string) => Promise<void>;
+  deleteEsqlView: (viewName: string) => Promise<void>;
   runEsql: (query: string) => Promise<{ columns: Array<{ name: string }>; values: unknown[][] }>;
   cleanupTestStreams: (prefix?: string) => Promise<void>;
 }
@@ -222,6 +224,29 @@ export function getStreamsTestApiService({
           path: `/internal/streams/${streamName}/lifecycle/_stats`,
         });
         return response.data as { phases: unknown };
+      });
+    },
+
+    async createEsqlView(viewName: string, query: string) {
+      await measurePerformanceAsync(log, 'streamsTestApi.createEsqlView', async () => {
+        await esClient.transport.request({
+          method: 'PUT',
+          path: `/_query/view/${viewName}`,
+          body: { query },
+        });
+      });
+    },
+
+    async deleteEsqlView(viewName: string) {
+      await measurePerformanceAsync(log, 'streamsTestApi.deleteEsqlView', async () => {
+        try {
+          await esClient.transport.request({
+            method: 'DELETE',
+            path: `/_query/view/${viewName}`,
+          });
+        } catch {
+          // Ignore if view doesn't exist
+        }
       });
     },
 

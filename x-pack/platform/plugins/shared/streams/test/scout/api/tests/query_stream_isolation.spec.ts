@@ -9,6 +9,9 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 
+const VIEW_PREFIX = '$.';
+const viewName = (streamName: string) => `${VIEW_PREFIX}${streamName}`;
+
 apiTest.describe(
   'Query stream isolation - child query streams excluded from parent views',
   { tag: [...tags.stateful.classic] },
@@ -28,20 +31,28 @@ apiTest.describe(
         eq: 'qs-isolation-test',
       });
 
+      // Wired streams will have views created automatically in the future.
+      // For now, create one manually so the parent reference validation passes.
+      const parentView = viewName(parentStream);
+      await apiServices.streamsTest.createEsqlView(parentView, `FROM ${parentStream}`);
+
       // Create query streams via kbnClient (superuser) because the PUT /_query/view
       // ES API requires cluster privileges not available to the streamsAdmin test role.
       await apiServices.streamsTest.createQueryStream(
         queryChildName,
-        `FROM ${parentStream} | STATS error_count = COUNT(*) BY \`log.level\``
+        `FROM ${parentView} | STATS error_count = COUNT(*) BY \`log.level\``
       );
 
       await apiServices.streamsTest.createQueryStream(
         nestedQueryChildName,
-        `FROM $.${queryChildName} | EVAL doubled = error_count * 2 | KEEP doubled, \`log.level\``
+        `FROM ${viewName(
+          queryChildName
+        )} | EVAL doubled = error_count * 2 | KEEP doubled, \`log.level\``
       );
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.streamsTest.deleteEsqlView(viewName(parentStream));
       await apiServices.streamsTest.cleanupTestStreams(parentStream);
       await apiServices.streamsTest.disableQueryStreams();
     });
@@ -108,7 +119,7 @@ apiTest.describe(
     });
 
     apiTest('query stream view exposes its own transformed columns', async ({ esClient }) => {
-      const result = await runEsql(esClient, `FROM $.${queryChildName} | LIMIT 0`);
+      const result = await runEsql(esClient, `FROM ${viewName(queryChildName)} | LIMIT 0`);
 
       const columnNames = result.columns.map((c) => c.name);
       expect(columnNames).toContain('error_count');
@@ -120,7 +131,7 @@ apiTest.describe(
     apiTest(
       'nested query stream exposes its own columns, not parent query stream columns',
       async ({ esClient }) => {
-        const result = await runEsql(esClient, `FROM $.${nestedQueryChildName} | LIMIT 0`);
+        const result = await runEsql(esClient, `FROM ${viewName(nestedQueryChildName)} | LIMIT 0`);
 
         const columnNames = result.columns.map((c) => c.name);
         expect(columnNames).toContain('doubled');
@@ -130,7 +141,7 @@ apiTest.describe(
     );
 
     apiTest('parent query stream schema is unaffected by nested child', async ({ esClient }) => {
-      const result = await runEsql(esClient, `FROM $.${queryChildName} | LIMIT 0`);
+      const result = await runEsql(esClient, `FROM ${viewName(queryChildName)} | LIMIT 0`);
 
       const columnNames = result.columns.map((c) => c.name);
       expect(columnNames).toContain('error_count');
@@ -155,7 +166,10 @@ apiTest.describe(
 
       // After deletion, querying the deleted view should throw
       await expect(
-        esClient.esql.query({ query: `FROM $.${nestedQueryChildName} | LIMIT 0`, format: 'json' })
+        esClient.esql.query({
+          query: `FROM ${viewName(nestedQueryChildName)} | LIMIT 0`,
+          format: 'json',
+        })
       ).rejects.toThrow(/Unknown index/i);
     });
   }
