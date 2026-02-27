@@ -8,12 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import {
+  downloadMultipleAs,
+  type ExportShare,
+  type RegisterShareIntegrationArgs,
+} from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public/types';
 import type { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {

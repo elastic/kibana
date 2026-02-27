@@ -4749,6 +4749,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-export-source@link:src/platform/packages/shared/as-code/export-source":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-filters-constants@link:src/platform/packages/shared/as-code/filters-constants":
   version "0.0.0"
   uid ""

@@ -53,7 +53,7 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { ExportShare, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -78,6 +78,7 @@ import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
+import { exportSourceDashboardShareIntegration } from './share/export_source_share_integration';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -177,6 +178,10 @@ export class DashboardPlugin
             return toStoredFilters(result.data.filters) ?? [];
           },
         })
+      );
+      share.registerShareIntegration<ExportShare>(
+        'dashboard',
+        exportSourceDashboardShareIntegration()
       );
     }
 
