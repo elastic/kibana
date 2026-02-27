@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -137,7 +137,7 @@ describe('migration v2', () => {
           const records = logFileContent
             .split('\n')
             .filter(Boolean)
-            .map((str) => JSON5.parse(str)) as LogRecord[];
+            .map((str) => parse(str)) as LogRecord[];
           expect(
             records.find(
               (rec) =>
