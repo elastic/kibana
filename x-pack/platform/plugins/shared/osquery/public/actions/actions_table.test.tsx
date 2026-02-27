@@ -93,7 +93,7 @@ describe('ActionsTable', () => {
     const items = [createMockSearchHit(), createMockSearchHit()];
     mockActions({ items });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(screen.getByTestId('liveQueryActionsTable')).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(items.length + 1);
@@ -102,7 +102,7 @@ describe('ActionsTable', () => {
   it('shows loading skeleton when isLoading is true', () => {
     mockActions({ isLoading: true });
 
-    const { container } = renderWithProviders(React.createElement(ActionsTable));
+    const { container } = renderWithProviders(<ActionsTable />);
 
     expect(container.querySelector('.euiSkeletonText')).toBeInTheDocument();
     expect(screen.queryByTestId('liveQueryActionsTable')).not.toBeInTheDocument();
@@ -111,7 +111,7 @@ describe('ActionsTable', () => {
   it('shows loading indicator on refetch', () => {
     mockActions({ items: [createMockSearchHit()], isFetching: true });
 
-    const { container } = renderWithProviders(React.createElement(ActionsTable));
+    const { container } = renderWithProviders(<ActionsTable />);
 
     expect(container.querySelector('.euiBasicTable-loading')).toBeInTheDocument();
   });
@@ -119,7 +119,7 @@ describe('ActionsTable', () => {
   it('renders basic columns only (no Source, no Results)', () => {
     mockActions({ items: [createMockSearchHit()] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(screen.getByText('Query')).toBeInTheDocument();
     expect(screen.getByText('Agents')).toBeInTheDocument();
@@ -141,7 +141,7 @@ describe('ActionsTable', () => {
     });
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(screen.getByText('3')).toBeInTheDocument();
   });
@@ -157,7 +157,7 @@ describe('ActionsTable', () => {
     });
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(screen.getByText('some_user')).toBeInTheDocument();
   });
@@ -166,7 +166,7 @@ describe('ActionsTable', () => {
     const hit = createMockSearchHit();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
   });
@@ -175,7 +175,7 @@ describe('ActionsTable', () => {
     const hit = createMockPackSearchHit();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(screen.getByText('My Pack')).toBeInTheDocument();
   });
@@ -185,7 +185,7 @@ describe('ActionsTable', () => {
     const actionId = (hit.fields as Record<string, string[]>).action_id[0];
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(mockUseRouterNavigate).toHaveBeenCalledWith(`live_queries/${actionId}`);
   });
@@ -194,7 +194,7 @@ describe('ActionsTable', () => {
     const hit = createMockSearchHit();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     const playButtons = screen.getAllByLabelText('Run query');
     playButtons[0].click();
@@ -214,7 +214,7 @@ describe('ActionsTable', () => {
     const hit = createMockSearchHit();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     const playButtons = screen.queryAllByLabelText('Run query');
     expect(playButtons).toHaveLength(0);
@@ -223,7 +223,7 @@ describe('ActionsTable', () => {
   it('no filter UI rendered', () => {
     mockActions({ items: [createMockSearchHit()] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(screen.queryByTestId('history-search-input')).not.toBeInTheDocument();
   });
@@ -231,7 +231,7 @@ describe('ActionsTable', () => {
   it('passes hardcoded kuery to useAllLiveQueries', () => {
     mockActions({ items: [] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     expect(useAllLiveQueriesMock).toHaveBeenCalledWith(
       expect.objectContaining({ kuery: 'user_id: *' })
@@ -241,7 +241,7 @@ describe('ActionsTable', () => {
   it('does not pass withResultCounts to useAllLiveQueries', () => {
     mockActions({ items: [] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     const callArgs = useAllLiveQueriesMock.mock.calls[0][0];
     expect(callArgs).not.toHaveProperty('withResultCounts');
@@ -252,7 +252,7 @@ describe('ActionsTable', () => {
     mockPacks([{ id: 'pack-1' }]);
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     const playButtons = screen.getAllByLabelText('Run query');
     playButtons[0].click();
@@ -278,7 +278,7 @@ describe('ActionsTable', () => {
     });
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(ActionsTable));
+    renderWithProviders(<ActionsTable />);
 
     const truncated = `${longQuery.substring(0, 90)}...`;
     expect(screen.getByText(truncated)).toBeInTheDocument();

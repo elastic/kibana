@@ -115,7 +115,7 @@ describe('UnifiedHistoryTable', () => {
     const items = [createMockSearchHitWithResultCounts(), createMockSearchHitWithResultCounts()];
     mockActions({ items });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByTestId('liveQueryActionsTable')).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(items.length + 1);
@@ -124,7 +124,7 @@ describe('UnifiedHistoryTable', () => {
   it('shows loading skeleton when isLoading is true', () => {
     mockActions({ isLoading: true });
 
-    const { container } = renderWithProviders(React.createElement(UnifiedHistoryTable));
+    const { container } = renderWithProviders(<UnifiedHistoryTable />);
 
     expect(container.querySelector('.euiSkeletonText')).toBeInTheDocument();
     expect(screen.queryByTestId('liveQueryActionsTable')).not.toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('UnifiedHistoryTable', () => {
   it('renders all history columns', () => {
     mockActions({ items: [createMockSearchHitWithResultCounts()] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('Query')).toBeInTheDocument();
     expect(screen.getByText('Source')).toBeInTheDocument();
@@ -147,7 +147,7 @@ describe('UnifiedHistoryTable', () => {
   it('renders HistoryFilters', () => {
     mockActions({ items: [] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByTestId('history-search-input')).toBeInTheDocument();
   });
@@ -155,7 +155,7 @@ describe('UnifiedHistoryTable', () => {
   it('fetches data with withResultCounts', () => {
     mockActions({ items: [] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(useAllLiveQueriesMock).toHaveBeenCalledWith(
       expect.objectContaining({ withResultCounts: true })
@@ -166,7 +166,7 @@ describe('UnifiedHistoryTable', () => {
     const items = [createMockSearchHitWithResultCounts()];
     mockActions({ items });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(useBulkGetUserProfilesMock).toHaveBeenCalledWith(items);
   });
@@ -184,7 +184,7 @@ describe('UnifiedHistoryTable', () => {
     });
     mockActions({ items: [hit] });
 
-    const { container } = renderWithProviders(React.createElement(UnifiedHistoryTable));
+    const { container } = renderWithProviders(<UnifiedHistoryTable />);
 
     const agentsCellContent = container.querySelector(
       '[data-test-subj="tableHeaderCell_agents_3"]'
@@ -210,7 +210,7 @@ describe('UnifiedHistoryTable', () => {
     });
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('3')).toBeInTheDocument();
   });
@@ -219,7 +219,7 @@ describe('UnifiedHistoryTable', () => {
     const hit = createMockSearchHitWithResultCounts();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('42')).toBeInTheDocument();
   });
@@ -228,7 +228,7 @@ describe('UnifiedHistoryTable', () => {
     const hit = createMockPackSearchHitWithResultCounts();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText(/3 of 5/)).toBeInTheDocument();
   });
@@ -237,7 +237,7 @@ describe('UnifiedHistoryTable', () => {
     const hit = createMockSearchHit();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('\u2014')).toBeInTheDocument();
   });
@@ -253,7 +253,7 @@ describe('UnifiedHistoryTable', () => {
     });
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('Live')).toBeInTheDocument();
   });
@@ -269,7 +269,7 @@ describe('UnifiedHistoryTable', () => {
     });
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('Rule')).toBeInTheDocument();
   });
@@ -279,7 +279,7 @@ describe('UnifiedHistoryTable', () => {
     const actionId = (hit.fields as Record<string, string[]>).action_id[0];
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(mockUseRouterNavigate).toHaveBeenCalledWith(`history/${actionId}`);
   });
@@ -288,7 +288,7 @@ describe('UnifiedHistoryTable', () => {
     const hit = createMockSearchHitWithResultCounts();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     const playButtons = screen.getAllByLabelText('Run query');
     playButtons[0].click();
@@ -308,7 +308,7 @@ describe('UnifiedHistoryTable', () => {
     const hit = createMockSearchHitWithResultCounts();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.queryAllByLabelText('Run query')).toHaveLength(0);
   });
@@ -316,7 +316,7 @@ describe('UnifiedHistoryTable', () => {
   it('search debounces at 400ms', async () => {
     mockActions({ items: [] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     const searchInput = screen.getByTestId('history-search-input');
     fireEvent.change(searchInput, { target: { value: 'test-search' } });
@@ -339,7 +339,7 @@ describe('UnifiedHistoryTable', () => {
   it('kuery uses buildHistoryKuery', () => {
     mockActions({ items: [] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(buildHistoryKuerySpy).toHaveBeenCalledWith({
       searchTerm: '',
@@ -351,7 +351,7 @@ describe('UnifiedHistoryTable', () => {
     const hit = createMockSearchHitWithResultCounts();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
   });
@@ -360,7 +360,7 @@ describe('UnifiedHistoryTable', () => {
     const hit = createMockPackSearchHitWithResultCounts();
     mockActions({ items: [hit] });
 
-    renderWithProviders(React.createElement(UnifiedHistoryTable));
+    renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('My Pack')).toBeInTheDocument();
   });
@@ -368,7 +368,7 @@ describe('UnifiedHistoryTable', () => {
   it('shows loading indicator on refetch', () => {
     mockActions({ items: [createMockSearchHitWithResultCounts()], isFetching: true });
 
-    const { container } = renderWithProviders(React.createElement(UnifiedHistoryTable));
+    const { container } = renderWithProviders(<UnifiedHistoryTable />);
 
     expect(container.querySelector('.euiBasicTable-loading')).toBeInTheDocument();
   });

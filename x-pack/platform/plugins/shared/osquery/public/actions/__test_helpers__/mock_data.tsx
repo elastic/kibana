@@ -40,21 +40,28 @@ const createTestQueryClient = () =>
 
 export const renderWithProviders = (element: React.ReactElement) =>
   render(
-    React.createElement(
-      EuiProvider,
-      null,
-      React.createElement(
-        IntlProvider,
-        { locale: 'en' },
-        React.createElement(QueryClientProvider, { client: createTestQueryClient() }, element)
-      )
-    )
+    <EuiProvider>
+      <IntlProvider locale="en">
+        <QueryClientProvider client={createTestQueryClient()}>{element}</QueryClientProvider>
+      </IntlProvider>
+    </EuiProvider>
   );
 
-let counter = 0;
+const createMockCounter = () => {
+  let value = 0;
+
+  return {
+    next: () => ++value,
+    reset: () => {
+      value = 0;
+    },
+  };
+};
+
+const mockCounter = createMockCounter();
 
 export const createMockSearchHit = (overrides?: Partial<SearchHit>): SearchHit => {
-  counter += 1;
+  const counter = mockCounter.next();
   const actionId = `action-${counter}`;
   const { _source, fields, ...rest } = overrides ?? {};
 
@@ -82,7 +89,7 @@ export const createMockSearchHit = (overrides?: Partial<SearchHit>): SearchHit =
 };
 
 export const createMockPackSearchHit = (overrides?: Partial<SearchHit>): SearchHit => {
-  counter += 1;
+  const counter = mockCounter.next();
   const actionId = `pack-action-${counter}`;
   const { _source, fields, ...rest } = overrides ?? {};
 
@@ -147,5 +154,5 @@ export const createMockPackSearchHitWithResultCounts = (
   });
 
 export const resetMockCounter = () => {
-  counter = 0;
+  mockCounter.reset();
 };
