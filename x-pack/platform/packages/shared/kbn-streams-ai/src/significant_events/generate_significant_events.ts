@@ -144,6 +144,7 @@ export async function generateSignificantEvents({
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
               try {
+                // The query search validates syntax and field mapping in Elasticsearch.
                 await esClient.esql.query({
                   query: `${query.esql}\n| LIMIT 0`,
                   format: 'json',
