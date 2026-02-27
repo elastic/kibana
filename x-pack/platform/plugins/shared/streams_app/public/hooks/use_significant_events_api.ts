@@ -31,8 +31,7 @@ interface SignificantEventsApi {
   abort: () => void;
   getGenerationTask: () => Promise<SignificantEventsQueriesGenerationTaskResult>;
   scheduleGenerationTask: (
-    connectorId: string,
-    sampleDocsSize?: number
+    connectorId: string
   ) => Promise<SignificantEventsQueriesGenerationTaskResult>;
   cancelGenerationTask: () => Promise<SignificantEventsQueriesGenerationTaskResult>;
   acknowledgeGenerationTask: () => Promise<SignificantEventsQueriesGenerationTaskResult>;
@@ -104,7 +103,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
         }
       );
     },
-    scheduleGenerationTask: async (connectorId: string, sampleDocsSize?: number) => {
+    scheduleGenerationTask: async (connectorId: string) => {
       const { from, to } = getLast24HoursTimeRange();
       return streamsRepositoryClient.fetch(
         'POST /internal/streams/{name}/significant_events/_task',
@@ -117,7 +116,6 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
               connectorId,
               from,
               to,
-              sampleDocsSize,
             },
           },
         }

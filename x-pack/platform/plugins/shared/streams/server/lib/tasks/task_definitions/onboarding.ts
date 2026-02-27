@@ -275,7 +275,6 @@ export async function saveQueries(
         id: v4(),
         esql: query.esql,
         title: query.title,
-        feature: query.feature,
         severity_score: query.severity_score,
         evidence: query.evidence,
       },

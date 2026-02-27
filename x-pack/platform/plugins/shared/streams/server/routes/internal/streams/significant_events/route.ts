@@ -6,7 +6,6 @@
  */
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
-  systemSchema,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
@@ -79,13 +78,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      sampleDocsSize: z
-        .number()
-        .optional()
-        .describe(
-          'Number of sample documents to use for generation from the current data of stream'
-        ),
-      systems: z.array(systemSchema).optional().describe('Optional array of systems'),
     }),
   }),
   options: {
@@ -134,8 +126,6 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
-                  systems: body.systems,
-                  sampleDocsSize: body.sampleDocsSize,
                   streamName: name,
                 };
               })(),

@@ -669,8 +669,7 @@ export class QueryClient {
     const idSet = new Set(queryIds);
     const toPromote = unbacked
       .filter((link) => idSet.has(link.query.id))
-      .map((link) => 
-           ({ query: link.query, stream: streamName }));
+      .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
 
     if (toPromote.length === 0) {
       return { promoted: 0 };

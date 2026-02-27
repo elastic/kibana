@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { Feature, Streams, System } from '@kbn/streams-schema';
+import type { Feature, Streams } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
-import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
-import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { dateRangeQuery } from '@kbn/es-query';
 import { Parser, Walker } from '@kbn/esql-language';
@@ -67,19 +65,16 @@ export const getUnmappedFields = (fieldNames: string[], mappedFields: Set<string
  */
 export async function generateSignificantEvents({
   stream,
-  system,
   esClient,
   start,
   end,
   getFeatures,
   inferenceClient,
   signal,
-  sampleDocsSize,
   systemPrompt,
   logger,
 }: {
   stream: Streams.all.Definition;
-  system?: System;
   esClient: ElasticsearchClient;
   start: number;
   end: number;
@@ -91,7 +86,6 @@ export async function generateSignificantEvents({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-  sampleDocsSize?: number;
   systemPrompt: string;
 }): Promise<{
   queries: Query[];
@@ -102,21 +96,6 @@ export async function generateSignificantEvents({
 
   const toolUsage = createDefaultSignificantEventsToolUsage();
   let formattedAnalysis: FormattedDocumentAnalysis | undefined;
-
-  if (system?.filter) {
-    logger.trace('Describing dataset for significant event generation (with filter)');
-    const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
-      describeDataset({
-        sampleDocsSize,
-        start,
-        end,
-        esClient,
-        index: stream.name,
-        filter: conditionToQueryDsl(system.filter),
-      })
-    );
-    formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
-  }
 
   const fieldCapsResponse = await esClient
     .fieldCaps({
@@ -141,8 +120,8 @@ export async function generateSignificantEvents({
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
-        name: system?.name || stream.name,
-        description: system?.description || stream.description,
+        name: stream.name,
+        description: stream.description,
         dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),

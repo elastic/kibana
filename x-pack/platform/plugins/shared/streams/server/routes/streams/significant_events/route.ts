@@ -147,6 +147,9 @@ const readStreamSignificantEventsRoute = createServerRoute({
   },
 });
 
+/**
+ * This should be @deprecated and removed since it is no longer used.
+ */
 const generateSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
   params: z.object({
@@ -223,11 +226,9 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          system: params.body?.system,
           connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
-          sampleDocsSize: params.query.sampleDocsSize,
           systemPrompt: significantEventsPromptOverride,
         },
         {
@@ -242,7 +243,7 @@ const generateSignificantEventsRoute = createServerRoute({
       map(({ queries, tokensUsed, toolUsage }) => {
         telemetry.trackSignificantEventsQueriesGenerated({
           count: queries.length,
-          systems_count: params.body?.system ? 1 : 0,
+          systems_count: 0,
           stream_name: definition.name,
           stream_type: getStreamTypeFromDefinition(definition),
           input_tokens_used: tokensUsed.prompt,
