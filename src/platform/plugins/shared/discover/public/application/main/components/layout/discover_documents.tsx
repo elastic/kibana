@@ -170,8 +170,7 @@ function DiscoverDocumentsComponent({
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading =
     useCurrentTabSelector((state) => state.isDataViewLoading) && !isEsqlMode;
-  const isEmptyDataResult =
-    isEsqlMode || !documentState.result || documentState.result.length === 0;
+  const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({

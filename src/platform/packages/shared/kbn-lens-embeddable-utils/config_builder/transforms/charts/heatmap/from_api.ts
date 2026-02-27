@@ -82,6 +82,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
         legendSize: layer.legend?.size as LegendSize,
+        shouldTruncate: Boolean(layer.legend?.truncate_after_lines),
       }),
     },
     ...(basePalette && {
