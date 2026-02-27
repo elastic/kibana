@@ -31,7 +31,7 @@ import { getVal } from './utils';
  */
 export const getHash = (feature: string): number => {
   // murmurhash v3 returns an unsigned 32-bit integer
-  return murmurhash.v3(feature) >>> 0;
+  return murmurhash.v3(feature);
 };
 
 // ============================================================
@@ -131,36 +131,18 @@ export const getFieldsFromAlert = (data: unknown, parentKey?: string): Array<[st
     for (const [key, value] of Object.entries(record)) {
       const newKey = parentKey ? `${parentKey}.${key}` : key;
 
-      // Skip non-ECS capitalized keys (e.g., "Events", "Responses")
+      const isUpperCase = key[0] === key[0].toUpperCase() && key[0] !== key[0].toLowerCase();
       if (
-        key[0] === key[0].toUpperCase() &&
-        key[0] !== key[0].toLowerCase() &&
-        !NON_ECS_TO_KEEP.has(key)
+        !(isUpperCase && !NON_ECS_TO_KEEP.has(key)) &&
+        !(!parentKey && TOP_LEVEL_SKIP_FIELDS.has(key)) &&
+        !FULL_FIELDS_TO_SKIP.has(newKey) &&
+        !ENDSWITH_FIELDS_TO_SKIP.some((suffix) => newKey.endsWith(suffix))
       ) {
-        continue;
-      }
-
-      // Skip top-level noisy fields
-      if (!parentKey && TOP_LEVEL_SKIP_FIELDS.has(key)) {
-        continue;
-      }
-
-      // Skip specific full field names
-      if (FULL_FIELDS_TO_SKIP.has(newKey)) {
-        continue;
-      }
-
-      // Skip fields ending with certain suffixes
-      if (ENDSWITH_FIELDS_TO_SKIP.some((suffix) => newKey.endsWith(suffix))) {
-        continue;
-      }
-
-      if (value != null && typeof value === 'object' && !Array.isArray(value)) {
-        // Recurse into nested objects
-        items.push(...getFieldsFromAlert(value, newKey));
-      } else {
-        // Leaf value
-        items.push([newKey, value]);
+        if (value != null && typeof value === 'object' && !Array.isArray(value)) {
+          items.push(...getFieldsFromAlert(value, newKey));
+        } else {
+          items.push([newKey, value]);
+        }
       }
     }
   } else {
@@ -209,16 +191,14 @@ export const getGenericAlertFeatureVector = (alert: AlertDocument, weighted = fa
 
     const kvPairs = getFieldsFromAlert(alert);
     for (const [k, v] of kvPairs) {
-      if ((TRIAGE_FIELDS as readonly string[]).includes(k)) {
-        continue;
-      }
-      const fieldVector = vectorFromVal(v, fieldSize);
-      const index = getHash(k) % unknownVectorCount;
+      if (!(TRIAGE_FIELDS as readonly string[]).includes(k)) {
+        const fieldVector = vectorFromVal(v, fieldSize);
+        const index = getHash(k) % unknownVectorCount;
 
-      // Add this field's vector into the correct position
-      const start = index * fieldSize + knownFieldCount * fieldSizeKnown;
-      for (let i = 0; i < fieldSize; i++) {
-        featureVector[start + i] += fieldVector[i];
+        const start = index * fieldSize + knownFieldCount * fieldSizeKnown;
+        for (let i = 0; i < fieldSize; i++) {
+          featureVector[start + i] += fieldVector[i];
+        }
       }
     }
   }

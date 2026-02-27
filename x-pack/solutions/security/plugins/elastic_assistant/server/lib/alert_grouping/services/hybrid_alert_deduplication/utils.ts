@@ -95,17 +95,17 @@ export const getEntityStats = (alerts: AlertDocument[]): EntityStats => {
 
     for (const entityField of ENTITY_FIELDS) {
       const entityVal = getVal(alert, entityField);
-      if (entityVal == null) continue;
-
-      const entityStr = String(entityVal);
-      if ((LOW_QUALITY_ENTITIES as readonly string[]).includes(entityStr)) continue;
-
-      if (!(entityField in entities)) {
-        entities[entityField] = [];
-      }
-      const fieldValues = entities[entityField] as string[];
-      if (!fieldValues.includes(entityStr)) {
-        fieldValues.push(entityStr);
+      if (entityVal != null) {
+        const entityStr = String(entityVal);
+        if (!(LOW_QUALITY_ENTITIES as readonly string[]).includes(entityStr)) {
+          if (!(entityField in entities)) {
+            entities[entityField] = [];
+          }
+          const fieldValues = entities[entityField] as string[];
+          if (!fieldValues.includes(entityStr)) {
+            fieldValues.push(entityStr);
+          }
+        }
       }
     }
   }
@@ -122,20 +122,24 @@ export const updateEntityStats = (baseAlert: EnrichedAlert, addedAlert: Enriched
     addedAlert.entities = getEntityStats([addedAlert]);
   }
 
-  const baseEntities = baseAlert.entities!;
+  if (!baseAlert.entities) {
+    baseAlert.entities = getEntityStats([baseAlert]);
+  }
+
+  const baseEntities = baseAlert.entities;
   const addedEntities = addedAlert.entities;
 
   for (const entity of Object.keys(baseEntities)) {
-    if (!(entity in addedEntities)) continue;
-
-    if (entity === 'total') {
-      (baseEntities.total as number) += addedEntities.total as number;
-    } else {
-      const baseValues = baseEntities[entity] as string[];
-      const addedValues = addedEntities[entity] as string[];
-      for (const e of addedValues) {
-        if (!baseValues.includes(e)) {
-          baseValues.push(e);
+    if (entity in addedEntities) {
+      if (entity === 'total') {
+        (baseEntities.total as number) += addedEntities.total as number;
+      } else {
+        const baseValues = baseEntities[entity] as string[];
+        const addedValues = addedEntities[entity] as string[];
+        for (const e of addedValues) {
+          if (!baseValues.includes(e)) {
+            baseValues.push(e);
+          }
         }
       }
     }
@@ -157,9 +161,10 @@ export const displayAlert = (alert: EnrichedAlert, commonFields?: string[]): str
   if (alert.entities) {
     let entityStr = '';
     for (const [entity, values] of Object.entries(alert.entities)) {
-      if (entity === 'total') continue;
-      if (Array.isArray(values)) {
-        entityStr += `${entity}: ${values.length} `;
+      if (entity !== 'total') {
+        if (Array.isArray(values)) {
+          entityStr += `${entity}: ${values.length} `;
+        }
       }
     }
     output += `Rule: ${ruleName}, Total: ${alert.entities.total}, ${entityStr}\n`;

@@ -192,7 +192,7 @@ export const registerCaseObservableExtractionRoute = (
           });
 
           const alerts = alertsResponse.hits.hits.map((hit) => ({
-            _id: hit._id!,
+            _id: hit._id ?? '',
             _source: hit._source as Record<string, unknown>,
           }));
 

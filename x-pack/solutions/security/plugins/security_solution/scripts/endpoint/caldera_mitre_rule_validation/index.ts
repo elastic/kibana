@@ -21,7 +21,7 @@ import { assertGcloudAvailable, gcloudSsh } from '../gcp_fleet_vm/gcloud';
 import {
   tactics as mitreTactics,
   techniques as mitreTechniques,
-} from '../../../public/detections/mitre/mitre_tactics_techniques';
+} from '../../../common/detection_engine/mitre/mitre_tactics_techniques';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../common/constants';
 import { PERFORM_RULE_INSTALLATION_URL } from '../../../common/api/detection_engine/prebuilt_rules';
 import { addOsqueryIntegrationToAgentPolicy } from '../osquery_host/services/add_osquery_integration';

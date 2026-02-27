@@ -97,8 +97,8 @@ export class EntityExtractionService {
 
           if (entityMap.has(entityKey)) {
             // Update existing entity
-            const entity = entityMap.get(entityKey)!;
-            if (!entity.alertIds.includes(alertId)) {
+            const entity = entityMap.get(entityKey);
+            if (entity && !entity.alertIds.includes(alertId)) {
               entity.alertIds.push(alertId);
               entity.occurrenceCount++;
             }
@@ -164,23 +164,21 @@ export class EntityExtractionService {
     for (const sourceField of config.sourceFields) {
       const rawValue = get(sourceField, alertSource);
 
-      if (rawValue == null) {
-        continue;
-      }
+      if (rawValue != null) {
+        // Handle array values
+        const values = Array.isArray(rawValue) ? rawValue : [rawValue];
 
-      // Handle array values
-      const values = Array.isArray(rawValue) ? rawValue : [rawValue];
-
-      for (const val of values) {
-        const normalized = this.normalizeAndValidateValue(val, config.type);
-        if (normalized) {
-          // Check for duplicates within this extraction
-          if (!results.some((r) => r.normalizedValue === normalized)) {
-            results.push({
-              value: String(val).trim(),
-              normalizedValue: normalized,
-              sourceField,
-            });
+        for (const val of values) {
+          const normalized = this.normalizeAndValidateValue(val, config.type);
+          if (normalized) {
+            // Check for duplicates within this extraction
+            if (!results.some((r) => r.normalizedValue === normalized)) {
+              results.push({
+                value: String(val).trim(),
+                normalizedValue: normalized,
+                sourceField,
+              });
+            }
           }
         }
       }
@@ -526,26 +524,24 @@ export class EntityExtractionService {
       const parentExe = get('process.parent.executable', source) as string | undefined;
       const processArgs = get('process.args', source) as string[] | undefined;
 
-      if (!processName && !processExe) {
-        continue;
-      }
+      if (processName || processExe) {
+        const key = `${processExe ?? processName}:${parentExe ?? parentName ?? 'none'}`;
 
-      const key = `${processExe ?? processName}:${parentExe ?? parentName ?? 'none'}`;
-
-      if (processMap.has(key)) {
-        const existing = processMap.get(key)!;
-        if (!existing.alertIds.includes(alert._id)) {
-          existing.alertIds.push(alert._id);
+        if (processMap.has(key)) {
+          const existing = processMap.get(key);
+          if (existing && !existing.alertIds.includes(alert._id)) {
+            existing.alertIds.push(alert._id);
+          }
+        } else {
+          processMap.set(key, {
+            name: processName ?? '',
+            executable: processExe ?? '',
+            parentName,
+            parentExecutable: parentExe,
+            args: processArgs,
+            alertIds: [alert._id],
+          });
         }
-      } else {
-        processMap.set(key, {
-          name: processName ?? '',
-          executable: processExe ?? '',
-          parentName,
-          parentExecutable: parentExe,
-          args: processArgs,
-          alertIds: [alert._id],
-        });
       }
     }
 

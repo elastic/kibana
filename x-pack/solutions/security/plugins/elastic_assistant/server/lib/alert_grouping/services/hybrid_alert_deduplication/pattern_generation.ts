@@ -56,7 +56,6 @@ export const exceptionlistMatch = (alert: AlertDocument, exception: ExceptionPat
     }
 
     let patternVal = pattern;
-    let vStr: string;
 
     // Handle arrays (take first element)
     if (Array.isArray(patternVal)) {
@@ -66,7 +65,7 @@ export const exceptionlistMatch = (alert: AlertDocument, exception: ExceptionPat
       v = v[0];
     }
 
-    vStr = String(v).toLowerCase();
+    const vStr = String(v).toLowerCase();
     const patternStr = String(patternVal).toLowerCase();
 
     if (!wildmatch(vStr, patternStr)) {
@@ -131,24 +130,19 @@ export const longestCommonSubstring = (strings: string[], minSubstr: number): st
   // Try positions from left to right FIRST, then by decreasing length
   for (let i = 0; i < shortestString.length; i++) {
     for (let length = shortestString.length - i; length >= minSubstr; length--) {
-      if (i + length > shortestString.length) {
-        continue;
-      }
+      if (i + length <= shortestString.length) {
+        const substring = shortestString.slice(i, i + length); // Original case
+        const substringLower = shortestStringLower.slice(i, i + length); // For comparison
 
-      const substring = shortestString.slice(i, i + length); // Original case
-      const substringLower = shortestStringLower.slice(i, i + length); // For comparison
+        if (!substring.startsWith('\x00') && !substring.endsWith('\x00')) {
+          if (substring.length < Math.min(minSubstr, shortestLen)) {
+            break; // No point checking shorter lengths at this position
+          }
 
-      // Skip nulls
-      if (substring.startsWith('\x00') || substring.endsWith('\x00')) {
-        continue;
-      }
-
-      if (substring.length < Math.min(minSubstr, shortestLen)) {
-        break; // No point checking shorter lengths at this position
-      }
-
-      if (stringsLower.every((s) => s.includes(substringLower))) {
-        return substring;
+          if (stringsLower.every((s) => s.includes(substringLower))) {
+            return substring;
+          }
+        }
       }
     }
   }
@@ -190,9 +184,10 @@ export const generateMatchPattern = (
   const skipFields: string[] = [];
   for (const alert of alerts) {
     for (const f of TRIAGE_FIELDS) {
-      if (skipFields.includes(f)) continue;
-      const v = getVal(alert, f);
-      if (v == null) skipFields.push(f);
+      if (!skipFields.includes(f)) {
+        const v = getVal(alert, f);
+        if (v == null) skipFields.push(f);
+      }
     }
   }
   for (const f of skipFields) {
@@ -238,22 +233,20 @@ export const generateMatchPattern = (
       pattern = pattern.replace(/\*\*/g, '*');
     }
 
-    if (pattern === '*') continue;
+    if (pattern !== '*') {
+      // Prune start/end wildcards if the pattern still matches all alerts
+      if (pattern.startsWith('*') && exceptionQaAlerts(alerts, f, pattern.slice(1))) {
+        pattern = pattern.slice(1);
+      }
+      if (pattern.endsWith('*') && exceptionQaAlerts(alerts, f, pattern.slice(0, -1))) {
+        pattern = pattern.slice(0, -1);
+      }
 
-    // Prune start/end wildcards if the pattern still matches all alerts
-    if (pattern.startsWith('*') && exceptionQaAlerts(alerts, f, pattern.slice(1))) {
-      pattern = pattern.slice(1);
+      // Final QA: verify the pattern matches all alerts
+      if (exceptionQaAlerts(alerts, f, pattern)) {
+        exception.push([f, pattern]);
+      }
     }
-    if (pattern.endsWith('*') && exceptionQaAlerts(alerts, f, pattern.slice(0, -1))) {
-      pattern = pattern.slice(0, -1);
-    }
-
-    // Final QA: verify the pattern matches all alerts
-    if (!exceptionQaAlerts(alerts, f, pattern)) {
-      continue;
-    }
-
-    exception.push([f, pattern]);
   }
 
   return exception.length > 0 ? exception : undefined;

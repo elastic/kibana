@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 
 import { deduplicateAlertsStepCommonDefinition } from '../../../../common/workflow_steps';
@@ -137,7 +138,7 @@ export const getDeduplicateAlertsStepDefinition = (
             lowConfidenceThreshold: context.input.lowConfidenceThreshold,
             rankCutoff: context.input.rankCutoff,
           },
-          logger: context.logger as any,
+          logger: context.logger as Logger,
           invokeLLM,
         });
 
@@ -228,13 +229,12 @@ const deduplicateByEventId = (alerts: AlertDocument[]): AlertDocument[] => {
 
   for (const alert of alerts) {
     const eventId = getVal(alert, UNIQUE_FIELD) as string | undefined;
-    if (eventId && seen.has(eventId)) {
-      continue;
+    if (!eventId || !seen.has(eventId)) {
+      if (eventId) {
+        seen.add(eventId);
+      }
+      unique.push(alert);
     }
-    if (eventId) {
-      seen.add(eventId);
-    }
-    unique.push(alert);
   }
 
   return unique;

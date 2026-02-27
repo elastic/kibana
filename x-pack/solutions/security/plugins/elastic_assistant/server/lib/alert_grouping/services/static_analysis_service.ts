@@ -277,30 +277,32 @@ export class StaticAnalysisService {
     const techniqueSet = new Set(techniques);
 
     for (const rule of CLASSIFICATION_RULES) {
-      if (!rule.requiredTactics) continue;
+      if (rule.requiredTactics) {
+        // Count how many required tactics are present
+        const matchingTactics = rule.requiredTactics.filter((t) => tacticSet.has(t));
+        if (matchingTactics.length >= rule.minTacticMatches) {
+          // Check signal techniques for stronger confidence
+          const matchingTechniques = (rule.signalTechniques ?? []).filter((t) =>
+            techniqueSet.has(t)
+          );
 
-      // Count how many required tactics are present
-      const matchingTactics = rule.requiredTactics.filter((t) => tacticSet.has(t));
-      if (matchingTactics.length < rule.minTacticMatches) continue;
+          // If we have tactic match, classify
+          const orderedTactics = this.orderTactics(tactics);
+          const description = rule.descriptionTemplate
+            .replace('{host}', hostName)
+            .replace('{alertCount}', String(alertIds.length))
+            .replace('{tactics}', orderedTactics.join(' → '));
 
-      // Check signal techniques for stronger confidence
-      const matchingTechniques = (rule.signalTechniques ?? []).filter((t) => techniqueSet.has(t));
+          this.logger.debug(
+            `Cluster ${cluster.id} classified as "${rule.label}" ` +
+              `(tactics: ${matchingTactics.join(', ')}, techniques: ${
+                matchingTechniques.length
+              } signal matches)`
+          );
 
-      // If we have tactic match, classify
-      const orderedTactics = this.orderTactics(tactics);
-      const description = rule.descriptionTemplate
-        .replace('{host}', hostName)
-        .replace('{alertCount}', String(alertIds.length))
-        .replace('{tactics}', orderedTactics.join(' → '));
-
-      this.logger.debug(
-        `Cluster ${cluster.id} classified as "${rule.label}" ` +
-          `(tactics: ${matchingTactics.join(', ')}, techniques: ${
-            matchingTechniques.length
-          } signal matches)`
-      );
-
-      return { classification: rule.label, description };
+          return { classification: rule.label, description };
+        }
+      }
     }
 
     // Fallback: use the dominant tactic

@@ -702,42 +702,43 @@ export const cleanupAndAddFleetServerHostSettings = async (
     for (const fleetServerEntry of existingFleetServerHostList.items) {
       if (fleetServerEntry.host_urls.includes(fleetServerUrl)) {
         hasCorrectUrl = true;
-        continue;
-      }
+      } else {
+        const hasInvalidUrl = fleetServerEntry.host_urls.some((url) => {
+          try {
+            const urlObj = new URL(url);
+            const hostname = urlObj.hostname;
+            return (
+              hostname === 'localhost' ||
+              hostname === '127.0.0.1' ||
+              (isPrivateIpv4(hostname) && hostname !== localhostRealIp)
+            );
+          } catch {
+            return false;
+          }
+        });
 
-      const hasInvalidUrl = fleetServerEntry.host_urls.some((url) => {
-        try {
-          const urlObj = new URL(url);
-          const hostname = urlObj.hostname;
-          return (
-            hostname === 'localhost' ||
-            hostname === '127.0.0.1' ||
-            (isPrivateIpv4(hostname) && hostname !== localhostRealIp)
+        if (hasInvalidUrl && !fleetServerEntry.is_preconfigured) {
+          log.info(
+            `Removing invalid Fleet Server host entry: ${fleetServerEntry.name} (${fleetServerEntry.id})`
           );
-        } catch {
-          return false;
-        }
-      });
-
-      if (hasInvalidUrl && !fleetServerEntry.is_preconfigured) {
-        log.info(
-          `Removing invalid Fleet Server host entry: ${fleetServerEntry.name} (${fleetServerEntry.id})`
-        );
-        try {
-          await kbnClient
-            .request({
-              method: 'DELETE',
-              path: fleetServerHostsRoutesService.getDeletePath(fleetServerEntry.id),
-              headers: {
-                'elastic-api-version': API_VERSIONS.public.v1,
-              },
-            })
-            .catch(catchAxiosErrorFormatAndThrow);
-          log.info(`Successfully removed invalid Fleet Server host entry: ${fleetServerEntry.id}`);
-        } catch (error) {
-          log.warning(
-            `Failed to remove invalid Fleet Server host entry ${fleetServerEntry.id}: ${error}`
-          );
+          try {
+            await kbnClient
+              .request({
+                method: 'DELETE',
+                path: fleetServerHostsRoutesService.getDeletePath(fleetServerEntry.id),
+                headers: {
+                  'elastic-api-version': API_VERSIONS.public.v1,
+                },
+              })
+              .catch(catchAxiosErrorFormatAndThrow);
+            log.info(
+              `Successfully removed invalid Fleet Server host entry: ${fleetServerEntry.id}`
+            );
+          } catch (error) {
+            log.warning(
+              `Failed to remove invalid Fleet Server host entry ${fleetServerEntry.id}: ${error}`
+            );
+          }
         }
       }
     }

@@ -51,20 +51,20 @@ export const getLocalhostRealIp = (): string => {
   const preferredNames = new Set(['en0', 'en1', 'en2', 'eth0', 'eth1', 'wlan0', 'wlan1']);
 
   for (const [interfaceName, entries] of Object.entries(interfaces)) {
-    if (skipNamePrefixes.some((p) => interfaceName.startsWith(p))) continue;
+    if (!skipNamePrefixes.some((p) => interfaceName.startsWith(p))) {
+      for (const entry of entries ?? []) {
+        if (
+          entry.family === 'IPv4' &&
+          entry.internal === false &&
+          entry.address &&
+          !isLinkLocal(entry.address)
+        ) {
+          let priority = 1;
+          if (interfaceName.startsWith('bridge')) priority = 3;
+          else if (preferredNames.has(interfaceName)) priority = 2;
 
-    for (const entry of entries ?? []) {
-      if (
-        entry.family === 'IPv4' &&
-        entry.internal === false &&
-        entry.address &&
-        !isLinkLocal(entry.address)
-      ) {
-        let priority = 1;
-        if (interfaceName.startsWith('bridge')) priority = 3;
-        else if (preferredNames.has(interfaceName)) priority = 2;
-
-        candidates.push({ name: interfaceName, address: entry.address, priority });
+          candidates.push({ name: interfaceName, address: entry.address, priority });
+        }
       }
     }
   }

@@ -20,6 +20,7 @@ import {
   ATTACK_DISCOVERIES_TAB,
 } from './translations';
 import { type CaseUI } from '../../../common';
+import type { ExternalReferenceAttachmentUI } from '../../../common/ui/types';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
@@ -224,7 +225,8 @@ export const useCaseAttachmentTabs = ({
     return caseData.comments.filter(
       (comment) =>
         comment.type === AttachmentType.externalReference &&
-        (comment as any).externalReferenceAttachmentTypeId === ATTACK_DISCOVERY_ATTACHMENT_TYPE
+        (comment as ExternalReferenceAttachmentUI).externalReferenceAttachmentTypeId ===
+          ATTACK_DISCOVERY_ATTACHMENT_TYPE
     ).length;
   }, [caseData.comments]);
 

@@ -143,31 +143,31 @@ export class ObservableAutoExtractor {
       // Skip duplicates if deduplication is enabled
       if (this.config.deduplicateExisting && existingValues.has(key)) {
         duplicatesSkipped++;
-        continue;
+      } else {
+        // Check max per type limit
+        const currentCount = countsPerType[entity.type] ?? 0;
+        if (
+          !this.config.maxObservablesPerType ||
+          currentCount < this.config.maxObservablesPerType
+        ) {
+          // Add to observables
+          observables.push({
+            typeKey: entity.type as ObservableTypeKey,
+            value: entity.normalizedValue,
+            description: `Auto-extracted from alert ${entity.sourceAlertId} (field: ${entity.sourceField})`,
+            createdAt: now,
+            source: {
+              alertId: entity.sourceAlertId,
+              field: entity.sourceField,
+              automatic: true,
+            },
+          });
+
+          // Update counts
+          countsPerType[entity.type] = currentCount + 1;
+          existingValues.add(key);
+        }
       }
-
-      // Check max per type limit
-      const currentCount = countsPerType[entity.type] ?? 0;
-      if (this.config.maxObservablesPerType && currentCount >= this.config.maxObservablesPerType) {
-        continue;
-      }
-
-      // Add to observables
-      observables.push({
-        typeKey: entity.type as ObservableTypeKey,
-        value: entity.normalizedValue,
-        description: `Auto-extracted from alert ${entity.sourceAlertId} (field: ${entity.sourceField})`,
-        createdAt: now,
-        source: {
-          alertId: entity.sourceAlertId,
-          field: entity.sourceField,
-          automatic: true,
-        },
-      });
-
-      // Update counts
-      countsPerType[entity.type] = currentCount + 1;
-      existingValues.add(key);
     }
 
     this.logger.debug(

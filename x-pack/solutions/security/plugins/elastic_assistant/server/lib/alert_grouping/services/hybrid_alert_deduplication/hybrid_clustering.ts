@@ -155,16 +155,14 @@ export class HybridClustering {
    */
   private stage1LeaderClustering(alert: EnrichedAlert): EnrichedAlert | undefined {
     for (const leader of this.leaders) {
-      if (this.unrelatedAlerts(leader, alert)) {
-        continue;
-      }
-
-      const distance = cosineDistance(leader.vector, alert.vector);
-      if (distance <= this.highConfidenceThreshold) {
-        updateEntityStats(leader, alert);
-        if (!leader.followers) leader.followers = [];
-        leader.followers.push(alert);
-        return leader;
+      if (!this.unrelatedAlerts(leader, alert)) {
+        const distance = cosineDistance(leader.vector, alert.vector);
+        if (distance <= this.highConfidenceThreshold) {
+          updateEntityStats(leader, alert);
+          if (!leader.followers) leader.followers = [];
+          leader.followers.push(alert);
+          return leader;
+        }
       }
     }
 
@@ -186,16 +184,14 @@ export class HybridClustering {
   private async stage2LLMClustering(alert: EnrichedAlert): Promise<EnrichedAlert | undefined> {
     // First pass: check exception lists (fast)
     for (const leader of this.leaders) {
-      if (this.unrelatedAlerts(leader, alert)) {
-        continue;
-      }
-
-      for (const exception of leader.exceptions ?? []) {
-        if (exceptionlistMatch(alert, exception)) {
-          updateEntityStats(leader, alert);
-          if (!leader.followers) leader.followers = [];
-          leader.followers.push(alert);
-          return leader;
+      if (!this.unrelatedAlerts(leader, alert)) {
+        for (const exception of leader.exceptions ?? []) {
+          if (exceptionlistMatch(alert, exception)) {
+            updateEntityStats(leader, alert);
+            if (!leader.followers) leader.followers = [];
+            leader.followers.push(alert);
+            return leader;
+          }
         }
       }
     }
@@ -204,14 +200,12 @@ export class HybridClustering {
     const leaderDistances: Array<{ distance: number; leader: EnrichedAlert }> = [];
 
     for (const leader of this.leaders) {
-      if (this.unrelatedAlerts(leader, alert)) {
-        continue;
-      }
+      if (!this.unrelatedAlerts(leader, alert)) {
+        const distance = cosineDistance(leader.vector, alert.vector);
 
-      const distance = cosineDistance(leader.vector, alert.vector);
-
-      if (distance <= this.lowConfidenceThreshold || this.rankCutoff) {
-        leaderDistances.push({ distance, leader });
+        if (distance <= this.lowConfidenceThreshold || this.rankCutoff) {
+          leaderDistances.push({ distance, leader });
+        }
       }
     }
 

@@ -203,7 +203,10 @@ export class CaseEventTriggerService {
     }
 
     // Get the pending trigger (new or existing)
-    const pendingTrigger = this.pendingTriggers.get(triggerKey)!;
+    const pendingTrigger = this.pendingTriggers.get(triggerKey);
+    if (!pendingTrigger) {
+      return;
+    }
 
     // Schedule execution after debounce period
     pendingTrigger.timeoutId = setTimeout(async () => {

@@ -724,7 +724,11 @@ export const getAgentDownloadUrl = async (
   const targetOs = (isOs ? targetArchOrOs : 'linux') as 'linux' | 'windows' | 'darwin';
   const targetArch = isOs ? arch : (targetArchOrOs as string | undefined);
 
-  const fileNameWithoutExtension = getAgentFileName(agentVersion, targetOs, targetArch as any);
+  const fileNameWithoutExtension = getAgentFileName(
+    agentVersion,
+    targetOs,
+    targetArch as 'auto' | 'x86_64' | 'arm64' | undefined
+  );
   const fileExtension = targetOs === 'windows' ? '.zip' : '.tar.gz';
   const agentFile = `${fileNameWithoutExtension}${fileExtension}`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;

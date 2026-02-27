@@ -176,37 +176,24 @@ export const createMultipassHostVmClient = (
       if (escapeNext) {
         current += ch;
         escapeNext = false;
-        continue;
-      }
-
-      if (ch === '\\') {
+      } else if (ch === '\\') {
         escapeNext = true;
-        continue;
-      }
-
-      if (quote) {
+      } else if (quote) {
         if (ch === quote) {
           quote = null;
         } else {
           current += ch;
         }
-        continue;
-      }
-
-      if (ch === '"' || ch === "'") {
+      } else if (ch === '"' || ch === "'") {
         quote = ch;
-        continue;
-      }
-
-      if (/\s/.test(ch)) {
+      } else if (/\s/.test(ch)) {
         if (current.length) {
           args.push(current);
           current = '';
         }
-        continue;
+      } else {
+        current += ch;
       }
-
-      current += ch;
     }
 
     if (current.length) {

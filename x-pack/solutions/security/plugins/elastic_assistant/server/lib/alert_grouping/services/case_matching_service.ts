@@ -72,16 +72,18 @@ export class CaseMatchingService {
 
     for (const caseData of cases) {
       // Check time proximity if configured
-      if (timeProximityMs !== null && alertTimestamp) {
-        if (!this.isWithinTimeProximity(alertTimestamp, caseData, timeProximityMs)) {
-          this.logger.debug(`Case ${caseData.id} excluded due to time proximity constraint`);
-          continue;
-        }
-      }
+      const withinTimeWindow =
+        timeProximityMs === null ||
+        !alertTimestamp ||
+        this.isWithinTimeProximity(alertTimestamp, caseData, timeProximityMs);
 
-      const match = this.evaluateCaseMatch(entities, caseData);
-      if (match) {
-        matches.push(match);
+      if (!withinTimeWindow) {
+        this.logger.debug(`Case ${caseData.id} excluded due to time proximity constraint`);
+      } else {
+        const match = this.evaluateCaseMatch(entities, caseData);
+        if (match) {
+          matches.push(match);
+        }
       }
     }
 

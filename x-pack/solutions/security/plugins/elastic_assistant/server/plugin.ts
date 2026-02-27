@@ -133,9 +133,10 @@ export class ElasticAssistantPlugin
 
     // Register Attack Discovery attachment type with Cases plugin (server-side)
     if (plugins.cases) {
-      const { ATTACK_DISCOVERY_ATTACHMENT_TYPE } = require('@kbn/cases-plugin/common');
-      plugins.cases.attachmentFramework.registerExternalReference({
-        id: ATTACK_DISCOVERY_ATTACHMENT_TYPE,
+      import('@kbn/cases-plugin/common').then((casesCommon) => {
+        plugins.cases?.attachmentFramework.registerExternalReference({
+          id: casesCommon.ATTACK_DISCOVERY_ATTACHMENT_TYPE,
+        });
       });
     }
 
@@ -233,11 +234,12 @@ export class ElasticAssistantPlugin
       .catch(() => {});
 
     // Start alert grouping task with dependencies
-    if (this.alertGroupingTask && plugins.taskManager) {
+    if (this.alertGroupingTask && plugins.taskManager && this.assistantService) {
+      const assistantService = this.assistantService;
       this.alertGroupingTask.start({
         taskManager: plugins.taskManager,
-        getStartServices: async () => [core, plugins, {}] as any,
-        assistantService: this.assistantService!,
+        getStartServices: async (): Promise<[CoreStart, unknown, unknown]> => [core, plugins, {}],
+        assistantService,
         cases: plugins.cases,
       });
     }

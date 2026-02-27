@@ -110,7 +110,7 @@ export const registerExtractEntitiesRoute = (
           });
 
           const alerts = searchResponse.hits.hits.map((hit) => ({
-            _id: hit._id!,
+            _id: hit._id ?? '',
             _source: hit._source ?? {},
           }));
 

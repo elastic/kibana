@@ -643,32 +643,31 @@ export class FileReporter {
       if (table.rows.length === 0) {
         lines.push('*No data*');
         lines.push('');
-        continue;
-      }
+      } else {
+        // Header row
+        const headers = table.columns.map((col) => col.header);
+        lines.push(`| ${headers.join(' | ')} |`);
 
-      // Header row
-      const headers = table.columns.map((col) => col.header);
-      lines.push(`| ${headers.join(' | ')} |`);
+        // Alignment row
+        const alignments = table.columns.map((col) => {
+          switch (col.align) {
+            case 'right':
+              return '---:';
+            case 'center':
+              return ':---:';
+            default:
+              return '---';
+          }
+        });
+        lines.push(`| ${alignments.join(' | ')} |`);
 
-      // Alignment row
-      const alignments = table.columns.map((col) => {
-        switch (col.align) {
-          case 'right':
-            return '---:';
-          case 'center':
-            return ':---:';
-          default:
-            return '---';
+        // Data rows
+        for (const row of table.rows) {
+          const values = table.columns.map((col) => String(row[col.key] ?? ''));
+          lines.push(`| ${values.join(' | ')} |`);
         }
-      });
-      lines.push(`| ${alignments.join(' | ')} |`);
-
-      // Data rows
-      for (const row of table.rows) {
-        const values = table.columns.map((col) => String(row[col.key] ?? ''));
-        lines.push(`| ${values.join(' | ')} |`);
+        lines.push('');
       }
-      lines.push('');
     }
 
     lines.push('---');

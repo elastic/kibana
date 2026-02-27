@@ -37,46 +37,46 @@ export const buildTagOperations = (
 
   for (const leader of leaders) {
     const leaderId = getAlertId(leader);
-    if (!leaderId) continue;
+    if (leaderId) {
+      const followers = leader.followers ?? [];
+      const followerCount = followers.length;
 
-    const followers = leader.followers ?? [];
-    const followerCount = followers.length;
-
-    // Tag the leader
-    operations.push(
-      { update: { _index: alertIndex, _id: leaderId } },
-      {
-        doc: {
-          'kibana.alert.dedup': {
-            cluster_id: leaderId,
-            is_leader: true,
-            confidence: 'new',
-            follower_count: followerCount,
-            processed_at: processedAt,
-          },
-        },
-      }
-    );
-
-    // Tag each follower
-    for (const follower of followers) {
-      const followerId = getAlertId(follower);
-      if (!followerId) continue;
-
-      const confidence = determineConfidence(follower);
+      // Tag the leader
       operations.push(
-        { update: { _index: alertIndex, _id: followerId } },
+        { update: { _index: alertIndex, _id: leaderId } },
         {
           doc: {
             'kibana.alert.dedup': {
               cluster_id: leaderId,
-              is_leader: false,
-              confidence,
+              is_leader: true,
+              confidence: 'new',
+              follower_count: followerCount,
               processed_at: processedAt,
             },
           },
         }
       );
+
+      // Tag each follower
+      for (const follower of followers) {
+        const followerId = getAlertId(follower);
+        if (followerId) {
+          const confidence = determineConfidence(follower);
+          operations.push(
+            { update: { _index: alertIndex, _id: followerId } },
+            {
+              doc: {
+                'kibana.alert.dedup': {
+                  cluster_id: leaderId,
+                  is_leader: false,
+                  confidence,
+                  processed_at: processedAt,
+                },
+              },
+            }
+          );
+        }
+      }
     }
   }
 

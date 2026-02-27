@@ -8,6 +8,7 @@
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { AttackDiscoveryTab } from '../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab';
@@ -43,7 +44,9 @@ const AttackDiscoveryContent = ({ externalReferenceMetadata }: IAttackDiscoveryA
   if (!metadata) {
     return (
       <EuiText size="s" color="subdued">
-        Attack discovery information not available
+        {i18n.translate('xpack.securitySolution.cases.attackDiscovery.notAvailable', {
+          defaultMessage: 'Attack discovery information not available',
+        })}
       </EuiText>
     );
   }
@@ -55,7 +58,9 @@ const AttackDiscoveryContent = ({ externalReferenceMetadata }: IAttackDiscoveryA
   if (!attackDiscovery) {
     return (
       <EuiText size="s" color="subdued">
-        Attack discovery not found
+        {i18n.translate('xpack.securitySolution.cases.attackDiscovery.notFound', {
+          defaultMessage: 'Attack discovery not found',
+        })}
       </EuiText>
     );
   }
