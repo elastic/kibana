@@ -18,6 +18,7 @@ import type {
 import { useRunWorkflow } from '@kbn/workflows-ui';
 import { useKibana } from './use_kibana';
 import { useTelemetry } from './use_telemetry';
+import type { WorkflowTriggerTab } from '../features/run_workflow/ui/types';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
@@ -191,7 +192,7 @@ export const useWorkflowActions = () => {
     },
   });
 
-  const runWorkflow = useRunWorkflow({
+  const runWorkflow = useRunWorkflow<{ triggerTab?: WorkflowTriggerTab }>({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 

@@ -11,18 +11,12 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMutation, type UseMutationOptions } from '@kbn/react-query';
 import type { RunWorkflowCommand, RunWorkflowResponseDto } from '@kbn/workflows';
-import type { WorkflowTriggerTab } from '../types';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
 export type RunWorkflowParams = RunWorkflowCommand & {
   /** Workflow ID to run. */
   id: string;
-  /**
-   * Optional client-only trigger source used for telemetry.
-   * Not sent to the server.
-   */
-  triggerTab?: WorkflowTriggerTab;
 };
 
 /**
@@ -43,12 +37,12 @@ export type RunWorkflowParams = RunWorkflowCommand & {
  * });
  * ```
  */
-export const useRunWorkflow = (
-  options?: UseMutationOptions<RunWorkflowResponseDto, HttpError, RunWorkflowParams>
+export const useRunWorkflow = <P extends object = {}>(
+  options?: UseMutationOptions<RunWorkflowResponseDto, HttpError, RunWorkflowParams & P>
 ) => {
   const { http } = useKibana().services;
 
-  return useMutation<RunWorkflowResponseDto, HttpError, RunWorkflowParams>({
+  return useMutation<RunWorkflowResponseDto, HttpError, RunWorkflowParams & P>({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
       if (!http) {

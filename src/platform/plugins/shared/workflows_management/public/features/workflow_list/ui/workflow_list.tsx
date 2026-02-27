@@ -27,7 +27,7 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
-import { useWorkflows, type WorkflowTriggerTab } from '@kbn/workflows-ui';
+import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -38,6 +38,7 @@ import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
+import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
