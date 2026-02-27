@@ -11,8 +11,12 @@ import type { RunningQuery, QueryType } from '../../common/types';
 /** Tasks running shorter than this are excluded. 0.1s = 100_000_000 nanos. */
 export const RUNNING_TIME_THRESHOLD_NANOS = 100_000_000;
 
-const SEARCH_ACTION = 'indices:data/read/search';
+const SEARCH_ACTION_PREFIX = 'indices:data/read/search';
 const ESQL_ACTION_PREFIX = 'indices:data/read/esql';
+const EQL_ACTION_PREFIX = 'indices:data/read/eql';
+const SQL_ACTION_PREFIX = 'indices:data/read/sql';
+const MSEARCH_ACTION_PREFIX = 'indices:data/read/msearch';
+const ASYNC_SEARCH_ACTION_PREFIX = 'indices:data/read/async_search';
 
 const INDICES_REGEX = /indices\[([^\]]*)\]/;
 const SOURCE_REGEX = /source\[(\{.*\})\]/s;
@@ -25,7 +29,19 @@ export function getQueryType(action: string): QueryType {
   if (action.startsWith(ESQL_ACTION_PREFIX)) {
     return 'ES|QL';
   }
-  if (action === SEARCH_ACTION) {
+  if (action.startsWith(EQL_ACTION_PREFIX)) {
+    return 'EQL';
+  }
+  if (action.startsWith(SQL_ACTION_PREFIX)) {
+    return 'SQL';
+  }
+  if (action.startsWith(MSEARCH_ACTION_PREFIX)) {
+    return 'MSearch';
+  }
+  if (action.startsWith(ASYNC_SEARCH_ACTION_PREFIX)) {
+    return 'Async search';
+  }
+  if (action.startsWith(SEARCH_ACTION_PREFIX)) {
     return 'DSL';
   }
   return 'Other';
@@ -107,7 +123,14 @@ export function isIncludedTask(task: TasksTaskInfo): boolean {
   }
 
   const action = task.action ?? '';
-  if (action !== SEARCH_ACTION && !action.startsWith(ESQL_ACTION_PREFIX)) {
+  if (
+    !action.startsWith(SEARCH_ACTION_PREFIX) &&
+    !action.startsWith(ESQL_ACTION_PREFIX) &&
+    !action.startsWith(EQL_ACTION_PREFIX) &&
+    !action.startsWith(SQL_ACTION_PREFIX) &&
+    !action.startsWith(MSEARCH_ACTION_PREFIX) &&
+    !action.startsWith(ASYNC_SEARCH_ACTION_PREFIX)
+  ) {
     return false;
   }
 
@@ -143,8 +166,14 @@ export function transformTasks(tasks: TasksTaskInfo[]): RunningQuery[] {
 
     if (queryType === 'ES|QL') {
       ({ indices, query } = parseEsqlDescription(description));
+    } else if (queryType === 'EQL' || queryType === 'SQL') {
+      indices = 0;
+      query = description;
     } else {
       ({ indices, query } = parseDslDescription(description));
+      if (!query && description) {
+        query = description;
+      }
     }
 
     results.push({

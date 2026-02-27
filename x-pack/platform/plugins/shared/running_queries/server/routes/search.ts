@@ -33,7 +33,14 @@ export const registerSearchRoute = ({ router, logger }: RouteOptions) => {
         const result = await esClient.tasks.list({
           detailed: true,
           group_by: 'none',
-          actions: ['indices:data/read/search', 'indices:data/read/esql*'],
+          actions: [
+            'indices:data/read/search*',
+            'indices:data/read/esql*',
+            'indices:data/read/eql*',
+            'indices:data/read/sql*',
+            'indices:data/read/msearch*',
+            'indices:data/read/async_search*',
+          ],
         });
 
         const tasks = (result.tasks ?? []) as TasksTaskInfo[];

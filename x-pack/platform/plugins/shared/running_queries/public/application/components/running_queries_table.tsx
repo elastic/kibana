@@ -204,8 +204,14 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
     [canCancelTasks, requestStopQuery, stopRequestedTaskIds]
   );
 
-  const uniqueSources = useMemo(() => [...new Set(queries.map((q) => q.source))], [queries]);
-  const uniqueQueryTypes = useMemo(() => [...new Set(queries.map((q) => q.queryType))], [queries]);
+  const uniqueSources = useMemo(
+    () => [...new Set(queries.map((q) => q.source).filter((s) => s.trim().length > 0))],
+    [queries]
+  );
+  const uniqueQueryTypes = useMemo(
+    () => [...new Set(queries.map((q) => q.queryType).filter((s) => s.trim().length > 0))],
+    [queries]
+  );
 
   const runTimeValueRef = React.useRef(runTimeValue);
   runTimeValueRef.current = runTimeValue;

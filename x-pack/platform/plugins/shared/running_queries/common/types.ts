@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type QueryType = 'ES|QL' | 'DSL' | 'Other';
+export type QueryType = 'ES|QL' | 'DSL' | 'EQL' | 'SQL' | 'MSearch' | 'Async search' | 'Other';
 
 export interface RunningQuery {
   taskId: string;

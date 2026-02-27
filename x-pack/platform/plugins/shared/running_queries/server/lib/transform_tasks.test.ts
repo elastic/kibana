@@ -38,6 +38,27 @@ describe('getQueryType', () => {
 
   it('maps search action to DSL', () => {
     expect(getQueryType('indices:data/read/search')).toBe('DSL');
+    expect(getQueryType('indices:data/read/search[phase/query]')).toBe('DSL');
+  });
+
+  it('maps EQL actions to EQL', () => {
+    expect(getQueryType('indices:data/read/eql')).toBe('EQL');
+    expect(getQueryType('indices:data/read/eql/search')).toBe('EQL');
+  });
+
+  it('maps SQL actions to SQL', () => {
+    expect(getQueryType('indices:data/read/sql')).toBe('SQL');
+    expect(getQueryType('indices:data/read/sql/translate')).toBe('SQL');
+  });
+
+  it('maps msearch actions to MSearch', () => {
+    expect(getQueryType('indices:data/read/msearch')).toBe('MSearch');
+    expect(getQueryType('indices:data/read/msearch/template')).toBe('MSearch');
+  });
+
+  it('maps async_search actions to Async search', () => {
+    expect(getQueryType('indices:data/read/async_search')).toBe('Async search');
+    expect(getQueryType('indices:data/read/async_search/submit')).toBe('Async search');
   });
 
   it('returns Other for unknown actions', () => {
@@ -135,6 +156,22 @@ describe('isIncludedTask', () => {
     expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/esql[a]' })).toBe(true);
   });
 
+  it('includes eql tasks', () => {
+    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/eql/search' })).toBe(true);
+  });
+
+  it('includes sql tasks', () => {
+    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/sql' })).toBe(true);
+  });
+
+  it('includes msearch tasks', () => {
+    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/msearch' })).toBe(true);
+  });
+
+  it('includes async_search tasks', () => {
+    expect(isIncludedTask({ ...baseTask, action: 'indices:data/read/async_search/submit' })).toBe(true);
+  });
+
   it('excludes child tasks with parent_task_id', () => {
     expect(isIncludedTask({ ...baseTask, parent_task_id: 'node1:99' })).toBe(false);
   });
@@ -198,6 +235,60 @@ describe('transformTasks', () => {
       source: 'Dashboard',
       indices: 2,
       query: '{"query":{"match_all":{}}}',
+    });
+  });
+
+  it('uses raw description for SQL tasks', () => {
+    const task: TasksTaskInfo = {
+      ...baseTask,
+      action: 'indices:data/read/sql',
+      description: 'SELECT * FROM "kibana_sample_data_logs" LIMIT 10',
+      headers: {
+        'X-Opaque-Id': 'req3;kibana:application:discover:new',
+      },
+    };
+
+    const results = transformTasks([task]);
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      queryType: 'SQL',
+      query: 'SELECT * FROM "kibana_sample_data_logs" LIMIT 10',
+    });
+  });
+
+  it('uses raw description for EQL tasks', () => {
+    const task: TasksTaskInfo = {
+      ...baseTask,
+      action: 'indices:data/read/eql/search',
+      description: 'process where true',
+      headers: {
+        'X-Opaque-Id': 'req4;kibana:application:discover:new',
+      },
+    };
+
+    const results = transformTasks([task]);
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      queryType: 'EQL',
+      query: 'process where true',
+    });
+  });
+
+  it('falls back to raw description for msearch tasks when no source block exists', () => {
+    const task: TasksTaskInfo = {
+      ...baseTask,
+      action: 'indices:data/read/msearch',
+      description: 'msearch[requests[2]]',
+      headers: {
+        'X-Opaque-Id': 'req5;kibana:application:discover:new',
+      },
+    };
+
+    const results = transformTasks([task]);
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      queryType: 'MSearch',
+      query: 'msearch[requests[2]]',
     });
   });
 });
