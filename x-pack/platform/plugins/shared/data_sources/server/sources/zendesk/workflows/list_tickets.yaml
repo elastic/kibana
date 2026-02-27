@@ -53,7 +53,7 @@ steps:
           assignee_id: "${{ ticket.assignee_id }}"
           submitter_id: "${{ ticket.submitter_id }}"
           tags: "${{ ticket.tags }}"
-#        custom_fields (per ticket):
+#        custom_fields:
 #          $map: { items: "${{ ticket.custom_fields }}", item: "cf" }
 #          id: "${{ cf.id }}"
 #          value: "${{ cf.value }}"
