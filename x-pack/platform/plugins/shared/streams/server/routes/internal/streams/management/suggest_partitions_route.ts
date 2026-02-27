@@ -68,9 +68,10 @@ export const suggestPartitionsRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { inferenceClient, scopedClusterClient, streamsClient, featureClient } =
+      await getScopedClients({
+        request,
+      });
 
     const stream = await streamsClient.getStream(params.path.name);
     if (!Streams.ingest.all.Definition.is(stream)) {
@@ -84,8 +85,12 @@ export const suggestPartitionsRoute = createServerRoute({
       logger,
       start: params.body.start,
       end: params.body.end,
-      maxSteps: 1, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
+      maxSteps: 4, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
       signal: getRequestAbortSignal(request),
+      getFeatures: async (filters) => {
+        const { hits } = await featureClient.getFeatures(params.path.name, filters);
+        return hits;
+      },
     });
 
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
