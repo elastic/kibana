@@ -237,11 +237,7 @@ export function RuleComponent({
           <AlertSummaryWidget
             ruleTypeIds={[rule.ruleTypeId]}
             consumers={[rule.consumer]}
-            filter={{
-              term: {
-                [ALERT_RULE_UUID]: rule.id,
-              },
-            }}
+            filter={alertsSearchEsQuery}
             timeRange={alertSummaryWidgetTimeRange}
             onClick={() => {
               setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());

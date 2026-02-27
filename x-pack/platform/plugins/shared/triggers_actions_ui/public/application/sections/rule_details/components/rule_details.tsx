@@ -21,10 +21,15 @@ import {
   EuiIcon,
   EuiLink,
   EuiIconTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import {
+  type RuleExecutionStatuses,
+  RuleExecutionStatusErrorReasons,
+  parseDuration,
+} from '@kbn/alerting-plugin/common';
 import { getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/response-ops-rule-form';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
@@ -362,6 +367,12 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         }
         description={
           <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={getHealthColor(rule.executionStatus.status)}>
+                {rule.executionStatus.status.charAt(0).toUpperCase() +
+                  rule.executionStatus.status.slice(1)}
+              </EuiBadge>
+            </EuiFlexItem>
             {hasManageApiKeysCapability(capabilities) && rule.apiKeyOwner && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
@@ -558,5 +569,22 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     </>
   );
 };
+
+export function getHealthColor(status: RuleExecutionStatuses) {
+  switch (status) {
+    case 'active':
+      return 'success';
+    case 'error':
+      return 'danger';
+    case 'ok':
+      return 'primary';
+    case 'pending':
+      return 'accent';
+    case 'warning':
+      return 'warning';
+    default:
+      return 'subdued';
+  }
+}
 
 export const RuleDetailsWithApi = withBulkRuleOperations(RuleDetails);
