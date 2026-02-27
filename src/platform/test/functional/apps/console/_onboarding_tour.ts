@@ -50,6 +50,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     };
 
+    const waitForStepOpen = async (tourStepDataSubj: string) => {
+      await retry.waitFor(`${tourStepDataSubj} to open`, async () => {
+        return await isTourStepOpen(tourStepDataSubj);
+      });
+    };
+
+    const clickNextAndWaitForStep = async (currentStep: string, nextStep: string) => {
+      await waitForStepOpen(currentStep);
+
+      await retry.waitFor(`advance from ${currentStep} to ${nextStep}`, async () => {
+        if (await isTourStepOpen(nextStep)) return true;
+
+        if (await isTourStepOpen(currentStep)) {
+          await testSubjects.existOrFail('consoleNextTourStepButton');
+          await testSubjects.waitForEnabled('consoleNextTourStepButton');
+          await PageObjects.console.clickNextTourStep();
+        }
+
+        return await isTourStepOpen(nextStep);
+      });
+    };
+
     const waitUntilFinishedLoading = async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.sleep(DELAY_FOR);
@@ -71,34 +93,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await runConsoleTour();
 
       // Verify that first tour step is visible
-      expect(await isTourStepOpen('shellTourStep')).to.be(true);
+      await waitForStepOpen('shellTourStep');
     });
 
     it('displays all five steps in the tour', async () => {
-      const andWaitFor = DELAY_FOR;
       await waitUntilFinishedLoading();
 
       // Run tour
       await runConsoleTour();
 
       log.debug('on Shell tour step');
-      expect(await isTourStepOpen('shellTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep(andWaitFor);
+      await clickNextAndWaitForStep('shellTourStep', 'editorTourStep');
 
       log.debug('on Editor tour step');
-      expect(await isTourStepOpen('editorTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep(andWaitFor);
+      await clickNextAndWaitForStep('editorTourStep', 'historyTourStep');
 
       log.debug('on History tour step');
-      expect(await isTourStepOpen('historyTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep(andWaitFor);
+      await clickNextAndWaitForStep('historyTourStep', 'configTourStep');
 
       log.debug('on Config tour step');
-      expect(await isTourStepOpen('configTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep(andWaitFor);
+      await clickNextAndWaitForStep('configTourStep', 'filesTourStep');
 
       log.debug('on Files tour step');
-      expect(await isTourStepOpen('filesTourStep')).to.be(true);
+      await waitForStepOpen('filesTourStep');
       // Last tour step should contain the "Complete" button
       expect(await testSubjects.exists('consoleCompleteTourButton')).to.be(true);
       await PageObjects.console.clickCompleteTour();
