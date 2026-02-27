@@ -147,11 +147,6 @@ export const getExpectedQueryByExecutionUuid = ({
             ],
           },
         },
-        {
-          bool: {
-            must_not: { term: { 'kibana.alert.muted': true } },
-          },
-        },
         ...(isLifecycleAlert ? [{ term: { 'event.action': alertTypes[alertType] } }] : []),
         ...(!!excludedAlertInstanceIds?.length
           ? [
@@ -271,9 +266,6 @@ export const getExpectedQueryByTimeRange = ({
     { term: { 'kibana.alert.rule.uuid': ruleId } },
     {
       bool: { must_not: { term: { 'kibana.alert.status': 'delayed' } } },
-    },
-    {
-      bool: { must_not: { term: { 'kibana.alert.muted': true } } },
     }
   );
   if (excludedAlertInstanceIds?.length) {
