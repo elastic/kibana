@@ -70,12 +70,7 @@ import {
   TableDimensionEditorAdditionalSection,
 } from './components';
 import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
-import {
-  hasIncompatibleColorConfig,
-  getDataBoundsForAccessor,
-  getFixedColorConfiguration,
-  resolveColorDefaults,
-} from './utils';
+import { hasIncompatibleColorConfig, getDataBoundsForAccessor, getColorDefaults } from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -324,15 +319,17 @@ export const getDatatableVisualization = ({
       const { isCategory: isBucketable } = getAccessorType(datasource, accessor, columnMeta?.type);
       const dataBounds =
         getDataBoundsForAccessor(accessor, currentData, state.columns) ?? getFallbackDataBounds();
-      const { palette: resolvedPalette, colorMapping: resolvedColorMapping } = resolveColorDefaults(
-        {
-          colorByTerms: isBucketable,
-          palette,
-          colorMapping,
-          paletteService,
-          dataBounds,
-        }
-      );
+      const hasColorConfigMismatch = hasIncompatibleColorConfig({
+        colorByTerms: isBucketable,
+        palette,
+        colorMapping,
+      });
+      const needsDefaults = !palette && !colorMapping;
+
+      const { palette: resolvedPalette, colorMapping: resolvedColorMapping } =
+        hasColorConfigMismatch || needsDefaults
+          ? getColorDefaults({ colorByTerms: isBucketable, paletteService, dataBounds })
+          : { palette, colorMapping };
 
       return getPaletteDisplayColors(
         paletteService,
@@ -845,15 +842,13 @@ export const getDatatableVisualization = ({
       return warnings;
     }
 
-    const fixedState = getFixedColorConfiguration(state, datasource, paletteService, currentData);
-
     const mismatchedColumnLabels: string[] = [];
 
-    state.columns.forEach((column) => {
+    const normalizedColumns = state.columns.map((column) => {
       const { colorMode, palette, colorMapping } = column;
 
       if (!colorMode || colorMode === 'none') {
-        return;
+        return column;
       }
 
       const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
@@ -872,8 +867,30 @@ export const getDatatableVisualization = ({
       ) {
         const operation = datasource.getOperationForColumnId(column.columnId);
         mismatchedColumnLabels.push(operation?.label ?? column.columnId);
+
+        const dataBounds =
+          getDataBoundsForAccessor(column.columnId, currentData, state.columns) ??
+          getFallbackDataBounds();
+
+        const { palette: resolvedPalette, colorMapping: resolvedColorMapping } = getColorDefaults({
+          colorByTerms: isBucketable,
+          paletteService,
+          dataBounds,
+        });
+
+        return { ...column, palette: resolvedPalette, colorMapping: resolvedColorMapping };
       }
+
+      return column;
     });
+
+    const hasChanges = normalizedColumns.some(
+      (col, i) =>
+        col.colorMapping !== state.columns[i].colorMapping ||
+        col.palette !== state.columns[i].palette
+    );
+
+    const fixedState = hasChanges ? { ...state, columns: normalizedColumns } : undefined;
 
     if (mismatchedColumnLabels.length > 0) {
       const columnList = mismatchedColumnLabels.map((label) => `"${label}"`).join(', ');

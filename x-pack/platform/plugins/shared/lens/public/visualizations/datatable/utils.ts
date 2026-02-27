@@ -13,16 +13,10 @@ import type {
   PaletteOutput,
   PaletteRegistry,
 } from '@kbn/coloring';
-import { DEFAULT_COLOR_MAPPING_CONFIG, getFallbackDataBounds } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { DatasourcePublicAPI, DatatableVisualizationState } from '@kbn/lens-common';
-import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
-import {
-  findMinMaxByColumnId,
-  getAccessorType,
-  getColorByValuePalette,
-} from '../../shared_components';
+import { findMinMaxByColumnId, getColorByValuePalette } from '../../shared_components';
 
 export function getColumnAlignment<C extends { alignment?: 'left' | 'right' | 'center' }>(
   { alignment }: C,
@@ -43,7 +37,8 @@ export function hasIncompatibleColorConfig({
 }): boolean {
   const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
   const hasColorMappingOnNumeric = !colorByTerms && colorMapping != null;
-  const hasValuePaletteOnBucket = colorByTerms && isValueBasedPalette;
+  // To avoid warnings on current SOs with both palette and color mapping defined
+  const hasValuePaletteOnBucket = colorByTerms && isValueBasedPalette && !colorMapping;
   return hasColorMappingOnNumeric || hasValuePaletteOnBucket;
 }
 
@@ -77,101 +72,27 @@ export function getDataBoundsForAccessor(
 }
 
 /**
- * Resolves effective color configuration for a column by detecting mismatches
- * between the stored config type (terms vs values) and the column's actual type,
- * then applying correct defaults when needed
+ * Applies correct default color configuration
  */
-export function resolveColorDefaults({
+export function getColorDefaults({
   colorByTerms,
-  palette,
-  colorMapping,
   paletteService,
   dataBounds,
 }: {
   colorByTerms: boolean;
-  palette?: PaletteOutput<CustomPaletteParams>;
-  colorMapping?: ColorMapping.Config;
   paletteService: PaletteRegistry;
   dataBounds: DataBounds;
 }): {
   palette: PaletteOutput<CustomPaletteParams> | undefined;
   colorMapping: ColorMapping.Config | undefined;
-  hasMismatch: boolean;
 } {
-  const hasColorConfigMismatch = hasIncompatibleColorConfig({
-    colorByTerms,
-    palette,
-    colorMapping,
-  });
-
-  const needsDefaults = (!palette && !colorMapping) || hasColorConfigMismatch;
-
-  if (!needsDefaults) {
-    return { palette, colorMapping, hasMismatch: false };
-  }
-
   if (colorByTerms) {
     return {
       palette: undefined,
       colorMapping: DEFAULT_COLOR_MAPPING_CONFIG,
-      hasMismatch: hasColorConfigMismatch,
     };
   }
 
   const { palette: defaultPalette } = getColorByValuePalette(paletteService, dataBounds);
-  return { palette: defaultPalette, colorMapping: undefined, hasMismatch: hasColorConfigMismatch };
-}
-
-export function getFixedColorConfiguration(
-  state: DatatableVisualizationState,
-  datasourceLayer: DatasourcePublicAPI,
-  paletteService: PaletteRegistry,
-  currentData?: Datatable
-) {
-  if (!currentData || state.columns.length === 0) {
-    return undefined;
-  }
-
-  const normalizedColumns = state.columns.map((column) => {
-    const { colorMapping, palette, colorMode } = column;
-
-    if (!colorMode || colorMode === 'none') {
-      return column;
-    }
-
-    const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
-    const { isCategory: isBucketable } = getAccessorType(
-      datasourceLayer,
-      column.columnId,
-      columnMeta?.type
-    );
-    const dataBounds =
-      getDataBoundsForAccessor(column.columnId, currentData, state.columns) ??
-      getFallbackDataBounds();
-
-    const {
-      palette: resolvedPalette,
-      colorMapping: resolvedColorMapping,
-      hasMismatch,
-    } = resolveColorDefaults({
-      colorByTerms: isBucketable,
-      palette,
-      colorMapping,
-      paletteService,
-      dataBounds,
-    });
-
-    if (hasMismatch) {
-      return { ...column, palette: resolvedPalette, colorMapping: resolvedColorMapping };
-    }
-
-    return column;
-  });
-
-  const hasChanges = normalizedColumns.some(
-    (col, i) =>
-      col.colorMapping !== state.columns[i].colorMapping || col.palette !== state.columns[i].palette
-  );
-
-  return hasChanges ? { ...state, columns: normalizedColumns } : undefined;
+  return { palette: defaultPalette, colorMapping: undefined };
 }
