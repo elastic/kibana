@@ -76,7 +76,7 @@ const createConnectorFields = (
 
     const dynamicSchema = useMemo(
       () => generateSchema(spec, { authMode: formData?.authMode, authorizationCodeEnabled }),
-      [formData?.authMode, authorizationCodeEnabled]
+      [formData?.authMode]
     );
 
     return generateFormFields({
