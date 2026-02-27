@@ -8,7 +8,6 @@
 export * from './cert_refresh_btn';
 export * from './cert_monitors';
 export * from './cert_search';
-export * from './cert_status';
 export * from './certificates';
 export * from './certificates_list';
 export * from './certificate_title';

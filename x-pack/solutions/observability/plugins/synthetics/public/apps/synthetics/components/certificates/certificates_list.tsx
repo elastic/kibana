@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import type { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../hooks/use_date_format';
 import { useSyntheticsSettingsContext } from '../../contexts';
-import { CertStatus } from './cert_status';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
 import { FingerprintCol } from './fingerprint_col';
@@ -103,12 +102,6 @@ export const CertificateList: React.FC<Props> = ({
   };
 
   const columns = [
-    {
-      field: 'not_after',
-      name: labels.STATUS_COL,
-      sortable: true,
-      render: (val: string, item: Cert) => <CertStatus cert={item} />,
-    },
     {
       name: labels.COMMON_NAME_COL,
       field: 'common_name',
