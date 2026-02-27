@@ -178,7 +178,9 @@ export function ManualFlowForm({
                 <StreamsESQLEditor
                   query={{ esql: field.value }}
                   isDisabled={isSubmitting}
-                  onTextLangQuerySubmit={async () => {}}
+                  onTextLangQuerySubmit={async (newQuery) => {
+                    if (newQuery) field.onChange(newQuery.esql);
+                  }}
                   onTextLangQueryChange={(newQuery) => field.onChange(newQuery.esql)}
                   prefix={queryFrom}
                 />
