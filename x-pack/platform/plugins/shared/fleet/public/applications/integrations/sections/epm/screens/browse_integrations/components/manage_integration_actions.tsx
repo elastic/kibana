@@ -59,6 +59,7 @@ export const ManageIntegrationActions: React.FC<{
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
