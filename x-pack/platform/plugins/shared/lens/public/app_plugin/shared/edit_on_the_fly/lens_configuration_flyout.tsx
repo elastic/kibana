@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
-import type { Reference } from '@kbn/content-management-utils';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -112,13 +111,14 @@ export function LensEditConfigurationFlyout({
     const previousAttrs = previousAttributes.current;
     const rawState = datasourceStates[datasourceId].state;
     const currentPersistable = rawState
-      ? datasourceMap[datasourceId].getPersistableState(rawState) : null;
+      ? datasourceMap[datasourceId].getPersistableState(rawState)
+      : null;
     const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
-    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison. 
+    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
     // formBased attributes are already persistable and getPersistableState expects private state.
     const previousPersistable =
       previousDsState && datasourceId === 'textBased'
-        ? datasourceMap[datasourceId].getPersistableState(previousDsState) 
+        ? datasourceMap[datasourceId].getPersistableState(previousDsState)
         : previousDsState
         ? { state: previousDsState, references: previousAttrs.references }
         : null;

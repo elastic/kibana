@@ -62,7 +62,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
       const editor = page.getByTestId('customizeLens');
       await expect(editor).toBeHidden();
 
-      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID)
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(editor).toBeVisible();
       await expect(lens.getApplyFlyoutButton()).toBeDisabled();
 
