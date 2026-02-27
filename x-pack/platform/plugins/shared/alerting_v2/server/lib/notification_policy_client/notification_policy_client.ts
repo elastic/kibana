@@ -12,16 +12,16 @@ import {
   updateNotificationPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
-import { stringifyZodError } from '@kbn/zod-helpers';
 import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
-import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectService } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import type { UserServiceContract } from '../services/user_service/user_service';
-import { UserService } from '../services/user_service/user_service';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
+import type { UserServiceContract } from '../services/user_service/user_service';
+import { UserService } from '../services/user_service/user_service';
 import type { CreateNotificationPolicyParams, UpdateNotificationPolicyParams } from './types';
 
 const API_KEY_FIELDS = ['apiKey', 'uiamApiKey'] as const;
@@ -29,7 +29,7 @@ const API_KEY_FIELDS = ['apiKey', 'uiamApiKey'] as const;
 @injectable()
 export class NotificationPolicyClient {
   constructor(
-    @inject(NotificationPolicySavedObjectService)
+    @inject(NotificationPolicySavedObjectServiceScopedToken)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract
@@ -120,14 +120,15 @@ export class NotificationPolicyClient {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
-    const existingDoc = await this.fetchRawNotificationPolicy(params.options.id);
-    const existingAttrs = existingDoc.attributes;
+    const existingPolicy = await this.getNotificationPolicy({
+      id: params.options.id,
+    });
 
-    const policyName = params.data.name ?? existingAttrs.name;
+    const policyName = parsed.data.name ?? existingPolicy.name;
     const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${policyName}`);
 
     const nextAttrs: NotificationPolicySavedObjectAttributes = {
-      ...existingAttrs,
+      ...omit(existingPolicy, ['id', 'version']),
       ...parsed.data,
       ...apiKeyAttrs,
       updatedBy: userProfileUid,
@@ -159,21 +160,6 @@ export class NotificationPolicyClient {
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
     await this.getNotificationPolicy({ id });
     await this.notificationPolicySavedObjectService.delete({ id });
-  }
-
-  private async fetchRawNotificationPolicy(id: string): Promise<{
-    attributes: NotificationPolicySavedObjectAttributes;
-    version?: string;
-  }> {
-    try {
-      const doc = await this.notificationPolicySavedObjectService.get(id);
-      return { attributes: doc.attributes, version: doc.version };
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Notification policy with id "${id}" not found`);
-      }
-      throw e;
-    }
   }
 
   private async getUserProfileUid(): Promise<string | null> {

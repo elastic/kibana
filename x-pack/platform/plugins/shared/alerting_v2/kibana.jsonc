@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/alerting-v2-plugin",
-  "owner": ["@elastic/response-ops"],
+  "owner": ["@elastic/rna-project-team"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {

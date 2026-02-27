@@ -6,15 +6,20 @@
  */
 
 import type { AlertingServerStartDependencies } from '../../types';
+import type { ResourceManagerContract } from '../services/resource_service/resource_manager';
 import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './task_definition';
 
 export const INTERVAL = '5s';
 
 export async function scheduleDispatcherTask({
   taskManager,
+  resourceManager,
 }: {
   taskManager: AlertingServerStartDependencies['taskManager'];
+  resourceManager: ResourceManagerContract;
 }): Promise<void> {
+  await resourceManager.waitUntilReady();
+
   await taskManager.ensureScheduled({
     id: DISPATCHER_TASK_ID,
     taskType: DISPATCHER_TASK_TYPE,
