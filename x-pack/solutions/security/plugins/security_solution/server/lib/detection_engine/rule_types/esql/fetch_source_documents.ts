@@ -8,8 +8,10 @@
 import { performance } from 'perf_hooks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
+import type { Filter } from '@kbn/es-query';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logQueryRequest } from '../utils/logged_requests';
+import { getQueryFilter } from '../utils/get_query_filter';
 import * as i18n from '../translations';
 import type { SignalSource } from '../types';
 import { convertExternalIdsToDSL } from './build_esql_search_request';
@@ -32,6 +34,7 @@ interface FetchSourceDocumentsArgs {
   hasLoggedRequestsReachedLimit: boolean;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   excludedDocuments: Record<string, ExcludedDocument[]>;
+  filters?: Filter[];
 }
 /**
  * fetches source documents by list of their ids
@@ -47,6 +50,7 @@ export const fetchSourceDocuments = async ({
   hasLoggedRequestsReachedLimit,
   runtimeMappings,
   excludedDocuments,
+  filters,
 }: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument[]>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
@@ -60,12 +64,23 @@ export const fetchSourceDocuments = async ({
     return {};
   }
 
+  const filterClauses: estypes.QueryDslQueryContainer[] = [{ ids: { values: ids } }];
+
+  if (filters && filters.length > 0) {
+    const esFilter = getQueryFilter({
+      query: '',
+      language: 'esql',
+      filters,
+      index: undefined,
+      exceptionFilter: undefined,
+    });
+    filterClauses.push(esFilter);
+  }
+
   const idsQuery = {
     query: {
       bool: {
-        filter: {
-          ids: { values: ids },
-        },
+        filter: filterClauses,
         ...(Object.keys(excludedDocuments).length > 0
           ? {
               must_not: convertExternalIdsToDSL(excludedDocuments, new Set(ids)),
