@@ -364,4 +364,50 @@ describe('CPSManager', () => {
       expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
     });
   });
+
+  describe('updateDefaultProjectRouting', () => {
+    const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    const changeAccess = async (access: ProjectRoutingAccess) => {
+      mockGetProjectRoutingAccess.mockReturnValue(access);
+      (mockApplication.currentAppId$ as BehaviorSubject<string | undefined>).next('app');
+      await flushAsync();
+    };
+
+    beforeEach(() => {
+      // Ensure default routing gets initialized to a known value.
+      mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
+      mockHttp.get = jest.fn().mockResolvedValue(DEFAULT_NPRE_VALUE);
+
+      cpsManager = new CPSManager({
+        http: mockHttp,
+        logger: mockLogger,
+        application: mockApplication,
+      });
+    });
+
+    it('updates the default project routing and current routing when access is EDITABLE', async () => {
+      await cpsManager.whenReady();
+
+      cpsManager.setProjectRouting('_alias:_origin');
+      expect(cpsManager.getProjectRouting()).toBe('_alias:_origin');
+
+      cpsManager.updateDefaultProjectRouting('_alias:*');
+
+      expect(cpsManager.getDefaultProjectRouting()).toBe('_alias:*');
+      expect(cpsManager.getProjectRouting()).toBe('_alias:*');
+    });
+
+    it('does not update current routing when access is DISABLED (remains undefined)', async () => {
+      await cpsManager.whenReady();
+      await changeAccess(ProjectRoutingAccess.DISABLED);
+
+      expect(cpsManager.getProjectRouting()).toBeUndefined();
+
+      cpsManager.updateDefaultProjectRouting('_alias:_origin');
+
+      expect(cpsManager.getDefaultProjectRouting()).toBe('_alias:_origin');
+      expect(cpsManager.getProjectRouting()).toBeUndefined();
+    });
+  });
 });
