@@ -6,7 +6,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
@@ -64,8 +63,7 @@ type ClusterHealth = SpacesHealthOverInterval;
 
 export const createEventLogHealthClient = (
   eventLog: IEventLogClient,
-  ruleSpacesClient: IRuleSpacesClient,
-  logger: Logger
+  ruleSpacesClient: IRuleSpacesClient
 ): IEventLogHealthClient => {
   const EVENT_PROVIDERS = [RULE_EXECUTION_LOG_PROVIDER, ALERTING_PROVIDER];
   const EVENT_PROVIDERS_FILTER = `${f.EVENT_PROVIDER}: (${kqlOr(EVENT_PROVIDERS)})`;

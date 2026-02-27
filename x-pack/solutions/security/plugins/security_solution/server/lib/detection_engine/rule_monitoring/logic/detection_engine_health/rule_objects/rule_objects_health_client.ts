@@ -6,7 +6,7 @@
  */
 
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 import type { RuleHealthParameters } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
@@ -75,8 +75,7 @@ interface ClusterHealth extends Debuggable {
 
 export const createRuleObjectsHealthClient = (
   rulesClient: RulesClientApi,
-  internalSavedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
+  internalSavedObjectsClient: SavedObjectsClientContract
 ): IRuleObjectsHealthClient => {
   return {
     calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealth> {
