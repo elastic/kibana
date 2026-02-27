@@ -13,7 +13,6 @@ import type {
   SloOverviewFlyoutStatusFilteredParams,
   SloAppRedirectClickedParams,
   SloCreateFlowStartedParams,
-  SloManageFlowStartedParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -44,10 +43,6 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportSloCreateFlowStarted = (params: SloCreateFlowStartedParams): void => {
     this.analytics.reportEvent(TelemetryEventTypes.SLO_CREATE_FLOW_STARTED, params);
-  };
-
-  public reportSloManageFlowStarted = (params: SloManageFlowStartedParams): void => {
-    this.analytics.reportEvent(TelemetryEventTypes.SLO_MANAGE_FLOW_STARTED, params);
   };
 
   public reportSloAppRedirectClicked = (params: SloAppRedirectClickedParams): void => {

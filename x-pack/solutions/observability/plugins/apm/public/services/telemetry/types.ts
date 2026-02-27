@@ -6,7 +6,6 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-import type { SloStatus } from '../../../common/service_inventory';
 import type { ApmIndicatorType } from '../../../common/slo_indicator_types';
 
 export interface TelemetryServiceSetupParams {
@@ -40,11 +39,6 @@ export interface SloCreateFlowStartedParams {
   sloType: ApmIndicatorType;
 }
 
-export interface SloManageFlowStartedParams {
-  location: 'service_inventory_badge' | 'service_view_badge';
-  sloStatus: SloStatus | 'noSLOs';
-}
-
 export interface SloAppRedirectClickedParams {
   location: `service_inventory_actions` | `top_nav_button` | `service_view_actions`;
 }
@@ -56,7 +50,6 @@ export interface ITelemetryClient {
   reportSloOverviewFlyoutStatusFiltered(params: SloOverviewFlyoutStatusFilteredParams): void;
   reportSloInfoShown(): void;
   reportSloCreateFlowStarted(params: SloCreateFlowStartedParams): void;
-  reportSloManageFlowStarted(params: SloManageFlowStartedParams): void;
   reportSloAppRedirectClicked(params: SloAppRedirectClickedParams): void;
   reportSloTopNavClicked(): void;
 }
@@ -68,7 +61,6 @@ export enum TelemetryEventTypes {
   SLO_OVERVIEW_FLYOUT_STATUS_FILTERED = 'slo_overview_flyout_status_filtered',
   SLO_INFO_SHOWN = 'SLO Info Shown',
   SLO_CREATE_FLOW_STARTED = 'SLO Create Flow Started',
-  SLO_MANAGE_FLOW_STARTED = 'SLO Manage Flow Started',
   SLO_APP_REDIRECT_CLICKED = 'SLO App Redirect Clicked',
   SLO_TOP_NAV_CLICKED = 'SLO Top Nav Clicked',
 }
@@ -94,10 +86,6 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.SLO_CREATE_FLOW_STARTED;
       schema: RootSchema<SloCreateFlowStartedParams>;
-    }
-  | {
-      eventType: TelemetryEventTypes.SLO_MANAGE_FLOW_STARTED;
-      schema: RootSchema<SloManageFlowStartedParams>;
     }
   | {
       eventType: TelemetryEventTypes.SLO_APP_REDIRECT_CLICKED;

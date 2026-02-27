@@ -87,24 +87,6 @@ const sloCreateFlowStartedEventType: TelemetryEvent = {
   },
 };
 
-const sloManageFlowStartedEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.SLO_MANAGE_FLOW_STARTED,
-  schema: {
-    location: {
-      type: 'keyword',
-      _meta: {
-        description: 'The location from which the SLO manage flow was started',
-      },
-    },
-    sloStatus: {
-      type: 'keyword',
-      _meta: {
-        description: 'The status of the SLOs related to the manage flow started event',
-      },
-    },
-  },
-};
-
 const sloAppRedirectClickedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SLO_APP_REDIRECT_CLICKED,
   schema: {
@@ -129,7 +111,6 @@ export const apmTelemetryEventBasedTypes = [
   sloOverviewFlyoutStatusFilteredEventType,
   sloInfoShownEventType,
   sloCreateFlowStartedEventType,
-  sloManageFlowStartedEventType,
   sloAppRedirectClickedEventType,
   sloTopNavClickedEventType,
 ];

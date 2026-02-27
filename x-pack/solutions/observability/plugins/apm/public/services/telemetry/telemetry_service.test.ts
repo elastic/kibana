@@ -11,7 +11,6 @@ import {
   SearchQueryActions,
   TelemetryEventTypes,
   type SloCreateFlowStartedParams,
-  type SloManageFlowStartedParams,
   type SloAppRedirectClickedParams,
 } from './types';
 
@@ -71,21 +70,6 @@ describe('TelemetryService', () => {
     expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
       TelemetryEventTypes.SLO_CREATE_FLOW_STARTED,
-      params
-    );
-  });
-
-  it('should report slo manage flow started event with the properties', async () => {
-    const params: SloManageFlowStartedParams = {
-      location: 'service_inventory_badge',
-      sloStatus: 'noSLOs',
-    };
-
-    telemetry.reportSloManageFlowStarted(params);
-
-    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
-      TelemetryEventTypes.SLO_MANAGE_FLOW_STARTED,
       params
     );
   });

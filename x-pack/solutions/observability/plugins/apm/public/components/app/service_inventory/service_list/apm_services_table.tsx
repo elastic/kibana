@@ -178,7 +178,6 @@ export function getServiceColumns({
                   sloCount={sloCount}
                   serviceName={serviceName}
                   onClick={() => onSloBadgeClick(serviceName, agentName)}
-                  telemetryLocation="service_inventory_badge"
                 />
               );
             },
