@@ -433,26 +433,7 @@ export class QueryClient {
       query,
     });
 
-    const queriesById = new Map<string, StreamQuery>();
-
-    queriesResponse.hits.hits.forEach((hit) => {
-      const streamQuery = fromStorage(hit._source).query;
-      const existingQuery = queriesById.get(streamQuery.id);
-
-      if (!existingQuery) {
-        queriesById.set(streamQuery.id, streamQuery);
-        return;
-      }
-
-      queriesById.set(streamQuery.id, {
-        ...existingQuery,
-        affected_streams: Array.from(
-          new Set([...existingQuery.affected_streams, ...streamQuery.affected_streams])
-        ),
-      });
-    });
-
-    return Array.from(queriesById.values());
+    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source).query);
   }
 
   /**
