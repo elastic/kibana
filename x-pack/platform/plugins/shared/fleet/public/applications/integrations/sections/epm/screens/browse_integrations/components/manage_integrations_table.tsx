@@ -373,70 +373,39 @@ export const ManageIntegrationsTable: React.FC<{
             </EuiBadge>
           );
         },
+        width: '124px',
       },
       {
-        name: '',
-        render: (item: CreatedIntegrationRow) => {
-          if (canReviewApproveIntegration(item)) {
-            return (
-              <ManageIntegrationActions
-                integration={item}
-                canReviewApprove={true}
-                inlineActionType="reviewApprove"
-                showMenuButton={false}
-                onEdit={goToEditIntegration}
-                onDelete={deleteIntegration}
-                DataStreamResultsFlyoutComponent={
-                  automaticImportVTwo?.components.DataStreamResultsFlyout
-                }
-                onFetchReviewDetails={fetchIntegrationReviewDetails}
-                onApproveAndDeploy={approveAndDeployIntegration}
-              />
-            );
-          }
-
-          if (item.status === 'failed' || item.status === 'cancelled') {
-            return (
-              <ManageIntegrationActions
-                integration={item}
-                canReviewApprove={false}
-                inlineActionType="editIntegration"
-                showMenuButton={false}
-                onEdit={goToEditIntegration}
-                onDelete={deleteIntegration}
-                DataStreamResultsFlyoutComponent={
-                  automaticImportVTwo?.components.DataStreamResultsFlyout
-                }
-                onFetchReviewDetails={fetchIntegrationReviewDetails}
-                onApproveAndDeploy={approveAndDeployIntegration}
-              />
-            );
-          }
-
-          return null;
-        },
-      },
-      {
+        field: 'status',
         name: (
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.table.actions"
             defaultMessage="Actions"
           />
         ),
-        width: '80px',
-        render: (item: CreatedIntegrationRow) => (
-          <ManageIntegrationActions
-            integration={item}
-            canReviewApprove={canReviewApproveIntegration(item)}
-            onEdit={goToEditIntegration}
-            onDelete={deleteIntegration}
-            DataStreamResultsFlyoutComponent={
-              automaticImportVTwo?.components.DataStreamResultsFlyout
-            }
-            onFetchReviewDetails={fetchIntegrationReviewDetails}
-            onApproveAndDeploy={approveAndDeployIntegration}
-          />
-        ),
+        render: (status: TaskStatus, item: CreatedIntegrationRow) => {
+          const showInlineAction =
+            canReviewApproveIntegration(item) || status === 'failed' || status === 'cancelled';
+          const inlineActionType = canReviewApproveIntegration(item)
+            ? 'reviewApprove'
+            : 'editIntegration';
+
+          return (
+            <ManageIntegrationActions
+              integration={item}
+              canReviewApprove={canReviewApproveIntegration(item)}
+              inlineActionType={showInlineAction ? inlineActionType : undefined}
+              onEdit={goToEditIntegration}
+              onDelete={deleteIntegration}
+              DataStreamResultsFlyoutComponent={
+                automaticImportVTwo?.components.DataStreamResultsFlyout
+              }
+              onFetchReviewDetails={fetchIntegrationReviewDetails}
+              onApproveAndDeploy={approveAndDeployIntegration}
+            />
+          );
+        },
+        width: '200px',
       },
     ],
     [
@@ -613,6 +582,7 @@ export const ManageIntegrationsTable: React.FC<{
         pagination
         sorting
         data-test-subj="manageIntegrationsTable"
+        tableLayout="auto"
       />
     </>
   );
