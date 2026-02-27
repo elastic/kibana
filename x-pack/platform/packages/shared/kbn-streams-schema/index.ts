@@ -181,6 +181,8 @@ export {
   COMPUTED_FEATURE_TYPES,
   isFeature,
   isComputedFeature,
+  isDuplicateFeature,
+  hasSameFingerprint,
   featureSchema,
   baseFeatureSchema,
   featureStatusSchema,
