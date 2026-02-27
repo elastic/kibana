@@ -101,7 +101,6 @@ export function initializeESQLControlManager(
     (initialState.control_type as EsqlControlType) ?? ''
   );
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esql_query ?? '');
-  const title$ = new BehaviorSubject<string | undefined>(initialState.title);
   let valuesColumnType: string | undefined;
   const totalCardinality$ = new BehaviorSubject<number>(
     initialState.available_options?.length ?? 0
@@ -316,7 +315,6 @@ export function initializeESQLControlManager(
       variableType$.next((lastSaved?.variable_type as ESQLVariableType) ?? ESQLVariableType.VALUES);
       if (lastSaved?.control_type) controlType$.next(lastSaved?.control_type as EsqlControlType);
       esqlQuery$.next(lastSaved?.esql_query ?? '');
-      title$.next(lastSaved?.title);
       valuesColumnType = undefined;
       temporaryStateManager.api.setInvalidSelections(new Set());
       previousESQLVariables = [];
