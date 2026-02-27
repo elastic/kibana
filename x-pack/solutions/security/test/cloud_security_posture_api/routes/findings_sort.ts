@@ -12,12 +12,15 @@ import {
   FIELDS_REQUIRING_CASE_INSENSITIVE_SORT,
 } from '@kbn/cloud-security-posture-plugin/common/utils/findings_sort';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { EsIndexDataProvider } from '../utils';
+import { EsIndexDataProvider, waitForPluginInitialized } from '../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es = getService('es');
+  const supertest = getService('supertest');
+  const retry = getService('retry');
+  const logger = getService('log');
 
   const findingsIndex = new EsIndexDataProvider(
     es,
@@ -48,25 +51,13 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     before(async () => {
-      await findingsIndex.destroyIndex();
-      await es.indices.create({
-        index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
-        mappings: {
-          properties: {
-            'resource.id': { type: 'keyword' },
-            'resource.name': { type: 'keyword' },
-            'resource.sub_type': { type: 'keyword' },
-            'rule.section': { type: 'keyword' },
-            'rule.name': { type: 'keyword' },
-            'result.evaluation': { type: 'keyword' },
-          },
-        },
-      });
+      await waitForPluginInitialized({ retry, logger, supertest });
+      await findingsIndex.deleteAll();
       await findingsIndex.addBulk([docWithAllFields, docMissingSortFields]);
     });
 
     after(async () => {
-      await findingsIndex.destroyIndex();
+      await findingsIndex.deleteAll();
     });
 
     for (const field of FIELDS_REQUIRING_CASE_INSENSITIVE_SORT) {
