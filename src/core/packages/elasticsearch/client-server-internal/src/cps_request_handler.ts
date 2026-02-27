@@ -9,7 +9,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
-import type { OnRequestHandler } from '@kbn/core-elasticsearch-client-server-internal';
+import type { OnRequestHandler } from './create_transport';
 
 /** @internal */
 export function getCpsRequestHandler(
