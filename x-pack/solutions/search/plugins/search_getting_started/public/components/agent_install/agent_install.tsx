@@ -14,8 +14,8 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSuperSelect,
+  EuiButton,
   EuiText,
-  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
@@ -24,112 +24,8 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SEARCH_AGENT_ID } from '../../../common/constants';
 import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { PromptModal } from './prompt_modal';
-
-type UseCaseId =
-  | 'general-search'
-  | 'semantic-search'
-  | 'vector-database'
-  | 'rag-chatbot'
-  | 'keyword-search'
-  | 'hybrid-search'
-  | 'catalog-ecommerce';
-
-type Environment = 'cursor' | 'cli' | 'agent-builder';
-
-interface UseCaseOption {
-  id: UseCaseId;
-  label: string;
-}
-
-const USE_CASE_OPTIONS: UseCaseOption[] = [
-  {
-    id: 'general-search',
-    label: i18n.translate('xpack.gettingStarted.cursorAgent.useCase.generalSearch', {
-      defaultMessage: 'General search',
-    }),
-  },
-  {
-    id: 'semantic-search',
-    label: i18n.translate('xpack.gettingStarted.cursorAgent.useCase.semanticSearch', {
-      defaultMessage: 'Semantic search',
-    }),
-  },
-  {
-    id: 'vector-database',
-    label: i18n.translate('xpack.gettingStarted.cursorAgent.useCase.vectorDatabase', {
-      defaultMessage: 'Vector database',
-    }),
-  },
-  {
-    id: 'rag-chatbot',
-    label: i18n.translate('xpack.gettingStarted.cursorAgent.useCase.ragChat', {
-      defaultMessage: 'RAG chat',
-    }),
-  },
-  {
-    id: 'keyword-search',
-    label: i18n.translate('xpack.gettingStarted.cursorAgent.useCase.keywordSearch', {
-      defaultMessage: 'Keyword search',
-    }),
-  },
-  {
-    id: 'hybrid-search',
-    label: i18n.translate('xpack.gettingStarted.cursorAgent.useCase.hybridSearch', {
-      defaultMessage: 'Hybrid search',
-    }),
-  },
-  {
-    id: 'catalog-ecommerce',
-    label: i18n.translate('xpack.gettingStarted.cursorAgent.useCase.catalogSearch', {
-      defaultMessage: 'Catalog search',
-    }),
-  },
-];
-
-const BASE_PROMPT_LINES_CURSOR = [
-  'Fetch and run this remote script:',
-  'curl -sSL https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/install-cursor.sh | sh',
-  'Then help me get started with Elasticsearch.',
-];
-
-const BASE_PROMPT_LINES_CLI = [
-  'Fetch and run this remote script:',
-  'curl -sSL https://raw.githubusercontent.com/wildemat/kibana/search-agent/src/platform/packages/shared/kbn-search-agent/install-agent.sh | sh',
-  'Then help me get started with Elasticsearch.',
-];
-
-const USE_CASE_INITIAL_MESSAGES: Record<UseCaseId, string> = {
-  'general-search': 'Help me get started with Elasticsearch.',
-  'semantic-search': 'I want to build semantic search with Elasticsearch.',
-  'vector-database': 'I want to use Elasticsearch as a vector database for my AI app.',
-  'rag-chatbot': 'I want to build a RAG chatbot that answers questions from my data.',
-  'keyword-search': 'I want to build keyword search with filters and autocomplete.',
-  'hybrid-search': 'I want to build hybrid search combining keyword and semantic.',
-  'catalog-ecommerce':
-    'I want to build product search for an e-commerce catalog with facets and autocomplete.',
-};
-
-const buildPrompt = (useCaseId: UseCaseId, environment: Environment) => {
-  switch (environment) {
-    case 'cursor':
-      return addUseCaseSkill(useCaseId, BASE_PROMPT_LINES_CURSOR);
-    case 'cli':
-      return addUseCaseSkill(useCaseId, BASE_PROMPT_LINES_CLI);
-    case 'agent-builder':
-      return USE_CASE_INITIAL_MESSAGES[useCaseId];
-    default:
-      throw new Error(`Unsupported environment: ${environment}`);
-  }
-};
-
-const addUseCaseSkill = (useCaseId: UseCaseId, basePromptLines: string[]): string => {
-  const skillLine =
-    useCaseId === 'general-search'
-      ? ''
-      : `Finally, follow the /${useCaseId} skill for my use case.`;
-  const promptLines = skillLine ? [...basePromptLines, skillLine] : basePromptLines;
-  return promptLines.join('\n');
-};
+import { USE_CASE_OPTIONS, type UseCaseId } from './constants';
+import { buildPrompt } from './util';
 
 export const AgentInstallSection = () => {
   const { services } = useKibana();
@@ -176,7 +72,7 @@ export const AgentInstallSection = () => {
   const handleOpenInAgentBuilder = useCallback(() => {
     closePopover();
     const initialMessage = buildPrompt(selectedUseCase, 'agent-builder');
-    localStorage.setItem('agentBuilder.agentId', JSON.stringify(SEARCH_AGENT_ID));
+    // Open agent builder page with the correct agent selected and a prompt loaded
     services.application.navigateToApp(AGENT_BUILDER_APP_ID, {
       path: `/conversations/new?agent_id=${SEARCH_AGENT_ID}`,
       state: { initialMessage, autoSendInitialMessage: false },
@@ -184,36 +80,26 @@ export const AgentInstallSection = () => {
   }, [closePopover, selectedUseCase, services.application]);
 
   const launchButton = (
-    <EuiButtonGroup
-      legend={i18n.translate('xpack.gettingStarted.cursorAgent.launchLegend', {
-        defaultMessage: 'Launch assistant',
+    <EuiButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={togglePopover}
+      data-test-subj="agentInstallLaunchBtn"
+    >
+      {i18n.translate('xpack.gettingStarted.agentInstall.launchButton', {
+        defaultMessage: 'Open in...',
       })}
-      buttonSize="m"
-      options={[
-        {
-          id: 'launchAssistant',
-          label: i18n.translate('xpack.gettingStarted.cursorAgent.launchButton', {
-            defaultMessage: 'Open in...',
-          }),
-          iconType: 'arrowDown',
-          iconSide: 'right' as const,
-          'data-test-subj': 'agentInstallLaunchOption',
-        },
-      ]}
-      idSelected="launchAssistant"
-      onChange={togglePopover}
-      data-test-subj="cursorAgentLaunchBtn"
-    />
+    </EuiButton>
   );
 
   return (
     <>
       <SearchGettingStartedSectionHeading
         icon="sparkles"
-        title={i18n.translate('xpack.gettingStarted.cursorAgent.title', {
+        title={i18n.translate('xpack.gettingStarted.agentInstall.title', {
           defaultMessage: 'Build search with your AI assistant',
         })}
-        description={i18n.translate('xpack.gettingStarted.cursorAgent.description', {
+        description={i18n.translate('xpack.gettingStarted.agentInstall.description', {
           defaultMessage:
             'Install the Elasticsearch assistant into your LLM environment to get AI-powered help with building your search application.',
         })}
@@ -223,7 +109,7 @@ export const AgentInstallSection = () => {
         <EuiFlexItem grow={false}>
           <EuiText>
             <p>
-              {i18n.translate('xpack.gettingStarted.cursorAgent.useCaseDescription', {
+              {i18n.translate('xpack.gettingStarted.agentInstall.useCaseDescription', {
                 defaultMessage: 'Have a specific use case in mind?',
               })}
             </p>
@@ -234,10 +120,10 @@ export const AgentInstallSection = () => {
             options={selectOptions}
             valueOfSelected={selectedUseCase}
             onChange={setSelectedUseCase}
-            aria-label={i18n.translate('xpack.gettingStarted.cursorAgent.useCaseSelectLabel', {
+            aria-label={i18n.translate('xpack.gettingStarted.agentInstall.useCaseSelectLabel', {
               defaultMessage: 'Select a use case',
             })}
-            data-test-subj="cursorAgentUseCaseSelect"
+            data-test-subj="agentInstallUseCaseSelect"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -258,7 +144,7 @@ export const AgentInstallSection = () => {
                   onClick={handleOpenInCursor}
                   data-test-subj="agentInstallOpenInCursor"
                 >
-                  {i18n.translate('xpack.gettingStarted.cursorAgent.menuCursor', {
+                  {i18n.translate('xpack.gettingStarted.agentInstall.menuCursor', {
                     defaultMessage: 'Cursor',
                   })}
                 </EuiContextMenuItem>,
@@ -268,7 +154,7 @@ export const AgentInstallSection = () => {
                   onClick={handleOpenInClaudeCli}
                   data-test-subj="agentInstallOpenInClaudeCli"
                 >
-                  {i18n.translate('xpack.gettingStarted.cursorAgent.menuClaudeCli', {
+                  {i18n.translate('xpack.gettingStarted.agentInstall.menuClaudeCli', {
                     defaultMessage: 'Claude / CLI',
                   })}
                 </EuiContextMenuItem>,
@@ -278,7 +164,7 @@ export const AgentInstallSection = () => {
                   onClick={handleOpenInAgentBuilder}
                   data-test-subj="agentInstallOpenInAgentBuilder"
                 >
-                  {i18n.translate('xpack.gettingStarted.cursorAgent.menuAgentBuilder', {
+                  {i18n.translate('xpack.gettingStarted.agentInstall.menuAgentBuilder', {
                     defaultMessage: 'Kibana Agent Builder',
                   })}
                 </EuiContextMenuItem>,

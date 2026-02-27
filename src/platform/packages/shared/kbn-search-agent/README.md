@@ -1,55 +1,78 @@
 # Search onboarding agent
 
-Agent configuration files tailored to search solution onboarding.
+Agent configuration files tailored to search solution onboarding. Guides developers from
+"I want search" to a working Elasticsearch experience — understanding intent, recommending
+an approach, designing mappings, and generating production-ready code.
 
-## Instruction sets
+## Package contents
 
-This package exports two instruction sets, each designed for a different runtime:
+```
+search_agent_instructions.ts    ← source of truth for all instructions
+index.ts                        ← exports searchAgentInstructions
+build                           ← regenerates AGENTS.md + packages zip
+scripts/generate_agents_md.js   ← extracts the template literal → markdown
+install-agent.sh                ← remote installer (AGENTS.md workflow)
+install-cursor.sh               ← remote installer (Cursor rules + skills)
+AGENTS-elasticsearch-append.md  ← appended to the project's AGENTS.md on install
+.elasticsearch-agent/
+  AGENTS.md                     ← generated — do not edit directly
+  skills/recipes/               ← use-case guides (keyword, semantic, hybrid, RAG, etc.)
+```
 
-### `AGENTS.md`
+## Instruction set
 
-The full conversational playbook used by external LLM agents (Cursor, CLI). It drives a
-multi-turn guided flow: understand intent, understand data, recommend an approach, walk through
-the mapping, generate code, test, and iterate. The LLM has direct control over the conversation
-and can ask one question at a time.
+The package exports a single instruction set — `searchAgentInstructions` — which is the
+canonical conversational playbook for the Elasticsearch onboarding agent. It covers intent
+discovery, data understanding, approach recommendation, mapping design, code generation,
+testing, and iteration.
 
-### `searchAgentInstructionsAgentBuilder`
+This same export is consumed by two runtimes:
 
-A condensed, domain-expertise-focused instruction set for the Kibana Agent Builder built-in agent.
-Agent Builder uses a two-phase architecture (research agent -> answer agent) where a hardcoded base
-system prompt drives tool-calling behavior. Custom instructions extend that base prompt rather than
-replacing it.
+### External LLM agents (Cursor, CLI)
 
-Because of this architecture, the Agent Builder version:
+`./build` generates `.elasticsearch-agent/AGENTS.md` from the TypeScript source and packages
+it into a zip alongside the recipe skills and the `AGENTS-elasticsearch-append.md` file.
+The install scripts download and unpack this zip into the developer's project.
 
-- Provides domain expertise (search approach selection, mapping design, query patterns, code
-  generation standards) instead of controlling conversational flow.
-- Uses tagged sections (similar to Observability and Security agents) so the model can reference
-  specific guidance during tool selection and response generation.
-- Does **not** use `replace_default_instructions` — it works with the default research-then-answer
-  loop rather than fighting it.
+### Kibana Agent Builder
+
+The `search_getting_started` plugin registers the agent via `@kbn/agent-builder-server` with
+`replace_default_instructions: true`, providing the full playbook as the system prompt.
 
 ## Installation
 
-Copy this prompt to your LLM (won't work until it's properly hosted in kibana):
+Two install scripts are provided, each tailored to a different workflow.
+
+### Generic (AGENTS.md-based)
+
+Installs `.elasticsearch-agent/AGENTS.md`, recipe skills, and appends an Elasticsearch
+reference to the project's `AGENTS.md`.
 
 ```
-Fetch and run this remote command:
-
+Fetch and run this remote script:
 curl -sSL https://raw.githubusercontent.com/elastic/kibana/releases/install-agent.sh | sh
+Then help me get started with Elasticsearch.
+```
 
+### Cursor-specific
+
+Converts the agent into a Cursor rule (`.cursor/rules/elastic.mdc`) and copies recipe skills
+into `.cursor/skills/`. Does not modify `AGENTS.md`.
+
+```
+Fetch and run this remote script:
+curl -sSL https://raw.githubusercontent.com/elastic/kibana/releases/install-cursor.sh | sh
 Then help me get started with Elasticsearch.
 ```
 
 ## Development
 
-- Main agent instructions live in `search_agent_instructions.ts` (the source of
-  truth). The `.elasticsearch-agent/AGENTS.md` file is **generated** — do not
-  edit it directly.
+- `search_agent_instructions.ts` is the **source of truth**. The
+  `.elasticsearch-agent/AGENTS.md` file is generated — do not edit it directly.
 - Run `./build` to regenerate `AGENTS.md` from the TypeScript source and
   package the zip file for usage outside of Kibana.
 
-Prompt during development (points to pr branch):
+Prompt during development (points to PR branch):
 
 ```
 Fetch and run this remote script:
