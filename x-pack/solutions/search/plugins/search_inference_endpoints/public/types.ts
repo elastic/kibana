@@ -8,6 +8,7 @@
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
@@ -39,6 +40,7 @@ export interface AppPluginSetupDependencies {
   history: AppMountParameters['history'];
   share: SharePluginSetup;
   console?: ConsolePluginSetup;
+  management: ManagementSetup;
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
