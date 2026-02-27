@@ -38,8 +38,8 @@ export class SearchInferenceEndpointsPlugin
     registerLocators(plugins.share);
 
     plugins.licensing.license$
-      .pipe(take(1))
       .pipe(
+        take(1),
         mergeMap(async (license) => {
           const hasEnterpriseLicense =
             license && license.isAvailable && license.isActive && license.hasAtLeast('enterprise');
