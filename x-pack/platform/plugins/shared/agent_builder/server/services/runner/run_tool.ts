@@ -121,6 +121,15 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     }
   }
 
+  const toolHandlerContext = await createToolHandlerContext<TParams>({
+    toolExecutionParams: {
+      ...toolExecutionParams,
+      toolId: tool.id,
+      toolParams: toolParams as TParams,
+    },
+    manager,
+  });
+
   const toolReturn = await withExecuteToolSpan(
     tool.id,
     { tool: { input: toolParams } },
@@ -132,15 +141,6 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
           `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
         );
       }
-
-      const toolHandlerContext = await createToolHandlerContext<TParams>({
-        toolExecutionParams: {
-          ...toolExecutionParams,
-          toolId: tool.id,
-          toolParams: toolParams as TParams,
-        },
-        manager,
-      });
 
       try {
         const toolHandler = await tool.getHandler();
@@ -179,6 +179,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     request: manager.deps.request,
     toolReturn: runToolReturn,
     abortSignal: manager.deps.abortSignal,
+    toolHandlerContext,
   };
   const afterToolHooksResult = await hooks.run(HookLifecycle.afterToolCall, postContext);
   runToolReturn = afterToolHooksResult.toolReturn;
