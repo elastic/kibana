@@ -6,7 +6,6 @@
  */
 import {
   getStreamTypeFromDefinition,
-  systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
@@ -170,9 +169,7 @@ const generateSignificantEventsRoute = createServerRoute({
           'Number of sample documents to use for generation from the current data of stream'
         ),
     }),
-    body: z.object({
-      system: systemSchema.optional(),
-    }),
+    body: z.object({}),
   }),
   options: {
     access: 'public',
@@ -243,7 +240,6 @@ const generateSignificantEventsRoute = createServerRoute({
       map(({ queries, tokensUsed, toolUsage }) => {
         telemetry.trackSignificantEventsQueriesGenerated({
           count: queries.length,
-          systems_count: 0,
           stream_name: definition.name,
           stream_type: getStreamTypeFromDefinition(definition),
           input_tokens_used: tokensUsed.prompt,
