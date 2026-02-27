@@ -12,9 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { dataFindStepCommonDefinition, DataFindStepTypeId } from '../../../common/steps/data';
 import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
 
-/** Wrap markdown/code content so ICU treats it as literal (avoids FORMAT_ERROR on # and {}) */
-const literal = (s: string) => `'${s.replace(/'/g, "''")}'`;
-
 export const dataFindStepDefinition: PublicStepDefinition = {
   ...dataFindStepCommonDefinition,
   icon: React.lazy(() =>
@@ -41,7 +38,7 @@ export const dataFindStepDefinition: PublicStepDefinition = {
     }),
     examples: [
       i18n.translate('workflowsExtensions.dataFindStep.documentation.example1', {
-        defaultMessage: literal(`## Find first matching item
+        defaultMessage: `## Find first matching item
 \`\`\`yaml
 - name: find-primary-owner
   type: ${DataFindStepTypeId}
@@ -51,11 +48,11 @@ export const dataFindStepDefinition: PublicStepDefinition = {
 
 # Output: { item: { role: "primary_owner", ... }, index: 2 }
 # Or if no match: { item: null, index: null }
-\`\`\``),
+\`\`\``,
       }),
 
       i18n.translate('workflowsExtensions.dataFindStep.documentation.example2', {
-        defaultMessage: literal(`## Find with complex condition
+        defaultMessage: `## Find with complex condition
 \`\`\`yaml
 - name: find-critical-alert
   type: ${DataFindStepTypeId}
@@ -64,11 +61,11 @@ export const dataFindStepDefinition: PublicStepDefinition = {
     condition: "item.status: active AND item.severity >= 4"
 
 # Output: First active alert with severity 4 or higher
-\`\`\``),
+\`\`\``,
       }),
 
       i18n.translate('workflowsExtensions.dataFindStep.documentation.example3', {
-        defaultMessage: literal(`## Error if no match found
+        defaultMessage: `## Error if no match found
 \`\`\`yaml
 - name: find-required-config
   type: ${DataFindStepTypeId}
@@ -78,11 +75,11 @@ export const dataFindStepDefinition: PublicStepDefinition = {
     errorIfEmpty: true
 
 # Returns error if no config with name "production" is found
-\`\`\``),
+\`\`\``,
       }),
 
       i18n.translate('workflowsExtensions.dataFindStep.documentation.example4', {
-        defaultMessage: literal(`## Access the matched item and its index
+        defaultMessage: `## Access the matched item and its index
 \`\`\`yaml
 - name: find-enabled
   type: ${DataFindStepTypeId}
@@ -94,11 +91,11 @@ export const dataFindStepDefinition: PublicStepDefinition = {
   type: console
   with:
     message: "Found item at index {{steps.find-enabled.output.index}}: {{steps.find-enabled.output.item | json}}"
-\`\`\``),
+\`\`\``,
       }),
 
       i18n.translate('workflowsExtensions.dataFindStep.documentation.example5', {
-        defaultMessage: literal(`## Find using index
+        defaultMessage: `## Find using index
 \`\`\`yaml
 - name: find-after-index
   type: ${DataFindStepTypeId}
@@ -107,11 +104,11 @@ export const dataFindStepDefinition: PublicStepDefinition = {
     condition: "index >= 10 AND item.status: pending"
 
 # Output: First pending item at index 10 or later
-\`\`\``),
+\`\`\``,
       }),
 
       i18n.translate('workflowsExtensions.dataFindStep.documentation.example6', {
-        defaultMessage: literal(`## Find with wildcards
+        defaultMessage: `## Find with wildcards
 \`\`\`yaml
 - name: find-error-log
   type: ${DataFindStepTypeId}
@@ -120,7 +117,7 @@ export const dataFindStepDefinition: PublicStepDefinition = {
     condition: "item.level: error AND item.message: *timeout*"
 
 # Output: First error log containing "timeout" in the message
-\`\`\``),
+\`\`\``,
       }),
     ],
   },

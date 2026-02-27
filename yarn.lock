@@ -6932,7 +6932,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/flyout-system-plugin@link:src/platform/plugins/shared/flyout_system":
+"@kbn/flyout-system-example-plugin@link:examples/flyout_system":
   version "0.0.0"
   uid ""
 

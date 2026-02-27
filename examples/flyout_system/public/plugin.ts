@@ -8,20 +8,34 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
-const PLUGIN_NAME = 'Flyout System Examples';
+const PLUGIN_NAME = 'FlyoutSystemExamples';
 
-export class FlyoutSystemExamplesPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup): void {
-    // Register application with the core application service (available in full builds)
+interface SetupDeps {
+  developerExamples: DeveloperExamplesSetup;
+}
+
+export class FlyoutSystemExamplesPlugin implements Plugin<void, void, SetupDeps> {
+  public setup(core: CoreSetup, deps: SetupDeps): void {
+    // Register an application into the side navigation menu
     core.application.register({
       id: 'flyoutSystemExamples',
       title: PLUGIN_NAME,
       async mount(params: AppMountParameters) {
+        // Load application bundle
         const { renderApp } = await import('./application');
+        // Get start services as specified in kibana.json
         const [coreStart] = await core.getStartServices();
+        // Render the application
         return renderApp(coreStart, params);
       },
+    });
+
+    deps.developerExamples.register({
+      appId: 'flyoutSystemExamples',
+      title: 'Flyout System Example Application',
+      description: `Demonstrates the impressive Flyout System.`,
     });
   }
 
