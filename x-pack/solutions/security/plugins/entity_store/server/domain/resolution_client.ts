@@ -60,38 +60,41 @@ export class ResolutionClient {
    * Validates chain prevention (can't link an alias) and has-aliases prevention
    * (can't link an entity that has aliases pointing to it).
    */
-  public async linkEntities(targetId: string, entityIds: string[]): Promise<LinkResult> {
+  public async linkEntities(targetId: string, rawEntityIds: string[]): Promise<LinkResult> {
     const index = getLatestEntitiesIndexName(this.namespace);
 
-    // 1. Validate: target cannot appear in entity_ids
+    // 1. Deduplicate entity_ids
+    const entityIds = [...new Set(rawEntityIds)];
+
+    // 2. Validate: target cannot appear in entity_ids
     if (entityIds.includes(targetId)) {
       throw new SelfLinkError(targetId);
     }
 
-    // 2. Fetch all involved entities
+    // 3. Fetch all involved entities
     const allIds = [targetId, ...entityIds];
     const entities = await this.fetchEntitiesByIds(allIds);
 
-    // 3. Validate: all exist
+    // 4. Validate: all exist
     const missingIds = allIds.filter((id) => !entities.has(id));
     if (missingIds.length > 0) {
       throw new EntitiesNotFoundError(missingIds);
     }
 
-    // 4. Validate: all same type
+    // 5. Validate: all same type
     this.validateSameEntityType(entities);
 
-    // 5. Validate: target has no resolved_to (is not an alias)
+    // 6. Validate: target has no resolved_to (is not an alias)
     const targetEntity = entities.get(targetId)!;
     const targetResolvedTo = targetEntity[RESOLVED_TO_FIELD] as string | undefined;
     if (targetResolvedTo) {
       throw new ChainResolutionError(targetId, targetResolvedTo);
     }
 
-    // 6. Check which entities among entity_ids have aliases pointing to them
+    // 7. Check which entities among entity_ids have aliases pointing to them
     const entitiesWithAliases = await this.findEntitiesWithAliases(entityIds);
 
-    // 7. Categorize each entity_id
+    // 8. Categorize each entity_id
     const linked: string[] = [];
     const skipped: string[] = [];
 
@@ -114,10 +117,10 @@ export class ResolutionClient {
       return { linked: [], skipped, target_id: targetId };
     }
 
-    // 8. Batch updateByQuery: set resolved_to on all entities to link
+    // 9. Batch updateByQuery: set resolved_to on all entities to link
     this.logger.info(`Linking ${linked.length} entities to target '${targetId}'`);
 
-    const updateResponse = await this.esClient.updateByQuery({
+    await this.esClient.updateByQuery({
       index,
       query: {
         bool: {
@@ -130,12 +133,7 @@ export class ResolutionClient {
         params: { targetId },
       },
       refresh: true,
-      conflicts: 'proceed',
     });
-
-    if (updateResponse.failures && updateResponse.failures.length > 0) {
-      this.logger.error(`Some entities failed to link: ${JSON.stringify(updateResponse.failures)}`);
-    }
 
     return { linked, skipped, target_id: targetId };
   }
@@ -144,19 +142,22 @@ export class ResolutionClient {
    * Unlinks alias entities by removing their resolved_to field.
    * Unlinked entities become standalone.
    */
-  public async unlinkEntities(entityIds: string[]): Promise<UnlinkResult> {
+  public async unlinkEntities(rawEntityIds: string[]): Promise<UnlinkResult> {
     const index = getLatestEntitiesIndexName(this.namespace);
 
-    // 1. Fetch all entities
+    // 1. Deduplicate entity_ids
+    const entityIds = [...new Set(rawEntityIds)];
+
+    // 2. Fetch all entities
     const entities = await this.fetchEntitiesByIds(entityIds);
 
-    // 2. Validate: all exist
+    // 3. Validate: all exist
     const missingIds = entityIds.filter((id) => !entities.has(id));
     if (missingIds.length > 0) {
       throw new EntitiesNotFoundError(missingIds);
     }
 
-    // 3. Validate: all have resolved_to (are aliases)
+    // 4. Validate: all have resolved_to (are aliases)
     const notAliases: string[] = [];
     for (const entityId of entityIds) {
       const entity = entities.get(entityId)!;
@@ -170,10 +171,10 @@ export class ResolutionClient {
       throw new EntityNotAliasError(notAliases);
     }
 
-    // 4. Batch updateByQuery: remove resolved_to field
+    // 5. Batch updateByQuery: remove resolved_to field
     this.logger.info(`Unlinking ${entityIds.length} entities`);
 
-    const updateResponse = await this.esClient.updateByQuery({
+    await this.esClient.updateByQuery({
       index,
       query: {
         bool: {
@@ -185,14 +186,7 @@ export class ResolutionClient {
         lang: 'painless',
       },
       refresh: true,
-      conflicts: 'proceed',
     });
-
-    if (updateResponse.failures && updateResponse.failures.length > 0) {
-      this.logger.error(
-        `Some entities failed to unlink: ${JSON.stringify(updateResponse.failures)}`
-      );
-    }
 
     return { unlinked: entityIds };
   }

@@ -209,6 +209,25 @@ describe('ResolutionClient', () => {
         EntityHasAliasesError
       );
     });
+
+    it('should deduplicate entity_ids', async () => {
+      const targetDoc = createEntityDoc('target-1');
+      const entity1Doc = createEntityDoc('entity-1');
+
+      mockEsClient.search.mockResolvedValueOnce(
+        createSearchResponse([targetDoc, entity1Doc]) as never
+      );
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([]) as never);
+      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 1 } as never);
+
+      const result = await client.linkEntities('target-1', ['entity-1', 'entity-1', 'entity-1']);
+
+      expect(result).toEqual({
+        linked: ['entity-1'],
+        skipped: [],
+        target_id: 'target-1',
+      });
+    });
   });
 
   describe('unlinkEntities', () => {
@@ -256,6 +275,17 @@ describe('ResolutionClient', () => {
       await expect(client.unlinkEntities(['alias-1', 'entity-1'])).rejects.toThrow(
         EntityNotAliasError
       );
+    });
+
+    it('should deduplicate entity_ids', async () => {
+      const aliasDoc = createEntityDoc('alias-1', 'user', 'target-1');
+
+      mockEsClient.search.mockResolvedValueOnce(createSearchResponse([aliasDoc]) as never);
+      mockEsClient.updateByQuery.mockResolvedValueOnce({ updated: 1 } as never);
+
+      const result = await client.unlinkEntities(['alias-1', 'alias-1', 'alias-1']);
+
+      expect(result).toEqual({ unlinked: ['alias-1'] });
     });
   });
 
