@@ -13,7 +13,9 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 
 // Markdown by-value state schema (contains content)
 const markdownByValueStateSchema = schema.object({
-  content: schema.string(),
+  content: schema.string({
+    defaultValue: '### Hello'
+  }),
 });
 
 // Markdown by-reference state schema (contains savedObjectId)

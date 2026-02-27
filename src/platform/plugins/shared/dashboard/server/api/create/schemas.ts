@@ -30,8 +30,8 @@ export const createRequestQuerySchema = schema.maybe(
   })
 );
 
-export function getCreateRequestBodySchema() {
-  return getDashboardStateSchema();
+export function getCreateRequestBodySchema(allowUnmappedKeys: boolean) {
+  return getDashboardStateSchema(allowUnmappedKeys);
 }
 
 export function getCreateResponseBodySchema() {

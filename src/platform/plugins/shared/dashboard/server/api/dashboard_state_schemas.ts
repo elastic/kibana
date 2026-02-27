@@ -50,9 +50,16 @@ export const panelGridSchema = schema.object({
   }),
 });
 
-export function getPanelSchema() {
+export function getPanelSchema(allowUnmappedKeys?: boolean) {
   return schema.object({
-    config: schema.oneOf([
+    config: allowUnmappedKeys
+      ? schema.object(
+          {},
+          {
+            unknowns: 'allow',
+          }
+        )
+      : schema.oneOf([
       ...((embeddableService ? embeddableService.getAllEmbeddableSchemas() : []) as [
         ObjectType<{}>
       ]),
@@ -171,14 +178,14 @@ export const accessControlSchema = schema.maybe(
   })
 );
 
-export function getDashboardStateSchema() {
+export function getDashboardStateSchema(allowUnmappedKeys?: boolean) {
   return schema.object({
     pinned_panels: schema.maybe(pinnedPanelsSchema),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
     options: schema.maybe(optionsSchema),
     panels: schema.maybe(
-      schema.arrayOf(schema.oneOf([getPanelSchema(), getSectionSchema()]), {
+      schema.arrayOf(schema.oneOf([getPanelSchema(allowUnmappedKeys), getSectionSchema()]), {
         defaultValue: [],
       })
     ),

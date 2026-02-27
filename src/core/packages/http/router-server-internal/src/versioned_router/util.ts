@@ -75,7 +75,7 @@ export function prepareVersionedRouteValidation(
   let validate = originalValidate;
 
   if (typeof originalValidate === 'function') {
-    validate = once(() => prepareValidation(originalValidate()));
+    validate = once((hapiRequest) => prepareValidation(originalValidate(hapiRequest)));
   } else if (typeof validate === 'object' && validate !== null) {
     validate = prepareValidation(validate);
   }

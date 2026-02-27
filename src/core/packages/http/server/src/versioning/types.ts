@@ -22,6 +22,7 @@ import type {
   RouteSecurity,
 } from '../..';
 import type { RouteDeprecationInfo } from '../router/route';
+import type { Request } from '@hapi/hapi';
 type RqCtx = RequestHandlerContextBase;
 
 export type { ApiVersion };
@@ -344,7 +345,7 @@ export interface AddVersionOpts<P, Q, B> {
    *       that the function will only be called once.
    * @public
    */
-  validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
+  validate: false | VersionedRouteValidation<P, Q, B> | ((hapiRequest?: Request) => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
 
   security?: Pick<RouteSecurity, 'authz'>;
 

@@ -30,18 +30,23 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
   createRoute.addVersion(
     {
       version: INTERNAL_API_VERSION,
-      validate: () => ({
-        request: {
-          params: createRequestParamsSchema,
-          query: createRequestQuerySchema,
-          body: getCreateRequestBodySchema(),
-        },
-        response: {
-          200: {
-            body: getCreateResponseBodySchema,
+      validate: (hapiRequest) => {
+        console.log(hapiRequest);
+        console.log(hapiRequest?.query);
+        console.trace();
+        return {
+          request: {
+            params: createRequestParamsSchema,
+            query: createRequestQuerySchema,
+            body: getCreateRequestBodySchema(hapiRequest?.query?.allowUnmappedKeys ?? false),
           },
-        },
-      }),
+          response: {
+            200: {
+              body: getCreateResponseBodySchema,
+            },
+          },
+        };
+      },
     },
     async (ctx, req, res) => {
       try {

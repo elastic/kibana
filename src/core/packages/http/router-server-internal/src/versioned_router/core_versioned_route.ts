@@ -53,9 +53,9 @@ interface InternalVersionedRouteConfig<M extends RouteMethod> extends VersionedR
   defaultHandlerResolutionStrategy: HandlerResolutionStrategy;
 }
 
-function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handlers'][0]) {
+function extractValidationSchemaFromHandler(handler: VersionedRouterRoute['handlers'][0], hapiRequest?: Request) {
   if (handler.options.validate === false) return undefined;
-  if (typeof handler.options.validate === 'function') return handler.options.validate();
+  if (typeof handler.options.validate === 'function') return handler.options.validate(hapiRequest);
   return handler.options.validate;
 }
 
@@ -196,7 +196,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         }]. Available versions are: ${this.versionsToString()}`,
       });
     }
-    const validation = extractValidationSchemaFromHandler(handler);
+    const validation = extractValidationSchemaFromHandler(handler, hapiRequest);
 
     const { error, ok: kibanaRequest } = validateHapiRequest(hapiRequest, {
       routeInfo: {
