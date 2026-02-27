@@ -7,7 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RunToolFn, RunAgentFn } from '@kbn/agent-builder-server';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
@@ -31,7 +30,6 @@ import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
 import type { AgentRegistry } from './services/agents';
 import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
-import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
 
 export interface AgentBuilderSetupDependencies {
@@ -79,27 +77,6 @@ export interface ToolsSetup {
    * Register a built-in tool to be available in agentBuilder.
    */
   register: ToolsServiceSetup['register'];
-}
-
-/**
- * AgentBuilder skills service's start contract
- */
-export interface SkillsStart {
-  /**
-   * Create a skill registry scoped to the current user and context.
-   * The registry provides access to both built-in and persisted skills.
-   */
-  getRegistry(opts: { request: KibanaRequest }): Promise<SkillRegistry>;
-  /**
-   * Register a skill dynamically after plugin start.
-   * Only affects future conversations (existing ones snapshot skills at creation time).
-   */
-  register: (skill: SkillDefinition) => Promise<void>;
-  /**
-   * Unregister a previously registered skill by ID.
-   * Returns true if the skill was found and removed.
-   */
-  unregister: (skillId: string) => Promise<boolean>;
 }
 
 /**
@@ -187,10 +164,6 @@ export interface AgentBuilderPluginStart {
    * Tools service, to manage or execute tools.
    */
   tools: ToolsStart;
-  /**
-   * Skills service, to manage and access skills.
-   */
-  skills: SkillsStart;
   /**
    * Execution service, to execute agents and retrieve execution status.
    */

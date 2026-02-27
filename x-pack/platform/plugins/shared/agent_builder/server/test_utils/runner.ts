@@ -147,22 +147,17 @@ export const createStateManagerMock = (): StateManagerMock => {
 
 export const createSkillServiceStartMock = (): SkillServiceStartMock => {
   return {
-    getRegistry: jest.fn().mockResolvedValue(createSkillRegistryMock()),
-    registerSkill: jest.fn().mockResolvedValue(undefined),
-    unregisterSkill: jest.fn().mockResolvedValue(false),
+    getSkillDefinition: jest.fn().mockReturnValue(undefined),
+    listSkills: jest.fn().mockReturnValue([]),
   };
 };
 
 export const createSkillRegistryMock = (): SkillRegistryMock => {
   return {
-    has: jest.fn().mockResolvedValue(false),
-    get: jest.fn().mockResolvedValue(undefined),
-    list: jest.fn().mockResolvedValue([]),
-    listSkillDefinitions: jest.fn().mockResolvedValue([]),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    resolveSkillSelection: jest.fn().mockResolvedValue([]),
+    register: jest.fn().mockResolvedValue(undefined),
+    has: jest.fn().mockReturnValue(false),
+    get: jest.fn().mockReturnValue(undefined),
+    list: jest.fn().mockReturnValue([]),
   };
 };
 

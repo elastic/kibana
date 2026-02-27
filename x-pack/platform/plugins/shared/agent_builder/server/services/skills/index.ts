@@ -5,22 +5,6 @@
  * 2.0.
  */
 
-export {
-  type SkillService,
-  type SkillServiceStartDeps,
-  type SkillServiceSetup,
-  type SkillServiceStart,
-  type SkillRegistry,
-  type SkillProvider,
-  createSkillService,
-  createSkillRegistry,
-} from './skill_service';
-export {
-  type ReadonlySkillProvider,
-  type WritableSkillProvider,
-  isReadonlySkillProvider,
-  isWritableSkillProvider,
-} from './skill_provider';
-export { createBuiltinSkillProvider } from './builtin';
-export { createPersistedSkillProvider } from './persisted';
-export { internalToPublicDefinition } from './utils';
+export { createSkillRegistry, type SkillRegistry } from './skill_registry';
+export { type SkillService, createSkillService } from './skill_service';
+export type { SkillServiceSetup, SkillServiceStart } from './types';
