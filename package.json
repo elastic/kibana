@@ -132,7 +132,7 @@
     "@elastic/ecs": "9.3.0",
     "@elastic/elasticsearch": "9.3.2",
     "@elastic/ems-client": "8.6.3",
-    "@elastic/eui": "113.1.0",
+    "@elastic/eui": "file:./eui_flyouts_emotion_fix_3.tgz",
     "@elastic/eui-theme-borealis": "6.1.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/kibana-d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
