@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { isTemplateReference } from './is_template_reference';
 import {
   getActionTypeDisplayNameFromStepType,
   getActionTypeIdFromStepType,
@@ -23,15 +24,6 @@ import {
   getEditConnectorHoverCommandLink,
 } from '../../../widgets/workflow_yaml_editor/lib/use_register_hover_commands';
 import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
-
-function isTemplateReference(value: string | null | undefined): boolean {
-  if (value == null || typeof value !== 'string') return false;
-  const trimmed = value.trim();
-  return (
-    (trimmed.startsWith('${{') && trimmed.endsWith('}}')) ||
-    (trimmed.startsWith('{{') && trimmed.endsWith('}}'))
-  );
-}
 
 const TRANSLATIONS = {
   manageConnector: i18n.translate('workflows.validateConnectorIds.manageConnectorMessage', {
