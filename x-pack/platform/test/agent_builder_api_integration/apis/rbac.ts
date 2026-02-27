@@ -101,7 +101,8 @@ export default function ({ getService }: FtrProviderContext) {
     await security.role.delete(roleName);
   }
 
-  describe('Agent Builder RBAC: manage_agents and manage_tools sub-features', () => {
+  describe('Agent Builder RBAC: manage_agents and manage_tools sub-features', function () {
+    this.tags(['skipServerless']); // only run on stateful because serverless doesn't support user and roles management
     const rbacTestIndex = `${RBAC_TEST_PREFIX}-index-${testRunId}`;
 
     const fixtureAgentId = `${RBAC_TEST_PREFIX}-fixture-agent-${testRunId}`;
