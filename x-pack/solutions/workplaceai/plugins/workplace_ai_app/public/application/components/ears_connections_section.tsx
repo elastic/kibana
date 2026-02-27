@@ -43,7 +43,7 @@ const GOOGLE_SCOPES = [
 function getEARSAuthUrl(
   config: WorkplaceAIClientConfig,
   kibanaBasePath: string | undefined,
-  pkceCodeVerifier: string,
+  pkceCodeVerifier: string | undefined,
   state: string
 ): string | undefined {
   if (!kibanaBasePath) {
@@ -55,9 +55,13 @@ function getEARSAuthUrl(
   const params = new URLSearchParams();
   GOOGLE_SCOPES.forEach((s) => params.append('scope', s));
   params.set('callback_uri', `${kibanaBasePath}/app/workplace_ai`);
-  params.set('pkce_challenge', calculateCodeChallenge(pkceCodeVerifier));
-  params.set('pkce_method', 'S256');
-  params.set('state', state);
+  if (pkceCodeVerifier) {
+    params.set('pkce_challenge', calculateCodeChallenge(pkceCodeVerifier));
+    params.set('pkce_method', 'S256');
+  }
+  if (state) {
+    params.set('state', state);
+  }
 
   const authUrl = earsUrl
     ? `${earsUrl}/${EarsOAuthProvider.Google}/oauth/authorize?${params.toString()}`
