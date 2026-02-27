@@ -29,8 +29,6 @@ export * from './src/testbed';
 
 export * from './src/testing_library_react_helpers';
 
-export * from './src/react_18_concurrent_mode_compatibility';
-
 export const nextTick = () => new Promise((res) => process.nextTick(res));
 
 export const delay = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));
