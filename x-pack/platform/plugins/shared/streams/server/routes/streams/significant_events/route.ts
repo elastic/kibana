@@ -169,7 +169,6 @@ const generateSignificantEventsRoute = createServerRoute({
           'Number of sample documents to use for generation from the current data of stream'
         ),
     }),
-    body: z.object({}),
   }),
   options: {
     access: 'public',
