@@ -9,9 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
 import {
-  createAsCodeExportShareIntegration,
   downloadMultipleAs,
-  type AsCodeExportFormat,
   type ExportShare,
   type RegisterShareIntegrationArgs,
 } from '@kbn/share-plugin/public';
@@ -19,7 +17,6 @@ import { exporters } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { JsonValue } from '@kbn/utility-types';
 import type { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
@@ -27,18 +24,6 @@ export interface CSVSharingData {
   datatables: Datatable[];
   csvEnabled: boolean;
 }
-
-export interface ExportSourceSharingData {
-  title: string;
-  exportSource: JsonValue;
-}
-
-const jsonFormat: AsCodeExportFormat = {
-  label: 'JSON',
-  fileExtension: '.json',
-  mimeType: 'application/json',
-  codeLanguage: 'json',
-};
 
 declare global {
   interface Window {
@@ -181,31 +166,4 @@ export const downloadCsvLensShareProvider = ({
       };
     },
   };
-};
-
-export const exportSourceLensShareProvider = (): RegisterShareIntegrationArgs<ExportShare> => {
-  return createAsCodeExportShareIntegration<ExportSourceSharingData>({
-    id: 'exportSourceLens',
-    exportType: 'lens_export_source',
-    icon: 'code',
-    label: i18n.translate('xpack.lens.exportSource.label', {
-      defaultMessage: 'Export source (JSON)',
-    }),
-    format: jsonFormat,
-    getFilenameBase: ({ title }) => title,
-    getContent: ({ exportSource }) => JSON.stringify(exportSource, null, 2),
-    copyAsset: {
-      headingText: i18n.translate('xpack.lens.exportSource.panelTitle', {
-        defaultMessage: 'Lens export source',
-      }),
-      helpText: i18n.translate('xpack.lens.exportSource.panelDescription', {
-        defaultMessage: 'Use this JSON as the source for automated exports.',
-      }),
-    },
-    download: {
-      buttonLabel: i18n.translate('xpack.lens.exportSource.downloadButtonLabel', {
-        defaultMessage: 'Download JSON',
-      }),
-    },
-  });
 };

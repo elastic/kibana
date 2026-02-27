@@ -135,10 +135,7 @@ import {
   ACTION_CREATE_ESQL_CHART,
   ACTION_EDIT_LENS_EMBEDDABLE,
 } from './trigger_actions/open_lens_config/constants';
-import {
-  downloadCsvLensShareProvider,
-  exportSourceLensShareProvider,
-} from './app_plugin/csv_download_provider/csv_download_provider';
+import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import { setLensFeatureFlags } from './get_feature_flags';
 import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
@@ -467,8 +464,6 @@ export class LensPlugin {
           },
         })
       );
-
-      share.registerShareIntegration<ExportShare>('lens', exportSourceLensShareProvider());
     }
 
     visualizations.registerAlias(lensVisTypeAlias);
