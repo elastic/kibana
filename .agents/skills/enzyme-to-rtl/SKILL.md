@@ -181,17 +181,16 @@ Use this pattern instead of enzyme's `.find(Component).prop('propName')`. Clear 
 
 ## Async & state updates
 
-- Wrap async state updates in `act()` or use `waitFor()`:
+- Wait for a UI boundary with `findBy*` (preferred) or `waitFor()` when you need a custom assertion. Use `act()` for explicit timer advancement/flush (e.g. `jest.runOnlyPendingTimersAsync()` in fake-timer suites) or imperative callbacks that trigger React updates.
 
 ```typescript
-import { waitFor } from '@testing-library/react';
-
-await screen.findByTestId('results')
-```
+await screen.findByTestId('results');
 
 - Replace `wrapper.update()` + `nextTick()` patterns with `await waitFor(...)`.
 - For promises that resolve in tests, prefer `findByTestId` (auto-waits) over `getByTestId` + `waitFor`. Prefer reusing the element returned from `findBy*` instead of re-querying with `getBy*` immediately after (re-query only when you expect the DOM to change/replace the element).
 - For elements that should disappear, prefer `waitForElementToBeRemoved(...)` (example: `await waitForElementToBeRemoved(screen.getByTestId('loading'))`).
+- Don't wrap `fireEvent`/`userEvent` in `act()`; instead, perform the interaction and then wait on the relevant UI boundary (see bullets above).
+- Avoid “fixing” failures by increasing `waitFor` timeouts; tighten the UI boundary you wait for instead.
 
 ## Snapshot strategy
 
@@ -235,7 +234,7 @@ await waitFor(() => {
 - **Missing providers after removing shallow.** Enzyme `shallow` doesn't render children deeply, hiding missing context providers. After switching to `render()`, add required providers (I18n, Redux, Router, Theme, etc.) or mock them.
 - **EUI component explosions.** Some EUI components render complex DOM. Mock them if the test doesn't care about their internals. Prefer shared mocks when available (e.g. `import "@kbn/code-editor-mock/jest_helper"`), then plugin-local `__mocks__/` files (e.g. `<pluginRoot>/__mocks__/@elastic/charts/index.tsx`), then an inline mock factory as a fallback. When stubbing components to `<div>`s, add a `data-test-subj` only when the test needs a stable query for "mock rendered".
 - **Portal-based elements.** Modals, toasts, and popovers render outside `container`. Use `document.querySelector` or `screen` (which queries the whole document body). Never snapshot these — use targeted assertions instead (see Snapshot strategy).
-- **`act()` warnings.** Usually caused by missing `await` / missing async UI boundary after an interaction. Prefer `await screen.findBy...` / `await waitFor(...)` over wrapping events in `act()` (events are already wrapped). Use `act()` when you're manually advancing timers or otherwise triggering React updates outside RTL helpers.
+- **`act()` warnings.** Usually caused by missing `await` / missing async UI boundary after an interaction. Prefer `await screen.findBy...` / `await waitFor(...)` over wrapping events in `act()` (events are already wrapped). Use `act()` for explicit timer advancement/flush (e.g. `jest.runOnlyPendingTimersAsync()` in fake-timer suites) or imperative callbacks that trigger React updates. Never use empty `act()` blocks (e.g. `await act(async () => {})`).
 - **`userEvent` performance.** `userEvent` simulates full event sequences and scales poorly in CI (geometrically with interaction count). Prefer `fireEvent` for simple clicks and value changes. Replace `userEvent.type(input, 'text')` with `fireEvent.change(input, { target: { value: 'text' } })` + `fireEvent.blur(input)` unless the test is specifically exercising per-keystroke behavior (e.g. keydown handlers, typeahead suggestions, input masking/formatting, debounce-on-each-char). When `fireEvent.change` causes act warnings inside portals/overlays, prefer `userEvent.paste` over `userEvent.type` — it sets the full value in one step without per-character overhead.
 - **Timer-based tests.** Replace `jest.advanceTimersByTime` patterns carefully — RTL's `userEvent` uses real timers by default. Use `userEvent.setup({ advanceTimers: jest.advanceTimersByTime })` when fake timers are needed.
 
