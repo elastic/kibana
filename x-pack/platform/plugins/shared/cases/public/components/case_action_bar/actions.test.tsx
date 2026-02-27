@@ -96,9 +96,7 @@ describe('CaseView actions', () => {
       .first()
       .simulate('click');
     expect(wrapper.find('[data-test-subj="property-actions-case-trash"]').exists()).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="property-actions-case-copy"]').exists()
-    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="property-actions-case-copy"]').exists()).toBeTruthy();
   });
 
   it('toggle delete modal and confirm', async () => {
