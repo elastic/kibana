@@ -34,7 +34,9 @@ describe('partitionStream', () => {
     error: jest.fn(),
   } as unknown as Logger;
 
-  const mockEsClient = {} as ElasticsearchClient;
+  const mockEsClient = {
+    count: jest.fn(),
+  } as unknown as ElasticsearchClient;
   const mockInferenceClient = {} as BoundInferenceClient;
   const mockSignal = new AbortController().signal;
   const mockGetFeatures = jest.fn().mockResolvedValue([]);
@@ -43,13 +45,16 @@ describe('partitionStream', () => {
     routing: Streams.WiredStream.Definition['ingest']['wired']['routing'] = []
   ): Streams.WiredStream.Definition => ({
     name: 'logs.test',
+    description: 'Test stream',
+    updated_at: '2024-01-01T00:00:00Z',
     ingest: {
       lifecycle: { dsl: {} },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: '2024-01-01T00:00:00Z' },
+      settings: {},
+      failure_store: { disabled: {} },
       wired: {
         routing,
         fields: {},
-        failure_store: { enabled: false },
       },
     },
   });
@@ -63,6 +68,12 @@ describe('partitionStream', () => {
     signal: mockSignal,
     getFeatures: mockGetFeatures,
   };
+
+  const createMockAnalysis = () => ({
+    total: 100,
+    sampled: 50,
+    fields: { message: ['test log message'] },
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -109,7 +120,7 @@ describe('partitionStream', () => {
       expect(mockExecuteAsReasoningAgent).not.toHaveBeenCalled();
     });
 
-    it('should return no_samples when clusters have zero samples, child conditions exist, but no samples without exclusion either', async () => {
+    it('should return no_samples when clusters have zero samples, child conditions exist, but no docs without exclusion either', async () => {
       const definition = createMockDefinition([
         {
           destination: 'logs.test.child',
@@ -118,21 +129,15 @@ describe('partitionStream', () => {
         },
       ]);
 
-      mockClusterLogs
-        .mockResolvedValueOnce([
-          {
-            name: 'Uncategorized logs',
-            condition: { always: {} },
-            clustering: { sampled: 0, noise: [], clusters: [] },
-          },
-        ])
-        .mockResolvedValueOnce([
-          {
-            name: 'Uncategorized logs',
-            condition: { always: {} },
-            clustering: { sampled: 0, noise: [], clusters: [] },
-          },
-        ]);
+      mockClusterLogs.mockResolvedValueOnce([
+        {
+          name: 'Uncategorized logs',
+          condition: { always: {} },
+          clustering: { sampled: 0, noise: [], clusters: [] },
+        },
+      ]);
+
+      (mockEsClient.count as jest.Mock).mockResolvedValueOnce({ count: 0 });
 
       const result = await partitionStream({
         ...defaultParams,
@@ -143,17 +148,15 @@ describe('partitionStream', () => {
         partitions: [],
         reason: 'no_samples',
       });
-      expect(mockClusterLogs).toHaveBeenCalledTimes(2);
-      expect(mockClusterLogs).toHaveBeenNthCalledWith(
-        1,
+      expect(mockClusterLogs).toHaveBeenCalledTimes(1);
+      expect(mockClusterLogs).toHaveBeenCalledWith(
         expect.objectContaining({
           excludeConditions: [{ field: 'service.name', eq: 'api' }],
         })
       );
-      expect(mockClusterLogs).toHaveBeenNthCalledWith(
-        2,
+      expect(mockEsClient.count).toHaveBeenCalledWith(
         expect.objectContaining({
-          excludeConditions: [],
+          index: 'logs.test',
         })
       );
       expect(mockExecuteAsReasoningAgent).not.toHaveBeenCalled();
@@ -161,7 +164,7 @@ describe('partitionStream', () => {
   });
 
   describe('reason: all_data_partitioned', () => {
-    it('should return all_data_partitioned when clusters have zero samples with exclusions but have samples without exclusions', async () => {
+    it('should return all_data_partitioned when clusters have zero samples with exclusions but docs exist without exclusions', async () => {
       const definition = createMockDefinition([
         {
           destination: 'logs.test.child',
@@ -170,21 +173,15 @@ describe('partitionStream', () => {
         },
       ]);
 
-      mockClusterLogs
-        .mockResolvedValueOnce([
-          {
-            name: 'Uncategorized logs',
-            condition: { always: {} },
-            clustering: { sampled: 0, noise: [], clusters: [] },
-          },
-        ])
-        .mockResolvedValueOnce([
-          {
-            name: 'Uncategorized logs',
-            condition: { always: {} },
-            clustering: { sampled: 100, noise: [], clusters: [] },
-          },
-        ]);
+      mockClusterLogs.mockResolvedValueOnce([
+        {
+          name: 'Uncategorized logs',
+          condition: { always: {} },
+          clustering: { sampled: 0, noise: [], clusters: [] },
+        },
+      ]);
+
+      (mockEsClient.count as jest.Mock).mockResolvedValueOnce({ count: 100 });
 
       const result = await partitionStream({
         ...defaultParams,
@@ -195,7 +192,8 @@ describe('partitionStream', () => {
         partitions: [],
         reason: 'all_data_partitioned',
       });
-      expect(mockClusterLogs).toHaveBeenCalledTimes(2);
+      expect(mockClusterLogs).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.count).toHaveBeenCalledTimes(1);
       expect(mockExecuteAsReasoningAgent).not.toHaveBeenCalled();
     });
 
@@ -213,21 +211,15 @@ describe('partitionStream', () => {
         },
       ]);
 
-      mockClusterLogs
-        .mockResolvedValueOnce([
-          {
-            name: 'Uncategorized logs',
-            condition: { always: {} },
-            clustering: { sampled: 0, noise: [], clusters: [] },
-          },
-        ])
-        .mockResolvedValueOnce([
-          {
-            name: 'Uncategorized logs',
-            condition: { always: {} },
-            clustering: { sampled: 50, noise: [], clusters: [] },
-          },
-        ]);
+      mockClusterLogs.mockResolvedValueOnce([
+        {
+          name: 'Uncategorized logs',
+          condition: { always: {} },
+          clustering: { sampled: 0, noise: [], clusters: [] },
+        },
+      ]);
+
+      (mockEsClient.count as jest.Mock).mockResolvedValueOnce({ count: 50 });
 
       const result = await partitionStream({
         ...defaultParams,
@@ -239,8 +231,7 @@ describe('partitionStream', () => {
         reason: 'all_data_partitioned',
       });
 
-      expect(mockClusterLogs).toHaveBeenNthCalledWith(
-        1,
+      expect(mockClusterLogs).toHaveBeenCalledWith(
         expect.objectContaining({
           excludeConditions: [{ field: 'service.name', eq: 'api' }],
         })
@@ -259,14 +250,16 @@ describe('partitionStream', () => {
           clustering: {
             sampled: 100,
             noise: [],
-            clusters: [{ count: 50, analysis: { message: 'cluster 1' } }],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
           },
         },
       ]);
 
       mockExecuteAsReasoningAgent.mockResolvedValueOnce({
+        content: '',
         toolCalls: [
           {
+            toolCallId: 'call-1',
             function: {
               name: 'partition_logs',
               arguments: {
@@ -276,7 +269,7 @@ describe('partitionStream', () => {
             },
           },
         ],
-      });
+      } as any);
 
       const result = await partitionStream({
         ...defaultParams,
@@ -299,14 +292,16 @@ describe('partitionStream', () => {
           clustering: {
             sampled: 100,
             noise: [],
-            clusters: [{ count: 50, analysis: { message: 'cluster 1' } }],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
           },
         },
       ]);
 
       mockExecuteAsReasoningAgent.mockResolvedValueOnce({
+        content: '',
         toolCalls: [
           {
+            toolCallId: 'call-1',
             function: {
               name: 'partition_logs',
               arguments: {
@@ -316,7 +311,7 @@ describe('partitionStream', () => {
             },
           },
         ],
-      });
+      } as any);
 
       const result = await partitionStream({
         ...defaultParams,
@@ -339,14 +334,16 @@ describe('partitionStream', () => {
           clustering: {
             sampled: 100,
             noise: [],
-            clusters: [{ count: 50, analysis: { message: 'cluster 1' } }],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
           },
         },
       ]);
 
       mockExecuteAsReasoningAgent.mockResolvedValueOnce({
+        content: '',
         toolCalls: [
           {
+            toolCallId: 'call-1',
             function: {
               name: 'partition_logs',
               arguments: {
@@ -359,7 +356,7 @@ describe('partitionStream', () => {
             },
           },
         ],
-      });
+      } as any);
 
       const result = await partitionStream({
         ...defaultParams,
@@ -380,14 +377,16 @@ describe('partitionStream', () => {
           clustering: {
             sampled: 100,
             noise: [],
-            clusters: [{ count: 50, analysis: { message: 'cluster 1' } }],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
           },
         },
       ]);
 
       mockExecuteAsReasoningAgent.mockResolvedValueOnce({
+        content: '',
         toolCalls: [
           {
+            toolCallId: 'call-1',
             function: {
               name: 'partition_logs',
               arguments: {
@@ -400,7 +399,7 @@ describe('partitionStream', () => {
             },
           },
         ],
-      });
+      } as any);
 
       const result = await partitionStream({
         ...defaultParams,
@@ -421,9 +420,7 @@ describe('partitionStream', () => {
         },
       ]);
 
-      let capturedToolCallback:
-        | ((args: { function: { arguments: unknown } }) => Promise<unknown>)
-        | null = null;
+      let capturedToolCallback: ((args: any) => Promise<unknown>) | null = null;
 
       mockClusterLogs.mockResolvedValue([
         {
@@ -432,16 +429,18 @@ describe('partitionStream', () => {
           clustering: {
             sampled: 100,
             noise: [],
-            clusters: [{ count: 50, analysis: { message: 'cluster 1' } }],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
           },
         },
       ]);
 
-      mockExecuteAsReasoningAgent.mockImplementation(async ({ toolCallbacks }) => {
+      mockExecuteAsReasoningAgent.mockImplementation((async ({ toolCallbacks }: any) => {
         capturedToolCallback = toolCallbacks.partition_logs;
         return {
+          content: '',
           toolCalls: [
             {
+              toolCallId: 'call-1',
               function: {
                 name: 'partition_logs',
                 arguments: {
@@ -452,7 +451,7 @@ describe('partitionStream', () => {
             },
           ],
         };
-      });
+      }) as any);
 
       await partitionStream({
         ...defaultParams,
@@ -465,6 +464,7 @@ describe('partitionStream', () => {
       mockClusterLogs.mockResolvedValueOnce([]);
 
       await capturedToolCallback!({
+        toolCallId: 'test-call',
         function: {
           arguments: {
             index: 'logs.test',
