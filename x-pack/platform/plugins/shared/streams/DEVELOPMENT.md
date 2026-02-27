@@ -59,6 +59,18 @@ The Discover integration handles this automatically — `getDiscoverEsqlQuery()`
 | `streams/server/.../esql_views/manage_esql_views.ts` | Creates/reads/deletes ES|QL views via `/_query/view` |
 | `streams/server/.../state_management/streams/query_stream.ts` | Uses `getEsqlViewName()` when building create/update/delete actions |
 
+#### Known limitation: wildcard queries over ES|QL views
+
+Querying query streams with wildcard patterns like `FROM $.parent.*` is **unreliable** and should not be used. Manual testing revealed that Elasticsearch produces false "circular view reference" errors even when no actual cycles exist in the view graph. Key findings:
+
+- `FROM $.parent.*` may succeed or fail unpredictably depending on the **global view graph state** — the full set of ES|QL views defined in the cluster, not just those matching the wildcard
+- Adding or removing an unrelated view elsewhere in the system can cause a previously working wildcard query to start failing, or vice versa
+- The error message (`circular view reference`) is misleading — it does not indicate an actual circular dependency
+- Elasticsearch's `Regex.simpleMatch()` matches across dots, so `*` is multi-segment (e.g., `$.parent.*` matches `$.parent.child.grandchild`)
+- The behavior appears tied to view resolution order, which is non-deterministic from the user's perspective
+
+This is an Elasticsearch-level limitation, not a Kibana bug. The `$.` prefix isolation ensures that **ingest stream** wildcard patterns (`FROM parent, parent.*`) work reliably because they never enter the `$.` namespace. But querying across query stream views with wildcards should be avoided until Elasticsearch resolves the underlying view resolution issue.
+
 ### Draft Mode
 
 Processing and child streams can exist in "draft" mode, which uses ES|QL views at query time instead of ingest pipelines. This lets users test changes on existing data before committing them to ingest time. Draft streams can be promoted to ingest sub streams when ready.
