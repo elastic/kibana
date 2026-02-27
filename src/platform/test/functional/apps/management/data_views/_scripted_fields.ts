@@ -198,9 +198,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should visualize scripted field in vertical bar chart', async function () {
-          const allGlobal = await kibanaServer.uiSettings.getAllGlobal();
-          log.info(allGlobal);
-
           await filterBar.removeAllFilters();
           await PageObjects.unifiedFieldList.clickFieldListItemVisualize(scriptedPainlessFieldName);
           await PageObjects.header.waitUntilLoadingHasFinished();

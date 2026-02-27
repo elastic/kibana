@@ -124,13 +124,4 @@ export class KbnClientUiSettings {
 
     return data.settings;
   }
-
-  async getAllGlobal({ space }: { space?: string } = {}) {
-    const { data } = await this.requester.request<UiSettingsApiResponse>({
-      path: pathWithSpace(space)`/internal/kibana/global_settings`,
-      method: 'GET',
-    });
-
-    return data.settings;
-  }
 }
