@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { generateSecretsSchemaFromSpec } from './generate_secrets_schema_from_spec';
-import { AuthMode } from '../connector_spec';
+import type { AuthMode } from '../connector_spec';
 
 describe('generateSecretsSchemaFromSpec', () => {
   test('correctly generates schemas for array of auth types', () => {
