@@ -246,9 +246,37 @@ describe('EditIlmPhasesFlyout', () => {
             hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
             warm: { name: 'warm', size_in_bytes: 0, min_age: '10d' },
           },
-          expect.any(Object)
+          { invalidPhases: [] }
         )
       );
+    });
+
+    it('emits invalidPhases meta when a phase is invalid', async () => {
+      const { onChange } = renderFlyout(
+        {
+          initialPhases: {
+            hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+            warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+            cold: { name: 'cold', size_in_bytes: 0, min_age: '40d' },
+          },
+        },
+        { initialSelectedPhase: 'cold' }
+      );
+
+      await tick();
+      onChange.mockClear();
+
+      const coldPanel = withinPhase('cold');
+      fireEvent.change(coldPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`), {
+        target: { value: '' },
+      });
+
+      await waitFor(() => {
+        const lastCall = onChange.mock.calls.at(-1);
+        expect(lastCall).toBeDefined();
+        const meta = lastCall?.[1];
+        expect(meta.invalidPhases).toContain('cold');
+      });
     });
 
     it('defaults a newly-enabled phase min_age to 2x the closest enabled previous phase', async () => {
@@ -349,7 +377,7 @@ describe('EditIlmPhasesFlyout', () => {
               downsample: { after: '30d', fixed_interval: '1d' },
             },
           },
-          expect.any(Object)
+          { invalidPhases: [] }
         )
       );
 
@@ -415,7 +443,7 @@ describe('EditIlmPhasesFlyout', () => {
               downsample: { after: '30d', fixed_interval: '2d' },
             },
           },
-          expect.any(Object)
+          { invalidPhases: [] }
         )
       );
     });
@@ -460,7 +488,7 @@ describe('EditIlmPhasesFlyout', () => {
             downsample: { after: '30d', fixed_interval: '1d' },
           },
         },
-        expect.any(Object)
+        { invalidPhases: [] }
       );
 
       // Disable downsampling -> readonly should re-appear (re-mounted).
@@ -635,7 +663,7 @@ describe('EditIlmPhasesFlyout', () => {
               searchable_snapshot: 'repo2',
             },
           },
-          expect.any(Object)
+          { invalidPhases: [] }
         )
       );
     });
@@ -714,7 +742,7 @@ describe('EditIlmPhasesFlyout', () => {
           {
             hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
           },
-          expect.any(Object)
+          { invalidPhases: [] }
         )
       );
       expect(getPanel('hot')).toBeVisible();
@@ -841,7 +869,7 @@ describe('EditIlmPhasesFlyout', () => {
             hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
             warm: { name: 'warm', size_in_bytes: 0, min_age: '3d' },
           },
-          expect.any(Object)
+          { invalidPhases: [] }
         );
 
         expect(clearTimeoutSpy).toHaveBeenCalled();

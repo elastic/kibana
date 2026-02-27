@@ -569,19 +569,47 @@ describe('EditDslStepsFlyout', () => {
       await tick();
 
       expect(onChange).toHaveBeenCalled();
-      expect(onChange).toHaveBeenLastCalledWith(
-        {
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith(
+          {
+            dsl: {
+              data_retention: '30d',
+              downsample: [
+                { after: '40d', fixed_interval: '5d' },
+                { after: '41d', fixed_interval: '10d' },
+                { after: '82d', fixed_interval: '20d' },
+              ],
+            },
+          },
+          { invalidStepIndices: [0, 1, 2] }
+        )
+      );
+    });
+
+    it('emits invalidStepIndices meta when a step has errors', async () => {
+      const { onChange } = renderFlyout({
+        initialSteps: {
           dsl: {
             data_retention: '30d',
-            downsample: [
-              { after: '40d', fixed_interval: '5d' },
-              { after: '41d', fixed_interval: '10d' },
-              { after: '82d', fixed_interval: '20d' },
-            ],
+            downsample: [{ after: '30d', fixed_interval: '1h' }],
           },
         },
-        expect.any(Object)
-      );
+      });
+
+      await tick();
+      onChange.mockClear();
+
+      const panel = withinStep(0);
+      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+        target: { value: '1.5' },
+      });
+
+      await waitFor(() => {
+        const lastCall = onChange.mock.calls.at(-1);
+        expect(lastCall).toBeDefined();
+        const meta = lastCall?.[1];
+        expect(meta.invalidStepIndices).toContain(0);
+      });
     });
 
     it('debounces rapid user edits into a single onChange', async () => {
@@ -637,7 +665,7 @@ describe('EditDslStepsFlyout', () => {
               downsample: [{ after: '30d', fixed_interval: '3h' }],
             },
           },
-          expect.any(Object)
+          { invalidStepIndices: [] }
         );
 
         // Intermediate edits should clear the previous pending debounce timer.
