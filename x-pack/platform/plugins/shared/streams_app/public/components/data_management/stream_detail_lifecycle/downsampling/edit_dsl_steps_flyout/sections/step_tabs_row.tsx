@@ -45,6 +45,7 @@ export const StepTabsRow = ({
   const tabsScrollCss = useEuiOverflowScroll('x');
   const { tabsContainerStyles, tabsErrorSelectedUnderlineStyles } = useStyles();
   const tabsContainerRef = useRef<HTMLDivElement | null>(null);
+  const tabRefs = useRef<Array<HTMLSpanElement | null>>([]);
 
   useEffect(() => {
     if (selectedStepIndex === undefined) return;
@@ -53,9 +54,8 @@ export const StepTabsRow = ({
 
     // Wait for EuiTabs/EuiTab to render before attempting to scroll
     const id = window.requestAnimationFrame(() => {
-      const selector = `[data-test-subj="${dataTestSubj}Tab-step-${selectedStepIndex + 1}"]`;
-      const selectedTabEl = containerEl.querySelector<HTMLElement>(selector);
-      selectedTabEl?.scrollIntoView?.({
+      const selectedTabWrapperEl = tabRefs.current[selectedStepIndex];
+      selectedTabWrapperEl?.scrollIntoView?.({
         behavior: 'smooth',
         block: 'nearest',
         inline: 'nearest',
@@ -74,31 +74,37 @@ export const StepTabsRow = ({
       });
 
       return (
-        <EuiTab
+        <span
           key={item.id}
-          onClick={() => setSelectedStepIndex(index)}
-          isSelected={index === selectedStepIndex}
-          className={hasErrors ? 'streamsDslStepsTab--hasErrors' : undefined}
-          data-test-subj={`${dataTestSubj}Tab-step-${index + 1}`}
-          prepend={
-            hasErrors ? (
-              <EuiIcon
-                type="warning"
-                color="danger"
-                size="m"
-                aria-label={i18n.translate(
-                  'xpack.streams.editDslStepsFlyout.stepTabHasErrorsIconAriaLabel',
-                  {
-                    defaultMessage: 'Step {stepNumber} has errors',
-                    values: { stepNumber: index + 1 },
-                  }
-                )}
-              />
-            ) : undefined
-          }
+          ref={(node) => {
+            tabRefs.current[index] = node;
+          }}
         >
-          {hasErrors ? <EuiTextColor color="danger">{label}</EuiTextColor> : label}
-        </EuiTab>
+          <EuiTab
+            onClick={() => setSelectedStepIndex(index)}
+            isSelected={index === selectedStepIndex}
+            className={hasErrors ? 'streamsDslStepsTab--hasErrors' : undefined}
+            data-test-subj={`${dataTestSubj}Tab-step-${index + 1}`}
+            prepend={
+              hasErrors ? (
+                <EuiIcon
+                  type="warning"
+                  color="danger"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.streams.editDslStepsFlyout.stepTabHasErrorsIconAriaLabel',
+                    {
+                      defaultMessage: 'Step {stepNumber} has errors',
+                      values: { stepNumber: index + 1 },
+                    }
+                  )}
+                />
+              ) : undefined
+            }
+          >
+            {hasErrors ? <EuiTextColor color="danger">{label}</EuiTextColor> : label}
+          </EuiTab>
+        </span>
       );
     });
   }, [dataTestSubj, items, selectedStepIndex, setSelectedStepIndex, tabHasErrors]);
