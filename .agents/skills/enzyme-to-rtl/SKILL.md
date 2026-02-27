@@ -212,6 +212,7 @@ await waitFor(() => {
 - **EUI component explosions.** Some EUI components render complex DOM. Mock them if the test doesn't care about their internals: `jest.mock('@elastic/eui', () => ({ EuiPopover: ({ children }: any) => <div>{children}</div> }))`.
 - **Portal-based elements.** Modals, toasts, and popovers render outside `container`. Use `document.querySelector` or `screen` (which queries the whole document body). Never snapshot these — use targeted assertions instead (see Snapshot strategy).
 - **`act()` warnings.** State updates in effects or callbacks need to be wrapped. Use `await waitFor(...)` or `await act(async () => { ... })`.
+- **`userEvent` performance.** `userEvent` simulates full event sequences and scales poorly in CI (geometrically with interaction count). Prefer `fireEvent` for simple clicks and value changes. Replace `userEvent.type(input, 'text')` with `fireEvent.change(input, { target: { value: 'text' } })` + `fireEvent.blur(input)` unless the test is specifically exercising per-keystroke behavior (e.g. keydown handlers, typeahead suggestions, input masking/formatting, debounce-on-each-char). When `fireEvent.change` causes act warnings inside portals/overlays, prefer `userEvent.paste` over `userEvent.type` — it sets the full value in one step without per-character overhead.
 - **Timer-based tests.** Replace `jest.advanceTimersByTime` patterns carefully — RTL's `userEvent` uses real timers by default. Use `userEvent.setup({ advanceTimers: jest.advanceTimersByTime })` when fake timers are needed.
 
 ## Running tests
