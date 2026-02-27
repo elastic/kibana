@@ -6,7 +6,7 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -38,7 +38,6 @@ export interface AppPluginStartDependencies {
 
 export interface AppPluginSetupDependencies {
   share: SharePluginSetup;
-  console?: ConsolePluginSetup;
   licensing: LicensingPluginSetup;
   management: ManagementSetup;
 }
