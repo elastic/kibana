@@ -37,6 +37,7 @@ export interface AppPluginStartDependencies {
 }
 
 export interface AppPluginSetupDependencies {
+  history: AppMountParameters['history'];
   share: SharePluginSetup;
   console?: ConsolePluginSetup;
   management: ManagementSetup;
