@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import React, {
   useCallback,
   useEffect,
@@ -94,7 +95,6 @@ interface CustomCascadeGridBodyProps
 }
 
 const EMPTY_SORT: SortOrder[] = [];
-const USE_LIGHTWEIGHT_UNIFIED_DATA_TABLE = true;
 const LIGHTWEIGHT_SUMMARY_ROW_HEIGHT = 68;
 
 const ExpandButtonLight = React.memo(function ExpandButtonLight({
@@ -129,48 +129,64 @@ const ExpandButtonLight = React.memo(function ExpandButtonLight({
   );
 });
 
-const lightweightTableStyles = {
-  wrapper: {
+const getLightweightTableStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
+  wrapper: css({
     display: 'flex',
-    flexDirection: 'column' as const,
+    flexDirection: 'column',
     height: '100%',
     minHeight: 0,
-  },
-  header: {
-    borderBottom: 'var(--euiBorderThin)',
-    padding: '6px 8px',
-  },
-  rowsViewport: {
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    fontSize: euiTheme.font.scale.s * euiTheme.base,
+  }),
+  header: css({
+    borderBottom: euiTheme.border.thin,
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+  }),
+  rowsViewport: css({
     minHeight: 0,
-  },
-  row: {
+  }),
+  row: css({
     display: 'flex',
-    borderBottom: 'var(--euiBorderThin)',
+    borderBottom: euiTheme.border.thin,
     alignItems: 'stretch',
     overflow: 'hidden',
-  },
-  controlCell: {
+    '&:hover': {
+      backgroundColor: euiTheme.colors.backgroundBaseHighlighted,
+    },
+  }),
+  rowStriped: css({
+    display: 'flex',
+    borderBottom: euiTheme.border.thin,
+    alignItems: 'stretch',
+    overflow: 'hidden',
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    '&:hover': {
+      backgroundColor: euiTheme.colors.backgroundBaseHighlighted,
+    },
+  }),
+  controlCell: css({
     width: 28,
     minWidth: 28,
     flexShrink: 0,
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    paddingTop: 4,
-  },
-  summaryCell: {
+    paddingTop: euiTheme.size.xs,
+  }),
+  summaryCell: css({
     minWidth: 0,
     flex: 1,
-    padding: '4px 8px',
+    padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+    fontFamily: euiTheme.font.familyCode,
     '.unifiedDataTable__descriptionList': {
       WebkitLineClamp: 3,
       display: '-webkit-box',
-      WebkitBoxOrient: 'vertical' as const,
+      WebkitBoxOrient: 'vertical',
       overflow: 'hidden',
       maxHeight: '4.5em',
     },
-  },
-} as const;
+  }),
+});
 
 const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   rows,
@@ -205,6 +221,8 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   resultsCount: number;
   onOpenInDiscoverTab: () => void;
 }) {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => getLightweightTableStyles(euiTheme), [euiTheme]);
   const maxDocFieldsDisplayed = services.uiSettings.get<number>(MAX_DOC_FIELDS_DISPLAYED);
   const showMultiFields = services.uiSettings.get<boolean>(SHOW_MULTIFIELDS);
   const isCompressed = dataGridDensityState === DataGridDensity.COMPACT;
@@ -267,8 +285,8 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
   }, []);
 
   return (
-    <div css={lightweightTableStyles.wrapper} data-test-subj="discoverCascadeLightDataTable">
-      <div css={lightweightTableStyles.header}>
+    <div css={styles.wrapper} data-test-subj="discoverCascadeLightDataTable">
+      <div css={styles.header}>
         <EuiFlexGroup
           alignItems="center"
           justifyContent="spaceBetween"
@@ -301,12 +319,13 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      <div css={lightweightTableStyles.rowsViewport}>
+      <div css={styles.rowsViewport}>
         <div style={{ height: virtualizer.getTotalSize() }}>
           <div style={{ transform: `translateY(${translateY}px)` }}>
             {items.map((virtualRow) => {
               const row = rows[virtualRow.index];
               const isCurrentRowExpanded = expandedDoc?.id === row?.id;
+              const isStriped = virtualRow.index % 2 === 1;
 
               return (
                 <div
@@ -314,9 +333,9 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
                   data-index={virtualRow.index}
                   ref={measureRowHeightOnce}
                   style={measuredRowHeight ? { height: measuredRowHeight } : undefined}
-                  css={lightweightTableStyles.row}
+                  css={isStriped ? styles.rowStriped : styles.row}
                 >
-                  <div css={lightweightTableStyles.controlCell}>
+                  <div css={styles.controlCell}>
                     {canExpand ? (
                       <ExpandButtonLight
                         isExpanded={Boolean(isCurrentRowExpanded)}
@@ -328,7 +347,7 @@ const UnifiedDataTableLight = React.memo(function UnifiedDataTableLight({
                     ) : null}
                   </div>
                   <div
-                    css={lightweightTableStyles.summaryCell}
+                    css={styles.summaryCell}
                     className={
                       isCurrentRowExpanded ? 'unifiedDataTable__cell--expanded' : undefined
                     }
@@ -542,6 +561,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const { getDataGridUiStateMap, setDataGridUiState, openInNewTab, esqlQuery } =
       useCascadedDocumentsContext();
 
+    // Add "// @light" to the ES|QL query to use the lightweight table, omit for EUI DataGrid
+    const useLightweightTable = 'esql' in esqlQuery && esqlQuery.esql.includes('// @light');
+
     const initialGridState = useMemo(() => {
       return getDataGridUiStateMap()?.[cellId];
     }, [cellId, getDataGridUiStateMap]);
@@ -666,7 +688,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     return (
       <EuiPanel paddingSize="none">
-        {USE_LIGHTWEIGHT_UNIFIED_DATA_TABLE ? (
+        {useLightweightTable ? (
           <UnifiedDataTableLight
             rows={cellData}
             dataView={dataView}
