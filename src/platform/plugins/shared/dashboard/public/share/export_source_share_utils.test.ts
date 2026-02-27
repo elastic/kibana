@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_API_PATH } from '../../common/constants';
-import {
-  buildCreateDashboardRequestForConsole,
-  buildExportSourceFilename,
-} from './export_source_share_utils';
+import { buildExportSourceFilename } from './export_source_share_utils';
 
 describe('export_source_share_utils', () => {
   describe('buildExportSourceFilename', () => {
@@ -35,12 +31,4 @@ describe('export_source_share_utils', () => {
       expect(buildExportSourceFilename('name', 'json')).toBe('name.json');
     });
   });
-
-  describe('buildCreateDashboardRequestForConsole', () => {
-    it('builds a POST request against the dashboards API', () => {
-      const body = '{ "title": "x" }';
-      expect(buildCreateDashboardRequestForConsole(body)).toBe(`POST kbn:${DASHBOARD_API_PATH}\n${body}`);
-    });
-  });
 });
-

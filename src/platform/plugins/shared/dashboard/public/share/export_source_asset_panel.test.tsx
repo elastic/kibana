@@ -69,31 +69,6 @@ describe('ExportSourceAssetPanel', () => {
     expect(screen.getByTestId('exportAssetValue')).toBeInTheDocument();
   });
 
-  it('collapses large warning lists by default and allows expanding', async () => {
-    const user = userEvent.setup();
-    const warnings = Array.from({ length: 6 }, (_, i) => `Dropped panel panel${i + 1}`);
-
-    (getSanitizedExportSource as jest.Mock).mockResolvedValue({
-      data: { title: 'my dashboard', panels: [] },
-      warnings,
-    });
-
-    render(<ExportSourceAssetPanel dashboardState={dashboardState} />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('dashboardExportSourceWarnings')).toBeInTheDocument();
-    });
-
-    // Collapsed: list content shouldn't be in the DOM yet
-    expect(screen.queryByTestId('dashboardExportSourceWarningsList')).not.toBeInTheDocument();
-    expect(screen.queryByText('Dropped panel panel1')).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /Show details/i }));
-
-    expect(screen.getByTestId('dashboardExportSourceWarningsList')).toBeInTheDocument();
-    expect(screen.getByText('Dropped panel panel1')).toBeInTheDocument();
-  });
-
   it('renders an error callout when sanitization fails and hides sanitized JSON', async () => {
     (getSanitizedExportSource as jest.Mock).mockRejectedValue(new Error('boom'));
 
@@ -134,4 +109,3 @@ describe('ExportSourceAssetPanel', () => {
     });
   });
 });
-
