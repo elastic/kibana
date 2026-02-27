@@ -500,10 +500,10 @@
         "label": "SetupTechnologySelector",
         "description": [],
         "signature": [
-          "({ disabled, allowedSetupTechnologies, setupTechnology, onSetupTechnologyChange, isAgentlessDefault, showBetaBadge, useDescribedFormGroup, }: SetupTechnologySelectorProps) => React.JSX.Element"
+          "({ disabled, packageInfo, allowedSetupTechnologies, setupTechnology, onSetupTechnologyChange, isAgentlessDefault, showBetaBadge, useDescribedFormGroup, useCheckableCards, hideTitle, }: SetupTechnologySelectorProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/public/services/setup_technology_selector.tsx",
-        "lineNumber": 36,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -513,13 +513,13 @@
             "id": "def-public.SetupTechnologySelector.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  disabled,\n  allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],\n  setupTechnology,\n  onSetupTechnologyChange,\n  isAgentlessDefault = false,\n  showBetaBadge = true,\n  useDescribedFormGroup = true,\n}",
+            "label": "{\n  disabled,\n  packageInfo,\n  allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],\n  setupTechnology,\n  onSetupTechnologyChange,\n  isAgentlessDefault = false,\n  showBetaBadge = true,\n  useDescribedFormGroup = true,\n  useCheckableCards = false,\n  hideTitle = false,\n}",
             "description": [],
             "signature": [
               "SetupTechnologySelectorProps"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/services/setup_technology_selector.tsx",
-            "lineNumber": 36,
+            "lineNumber": 44,
             "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
@@ -6081,7 +6081,7 @@
           "\"setup-technology-selector\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/public/services/setup_technology_selector.tsx",
-        "lineNumber": 24,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
