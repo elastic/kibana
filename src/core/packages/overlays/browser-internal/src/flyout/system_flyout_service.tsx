@@ -24,6 +24,9 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SystemFlyoutRef } from './system_flyout_ref';
 
+/** Max number of hidden (closed) flyout containers to keep in the DOM before pruning the oldest. */
+const MAX_HIDDEN_FLYOUT_CONTAINERS = 20;
+
 interface SystemFlyoutStartDeps {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
@@ -39,6 +42,7 @@ interface SystemFlyoutStartDeps {
 export class SystemFlyoutService {
   private targetDomElement: Element | null = null;
   private activeFlyouts = new Map<string, SystemFlyoutRef>();
+  private hiddenContainers: HTMLElement[] = [];
 
   public start({
     analytics,
@@ -62,7 +66,9 @@ export class SystemFlyoutService {
         flyoutContainer.setAttribute('data-system-flyout', flyoutId);
         this.targetDomElement!.appendChild(flyoutContainer);
 
-        const flyoutRef = new SystemFlyoutRef(flyoutContainer);
+        const flyoutRef = new SystemFlyoutRef(flyoutContainer as HTMLElement, (hiddenContainer) =>
+          this.registerHiddenContainer(hiddenContainer)
+        );
         this.activeFlyouts.set(flyoutId, flyoutRef);
 
         // Handle close events
@@ -145,11 +151,25 @@ export class SystemFlyoutService {
    */
   public stop(): void {
     this.closeAllSystemFlyouts();
+    this.hiddenContainers.forEach((el) => el.remove());
+    this.hiddenContainers = [];
     this.targetDomElement = null;
   }
 
   private closeAllSystemFlyouts(): void {
     this.activeFlyouts.forEach((flyout) => flyout.close());
     this.activeFlyouts.clear();
+  }
+
+  /**
+   * Register a container that was hidden on close. Prunes the oldest hidden container
+   * when over MAX_HIDDEN_FLYOUT_CONTAINERS so the DOM does not grow unbounded.
+   */
+  private registerHiddenContainer(container: HTMLElement): void {
+    this.hiddenContainers.push(container);
+    while (this.hiddenContainers.length > MAX_HIDDEN_FLYOUT_CONTAINERS) {
+      const oldest = this.hiddenContainers.shift();
+      oldest?.remove();
+    }
   }
 }

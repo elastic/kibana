@@ -37,7 +37,7 @@ describe('SystemFlyoutRef', () => {
   });
 
   describe('close()', () => {
-    it('unmounts the component and removes the container', async () => {
+    it('unmounts the component and hides the container (keeps it in document)', async () => {
       const ref = new SystemFlyoutRef(container);
       expect(mockReactDomUnmount).not.toHaveBeenCalled();
       expect(document.body.contains(container)).toBe(true);
@@ -45,7 +45,10 @@ describe('SystemFlyoutRef', () => {
       await ref.close();
 
       expect(mockReactDomUnmount).toHaveBeenCalledWith(container);
-      expect(document.body.contains(container)).toBe(false);
+      expect(document.body.contains(container)).toBe(true);
+      expect(container.style.display).toBe('none');
+      expect(container.getAttribute('aria-hidden')).toBe('true');
+      expect(container.getAttribute('data-system-flyout-hidden')).toBe('true');
     });
 
     it('resolves the onClose Promise', async () => {

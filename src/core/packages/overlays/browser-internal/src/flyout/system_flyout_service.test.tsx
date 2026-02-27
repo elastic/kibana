@@ -257,7 +257,7 @@ describe('SystemFlyoutService', () => {
       expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
     });
 
-    it('removes the flyout container from the DOM', async () => {
+    it('hides the flyout container in the DOM on close (keeps node for Emotion)', async () => {
       const targetElement = document.createElement('div');
       const testService = new SystemFlyoutService();
       const flyouts = testService.start({
@@ -272,9 +272,15 @@ describe('SystemFlyoutService', () => {
       expect(targetElement.children.length).toBe(1);
 
       await ref.close();
-      expect(targetElement.children.length).toBe(0);
+      // Container stays in DOM but is hidden (avoids Emotion insertBefore stale refs)
+      expect(targetElement.children.length).toBe(1);
+      const container = targetElement.firstElementChild as HTMLElement;
+      expect(container.style.display).toBe('none');
+      expect(container.getAttribute('data-system-flyout-hidden')).toBe('true');
 
       testService.stop();
+      // stop() removes hidden containers
+      expect(targetElement.children.length).toBe(0);
     });
   });
 
@@ -301,7 +307,7 @@ describe('SystemFlyoutService', () => {
 
       testService.stop();
 
-      // All flyouts should be unmounted
+      // All flyouts should be unmounted; stop() also removes hidden containers
       expect(mockReactDomUnmount).toHaveBeenCalledTimes(2);
       expect(testTarget.children.length).toBe(0);
     });
