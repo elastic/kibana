@@ -38,7 +38,7 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
-        "lineNumber": 41,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -60,7 +60,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
-            "lineNumber": 41,
+            "lineNumber": 52,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -241,6 +241,44 @@
             ],
             "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
             "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.schemaNameTransform",
+            "type": "string",
+            "tags": [
+              "default"
+            ],
+            "label": "schemaNameTransform",
+            "description": [
+              "\nSchema name transformation strategy for generated TypeScript/zod types\n- 'pascalCase': Converts names to PascalCase\n- undefined: No transformation (preserves original names)"
+            ],
+            "signature": [
+              "\"pascalCase\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/openapi-generator",
+            "id": "def-common.GeneratorConfig.experimentallyImportZodV4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "experimentallyImportZodV4",
+            "description": [
+              "\nThis forces the generator to use the Zod v4 import."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

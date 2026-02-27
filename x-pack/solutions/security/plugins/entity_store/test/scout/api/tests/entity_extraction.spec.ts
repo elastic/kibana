@@ -221,7 +221,9 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(firstExtractionResponse.body).toMatchObject({ count: 1 });
 
     const beforeSubType = await searchDocById(esClient, 'user:latest-test');
+
     expect(beforeSubType.hits.hits).toHaveLength(1);
+    expect(beforeSubType.hits.hits[0]._version).toBe(1);
     expect(beforeSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:00:00.000Z',
       'entity.id': 'user:latest-test',
@@ -253,6 +255,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     const afterSubType = await searchDocById(esClient, 'user:latest-test');
     expect(afterSubType.hits.hits).toHaveLength(1);
+    expect(afterSubType.hits.hits[0]._version).toBe(2);
     expect(afterSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:01:00.000Z',
       'entity.id': 'user:latest-test',
@@ -318,6 +321,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     const updatedSubType = await searchDocById(esClient, 'user:latest-test');
     expect(updatedSubType.hits.hits).toHaveLength(1);
+    expect(updatedSubType.hits.hits[0]._version).toBe(3);
     expect(updatedSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:02:04.000Z',
       'entity.id': 'user:latest-test',
@@ -349,6 +353,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     const updatedLatestDomain = await searchDocById(esClient, 'user:latest-test');
     expect(updatedLatestDomain.hits.hits).toHaveLength(1);
+    expect(updatedLatestDomain.hits.hits[0]._version).toBe(4);
     expect(updatedLatestDomain.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:03:00.000Z',
       'entity.id': 'user:latest-test',

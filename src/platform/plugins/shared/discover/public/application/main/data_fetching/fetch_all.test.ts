@@ -14,7 +14,6 @@ import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import type {
   DataDocumentsMsg,
@@ -27,9 +26,10 @@ import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -60,34 +60,37 @@ describe('test fetchAll', () => {
   let deps: Parameters<typeof fetchAll>[0];
   let searchSource: SearchSource;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     subjects = {
       main$: new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
-    const { internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock({});
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+      skipWaitForDataFetching: true,
+    });
     const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
-      runtimeStateManager,
-      getCurrentTab().id
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
     );
     deps = {
       dataSubjects: subjects,
       reset: false,
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
-      internalState,
+      internalState: toolkit.internalState,
       scopedProfilesManager: scopedProfilesManager$.getValue(),
       scopedEbtManager: scopedEbtManager$.getValue(),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
-      savedSearch: {
-        ...savedSearchMock,
-        searchSource,
-      },
-      services: discoverServiceMock,
-      getCurrentTab,
+      searchSource,
+      services,
+      getCurrentTab: toolkit.getCurrentTab,
     };
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
@@ -120,11 +123,15 @@ describe('test fetchAll', () => {
     await waitForNextTick();
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING },
+      {
+        fetchStatus: FetchStatus.LOADING,
+        query: { query: '', language: 'kuery' },
+      },
       {
         fetchStatus: FetchStatus.COMPLETE,
         interceptedWarnings: [],
         result: documents,
+        query: { query: '', language: 'kuery' },
       },
     ]);
   });

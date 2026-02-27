@@ -15,6 +15,10 @@ exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Error ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
+
 exports[`Error ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Error CHILD_ID 1`] = `undefined`;
@@ -72,6 +76,8 @@ exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 exports[`Error DURATION 1`] = `undefined`;
 
 exports[`Error ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
+exports[`Error ERROR_CODE 1`] = `undefined`;
 
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
@@ -177,6 +183,8 @@ exports[`Error KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Error KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Error KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_UID 1`] = `undefined`;
 
@@ -451,6 +459,10 @@ exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Span ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
+
 exports[`Span ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
@@ -508,6 +520,8 @@ exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 exports[`Span DURATION 1`] = `undefined`;
 
 exports[`Span ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
+exports[`Span ERROR_CODE 1`] = `undefined`;
 
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
@@ -600,6 +614,8 @@ exports[`Span KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Span KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Span KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_UID 1`] = `undefined`;
 
@@ -870,6 +886,10 @@ exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Transaction ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
+
 exports[`Transaction ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Transaction CHILD_ID 1`] = `undefined`;
@@ -931,6 +951,8 @@ exports[`Transaction DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 exports[`Transaction DURATION 1`] = `undefined`;
 
 exports[`Transaction ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
+exports[`Transaction ERROR_CODE 1`] = `undefined`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
@@ -1033,6 +1055,8 @@ exports[`Transaction KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
 exports[`Transaction KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_UID 1`] = `"pod1234567890abcdef"`;
 

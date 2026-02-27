@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
+import { dataExplorationSkill } from './skills';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -48,6 +49,8 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
+
+    setupDeps.agentBuilder.skills.register(dataExplorationSkill);
 
     return {};
   }

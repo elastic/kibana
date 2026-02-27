@@ -220,7 +220,7 @@ function ChartBarPhasesSeriesBase({
         css={{ width: '100%', height: '100%' }}
         gutterSize="s"
       >
-        <EuiFlexItem grow={9} css={{ minHeight: '200px' }}>
+        <EuiFlexItem grow={9}>
           <Chart size={{ height: '100%', width: '100%' }}>
             <Settings showLegend={false} baseTheme={chartBaseTheme} />
             {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
@@ -342,7 +342,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
                   }}
                 />
               ) : (
-                <EuiIcon type={phase.icon} />
+                <EuiIcon type={phase.icon} aria-hidden={true} />
               )}
             </EuiFlexItem>
 
