@@ -473,14 +473,11 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
                   tables: result,
                   message:
                     result.length > 0
-                      ? `Found ${result.length} table(s).${
-                          search ? ` Filtered by "${search}".` : ''
-                        }${
-                          platform ? ` Platform: ${platform}.` : ''
-                        } Call again with tableName and agentId to get full column details for a specific table.`
-                      : `No tables found${search ? ` matching "${search}"` : ''}${
-                          platform ? ` for platform ${platform}` : ''
-                        }.`,
+                      ? `Found ${result.length} table(s).${search ? ` Filtered by "${search}".` : ''
+                      }${platform ? ` Platform: ${platform}.` : ''
+                      } Call again with tableName and agentId to get full column details for a specific table.`
+                      : `No tables found${search ? ` matching "${search}"` : ''}${platform ? ` for platform ${platform}` : ''
+                      }.`,
                 }),
               },
             },
