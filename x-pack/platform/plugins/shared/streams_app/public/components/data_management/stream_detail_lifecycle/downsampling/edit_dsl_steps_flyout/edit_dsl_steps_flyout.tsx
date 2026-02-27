@@ -171,7 +171,16 @@ export const EditDslStepsFlyout = ({
         hasInitializedSubscriptionRef.current = true;
       }
 
-      if (isEqual(next, lastEmittedOutputRef.current)) return;
+      const metaForNext: EditDslStepsFlyoutChangeMeta = {
+        invalidStepIndices: buildInvalidStepIndices(next),
+      };
+
+      if (
+        isEqual(next, lastEmittedOutputRef.current) &&
+        isEqual(metaForNext, lastEmittedMetaRef.current)
+      ) {
+        return;
+      }
 
       pendingOnChangeOutputRef.current = next;
       scheduleOnChangeEmit();
@@ -185,7 +194,7 @@ export const EditDslStepsFlyout = ({
       pendingOnChangeOutputRef.current = null;
       sub.unsubscribe();
     };
-  }, [form, onChangeDebounceMs, scheduleOnChangeEmit]);
+  }, [buildInvalidStepIndices, form, onChangeDebounceMs, scheduleOnChangeEmit]);
 
   useEffect(() => {
     // Re-emit meta when tab errors change without any DSL change.

@@ -160,6 +160,17 @@ export const EditIlmPhasesFlyout = ({
     const sub = form.subscribe(({ data }) => {
       const next = data.format();
 
+      const metaForNext: EditIlmPhasesFlyoutChangeMeta = {
+        invalidPhases: buildInvalidPhases(),
+      };
+
+      if (
+        isEqual(next, lastEmittedOutputRef.current) &&
+        isEqual(metaForNext, lastEmittedMetaRef.current)
+      ) {
+        return;
+      }
+
       pendingOnChangeOutputRef.current = next;
       scheduleOnChangeEmit();
     });
@@ -172,7 +183,7 @@ export const EditIlmPhasesFlyout = ({
       pendingOnChangeOutputRef.current = null;
       sub.unsubscribe();
     };
-  }, [form, scheduleOnChangeEmit]);
+  }, [buildInvalidPhases, form, scheduleOnChangeEmit]);
 
   useEffect(() => {
     // Re-emit meta when tab errors change without any form data change.
