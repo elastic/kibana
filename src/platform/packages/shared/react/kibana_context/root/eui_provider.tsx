@@ -19,10 +19,7 @@ import createCache from '@emotion/cache';
 
 import type { EuiProviderProps } from '@elastic/eui';
 import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
-import {
-  EUI_STYLES_GLOBAL,
-  EUI_STYLES_UTILS,
-} from '@kbn/core-base-common';
+import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import {
   getColorMode,
   defaultTheme,
@@ -57,89 +54,23 @@ const sharedCacheOptions = {
   speedy: true, // Enable speedy mode for better performance
 };
 
-/**
- * Resolves the Emotion cache container (meta marker or document.head).
- * Returns undefined when run outside the browser (e.g. SSR).
- */
-function getEmotionContainer(metaName: string): HTMLElement | undefined {
-  if (typeof document === 'undefined') {
-    return undefined;
-  }
-  const el = document.querySelector<HTMLElement>(`meta[name="${metaName}"]`);
-  if (el) {
-    return el;
-  }
-  return document.head;
-}
-
-/**
- * Wraps an Emotion cache's sheet._insertTag to validate the insertion point before insertBefore.
- * When multiple flyouts close (e.g. closeAllFlyouts), the sheet can hold references to style tags
- * that were removed from the DOM; the next insert then throws "The node before which the new node
- * is to be inserted is not a child of this node." We fall back to appending and clear stale tag refs.
- * When we clear stale tags we also reset the sheet's rule counter (ctr) so the next insert creates
- * a fresh style element; otherwise Emotion would try insertRule on a tag that may be full or stale.
- */
-function wrapSheetInsertTag(
-  sheetKey: string,
-  sheet: {
-    container: Node;
-    tags: HTMLStyleElement[];
-    ctr?: number;
-    insertionPoint?: HTMLElement;
-    prepend?: boolean;
-    before?: Node | null;
-    _insertTag: (tag: HTMLStyleElement) => void;
-  }
-): void {
-  sheet._insertTag = (tag: HTMLStyleElement) => {
-    const container = sheet.container;
-    let before: Node | null;
-    if (sheet.tags.length === 0) {
-      before = sheet.insertionPoint
-        ? sheet.insertionPoint.nextSibling
-        : sheet.prepend
-          ? container.firstChild
-          : sheet.before ?? null;
-    } else {
-      before = sheet.tags[sheet.tags.length - 1].nextSibling;
-    }
-    const validBefore = before === null || before.parentNode === container;
-    if (!validBefore) {
-      sheet.tags = sheet.tags.filter((t) => t.parentNode === container);
-      before = sheet.tags.length > 0 ? sheet.tags[sheet.tags.length - 1].nextSibling : null;
-      // Emotion creates a new style tag when ctr % 65000 === 0 (speedy mode). Set ctr so the next
-      // insert() allocates a fresh tag instead of using a possibly full or stale one.
-      sheet.ctr = 64999;
-    }
-    (container as HTMLElement).insertBefore(tag, before);
-    sheet.tags.push(tag);
-  };
-}
-
 const emotionCache = createCache({
   ...sharedCacheOptions,
   key: 'css',
-  container: getEmotionContainer('emotion'),
+  container: document.querySelector('meta[name="emotion"]') as HTMLElement,
 });
 
 const globalCache = createCache({
   ...sharedCacheOptions,
   key: EUI_STYLES_GLOBAL,
-  container: getEmotionContainer(EUI_STYLES_GLOBAL),
+  container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
 });
 
 const utilitiesCache = createCache({
   ...sharedCacheOptions,
   key: EUI_STYLES_UTILS,
-  container: getEmotionContainer(EUI_STYLES_UTILS),
+  container: document.querySelector(`meta[name="${EUI_STYLES_UTILS}"]`) as HTMLElement,
 });
-
-if (typeof document !== 'undefined') {
-  wrapSheetInsertTag('css', emotionCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
-  wrapSheetInsertTag(EUI_STYLES_GLOBAL, globalCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
-  wrapSheetInsertTag(EUI_STYLES_UTILS, utilitiesCache.sheet as Parameters<typeof wrapSheetInsertTag>[1]);
-}
 
 // Enable "compat mode" in Emotion caches.
 emotionCache.compat = true;
