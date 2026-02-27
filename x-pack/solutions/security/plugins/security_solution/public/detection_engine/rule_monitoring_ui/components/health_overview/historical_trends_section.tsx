@@ -16,8 +16,7 @@ import {
 import { Axis, Chart, CurveType, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import React, { memo, useMemo } from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import type { HealthData } from './constants';
-import { getP } from './constants';
+import type { HealthData } from './types';
 import * as i18n from './translations';
 
 const LINE_STYLE = { point: { visible: 'never' as const } };
@@ -45,7 +44,7 @@ export const HistoricalTrendsSection = memo(function HistoricalTrendsSection({
     () =>
       buckets.map((b) => ({
         x: new Date(b.timestamp).getTime(),
-        p95: getP(b.stats.schedule_delay_ms.percentiles, 'p95', '95.0'),
+        p95: b.stats.schedule_delay_ms.percentiles['95.0'] ?? 0,
       })),
     [buckets]
   );

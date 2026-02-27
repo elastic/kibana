@@ -10,8 +10,8 @@ import { EuiSpacer, EuiBasicTable, useEuiTheme } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import React, { memo, useMemo } from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import type { HealthData } from './constants';
-import { CHART_HEIGHT, getP } from './constants';
+import type { HealthData } from './types';
+import { CHART_HEIGHT } from './constants';
 import * as i18n from './translations';
 
 interface PerformanceRow {
@@ -95,10 +95,10 @@ const buildPerfRow = (
   agg: { percentiles: Record<string, number> } | undefined
 ): PerformanceRow => ({
   metric: label,
-  p50: getP(agg?.percentiles, 'p50', '50.0', '50'),
-  p95: getP(agg?.percentiles, 'p95', '95.0', '95'),
-  p99: getP(agg?.percentiles, 'p99', '99.0', '99'),
-  p999: getP(agg?.percentiles, 'p99.9', '99.9'),
+  p50: agg?.percentiles['50.0'] ?? 0,
+  p95: agg?.percentiles['95.0'] ?? 0,
+  p99: agg?.percentiles['99.0'] ?? 0,
+  p999: agg?.percentiles['99.9'] ?? 0,
 });
 
 const PERF_COLUMNS: Array<EuiBasicTableColumn<PerformanceRow>> = [

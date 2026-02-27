@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { memo, useMemo } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
-import React, { memo, useMemo } from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import type { HealthData } from './constants';
+import type { HealthData } from './types';
 import { CHART_HEIGHT, LOG_LEVELS } from './constants';
 import * as i18n from './translations';
 

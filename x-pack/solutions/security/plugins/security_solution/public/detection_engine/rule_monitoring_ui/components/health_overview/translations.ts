@@ -41,12 +41,22 @@ export const FAILURES = i18n.translate(
   { defaultMessage: 'Failures' }
 );
 
+export const WARNINGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.warnings',
+  { defaultMessage: 'Warnings' }
+);
+
 export const DETECTED_GAPS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.detectedGaps',
   { defaultMessage: 'Detected Gaps' }
 );
 
-export const P95_SCHEDULE_DELAY = i18n.translate(
+export const SEARCH_DURATION_P95 = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.p95SearchDuration',
+  { defaultMessage: 'p95 Search Duration' }
+);
+
+export const SCHEDULE_DELAY_P95 = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleMonitoring.healthOverview.p95ScheduleDelay',
   { defaultMessage: 'p95 Schedule Delay' }
 );

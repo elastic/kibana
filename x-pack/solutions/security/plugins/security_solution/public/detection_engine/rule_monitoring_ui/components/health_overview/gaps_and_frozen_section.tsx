@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import React, { memo } from 'react';
-import type { HealthData } from './constants';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import type { HealthData } from './types';
 import * as i18n from './translations';
 
 export const GapsAndFrozenSection = memo(function GapsAndFrozenSection({

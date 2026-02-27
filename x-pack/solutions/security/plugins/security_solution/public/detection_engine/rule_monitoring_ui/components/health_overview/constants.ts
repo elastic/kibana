@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { GetSpaceHealthResponse } from '../../../../../common/api/detection_engine';
-
-export type HealthData = GetSpaceHealthResponse['health'];
-
 export const RULE_TYPE_NAMES: Record<string, string> = {
   'siem.eqlRule': 'EQL',
   'siem.queryRule': 'Query',
@@ -26,14 +22,3 @@ export const CHART_HEIGHT = 220;
 
 export const getRuleTypeName = (key: string): string =>
   RULE_TYPE_NAMES[key] ?? key.replace('siem.', '').replace('Rule', '');
-
-export const getP = (
-  percentiles: Record<string, number> | undefined,
-  ...keys: string[]
-): number => {
-  if (!percentiles) return 0;
-  for (const key of keys) {
-    if (key in percentiles) return percentiles[key];
-  }
-  return 0;
-};

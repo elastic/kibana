@@ -12,4 +12,4 @@ export { PerformanceSection } from './performance_section';
 export { GapsAndFrozenSection } from './gaps_and_frozen_section';
 export { TopMessagesSection } from './top_messages_section';
 export { HistoricalTrendsSection } from './historical_trends_section';
-export type { HealthData } from './constants';
+export type { HealthData } from './types';
