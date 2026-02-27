@@ -1666,6 +1666,7 @@
     "@kbn/evals": "link:x-pack/platform/packages/shared/kbn-evals",
     "@kbn/evals-phoenix-executor": "link:x-pack/platform/packages/shared/kbn-evals-phoenix-executor",
     "@kbn/evals-suite-agent-builder": "link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder",
+    "@kbn/evals-suite-endpoint": "link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint",
     "@kbn/evals-suite-llm-tasks": "link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks",
     "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",
