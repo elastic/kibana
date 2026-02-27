@@ -43,6 +43,7 @@ export async function getEsqlDataView(
         // otherwise a single mutated data view instance would be used across tabs (inside currentDataView$) which would be incorrect
         // https://github.com/elastic/kibana/issues/234719
         createNewInstanceEvenIfCachedOneAvailable: !currentDataView || onlyTimeFieldChanged,
+        skipFetchFields: true,
       },
       http: services.http,
     });
