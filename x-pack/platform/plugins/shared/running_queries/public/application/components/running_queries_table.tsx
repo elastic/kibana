@@ -99,7 +99,7 @@ export const RunningQueriesTable: React.FC<RunningQueriesTableProps> = ({
     const sinceMs = moment()
       .subtract(runTimeValue, runTimeUnit as moment.unitOfTime.DurationConstructor)
       .valueOf();
-    return queries.filter((q) => q.startTime >= sinceMs);
+    return queries.filter((q) => q.startTime <= sinceMs);
   }, [queries, runTimeValue, runTimeUnit]);
 
   const columns: Array<EuiBasicTableColumn<RunningQuery>> = useMemo(
