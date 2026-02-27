@@ -71,6 +71,12 @@ Note: In Kibana Jest setup, RTL uses `testIdAttribute: 'data-test-subj'`, so `ge
 | `wrapper.find('[data-test-subj="x"]').exists()` | `screen.queryByTestId('x')` (returns `null` if absent) |
 | Nested: `wrapper.find('[data-test-subj="a"] [data-test-subj="b"]')` | `within(screen.getByTestId('a')).getByTestId('b')` |
 
+Kibana-specific fallback: `subj()` from `@kbn/test-subj-selector` converts test-subject selector syntax to a CSS selector (supports `~`/`*`/`>`). Prefer RTL queries first; use this when you truly need CSS selection:
+
+```typescript
+import { subj } from '@kbn/test-subj-selector';
+
+const el = container.querySelector(subj('foo > ~bar'));
 Note: Some EUI components reuse the same `data-test-subj` on both a wrapper and the actual control. If `getByTestId` throws “Found multiple elements”, use `getAllByTestId`/`queryAllByTestId` and narrow (or scope with `within(...)`) instead of switching to brittle CSS selectors.
 ### CSS selectors
 
