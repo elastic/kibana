@@ -7,6 +7,7 @@
 
 import type { FieldDefinition } from '.';
 import {
+  classicFieldDefinitionConfigSchema,
   fieldDefinitionConfigSchema,
   isMappingProperties,
   namedFieldDefinitionConfigSchema,
@@ -119,6 +120,62 @@ describe('namedFieldDefinitionConfigSchema', () => {
       type: 'keyword',
     };
     expect(() => namedFieldDefinitionConfigSchema.parse(fieldWithEmptyName)).toThrow();
+  });
+});
+
+describe('classicFieldDefinitionConfigSchema', () => {
+  it('should accept regular field types with optional description', () => {
+    const keywordField = { type: 'keyword' };
+    expect(classicFieldDefinitionConfigSchema.parse(keywordField)).toEqual(keywordField);
+
+    const keywordFieldWithDesc = {
+      type: 'keyword',
+      description: 'A keyword field',
+    };
+    expect(classicFieldDefinitionConfigSchema.parse(keywordFieldWithDesc)).toEqual(
+      keywordFieldWithDesc
+    );
+  });
+
+  it('should accept system type', () => {
+    const systemField = { type: 'system' };
+    expect(classicFieldDefinitionConfigSchema.parse(systemField)).toEqual(systemField);
+
+    const systemFieldWithDesc = { type: 'system', description: 'A system field' };
+    expect(classicFieldDefinitionConfigSchema.parse(systemFieldWithDesc)).toEqual(
+      systemFieldWithDesc
+    );
+  });
+
+  it('should reject description-only override without type', () => {
+    const descriptionOnlyOverride = {
+      description: 'Custom description without type',
+    };
+    expect(() => classicFieldDefinitionConfigSchema.parse(descriptionOnlyOverride)).toThrow();
+  });
+
+  it.each([
+    'keyword',
+    'match_only_text',
+    'long',
+    'double',
+    'date',
+    'boolean',
+    'ip',
+    'geo_point',
+    'integer',
+    'short',
+    'byte',
+    'float',
+    'half_float',
+    'text',
+    'wildcard',
+    'version',
+    'unsigned_long',
+    'date_nanos',
+  ] as const)('should accept %s type', (type) => {
+    const field = { type };
+    expect(classicFieldDefinitionConfigSchema.parse(field)).toEqual(field);
   });
 });
 

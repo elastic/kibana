@@ -19,7 +19,6 @@ import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import type { Query } from '../../../../common/queries';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
-import { getTypelessDescriptionFieldsFromClassicIngest } from './validate_ingest_upsert';
 
 async function getAssets({
   name,
@@ -224,19 +223,6 @@ const upsertIngestRoute = createServerRoute({
         name,
         ingest,
       });
-    }
-
-    // For classic streams, description-only overrides (fields with description but no type) are not allowed.
-    // Users must specify a type to add a description to a classic stream field.
-    if (ClassicIngestUpsertRequest.is(ingest)) {
-      const typelessDescriptionFields = getTypelessDescriptionFieldsFromClassicIngest(ingest);
-      if (typelessDescriptionFields.length > 0) {
-        throw badRequest(
-          `Classic streams do not support description-only field overrides. ` +
-            `To add a description, you must also specify a field type. ` +
-            `Fields with description but no type: ${typelessDescriptionFields.join(', ')}`
-        );
-      }
     }
 
     return await updateClassicIngest({

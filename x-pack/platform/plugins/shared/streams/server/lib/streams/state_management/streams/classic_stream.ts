@@ -66,20 +66,16 @@ function getClassicFieldOverrideMappings(
       continue;
     }
 
-    // Streams supports storing metadata on field overrides (e.g. `description`) that ES mappings
-    // don't understand. Filter that metadata out when building the mapping update payload.
-    const { description: _description, ...rest } = config as Record<string, unknown>;
+    const { description: _description, type, ...rest } = config as Record<string, unknown>;
 
-    // If there is no ES mapping `type`, then this override is metadata-only (e.g. description for a dynamic field).
-    // Those should be stored but must not be sent to ES.
-    const type = rest.type;
-    if (typeof type !== 'string' || type === 'system') {
+    // Skip system fields (not actual ES mappings)
+    if (type === 'system') {
       continue;
     }
 
-    // At this point we've verified a valid mapping `type` exists, but TS can't fully prove
-    // `rest` matches the ES mapping union type. We intentionally keep runtime validation minimal here.
-    mappings[fieldName] = rest as unknown as StreamsMappingProperties[string];
+    // Classic streams require a type for all field overrides (enforced by schema),
+    // so we can safely build the mapping. We filter out `description` since ES doesn't understand it.
+    mappings[fieldName] = { type, ...rest } as unknown as StreamsMappingProperties[string];
   }
 
   return Object.keys(mappings).length > 0 ? mappings : undefined;

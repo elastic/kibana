@@ -140,6 +140,46 @@ export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
   fieldDefinitionConfigSchema
 );
 
+/**
+ * Schema for classic stream field overrides.
+ * Classic streams require a `type` for all field overrides - description-only fields are not supported.
+ * This schema excludes the documentation-only override variant that allows type to be omitted.
+ */
+export type ClassicFieldDefinitionConfig =
+  | (MappingProperty & {
+      type: FieldDefinitionType;
+      format?: string;
+      description?: string;
+    })
+  | {
+      type: 'system';
+      description?: string;
+    };
+
+export const classicFieldDefinitionConfigSchema = z.intersection(
+  recursiveRecord,
+  z.union([
+    z.object({
+      type: z.enum(FIELD_DEFINITION_TYPES),
+      format: z.optional(NonEmptyString),
+      description: z.optional(z.string()),
+    }),
+    z.object({
+      type: z.literal('system'),
+      description: z.optional(z.string()),
+    }),
+  ])
+) as z.ZodType<ClassicFieldDefinitionConfig>;
+
+export interface ClassicFieldDefinition {
+  [x: string]: ClassicFieldDefinitionConfig;
+}
+
+export const classicFieldDefinitionSchema: z.Schema<ClassicFieldDefinition> = z.record(
+  z.string(),
+  classicFieldDefinitionConfigSchema
+);
+
 export type InheritedFieldDefinitionConfig = FieldDefinitionConfig & {
   from: string;
   alias_for?: string;
