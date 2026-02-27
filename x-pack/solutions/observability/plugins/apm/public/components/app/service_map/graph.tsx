@@ -10,6 +10,7 @@ import {
   ReactFlow,
   Background,
   Controls,
+  ControlButton,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -24,7 +25,9 @@ import {
   useEuiTheme,
   EuiScreenReaderOnly,
   EuiScreenReaderLive,
+  EuiIcon,
   useGeneratedHtmlId,
+  keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import '@xyflow/react/dist/style.css';
@@ -65,6 +68,8 @@ interface GraphProps {
   kuery: string;
   start: string;
   end: string;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 function GraphInner({
@@ -76,6 +81,8 @@ function GraphInner({
   kuery,
   start,
   end,
+  isFullscreen = false,
+  onToggleFullscreen,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -226,6 +233,25 @@ function GraphInner({
     onPopoverClose: handlePopoverClose,
   });
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === keys.ESCAPE && isFullscreen && onToggleFullscreen) {
+        e.preventDefault();
+        onToggleFullscreen();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isFullscreen, onToggleFullscreen]);
+
+  const fullscreenButtonLabel = isFullscreen
+    ? i18n.translate('xpack.apm.serviceMap.fullScreenExitButton', {
+        defaultMessage: 'Exit fullscreen (esc)',
+      })
+    : i18n.translate('xpack.apm.serviceMap.fullScreenButton', {
+        defaultMessage: 'Enter fullscreen',
+      });
+
   const containerStyle = useMemo(
     () => ({
       height,
@@ -354,7 +380,21 @@ function GraphInner({
         edgesFocusable={false}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
-        <Controls showInteractive={false} position="top-left" css={controlsStyles} />
+        <Controls showInteractive={false} position="top-left" css={controlsStyles}>
+          {onToggleFullscreen && (
+            <ControlButton
+              onClick={onToggleFullscreen}
+              title={fullscreenButtonLabel}
+              aria-label={fullscreenButtonLabel}
+              data-test-subj="serviceMapFullScreenButton"
+            >
+              <EuiIcon
+                type={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                aria-label={fullscreenButtonLabel}
+              />
+            </ControlButton>
+          )}
+        </Controls>
       </ReactFlow>
       <MapPopover
         selectedNode={selectedNodeForPopover}

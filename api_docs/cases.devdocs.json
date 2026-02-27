@@ -3984,15 +3984,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"comment\"; payload: { comment: { comment: string; type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.AttachmentType",
-            "text": "AttachmentType"
-          },
-          ".user; owner: string; } | { type: ",
+          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"comment\"; payload: { comment: { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -4008,15 +4000,7 @@
             "section": "def-common.AttachmentType",
             "text": "AttachmentType"
           },
-          ".event; eventId: string | string[]; index: string | string[]; owner: string; } | { type: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.AttachmentType",
-            "text": "AttachmentType"
-          },
-          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } | { externalReferenceId: string; externalReferenceStorage: { type: ",
+          ".event; eventId: string | string[]; index: string | string[]; owner: string; } | { externalReferenceId: string; externalReferenceStorage: { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -4080,7 +4064,55 @@
             "section": "def-common.JsonValue",
             "text": "JsonValue"
           },
-          "; }; }; }; } | ({ type: \"create_case\"; } & { payload: { connector: { id: string; } & (({ type: ",
+          "; }; } | { comment: string; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
+          ".user; owner: string; } | { type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.AttachmentType",
+            "text": "AttachmentType"
+          },
+          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } | ({ type: string; attachmentId: string; } & { data?: { [x: string]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          "; } | null | undefined; metadata?: { [x: string]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          "; } | null | undefined; }) | ({ type: string; data: { [x: string]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          "; }; } & { metadata?: { [x: string]: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.JsonValue",
+            "text": "JsonValue"
+          },
+          "; } | null | undefined; }); }; } | ({ type: \"create_case\"; } & { payload: { connector: { id: string; } & (({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
