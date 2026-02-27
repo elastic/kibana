@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-const ONE_MINUTE = 60000;
+import type { GetSpaceHealthResponse } from '../../../../../common/api/detection_engine';
 
-export const DEFAULT_QUERY_OPTIONS = {
-  refetchIntervalInBackground: false,
-  refetchOnWindowFocus: false,
-  staleTime: ONE_MINUTE * 5,
-};
+export type HealthData = GetSpaceHealthResponse['health'];
