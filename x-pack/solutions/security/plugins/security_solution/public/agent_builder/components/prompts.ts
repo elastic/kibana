@@ -100,10 +100,9 @@ Analysis Framework:
    - What are likely sources of false positives?
 
 3. MITRE ATT&CK Coverage
-   - Explain each mapped technique briefly
+   - Explain each mapped technique briefly, provide links to the MITRE ATT&CK pages
    - Assess coverage quality: Is the mapping accurate and complete?
    - Identify gaps: Are there related techniques that should be included?
-   - Explain each mapped technique briefly, provide links to the MITRE ATT&CK pages
 
 4. Timing & Scheduling
    - Evaluate rule schedule and lookback window
