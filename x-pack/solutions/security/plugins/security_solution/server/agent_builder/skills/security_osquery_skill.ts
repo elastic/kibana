@@ -473,11 +473,14 @@ const createGetTableSchemaTool = (osquerySetup: OsqueryPluginSetup): BuiltinSkil
                   tables: result,
                   message:
                     result.length > 0
-                      ? `Found ${result.length} table(s).${search ? ` Filtered by "${search}".` : ''
-                      }${platform ? ` Platform: ${platform}.` : ''
-                      } Call again with tableName and agentId to get full column details for a specific table.`
-                      : `No tables found${search ? ` matching "${search}"` : ''}${platform ? ` for platform ${platform}` : ''
-                      }.`,
+                      ? `Found ${result.length} table(s).${
+                          search ? ` Filtered by "${search}".` : ''
+                        }${
+                          platform ? ` Platform: ${platform}.` : ''
+                        } Call again with tableName and agentId to get full column details for a specific table.`
+                      : `No tables found${search ? ` matching "${search}"` : ''}${
+                          platform ? ` for platform ${platform}` : ''
+                        }.`,
                 }),
               },
             },
@@ -934,8 +937,7 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
         ignore_unavailable: true,
         query: { bool: { filter: [{ term: { action_id: actionId } }] } },
       });
-      const finalResults =
-        typeof finalResultCount.count === 'number' ? finalResultCount.count : 0;
+      const finalResults = typeof finalResultCount.count === 'number' ? finalResultCount.count : 0;
 
       if (finalResults > 0) {
         return await fetchAndReturnResults(
@@ -963,8 +965,14 @@ const createGetResultsTool = (): BuiltinSkillBoundedTool => ({
                 errors: errors.length > 0 ? errors : undefined,
                 message:
                   finalResponses > 0
-                    ? `${finalResponses} agent(s) responded with 0 results after ${Math.round((Date.now() - startTime) / 1000)}s.`
-                    : `Timed out after ${Math.round((Date.now() - startTime) / 1000)}s. ${finalResponses}/${expectedAgents ?? '?'} agents responded. Call again to check if more results arrived.`,
+                    ? `${finalResponses} agent(s) responded with 0 results after ${Math.round(
+                        (Date.now() - startTime) / 1000
+                      )}s.`
+                    : `Timed out after ${Math.round(
+                        (Date.now() - startTime) / 1000
+                      )}s. ${finalResponses}/${
+                        expectedAgents ?? '?'
+                      } agents responded. Call again to check if more results arrived.`,
               }),
             },
           },
