@@ -164,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
         await setTimeoutAsync(20000);
 
         const errorResponse = await esSupertest
-          .get('/_security/_authenticate ')
+          .get('/_security/_authenticate')
           .set('authorization', `Bearer ${accessToken}`)
           .expect(401);
         jestExpect(errorResponse.body).toEqual(
@@ -181,6 +181,9 @@ export default function ({ getService }: FtrProviderContext) {
       it('missing token error should include appropriate `additional_unsuccessful_credentials`', async () => {
         const { accessToken } = await createToken();
 
+        // Make sure newly created token documents are available for search.
+        await es.indices.refresh({ index: '.security-tokens' });
+
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
@@ -192,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(esResponse).to.have.property('deleted').greaterThan(0);
 
         const errorResponse = await esSupertest
-          .get('/_security/_authenticate ')
+          .get('/_security/_authenticate')
           .set('authorization', `Bearer ${accessToken}`)
           .expect(401);
         jestExpect(errorResponse.body).toEqual(

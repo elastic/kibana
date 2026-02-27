@@ -525,7 +525,42 @@ describe('AuthenticationService', () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({
             statusCode: 401,
-            body: { error: { reason: 'token' } },
+            body: { error: { reason: 'token expired' } },
+          })
+        ) as UnauthorizedError;
+
+        reauthenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(mockAuthenticatedUser(), {
+            authHeaders: { header: 'value' },
+          })
+        );
+
+        const mockRequest = httpServerMock.createKibanaRequest();
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: mockRequest },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+          authHeaders: { header: 'value' },
+        });
+        expect(mockUnauthorizedErrorToolkit.notHandled).not.toHaveBeenCalled();
+
+        expect(reauthenticate).toHaveBeenCalledTimes(1);
+        expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
+      });
+
+      it('handles error if authentication succeeds and authentication headers are available (UIAM).', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: {
+              error: {
+                reason: 'failed to authenticate cloud access token for project',
+                caused_by: { authentication_error_code: '0x7E0116' },
+              },
+            },
           })
         ) as UnauthorizedError;
 

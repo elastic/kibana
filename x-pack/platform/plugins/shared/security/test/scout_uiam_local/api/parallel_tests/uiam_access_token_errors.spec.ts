@@ -59,6 +59,7 @@ apiTest.describe('UIAM access token errors', { tag: tags.serverless.security.com
       expect.objectContaining({
         type: 'security_exception',
         reason: `failed to authenticate cloud access token for project [${MOCK_IDP_UIAM_PROJECT_ID}]`,
+        caused_by: expect.objectContaining({ authentication_error_code: '0x7E0116' }),
       })
     );
   });
@@ -84,6 +85,7 @@ apiTest.describe('UIAM access token errors', { tag: tags.serverless.security.com
       expect.objectContaining({
         type: 'security_exception',
         reason: `failed to authenticate cloud access token for project [${MOCK_IDP_UIAM_PROJECT_ID}]`,
+        caused_by: expect.objectContaining({ authentication_error_code: '0xD00DF3' }),
       })
     );
   });
