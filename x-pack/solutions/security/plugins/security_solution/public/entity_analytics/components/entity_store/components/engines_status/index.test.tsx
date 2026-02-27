@@ -25,12 +25,6 @@ jest.mock('../../../../../common/utils/download_blob', () => ({
   downloadBlob: () => mockDownloadBlob(),
 }));
 
-const mockOnDeleteEntityEngine = jest.fn().mockResolvedValue(undefined);
-const defaultProps = {
-  onDeleteEntityEngine: mockOnDeleteEntityEngine,
-  isDeletingEntityEngine: false,
-};
-
 describe('EngineStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,7 +37,7 @@ describe('EngineStatus', () => {
       error: null,
     });
 
-    render(<EngineStatus {...defaultProps} />, {
+    render(<EngineStatus />, {
       wrapper: TestProviders,
     });
 
@@ -57,7 +51,7 @@ describe('EngineStatus', () => {
       error: new Error('Error'),
     });
 
-    render(<EngineStatus {...defaultProps} />, {
+    render(<EngineStatus />, {
       wrapper: TestProviders,
     });
 
@@ -71,7 +65,7 @@ describe('EngineStatus', () => {
       error: null,
     });
 
-    render(<EngineStatus {...defaultProps} />, {
+    render(<EngineStatus />, {
       wrapper: TestProviders,
     });
 
@@ -89,7 +83,7 @@ describe('EngineStatus', () => {
     };
     mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<EngineStatus {...defaultProps} />, {
+    render(<EngineStatus />, {
       wrapper: TestProviders,
     });
 
@@ -109,7 +103,7 @@ describe('EngineStatus', () => {
     };
     mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
-    render(<EngineStatus {...defaultProps} />, {
+    render(<EngineStatus />, {
       wrapper: TestProviders,
     });
 
