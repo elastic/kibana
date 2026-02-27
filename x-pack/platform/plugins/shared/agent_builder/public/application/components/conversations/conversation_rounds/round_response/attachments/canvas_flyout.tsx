@@ -10,6 +10,7 @@ import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
+import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
@@ -29,10 +30,17 @@ interface CanvasFlyoutProps {
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
   const { canvasState, closeCanvas } = useCanvasContext();
+  const conversationId = useConversationId();
 
-  const updateOrigin = useCallback(async (originId: string) => {
-    // TODO: Implement updateOrigin
-  }, []);
+  const updateOrigin = useCallback(
+    async (origin: unknown) => {
+      if (!conversationId || !canvasState) {
+        return;
+      }
+      return attachmentsService.updateOrigin(conversationId, canvasState.attachment.id, origin);
+    },
+    [attachmentsService, conversationId, canvasState]
+  );
 
   const uiDefinition = canvasState
     ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
