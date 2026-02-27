@@ -31,6 +31,7 @@ import type { ESQLEditorDeps } from '../types';
 export { VisorMode } from './mode_selector';
 
 export const NL_TO_ESQL_FLAG = 'esql.nlToEsqlEnabled';
+const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -127,7 +128,7 @@ export function QuickSearchVisor({
     setIsNlLoading(true);
     try {
       const sourceLabels = selectedSources.map((s) => s.label);
-      const result = await core.http.post<{ content: string }>('/internal/esql/nl_to_esql', {
+      const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({
           query: trimmed,
           ...(sourceLabels.length > 0 && { sources: sourceLabels }),

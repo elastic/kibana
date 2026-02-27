@@ -21,6 +21,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 
 import type { EsqlServerPluginStart } from '../types';
 
+const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 const resolveConnectorId = async ({
@@ -74,7 +75,7 @@ export const registerNLtoESQLRoute = (
 ) => {
   router.post(
     {
-      path: '/internal/esql/nl_to_esql',
+      path: NL_TO_ESQL_ROUTE,
       validate: {
         body: schema.object({
           query: schema.string(),
