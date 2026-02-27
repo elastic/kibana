@@ -12,6 +12,7 @@ import {
   UpdateCaseStepTypeId,
 } from '../../common/workflows/steps/update_case';
 import * as i18n from './translations';
+// import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 export const createUpdateCaseStepDefinition = () => {
   return createPublicStepDefinition({
@@ -39,5 +40,7 @@ export const createUpdateCaseStepDefinition = () => {
       ],
     },
     actionsMenuGroup: ActionsMenuGroup.kibana,
+    // TODO: enable one case_id can be a template AND an inputHandler
+    // editorHandlers: caseIdInputEditorHandlers,
   });
 };

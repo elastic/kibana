@@ -6,6 +6,7 @@
  */
 
 import { addCommentStepDefinition } from './add_comment';
+// import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 describe('addCommentStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
@@ -13,4 +14,11 @@ describe('addCommentStepDefinition', () => {
     expect(addCommentStepDefinition.actionsMenuGroup).toBe('kibana');
     expect(addCommentStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
+
+  // TODO: enable one case_id can be a template AND an inputHandler
+  // it('configures case_id input selector', () => {
+  //   expect(addCommentStepDefinition.editorHandlers?.input?.case_id?.selection).toBe(
+  //     caseIdInputEditorHandlers.input.case_id.selection
+  //   );
+  // });
 });

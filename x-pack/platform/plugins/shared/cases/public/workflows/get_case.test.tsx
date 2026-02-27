@@ -6,6 +6,7 @@
  */
 
 import { getCaseStepDefinition } from './get_case';
+// import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 describe('getCaseStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
@@ -13,4 +14,11 @@ describe('getCaseStepDefinition', () => {
     expect(getCaseStepDefinition.actionsMenuGroup).toBe('kibana');
     expect(getCaseStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
+
+  // TODO: enable one case_id can be a template AND an inputHandler
+  // it('configures case_id input selector', () => {
+  //   expect(getCaseStepDefinition.editorHandlers?.input?.case_id?.selection).toBe(
+  //     caseIdInputEditorHandlers.input.case_id.selection
+  //   );
+  // });
 });

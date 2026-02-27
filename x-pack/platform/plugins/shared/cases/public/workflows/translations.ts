@@ -116,3 +116,15 @@ export const TEMPLATE_NOT_FOUND_MESSAGE = (template: string) =>
     defaultMessage: 'Template "{template}" was not found in case configuration.',
     values: { template },
   });
+
+export const CASE_CAN_BE_USED_MESSAGE = (caseTitle: string) =>
+  i18n.translate('xpack.cases.workflowSteps.shared.caseCanBeUsedMessage', {
+    defaultMessage: 'Case "{caseTitle}" can be used as input.',
+    values: { caseTitle },
+  });
+
+export const CASE_NOT_FOUND_MESSAGE = (caseId: string) =>
+  i18n.translate('xpack.cases.workflowSteps.shared.caseNotFoundMessage', {
+    defaultMessage: 'Case "{caseId}" was not found.',
+    values: { caseId },
+  });

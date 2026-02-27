@@ -12,6 +12,7 @@ import {
   AddCommentStepTypeId,
 } from '../../common/workflows/steps/add_comment';
 import * as i18n from './translations';
+// import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
 export const addCommentStepDefinition = createPublicStepDefinition({
   ...addCommentStepCommonDefinition,
@@ -36,4 +37,6 @@ export const addCommentStepDefinition = createPublicStepDefinition({
     ],
   },
   actionsMenuGroup: ActionsMenuGroup.kibana,
+  // TODO: enable one case_id can be a template AND an inputHandler
+  // editorHandlers: caseIdInputEditorHandlers,
 });
