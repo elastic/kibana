@@ -18,7 +18,10 @@ import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { trimStart } from 'lodash';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
-import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
+import {
+  getNamedMcpTools,
+  listMcpTools,
+} from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
 import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
 import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils';
 import { loadWorkflows } from '@kbn/data-catalog-plugin/common/workflow_loader';
@@ -58,6 +61,10 @@ function slugify(input: string): string {
 
 /**
  * Bulk imports MCP tools for a Data Source that uses the MCP stack connector.
+ *
+ * When `importAll` is true, discovers all tools from the MCP server via listTools
+ * and imports them, ignoring the `tools` whitelist. This is useful for MCP servers
+ * where tool names are user-defined (e.g. Snowflake).
  */
 async function importMcpTools(
   registry: ToolRegistry,
@@ -67,26 +74,41 @@ async function importMcpTools(
   tools: Array<ImportedTool>,
   name: string,
   namespace: string,
-  logger: Logger
+  logger: Logger,
+  importAll: boolean = false
 ): Promise<string[]> {
-  if (tools.length === 0) {
-    return [];
+  let dataSourceTools: Array<{ name: string; description: string }>;
+
+  if (importAll) {
+    const { tools: discoveredTools } = await listMcpTools({ actions, request, connectorId });
+    dataSourceTools = discoveredTools.map((tool) => ({
+      name: tool.name,
+      description: tool.description ?? '',
+    }));
+    logger.info(
+      `Discovered ${dataSourceTools.length} tools from MCP server for Data Source '${name}'`
+    );
+  } else {
+    if (tools.length === 0) {
+      return [];
+    }
+
+    const toolNames = tools.map((tool) => tool.name);
+
+    const mcpTools = await getNamedMcpTools({
+      actions,
+      request,
+      connectorId,
+      toolNames,
+      logger,
+    });
+
+    dataSourceTools = mcpTools.map((tool) => ({
+      name: tool.name,
+      description:
+        tool.description + ' ' + (tools.find((t) => t.name === tool.name)?.description ?? ''),
+    }));
   }
-
-  const toolNames = tools.map((tool) => tool.name);
-
-  const mcpTools = await getNamedMcpTools({
-    actions,
-    request,
-    connectorId,
-    toolNames,
-    logger,
-  });
-
-  const dataSourceTools = mcpTools.map((tool) => ({
-    name: tool.name,
-    description: tool.description + ' ' + tools.find((t) => t.name === tool.name)!.description,
-  }));
 
   let importedToolIds: string[] = [];
   try {
@@ -163,16 +185,20 @@ export async function createDataSourceAndRelatedResources(
 
     stackConnectorIds[`${connectorType}-stack-connector-id`] = finalStackConnectorId;
 
-    if (connectorType === 'mcp' && stackConnectorConfig.importedTools) {
+    if (
+      connectorType === 'mcp' &&
+      (stackConnectorConfig.importedTools || stackConnectorConfig.importAllMcpTools)
+    ) {
       const importedToolIds = await importMcpTools(
         toolRegistry,
         actions,
         request,
         finalStackConnectorId,
-        stackConnectorConfig.importedTools,
+        stackConnectorConfig.importedTools ?? [],
         name,
         `${type}.${slugify(name)}`,
-        logger
+        logger,
+        stackConnectorConfig.importAllMcpTools
       );
       toolIds.push(...importedToolIds);
     }

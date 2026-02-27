@@ -28,7 +28,7 @@ export const snowflakeDataSource: DataSource = {
         hasAuth: true,
         authType: MCPAuthType.Bearer,
       },
-      importedTools: [],
+      importAllMcpTools: true,
     },
   ],
 

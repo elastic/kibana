@@ -61,6 +61,12 @@ export interface StackConnectorConfig {
   type: string;
   config: Record<string, unknown>;
   importedTools?: ImportedTool[];
+  /**
+   * When true, all tools discovered via listTools on the MCP server are imported
+   * instead of only those listed in importedTools. Useful for MCP servers where
+   * tool names are user-defined and not known at code time (e.g. Snowflake).
+   */
+  importAllMcpTools?: boolean;
 }
 
 export interface ImportedTool {
