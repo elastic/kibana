@@ -12,6 +12,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { registerLocators } from './locator/register_locators';
@@ -70,6 +71,7 @@ export class AgentBuilderPlugin
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -203,6 +205,11 @@ export class AgentBuilderPlugin
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      addAttachment: (attachment: AttachmentInput) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.addAttachment(attachment);
+        }
+      },
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;

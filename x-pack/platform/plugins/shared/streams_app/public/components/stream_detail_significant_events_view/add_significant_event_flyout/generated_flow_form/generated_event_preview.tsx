@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import {
   EuiButton,
@@ -17,7 +17,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiSuperSelect,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +25,7 @@ import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { StreamsESQLEditor } from '../../../esql_query_editor';
 import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
-import { ALL_DATA_OPTION } from '../../system_selector';
+import { ConditionPanel } from '../../../data_management/shared/condition_display';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;

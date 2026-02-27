@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
-import { TaskStatus, type StreamQuery, type Streams, type System } from '@kbn/streams-schema';
+import { TaskStatus, type StreamQuery, type Streams } from '@kbn/streams-schema';
 import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/css';
@@ -48,11 +48,8 @@ interface Props {
   onClose: () => void;
   definition: Streams.all.GetResponse;
   onSave: (data: SaveData) => Promise<void>;
-  systems: System[];
   query?: StreamQuery;
   initialFlow?: Flow;
-  initialSelectedSystems: System[];
-  refreshSystems: () => void;
   generateOnMount: boolean;
   aiFeatures: AIFeatures | null;
 }
@@ -64,9 +61,6 @@ export function AddSignificantEventFlyout({
   definition,
   onSave,
   initialFlow = undefined,
-  initialSelectedSystems,
-  systems,
-  refreshSystems,
   aiFeatures,
 }: Props) {
   const { euiTheme } = useEuiTheme();
@@ -94,8 +88,6 @@ export function AddSignificantEventFlyout({
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [selectedSystems, setSelectedSystems] = useState<System[]>(initialSelectedSystems);
-
   const [generatedQueries, setGeneratedQueries] = useState<StreamQuery[]>([]);
 
   const [task, setTask] = useState<SignificantEventsQueriesGenerationTaskResult>(defaultTask);
@@ -105,9 +97,9 @@ export function AddSignificantEventFlyout({
   const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] =
     useAsyncFn(scheduleGenerationTask);
 
-  const scheduleTask = (connectorId: string, effectiveSystems: System[]) => {
+  const scheduleTask = (connectorId: string) => {
     setTask(defaultTask);
-    doScheduleGenerationTask(connectorId, effectiveSystems).then(setTask);
+    doScheduleGenerationTask(connectorId).then(setTask);
   };
 
   const getTaskStatus = useCallback(() => {
@@ -179,7 +171,7 @@ export function AddSignificantEventFlyout({
     }
   }, [selectedFlow]);
 
-  const generateQueries = (systemsOverride?: System[]) => {
+  const generateQueries = () => {
     const connectorId = aiFeatures?.genAiConnectors.selectedConnector;
     if (!connectorId) {
       return;
@@ -188,9 +180,7 @@ export function AddSignificantEventFlyout({
     setSelectedFlow('ai');
     setGeneratedQueries([]);
 
-    const effectiveSystems = systemsOverride ?? selectedSystems;
-
-    scheduleTask(connectorId, effectiveSystems);
+    scheduleTask(connectorId);
   };
 
   useEffect(() => {
@@ -245,12 +235,7 @@ export function AddSignificantEventFlyout({
               <EuiPanel hasShadow={false} paddingSize="l">
                 <SignificantEventsGenerationPanel
                   onManualEntryClick={() => setSelectedFlow('manual')}
-                  systems={systems}
-                  selectedSystems={selectedSystems}
-                  onSystemsChange={setSelectedSystems}
                   onGenerateSuggestionsClick={generateQueries}
-                  definition={definition.stream}
-                  refreshSystems={refreshSystems}
                   isGeneratingQueries={isGenerating}
                   isSavingManualEntry={isSubmitting}
                   selectedFlow={selectedFlow}
@@ -316,7 +301,6 @@ export function AddSignificantEventFlyout({
                       setCanSave={(next: boolean) => {
                         setCanSave(next);
                       }}
-                      systems={systems}
                       dataViews={dataViewsFetch.value ?? []}
                       taskStatus={task?.status}
                       taskError={task?.status === 'failed' ? task.error : undefined}
