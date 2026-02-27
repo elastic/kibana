@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
-  EuiBasicTable,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexItem,
   EuiFlexGroup,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
+  EuiPopover,
+  EuiSelectable,
   EuiText,
   useEuiTheme,
+  EuiInMemoryTable,
+  EuiSpacer,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
@@ -33,6 +39,7 @@ import { useStartServices } from '../../../../../hooks';
 
 import { ManageIntegrationActions } from './manage_integration_actions';
 import type { ReviewIntegrationDetails } from './manage_integration_actions';
+import { CreateNewIntegrationButton } from './create_new_integration';
 
 export interface CreatedIntegrationRow {
   integrationId: string;
@@ -113,6 +120,50 @@ export const ManageIntegrationsTable: React.FC<{
       refetchOnWindowFocus: false,
     }
   );
+
+  const [isActionsFilterOpen, setIsActionsFilterOpen] = useState(false);
+  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
+  const [selectedActions, setSelectedActions] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+
+  const integrationsWithActions = useMemo(() => {
+    return integrations.map((item) => {
+      let displayStatus: string;
+      switch (item.status) {
+        case 'completed':
+        case 'approved':
+          displayStatus = 'success';
+          break;
+        case 'pending':
+        case 'processing':
+          displayStatus = 'in_progress';
+          break;
+        case 'failed':
+          displayStatus = 'failed';
+          break;
+        case 'cancelled':
+          displayStatus = 'cancelled';
+          break;
+        default:
+          displayStatus = 'in_progress';
+      }
+      return {
+        ...item,
+        displayStatus,
+        availableAction: canReviewApproveIntegration(item) ? 'review_approve' : 'edit',
+      };
+    });
+  }, [integrations]);
+
+  const handleActionsChange = useCallback((options: EuiSelectableOption[]) => {
+    const selected = options.filter((opt) => opt.checked === 'on').map((opt) => opt.key as string);
+    setSelectedActions(selected);
+  }, []);
+
+  const handleStatusChange = useCallback((options: EuiSelectableOption[]) => {
+    const selected = options.filter((opt) => opt.checked === 'on').map((opt) => opt.key as string);
+    setSelectedStatuses(selected);
+  }, []);
 
   const goToEditIntegration = useCallback(
     (integrationId: string) => {
@@ -420,22 +471,147 @@ export const ManageIntegrationsTable: React.FC<{
     );
   }
 
-  return (
+  const actionsOptions: EuiSelectableOption[] = [
+    {
+      label: 'Review & Approve',
+      key: 'review_approve',
+      checked: selectedActions.includes('review_approve') ? 'on' : undefined,
+    },
+    { label: 'Edit', key: 'edit', checked: selectedActions.includes('edit') ? 'on' : undefined },
+  ];
+
+  const statusOptions: EuiSelectableOption[] = [
+    {
+      label: 'Success',
+      key: 'success',
+      checked: selectedStatuses.includes('success') ? 'on' : undefined,
+    },
+    {
+      label: 'In progress',
+      key: 'in_progress',
+      checked: selectedStatuses.includes('in_progress') ? 'on' : undefined,
+    },
+    {
+      label: 'Failed',
+      key: 'failed',
+      checked: selectedStatuses.includes('failed') ? 'on' : undefined,
+    },
+    {
+      label: 'Cancelled',
+      key: 'cancelled',
+      checked: selectedStatuses.includes('cancelled') ? 'on' : undefined,
+    },
+  ];
+
+  const filteredIntegrations = integrationsWithActions.filter((item) => {
+    const matchesAction =
+      selectedActions.length === 0 || selectedActions.includes(item.availableAction);
+    const matchesStatus =
+      selectedStatuses.length === 0 || selectedStatuses.includes(item.displayStatus);
+    return matchesAction && matchesStatus;
+  });
+
+  const filterButtonStyle = css`
+    .euiFilterButton {
+      background-color: ${euiTheme.colors.lightestShade};
+      border: none;
+      border-radius: ${euiTheme.border.radius.medium};
+    }
+  `;
+
+  const filterButtons = (
+    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup css={filterButtonStyle}>
+          <EuiPopover
+            button={
+              <EuiFilterButton
+                iconType="arrowDown"
+                onClick={() => setIsActionsFilterOpen(!isActionsFilterOpen)}
+                isSelected={isActionsFilterOpen}
+                hasActiveFilters={selectedActions.length > 0}
+                numActiveFilters={selectedActions.length}
+              >
+                {i18n.translate('xpack.fleet.epmList.manageIntegrations.actionsFilter', {
+                  defaultMessage: 'Actions',
+                })}
+              </EuiFilterButton>
+            }
+            isOpen={isActionsFilterOpen}
+            closePopover={() => setIsActionsFilterOpen(false)}
+            panelPaddingSize="none"
+          >
+            <EuiSelectable options={actionsOptions} onChange={handleActionsChange}>
+              {(list) => <div style={{ width: 200 }}>{list}</div>}
+            </EuiSelectable>
+          </EuiPopover>
+        </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup css={filterButtonStyle}>
+          <EuiPopover
+            button={
+              <EuiFilterButton
+                iconType="arrowDown"
+                onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
+                isSelected={isStatusFilterOpen}
+                hasActiveFilters={selectedStatuses.length > 0}
+                numActiveFilters={selectedStatuses.length}
+              >
+                {i18n.translate('xpack.fleet.epmList.manageIntegrations.statusFilter', {
+                  defaultMessage: 'Status',
+                })}
+              </EuiFilterButton>
+            }
+            isOpen={isStatusFilterOpen}
+            closePopover={() => setIsStatusFilterOpen(false)}
+            panelPaddingSize="none"
+          >
+            <EuiSelectable options={statusOptions} onChange={handleStatusChange}>
+              {(list) => <div style={{ width: 200 }}>{list}</div>}
+            </EuiSelectable>
+          </EuiPopover>
+        </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <CreateNewIntegrationButton />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const search: EuiSearchBarProps = {
+    box: {
+      incremental: true,
+      placeholder: 'Search integrations',
+    },
+    toolsRight: [filterButtons],
+  };
+
+  const countText = (
     <>
       <EuiText size="s">
         <FormattedMessage
           id="xpack.fleet.epmList.manageIntegrations.showingCount"
           defaultMessage="Showing {count} integrations"
-          values={{ count: integrations.length }}
+          values={{ count: filteredIntegrations.length }}
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiBasicTable
-        items={integrations}
+    </>
+  );
+
+  return (
+    <>
+      <EuiInMemoryTable
+        items={filteredIntegrations}
         columns={columns}
+        search={search}
+        childrenBetween={countText}
         tableCaption={i18n.translate('xpack.fleet.epmList.manageIntegrations.tableCaption', {
           defaultMessage: 'Manage created integrations',
         })}
+        pagination
+        sorting
         data-test-subj="manageIntegrationsTable"
       />
     </>
