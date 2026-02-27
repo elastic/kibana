@@ -35,7 +35,6 @@
     "@kbn/config-mocks",
     "@kbn/core-execution-context-server-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/safer-lodash-set",
     "@kbn/core-security-server-internal",
     "@kbn/core-security-server-mocks",
   ],
