@@ -18,11 +18,6 @@ export const mcpFieldStrings = {
       defaultMessage: 'Additional settings',
     }),
   },
-  authTypePagerDutyToken: {
-    label: i18n.translate('xpack.stackConnectors.components.mcp.authTypePagerDutyTokenLabel', {
-      defaultMessage: 'API Token',
-    }),
-  },
 };
 
 export const mcpErrorStrings = {
