@@ -68,4 +68,12 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     id: 'search.rerank',
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
+  {
+    id: 'security.renderAlertNarrative',
+    handlerHash: '46234ab4e74122540d4cdb2771778aec0b2f9cc59ef540365d9a66c1af99a13e',
+  },
+  {
+    id: 'security.buildAlertEntityGraph',
+    handlerHash: '90e95df7b6deaa5b6ab908c1ff8f4a3606b6e8f7fce5d59e0411d3d577d0be44',
+  },
 ];

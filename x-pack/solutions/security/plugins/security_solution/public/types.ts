@@ -69,6 +69,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { Logger } from '@kbn/logging';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -117,6 +118,7 @@ export interface SetupPlugins {
   cases?: CasesPublicSetup;
   data: DataPublicPluginSetup;
   discoverShared: DiscoverSharedPublicStart;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }
 
 /**
