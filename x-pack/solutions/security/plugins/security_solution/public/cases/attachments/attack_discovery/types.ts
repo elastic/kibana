@@ -8,17 +8,13 @@
 import type { ExternalReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
 export interface AttackDiscoveryAttachmentMetadata {
-    attackDiscoveryAlertId: string;
-    index: string;
-    generationUuid: string;
-    title: string;
-    timestamp: string;
+  attackDiscoveryAlertId: string;
+  index: string;
+  generationUuid: string;
+  title: string;
+  timestamp: string;
 }
 
 export interface IAttackDiscoveryAttachmentProps extends ExternalReferenceAttachmentViewProps {
-    externalReferenceMetadata: AttackDiscoveryAttachmentMetadata | null;
+  externalReferenceMetadata: AttackDiscoveryAttachmentMetadata | null;
 }
-
-
-
-

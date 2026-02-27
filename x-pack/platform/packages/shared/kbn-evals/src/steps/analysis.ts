@@ -196,9 +196,7 @@ export function createAnalysisStep(config: AnalysisStepConfig): AnalysisStep {
 
     const { experiment, model, additionalContext, focusCategories } = input;
 
-    log.info(
-      `🔬 Starting analysis step for experiment "${experiment.id}" using ${method} method`
-    );
+    log.info(`🔬 Starting analysis step for experiment "${experiment.id}" using ${method} method`);
 
     try {
       const analyzeInput: AnalyzeExperimentInput = {
@@ -225,9 +223,7 @@ export function createAnalysisStep(config: AnalysisStepConfig): AnalysisStep {
       }
 
       const suggestionCount = analysisResult.suggestions.length;
-      const highImpactCount = analysisResult.suggestions.filter(
-        (s) => s.impact === 'high'
-      ).length;
+      const highImpactCount = analysisResult.suggestions.filter((s) => s.impact === 'high').length;
 
       log.info(
         `✅ Analysis step completed for experiment "${experiment.id}": ${suggestionCount} suggestions generated (${highImpactCount} high-impact)`
@@ -346,9 +342,7 @@ export function createBatchAnalysisStep(config: BatchAnalysisStepConfig) {
     const startTime = Date.now();
     const results: AnalysisStepResult[] = [];
 
-    log.info(
-      `🔬 Starting batch analysis for ${inputs.length} experiments (parallel: ${parallel})`
-    );
+    log.info(`🔬 Starting batch analysis for ${inputs.length} experiments (parallel: ${parallel})`);
 
     if (parallel) {
       const pLimit = (await import('p-limit')).default;

@@ -53,4 +53,3 @@ class BuiltinSkillRegistryImpl implements BuiltinSkillRegistry {
     return [...this.skills.values()];
   }
 }
-

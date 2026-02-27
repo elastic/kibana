@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-import { createBuiltinSkillRegistry, registerBuiltinSkills, type BuiltinSkillRegistry } from './builtin';
+import {
+  createBuiltinSkillRegistry,
+  registerBuiltinSkills,
+  type BuiltinSkillRegistry,
+} from './builtin';
 import type { SkillsServiceSetup, SkillsServiceStart } from './types';
 
 export interface SkillsServiceSetupDeps {
@@ -47,4 +51,3 @@ export class SkillsService {
     };
   }
 }
-

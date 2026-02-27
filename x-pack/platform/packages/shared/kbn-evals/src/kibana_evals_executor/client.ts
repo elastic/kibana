@@ -50,7 +50,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       runId: string;
       repetitions?: number;
     }
-  ) { }
+  ) {}
 
   async runExperiment<
     TEvaluationDataset extends EvaluationDataset,

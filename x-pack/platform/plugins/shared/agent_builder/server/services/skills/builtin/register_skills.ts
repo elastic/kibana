@@ -16,4 +16,3 @@ export const registerBuiltinSkills = ({ registry }: { registry: BuiltinSkillRegi
   // from their owning plugins via `plugins.agentBuilder.skills.register(...)`.
   // (intentionally empty)
 };
-

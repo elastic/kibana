@@ -15,7 +15,6 @@ import type {
   EvaluatorDisplayOptions,
   EvaluatorDisplayGroup,
 } from './utils/reporting/report_table';
-import type { DatasetScoreWithStats } from './utils/evaluation_stats';
 import type { PreprocessedTrace } from './utils/improvement_suggestions/trace_preprocessor';
 import type { EvaluatorStats } from './utils/score_repository';
 

@@ -7,8 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SkillProvider } from '@kbn/agent-builder-server';
-import type { SkillsServiceStart } from '../types';
 import { createBadRequestError } from '@kbn/agent-builder-common';
+import type { SkillsServiceStart } from '../types';
 
 export const serviceToProvider = ({
   skillsService,
@@ -35,4 +35,3 @@ export const serviceToProvider = ({
     },
   };
 };
-

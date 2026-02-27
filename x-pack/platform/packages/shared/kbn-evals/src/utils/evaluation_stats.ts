@@ -6,7 +6,7 @@
  */
 
 import { mean, median, deviation, min, max } from 'd3';
-import type { RanExperiment, EvaluationResult } from '../types';
+import type { RanExperiment } from '../types';
 import type { EvaluationExplanation } from './score_repository';
 
 export interface EvaluatorStats {

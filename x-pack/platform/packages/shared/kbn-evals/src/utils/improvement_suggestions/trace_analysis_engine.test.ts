@@ -959,7 +959,10 @@ describe('TraceAnalysisEngine', () => {
     it('should not include cross-trace analysis for less than 3 traces', () => {
       const engine = createTraceAnalysisEngine();
 
-      const traces = [createMockTrace({ traceId: 'trace-1' }), createMockTrace({ traceId: 'trace-2' })];
+      const traces = [
+        createMockTrace({ traceId: 'trace-1' }),
+        createMockTrace({ traceId: 'trace-2' }),
+      ];
 
       const result = engine.analyzeTraces(traces);
 

@@ -158,9 +158,7 @@ export const VALID_OUTPUT_FORMATS: readonly OutputFormat[] = [
 export function parseMode(value: string | undefined): ModeType {
   const mode = value ?? 'once';
   if (!VALID_MODES.includes(mode as ModeType)) {
-    throw new Error(
-      `Invalid --mode value "${mode}". Expected one of: ${VALID_MODES.join(', ')}`
-    );
+    throw new Error(`Invalid --mode value "${mode}". Expected one of: ${VALID_MODES.join(', ')}`);
   }
   return mode as ModeType;
 }

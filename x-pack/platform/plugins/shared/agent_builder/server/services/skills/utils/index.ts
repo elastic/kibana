@@ -6,4 +6,3 @@
  */
 
 export { serviceToProvider } from './service_to_provider';
-

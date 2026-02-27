@@ -118,7 +118,8 @@ function formatLowScoreExplanations(datasetScoresWithStats: DatasetScoreWithStat
           if (explanations.length > MAX_EXPLANATIONS_PER_EVALUATOR) {
             datasetLowScores.push(
               chalk.gray(
-                `     ... and ${explanations.length - MAX_EXPLANATIONS_PER_EVALUATOR
+                `     ... and ${
+                  explanations.length - MAX_EXPLANATIONS_PER_EVALUATOR
                 } more low-scoring examples`
               )
             );
@@ -275,7 +276,8 @@ export function createDefaultTerminalReporter(
         .join(', ');
 
       log.error(
-        `No evaluation results found for run ID: ${runId}${filterSuffix ? ` (${filterSuffix})` : ''
+        `No evaluation results found for run ID: ${runId}${
+          filterSuffix ? ` (${filterSuffix})` : ''
         }`
       );
       return;

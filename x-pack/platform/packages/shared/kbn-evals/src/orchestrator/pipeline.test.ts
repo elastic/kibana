@@ -8,7 +8,6 @@
 import {
   createPipeline,
   PIPELINE_STEP_ORDER,
-  type PipelineConfig,
   type PipelineContext,
   type PipelineStepId,
 } from './pipeline';
@@ -433,11 +432,7 @@ describe('createPipeline', () => {
 
       const skippedSteps = result.stepResults.filter((s) => s.status === 'skipped');
       expect(skippedSteps).toHaveLength(3);
-      expect(skippedSteps.map((s) => s.stepId)).toEqual([
-        'trace-collect',
-        'analyze',
-        'suggest',
-      ]);
+      expect(skippedSteps.map((s) => s.stepId)).toEqual(['trace-collect', 'analyze', 'suggest']);
     });
 
     it('should still execute non-skipped steps', async () => {
@@ -1054,7 +1049,9 @@ describe('createPipeline', () => {
         await controller.result;
 
         expect(reporter).toHaveBeenCalled();
-        expect(reporter).toHaveBeenCalledWith(expect.objectContaining({ evalOutput: expect.any(Object) }));
+        expect(reporter).toHaveBeenCalledWith(
+          expect.objectContaining({ evalOutput: expect.any(Object) })
+        );
       });
 
       it('should mark report as complete even without custom reporter', async () => {

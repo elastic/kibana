@@ -286,9 +286,7 @@ describe('createModeFromCliArgs', () => {
       expect(result.modeType).toBe('once');
       expect(result.controller).toBeNull();
       expect(result.hasController).toBe(false);
-      expect(mockLog.debug).toHaveBeenCalledWith(
-        expect.stringContaining('Running in "once" mode')
-      );
+      expect(mockLog.debug).toHaveBeenCalledWith(expect.stringContaining('Running in "once" mode'));
     });
 
     it('should default to once mode when no mode specified', () => {

@@ -7,7 +7,6 @@
 
 import {
   createFeedbackLoopOrchestrator,
-  type FeedbackLoopOrchestratorConfig,
   type FeedbackLoopInput,
   type FeedbackLoopIterationResult,
 } from './create_orchestrator';
@@ -568,12 +567,8 @@ describe('createFeedbackLoopOrchestrator', () => {
       await orchestrator.run(createMockInput()).result;
 
       expect(onIterationComplete).toHaveBeenCalledTimes(2);
-      expect(onIterationComplete).toHaveBeenCalledWith(
-        expect.objectContaining({ iteration: 1 })
-      );
-      expect(onIterationComplete).toHaveBeenCalledWith(
-        expect.objectContaining({ iteration: 2 })
-      );
+      expect(onIterationComplete).toHaveBeenCalledWith(expect.objectContaining({ iteration: 1 }));
+      expect(onIterationComplete).toHaveBeenCalledWith(expect.objectContaining({ iteration: 2 }));
     });
 
     it('should include correct iteration data in callback', async () => {
