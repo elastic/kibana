@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -17,6 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useHistory, useParams } from 'react-router-dom';
 
 import { EntityAnalyticsToggle } from '../components/entity_analytics_toggle';
 import { ENTITY_ANALYTICS } from '../../app/translations';
@@ -35,6 +36,7 @@ import {
 } from '../components/entity_store/hooks/use_entity_store';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
+import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
 import { userHasRiskEngineReadPermissions, safeErrorMessage } from '../common';
 import {
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TEST_ID,
@@ -46,11 +48,13 @@ import {
   ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
 } from '../test_ids';
 
-enum TabId {
-  RiskScore = 'riskScore',
-  AssetCriticality = 'assetCriticality',
+export enum TabId {
+  RiskScore = 'risk_score',
+  AssetCriticality = 'asset_criticality',
   Status = 'status',
 }
+
+const VALID_TABS = Object.values(TabId);
 
 const isEntityStoreInstalled = (status?: string) => status && status !== 'not_installed';
 const canDeleteEntityEngine = (status?: string) =>
@@ -107,13 +111,28 @@ export const EntityAnalyticsManagementPage = () => {
     isEntityStoreInstalled(entityStoreStatus.data?.status) &&
     entityEnginePrivileges?.has_all_required;
 
-  const [selectedTabId, setSelectedTabId] = useState(TabId.RiskScore);
+  const history = useHistory();
+  const { tab } = useParams<{ tab?: string }>();
+
+  const selectedTabId = useMemo(() => {
+    if (tab && VALID_TABS.includes(tab as TabId)) {
+      return tab as TabId;
+    }
+    return TabId.RiskScore;
+  }, [tab]);
+
+  const handleTabChange = useCallback(
+    (tabId: TabId) => {
+      history.push(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${tabId}`);
+    },
+    [history]
+  );
 
   useEffect(() => {
     if (selectedTabId === TabId.Status && !shouldDisplayEngineStatusTab) {
-      setSelectedTabId(TabId.RiskScore);
+      history.replace(`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${TabId.RiskScore}`);
     }
-  }, [shouldDisplayEngineStatusTab, selectedTabId]);
+  }, [shouldDisplayEngineStatusTab, selectedTabId, history]);
 
   const deleteError = safeErrorMessage(deleteEntityEngineMutation.error);
 
@@ -197,7 +216,7 @@ export const EntityAnalyticsManagementPage = () => {
         <EuiTab
           key={TabId.RiskScore}
           isSelected={selectedTabId === TabId.RiskScore}
-          onClick={() => setSelectedTabId(TabId.RiskScore)}
+          onClick={() => handleTabChange(TabId.RiskScore)}
           data-test-subj={RISK_SCORE_TAB_TEST_ID}
         >
           <FormattedMessage
@@ -208,7 +227,7 @@ export const EntityAnalyticsManagementPage = () => {
         <EuiTab
           key={TabId.AssetCriticality}
           isSelected={selectedTabId === TabId.AssetCriticality}
-          onClick={() => setSelectedTabId(TabId.AssetCriticality)}
+          onClick={() => handleTabChange(TabId.AssetCriticality)}
           data-test-subj={ASSET_CRITICALITY_TAB_TEST_ID}
         >
           <FormattedMessage
@@ -220,7 +239,7 @@ export const EntityAnalyticsManagementPage = () => {
           <EuiTab
             key={TabId.Status}
             isSelected={selectedTabId === TabId.Status}
-            onClick={() => setSelectedTabId(TabId.Status)}
+            onClick={() => handleTabChange(TabId.Status)}
             data-test-subj={ENGINE_STATUS_TAB_TEST_ID}
           >
             <FormattedMessage

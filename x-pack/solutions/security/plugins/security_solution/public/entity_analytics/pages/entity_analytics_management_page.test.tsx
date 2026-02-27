@@ -8,8 +8,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import type { TabId } from './entity_analytics_management_page';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management_page';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
 
 import {
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
@@ -234,13 +238,23 @@ describe('EntityAnalyticsManagementPage', () => {
     });
   });
 
-  const pageComponent = () => (
-    <IntlProvider locale="en">
-      <QueryClientProvider client={new QueryClient()}>
-        <EntityAnalyticsManagementPage />
-      </QueryClientProvider>
-    </IntlProvider>
-  );
+  const pageComponent = (initialTab?: TabId) => {
+    const initialPath = initialTab
+      ? `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${initialTab}`
+      : ENTITY_ANALYTICS_MANAGEMENT_PATH;
+
+    return (
+      <IntlProvider locale="en">
+        <QueryClientProvider client={new QueryClient()}>
+          <MemoryRouter initialEntries={[initialPath]}>
+            <Route path={`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/:tab?`}>
+              <EntityAnalyticsManagementPage />
+            </Route>
+          </MemoryRouter>
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+  };
 
   it('renders page title and tabs', () => {
     render(pageComponent());

@@ -38,8 +38,7 @@ const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route
-        path={ENTITY_ANALYTICS_MANAGEMENT_PATH}
-        exact
+        path={`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/:tab?`}
         component={EntityAnalyticsManagementWrapper}
       />
       <Route component={NotFoundPage} />
@@ -59,7 +58,7 @@ const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
           <Redirect
             to={{
               ...location,
-              pathname: ENTITY_ANALYTICS_MANAGEMENT_PATH,
+              pathname: `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/asset_criticality`,
               search: location.search,
             }}
           />
