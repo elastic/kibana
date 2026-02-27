@@ -12,9 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseTestConfig.getAll(),
-    testFiles: [
-      require.resolve('../../test_suites/context'),
-    ],
+    testFiles: [require.resolve('../../test_suites/context')],
     junit: {
       reportName: 'Serverless Security Functional Tests - Common Group 10 (Context)',
     },
