@@ -273,6 +273,22 @@ export const useTopNavLinks = ({
             ? {
                 items: [
                   {
+                    run: async () => {
+                      await onSaveDiscoverSession({
+                        initialCopyOnSave: true,
+                        services,
+                        state,
+                      });
+                    },
+                    id: 'saveAs',
+                    order: 1,
+                    label: i18n.translate('discover.localMenu.saveAsTitle', {
+                      defaultMessage: 'Save as',
+                    }),
+                    iconType: 'save',
+                    testId: 'interactiveSaveMenuItem',
+                  },
+                  {
                     run: () => services.embeddableEditor.transferBackToEditor(),
                     id: 'cancel',
                     order: 100,
