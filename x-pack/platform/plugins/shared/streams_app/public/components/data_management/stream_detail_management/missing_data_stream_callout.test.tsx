@@ -147,9 +147,7 @@ describe('MissingDataStreamCallout', () => {
       );
 
       expect(screen.getByTestId('streamsMissingDataStreamRestoreButton')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('streamsMissingDataStreamDeleteButton')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('streamsMissingDataStreamDeleteButton')).not.toBeInTheDocument();
     });
 
     it('shows delete button when canDelete is true', () => {
@@ -200,9 +198,7 @@ describe('MissingDataStreamCallout', () => {
         </I18nProvider>
       );
 
-      expect(
-        screen.getByText(/delete it properly to clean up its definition/)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/delete it properly to clean up its definition/)).toBeInTheDocument();
     });
   });
 });
