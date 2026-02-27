@@ -71,7 +71,7 @@ const resolveGradientAngle = ({
   return diagonalGradientAngle + angleBoost;
 };
 
-const getForegroundColors = (colors: UseEuiTheme['euiTheme']['colors']): AiGradientColors => ({
+const getTextColors = (colors: UseEuiTheme['euiTheme']['colors']): AiGradientColors => ({
   startColor: colors.textPrimary,
   endColor: colors.textAssistance,
 });
@@ -94,7 +94,7 @@ const gradientTextCss = (cssGradient: string, hoverGradient?: string) => css`
     : ''}
 `;
 
-const solidTextCss = (color: string) => css`
+const plainTextCss = (color: string) => css`
   background: none !important;
   background-clip: initial !important;
   -webkit-background-clip: initial !important;
@@ -103,7 +103,7 @@ const solidTextCss = (color: string) => css`
 `;
 
 // Uses ::after so it doesn't collide with EUI's ::before interaction overlay.
-const outlinedBorderRingCss = (borderGradient: string) => css`
+const outlinedBorderGradientCss = (borderGradient: string) => css`
   position: relative;
   border: none;
   isolation: isolate;
@@ -131,16 +131,19 @@ const resolveVariantStyles = (
   const {
     colors,
     components: {
-      buttons: { backgroundPrimaryHover, backgroundAssistanceHover },
+      buttons: {
+        backgroundPrimaryHover: hoverOverlayStartColor,
+        backgroundAssistanceHover: hoverOverlayEndColor,
+      },
     },
   } = euiTheme;
-  const foregroundGradient = buildLinearGradient(getForegroundColors(colors));
+  const textGradient = buildLinearGradient(getTextColors(colors));
 
   const hoverOverlay = linearGradientCss({
     angle: verticalGradientAngle,
-    startColor: backgroundPrimaryHover,
+    startColor: hoverOverlayStartColor,
     startPercent: 18,
-    endColor: backgroundAssistanceHover,
+    endColor: hoverOverlayEndColor,
     endPercent: 83,
   });
 
@@ -149,8 +152,8 @@ const resolveVariantStyles = (
       return {
         buttonBackground: 'transparent',
         hoverBackground: hoverOverlay,
-        foregroundColor: colors.textPrimary,
-        labelCss: gradientTextCss(foregroundGradient),
+        textColor: colors.textPrimary,
+        textCss: gradientTextCss(textGradient),
       };
 
     case 'outlined':
@@ -168,8 +171,8 @@ const resolveVariantStyles = (
             endPercent: diagonalGradientEndPercent,
           }
         ),
-        foregroundColor: colors.textPrimary,
-        labelCss: gradientTextCss(foregroundGradient),
+        textColor: colors.textPrimary,
+        textCss: gradientTextCss(textGradient),
       };
 
     case 'accent': {
@@ -188,8 +191,8 @@ const resolveVariantStyles = (
       return {
         buttonBackground: accentBg,
         hoverBackground: `${hoverOverlay}, ${accentBg}`,
-        foregroundColor: colors.textInverse,
-        labelCss: solidTextCss(colors.textInverse),
+        textColor: colors.textInverse,
+        textCss: plainTextCss(colors.textInverse),
       };
     }
 
@@ -205,8 +208,8 @@ const resolveVariantStyles = (
       return {
         buttonBackground: baseBg,
         hoverBackground: `${hoverOverlay}, ${baseBg}`,
-        foregroundColor: colors.textPrimary,
-        labelCss: gradientTextCss(foregroundGradient, `${hoverOverlay}, ${foregroundGradient}`),
+        textColor: colors.textPrimary,
+        textCss: gradientTextCss(textGradient, `${hoverOverlay}, ${textGradient}`),
       };
     }
   }
@@ -220,14 +223,14 @@ export const useAiButtonGradientStyles = ({
 
   return useMemo(() => {
     const buttonGradientAngle = resolveGradientAngle({ iconOnly, variant });
-    const { buttonBackground, hoverBackground, borderGradient, foregroundColor, labelCss } =
+    const { buttonBackground, hoverBackground, borderGradient, textColor, textCss } =
       resolveVariantStyles(variant, euiTheme, buttonGradientAngle);
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
       border-radius: ${euiTheme.border.radius.medium};
-      color: ${foregroundColor} !important;
-      ${borderGradient ? outlinedBorderRingCss(borderGradient) : ''}
+      color: ${textColor} !important;
+      ${borderGradient ? outlinedBorderGradientCss(borderGradient) : ''}
 
       &:hover:not(:disabled),
       &:focus-visible:not(:disabled) {
@@ -244,7 +247,7 @@ export const useAiButtonGradientStyles = ({
       }
     `;
 
-    return { buttonCss, labelCss };
+    return { buttonCss, textCss };
   }, [variant, iconOnly, euiTheme]);
 };
 
@@ -268,12 +271,12 @@ export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): Svg
         `
       : undefined;
 
-    const foregroundColors = getForegroundColors(euiTheme.colors);
+    const textColors = getTextColors(euiTheme.colors);
 
     return {
       iconGradientCss,
       gradientId,
-      colors: foregroundColors,
+      colors: textColors,
     };
   }, [gradientId, variant, euiTheme]);
 };
