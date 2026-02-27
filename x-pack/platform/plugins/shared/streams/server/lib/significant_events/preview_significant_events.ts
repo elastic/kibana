@@ -34,14 +34,14 @@ function parseBucketSize(raw: string): { value: number; unit: string } {
 
 /**
  * Takes the user's ES|QL query (which already contains FROM + WHERE), strips
- * everything after the WHERE clause, and appends STATS … BY BUCKET(…) and
- * optionally CHANGE_POINT.
+ * everything after the WHERE clause, and appends
+ * STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, <interval>)
+ * followed by CHANGE_POINT count ON bucket.
+ *
+ * CHANGE_POINT silently returns no change-point columns when there are
+ * insufficient data points (< 22 buckets), so it is always included.
  */
-function buildHistogramQuery(
-  esqlQuery: string,
-  bucketSize: string,
-  withChangePoint: boolean
-): string {
+function buildHistogramQuery(esqlQuery: string, bucketSize: string): string {
   const { root } = Parser.parse(esqlQuery);
   const { value, unit } = parseBucketSize(bucketSize);
 
@@ -74,22 +74,18 @@ function buildHistogramQuery(
     ],
   });
 
+  const changePointCommand = Builder.command({
+    name: 'change_point',
+    args: [
+      Builder.expression.column('count'),
+      Builder.option({ name: 'on', args: [Builder.expression.column('bucket')] }),
+    ],
+  });
+
   const commands: ESQLCommand[] = [];
   if (fromCmd) commands.push(fromCmd);
   if (whereCmd) commands.push(whereCmd);
-  commands.push(statsCommand);
-
-  if (withChangePoint) {
-    commands.push(
-      Builder.command({
-        name: 'change_point',
-        args: [
-          Builder.expression.column('count'),
-          Builder.option({ name: 'on', args: [Builder.expression.column('bucket')] }),
-        ],
-      })
-    );
-  }
+  commands.push(statsCommand, changePointCommand);
 
   return BasicPrettyPrinter.print(Builder.expression.query(commands));
 }
@@ -149,22 +145,15 @@ export async function previewSignificantEvents(
     },
   };
 
-  // Try with CHANGE_POINT to get histogram + change-point detection in a
-  // single round trip. Falls back to histogram-only when CHANGE_POINT cannot
-  // run (e.g. fewer than 22 buckets).
-  let response: ESQLSearchResponse;
-  try {
-    response = (await scopedClusterClient.asCurrentUser.esql.query({
-      query: buildHistogramQuery(esqlQuery, bucketSize, true),
-      filter,
-    })) as unknown as ESQLSearchResponse;
-  } catch {
-    response = (await scopedClusterClient.asCurrentUser.esql.query({
-      query: buildHistogramQuery(esqlQuery, bucketSize, false),
-      filter,
-      drop_null_columns: true,
-    })) as unknown as ESQLSearchResponse;
-  }
+  // CHANGE_POINT silently returns no change-point columns when there are
+  // insufficient buckets (< 22), so a single query is enough.
+  // drop_null_columns removes them from the response when they are absent,
+  // and the column-presence check below handles both cases uniformly.
+  const response = (await scopedClusterClient.asCurrentUser.esql.query({
+    query: buildHistogramQuery(esqlQuery, bucketSize),
+    filter,
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
 
   const countIdx = response.columns.findIndex((col) => col.name === 'count');
   const bucketIdx = response.columns.findIndex((col) => col.name === 'bucket');
