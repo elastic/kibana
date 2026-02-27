@@ -37,18 +37,9 @@ export interface ResolvedVariantStyles {
   readonly labelCss: SerializedStyles;
 }
 
-/** SVG gradient definition with colors and optional icon styles. */
+/** SVG gradient for the AI button icon. */
 export interface SvgAiGradient {
-  /**
-   * Emotion CSS that applies the gradient to EUI icons (`.euiIcon`) via `fill/stroke`.
-   */
   readonly iconGradientCss?: SerializedStyles;
-  /**
-   * The generated gradient id used by `SvgAiGradientDefs`.
-   */
   readonly gradientId: string;
-  /**
-   * The gradient colors used by the SVG defs component.
-   */
   readonly colors: AiGradientColors;
 }

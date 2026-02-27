@@ -19,12 +19,14 @@ import type {
   SvgAiGradient,
 } from './gradient_types';
 
-const diagonalGradientStartPercent = 2.98;
-const diagonalGradientEndPercent = 66.24;
-const diagonalGradientAngle = 130;
-const horizontalGradientAngle = 90;
-const verticalGradientAngle = 180;
-const angleBoost = 35;
+const DIAGONAL_GRADIENT_START_PERCENT = 2.98;
+const DIAGONAL_GRADIENT_END_PERCENT = 66.24;
+const DIAGONAL_GRADIENT_ANGLE = 130;
+const HORIZONTAL_GRADIENT_ANGLE = 90;
+const VERTICAL_GRADIENT_ANGLE = 180;
+const ANGLE_BOOST = 35;
+const HOVER_GRADIENT_START_PERCENT = 18;
+const HOVER_GRADIENT_END_PERCENT = 83;
 
 const linearGradientCss = ({
   angle,
@@ -43,9 +45,9 @@ const linearGradientCss = ({
 const buildLinearGradient = (
   colors: AiGradientColors,
   {
-    angle = diagonalGradientAngle,
-    startPercent = diagonalGradientStartPercent,
-    endPercent = diagonalGradientEndPercent,
+    angle = DIAGONAL_GRADIENT_ANGLE,
+    startPercent = DIAGONAL_GRADIENT_START_PERCENT,
+    endPercent = DIAGONAL_GRADIENT_END_PERCENT,
   }: { angle?: number; startPercent?: number; endPercent?: number } = {}
 ): string =>
   linearGradientCss({
@@ -61,14 +63,14 @@ const resolveGradientAngle = ({
   variant,
 }: Pick<AiButtonGradientOptions, 'iconOnly' | 'variant'>): number => {
   if (iconOnly) {
-    return diagonalGradientAngle;
+    return DIAGONAL_GRADIENT_ANGLE;
   }
 
   if (variant === 'base') {
-    return horizontalGradientAngle;
+    return HORIZONTAL_GRADIENT_ANGLE;
   }
 
-  return diagonalGradientAngle + angleBoost;
+  return DIAGONAL_GRADIENT_ANGLE + ANGLE_BOOST;
 };
 
 const getLabelColors = (colors: UseEuiTheme['euiTheme']['colors']): AiGradientColors => ({
@@ -131,35 +133,34 @@ const resolveVariantStyles = (
   const {
     colors,
     components: {
-      buttons: {
-        backgroundPrimaryHover: hoverOverlayStartColor,
-        backgroundAssistanceHover: hoverOverlayEndColor,
-      },
+      buttons: { backgroundPrimaryHover, backgroundAssistanceHover },
     },
   } = euiTheme;
   const labelGradient = buildLinearGradient(getLabelColors(colors));
 
-  const hoverOverlay = linearGradientCss({
-    angle: verticalGradientAngle,
-    startColor: hoverOverlayStartColor,
-    startPercent: 18,
-    endColor: hoverOverlayEndColor,
-    endPercent: 83,
+  const hoverGradient = linearGradientCss({
+    angle: VERTICAL_GRADIENT_ANGLE,
+    startColor: backgroundPrimaryHover,
+    startPercent: HOVER_GRADIENT_START_PERCENT,
+    endColor: backgroundAssistanceHover,
+    endPercent: HOVER_GRADIENT_END_PERCENT,
   });
+
+  const defaultLabelColor = colors.textPrimary;
 
   switch (variant) {
     case 'empty':
       return {
         buttonBackground: 'transparent',
-        hoverBackground: hoverOverlay,
-        labelColor: colors.textPrimary,
+        hoverBackground: hoverGradient,
+        labelColor: defaultLabelColor,
         labelCss: gradientLabelCss(labelGradient),
       };
 
     case 'outlined':
       return {
         buttonBackground: 'transparent',
-        hoverBackground: hoverOverlay,
+        hoverBackground: hoverGradient,
         borderGradient: buildLinearGradient(
           {
             startColor: colors.backgroundFilledPrimary,
@@ -167,37 +168,31 @@ const resolveVariantStyles = (
           },
           {
             angle: buttonGradientAngle,
-            startPercent: diagonalGradientStartPercent,
-            endPercent: diagonalGradientEndPercent,
           }
         ),
-        labelColor: colors.textPrimary,
+        labelColor: defaultLabelColor,
         labelCss: gradientLabelCss(labelGradient),
       };
 
     case 'accent': {
-      const accentBg = buildLinearGradient(
+      const accentBackground = buildLinearGradient(
         {
           startColor: colors.backgroundFilledPrimary,
           endColor: colors.backgroundFilledAssistance,
         },
-        {
-          angle: buttonGradientAngle,
-          startPercent: diagonalGradientStartPercent,
-          endPercent: diagonalGradientEndPercent,
-        }
+        { angle: buttonGradientAngle }
       );
 
       return {
-        buttonBackground: accentBg,
-        hoverBackground: `${hoverOverlay}, ${accentBg}`,
+        buttonBackground: accentBackground,
+        hoverBackground: `${hoverGradient}, ${accentBackground}`,
         labelColor: colors.textInverse,
         labelCss: plainLabelCss(colors.textInverse),
       };
     }
 
     case 'base': {
-      const baseBg = buildLinearGradient(
+      const baseBackground = buildLinearGradient(
         {
           startColor: colors.backgroundLightPrimary,
           endColor: colors.backgroundLightAssistance,
@@ -206,10 +201,10 @@ const resolveVariantStyles = (
       );
 
       return {
-        buttonBackground: baseBg,
-        hoverBackground: `${hoverOverlay}, ${baseBg}`,
-        labelColor: colors.textPrimary,
-        labelCss: gradientLabelCss(labelGradient, `${hoverOverlay}, ${labelGradient}`),
+        buttonBackground: baseBackground,
+        hoverBackground: `${hoverGradient}, ${baseBackground}`,
+        labelColor: defaultLabelColor,
+        labelCss: gradientLabelCss(labelGradient, `${hoverGradient}, ${labelGradient}`),
       };
     }
   }
@@ -242,9 +237,6 @@ export const useAiButtonGradientStyles = ({
           background-color: transparent !important;
         }
       }
-      &:disabled {
-        opacity: 0.5;
-      }
     `;
 
     return { buttonCss, labelCss };
@@ -257,19 +249,16 @@ export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): Svg
 
   return useMemo(() => {
     const gradientUrl = `url(#${gradientId})`;
-    const useIconGradient = variant !== 'accent';
 
-    const iconGradientCss = useIconGradient
-      ? css`
-          & .euiIcon,
-          & .euiIcon [fill]:not([fill='none']) {
-            fill: ${gradientUrl} !important;
-          }
-          & .euiIcon [stroke]:not([stroke='none']) {
-            stroke: ${gradientUrl} !important;
-          }
-        `
-      : undefined;
+    const iconGradientCss =
+      variant !== 'accent'
+        ? css`
+            & .euiIcon,
+            & .euiIcon [fill]:not([fill='none']) {
+              fill: ${gradientUrl} !important;
+            }
+          `
+        : undefined;
 
     const labelColors = getLabelColors(euiTheme.colors);
 
