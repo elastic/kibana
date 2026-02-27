@@ -117,7 +117,9 @@ export class ThemeService {
       const chartsTheme = getChartsTheme(newTheme);
       const { fill } = chartsTheme.axes.tickLabel;
       chartsTheme.axes.axisTitle.fill = fill;
+      chartsTheme.axes.axisTitle.fontWeight = 450;
       chartsTheme.axes.axisPanelTitle.fill = fill;
+      chartsTheme.axes.axisPanelTitle.fontWeight = 450;
       this._chartsBaseTheme$.next(chartsTheme);
     });
   }
