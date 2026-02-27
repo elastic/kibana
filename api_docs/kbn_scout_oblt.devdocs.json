@@ -10132,14 +10132,6 @@
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/dashboard_app.ts"
               },
               {
-                "plugin": "ux",
-                "path": "x-pack/solutions/observability/plugins/ux/e2e/page_objects/date_picker.ts"
-              },
-              {
-                "plugin": "ux",
-                "path": "x-pack/solutions/observability/plugins/ux/e2e/page_objects/date_picker.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
               }

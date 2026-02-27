@@ -8,7 +8,7 @@
 import path from 'path';
 import fs from 'fs/promises';
 
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import * as Registry from '../services/epm/registry';
@@ -31,7 +31,7 @@ describe('validate bundled packages', () => {
   async function getBundledPackageEntries() {
     const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
     const configFile = await fs.readFile(configFilePath, 'utf8');
-    const bundledPackages = JSON5.parse(configFile);
+    const bundledPackages = parse(configFile);
 
     return bundledPackages as Array<{ name: string; version: string }>;
   }
