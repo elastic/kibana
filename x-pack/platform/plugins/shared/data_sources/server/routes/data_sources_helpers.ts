@@ -189,11 +189,11 @@ export async function createDataSourceAndRelatedResources(
 
   const workflowAndToolResults = await Promise.all(
     workflowInfos.map(async (workflowInfo) => {
-      // Extract workflow name from YAML; use convention sources.<type>.<action> to avoid collisions
+      // Extract workflow name from YAML; use convention source.<type>.<action> to avoid collisions
       const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
       const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
       const workflowBaseName = originalName.split('.').pop() || originalName;
-      const canonicalName = `sources.${type}.${workflowBaseName}`;
+      const canonicalName = `source.${type}.${workflowBaseName}`;
       const prefixedName = `${slugify(name)}.${canonicalName}`;
       const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
 

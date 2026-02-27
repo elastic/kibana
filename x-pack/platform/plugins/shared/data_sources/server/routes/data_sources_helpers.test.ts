@@ -217,8 +217,7 @@ tags:
       mockRequest
     );
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
-    // Workflow name uses convention sources.<type>.<action> (type=test_type, action=search)
-    expect(createdYaml).toContain('name: my-data-source.sources.test_type.search');
+    expect(createdYaml).toContain('name: my-data-source.source.test_type.search');
     expect(createdYaml).toContain('description: Search Notion content');
     expect(createdYaml).toContain('tags:');
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
