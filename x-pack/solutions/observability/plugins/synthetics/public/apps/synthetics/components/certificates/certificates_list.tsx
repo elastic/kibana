@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 import type { Direction } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../hooks/use_date_format';
@@ -46,9 +46,37 @@ interface Props {
   sort: CertSort;
   onChange: (page: Page, sort: CertSort) => void;
   certificates: CertResult & { isLoading?: boolean };
+  alertsByCert?: Map<string, number>;
 }
 
-export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onChange }) => {
+const CertAlertsBadge: React.FC<{
+  sha256: string;
+  alertsByCert?: Map<string, number>;
+}> = ({ sha256, alertsByCert }) => {
+  const count = alertsByCert?.get(sha256) ?? 0;
+  if (count > 0) {
+    return (
+      <EuiToolTip
+        content={i18n.translate('xpack.synthetics.certs.list.activeAlertsTooltip', {
+          defaultMessage:
+            '{count, plural, one {# active TLS alert} other {# active TLS alerts}} for this certificate',
+          values: { count },
+        })}
+      >
+        <EuiBadge color="danger">{count}</EuiBadge>
+      </EuiToolTip>
+    );
+  }
+  return <EuiBadge color="hollow">0</EuiBadge>;
+};
+
+export const CertificateList: React.FC<Props> = ({
+  page,
+  certificates,
+  sort,
+  onChange,
+  alertsByCert,
+}) => {
   const dateFormatter = useDateFormat();
   const pagination = {
     pageIndex: page.index,
@@ -91,6 +119,11 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       field: 'not_before',
       sortable: true,
       render: (value: string) => moment().diff(moment(value), 'days') + ' ' + labels.DAYS,
+    },
+    {
+      name: labels.ALERTS_COL,
+      field: 'sha256',
+      render: (sha256: string) => <CertAlertsBadge sha256={sha256} alertsByCert={alertsByCert} />,
     },
     {
       name: labels.FINGERPRINTS_COL,

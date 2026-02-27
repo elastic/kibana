@@ -59,6 +59,19 @@ export const DAYS = i18n.translate('xpack.synthetics.certs.list.days', {
   defaultMessage: 'days',
 });
 
+export const ALERTS_COL = i18n.translate('xpack.synthetics.certs.list.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const ACTIVE_ALERTS = i18n.translate('xpack.synthetics.certs.list.activeAlerts', {
+  defaultMessage:
+    '{count, plural, one {# active alert} other {# active alerts}}',
+});
+
+export const NO_ACTIVE_ALERTS = i18n.translate('xpack.synthetics.certs.list.noActiveAlerts', {
+  defaultMessage: 'No active alerts',
+});
+
 export const FINGERPRINTS_COL = i18n.translate('xpack.synthetics.certs.list.expirationDate', {
   defaultMessage: 'Fingerprints',
 });

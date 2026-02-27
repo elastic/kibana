@@ -7,7 +7,7 @@
 
 import { useDispatch } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
 import { CertificateSearch } from './cert_search';
@@ -15,6 +15,7 @@ import { useCertSearch } from './use_cert_search';
 import type { CertSort } from './certificates_list';
 import { CertificateList } from './certificates_list';
 import { useBreadcrumbs } from '../../hooks';
+import { useFetchCertAlerts } from './use_fetch_cert_alerts';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -49,6 +50,13 @@ export const CertificatesPage: React.FC = () => {
     direction: sort.direction,
   });
 
+  const certSha256List = useMemo(
+    () => (certificates?.certs ?? []).map((cert) => cert.sha256).filter(Boolean),
+    [certificates?.certs]
+  );
+
+  const { alertsByCert } = useFetchCertAlerts(certSha256List);
+
   useEffect(() => {
     dispatch(setCertificatesTotalAction({ total: certificates.total }));
   }, [certificates.total, dispatch]);
@@ -67,6 +75,7 @@ export const CertificatesPage: React.FC = () => {
         }}
         sort={sort}
         certificates={certificates}
+        alertsByCert={alertsByCert}
       />
     </>
   );
