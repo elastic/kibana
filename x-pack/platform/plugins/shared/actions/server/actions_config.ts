@@ -285,6 +285,6 @@ export function getActionsConfigurationUtilities(
       const nonNegativeLength = Math.max(0, configuredLength);
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },
-    getEarsUrl: () => earsBaseUrlGetter?.(),
+    getEarsUrl: () => earsBaseUrlGetter?.() ?? config.ears?.url,
   };
 }

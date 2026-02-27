@@ -264,7 +264,7 @@ export const getAxiosInstanceWithAuth = ({
       });
 
       if (connectorTokenClient) {
-        if (authTypeId === 'oauth_authorization_code') {
+        if (authTypeId === 'oauth_authorization_code' || authTypeId === 'ears') {
           // Add a response interceptor to handle 401 errors for OAuth authz code grant connectors
           axiosInstance.interceptors.response.use(
             (response) => response,

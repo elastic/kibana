@@ -256,6 +256,7 @@ export class ActionsPlugin
       this.logger,
       resolveCustomHosts(this.logger, initContext.config.get<ActionsConfig>())
     );
+    this.earsBaseUrl = this.actionsConfig.ears?.url;
     this.telemetryLogger = initContext.logger.get('usage');
     this.inMemoryConnectors = [];
     this.inMemoryMetrics = new InMemoryMetrics(initContext.logger.get('in_memory_metrics'));

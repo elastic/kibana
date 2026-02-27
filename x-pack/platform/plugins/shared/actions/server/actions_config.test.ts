@@ -46,6 +46,7 @@ const defaultActionsConfig: ActionsConfig = {
     authorize: { lookbackWindow: '1h', limit: 100 },
     callback: { lookbackWindow: '1h', limit: 100 },
   },
+  ears: {},
 };
 
 describe('ensureUriAllowed', () => {
@@ -763,6 +764,29 @@ describe('getAwsSesConfig()', () => {
       port: 1234,
       secure: true,
     });
+  });
+});
+
+describe('getEarsUrl()', () => {
+  test('returns undefined when ears.url is not set in config', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEarsUrl()).toBeUndefined();
+  });
+
+  test('returns the configured URL when ears.url is set in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      ears: { url: 'https://ears.example.com' },
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+
+  test('earsBaseUrlGetter override takes precedence over config', () => {
+    const acu = getActionsConfigurationUtilities(
+      { ...defaultActionsConfig, ears: { url: 'https://ears.example.com' } },
+      () => 'https://override.example.com'
+    );
+    expect(acu.getEarsUrl()).toBe('https://override.example.com');
   });
 });
 

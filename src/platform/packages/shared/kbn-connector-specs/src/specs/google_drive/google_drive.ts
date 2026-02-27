@@ -59,6 +59,13 @@ export const GoogleDriveConnector: ConnectorSpec = {
     types: [
       'bearer',
       {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://accounts.google.com/o/oauth2/token',
+        },
+      },
+      {
         type: 'ears',
         defaults: {
           provider: 'google',
