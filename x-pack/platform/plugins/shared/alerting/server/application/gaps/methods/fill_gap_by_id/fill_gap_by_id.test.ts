@@ -30,6 +30,7 @@ import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { getRule } from '../../../rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 jest.mock('../../../../lib/rule_gaps/find_gaps_by_id');
 jest.mock('../../../backfill/methods/schedule');
@@ -109,6 +110,8 @@ describe('fillGapById', () => {
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       eventLogger: eventLoggerMock.create(),
+      featureFlags: coreFeatureFlagsMock.createStart(),
+      isServerless: false,
     };
 
     rulesClient = new RulesClient(rulesClientParams);
