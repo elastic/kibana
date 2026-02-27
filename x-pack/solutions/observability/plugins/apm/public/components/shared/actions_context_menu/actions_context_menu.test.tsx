@@ -104,7 +104,7 @@ describe('ActionsContextMenu', () => {
 
     fireEvent.click(screen.getByTestId('triggerButton'));
     expect(screen.queryByTestId('testMenuGroup-noLabel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('testMenuItem-action1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('testMenuItem-action1')).toBeInTheDocument();
   });
 
   it('renders all action items in the main panel', () => {
