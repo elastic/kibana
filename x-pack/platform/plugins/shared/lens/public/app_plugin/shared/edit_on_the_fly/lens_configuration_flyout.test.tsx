@@ -21,6 +21,7 @@ import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { isEqual } from 'lodash';
 import * as getApplicationUserMessagesModule from '../../get_application_user_messages';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
@@ -149,16 +150,28 @@ const startDependencies = {
 const datasourceMap = mockDatasourceMap();
 const visualizationMap = mockVisualizationMap();
 
+/** Test overrides: may include datasourceMap for Provider (not on EditConfigPanelProps). */
+type LensConfigFlyoutTestOverrides = Partial<EditConfigPanelProps> & {
+  datasourceMap?: ReturnType<typeof mockDatasourceMap>;
+};
+
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
-    propsOverrides: Partial<EditConfigPanelProps> = {},
+    propsOverrides: LensConfigFlyoutTestOverrides = {},
     query?: Query | AggregateQuery,
-    stateOverrides: { hideTextBasedEditor?: boolean } = {}
+    stateOverrides: { hideTextBasedEditor?: boolean } & Partial<{
+      datasourceStates: Record<string, { isLoading: boolean; state: unknown }>;
+      activeDatasourceId: string;
+    }> = {}
   ) {
     const mockCoreStart = coreMock.createStart();
     mockCoreStart.rendering.addContext = createAddContextMock();
+    const datasourceMapToUse = propsOverrides.datasourceMap ?? datasourceMap;
     const { container, ...rest } = renderWithReduxStore(
-      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+      <EditorFrameServiceProvider
+        visualizationMap={visualizationMap}
+        datasourceMap={datasourceMapToUse}
+      >
         {mockCoreStart.rendering.addContext(
           <LensEditConfigurationFlyout
             attributes={lensAttributes}
@@ -355,16 +368,103 @@ describe('LensEditConfigurationFlyout', () => {
       saveByRef: saveByRefSpy,
       attributes: lensAttributes,
     };
-    // Set formBased to match the preloaded Redux state so no changes are detected
+    // Set formBased to match the preloaded Redux state so no changes are detected. For formBased we compare current (from getPersistableState(Redux state)) with previous (attributes state + refs) as-is.
     newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
+    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+  });
+
+  it('formBased only calls getPersistableState on current (Redux) state, not on previous (attributes) state', async () => {
+    const formBasedWithSpy = {
+      ...datasourceMap.formBased,
+      getPersistableState: jest.fn((x: unknown) => ({
+        state: x,
+        references: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
+      })),
+    };
+    const attributesWithFormBased = {
+      ...lensAttributes,
+      state: { ...lensAttributes.state, datasourceStates: { formBased: mockFormBasedState } },
+    };
+    await renderConfigFlyout({
+      attributes: attributesWithFormBased,
+      datasourceMap: { ...datasourceMap, formBased: formBasedWithSpy } as ReturnType<
+        typeof mockDatasourceMap
+      >,
+    });
+    expect(formBasedWithSpy.getPersistableState).toHaveBeenCalledTimes(1);
+    expect(formBasedWithSpy.getPersistableState).toHaveBeenCalledWith(mockFormBasedState);
+  });
+
+  it('Apply and close is disabled for textBased when runtime state differs only by private fields (e.g. indexPatternRefs)', async () => {
+    // Verifies textBased normalizes both current and previous to persistable so private fields (e.g. indexPatternRefs) do not mark the panel dirty.
+    const textBasedPersistableState = {
+      layers: {
+        layerA: {
+          columns: [
+            {
+              columnId: 'col1',
+              fieldName: 'bytes',
+              meta: { type: 'number' },
+            },
+          ],
+          query: { esql: 'FROM my-index | STATS bytes = SUM(bytes)' },
+        },
+      },
+    };
+    const textBasedRuntimeState = {
+      ...textBasedPersistableState,
+      indexPatternRefs: [{ id: 'dv-1', title: 'my-index', name: 'my-index' }],
+    };
+    const textBasedDatasource = {
+      ...datasourceMap.textBased,
+      getPersistableState: jest.fn((state: { layers: unknown }) => ({
+        state: { layers: state.layers },
+        references: [],
+      })),
+      isEqual: jest.fn(
+        (
+          persistable1: { layers?: unknown },
+          _refs1: unknown[],
+          persistable2: { layers?: unknown },
+          _refs2: unknown[]
+        ) => isEqual(persistable1?.layers, persistable2?.layers)
+      ),
+    };
+    const textBasedAttributes = {
+      ...lensAttributes,
+      state: {
+        ...lensAttributes.state,
+        datasourceStates: {
+          textBased: textBasedPersistableState,
+        },
+        query: { esql: 'FROM my-index | STATS bytes = SUM(bytes)' },
+      },
+    } as unknown as TypedLensSerializedState['attributes'];
+
+    await renderConfigFlyout(
+      {
+        attributes: textBasedAttributes,
+        datasourceMap: { ...datasourceMap, textBased: textBasedDatasource } as ReturnType<
+          typeof mockDatasourceMap
+        >,
+      },
+      { esql: 'FROM my-index | STATS bytes = SUM(bytes)' },
+      {
+        datasourceStates: {
+          textBased: { isLoading: false, state: textBasedRuntimeState },
+        },
+        activeDatasourceId: 'textBased',
+      }
+    );
+
     expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
   });
 
   it('save button should be disabled if expression cannot be generated', async () => {
     const updateByRefInputSpy = jest.fn();
     const saveByRefSpy = jest.fn();
-    const newProps = {
+    const newProps: LensConfigFlyoutTestOverrides = {
       closeFlyout: jest.fn(),
       updateByRefInput: updateByRefInputSpy,
       savedObjectId: 'id',
@@ -375,7 +475,7 @@ describe('LensEditConfigurationFlyout', () => {
           ...datasourceMap.formBased,
           toExpression: jest.fn(() => null),
         },
-      },
+      } as unknown as ReturnType<typeof mockDatasourceMap>,
     };
 
     await renderConfigFlyout(newProps);

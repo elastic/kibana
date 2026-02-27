@@ -648,29 +648,22 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     /** Treat undefined and “missing property” as equivalent */
     isEqual: (
-      persistableState1: TextBasedPersistedState | TextBasedPrivateState,
+      persistableState1: TextBasedPersistedState,
       references1: Reference[],
-      persistableState2: TextBasedPersistedState | TextBasedPrivateState,
+      persistableState2: TextBasedPersistedState,
       references2: Reference[]
-    ) => {
-      const normalizeState = (state: TextBasedPersistedState | TextBasedPrivateState) => {
-        const normalizedState = Object.fromEntries(
-          Object.entries(state).filter(([, value]) => value !== undefined)
-        );
-        return {
-          ...normalizedState,
-          ...('indexPatternRefs' in state
-            ? {
-                indexPatternRefs: state.indexPatternRefs.map((obj) =>
-                  Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined))
-                ),
-              }
-            : {}),
-        };
-      };
-
-      return isEqual(normalizeState(persistableState1), normalizeState(persistableState2));
-    },
+    ) =>
+      // undefined is not equal to missing
+      isEqual(
+        {
+          initialContext: undefined,
+          ...persistableState1,
+        },
+        {
+          initialContext: undefined,
+          ...persistableState2,
+        }
+      ),
     getDatasourceInfo: async (state, references, dataViewsService) => {
       if (!dataViewsService) {
         return [];

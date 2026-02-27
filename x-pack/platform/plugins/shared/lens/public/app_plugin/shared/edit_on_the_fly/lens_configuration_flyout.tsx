@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
+import type { Reference } from '@kbn/content-management-utils';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -109,16 +110,25 @@ export function LensEditConfigurationFlyout({
     if (isNewPanel) return true;
 
     const previousAttrs = previousAttributes.current;
+    const rawState = datasourceStates[datasourceId].state;
+    const currentPersistable = rawState
+      ? datasourceMap[datasourceId].getPersistableState(rawState) : null;
+    const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
+    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison. 
+    // formBased attributes are already persistable and getPersistableState expects private state.
+    const previousPersistable =
+      previousDsState && datasourceId === 'textBased'
+        ? datasourceMap[datasourceId].getPersistableState(previousDsState) 
+        : previousDsState
+        ? { state: previousDsState, references: previousAttrs.references }
+        : null;
     const datasourceStatesAreSame =
-      datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
+      currentPersistable && previousPersistable
         ? datasourceMap[datasourceId].isEqual(
-            previousAttrs.state.datasourceStates[datasourceId],
-            previousAttrs.references,
-            datasourceStates[datasourceId].state,
-            // Extract references from the current state as they contain resolved data view IDs
-            // We cannot use attributes.references because they may contain stale data view IDs from when the panel was initially loaded
-            datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
-              .references
+            previousPersistable.state,
+            previousPersistable.references,
+            currentPersistable.state,
+            currentPersistable.references
           )
         : false;
 

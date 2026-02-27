@@ -62,26 +62,9 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
       const editor = page.getByTestId('customizeLens');
       await expect(editor).toBeHidden();
 
-      // Check the "Apply and close" button is disabled
-      await expect
-        .poll(
-          async () => {
-            await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
-            if (!(await editor.isVisible())) {
-              return false;
-            }
-            if (await lens.getApplyFlyoutButton().isDisabled()) {
-              return true;
-            }
-            await lens.clickOnFlyoutCancelButton();
-            return false;
-          },
-          {
-            timeout: 20000,
-            intervals: [100],
-          }
-        )
-        .toBe(true);
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID)
+      await expect(editor).toBeVisible();
+      await expect(lens.getApplyFlyoutButton()).toBeDisabled();
 
       // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
     }
