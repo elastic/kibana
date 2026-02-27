@@ -310,11 +310,7 @@ export class TaskStore {
     const result = await this.getApiKeys(ids);
 
     // the search doesn't wait for refresh, so may miss a newly created key
-    const idsOfMissingKeys = result
-      .entries()
-      .filter(([id, key]) => key === undefined)
-      .map(([id, key]) => id)
-      .toArray();
+    const idsOfMissingKeys = ids.filter((id) => result.get(id) === undefined);
 
     if (idsOfMissingKeys.length === 0) return result;
 
@@ -323,14 +319,12 @@ export class TaskStore {
 
     const missingResult = await this.getApiKeys(idsOfMissingKeys);
 
-    for (const [id, key] of result.entries()) {
-      if (key === undefined) {
-        const foundKey = missingResult.get(id);
-        if (foundKey === undefined) {
-          this.logger.error(`unable to obtain API key for task ${id}`);
-        } else {
-          result.set(id, foundKey);
-        }
+    for (const id of idsOfMissingKeys) {
+      const foundKey = missingResult.get(id);
+      if (foundKey === undefined) {
+        this.logger.error(`unable to obtain API key for task ${id}`);
+      } else {
+        result.set(id, foundKey);
       }
     }
 
