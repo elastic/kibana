@@ -9,10 +9,11 @@ import React from 'react';
 import moment from 'moment';
 import rison from '@kbn/rison';
 import type { Direction } from '@elastic/eui';
-import { EuiBasicTable, EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../hooks/use_date_format';
+import type { CertAlertInfo } from './use_fetch_cert_alerts';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
@@ -47,7 +48,7 @@ interface Props {
   sort: CertSort;
   onChange: (page: Page, sort: CertSort) => void;
   certificates: CertResult & { isLoading?: boolean };
-  alertsByCert?: Map<string, number>;
+  alertsByCert?: Map<string, CertAlertInfo>;
 }
 
 const useCertAlertsUrl = (sha256: string) => {
@@ -61,28 +62,38 @@ const useCertAlertsUrl = (sha256: string) => {
   })}`;
 };
 
+const ALERT_STATUS_DISPLAY: Record<string, { label: string; color: 'danger' | 'warning' }> = {
+  expired: { label: labels.EXPIRED, color: 'danger' },
+  expiring: { label: labels.EXPIRES_SOON, color: 'warning' },
+  aging: { label: labels.TOO_OLD, color: 'warning' },
+  unknown: { label: labels.EXPIRES_SOON, color: 'warning' },
+};
+
 const CertAlertsBadge: React.FC<{
   sha256: string;
-  alertsByCert?: Map<string, number>;
+  alertsByCert?: Map<string, CertAlertInfo>;
 }> = ({ sha256, alertsByCert }) => {
   const alertsUrl = useCertAlertsUrl(sha256);
-  const count = alertsByCert?.get(sha256) ?? 0;
-  if (count > 0) {
-    return (
-      <EuiToolTip
-        content={i18n.translate('xpack.synthetics.certs.list.activeAlertsTooltip', {
-          defaultMessage:
-            '{count, plural, one {# active TLS alert} other {# active TLS alerts}} for this certificate',
-          values: { count },
-        })}
-      >
-        <EuiLink href={alertsUrl}>
-          <EuiBadge color="danger">{count}</EuiBadge>
-        </EuiLink>
-      </EuiToolTip>
-    );
-  }
-  return <EuiBadge color="hollow">0</EuiBadge>;
+  const alertInfo = alertsByCert?.get(sha256);
+
+  if (!alertInfo) return null;
+
+  const { count, status } = alertInfo;
+  const display = ALERT_STATUS_DISPLAY[status];
+
+  return (
+    <EuiToolTip
+      content={i18n.translate('xpack.synthetics.certs.list.activeAlertsTooltip', {
+        defaultMessage:
+          '{count, plural, one {# active TLS alert} other {# active TLS alerts}} for this certificate',
+        values: { count },
+      })}
+    >
+      <EuiLink href={alertsUrl}>
+        <EuiHealth color={display.color}>{display.label}</EuiHealth>
+      </EuiLink>
+    </EuiToolTip>
+  );
 };
 
 export const CertificateList: React.FC<Props> = ({
@@ -132,7 +143,9 @@ export const CertificateList: React.FC<Props> = ({
     {
       name: labels.ALERTS_COL,
       field: 'sha256',
-      render: (sha256: string) => <CertAlertsBadge sha256={sha256} alertsByCert={alertsByCert} />,
+      render: (sha256: string) => (
+        <CertAlertsBadge sha256={sha256} alertsByCert={alertsByCert} />
+      ),
     },
     {
       name: labels.FINGERPRINTS_COL,

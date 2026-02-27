@@ -15,10 +15,30 @@ import { SYNTHETICS_TLS_RULE } from '../../../../../common/constants/synthetics_
 import { CERT_HASH_SHA256 } from '../../../../../common/field_names';
 import type { ClientPluginsStart } from '../../../../plugin';
 
+export type CertAlertStatus = 'expired' | 'expiring' | 'aging' | 'unknown';
+
+export interface CertAlertInfo {
+  count: number;
+  status: CertAlertStatus;
+}
+
 interface CertAlertsBucket {
   key: string;
   doc_count: number;
+  latest_reason: {
+    hits: {
+      hits: Array<{ _source: { 'kibana.alert.reason'?: string } }>;
+    };
+  };
 }
+
+const parseAlertStatus = (reason?: string): CertAlertStatus => {
+  if (!reason) return 'unknown';
+  if (reason.includes('has expired')) return 'expired';
+  if (reason.includes('is expiring soon')) return 'expiring';
+  if (reason.includes('is becoming too old')) return 'aging';
+  return 'unknown';
+};
 
 export const useFetchCertAlerts = (certSha256List: string[]) => {
   const { http } = useKibana<ClientPluginsStart>().services;
@@ -59,6 +79,15 @@ export const useFetchCertAlerts = (certSha256List: string[]) => {
               field: CERT_HASH_SHA256,
               size: 100,
             },
+            aggs: {
+              latest_reason: {
+                top_hits: {
+                  size: 1,
+                  sort: [{ '@timestamp': { order: 'desc' } }],
+                  _source: ['kibana.alert.reason'],
+                },
+              },
+            },
           },
         },
       }),
@@ -66,11 +95,15 @@ export const useFetchCertAlerts = (certSha256List: string[]) => {
   }, [sha256Key, http]);
 
   const alertsByCert = useMemo(() => {
-    const map = new Map<string, number>();
+    const map = new Map<string, CertAlertInfo>();
     const buckets =
       (data?.aggregations?.certs_with_alerts as { buckets?: CertAlertsBucket[] })?.buckets ?? [];
     for (const bucket of buckets) {
-      map.set(bucket.key, bucket.doc_count);
+      const reason = bucket.latest_reason?.hits?.hits?.[0]?._source?.['kibana.alert.reason'];
+      map.set(bucket.key, {
+        count: bucket.doc_count,
+        status: parseAlertStatus(reason),
+      });
     }
     return map;
   }, [data]);
