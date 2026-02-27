@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
-    cancel_on_build_failing: true
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
       machineType: n2-standard-4
