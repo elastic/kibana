@@ -300,7 +300,7 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByTestId('apmSloActiveAlertsBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('apmSloOverviewFlyoutTableActiveAlertsBadge')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
   });
 
@@ -413,9 +413,9 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByTestId('apmSloNameLink')).toBeInTheDocument();
+    expect(screen.getByTestId('apmSloOverviewFlyoutTableSloNameLink')).toBeInTheDocument();
 
-    const sloLink = screen.getByTestId('apmSloNameLink');
+    const sloLink = screen.getByTestId('apmSloOverviewFlyoutTableSloNameLink');
     fireEvent.mouseOver(sloLink);
 
     await waitFor(() => {
