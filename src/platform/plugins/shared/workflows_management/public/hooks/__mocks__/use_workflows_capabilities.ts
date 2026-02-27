@@ -18,3 +18,7 @@ export const mockWorkflowsManagementCapabilities: WorkflowsManagementCapabilitie
   canReadWorkflowExecution: true,
   canCancelWorkflowExecution: true,
 };
+
+export const useWorkflowsCapabilities = jest.fn(
+  (): WorkflowsManagementCapabilities => mockWorkflowsManagementCapabilities
+);

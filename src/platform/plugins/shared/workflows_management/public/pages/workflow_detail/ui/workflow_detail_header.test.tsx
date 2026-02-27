@@ -19,7 +19,10 @@ import {
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
+import {
+  useWorkflowsCapabilities as mockedUseWorkflowsCapabilities,
+  mockWorkflowsManagementCapabilities,
+} from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
@@ -37,7 +40,8 @@ jest.mock('react-router-dom', () => ({
   useParams: () => mockUseParams(),
 }));
 jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflowsCapabilities: jest.fn(),
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: mockedUseWorkflowsCapabilities,
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
