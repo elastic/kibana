@@ -45,9 +45,7 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
 
     await test.step('filter by type and search', async () => {
       await expect(page.getByText('Showing 1-3 of 3 Configurations')).toBeVisible();
-      await page.click('[aria-label="expands filter group for Type filter"]');
-      await page.click('span >> text="Journey / Page"');
-      await page.click('[aria-label="Apply the selected filters for Type"]');
+      await pageObjects.syntheticsApp.selectFilterOption('Type', 'Journey / Page');
 
       const searchInput = page.testSubj.locator('syntheticsOverviewSearchInput');
       await searchInput.click();

@@ -78,8 +78,7 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
 
     await test.step('delete monitor', async () => {
       await pageObjects.syntheticsApp.navigateToEditMonitor(monitorName);
-      await page.click('text="Delete monitor"');
-      await page.testSubj.click('confirmModalConfirmButton');
+      await pageObjects.syntheticsApp.deleteMonitorFromEditPage();
       await expect(page.getByText(`Deleted "${monitorName}" monitor successfully.`)).toBeVisible();
     });
   });

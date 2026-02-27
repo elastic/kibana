@@ -309,6 +309,119 @@ export class SyntheticsAppPage {
     }
   }
 
+  async openMonitorActionsMenu(monitorName: string) {
+    await this.page.hover(`text=${monitorName}`);
+    await this.page.click('[aria-label="Open actions menu"]');
+  }
+
+  async createPrivateLocation({
+    name,
+    agentPolicy,
+    tags,
+  }: {
+    name: string;
+    agentPolicy: string;
+    tags?: string[];
+  }) {
+    await this.page.click('button:has-text("Create location")');
+    await this.page.testSubj.fill('syntheticsLocationFormFieldText', name);
+    await this.page.click('[aria-label="Select agent policy"]');
+    await this.page.click(`button[role="option"]:has-text("${agentPolicy}Agents: 0")`);
+    if (tags?.length) {
+      await this.page.click('.euiComboBox__inputWrap');
+      for (const tag of tags) {
+        await this.page.fill('[aria-label="Tags"]', tag);
+        await this.page.press('[aria-label="Tags"]', 'Enter');
+      }
+    }
+    await this.page.click('button:has-text("Save")');
+  }
+
+  async deleteLocation() {
+    await this.page.click('[aria-label="Delete location"]');
+    await this.page.click('button:has-text("Delete location")');
+  }
+
+  async createGlobalParameter({
+    key,
+    value,
+    description,
+    tags,
+  }: {
+    key: string;
+    value: string;
+    description?: string;
+    tags?: string[];
+  }) {
+    await this.page.testSubj.click('syntheticsAddParamFlyoutButton');
+    await this.page.fill('input[name="key"]', key);
+    await this.page.testSubj.fill('syntheticsAddParamFormTextArea', value);
+    if (tags?.length) {
+      await this.page.click('.euiComboBox__inputWrap');
+      for (const tag of tags) {
+        await this.page.fill('[aria-label="Tags"]', tag);
+      }
+    }
+    if (description) {
+      await this.page.fill('input[name="description"]', description);
+    }
+    await this.page.click('text=Save');
+  }
+
+  async editGlobalParameter({
+    key,
+    newValue,
+    tags,
+  }: {
+    key?: string;
+    newValue?: string;
+    tags?: string[];
+  }) {
+    await this.page.testSubj.click('action-edit');
+    if (key) {
+      await this.page.fill('[aria-label="Key"]', key);
+    }
+    if (newValue) {
+      await this.page.fill('[aria-label="New value"]', newValue);
+    }
+    if (tags?.length) {
+      await this.page.click('.euiComboBox__inputWrap');
+      for (const tag of tags) {
+        await this.page.fill('[aria-label="Tags"]', tag);
+        await this.page.press('[aria-label="Tags"]', 'Enter');
+      }
+    }
+    await this.page.click('button:has-text("Save")');
+  }
+
+  async deleteGlobalParameter() {
+    await this.page.testSubj.click('action-delete');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+  }
+
+  async selectFilterOption(filterLabel: string, optionText: string) {
+    await this.page.click(`[aria-label="expands filter group for ${filterLabel} filter"]`);
+    await this.page.click(`span >> text="${optionText}"`);
+    await this.page.click(`[aria-label="Apply the selected filters for ${filterLabel}"]`);
+  }
+
+  async deleteMonitorFromEditPage() {
+    await this.page.click('text="Delete monitor"');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+  }
+
+  async editStatusRuleSchedule({ value, unit }: { value: string; unit: string }) {
+    await expect(this.page.testSubj.locator('editDefaultStatusRule')).toBeVisible({
+      timeout: 30_000,
+    });
+    await this.page.testSubj.click('editDefaultStatusRule');
+    await expect(this.page.getByText('Monitor status rule')).toBeVisible();
+    await this.page.testSubj.locator('ruleScheduleUnitInput').selectOption(unit);
+    await this.page.testSubj.locator('ruleScheduleNumberInput').fill(value);
+    await this.page.testSubj.click('ruleFlyoutFooterSaveButton');
+    await expect(this.page.getByText('Updated "Synthetics status internal rule"')).toBeVisible();
+  }
+
   async goToRulesPage() {
     await this.page.goto(this.kbnUrl.get('/app/observability/alerts/rules'));
   }

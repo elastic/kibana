@@ -29,13 +29,12 @@ test.describe('GlobalParameters', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('create parameter', async () => {
-      await page.testSubj.click('syntheticsAddParamFlyoutButton');
-      await page.fill('input[name="key"]', 'username');
-      await page.testSubj.fill('syntheticsAddParamFormTextArea', 'elastic');
-      await page.click('.euiComboBox__inputWrap');
-      await page.fill('[aria-label="Tags"]', 'dev');
-      await page.fill('input[name="description"]', 'website username');
-      await page.click('text=Save');
+      await pageObjects.syntheticsApp.createGlobalParameter({
+        key: 'username',
+        value: 'elastic',
+        tags: ['dev'],
+        description: 'website username',
+      });
       await expect(page.getByText('website username')).toBeVisible();
       await expect(page.getByText('username', { exact: true })).toBeVisible();
     });
@@ -61,19 +60,16 @@ test.describe('GlobalParameters', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('edit parameter', async () => {
-      await page.testSubj.click('action-edit');
-      await page.fill('[aria-label="Key"]', 'username2');
-      await page.fill('[aria-label="New value"]', 'elastic2');
-      await page.click('.euiComboBox__inputWrap');
-      await page.fill('[aria-label="Tags"]', 'staging');
-      await page.press('[aria-label="Tags"]', 'Enter');
-      await page.click('button:has-text("Save")');
+      await pageObjects.syntheticsApp.editGlobalParameter({
+        key: 'username2',
+        newValue: 'elastic2',
+        tags: ['staging'],
+      });
       await expect(page.getByText('username2')).toBeVisible();
     });
 
     await test.step('delete parameter', async () => {
-      await page.testSubj.click('action-delete');
-      await page.testSubj.click('confirmModalConfirmButton');
+      await pageObjects.syntheticsApp.deleteGlobalParameter();
       await expect(page.locator('.euiTableRow-isSelectable')).toHaveCount(0);
     });
   });

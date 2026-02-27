@@ -54,15 +54,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
 
     await test.step('edit default status alert rule schedule', async () => {
       await pageObjects.syntheticsApp.openManageStatusRule();
-
-      await expect(page.testSubj.locator('editDefaultStatusRule')).toBeVisible({ timeout: 30_000 });
-      await page.testSubj.click('editDefaultStatusRule');
-
-      await expect(page.getByText('Monitor status rule')).toBeVisible();
-      await page.testSubj.locator('ruleScheduleUnitInput').selectOption('second');
-      await page.testSubj.locator('ruleScheduleNumberInput').fill('20');
-      await page.testSubj.click('ruleFlyoutFooterSaveButton');
-      await expect(page.getByText('Updated "Synthetics status internal rule"')).toBeVisible();
+      await pageObjects.syntheticsApp.editStatusRuleSchedule({ value: '20', unit: 'second' });
     });
 
     await test.step('monitor shows as up', async () => {
@@ -74,8 +66,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('disable and re-enable status alert', async () => {
-      await page.hover('text=Test Monitor');
-      await page.click('[aria-label="Open actions menu"]');
+      await pageObjects.syntheticsApp.openMonitorActionsMenu('Test Monitor');
       await page.click('text=Disable status alert');
       await expect(
         page.getByText('Alerts are now disabled for the monitor "Test Monitor".')

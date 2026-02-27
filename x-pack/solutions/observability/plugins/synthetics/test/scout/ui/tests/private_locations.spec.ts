@@ -40,16 +40,11 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
 
     await test.step('create private location', async () => {
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
-      await page.click('button:has-text("Create location")');
-      await page.testSubj.fill('syntheticsLocationFormFieldText', 'Test private');
-      await page.click('[aria-label="Select agent policy"]');
-      await page.click(`button[role="option"]:has-text("${FLEET_POLICY_NAME}Agents: 0")`);
-      await page.click('.euiComboBox__inputWrap');
-      await page.fill('[aria-label="Tags"]', 'Basement');
-      await page.press('[aria-label="Tags"]', 'Enter');
-      await page.fill('[aria-label="Tags"]', 'Area51');
-      await page.press('[aria-label="Tags"]', 'Enter');
-      await page.click('button:has-text("Save")');
+      await pageObjects.syntheticsApp.createPrivateLocation({
+        name: 'Test private',
+        agentPolicy: FLEET_POLICY_NAME,
+        tags: ['Basement', 'Area51'],
+      });
     });
 
     await test.step('verify and assign monitor', async () => {
@@ -100,8 +95,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await syntheticsServices.deleteMonitors();
       await pageObjects.syntheticsApp.navigateToSettingsTab('Data Retention');
       await pageObjects.syntheticsApp.navigateToSettingsTab('Private Locations');
-      await page.click('[aria-label="Delete location"]');
-      await page.click('button:has-text("Delete location")');
+      await pageObjects.syntheticsApp.deleteLocation();
       await expect(page.getByText('Create your first private location')).toBeVisible();
     });
 
