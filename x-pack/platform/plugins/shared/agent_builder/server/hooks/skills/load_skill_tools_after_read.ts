@@ -16,9 +16,7 @@ import { isSkillFileEntry } from '../../services/runner/store/volumes/skills/uti
 
 const MAX_SKILL_REGISTRY_TOOLS = 25;
 
-export const loadSkillToolsAfterRead = async (
-  context: AfterToolCallHookContext
-): Promise<void> => {
+export const loadSkillToolsAfterRead = async (context: AfterToolCallHookContext): Promise<void> => {
   if (context.toolId !== filestoreTools.read) {
     return;
   }

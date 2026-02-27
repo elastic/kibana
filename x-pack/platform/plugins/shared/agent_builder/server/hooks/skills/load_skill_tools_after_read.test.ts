@@ -17,10 +17,7 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { ToolType } from '@kbn/agent-builder-common';
-import {
-  createToolHandlerContextMock,
-  type ToolHandlerContextMock,
-} from '../../test_utils/runner';
+import { createToolHandlerContextMock, type ToolHandlerContextMock } from '../../test_utils/runner';
 import { loadSkillToolsAfterRead } from './load_skill_tools_after_read';
 
 const createSkillFileEntry = (
@@ -277,10 +274,9 @@ describe('loadSkillToolsAfterRead', () => {
 
       await loadSkillToolsAfterRead(context);
 
-      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(
-        expect.any(Object),
-        { dynamic: true }
-      );
+      expect(toolHandlerContext.toolManager.addTools).toHaveBeenCalledWith(expect.any(Object), {
+        dynamic: true,
+      });
     });
 
     it('uses the skill_id from file entry metadata to look up the skill', async () => {
@@ -325,9 +321,7 @@ describe('loadSkillToolsAfterRead', () => {
 
       toolHandlerContext.filestore.read.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
-      toolHandlerContext.toolProvider.list.mockResolvedValue(
-        toolIds.map((id) => ({ id }) as any)
-      );
+      toolHandlerContext.toolProvider.list.mockResolvedValue(toolIds.map((id) => ({ id } as any)));
 
       const context = createHookContext({ toolHandlerContext });
 
