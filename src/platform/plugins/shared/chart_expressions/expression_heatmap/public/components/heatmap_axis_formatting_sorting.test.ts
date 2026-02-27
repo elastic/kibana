@@ -106,7 +106,7 @@ const basicArgs: HeatmapArguments = {
   yAccessor: 'y',
 };
 
-describe('XY categorical formatting', () => {
+describe('Heatmap axis formatting and sorting', () => {
   // use the current fieldFormatRegistry
   const fieldFormatsRegistry = getFieldFormatsRegistry({
     uiSettings: { get: jest.fn() },
@@ -233,5 +233,118 @@ describe('XY categorical formatting', () => {
     expect(debugState?.axes?.x[0].labels).toHaveLength(0);
     expect(debugState?.axes?.y[0].labels).toHaveLength(0);
     expect(debugState?.heatmap?.cells).toHaveLength(0);
+  });
+
+  test('Sort axis values correctly desc', async () => {
+    const { debugState } = await renderChart(
+      {
+        ...defaultHeatmapProps,
+        data: {
+          ...categoricalTable,
+          rows: [
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'c', y: 'z' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'c', y: 'z' },
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'c', y: 'z' },
+          ],
+        },
+        args: {
+          ...basicArgs,
+          xAccessor: 'x',
+          valueAccessor: 'value',
+          yAccessor: 'y',
+          gridConfig: {
+            ...basicArgs.gridConfig,
+            xSortPredicate: 'desc',
+            ySortPredicate: 'desc',
+          },
+        },
+      },
+      HeatmapComponent,
+      true
+    );
+
+    expect(debugState?.axes?.x[0].labels).toEqual(['c', 'b', 'a']);
+    expect(debugState?.axes?.y[0].labels).toEqual(['z', 'y', 'x']);
+  });
+
+  test('Sort axis values correctly asc', async () => {
+    const { debugState } = await renderChart(
+      {
+        ...defaultHeatmapProps,
+        data: {
+          ...categoricalTable,
+          rows: [
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'c', y: 'z' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'c', y: 'z' },
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'c', y: 'z' },
+          ],
+        },
+        args: {
+          ...basicArgs,
+          xAccessor: 'x',
+          valueAccessor: 'value',
+          yAccessor: 'y',
+          gridConfig: {
+            ...basicArgs.gridConfig,
+            xSortPredicate: 'asc',
+            ySortPredicate: 'asc',
+          },
+        },
+      },
+      HeatmapComponent,
+      true
+    );
+
+    expect(debugState?.axes?.x[0].labels).toEqual(['a', 'b', 'c']);
+    expect(debugState?.axes?.y[0].labels).toEqual(['x', 'y', 'z']);
+  });
+  test('Sort axis values by data index', async () => {
+    const { debugState } = await renderChart(
+      {
+        ...defaultHeatmapProps,
+        data: {
+          ...categoricalTable,
+          rows: [
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'c', y: 'z' },
+            { value: 1, x: 'a', y: 'x' },
+            { value: 1, x: 'c', y: 'z' },
+            { value: 1, x: 'b', y: 'y' },
+            { value: 1, x: 'c', y: 'z' },
+          ],
+        },
+        args: {
+          ...basicArgs,
+          xAccessor: 'x',
+          valueAccessor: 'value',
+          yAccessor: 'y',
+          gridConfig: {
+            ...basicArgs.gridConfig,
+            xSortPredicate: undefined,
+            ySortPredicate: undefined,
+          },
+        },
+      },
+      HeatmapComponent,
+      true
+    );
+
+    expect(debugState?.axes?.x[0].labels).toEqual(['b', 'a', 'c']);
+    expect(debugState?.axes?.y[0].labels).toEqual(['y', 'x', 'z']);
   });
 });
