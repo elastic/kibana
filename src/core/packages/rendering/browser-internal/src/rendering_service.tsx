@@ -29,6 +29,7 @@ import { getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
+import ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
 
 export interface RenderingServiceContextDeps {
@@ -95,12 +96,18 @@ export class RenderingService implements IRenderingService {
 
     const Layout = layout.getComponent();
 
-    createRoot(targetDomElement).render(
+    const element = (
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
       </KibanaRootContextProvider>
     );
+
+    if (startServices.coreEnv.isCoreRenderingInReactConcurrentMode) {
+      createRoot(targetDomElement).render(element);
+    } else {
+      ReactDOM.render(element, targetDomElement);
+    }
   }
 
   // Memoized context wrapper component to prevent recreation on each addContext call

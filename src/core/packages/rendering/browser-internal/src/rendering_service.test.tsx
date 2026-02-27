@@ -12,7 +12,6 @@ import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 
-// Mock createRoot to track roots for cleanup in concurrent mode
 const mockRoots: Array<{ unmount: jest.Mock }> = [];
 jest.mock('react-dom/client', () => ({
   createRoot: jest.fn((container: HTMLElement) => {
@@ -25,6 +24,15 @@ jest.mock('react-dom/client', () => ({
     mockRoots.push(mockRoot);
     return mockRoot;
   }),
+}));
+
+const mockLegacyRender = jest.fn();
+jest.mock('react-dom', () => ({
+  ...jest.requireActual('react-dom'),
+  render: (...args: unknown[]) => {
+    mockLegacyRender(...args);
+    return jest.requireActual('react-dom').render(...args);
+  },
 }));
 
 jest.mock('@kbn/react-kibana-context-render', () => ({
@@ -90,22 +98,29 @@ describe('RenderingService', () => {
   });
 
   afterEach(() => {
-    // Unmount all roots created during the test to prevent async updates after test completion
     act(() => {
       mockRoots.forEach((root) => root.unmount());
     });
     mockRoots.length = 0;
+    mockLegacyRender.mockClear();
   });
 
   describe('renderCore', () => {
-    const startService = () => {
+    const startService = (overrides?: { isCoreRenderingInReactConcurrentMode?: boolean }) => {
+      const env =
+        overrides?.isCoreRenderingInReactConcurrentMode !== undefined
+          ? {
+              ...coreEnv,
+              isCoreRenderingInReactConcurrentMode: overrides.isCoreRenderingInReactConcurrentMode,
+            }
+          : coreEnv;
       return rendering.start({
         analytics,
         i18n,
         executionContext,
         theme,
         userProfile,
-        coreEnv,
+        coreEnv: env,
         chrome,
       });
     };
@@ -172,6 +187,32 @@ describe('RenderingService', () => {
     it('adds global styles via `KibanaRootRenderingContext` `globalStyles` configuration', () => {
       startService();
       expect(document.querySelector(`style[data-emotion="eui-styles-global"]`)).toBeDefined();
+    });
+
+    it('uses createRoot when isCoreRenderingInReactConcurrentMode is true', async () => {
+      const { createRoot } = jest.requireMock('react-dom/client');
+      (createRoot as jest.Mock).mockClear();
+
+      const service = startService({ isCoreRenderingInReactConcurrentMode: true });
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
+
+      expect(createRoot).toHaveBeenCalledWith(targetDomElement);
+      expect(mockLegacyRender).not.toHaveBeenCalled();
+    });
+
+    it('uses legacy ReactDOM.render when isCoreRenderingInReactConcurrentMode is false', async () => {
+      const { createRoot } = jest.requireMock('react-dom/client');
+      (createRoot as jest.Mock).mockClear();
+
+      const service = startService({ isCoreRenderingInReactConcurrentMode: false });
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
+
+      expect(mockLegacyRender).toHaveBeenCalledWith(expect.anything(), targetDomElement);
+      expect(createRoot).not.toHaveBeenCalled();
     });
   });
 

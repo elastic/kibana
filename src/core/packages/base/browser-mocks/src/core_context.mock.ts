@@ -35,6 +35,7 @@ function createCoreContext({ production = false }: { production?: boolean } = {}
         buildFlavor: 'traditional',
       },
       airgapped: false,
+      isCoreRenderingInReactConcurrentMode: true,
     },
   });
 }
