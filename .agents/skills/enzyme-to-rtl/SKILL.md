@@ -163,9 +163,7 @@ Use this pattern instead of enzyme's `.find(Component).prop('propName')`. Clear 
 ```typescript
 import { waitFor } from '@testing-library/react';
 
-await waitFor(() => {
-  expect(screen.getByTestId('result')).toBeInTheDocument();
-});
+await screen.findByTestId('results')
 ```
 
 - Replace `wrapper.update()` + `nextTick()` patterns with `await waitFor(...)`.
