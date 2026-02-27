@@ -58,6 +58,21 @@ export abstract class AbstractFileSystem {
     return fileListPath;
   }
 
+  /**
+   * Returns the first SHA in `shas` that has an archive in this file system,
+   * without extracting anything. Use this to determine artifact state cheaply
+   * (e.g. when artifacts already exist on disk and a full restore can be skipped).
+   */
+  public async findBestSha(shas: string[]): Promise<string | undefined> {
+    for (const sha of shas) {
+      const archivePath = this.getArchivePath(join(COMMITS_PATH, sha));
+      if (await this.hasArchive(archivePath)) {
+        return sha;
+      }
+    }
+    return undefined;
+  }
+
   public async restoreArchive(options: {
     shas: string[];
     prNumber?: string;
@@ -70,7 +85,7 @@ export abstract class AbstractFileSystem {
      *  files before extraction. Useful for local dev where the caller has
      *  already verified no artifacts exist and configs were just generated. */
     skipClean?: boolean;
-  }): Promise<boolean> {
+  }): Promise<string | undefined> {
     const prArchiveId = options.prNumber ? join(PULL_REQUESTS_PATH, options.prNumber) : undefined;
 
     const prArchiveMetadata = prArchiveId
@@ -112,7 +127,7 @@ export abstract class AbstractFileSystem {
             this.log.warning(
               `Cached TypeScript build artifacts for ${shortSha} found, but cache invalidation files have changed:\n ${hashCheckResult.message}`
             );
-            return false;
+            return undefined;
           }
         }
 
@@ -124,7 +139,7 @@ export abstract class AbstractFileSystem {
 
         await this.extract(archivePath);
 
-        return true;
+        return sha;
       }
 
       this.log.verbose(`[${i + 1}/${totalShas}] No archive for ${shortSha}`);
@@ -134,7 +149,7 @@ export abstract class AbstractFileSystem {
       `No cached TypeScript build artifacts found after checking ${totalShas} commit(s).`
     );
 
-    return false;
+    return undefined;
   }
 
   public async updateArchive(options: {

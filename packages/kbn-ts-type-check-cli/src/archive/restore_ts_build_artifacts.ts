@@ -12,7 +12,12 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
-import { MAX_COMMITS_TO_CHECK, CACHE_INVALIDATION_FILES, LOCAL_CACHE_ROOT } from './constants';
+import {
+  ARTIFACTS_STATE_FILE,
+  CACHE_INVALIDATION_FILES,
+  LOCAL_CACHE_ROOT,
+  MAX_COMMITS_TO_CHECK,
+} from './constants';
 import { GcsFileSystem } from './file_system/gcs_file_system';
 import { LocalFileSystem } from './file_system/local_file_system';
 import {
@@ -29,6 +34,29 @@ import {
   withGcsAuth,
 } from './utils';
 
+interface ArtifactsState {
+  restoredSha: string;
+}
+
+export async function writeArtifactsState(sha: string): Promise<void> {
+  const state: ArtifactsState = { restoredSha: sha };
+  await Fs.promises.mkdir(Path.dirname(ARTIFACTS_STATE_FILE), { recursive: true });
+  await Fs.promises.writeFile(ARTIFACTS_STATE_FILE, JSON.stringify(state, null, 2));
+}
+
+/**
+ * Returns the commit SHA of the most-recently restored build artifact set, or
+ * undefined if no restore has been performed (or the state file was deleted).
+ */
+export async function readArtifactsState(): Promise<ArtifactsState | undefined> {
+  try {
+    const raw = await Fs.promises.readFile(ARTIFACTS_STATE_FILE, 'utf8');
+    return JSON.parse(raw) as ArtifactsState;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function restoreTSBuildArtifacts(log: SomeDevLog) {
   try {
     // If build artifacts already exist from a previous (possibly aborted) run,
@@ -39,6 +67,21 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
       const hasExistingArtifacts = await checkForExistingBuildArtifacts();
 
       if (hasExistingArtifacts) {
+        // If no state file exists (e.g. first run after this feature was added,
+        // or after tmpdir was cleared), peek at the local cache to record the
+        // best matching SHA so --only-detect-stale works without a full re-extract.
+        if ((await readArtifactsState()) === undefined) {
+          const [currentSha, history] = await Promise.all([
+            resolveCurrentCommitSha(),
+            readRecentCommitShas(MAX_COMMITS_TO_CHECK),
+          ]);
+          const candidateShas = buildCandidateShaList(currentSha, history);
+          const bestSha = await new LocalFileSystem(log).findBestSha(candidateShas);
+          if (bestSha) {
+            await writeArtifactsState(bestSha);
+          }
+        }
+
         log.info(
           'Found existing type cache directories — skipping archive restore (tsc incremental build will handle it).'
         );
@@ -168,6 +211,7 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
           ]);
 
           if (restored) {
+            await writeArtifactsState(restored);
             return;
           }
         } else if (availableShas.size > 0) {
@@ -194,11 +238,15 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog) {
       return;
     }
 
-    await new LocalFileSystem(log).restoreArchive({
+    const localRestored = await new LocalFileSystem(log).restoreArchive({
       ...restoreOptions,
       cacheInvalidationFiles: undefined,
       skipClean: true,
     });
+
+    if (localRestored) {
+      await writeArtifactsState(localRestored);
+    }
   } catch (error) {
     const restoreErrorDetails = error instanceof Error ? error.message : String(error);
 

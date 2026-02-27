@@ -89,7 +89,9 @@ describe('restoreTSBuildArtifacts', () => {
     jest.spyOn(Fs.promises, 'readFile').mockResolvedValue(JSON.stringify([]));
     // Mock Fs.promises.access so the local cache path is considered reachable in tests.
     jest.spyOn(Fs.promises, 'access').mockResolvedValue(undefined);
-    restoreSpy = jest.spyOn(LocalFileSystem.prototype, 'restoreArchive').mockResolvedValue(false);
+    restoreSpy = jest
+      .spyOn(LocalFileSystem.prototype, 'restoreArchive')
+      .mockResolvedValue(undefined);
   });
 
   afterEach(() => {

@@ -50,6 +50,13 @@ const BASE_DIR = Path.resolve(Os.tmpdir(), 'kibana-ts-type-check-cache');
 export const TMP_DIR = Path.join(BASE_DIR, 'tmp');
 export const LOCAL_CACHE_ROOT = Path.join(BASE_DIR, 'archives');
 
+/**
+ * Records the commit SHA of the most-recently restored build artifact set so
+ * that --only-detect-stale can determine the "from" commit without requiring
+ * the user to pass it explicitly.
+ */
+export const ARTIFACTS_STATE_FILE = Path.join(BASE_DIR, 'artifacts-state.json');
+
 export const MAX_COMMITS_TO_CHECK = 50;
 
 export const TYPES_DIRECTORY_GLOB = '**/target/types';
