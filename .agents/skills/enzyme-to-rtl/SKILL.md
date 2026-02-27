@@ -89,8 +89,8 @@ expect(screen.getByTestId('foo')).toBeInTheDocument();
 Enzyme chains like `wrapper.find('tbody tr td a').at(3).find('div span').at(2).text()` become:
 
 ```typescript
-container.querySelector('tbody tr td a:nth-child(4) div span:nth-child(3)')?.textContent
-```
+const links = container.querySelectorAll('tbody tr td a');
+links[3]?.querySelectorAll('div span')[2]?.textContent;
 
 ### Global selectors (modals, popovers)
 
