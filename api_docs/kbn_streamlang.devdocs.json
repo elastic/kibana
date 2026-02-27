@@ -10717,6 +10717,42 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.streamlangDSLSchemaStrict",
+        "type": "Object",
+        "tags": [],
+        "label": "streamlangDSLSchemaStrict",
+        "description": [
+          "\nStrict version of streamlangDSLSchema that rejects excess/unknown keys.\nPre-constructed for performance as DeepStrict creates proxy wrappers,"
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ steps: ",
+          "ZodArray",
+          "<",
+          "ZodType",
+          "<",
+          "StreamlangStep",
+          ", ",
+          "ZodTypeDef",
+          ", ",
+          "StreamlangStep",
+          ">, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { steps: ",
+          "StreamlangStep",
+          "[]; }, { steps: ",
+          "StreamlangStep",
+          "[]; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
+        "lineNumber": 99,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.stringOrNumberOrBoolean",
         "type": "Object",
         "tags": [],

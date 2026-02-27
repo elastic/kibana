@@ -237,7 +237,7 @@ export class AssetManager {
   ): Promise<CheckPrivilegesResponse> {
     const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
 
-    const sourceIndexPatterns = await this.logsExtractionClient.getIndexPatterns(
+    const sourceIndexPatterns = await this.logsExtractionClient.getLocalIndexPatterns(
       additionalIndexPatterns
     );
 
