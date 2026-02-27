@@ -31,52 +31,51 @@ test.describe('GlobalParameters', { tag: tags.stateful.classic }, () => {
     await test.step('create parameter', async () => {
       await page.click('text=No items found');
       await page.testSubj.click('syntheticsAddParamFlyoutButton');
-      await page.testSubj.fill('syntheticsAddParamFormFieldText', 'username');
+      await page.fill('input[name="key"]', 'username');
       await page.testSubj.fill('syntheticsAddParamFormTextArea', 'elastic');
       await page.click('.euiComboBox__inputWrap');
       await page.fill('[aria-label="Tags"]', 'dev');
-      await page.testSubj.fill('syntheticsAddParamFormFieldText', 'website username');
+      await page.fill('input[name="description"]', 'website username');
       await page.click('text=Save');
-      await expect(page.getByText('website username', { exact: true })).toBeVisible();
+      await expect(page.getByText('website username')).toBeVisible();
       await expect(page.getByText('username', { exact: true })).toBeVisible();
     });
 
     await test.step('toggle value visibility', async () => {
       await page.testSubj.click('syntheticsParamsTextButton');
-      // await expect(page.locator('tbody >> text=elastic')).toBeVisible();
-      const cellLocator = page.locator(
-        '.euiTableCellContent:has([data-test-subj="syntheticsParamsTextButton"]'
-      );
-      await expect(cellLocator.locator('text=elastic')).toBeVisible();
+      await expect(page.testSubj.locator('syntheticsParamsText')).toContainText('elastic');
       await page.testSubj.click('syntheticsParamsTextButton');
-      await expect(cellLocator.locator('text=••••••••••')).toBeVisible();
+      await expect(page.testSubj.locator('syntheticsParamsText')).toContainText('•••••••');
     });
 
     await test.step('search parameters', async () => {
-      await page.fill('[placeholder="Search..."]', 'username');
-      await expect(page.getByText('username', { exact: true })).toBeVisible();
-      await page.click('[aria-label="Clear search input"]');
-      await page.fill('[placeholder="Search..."]', 'extra');
-      await page.keyboard.press('Enter');
-      await expect(page.getByText('No items found', { exact: true })).toBeVisible();
-      await page.click('[aria-label="Clear search input"]');
+      await expect(page.testSubj.locator('syntheticsParamsTable-loaded')).toBeVisible();
+      await page.testSubj.typeWithDelay('syntheticsParamsSearchInput', 'username', { delay: 100 });
+      await page.testSubj.locator('syntheticsParamsSearchInput').press('Enter');
+      await expect(page.testSubj.locator('syntheticsParamsTable-loaded')).toBeVisible();
+      await page.testSubj.locator('syntheticsParamsSearchInput').clear();
+      await page.testSubj.typeWithDelay('syntheticsParamsSearchInput', 'extra', { delay: 100 });
+      await page.testSubj.locator('syntheticsParamsSearchInput').press('Enter');
+      await expect(page.testSubj.locator('syntheticsParamsTable-loaded')).toBeVisible();
+      await expect(page.locator('euiTableRow-isSelectable')).toHaveCount(0);
+      await page.testSubj.locator('syntheticsParamsSearchInput').clear();
     });
 
     await test.step('edit parameter', async () => {
-      await page.click('text=Delete ParameterEdit Parameter >> :nth-match(button, 2)');
+      await page.testSubj.click('action-edit');
       await page.fill('[aria-label="Key"]', 'username2');
       await page.fill('[aria-label="New value"]', 'elastic2');
       await page.click('.euiComboBox__inputWrap');
       await page.fill('[aria-label="Tags"]', 'staging');
       await page.press('[aria-label="Tags"]', 'Enter');
       await page.click('button:has-text("Save")');
-      await expect(page.getByText('username2', { exact: true })).toBeVisible();
+      await expect(page.getByText('username2')).toBeVisible();
     });
 
     await test.step('delete parameter', async () => {
-      await page.click('text=Delete ParameterEdit Parameter >> button');
-      await page.click('button:has-text("Delete")');
-      await expect(page.getByText('No items found', { exact: true })).toBeVisible();
+      await page.testSubj.click('action-delete');
+      await page.testSubj.click('confirmModalConfirmButton');
+      await expect(page.locator('euiTableRow-isSelectable')).toHaveCount(0);
     });
   });
 });

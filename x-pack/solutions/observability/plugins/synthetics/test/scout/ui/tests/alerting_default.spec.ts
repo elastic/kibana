@@ -15,7 +15,7 @@ test.describe('AlertingDefaults', { tag: tags.stateful.classic }, () => {
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.syntheticsApp.navigateToSettings();
   });
 

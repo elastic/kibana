@@ -25,7 +25,7 @@ test.describe('OverviewCompactView', { tag: tags.stateful.classic }, () => {
     syntheticsServices,
   }) => {
     await test.step('login and navigate to overview', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
       await pageObjects.syntheticsApp.navigateToOverview(15);
     });
 

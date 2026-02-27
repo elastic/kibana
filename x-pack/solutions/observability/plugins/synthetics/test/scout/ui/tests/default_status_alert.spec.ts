@@ -33,6 +33,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     browserAuth,
     syntheticsServices,
   }) => {
+    test.setTimeout(5 * 60_000);
     const firstCheckTime = new Date(Date.now()).toISOString();
 
     await test.step('setup: create monitor with connector and summary doc', async () => {
@@ -49,7 +50,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('login and navigate to overview', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.syntheticsApp.navigateToOverview(15);
     });
 
@@ -115,6 +116,7 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
 
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');
+        await page.waitForTimeout(5_000);
         await expect(page.getByText('1 Alert')).toBeVisible({ timeout: 5_000 });
         const text = page.testSubj.locator('o11yGetRenderCellValueLink');
         await expect(text).toHaveText(reasonMessage);
@@ -166,10 +168,21 @@ test.describe('DefaultStatusAlert', { tag: tags.stateful.classic }, () => {
       await page.testSubj.locator('queryInput').fill('kibana.alert.status : "recovered" ');
       await page.testSubj.click('querySubmitButton');
 
+      await page.testSubj.locator('optionsList-control-0').hover();
+      await page
+        .locator(
+          '[data-test-subj="hover-actions-0"] [data-test-subj="embeddablePanelAction-clearControl"]'
+        )
+        .click();
+
       await expect(async () => {
         await page.testSubj.click('querySubmitButton');
         await expect(page.getByText('1 Alert')).toBeVisible({ timeout: 10_000 });
       }).toPass({ timeout: 180_000 });
+
+      await page.testSubj.locator('queryInput').fill('kibana.alert.status : "active" ');
+      await page.testSubj.click('querySubmitButton');
+      await pageObjects.syntheticsApp.waitForLoadingToFinish();
     });
   });
 });

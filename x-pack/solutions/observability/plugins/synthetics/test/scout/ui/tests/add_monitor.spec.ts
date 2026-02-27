@@ -52,7 +52,7 @@ test.describe('AddMonitor', { tag: tags.stateful.classic }, () => {
       const monitorName = config.monitorConfig.name;
 
       await test.step('setup: login and navigate', async () => {
-        await browserAuth.loginAsAdmin();
+        await browserAuth.loginAsPrivilegedUser();
         await pageObjects.syntheticsApp.navigateToAddMonitor();
         await pageObjects.syntheticsApp.ensureIsOnMonitorConfigPage();
       });

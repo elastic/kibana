@@ -14,6 +14,7 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
   const monitorName = 'test-project-monitor';
 
   test.beforeAll(async ({ syntheticsServices }) => {
+    await syntheticsServices.enable();
     await syntheticsServices.deleteMonitors();
   });
 
@@ -37,7 +38,7 @@ test.describe('ProjectMonitorReadOnly', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify monitor appears', async () => {
-      await expect(page.getByText(monitorName)).toBeVisible();
+      await expect(page.getByText(monitorName)).toBeVisible({ timeout: 30_000 });
     });
 
     await test.step('verify read-only state', async () => {

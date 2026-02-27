@@ -29,7 +29,7 @@ test.describe('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
     const firstCheckTime = new Date(Date.now()).toISOString();
 
     await test.step('login and navigate to overview', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.syntheticsApp.navigateToOverview(15);
     });
 

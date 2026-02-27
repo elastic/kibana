@@ -12,13 +12,10 @@ import { test } from '../fixtures';
 test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
   const configId = 'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b';
   const checkGroup = 'ab240846-8d22-11ed-8fac-52bb19a2321e';
-  let locationId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
     await syntheticsServices.enable();
-    const location = await syntheticsServices.getDefaultLocation();
-    locationId = location.id;
     await syntheticsServices.addMonitor(
       'https://www.google.com',
       {
@@ -29,28 +26,6 @@ test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
       },
       configId
     );
-    await syntheticsServices.addSummaryDocument({
-      docType: 'journeyStart',
-      configId,
-      testRunId: checkGroup,
-      monitorId: configId,
-      name: 'https://www.google.com',
-    });
-    await syntheticsServices.addSummaryDocument({
-      docType: 'stepEnd',
-      stepIndex: 1,
-      configId,
-      testRunId: checkGroup,
-      monitorId: configId,
-      name: 'https://www.google.com',
-    });
-    await syntheticsServices.addSummaryDocument({
-      docType: 'journeyEnd',
-      configId,
-      testRunId: checkGroup,
-      monitorId: configId,
-      name: 'https://www.google.com',
-    });
   });
 
   test.afterAll(async ({ syntheticsServices }) => {
@@ -59,19 +34,25 @@ test.describe('StepDetailsPage', { tag: tags.stateful.classic }, () => {
 
   test('displays step detail metrics', async ({ pageObjects, page, browserAuth }) => {
     await test.step('login and navigate to step details', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
       await pageObjects.syntheticsApp.navigateToStepDetails({
         stepIndex: 1,
         checkGroup,
         configId,
-        locationId,
       });
     });
 
     await test.step('verify metrics are displayed', async () => {
-      await expect(page.getByText('558 KB')).toBeVisible({ timeout: 30_000 });
-      await expect(page.getByText('402 ms')).toBeVisible();
-      await expect(page.getByText('521 ms')).toBeVisible();
+      await page.testSubj.locator('synth-step-metrics').waitFor({ timeout: 20_000 });
+      await expect(
+        page.testSubj.locator('synth-step-metric-transfer-size').locator('.euiTitle')
+      ).toContainText('558 KB', {});
+      await expect(
+        page.testSubj.locator('synth-step-metric-fcp').locator('.euiTitle')
+      ).toContainText('402 ms');
+      await expect(
+        page.testSubj.locator('synth-step-metric-lcp').locator('.euiTitle')
+      ).toContainText('521 ms');
     });
   });
 });

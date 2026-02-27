@@ -26,7 +26,7 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
     browserAuth,
   }) => {
     await test.step('navigate to monitor management and login', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.syntheticsApp.navigateToGettingStarted();
     });
 

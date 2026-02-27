@@ -33,23 +33,23 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
   }) => {
     await test.step('login and navigate to settings', async () => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.syntheticsApp.navigateToGettingStarted();
+      await pageObjects.syntheticsApp.navigateToSettings();
     });
 
     await test.step('create agent policy', async () => {
-      await page.testSubj.click('gettingStartedAddLocationButton');
       await page.click('text=Private Locations');
       await page.click('text=No agent policies found');
       await page.click('text=Create agent policy');
       await page.fill('[placeholder="Choose a name"]', 'Test fleet policy');
       await page.click('text=Collect system logs and metrics');
       await page.click('div[role="dialog"] button:has-text("Create agent policy")');
+      await page.waitForTimeout(5_000);
       await pageObjects.syntheticsApp.waitForLoadingToFinish();
     });
 
     await test.step('create private location', async () => {
-      await pageObjects.syntheticsApp.navigateToGettingStarted();
-      await page.testSubj.click('gettingStartedAddLocationButton');
+      await pageObjects.syntheticsApp.navigateToSettings();
+      await page.click('text=Private Locations');
       await page.click('button:has-text("Create location")');
       await page.testSubj.fill('syntheticsLocationFormFieldText', 'Test private');
       await page.click('[aria-label="Select agent policy"]');
@@ -73,10 +73,12 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       });
     });
 
-    await test.step('edit location label', async () => {
-      await page.click('[data-test-subj="action-edit"]');
+    await test.step('edit location label and verify disabled fields', async () => {
+      await page.testSubj.click('action-edit');
       await expect(page.locator('[aria-label="Select agent policy"]')).toBeDisabled();
-      await page.fill('[aria-label="Location name"]', NEW_LOCATION_LABEL);
+      await expect(page.locator('[aria-label="Tags"]')).toBeEnabled();
+      await expect(page.locator('[aria-label="Spaces "]')).toBeDisabled();
+      await page.testSubj.fill('syntheticsLocationFormFieldText', NEW_LOCATION_LABEL);
       await page.testSubj.click('syntheticsLocationFlyoutSaveButton');
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
     });

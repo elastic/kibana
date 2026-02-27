@@ -35,7 +35,7 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
     browserAuth,
   }) => {
     await test.step('login and navigate to management', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.syntheticsApp.navigateToMonitorManagement();
     });
 
@@ -49,18 +49,14 @@ test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
       await page.click('span >> text="Journey / Page"');
       await page.click('[aria-label="Apply the selected filters for Type"]');
 
-      const searchInput = page.locator(
-        '[placeholder="Search by name, URL, host, tag, project or location"]'
-      );
+      const searchInput = page.testSubj.locator('syntheticsOverviewSearchInput');
       await searchInput.click();
       await searchInput.fill('3');
       await expect(page.getByText('Showing 1-1 of 1 Configuration')).toBeVisible();
     });
 
     await test.step('no results search', async () => {
-      const searchInput = page.locator(
-        '[placeholder="Search by name, URL, host, tag, project or location"]'
-      );
+      const searchInput = page.testSubj.locator('syntheticsOverviewSearchInput');
       await searchInput.fill('5553');
       await expect(page.getByText('0-0')).toBeVisible();
       await searchInput.press('Escape');

@@ -32,7 +32,7 @@ test.describe('MonitorDetailFlyout', { tag: tags.stateful.classic }, () => {
     browserAuth,
   }) => {
     await test.step('login and navigate to add monitor', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.syntheticsApp.navigateToAddMonitor();
       await pageObjects.syntheticsApp.ensureIsOnMonitorConfigPage();
     });

@@ -27,7 +27,7 @@ test.describe('MonitorFormValidation', { tag: tags.stateful.classic }, () => {
 
   test('validates HTTP monitor form fields', async ({ pageObjects, page, browserAuth }) => {
     await test.step('login and navigate to add monitor', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await pageObjects.syntheticsApp.navigateToAddMonitor();
       await pageObjects.syntheticsApp.ensureIsOnMonitorConfigPage();
     });

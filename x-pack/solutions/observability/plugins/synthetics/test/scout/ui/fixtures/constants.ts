@@ -11,6 +11,8 @@ export const ES_ARCHIVES = {
   BROWSER: 'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/es_archiver/browser',
   FULL_HEARTBEAT:
     'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/es_archiver/full_heartbeat',
+  SYNTHETICS_DATA:
+    'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/es_archiver/synthetics_data',
 } as const;
 
 const apmServiceName = 'apmServiceName';

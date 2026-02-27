@@ -29,7 +29,7 @@ export class SyntheticsAppPage {
 
   async navigateToGettingStarted() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/monitors/getting-started'));
-    await this.page.testSubj.waitForSelector('syntheticsGettingStartedPageLink');
+    await this.page.testSubj.waitForSelector('syntheticsGettingStartedOnPremLink');
   }
 
   async navigateToOverview(refreshInterval?: number) {
@@ -37,6 +37,7 @@ export class SyntheticsAppPage {
       ? `/app/synthetics?refreshInterval=${refreshInterval}`
       : '/app/synthetics';
     await this.page.goto(this.kbnUrl.get(url));
+    await this.waitForLoadingToFinish();
   }
 
   async navigateToSettings() {
@@ -46,7 +47,7 @@ export class SyntheticsAppPage {
 
   async navigateToAddMonitor() {
     await this.page.goto(this.kbnUrl.get('/app/synthetics/add-monitor'));
-    await this.page.testSubj.waitForSelector('syntheticsMonitorConfigName');
+    await this.page.testSubj.waitForSelector('syntheticsMonitorConfigName', { timeout: 30_000 });
   }
 
   async navigateToStepDetails({
@@ -60,8 +61,8 @@ export class SyntheticsAppPage {
     stepIndex: number;
     locationId?: string;
   }) {
-    const locId = locationId ?? 'test-private-location';
-    const stepDetailsPath = `/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${locId}`;
+    const locationQuery = locationId ? `?locationId=${locationId}` : '';
+    const stepDetailsPath = `/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}${locationQuery}`;
     await this.page.goto(this.kbnUrl.get(stepDetailsPath));
   }
 

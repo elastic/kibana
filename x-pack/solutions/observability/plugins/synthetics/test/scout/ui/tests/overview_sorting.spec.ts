@@ -30,7 +30,7 @@ test.describe('OverviewSorting', { tag: tags.stateful.classic }, () => {
 
   test('sorts monitors correctly in overview', async ({ pageObjects, page, browserAuth }) => {
     await test.step('login and navigate to overview', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
       await pageObjects.syntheticsApp.navigateToOverview(15);
     });
 

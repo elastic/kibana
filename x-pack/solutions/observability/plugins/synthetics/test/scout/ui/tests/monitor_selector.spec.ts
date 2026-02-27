@@ -32,7 +32,7 @@ test.describe('MonitorSelector', { tag: tags.stateful.classic }, () => {
     browserAuth,
   }) => {
     await test.step('login and navigate to monitor management', async () => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
       await pageObjects.syntheticsApp.navigateToMonitorManagement();
     });
 

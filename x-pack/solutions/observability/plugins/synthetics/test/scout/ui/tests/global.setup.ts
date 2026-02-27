@@ -6,14 +6,16 @@
  */
 
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
-import { testData } from '../fixtures';
 
 globalSetupHook(
   'Ingest Synthetics test data',
   { tag: tags.stateful.classic },
   async ({ esArchiver, log }) => {
-    const archives = [testData.ES_ARCHIVES.FULL_HEARTBEAT, testData.ES_ARCHIVES.BROWSER];
-
+    const archives = [
+      testData.ES_ARCHIVES.FULL_HEARTBEAT,
+      testData.ES_ARCHIVES.BROWSER,
+      testData.ES_ARCHIVES.SYNTHETICS_DATA,
+    ];
     log.debug('[setup] loading test data (only if indexes do not exist)...');
     for (const archive of archives) {
       await esArchiver.loadIfNeeded(archive);
