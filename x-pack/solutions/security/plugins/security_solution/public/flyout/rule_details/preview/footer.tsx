@@ -17,29 +17,33 @@ import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_ag
 
 interface PreviewFooterProps {
   rule: RuleResponse;
+  isPreviewMode?: boolean;
 }
 
 /**
  * Footer in rule preview panel
  */
-export const PreviewFooter = memo(({ rule }: PreviewFooterProps) => {
+export const PreviewFooter = memo(({ rule, isPreviewMode }: PreviewFooterProps) => {
   const href = useRuleDetailsLink({ ruleId: rule.id });
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
 
-  if (!href && !isAgentChatExperienceEnabled) {
+  const showAddToChat = isAgentChatExperienceEnabled;
+  const showLink = isPreviewMode && !!href;
+
+  if (!showAddToChat && !showLink) {
     return null;
   }
 
   return (
     <FlyoutFooter data-test-subj={RULE_PREVIEW_FOOTER_TEST_ID}>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {isAgentChatExperienceEnabled ? (
+      <EuiFlexGroup justifyContent={showAddToChat ? 'spaceBetween' : 'center'} alignItems="center">
+        {showAddToChat ? (
           <EuiFlexItem grow={false}>
             <AddRuleAttachmentToChatButton rule={rule} pathway="alerts_flyout_rule_summary" />
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem grow={false}>
-          {href ? (
+        {showLink ? (
+          <EuiFlexItem grow={false}>
             <EuiLink
               href={href}
               target="_blank"
@@ -50,8 +54,8 @@ export const PreviewFooter = memo(({ rule }: PreviewFooterProps) => {
                 defaultMessage: 'Show full rule details',
               })}
             </EuiLink>
-          ) : null}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </FlyoutFooter>
   );
