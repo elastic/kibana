@@ -43,7 +43,8 @@ const GOOGLE_SCOPES = [
 function getEARSAuthUrl(
   config: WorkplaceAIClientConfig,
   kibanaBasePath: string | undefined,
-  pkceCodeVerifier: string
+  pkceCodeVerifier: string,
+  state: string
 ): string | undefined {
   if (!kibanaBasePath) {
     return undefined;
@@ -55,7 +56,8 @@ function getEARSAuthUrl(
   GOOGLE_SCOPES.forEach((s) => params.append('scope', s));
   params.set('callback_uri', `${kibanaBasePath}/app/workplace_ai`);
   params.set('pkce_challenge', calculateCodeChallenge(pkceCodeVerifier));
-  params.set('pkce_method', "S256");
+  params.set('pkce_method', 'S256');
+  params.set('state', state);
 
   const authUrl = earsUrl
     ? `${earsUrl}/${EarsOAuthProvider.Google}/oauth/authorize?${params.toString()}`
@@ -64,11 +66,10 @@ function getEARSAuthUrl(
   return authUrl;
 }
 
-
 function generateCodeVerifier(length: number = 43) {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
   const randomBytes = crypto.randomBytes(length);
-  let codeVerifier = "";
+  let codeVerifier = '';
 
   for (let i = 0; i < length; i++) {
     const randomIndex = randomBytes[i] % characters.length;
@@ -80,16 +81,16 @@ function generateCodeVerifier(length: number = 43) {
 
 function calculateCodeChallenge(codeVerifier: string): string {
   // Step 1: Create a SHA-256 hash of the input
-  const hash = crypto.createHash("sha256").update(codeVerifier).digest();
+  const hash = crypto.createHash('sha256').update(codeVerifier).digest();
 
   // Step 2: Convert the hash to Base64 (standard Base64 first)
-  const base64 = hash.toString("base64");
+  const base64 = hash.toString('base64');
 
   // Step 3: Convert Base64 to URL-safe Base64
   const base64UrlSafe = base64
-    .replace(/\+/g, "-") // Replace '+' with '-'
-    .replace(/\//g, "_") // Replace '/' with '_'
-    .replace(/=+$/, ""); // Remove '=' padding
+    .replace(/\+/g, '-') // Replace '+' with '-'
+    .replace(/\//g, '_') // Replace '/' with '_'
+    .replace(/=+$/, ''); // Remove '=' padding
 
   return base64UrlSafe;
 }
@@ -99,13 +100,14 @@ export const EarsConnectionsSection: React.FC = () => {
   const { http } = useKibana().services;
   const basePath = http.basePath.publicBaseUrl;
 
-
   const urlParams = new URLSearchParams(window.location.search);
 
   const code = urlParams.get('code');
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [pkceCodeVerifier, setPkceCodeVerifier] = useState<string>(code !== null ? "" : generateCodeVerifier(128));
-  const [pkceError, setPkceError] = useState<string | null>(null);
+  const [pkceCodeVerifier, setPkceCodeVerifier] = useState<string>(
+    code !== null ? '' : generateCodeVerifier(128)
+  );
+  const [state, setState] = useState<string | null>(urlParams.get('state'));
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [earsLoading, setEarsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<GoogleUserInfo | null>(null);
@@ -113,15 +115,17 @@ export const EarsConnectionsSection: React.FC = () => {
   const [userInfoLoading, setUserInfoLoading] = useState(false);
   const [earsError, setEarsError] = useState<string | null>(null);
 
-  const earsAuthUrl = getEARSAuthUrl(config, basePath, pkceCodeVerifier);
+  const earsAuthUrl = getEARSAuthUrl(config, basePath, pkceCodeVerifier, state);
 
   const exchangeCodeMutation = useExchangeCode();
 
   const handleExchangeCode = () => {
     if (!code) return;
-    if (!pkceCodeVerifier || pkceCodeVerifier === "") {
-      setEarsError("PKCE Code Verifier is required. If you forgot to copy it you will need to restart the flow")
-      return
+    if (!pkceCodeVerifier || pkceCodeVerifier === '') {
+      setEarsError(
+        'PKCE Code Verifier is required. If you forgot to copy it you will need to restart the flow'
+      );
+      return;
     }
 
     setEarsError(null);
@@ -246,31 +250,57 @@ export const EarsConnectionsSection: React.FC = () => {
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h3>
-                {(pkceCodeVerifier && !code) ? (
                 <FormattedMessage
-                  id="xpack.workplaceai.gettingStarted.earsSection.pkceCopyTitle"
-                  defaultMessage="PKCE Code Verifier (copy it for exchanging code for token later)"
+                  id="xpack.workplaceai.gettingStarted.earsSection.stateTitle"
+                  defaultMessage="OAuth State (will be sent to EARS, when returned back should be the same!"
                 />
+              </h3>
+            </EuiTitle>
+            <EuiFieldText
+              placeholder={i18n.translate('xpack.workplaceai.state.placeholder', {
+                defaultMessage: 'Put your state here',
+              })}
+              value={state || ''}
+              onChange={(e) => setState(e.target.value)}
+              readOnly={!!code}
+              fullWidth
+              aria-label={i18n.translate('xpack.workplaceai.state.ariaLabel', {
+                defaultMessage: 'State',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiPanel paddingSize="l">
+        <EuiFlexGroup alignItems="center" gutterSize="l">
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>
+                {pkceCodeVerifier && !code ? (
+                  <FormattedMessage
+                    id="xpack.workplaceai.gettingStarted.earsSection.pkceCopyTitle"
+                    defaultMessage="PKCE Code Verifier (copy it for exchanging code for token later)"
+                  />
                 ) : (
-                <FormattedMessage
-                  id="xpack.workplaceai.gettingStarted.earsSection.pkcePasteTitle"
-                  defaultMessage="PKCE Code Verifier (paste it here to exchange the token)"
-                />
+                  <FormattedMessage
+                    id="xpack.workplaceai.gettingStarted.earsSection.pkcePasteTitle"
+                    defaultMessage="PKCE Code Verifier (paste it here to exchange the token)"
+                  />
                 )}
               </h3>
             </EuiTitle>
-              <EuiFieldText
-                placeholder={i18n.translate('xpack.workplaceai.pkceCodeVerifier.placeholder', {
-                  defaultMessage: 'Paste your PKCE Code Verifier',
-                })}
-                value={pkceCodeVerifier}
-                onChange={(e) => setPkceCodeVerifier(e.target.value)}
-                readOnly={!code}
-                fullWidth
-                aria-label={i18n.translate('xpack.workplaceai.pkceCodeVerifier.ariaLabel', {
-                  defaultMessage: 'PKCE Code Verifier',
-                })}
-              />
+            <EuiFieldText
+              placeholder={i18n.translate('xpack.workplaceai.pkceCodeVerifier.placeholder', {
+                defaultMessage: 'Paste your PKCE Code Verifier',
+              })}
+              value={pkceCodeVerifier}
+              onChange={(e) => setPkceCodeVerifier(e.target.value)}
+              readOnly={!code}
+              fullWidth
+              aria-label={i18n.translate('xpack.workplaceai.pkceCodeVerifier.ariaLabel', {
+                defaultMessage: 'PKCE Code Verifier',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
