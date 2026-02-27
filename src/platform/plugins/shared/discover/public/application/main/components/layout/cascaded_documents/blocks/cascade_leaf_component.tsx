@@ -613,8 +613,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const { getDataGridUiStateMap, setDataGridUiState, openInNewTab, esqlQuery, esqlVariables } =
       useCascadedDocumentsContext();
 
-    // Add "// @light" to the ES|QL query to use the lightweight table, omit for EUI DataGrid
-    const useLightweightTable = 'esql' in esqlQuery && esqlQuery.esql.includes('// @light');
+    // Add "// @vanilla" to the ES|QL query to use the lightweight table, omit for EUI DataGrid
+    const useLightweightTable = 'esql' in esqlQuery && esqlQuery.esql.includes('// @vanilla');
 
     const initialGridState = useMemo(() => {
       return getDataGridUiStateMap()?.[cellId];
