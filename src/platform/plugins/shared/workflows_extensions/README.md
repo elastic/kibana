@@ -850,6 +850,35 @@ The `context` parameter provides access to runtime services and step information
 - **`context.stepId`**: Current step instance identifier
 - **`context.stepType`**: Step type identifier (e.g., `'my-namespace.myCustomStep'`)
 
+### Cancellation Cleanup (`onCancel`)
+
+Steps can provide an optional `onCancel` handler for explicit cancellation cleanup. This is useful for steps that hold external resources (e.g., spawned child operations, long-running connections) that need teardown when the workflow is cancelled.
+
+`onCancel` is called **after** the step's `abortSignal` fires and `run()` completes — it is never invoked in parallel with `run()`. Steps that complete normally (without cancellation) skip `onCancel` entirely.
+
+```typescript
+const myStepDefinition = createServerStepDefinition({
+  ...myStepCommonDefinition,
+  handler: async (context) => {
+    // Main step logic — observe context.abortSignal for cooperative cancellation
+    const result = await doWork(context.abortSignal);
+    return { output: { result } };
+  },
+  onCancel: async (context) => {
+    // Cleanup logic — called only when the workflow is cancelled
+    context.logger.info('Cancelling spawned operations');
+    await cancelSpawnedOperations(context);
+  },
+});
+```
+
+**Key points:**
+
+- `onCancel` receives the same `StepHandlerContext` as `handler`, so it has access to `input`, `config`, and all runtime services
+- Implementations must be **idempotent** — `onCancel` may be called more than once in edge cases
+- Errors thrown in `onCancel` are logged but do **not** disrupt the cancellation flow
+- Steps without `onCancel` are unaffected — no changes required for existing step implementations
+
 ### Public-Side Definition Requirements
 
 The public definition must include:
