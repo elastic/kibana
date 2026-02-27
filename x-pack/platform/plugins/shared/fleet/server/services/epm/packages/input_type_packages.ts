@@ -62,7 +62,9 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
   pkgInfo: PackageInfo,
   existingDataStreams: IndicesDataStream[]
 ) => {
-  return (existingDataStreams || []).some((ds) => ds._meta?.package?.name !== pkgInfo.name);
+  return (existingDataStreams || []).some(
+    (ds) => ds._meta?.package?.name && ds._meta.package.name !== pkgInfo.name
+  );
 };
 
 export const isInputPackageDatasetUsedByMultiplePolicies = (
@@ -172,7 +174,7 @@ async function installAssetsForDataStreamType(opts: {
     }
     if (!force) {
       logger.info(
-        `Data stream for dataset ${datasetName} already exists, skipping data stream creation`
+        `Data stream for dataset ${datasetName} already exists, skipping index template creation`
       );
       return;
     }
@@ -185,7 +187,8 @@ async function installAssetsForDataStreamType(opts: {
 
   if (existingIndexTemplate) {
     const indexTemplateOwnedByDifferentPackage =
-      existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
+      existingIndexTemplate._meta?.package?.name &&
+      existingIndexTemplate._meta.package.name !== pkgInfo.name;
     if (indexTemplateOwnedByDifferentPackage) {
       // index template already exists but there is no data stream yet
       // we do not want to override the index template
