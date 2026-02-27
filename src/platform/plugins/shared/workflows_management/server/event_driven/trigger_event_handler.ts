@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { Logger } from '@kbn/core/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { TriggerEventHandlerParams } from '@kbn/workflows-extensions/server';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 import { validateWorkflowForExecution } from '../connectors/workflows/validate_workflow_for_execution';
-import {
-  writeTriggerEvent,
-  type TriggerEventsDataStreamClient,
-} from '../trigger_events_log';
+import { type TriggerEventsDataStreamClient, writeTriggerEvent } from '../trigger_events_log';
+import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
 export interface CreateTriggerEventHandlerParams {
   api: WorkflowsManagementApi;
@@ -52,7 +49,9 @@ export function createTriggerEventHandler({
         });
       } catch (error) {
         logger.warn(
-          `Failed to write trigger event to data stream (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
+          `Failed to write trigger event to data stream (trigger: ${triggerId}): ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
       }
     }
@@ -72,16 +71,12 @@ export function createTriggerEventHandler({
             definition: workflow.definition,
             yaml: workflow.yaml,
           };
-          await api.runWorkflow(
-            workflowToRun,
-            spaceId,
-            { event: payload },
-            request,
-            triggerId
-          );
+          await api.runWorkflow(workflowToRun, spaceId, { event: payload }, request, triggerId);
         } catch (error) {
           logger.warn(
-            `Event-driven workflow execution failed for workflow ${workflow.id} (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
+            `Event-driven workflow execution failed for workflow ${
+              workflow.id
+            } (trigger: ${triggerId}): ${error instanceof Error ? error.message : String(error)}`
           );
         }
       })
