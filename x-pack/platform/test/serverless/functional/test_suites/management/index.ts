@@ -7,6 +7,8 @@
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+// Security uses index_1.ts and index_2.ts instead of this file.
+// If you add tests here, also add them to the appropriate security index file.
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Serverless Common UI - Management', function () {
     this.tags(['esGate']);
