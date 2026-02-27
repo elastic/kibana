@@ -9,7 +9,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
 import type { Query } from '../../../../common/queries';
-import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query';
 
 export interface QueryData {
   title: string;
@@ -37,7 +36,7 @@ export async function collectQueryData({
   /** End of the time range to filter the query (ISO 8601). */
   to: string;
 }): Promise<QueryData> {
-  const ruleId = getRuleIdFromQueryLink(query);
+  const { rule_id: ruleId } = query;
 
   const currentResponse = await esClient.search<{ original_source: Record<string, unknown> }>({
     index: '.alerts-streams.alerts-default',
