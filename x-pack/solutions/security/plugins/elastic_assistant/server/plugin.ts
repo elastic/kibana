@@ -133,7 +133,7 @@ export class ElasticAssistantPlugin
 
     // Register Attack Discovery attachment type with Cases plugin (server-side)
     if (plugins.cases) {
-      import('@kbn/cases-plugin/common').then((casesCommon) => {
+      void import('@kbn/cases-plugin/common').then((casesCommon) => {
         plugins.cases?.attachmentFramework.registerExternalReference({
           id: casesCommon.ATTACK_DISCOVERY_ATTACHMENT_TYPE,
         });
