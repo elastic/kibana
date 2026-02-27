@@ -28,7 +28,6 @@ import { isArray, isEqual } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
-  LEGACY_RULE_BACKED_FALLBACK,
   type Query,
   type QueryLink,
   type QueryLinkRequest,
@@ -68,6 +67,10 @@ import { computeRuleId } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
+export interface QueryLinkFilters {
+  ruleBacked?: boolean;
+}
+
 interface TermQueryOpts {
   queryEmptyString: boolean;
 }
@@ -82,6 +85,30 @@ function termQuery<T extends string>(
   }
 
   return [{ term: { [field]: value } }];
+}
+
+function ruleBackedFilter(value: boolean | undefined): QueryDslQueryContainer[] {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!value) {
+    return termQuery(RULE_BACKED, false);
+  }
+
+  // When filtering for rule-backed queries, also include legacy docs
+  // that predate the rule_backed field.
+  return [
+    {
+      bool: {
+        should: [
+          { term: { [RULE_BACKED]: true } },
+          { bool: { must_not: [{ exists: { field: RULE_BACKED } }] } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
 }
 
 function termsQuery<T extends string>(
@@ -139,7 +166,6 @@ type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_ESQL_QUERY]: string;
   [QUERY_AFFECTED_STREAMS]?: string[];
   [QUERY_SEVERITY_SCORE]?: number;
-  [RULE_BACKED]?: boolean;
 };
 
 export type StoredQueryLink = QueryLinkStorageFields & {
@@ -194,7 +220,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   return {
     ...storageFields,
     stream_name: link[STREAM_NAME],
-    rule_backed: storageFields[RULE_BACKED] ?? LEGACY_RULE_BACKED_FALLBACK,
+    rule_backed: storageFields[RULE_BACKED],
     rule_id: storageFields[RULE_ID],
     query: {
       id: storageFields[ASSET_ID],
@@ -227,15 +253,9 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   } satisfies QueryLink;
 }
 
-type QueryLinkRequestWithRuleBacked = QueryLinkRequest & { rule_backed?: boolean };
-
-function toStorage(
-  definition: Streams.all.Definition,
-  request: QueryLinkRequestWithRuleBacked
-): StoredQueryLink {
+function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest): StoredQueryLink {
   const link = toQueryLink(definition, request);
   const { query, stream_name, ...rest } = link;
-  const ruleBacked = request.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK;
   return {
     ...rest,
     [STREAM_NAME]: definition.name,
@@ -256,7 +276,7 @@ function toStorage(
     [QUERY_MODEL]: query.model,
     [QUERY_CREATED_AT]: query.created_at,
     [QUERY_UPDATED_AT]: query.updated_at,
-    [RULE_BACKED]: ruleBacked,
+    [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
   } as StoredQueryLink;
 }
@@ -268,7 +288,15 @@ function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): b
   );
 }
 
-function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
+function toQueryLinkFromQuery({
+  query,
+  stream,
+  ruleBacked = true,
+}: {
+  query: StreamQuery;
+  stream: string;
+  ruleBacked?: boolean;
+}): QueryLink {
   const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
     'asset.uuid': assetUuid,
@@ -276,6 +304,7 @@ function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
     'asset.id': query.id,
     query,
     stream_name: stream,
+    rule_backed: ruleBacked,
     rule_id: computeRuleId(assetUuid, query.esql.query),
   };
 }
@@ -296,7 +325,7 @@ export class QueryClient {
 
   async syncQueryList(
     definition: Streams.all.Definition,
-    links: QueryLinkRequestWithRuleBacked[]
+    links: QueryLinkRequest[]
   ): Promise<{ deleted: QueryLink[]; indexed: QueryLink[] }> {
     const name = definition.name;
     const assetsResponse = await this.dependencies.storageClient.search({
@@ -379,8 +408,12 @@ export class QueryClient {
    * Returns all query links for given streams or
    * all query links if no stream names are provided.
    */
-  async getQueryLinks(streamNames: string[]): Promise<QueryLink[]> {
-    const filter = [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')];
+  async getQueryLinks(streamNames: string[], filters?: QueryLinkFilters): Promise<QueryLink[]> {
+    const filter = [
+      ...termsQuery(STREAM_NAME, streamNames),
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...ruleBackedFilter(filters?.ruleBacked),
+    ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -560,25 +593,8 @@ export class QueryClient {
   /**
    * Returns all query links across streams that do not have a backing Kibana rule.
    */
-  async getUnbackedQueryLinks(streamName?: string | string[]): Promise<QueryLink[]> {
-    const streamNames = streamName ? (Array.isArray(streamName) ? streamName : [streamName]) : [];
-    const filter = [
-      ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, false),
-      ...termsQuery(STREAM_NAME, streamNames),
-    ];
-
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-        },
-      },
-    });
-
-    return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+  async getAllUnbackedQueries(): Promise<QueryLink[]> {
+    return this.getQueryLinks([], { ruleBacked: false });
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -602,8 +618,16 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  async findQueries(streamNames: string[], query: string): Promise<QueryLink[]> {
-    const filter = [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')];
+  async findQueries(
+    streamNames: string[],
+    query: string,
+    filters?: QueryLinkFilters
+  ): Promise<QueryLink[]> {
+    const filter = [
+      ...termsQuery(STREAM_NAME, streamNames),
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...ruleBackedFilter(filters?.ruleBacked),
+    ];
 
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -635,7 +659,7 @@ export class QueryClient {
         if ('index' in operation) {
           const document = toStorage(
             definition,
-            Object.values(operation)[0].asset as QueryLinkRequestWithRuleBacked
+            Object.values(operation)[0].asset as QueryLinkRequest
           );
           return {
             index: {
@@ -671,6 +695,7 @@ export class QueryClient {
         query: link.query,
         title: link.query.title,
         stream_name: link.stream_name,
+        rule_backed: link.rule_backed,
         rule_id: link.rule_id,
       };
     });
@@ -709,11 +734,11 @@ export class QueryClient {
     for (const query of queries) {
       const currentLink = currentLinkByQueryId.get(query.id);
       if (!currentLink) {
-        const link = toQueryLinkFromQuery(query, stream);
+        const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
       } else if (hasBreakingChange(currentLink.query, query)) {
-        const link = toQueryLinkFromQuery(query, stream);
+        const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesUpdatedWithBreakingChange.push(link);
         allNextQueryLinks.push(link);
       } else {
@@ -837,20 +862,18 @@ export class QueryClient {
       ...operations
         .filter((operation) => operation.index && !currentIds.has(operation.index!.id))
         .map((operation) =>
-          toQueryLinkFromQuery(indexOperationsMap.get(operation.index!.id)!, stream)
+          toQueryLinkFromQuery({
+            query: indexOperationsMap.get(operation.index!.id)!,
+            stream,
+            ruleBacked: options?.createRules !== false,
+          })
         ),
     ];
 
     if (options?.createRules === false) {
-      const nextQueriesWithRuleBacked = nextQueries.map((link) => ({
-        ...link,
-        rule_backed: currentIds.has(link.query.id)
-          ? link.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK
-          : false,
-      }));
       await this.syncQueryList(
         definition,
-        nextQueriesWithRuleBacked.map((link) => ({
+        nextQueries.map((link) => ({
           [ASSET_ID]: link[ASSET_ID],
           [ASSET_TYPE]: link[ASSET_TYPE],
           query: link.query,
@@ -883,11 +906,11 @@ export class QueryClient {
       return { promoted: 0 };
     }
 
-    const unbacked = await this.getUnbackedQueryLinks(streamName);
+    const unbacked = await this.getQueryLinks([streamName], { ruleBacked: false });
     const idSet = new Set(queryIds);
     const toPromote = unbacked
       .filter((link) => idSet.has(link.query.id))
-      .map((link) => toQueryLinkFromQuery(link.query, streamName));
+      .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
 
     if (toPromote.length === 0) {
       return { promoted: 0 };

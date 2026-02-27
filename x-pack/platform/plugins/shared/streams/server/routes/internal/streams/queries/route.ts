@@ -78,7 +78,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const all = await queryClient.getUnbackedQueryLinks();
+    const all = await queryClient.getQueryLinks([], { ruleBacked: false });
     const requestedQueryIds = params?.body?.queryIds ?? [];
 
     let toPromote = all;
@@ -181,7 +181,7 @@ const getQueriesRoute = createServerRoute({
         source,
         search: search?.trim(),
       }),
-      queryClient.getUnbackedQueryLinks(),
+      queryClient.getQueryLinks(streamName ?? [], { ruleBacked: false }),
     ]);
 
     const sortedQueries = orderBy(

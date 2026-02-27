@@ -29,10 +29,10 @@ type SignificantEventsFetchResult =
     };
 
 export const useFetchSignificantEvents = (
-  options: { name?: string; query?: string } | undefined = {},
+  options: { name?: string; query?: string; ruleBacked?: boolean } | undefined = {},
   deps: unknown[] = []
 ) => {
-  const { name, query } = options;
+  const { name, query, ruleBacked } = options;
   const {
     dependencies: {
       start: {
@@ -77,6 +77,7 @@ export const useFetchSignificantEvents = (
             bucketSize: intervalString,
             query: query?.trim() ?? '',
             streamNames: name ? [name] : undefined,
+            ruleBacked,
           },
         },
         signal: signal ?? null,
@@ -115,7 +116,15 @@ export const useFetchSignificantEvents = (
   };
 
   return useQuery<SignificantEventsFetchResult, Error>({
-    queryKey: ['significantEvents', name, timeState.start, timeState.end, query, ...deps],
+    queryKey: [
+      'significantEvents',
+      name,
+      timeState.start,
+      timeState.end,
+      query,
+      ruleBacked,
+      ...deps,
+    ],
     queryFn: fetchSignificantEvents,
     onError: showFetchErrorToast,
   });
