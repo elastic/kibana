@@ -13,6 +13,7 @@ import {
   combineLatest,
   debounceTime,
   filter,
+  from,
   map,
   merge,
   of,
@@ -146,6 +147,7 @@ export function initializeESQLControlManager(
   let previousESQLVariables: ESQLControlVariable[] = [];
   let previousTimeRange: TimeRange | undefined;
   let hasInitialFetch = false;
+  let fetchAbortController = new AbortController();
   const fetchSubscription = fetch$({ uuid, parentApi })
     .pipe(
       filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
@@ -178,16 +180,23 @@ export function initializeESQLControlManager(
 
         return shouldFetch;
       }),
-      switchMap(async ({ timeRange, esqlVariables }) => {
+      switchMap(({ timeRange, esqlVariables }) => {
+        fetchAbortController.abort();
+        fetchAbortController = new AbortController();
+        const { signal } = fetchAbortController;
+
         setDataLoading(true);
         const variablesInParent = esqlVariables || [];
 
-        return await getESQLSingleColumnValues({
-          query: esqlQuery$.getValue(),
-          search: dataService.search.search,
-          timeRange,
-          esqlVariables: variablesInParent,
-        });
+        return from(
+          getESQLSingleColumnValues({
+            query: esqlQuery$.getValue(),
+            search: dataService.search.search,
+            signal,
+            timeRange,
+            esqlVariables: variablesInParent,
+          })
+        );
       })
     )
     .subscribe((result) => {
@@ -274,6 +283,7 @@ export function initializeESQLControlManager(
 
   return {
     cleanup: () => {
+      fetchAbortController.abort();
       variableSubscriptions.unsubscribe();
       fetchSubscription.unsubscribe();
       availableOptionsSearchSubscription.unsubscribe();
