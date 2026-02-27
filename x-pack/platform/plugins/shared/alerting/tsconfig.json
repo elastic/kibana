@@ -74,6 +74,8 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/config",
     "@kbn/expect",
+    "@kbn/core-feature-flags-server-mocks",
+    "@kbn/core-feature-flags-server",
   ],
   "exclude": ["target/**/*"]
 }
